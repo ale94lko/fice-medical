@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lff">
-    <q-header elevated>
+    <q-header elevated class="bg-teal-10">
       <q-toolbar>
         <q-btn
           flat
@@ -10,23 +10,37 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
         <q-toolbar-title>
           FiCE Medical
         </q-toolbar-title>
-
-        <!-- TODO: aqui va el menu y las notificaciones -->
+        <q-btn flat round dense icon="notifications">
+        </q-btn>
+        <q-btn flat round dense icon="manage_accounts">
+          <q-menu fit>
+            <q-list style="min-width: 100px">
+              <q-item clickable v-close-popup>
+                <q-item-section @click="$q.dark.toggle()">Dark mode</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable v-close-popup>
+                <q-item-section avatar>
+                  <q-icon name="logout" />
+                </q-item-section>
+                <q-item-section>Logout</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </q-toolbar>
     </q-header>
-
     <q-drawer
+      class="bg-teal-10"
       v-model="sidebar"
       show-if-above
       bordered
       :mini="sidebar && !sidebarExpanded"
-      :breakpoint="500"
-    >
-      <q-scroll-area class="fit" :horizontal-thumb-style="{ opacity: 0 }">
+      :breakpoint="500">
+      <q-scroll-area class="fit text-white" :horizontal-thumb-style="{ opacity: 0 }">
         <q-list padding>
           <q-item clickable v-ripple>
             <q-item-section avatar>
@@ -36,123 +50,108 @@
               Dashboard
             </q-item-section>
           </q-item>
-          <q-expansion-item
-            :content-inset-level="0.5"
-            expand-separator
-            icon="person"
-            label="Patient"
-          >
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="list" />
-              </q-item-section>
-              <q-item-section>Intake</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="security" />
-              </q-item-section>
-              <q-item-section>Prior authorization</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="assignment" />
-              </q-item-section>
-              <q-item-section>Patient assignment</q-item-section>
-            </q-item>
-          </q-expansion-item>
-          <q-expansion-item
-            :content-inset-level="0.5"
-            expand-separator
-            icon="monitor_heart"
-            label="Providers">
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>
-                TCM
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>CMHC</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Psychiatrist</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>PCP</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Radiologist</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Laboratory</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>RBT</q-item-section>
-            </q-item>
-          </q-expansion-item>
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="assist_walker" />
+            </q-item-section>
+            <q-item-section>Patient</q-item-section>
+            <q-item-section side class="text-white">
+              <q-icon v-if="patientMenu" name="chevron_left" />
+              <q-icon v-else name="chevron_right" />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="bg-teal-9 text-white"
+              v-model="patientMenu">
+              <q-item clickable>
+                <q-item-section>Intake</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Prior authorization</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Patient assignment</q-item-section>
+              </q-item>
+            </q-menu>
+          </q-item>
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="monitor_heart" />
+            </q-item-section>
+            <q-item-section>Providers</q-item-section>
+            <q-item-section side class="text-white">
+              <q-icon v-if="providerMenu" name="chevron_left" />
+              <q-icon v-else name="chevron_right" />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="bg-teal-9 text-white"
+              v-model="providerMenu">
+              <q-item clickable>
+                <q-item-section>TCM</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>CMHC</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Psychiatrist</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>PCP</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Radiologist</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Laboratory</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>RBT</q-item-section>
+              </q-item>
+            </q-menu>
+          </q-item>
           <q-item clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="medical_services" />
             </q-item-section>
             <q-item-section>Services</q-item-section>
           </q-item>
-          <q-expansion-item
-            :content-inset-level="0.5"
-            expand-separator
-            icon="groups"
-            label="Human Resources">
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>General</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Employees</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Human Resources</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Credentials and Roles</q-item-section>
-            </q-item>
-            <q-item clickable v-ripple>
-              <q-item-section avatar>
-                <q-icon name="label" />
-              </q-item-section>
-              <q-item-section>Signatures</q-item-section>
-            </q-item>
-          </q-expansion-item>
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="groups" />
+            </q-item-section>
+            <q-item-section>Human Resources</q-item-section>
+            <q-item-section side class="text-white">
+              <q-icon v-if="humanResourcesMenu" name="chevron_left" />
+              <q-icon v-else name="chevron_right" />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="bg-teal-9 text-white"
+              v-model="humanResourcesMenu">
+              <q-item clickable>
+                <q-item-section>General</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Employees</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Human Resources</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Credentials and Roles</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Signatures</q-item-section>
+              </q-item>
+            </q-menu>
+          </q-item>
           <q-item clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="account_balance" />
@@ -161,27 +160,43 @@
           </q-item>
           <q-item clickable v-ripple>
             <q-item-section avatar>
-              <q-icon name="analytics" />
+              <q-icon name="equalizer" />
             </q-item-section>
             <q-item-section>Reports</q-item-section>
           </q-item>
-          <q-expansion-item
-            :content-inset-level="0.5"
-            expand-separator
-            icon="manage_accounts"
-            label="Administration">
-          </q-expansion-item>
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="manage_accounts" />
+            </q-item-section>
+            <q-item-section>Administration</q-item-section>
+            <q-item-section side class="text-white">
+              <q-icon v-if="administrationMenu" name="chevron_left" />
+              <q-icon v-else name="chevron_right" />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="bg-teal-9 text-white"
+              v-model="administrationMenu">
+              <q-item clickable>
+                <q-item-section>General</q-item-section>
+              </q-item>
+            </q-menu>
+          </q-item>
         </q-list>
       </q-scroll-area>
       <div class="q-mini-drawer-hide absolute" style="bottom: 15px; right: 10px">
         <q-btn
           dense
+          class="bg-white"
           icon="chevron_left"
           @click="drawerClick"/>
       </div>
       <div class="q-mini-drawer-only absolute" style="bottom: 15px; right: 10px">
         <q-btn
           dense
+          class="bg-white"
           icon="chevron_right"
           @click="drawerClick"/>
       </div>
@@ -197,6 +212,10 @@ import { ref } from 'vue'
 
 const sidebar = ref(false)
 const sidebarExpanded = ref(true)
+const patientMenu = ref(null)
+const providerMenu = ref(null)
+const humanResourcesMenu = ref(null)
+const administrationMenu = ref(null)
 
 function toggleLeftDrawer () {
   sidebar.value = !sidebar.value
