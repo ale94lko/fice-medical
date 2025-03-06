@@ -6,6 +6,15 @@ const routes = [
       { path: '', component: () => import('pages/IndexPage.vue') }
     ]
   },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('layouts/LoginLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/account/LoginPage.vue') }
+    ],
+    meta: { guestOnly: true },
+  },
 
   // Always leave this as last one,
   // but you can also remove it
