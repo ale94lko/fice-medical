@@ -1,15 +1,12 @@
 import { defineRouter } from '#q-app/wrappers'
-import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import {
+  createRouter,
+  createMemoryHistory,
+  createWebHistory,
+  createWebHashHistory
+} from 'vue-router'
 import routes from './routes'
-
-/*
- * If not building with SSR mode, you can
- * directly export the Router instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Router instance.
- */
+import authStore from 'stores/auth-store.js'
 
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
@@ -26,5 +23,26 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE)
   })
 
+  Router.beforeEach(async (to, from, next) => {
+    const store = authStore()
+    console.log(store)
+    if (to.meta.requiresAuth && !store.isAuthenticated) {
+      try {
+        await store.initializeAuth()
+        if (store.isAuthenticated) {
+          next()
+        } else {
+          next('/login')
+        }
+      } catch (error) {
+        console.log(error)
+        next('/login')
+      }
+    } else {
+      next()
+    }
+
+    next()
+    })
   return Router
 })
