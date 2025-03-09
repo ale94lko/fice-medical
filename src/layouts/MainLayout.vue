@@ -22,7 +22,7 @@
                 <q-item-section @click="$q.dark.toggle()">Dark mode</q-item-section>
               </q-item>
               <q-separator />
-              <q-item clickable v-close-popup>
+              <q-item clickable @click="handleLogout">
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
@@ -207,22 +207,43 @@
   </q-layout>
 </template>
 
-<script setup>
+<script>
 import { ref } from 'vue'
+import { useAuthStore } from 'stores/auth-store.js'
 
-const sidebar = ref(false)
-const sidebarExpanded = ref(true)
-const patientMenu = ref(null)
-const providerMenu = ref(null)
-const humanResourcesMenu = ref(null)
-const administrationMenu = ref(null)
+export default {
+  methods: {
+    handleLogout() {
+      const store = useAuthStore()
+      store.logout(this.$router)
+    }
+  },
+  setup() {
+    const sidebar = ref(false)
+    const sidebarExpanded = ref(true)
+    const patientMenu = ref(null)
+    const providerMenu = ref(null)
+    const humanResourcesMenu = ref(null)
+    const administrationMenu = ref(null)
 
-function toggleLeftDrawer () {
-  sidebar.value = !sidebar.value
+    function toggleLeftDrawer() {
+      sidebar.value = !sidebar.value
+    }
+
+    function drawerClick() {
+      sidebarExpanded.value = !sidebarExpanded.value
+    }
+
+    return {
+      sidebar,
+      sidebarExpanded,
+      patientMenu,
+      providerMenu,
+      humanResourcesMenu,
+      administrationMenu,
+      toggleLeftDrawer,
+      drawerClick
+    }
+  }
 }
-
-function drawerClick () {
-  sidebarExpanded.value = !sidebarExpanded.value
-}
-
 </script>

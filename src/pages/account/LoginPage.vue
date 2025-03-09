@@ -10,11 +10,11 @@
           height="169px"
           style="max-width: 169px"
         />
-        <text-input v-model="user" label="Username" />
-        <text-input v-model="password" label="Password" type="password" />
+        <text-input v-model="email" label="Email" icon-left="mail" />
+        <text-input v-model="password" label="Password" icon-left="lock" type="password" />
       </q-card-section>
       <q-card-actions align="around">
-        <q-btn color="primary" label="Login" />
+        <q-btn color="primary" label="Login" @click="handleLogin" />
         <q-btn color="secondary" class="text-teal-10" label="Forgot password?" />
       </q-card-actions>
     </q-card>
@@ -22,19 +22,29 @@
 </template>
 
 <script >
-import { ref } from "vue";
-import TextInput from "components/TextInput.vue";
+import { ref } from 'vue'
+import TextInput from 'components/TextInput.vue'
+import { useAuthStore } from 'stores/auth-store.js'
 
 export default {
+  methods: {
+    async handleLogin() {
+      const store = useAuthStore()
+      let result = await store.login(this.email, this.password)
+      if (result) {
+        this.$router.push('/')
+      }
+    },
+  },
   components: {
     TextInput,
   },
   setup() {
-    const user = ref("");
-    const password = ref("");
+    const email = ref('')
+    const password = ref('')
 
     return {
-      user,
+      email,
       password,
     };
   },

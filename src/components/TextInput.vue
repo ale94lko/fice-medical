@@ -1,9 +1,13 @@
 <template>
-  <q-input outlined v-model="model" :type="props.type" :label="props.label" />
+  <q-input outlined v-model="model" :type="props.type" :label="props.label">
+    <template v-slot:prepend v-if="iconLeft">
+      <q-icon :name="iconLeft" />
+    </template>
+  </q-input>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue'
 
 const props = defineProps({
   type: {
@@ -13,6 +17,10 @@ const props = defineProps({
   label: {
     type: String,
     default: 'text',
+  },
+  iconLeft: {
+    type: String,
+    default: '',
   },
 })
 
