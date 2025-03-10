@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lff">
-    <q-header elevated class="bg-teal-10">
+    <q-header elevated class="bg-teal-10 glossy">
       <q-toolbar>
         <q-btn
           flat
@@ -33,6 +33,11 @@
         </q-btn>
       </q-toolbar>
     </q-header>
+    <q-footer reveal elevated>
+      <q-toolbar class="glossy justify-center">
+        <label class="">&copy; 2025 FiCE Medical. Powered by LandA Apps</label>
+      </q-toolbar>
+    </q-footer>
     <q-drawer
       class="bg-teal-10"
       v-model="sidebar"
@@ -40,7 +45,9 @@
       bordered
       :mini="sidebar && !sidebarExpanded"
       :breakpoint="500">
-      <q-scroll-area class="fit text-white" :horizontal-thumb-style="{ opacity: 0 }">
+      <q-scroll-area
+        class="fit text-white"
+        :horizontal-thumb-style="{ opacity: 0 }">
         <q-list padding>
           <q-item clickable v-ripple>
             <q-item-section avatar>
