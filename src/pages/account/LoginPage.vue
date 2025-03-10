@@ -8,8 +8,7 @@
           loading="lazy"
           spinner-color="white"
           height="169px"
-          style="max-width: 169px"
-        />
+          style="max-width: 169px"/>
         <text-input v-model="email" label="Email" icon-left="mail" />
         <text-input v-model="password" label="Password" icon-left="lock" type="password" />
       </q-card-section>
@@ -46,7 +45,7 @@ export default {
     return {
       email,
       password,
-    };
+    }
   },
 }
 </script>

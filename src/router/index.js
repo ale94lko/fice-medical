@@ -33,7 +33,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     } else {
       next()
     }
-    })
+  })
 
   authStore.router = Router
 

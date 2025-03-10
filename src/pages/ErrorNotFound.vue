@@ -16,12 +16,10 @@
         unelevated
         to="/"
         label="Go Home"
-        no-caps
-      />
+        no-caps />
     </div>
   </div>
 </template>
 
 <script setup>
-//
 </script>
