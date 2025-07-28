@@ -50,9 +50,7 @@ export default defineConfig((ctx) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      publicPath: process.env.DEPLOY_ENV === 'github'
-        ? '/fice-medical/'
-        : '/',
+      publicPath: 'fice-medical',
       // analyze: true,
       // env: {},
       // rawDefine: {}
