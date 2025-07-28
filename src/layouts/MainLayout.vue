@@ -44,7 +44,9 @@
       show-if-above
       bordered
       :mini="sidebar && !sidebarExpanded"
-      :breakpoint="500">
+      :breakpoint="500"
+      @mouseover="openDrawer()"
+      @mouseout="closeDrawer()">
       <q-scroll-area
         class="fit text-white"
         :horizontal-thumb-style="{ opacity: 0 }">
@@ -57,7 +59,24 @@
               Dashboard
             </q-item-section>
           </q-item>
-          <q-item clickable v-ripple>
+          <q-expansion-item
+            v-if="accordionMenu"
+            v-model="patientMenu"
+            :content-inset-level="1"
+            expand-separator
+            icon="assist_walker"
+            label="Patient">
+            <q-item clickable v-ripple>
+              <q-item-section>Intake</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Prior authorization</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Patient assignment</q-item-section>
+            </q-item>
+          </q-expansion-item>
+          <q-item clickable v-ripple v-else>
             <q-item-section avatar>
               <q-icon name="assist_walker" />
             </q-item-section>
@@ -72,18 +91,47 @@
               self="top left"
               class="bg-teal-9 text-white"
               v-model="patientMenu">
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Intake</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Prior authorization</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Patient assignment</q-item-section>
               </q-item>
             </q-menu>
           </q-item>
-          <q-item clickable v-ripple>
+          <q-expansion-item
+            v-if="accordionMenu"
+            v-model="providerMenu"
+            :content-inset-level="1"
+            expand-separator
+            icon="monitor_heart"
+            label="Providers">
+            <q-item clickable v-ripple>
+              <q-item-section>TCM</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>CMHC</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Psychiatrist</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>PCP</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Radiologist</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Laboratory</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>RBT</q-item-section>
+            </q-item>
+          </q-expansion-item>
+          <q-item clickable v-ripple v-else>
             <q-item-section avatar>
               <q-icon name="monitor_heart" />
             </q-item-section>
@@ -98,25 +146,25 @@
               self="top left"
               class="bg-teal-9 text-white"
               v-model="providerMenu">
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>TCM</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>CMHC</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Psychiatrist</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>PCP</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Radiologist</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Laboratory</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>RBT</q-item-section>
               </q-item>
             </q-menu>
@@ -127,7 +175,30 @@
             </q-item-section>
             <q-item-section>Services</q-item-section>
           </q-item>
-          <q-item clickable v-ripple>
+          <q-expansion-item
+            v-if="accordionMenu"
+            v-model="humanResourcesMenu"
+            :content-inset-level="1"
+            expand-separator
+            icon="groups"
+            label="Human Resources">
+            <q-item clickable v-ripple>
+              <q-item-section>General</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Employees</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Human Resources</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Credentials and Roles</q-item-section>
+            </q-item>
+            <q-item clickable v-ripple>
+              <q-item-section>Signatures</q-item-section>
+            </q-item>
+          </q-expansion-item>
+          <q-item clickable v-ripple v-else>
             <q-item-section avatar>
               <q-icon name="groups" />
             </q-item-section>
@@ -142,19 +213,19 @@
               self="top left"
               class="bg-teal-9 text-white"
               v-model="humanResourcesMenu">
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>General</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Employees</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Human Resources</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Credentials and Roles</q-item-section>
               </q-item>
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>Signatures</q-item-section>
               </q-item>
             </q-menu>
@@ -171,7 +242,18 @@
             </q-item-section>
             <q-item-section>Reports</q-item-section>
           </q-item>
-          <q-item clickable v-ripple>
+          <q-expansion-item
+            v-if="accordionMenu"
+            v-model="administrationMenu"
+            :content-inset-level="1"
+            expand-separator
+            icon="manage_accounts"
+            label="Administration">
+            <q-item clickable v-ripple>
+              <q-item-section>General</q-item-section>
+            </q-item>
+          </q-expansion-item>
+          <q-item clickable v-ripple v-else>
             <q-item-section avatar>
               <q-icon name="manage_accounts" />
             </q-item-section>
@@ -186,26 +268,29 @@
               self="top left"
               class="bg-teal-9 text-white"
               v-model="administrationMenu">
-              <q-item clickable>
+              <q-item clickable v-ripple>
                 <q-item-section>General</q-item-section>
               </q-item>
             </q-menu>
           </q-item>
         </q-list>
       </q-scroll-area>
-      <div class="q-mini-drawer-hide absolute" style="bottom: 15px; right: 10px">
+      <div
+        v-if="sidebarExpanded && !extraSmallView"
+        class="absolute"
+        style="bottom: 15px; right: 10px">
         <q-btn
           dense
           class="bg-white"
           icon="chevron_left"
-          @click="drawerClick"/>
+          @click="drawerClick(true)"/>
       </div>
-      <div class="q-mini-drawer-only absolute" style="bottom: 15px; right: 10px">
+      <div v-else-if="!extraSmallView" class="absolute" style="bottom: 15px; right: 10px">
         <q-btn
           dense
           class="bg-white"
           icon="chevron_right"
-          @click="drawerClick"/>
+          @click="drawerClick(false)"/>
       </div>
     </q-drawer>
     <q-page-container>
@@ -215,42 +300,69 @@
 </template>
 
 <script>
-import { ref } from 'vue'
 import { useAuthStore } from 'stores/auth-store.js'
+import { siteBreakpoints, siteBreakpointsPx } from 'components/constants.js'
 
 export default {
+  data() {
+    return {
+      sidebar: false,
+      sidebarExpanded: true,
+      openByMouseOver: false,
+      patientMenu: null,
+      providerMenu: null,
+      humanResourcesMenu: null,
+      administrationMenu: null,
+    }
+  },
+  watch: {
+    windowWidth() {
+      this.hideAllMenu()
+    },
+  },
+  computed: {
+    mobileView() {
+      return this.$q.screen.name === siteBreakpoints.XS
+    },
+    extraSmallView() {
+      return this.windowWidth <= siteBreakpointsPx.XXS
+    },
+    windowWidth() {
+      return this.$q.screen.width
+    },
+    accordionMenu() {
+      return (this.extraSmallView || this.mobileView) && this.sidebarExpanded
+    },
+  },
   methods: {
     handleLogout() {
       const store = useAuthStore()
       store.logout(this.$router)
-    }
+    },
+    toggleLeftDrawer() {
+      this.sidebar = !this.sidebar
+    },
+    drawerClick(state) {
+      this.sidebarExpanded = !state
+      this.openByMouseOver = false
+    },
+    openDrawer() {
+      if (!this.sidebarExpanded && !this.openByMouseOver) {
+        this.sidebarExpanded = true
+        this.openByMouseOver = true
+      }
+    },
+    closeDrawer() {
+      if (this.sidebarExpanded && this.openByMouseOver) {
+        this.sidebarExpanded = false
+      }
+    },
+    hideAllMenu() {
+      this.patientMenu = false
+      this.providerMenu = false
+      this.humanResourcesMenu = false
+      this.administrationMenu = false
+    },
   },
-  setup() {
-    const sidebar = ref(false)
-    const sidebarExpanded = ref(true)
-    const patientMenu = ref(null)
-    const providerMenu = ref(null)
-    const humanResourcesMenu = ref(null)
-    const administrationMenu = ref(null)
-
-    function toggleLeftDrawer() {
-      sidebar.value = !sidebar.value
-    }
-
-    function drawerClick() {
-      sidebarExpanded.value = !sidebarExpanded.value
-    }
-
-    return {
-      sidebar,
-      sidebarExpanded,
-      patientMenu,
-      providerMenu,
-      humanResourcesMenu,
-      administrationMenu,
-      toggleLeftDrawer,
-      drawerClick
-    }
-  }
 }
 </script>
