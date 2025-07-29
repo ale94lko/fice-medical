@@ -1,14 +1,7 @@
 <template>
   <q-page class="flex flex-center bg-teal-1">
-
     <q-card class="my-card">
-      <q-card-section >
-        <q-img
-          src="/img/logo.png"
-          loading="lazy"
-          spinner-color="white"
-          height="169px"
-          style="max-width: 169px"/>
+      <q-card-section>
         <text-input v-model="email" label="Email" icon-left="mail" />
         <text-input v-model="password" label="Password" icon-left="lock" type="password" />
       </q-card-section>

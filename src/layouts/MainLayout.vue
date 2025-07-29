@@ -18,10 +18,6 @@
         <q-btn flat round dense icon="manage_accounts">
           <q-menu fit>
             <q-list style="min-width: 100px">
-              <q-item clickable v-close-popup>
-                <q-item-section @click="$q.dark.toggle()">Dark mode</q-item-section>
-              </q-item>
-              <q-separator />
               <q-item clickable @click="handleLogout">
                 <q-item-section avatar>
                   <q-icon name="logout" />
