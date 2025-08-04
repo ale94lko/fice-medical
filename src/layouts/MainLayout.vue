@@ -51,9 +51,7 @@
             <q-item-section avatar>
               <q-icon name="dashboard" />
             </q-item-section>
-            <q-item-section>
-              Dashboard
-            </q-item-section>
+            <q-item-section> {{ t('dashboard') }} </q-item-section>
           </q-item>
           <q-expansion-item
             v-if="accordionMenu"
@@ -61,7 +59,7 @@
             :content-inset-level="1"
             expand-separator
             icon="assist_walker"
-            label="Patient">
+            label="t('client')">
             <q-item clickable v-ripple>
               <q-item-section>Intake</q-item-section>
             </q-item>
@@ -76,7 +74,7 @@
             <q-item-section avatar>
               <q-icon name="assist_walker" />
             </q-item-section>
-            <q-item-section>Patient</q-item-section>
+            <q-item-section>{{ t('client') }}</q-item-section>
             <q-item-section side class="text-white">
               <q-icon v-if="patientMenu" name="chevron_left" />
               <q-icon v-else name="chevron_right" />
@@ -331,6 +329,9 @@ export default {
     },
   },
   methods: {
+    t(text) {
+      return this.$t(text)
+    },
     handleLogout() {
       const store = useAuthStore()
       store.logout(this.$router)
