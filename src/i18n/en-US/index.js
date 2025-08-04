@@ -6,4 +6,7 @@ export default {
   welcome: 'Welcome, {name}!',
   dashboard: 'Dashboard',
   client: 'Client',
+  client_list: 'Client list',
+  prior_authorization: 'Prior authorization',
+  client_assignment: 'Client assignment',
 }

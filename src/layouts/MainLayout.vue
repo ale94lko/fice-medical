@@ -51,32 +51,32 @@
             <q-item-section avatar>
               <q-icon name="dashboard" />
             </q-item-section>
-            <q-item-section> {{ t('dashboard') }} </q-item-section>
+            <q-item-section>{{ t('dashboard') }}</q-item-section>
           </q-item>
           <q-expansion-item
             v-if="accordionMenu"
-            v-model="patientMenu"
+            v-model="clientMenu"
             :content-inset-level="1"
             expand-separator
-            icon="assist_walker"
+            icon="diversity_1"
             label="t('client')">
             <q-item clickable v-ripple>
-              <q-item-section>Intake</q-item-section>
+              <q-item-section>{{ t('client_list') }}</q-item-section>
             </q-item>
             <q-item clickable v-ripple>
-              <q-item-section>Prior authorization</q-item-section>
+              <q-item-section>{{ t('prior_authorization') }}</q-item-section>
             </q-item>
             <q-item clickable v-ripple>
-              <q-item-section>Patient assignment</q-item-section>
+              <q-item-section>{{ t('client_assignment') }}</q-item-section>
             </q-item>
           </q-expansion-item>
           <q-item clickable v-ripple v-else>
             <q-item-section avatar>
-              <q-icon name="assist_walker" />
+              <q-icon name="diversity_1" />
             </q-item-section>
             <q-item-section>{{ t('client') }}</q-item-section>
             <q-item-section side class="text-white">
-              <q-icon v-if="patientMenu" name="chevron_left" />
+              <q-icon v-if="clientMenu" name="chevron_left" />
               <q-icon v-else name="chevron_right" />
             </q-item-section>
             <q-menu
@@ -84,15 +84,15 @@
               anchor="top end"
               self="top left"
               class="bg-teal-9 text-white"
-              v-model="patientMenu">
+              v-model="clientMenu">
               <q-item clickable v-ripple>
-                <q-item-section>Intake</q-item-section>
+                <q-item-section>{{ t('client_list') }}</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
-                <q-item-section>Prior authorization</q-item-section>
+                <q-item-section>{{ t('prior_authorization') }}</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
-                <q-item-section>Patient assignment</q-item-section>
+                <q-item-section>{{ t('client_assignment') }}</q-item-section>
               </q-item>
             </q-menu>
           </q-item>
@@ -303,7 +303,7 @@ export default {
       sidebar: false,
       sidebarExpanded: true,
       openByMouseOver: false,
-      patientMenu: null,
+      clientMenu: null,
       providerMenu: null,
       humanResourcesMenu: null,
       administrationMenu: null,
@@ -355,7 +355,7 @@ export default {
       }
     },
     hideAllMenu() {
-      this.patientMenu = false
+      this.clientMenu = false
       this.providerMenu = false
       this.humanResourcesMenu = false
       this.administrationMenu = false
