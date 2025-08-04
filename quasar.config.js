@@ -3,7 +3,6 @@
 
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
-const browserLocale = navigator.language || 'es-ES';
 
 export default defineConfig((ctx) => {
   return {
@@ -101,7 +100,7 @@ export default defineConfig((ctx) => {
       config: {},
 
       // iconSet: 'material-icons', // Quasar icon set
-      lang: browserLocale,
+      lang: 'en-US',
 
       // For special cases outside of where the auto-import strategy can have an impact
       // (like functional components as one of the examples),
