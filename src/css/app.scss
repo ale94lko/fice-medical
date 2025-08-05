@@ -1,7 +1,24 @@
 // app global css in SCSS form
+@import 'quasar.variables';
 
-.q-item__section {
-  .q-icon {
-    color: #FFF !important;
+.q-expansion-item__container {
+  .q-item {
+    .q-item__section {
+      .q-icon {
+        color: $white !important;
+      }
+    }
+
+    &.text-primary {
+      .q-item__section {
+        .q-icon {
+          color: var(--q-primary) !important;
+        }
+      }
+    }
   }
+}
+
+.q-table__container {
+  max-height: calc(100vh - 100px);
 }

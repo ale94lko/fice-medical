@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lff">
-    <q-header elevated class="bg-teal-10 glossy">
+    <q-header elevated class="bg-teal-10">
       <q-toolbar>
         <q-btn
           flat
@@ -30,7 +30,7 @@
       </q-toolbar>
     </q-header>
     <q-footer reveal elevated>
-      <q-toolbar class="glossy justify-center">
+      <q-toolbar class="justify-center">
         <label class="">&copy; 2025 FiCE Medical. Powered by LandA Apps</label>
       </q-toolbar>
     </q-footer>
@@ -47,7 +47,11 @@
         class="fit text-white"
         :horizontal-thumb-style="{ opacity: 0 }">
         <q-list padding>
-          <q-item clickable v-ripple>
+          <q-item
+            clickable
+            v-ripple
+            to="/dashboard"
+            :active-class="activeClass">
             <q-item-section avatar>
               <q-icon name="dashboard" />
             </q-item-section>
@@ -56,28 +60,34 @@
           <q-expansion-item
             v-if="accordionMenu"
             v-model="clientMenu"
-            :content-inset-level="1"
             expand-separator
             icon="diversity_1"
-            label="t('client')">
-            <q-item clickable v-ripple>
+            :label="t('client')"
+            :content-inset-level="1"
+            :header-class="isClientActive ? activeClass : ''">
+            <q-item clickable v-ripple to="/clients" :active-class="activeClass">
               <q-item-section>{{ t('client_list') }}</q-item-section>
             </q-item>
-            <q-item clickable v-ripple>
+            <q-item clickable v-ripple :active-class="activeClass">
               <q-item-section>{{ t('prior_authorization') }}</q-item-section>
             </q-item>
-            <q-item clickable v-ripple>
+            <q-item clickable v-ripple :active-class="activeClass">
               <q-item-section>{{ t('client_assignment') }}</q-item-section>
             </q-item>
           </q-expansion-item>
-          <q-item clickable v-ripple v-else>
+          <q-item
+            v-else
+            v-ripple
+            clickable
+            :active="isClientActive"
+            :active-class="activeClass">
             <q-item-section avatar>
               <q-icon name="diversity_1" />
             </q-item-section>
             <q-item-section>{{ t('client') }}</q-item-section>
-            <q-item-section side class="text-white">
-              <q-icon v-if="clientMenu" name="chevron_left" />
-              <q-icon v-else name="chevron_right" />
+            <q-item-section side>
+              <q-icon v-if="clientMenu" name="chevron_left" :class="isActiveClass(isClientActive)" />
+              <q-icon v-else name="chevron_right" :class="isActiveClass(isClientActive)" />
             </q-item-section>
             <q-menu
               fit
@@ -85,7 +95,7 @@
               self="top left"
               class="bg-teal-9 text-white"
               v-model="clientMenu">
-              <q-item clickable v-ripple>
+              <q-item clickable v-ripple to="/clients" :active-class="activeClass">
                 <q-item-section>{{ t('client_list') }}</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
@@ -327,6 +337,14 @@ export default {
     accordionMenu() {
       return (this.extraSmallView || this.mobileView) && this.sidebarExpanded
     },
+    activeClass() {
+      return 'text-primary bg-blue-1'
+    },
+    isClientActive() {
+      const productRoutes = ['/clients', '/clients/add']
+
+      return productRoutes.includes(this.$route.path)
+    },
   },
   methods: {
     t(text) {
@@ -359,6 +377,9 @@ export default {
       this.providerMenu = false
       this.humanResourcesMenu = false
       this.administrationMenu = false
+    },
+    isActiveClass(condition) {
+      return condition ? 'text-primary' : 'text-white'
     },
   },
 }
