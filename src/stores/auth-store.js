@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
+import { apiInstance } from 'boot/axios'
+import { sha256 } from 'js-sha256'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null,
+    xTenantId: null,
   }),
   getters: {
     isAuthenticated: (state) => !!state.token
@@ -13,12 +16,18 @@ export const useAuthStore = defineStore('auth', {
       this.token = 'asd'
     },
     async login(email, pass) {
-      console.log(email, pass)
-      // TODO: hacer la peticion para el login
-      this.token = 'asd'
+      try {
+        const password = sha256(pass)
+        const response = await apiInstance.get('/api/public', {
+          email: email,
+          password: password
+        })
 
-      return {
-        result: true,
+        this.token = response.data.token
+        this.xTenantId = response.data.xTenantId
+      } catch (error) {
+        console.error('Error fetching clients:', error)
+        throw error
       }
     },
     async logout(router) {

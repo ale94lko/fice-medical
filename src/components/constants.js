@@ -8,4 +8,5 @@ export const siteBreakpoints = {
 
 export const siteBreakpointsPx = {
   XXS: 500,
+  MD: 1024,
 }

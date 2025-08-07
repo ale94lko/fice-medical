@@ -22,3 +22,31 @@
 .q-table__container {
   max-height: calc(100vh - 100px);
 }
+
+.my-card {
+  border-radius: 10px !important;
+}
+
+.login-card {
+  min-width: 100%;
+  flex-direction: column;
+
+  &:not(.mobile) {
+    min-width: 70%;
+  }
+
+  .logo {
+    margin-bottom: 20px;
+  }
+}
+
+.promo-container {
+  min-width: 30%;
+
+  .promo {
+    width: 100%;
+    height: calc(100% - 20px);
+    margin: 10px 0;
+    border-left: var(--q-primary) solid 1px;
+  }
+}
