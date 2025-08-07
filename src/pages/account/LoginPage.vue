@@ -9,14 +9,29 @@
         style="max-width: 120px"
       />
       <q-card class="my-card bg-grey-1">
-        <q-card-section>
-          <text-input v-model="email" label="Email" icon-left="mail" />
-          <text-input v-model="password" label="Password" icon-left="lock" type="password" />
-        </q-card-section>
-        <q-card-actions align="around">
-          <q-btn color="primary" label="Login" @click="handleLogin" />
-          <q-btn color="secondary" class="text-teal-10" label="Forgot password?" />
-        </q-card-actions>
+        <form @submit.prevent.stop="handleLogin">
+          <q-card-section>
+            <text-input
+              v-model="email"
+              label="Email"
+              icon-left="mail"
+              :error-message="getEmailErrorMessage()"
+              :error="isEmailInvalid" />
+            <text-input
+              v-model="password"
+              label="Password"
+              icon-left="lock"
+              type="password"
+              :error-message="getPasswordErrorMessage()"
+              :error="isPasswordInvalid" />
+          </q-card-section>
+          <q-card-actions>
+            <q-btn color="primary" label="Sign in" type="submit" class="full-width"/>
+            <div class="forgot-password-container">
+              <q-item-label @click="handleForgotPassword()" class="forgot-password">Forgot your password?</q-item-label>
+            </div>
+          </q-card-actions>
+        </form>
       </q-card>
     </q-page>
     <q-page class="promo-container" v-if="showPromo">
@@ -33,13 +48,44 @@ import { useAuthStore } from 'stores/auth-store.js'
 import { siteBreakpointsPx } from 'components/constants.js'
 
 export default {
+  data() {
+    return {
+      isEmailInvalid: false,
+      isPasswordInvalid: false,
+    }
+  },
   methods: {
     async handleLogin() {
-      const store = useAuthStore()
-      let result = await store.login(this.email, this.password)
-      if (result) {
-        this.$router.push('/')
+      this.isEmailInvalid = false
+      this.isPasswordInvalid = false
+
+      if (this.getEmailErrorMessage()) {
+        this.isEmailInvalid = true
       }
+      if (this.password.trim() === '') {
+        this.isPasswordInvalid = true
+      }
+
+      if (!this.isEmailInvalid && !this.isPasswordInvalid) {
+        const store = useAuthStore()
+        let result = await store.login(this.email, this.password)
+        if (result) {
+          this.$router.push('/')
+        }
+      }
+    },
+    handleForgotPassword() {
+      console.log('Forgot password clicked')
+    },
+    getEmailErrorMessage() {
+      const valid = /.+@.+\..+/.test(this.email)
+
+      return this.email.trim() === ''
+          ? 'Email is required'
+          : (!valid ? 'Please enter a valid email address' : '')
+    },
+    getPasswordErrorMessage() {
+      return this.password.trim() === '' ? 'Password is required' : ''
     },
   },
   computed: {

@@ -24,6 +24,7 @@
 }
 
 .my-card {
+  padding: 20px 10px;
   border-radius: 10px !important;
 }
 
@@ -37,6 +38,19 @@
 
   .logo {
     margin-bottom: 20px;
+  }
+
+  .forgot-password-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+
+    .forgot-password {
+      margin: 10px;
+      cursor: pointer;
+    }
   }
 }
 

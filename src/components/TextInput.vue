@@ -1,5 +1,11 @@
 <template>
-  <q-input outlined v-model="model" :type="props.type" :label="props.label">
+  <q-input
+    outlined
+    lazy-rules
+    v-model="model"
+    :type="props.type"
+    :label="props.label"
+    :rules="props.rules || []">
     <template v-slot:prepend v-if="iconLeft">
       <q-icon :name="iconLeft" />
     </template>
@@ -22,6 +28,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  rules: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const model = ref('')
@@ -29,6 +39,7 @@ const model = ref('')
 
 <style scoped>
   .q-input {
+    width: 300px;
     min-width: 120px;
     margin-bottom: 10px;
   }
