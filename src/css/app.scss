@@ -28,6 +28,10 @@ input:-webkit-autofill {
   max-height: calc(100vh - 100px);
 }
 
+.login-container {
+  background-color: $secondary-2;
+}
+
 .icon-hide {
   right: 10px;
   bottom: 15px;
@@ -59,6 +63,7 @@ input:-webkit-autofill {
 
     .forgot-password {
       margin: 10px;
+      color: #00796B;
       cursor: pointer;
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div class="row justify-between bg-grey-4">
+  <div class="row justify-between login-container">
     <q-page :class="['login-card flex flex-center', { 'mobile': !showPromo }]">
       <q-img
         class="logo"

@@ -7,7 +7,7 @@
     :label="props.label"
     :rules="props.rules || []">
     <template v-slot:prepend v-if="iconLeft">
-      <q-icon :name="iconLeft" />
+      <q-icon :name="iconLeft" class="input-icon"/>
     </template>
   </q-input>
 </template>
@@ -42,5 +42,9 @@ const model = ref('')
     width: 260px;
     min-width: 120px;
     margin-bottom: 10px;
+  }
+
+  .input-icon {
+    color: #004D40;
   }
 </style>
