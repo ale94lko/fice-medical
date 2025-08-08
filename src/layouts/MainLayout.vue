@@ -280,14 +280,14 @@
         </q-list>
       </q-scroll-area>
       <div
-        v-if="sidebarExpanded && !extraSmallView" class="absolute">
+        v-if="sidebarExpanded && !extraSmallView" class="absolute icon-hide">
         <q-btn
           dense
           class="bg-white"
           icon="chevron_left"
           @click="drawerClick(true)" />
       </div>
-      <div v-else-if="!extraSmallView" class="absolute">
+      <div v-else-if="!extraSmallView" class="absolute icon-hide">
         <q-btn
           dense
           class="bg-white"
