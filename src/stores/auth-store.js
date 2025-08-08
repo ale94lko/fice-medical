@@ -10,7 +10,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.token
   },
   actions: {
-    async login(email, pass) {
+    async login(email, pass, t) {
       try {
         const response = await apiInstance.post('/oauth/login', {
           email: email,
@@ -27,7 +27,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         switch (error.status) {
           case 401:
-            throw new Error('Credenciales incorrectas')
+            throw new Error(t('invalid_credentials'))
         }
 
         throw error

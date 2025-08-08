@@ -1,6 +1,11 @@
 export default {
   failed: 'Acción fallida',
   success: 'Acción satisfactoria',
+  email: 'Correo electrónico',
+  password: 'Contraseña',
+  sign_in: 'Iniciar sesión',
+  forgot_password: '¿Olvidaste tu contraseña?',
+  invalid_credentials: 'Credenciales inválidas, por favor intenta de nuevo.',
   save: 'Guardar',
   cancel: 'Cancelar',
   welcome: 'Bienvenido, {name}!',

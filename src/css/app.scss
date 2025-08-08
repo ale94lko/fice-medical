@@ -30,43 +30,51 @@ input:-webkit-autofill {
 
 .login-container {
   background-color: $secondary-2;
+
+  .login-card {
+    min-width: 100%;
+    flex-direction: column;
+
+    &:not(.mobile) {
+      min-width: 70%;
+    }
+
+    .logo {
+      margin-bottom: 20px;
+    }
+
+    .my-card {
+      padding: 20px 10px;
+      border-radius: 10px !important;
+
+      .login-inputs {
+        padding-bottom: 0 !important;
+
+        .login-error-msg {
+          color: $negative;
+        }
+      }
+
+      .forgot-password-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-top: 10px;
+
+        .forgot-password {
+          margin: 10px;
+          color: #00796B;
+          cursor: pointer;
+        }
+      }
+    }
+  }
 }
 
 .icon-hide {
   right: 10px;
   bottom: 15px;
-}
-
-.my-card {
-  padding: 20px 10px;
-  border-radius: 10px !important;
-}
-
-.login-card {
-  min-width: 100%;
-  flex-direction: column;
-
-  &:not(.mobile) {
-    min-width: 70%;
-  }
-
-  .logo {
-    margin-bottom: 20px;
-  }
-
-  .forgot-password-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin-top: 10px;
-
-    .forgot-password {
-      margin: 10px;
-      color: #00796B;
-      cursor: pointer;
-    }
-  }
 }
 
 .promo-container {
