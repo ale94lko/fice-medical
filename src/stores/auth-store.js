@@ -1,39 +1,53 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { sha256 } from 'js-sha256'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null,
-    xTenantId: null,
+    expireAt: null,
   }),
   getters: {
     isAuthenticated: (state) => !!state.token
   },
   actions: {
-    initializeAuth() {
-      // TODO: hacer la peticion a la api para validar el token
-      this.token = 'asd'
-    },
     async login(email, pass) {
       try {
-        const password = sha256(pass)
-        const response = await apiInstance.get('/api/public', {
+        const response = await apiInstance.post('/oauth/login', {
           email: email,
-          password: password
+          password: pass
         })
 
         this.token = response.data.token
-        this.xTenantId = response.data.xTenantId
+        this.expireAt = response.data.expiration
+
+        sessionStorage.setItem('token', this.token)
+        sessionStorage.setItem('expireAt', this.expireAt)
+
+        return true
       } catch (error) {
-        console.error('Error fetching clients:', error)
+        switch (error.status) {
+          case 401:
+            throw new Error('Credenciales incorrectas')
+        }
+
         throw error
       }
     },
     async logout(router) {
       // TODO: Hacer la peticion para invalidar el token
       this.token = null
+      this.expireAt = null
+      sessionStorage.clear()
       await router.push('/login')
-    }
+    },
+    restoreSession() {
+      const token = sessionStorage.getItem('token')
+      const expireAt = sessionStorage.getItem('expireAt')
+
+      if (token && expireAt && new Date() < new Date(expireAt)) {
+        this.token = token
+        this.expireAt = expireAt
+      }
+    },
   }
 })

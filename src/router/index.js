@@ -22,10 +22,23 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   const authStore = useAuthStore()
 
   Router.beforeEach(async (to, from, next) => {
-    if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    if (to.meta.requiresAuth) {
       try {
-        await authStore.initializeAuth()
-        authStore.isAuthenticated ? next() : next('/login')
+        let expireAt = new Date(authStore.expireAt)
+        let token = authStore.token
+        const now = new Date()
+
+        if (authStore.token == null) {
+          authStore.restoreSession()
+          expireAt = new Date(authStore.expireAt)
+          token = authStore.token
+        }
+
+        if (now < expireAt && token != null) {
+          next()
+        } else {
+          next('/login')
+        }
       } catch (error) {
         console.log(error)
         next('/login')

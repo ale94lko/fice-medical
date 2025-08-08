@@ -1,7 +1,6 @@
 <template>
   <div class="row justify-between bg-grey-4">
-    <q-page
-      :class="['login-card flex flex-center', { 'mobile': !showPromo }]">
+    <q-page :class="['login-card flex flex-center', { 'mobile': !showPromo }]">
       <q-img
         class="logo"
         src="logo.png"
@@ -15,98 +14,106 @@
               v-model="email"
               label="Email"
               icon-left="mail"
-              :error-message="getEmailErrorMessage()"
-              :error="isEmailInvalid" />
+              :error-message="emailErrorMessage"
+              :error="isEmailInvalid"
+            />
             <text-input
               v-model="password"
               label="Password"
               icon-left="lock"
               type="password"
-              :error-message="getPasswordErrorMessage()"
-              :error="isPasswordInvalid" />
+              :error-message="passwordErrorMessage"
+              :error="isPasswordInvalid"
+            />
           </q-card-section>
           <q-card-actions>
-            <q-btn color="primary" label="Sign in" type="submit" class="full-width"/>
+            <q-btn
+              color="primary"
+              label="Sign in"
+              type="submit"
+              class="full-width" />
             <div class="forgot-password-container">
-              <q-item-label @click="handleForgotPassword()" class="forgot-password">Forgot your password?</q-item-label>
+              <q-item-label @click="handleForgotPassword" class="forgot-password">
+                Forgot your password?
+              </q-item-label>
             </div>
           </q-card-actions>
         </form>
       </q-card>
     </q-page>
+
     <q-page class="promo-container" v-if="showPromo">
       <div class="promo">
+        <!-- contenido de promo aquí -->
       </div>
     </q-page>
   </div>
 </template>
 
-<script >
-import { ref } from 'vue'
+<script setup>
+import { ref, computed } from 'vue'
+import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from 'stores/auth-store'
+import { siteBreakpointsPx } from 'components/constants'
 import TextInput from 'components/TextInput.vue'
-import { useAuthStore } from 'stores/auth-store.js'
-import { siteBreakpointsPx } from 'components/constants.js'
+import { useNotifications } from 'src/composables/useNotifications'
 
-export default {
-  data() {
-    return {
-      isEmailInvalid: false,
-      isPasswordInvalid: false,
+// Quasar + Router + Auth Store
+const $q = useQuasar()
+const router = useRouter()
+const authStore = useAuthStore()
+
+// Reactive form fields
+const email = ref('')
+const password = ref('')
+
+// Validation flags
+const isEmailInvalid = ref(false)
+const isPasswordInvalid = ref(false)
+
+//Notifications
+const { notifyError } = useNotifications()
+
+// Validation error messages
+const emailErrorMessage = computed(() => {
+  const valid = /.+@.+\..+/.test(email.value)
+  return email.value.trim() === ''
+      ? 'Email is required'
+      : (!valid ? 'Please enter a valid email address' : '')
+})
+
+const passwordErrorMessage = computed(() => {
+  return password.value.trim() === '' ? 'Password is required' : ''
+})
+
+// Responsive logic
+const windowWidth = computed(() => $q.screen.width)
+const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
+
+// Login handler
+async function handleLogin() {
+  isEmailInvalid.value = !!emailErrorMessage.value
+  isPasswordInvalid.value = password.value.trim() === ''
+
+  if (!isEmailInvalid.value && !isPasswordInvalid.value) {
+    try {
+      const result = await authStore.login(email.value, password.value)
+      if (result) {
+        await router.push('/')
+      }
+    } catch (error) {
+      notifyError(error.message || 'Error al iniciar sesión')
     }
-  },
-  methods: {
-    async handleLogin() {
-      this.isEmailInvalid = false
-      this.isPasswordInvalid = false
+  }
+}
 
-      if (this.getEmailErrorMessage()) {
-        this.isEmailInvalid = true
-      }
-      if (this.password.trim() === '') {
-        this.isPasswordInvalid = true
-      }
-
-      if (!this.isEmailInvalid && !this.isPasswordInvalid) {
-        const store = useAuthStore()
-        let result = await store.login(this.email, this.password)
-        if (result) {
-          this.$router.push('/')
-        }
-      }
-    },
-    handleForgotPassword() {
-      console.log('Forgot password clicked')
-    },
-    getEmailErrorMessage() {
-      const valid = /.+@.+\..+/.test(this.email)
-
-      return this.email.trim() === ''
-          ? 'Email is required'
-          : (!valid ? 'Please enter a valid email address' : '')
-    },
-    getPasswordErrorMessage() {
-      return this.password.trim() === '' ? 'Password is required' : ''
-    },
-  },
-  computed: {
-    showPromo() {
-      return this.windowWidth >= siteBreakpointsPx.MD
-    },
-    windowWidth() {
-      return this.$q.screen.width
-    },
-  },
-  components: {
-    TextInput,
-  },
-  setup() {
-    const email = ref('')
-    const password = ref('')
-
-    return {
-      email,
-      password,
-    }
-  },
+// Forgot password placeholder
+function handleForgotPassword() {
+  console.log('Forgot password clicked')
 }
 </script>
+
+<style scoped>
+/* Tus estilos aquí si necesitas */
+</style>
