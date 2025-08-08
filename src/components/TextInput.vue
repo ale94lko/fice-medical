@@ -39,7 +39,7 @@ const model = ref('')
 
 <style scoped>
   .q-input {
-    width: 300px;
+    width: 260px;
     min-width: 120px;
     margin-bottom: 10px;
   }
