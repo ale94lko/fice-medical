@@ -105,7 +105,11 @@ async function handleLogin() {
 
   if (!isEmailInvalid.value && !isPasswordInvalid.value) {
     try {
-      const result = await authStore.login(email.value, password.value, t)
+      const result = await authStore.login(
+        email.value.trim(),
+        password.value,
+        t
+      )
       if (result) {
         await router.push('/')
       }

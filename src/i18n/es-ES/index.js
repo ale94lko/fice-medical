@@ -5,7 +5,7 @@ export default {
   password: 'Contraseña',
   sign_in: 'Iniciar sesión',
   forgot_password: '¿Olvidaste tu contraseña?',
-  invalid_credentials: 'Credenciales inválidas, por favor intenta de nuevo.',
+  invalid_credentials: 'Credenciales inválidas, intente de nuevo.',
   save: 'Guardar',
   cancel: 'Cancelar',
   welcome: 'Bienvenido, {name}!',
