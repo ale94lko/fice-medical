@@ -3,9 +3,9 @@
     <q-page :class="['login-card flex flex-center', { 'mobile': !showPromo }]">
       <q-img
         class="logo"
-        src="test.png"
+        src="logo.png"
         spinner-color="white"
-        style="max-width: 285px"
+        style="max-width: 115px"
       />
       <q-card class="my-card bg-grey-1">
         <form @submit.prevent.stop="handleLogin">
