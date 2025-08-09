@@ -16,13 +16,13 @@
         <q-btn flat round dense icon="notifications">
         </q-btn>
         <q-btn flat round dense icon="manage_accounts">
-          <q-menu fit>
+          <q-menu class="user-menu">
             <q-list style="min-width: 100px">
               <q-item clickable @click="handleLogout">
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
-                <q-item-section>Logout</q-item-section>
+                <q-item-section>{{ t('sign_out') }}</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -299,86 +299,106 @@
       <router-view />
     </q-page-container>
   </q-layout>
+  <ModalComponent
+    v-model="showSignOutConfirm"
+    :confirm-text="t('confirm')"
+    :cancel-text="t('cancel')"
+    :title="t('confirm_sign_out_title')"
+    :message="t('confirm_sign_out')"
+    @confirm="handleSignOutConfirm"
+    @cancel="handleSignOutCancel"
+  />
 </template>
 
-<script>
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { useAuthStore } from 'stores/auth-store.js'
 import { siteBreakpoints, siteBreakpointsPx } from 'components/constants.js'
+import { useI18n } from 'vue-i18n'
+import ModalComponent from 'components/ModalComponent.vue'
 
-export default {
-  data() {
-    return {
-      sidebar: false,
-      sidebarExpanded: true,
-      openByMouseOver: false,
-      clientMenu: null,
-      providerMenu: null,
-      humanResourcesMenu: null,
-      administrationMenu: null,
-    }
-  },
-  watch: {
-    windowWidth() {
-      this.hideAllMenu()
-    },
-  },
-  computed: {
-    mobileView() {
-      return this.$q.screen.name === siteBreakpoints.XS
-    },
-    extraSmallView() {
-      return this.windowWidth <= siteBreakpointsPx.XXS
-    },
-    windowWidth() {
-      return this.$q.screen.width
-    },
-    accordionMenu() {
-      return (this.extraSmallView || this.mobileView) && this.sidebarExpanded
-    },
-    activeClass() {
-      return 'text-primary bg-blue-1'
-    },
-    isClientActive() {
-      const productRoutes = ['/clients', '/clients/add']
+// Composables
+const $q = useQuasar()
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
 
-      return productRoutes.includes(this.$route.path)
-    },
-  },
-  methods: {
-    t(text) {
-      return this.$t(text)
-    },
-    handleLogout() {
-      const store = useAuthStore()
-      store.logout(this.$router)
-    },
-    toggleLeftDrawer() {
-      this.sidebar = !this.sidebar
-    },
-    drawerClick(state) {
-      this.sidebarExpanded = !state
-      this.openByMouseOver = false
-    },
-    openDrawer() {
-      if (!this.sidebarExpanded && !this.openByMouseOver) {
-        this.sidebarExpanded = true
-        this.openByMouseOver = true
-      }
-    },
-    closeDrawer() {
-      if (this.sidebarExpanded && this.openByMouseOver) {
-        this.sidebarExpanded = false
-      }
-    },
-    hideAllMenu() {
-      this.clientMenu = false
-      this.providerMenu = false
-      this.humanResourcesMenu = false
-      this.administrationMenu = false
-    },
-    isActiveClass(condition) {
-      return condition ? 'text-primary' : 'text-white'
-    },
-  },
+// State
+const sidebar = ref(false)
+const sidebarExpanded = ref(true)
+const openByMouseOver = ref(false)
+const showSignOutConfirm = ref(false)
+
+const clientMenu = ref(null)
+const providerMenu = ref(null)
+const humanResourcesMenu = ref(null)
+const administrationMenu = ref(null)
+
+// Computed
+const windowWidth = computed(() => $q.screen.width)
+
+const mobileView = computed(() => $q.screen.name === siteBreakpoints.XS)
+const extraSmallView = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
+const accordionMenu = computed(() => (extraSmallView.value || mobileView.value) && sidebarExpanded.value)
+const activeClass = computed(() => 'text-primary bg-blue-1')
+
+const isClientActive = computed(() => {
+  const productRoutes = ['/clients', '/clients/add']
+  return productRoutes.includes(route.path)
+})
+
+const isActiveClass = (condition) => {
+  return condition ? 'text-primary' : 'text-white'
 }
+
+// Methods
+const { t } = useI18n()
+
+const handleSignOutConfirm = () => {
+  authStore.logout(router)
+}
+
+const handleSignOutCancel = () => {
+  showSignOutConfirm.value = false
+}
+
+const toggleLeftDrawer = () => {
+  sidebar.value = !sidebar.value
+}
+
+const drawerClick = (state) => {
+  sidebarExpanded.value = !state
+  openByMouseOver.value = false
+}
+
+const openDrawer = () => {
+  if (!sidebarExpanded.value && !openByMouseOver.value) {
+    sidebarExpanded.value = true
+    openByMouseOver.value = true
+  }
+}
+
+const closeDrawer = () => {
+  if (sidebarExpanded.value && openByMouseOver.value) {
+    sidebarExpanded.value = false
+  }
+}
+
+const hideAllMenu = () => {
+  clientMenu.value = false
+  providerMenu.value = false
+  humanResourcesMenu.value = false
+  administrationMenu.value = false
+}
+
+const handleLogout = () => {
+  showSignOutConfirm.value = true
+}
+
+// Watchers
+watch(windowWidth, () => {
+  hideAllMenu()
+})
 </script>
