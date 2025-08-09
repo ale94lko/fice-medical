@@ -34,7 +34,12 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     async logout(router) {
-      // TODO: Hacer la peticion para invalidar el token
+      await apiInstance.post('/oauth/logout', {}, {
+        headers: {
+          Authorization: `Bearer ${this.token}`
+        }
+      })
+
       this.token = null
       this.expireAt = null
       sessionStorage.clear()
