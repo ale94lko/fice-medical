@@ -32,9 +32,11 @@
           <q-card-actions>
             <q-btn
               color="primary"
-              :label="t('sign_in')"
               type="submit"
-              class="full-width" />
+              class="full-width"
+              :label="t('sign_in')"
+              :loading="loading">
+            </q-btn>
             <div class="forgot-password-container">
               <q-item-label @click="handleForgotPassword" class="forgot-password">
                 {{ t('forgot_password') }}
@@ -76,6 +78,7 @@ const password = ref('')
 const isEmailInvalid = ref(false)
 const isPasswordInvalid = ref(false)
 const loginError = ref('')
+const loading = ref(false)
 
 //Notifications
 //const { notifyError } = useNotifications()
@@ -102,6 +105,7 @@ const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
 async function handleLogin() {
   isEmailInvalid.value = !!emailErrorMessage.value
   isPasswordInvalid.value = password.value.trim() === ''
+  loading.value = true
 
   if (!isEmailInvalid.value && !isPasswordInvalid.value) {
     try {
@@ -115,6 +119,7 @@ async function handleLogin() {
       }
     } catch (error) {
       loginError.value = error.message.replace(':br', '')
+      loading.value = false
       //notifyError(error.message || 'Error al iniciar sesión')
     }
   }
