@@ -1,1 +1,0 @@
-import{Q as e}from"./QPage-EmqbBv8W.js";import{_ as r,W as c,X as o}from"./index-DJwVE9it.js";import"./render-Cp3Yvt-m.js";const t={};function a(s,n){return o(),c(e,{class:"flex flex-center"})}const m=r(t,[["render",a]]);export{m as default};
