@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-  import { defineProps, defineEmits, toRef } from 'vue'
+  import { toRef } from 'vue'
 
   const props = defineProps({
     modelValue: Boolean, // v-model
