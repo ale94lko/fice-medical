@@ -1,7 +1,7 @@
 import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'https://1ac28fb21d41.ngrok-free.app' })
+const api = axios.create({ baseURL: 'https://4280349e8d5b.ngrok-free.app' })
 
 export default defineBoot(({ app }) => {
   app.config.globalProperties.$axios = axios

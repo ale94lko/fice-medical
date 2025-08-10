@@ -3,6 +3,7 @@
     <q-table
       selection="multiple"
       row-key="id"
+      :grid="showGrid"
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
@@ -52,7 +53,10 @@
 import { onMounted, computed, ref } from 'vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { siteBreakpointsPx } from 'components/constants.js'
 
+const $q = useQuasar()
 const loading = ref(false)
 const selected = ref([])
 
@@ -140,6 +144,11 @@ const columns = computed(() => [
   },
 ])
 const rows = computed(() => siteStore.clientList)
+
+// Responsive logic
+const windowWidth = computed(() => $q.screen.width)
+// TODO: take into account drawer width
+const showGrid = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
 
 // Methods
 const addClient = () => {

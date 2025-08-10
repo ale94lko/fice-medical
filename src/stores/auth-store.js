@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     async logout(router) {
-      await apiInstance.post('/oauth/logout', {}, {
+      await apiInstance.post('/logout', {}, {
         headers: {
           Authorization: `Bearer ${this.token}`
         }
