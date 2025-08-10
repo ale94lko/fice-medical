@@ -3,11 +3,13 @@
     <q-table
       selection="multiple"
       row-key="id"
+      :rows-per-page-options="[20, 50, 100, t('all')]"
       :grid="showGrid"
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
-      :selected="selected">
+      :selected="selected"
+      :rows-per-page-label="t('rows_per_page')">
       <template v-slot:top>
         <q-btn
           no-caps

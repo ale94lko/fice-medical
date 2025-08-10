@@ -27,6 +27,9 @@ export default {
   add_client: 'Add Client',
   assign_clinicians: 'Assign Clinicians',
   change_status: 'Change Status',
+  filters: 'Filters',
+  rows_per_page: 'Rows per page',
+  all: 'All',
   prior_authorization: 'Prior authorization',
   client_assignment: 'Client assignment',
 }
