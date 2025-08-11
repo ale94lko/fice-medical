@@ -67,18 +67,17 @@ const { t } = useI18n()
 
 // Load data when component is mounted
 onMounted(async () => {
-  await siteStore.getClientList()
+  await siteStore.getClientList(t)
 })
 
 // Computed properties
 const columns = computed(() => [
   {
-    name: 'client_no',
+    name: 'client_number',
     required: true,
-    label: t('client_no'),
+    label: t('client_number'),
     align: 'left',
-    field: row => row.client_no,
-    format: val => `${val}`,
+    field: row => row.client_number,
     sortable: true,
   },
   {
@@ -87,7 +86,6 @@ const columns = computed(() => [
     label: t('name'),
     align: 'left',
     field: row => row.name,
-    format: val => `${val}`,
     sortable: true,
   },
   {
@@ -96,7 +94,6 @@ const columns = computed(() => [
     label: t('email'),
     align: 'left',
     field: row => row.email,
-    format: val => `${val}`,
     sortable: true,
   },
   {
@@ -105,7 +102,6 @@ const columns = computed(() => [
     label: t('dob'),
     align: 'left',
     field: row => row.dob,
-    format: val => `${val}`,
     sortable: true,
   },
   {
@@ -114,7 +110,6 @@ const columns = computed(() => [
     label: t('clinicians'),
     align: 'left',
     field: row => row.clinicians,
-    format: val => `${val}`,
     sortable: false,
   },
   {
@@ -123,7 +118,6 @@ const columns = computed(() => [
     label: t('admission_date'),
     align: 'left',
     field: row => row.admission_date,
-    format: val => `${val}`,
     sortable: false,
   },
   {
@@ -132,7 +126,6 @@ const columns = computed(() => [
     label: t('status'),
     align: 'left',
     field: row => row.status,
-    format: val => `${val}`,
     sortable: false,
   },
   {
@@ -141,7 +134,6 @@ const columns = computed(() => [
     label: t('actions'),
     align: 'left',
     field: row => row.actions,
-    format: val => `${val}`,
     sortable: false,
   },
 ])

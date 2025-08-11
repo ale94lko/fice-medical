@@ -1,16 +1,43 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
+import { clientStatus } from 'src/components/constants'
 
 export const useSiteStore = defineStore('site', {
   state: () => ({
     clientList: [],
   }),
   actions: {
-    async getClientList() {
+    async getClientList(t) {
       try {
-        const response = await apiInstance.get('/user/all_clients')
+        const response = await apiInstance.get('/client/v1/all-clients')
 
         if (response) {
+
+          for (const client of response.data) {
+            client.name = client.first_name + ' ' + client.last_name
+            client.clinicians = ''
+            client.dob = new Date(client.dob).toLocaleDateString(
+              'en-US',
+              {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              }
+            )
+            switch (client.status) {
+              case clientStatus.CLOSED:
+                client.status = t('closed')
+                break
+
+              case clientStatus.OPEN:
+                client.status = t('open')
+                break
+
+              default:
+                client.status = 'unknown'
+            }
+          }
+
           this.clientList = response.data
         }
       } catch (error) {

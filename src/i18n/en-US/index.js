@@ -17,7 +17,7 @@ export default {
   client: 'Client',
   clients: 'Clients',
   client_list: 'Client list',
-  client_no: 'Client No.',
+  client_number: 'Client No.',
   name: 'Name',
   dob: 'DOB',
   clinicians: 'Clinicians',
@@ -32,4 +32,6 @@ export default {
   all: 'All',
   prior_authorization: 'Prior authorization',
   client_assignment: 'Client assignment',
+  open: 'Open',
+  closed: 'Closed',
 }

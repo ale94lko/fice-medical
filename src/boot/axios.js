@@ -1,7 +1,7 @@
 import { defineBoot } from '#q-app/wrappers'
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'https://4280349e8d5b.ngrok-free.app' })
+const api = axios.create({ baseURL: 'https://68d1ec3535c3.ngrok-free.app' })
 
 api.interceptors.request.use(config => {
   const token = sessionStorage.getItem('token')

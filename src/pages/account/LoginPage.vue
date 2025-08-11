@@ -118,11 +118,11 @@ async function handleLogin() {
         await router.push('/')
       }
     } catch (error) {
-      loginError.value = error.message.replace(':br', '')
-      loading.value = false
+      loginError.value = error.message
       //notifyError(error.message || 'Error al iniciar sesión')
     }
   }
+  loading.value = false
 }
 
 // Forgot password placeholder
