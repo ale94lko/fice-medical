@@ -1,14 +1,15 @@
 <template>
   <q-page>
     <q-table
+      class="table"
       selection="multiple"
       row-key="id"
+      v-model:selected="selected"
       :rows-per-page-options="[20, 50, 100, t('all')]"
       :grid="showGrid"
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
-      :selected="selected"
       :rows-per-page-label="t('rows_per_page')">
       <template v-slot:top>
         <q-btn
@@ -25,7 +26,7 @@
           icon="assignment_ind"
           :disable="selected.length === 0 || loading"
           :label="t('assign_clinicians')"
-          @click="assignClinicians" />
+          @click="assignClinicians(selected)" />
         <q-btn
           no-caps
           class="q-ml-sm"
@@ -33,19 +34,43 @@
           icon="note_alt"
           :disable="selected.length === 0 || loading"
           :label="t('change_status')"
-          @click="changeStatus" />
+          @click="changeStatus(selected)" />
         <q-space />
-        <q-input borderless dense debounce="300" color="primary" v-model="filter">
-          <template v-slot:append>
-            <q-btn
-              color="secondary"
-              class="text-teal-10"
-              icon="filter_alt"
-              :disable="loading"
-              :label="t('filters')"
-              @click="showFilters" />
-          </template>
-        </q-input>
+        <q-btn
+          color="secondary"
+          class="text-teal-10"
+          icon="filter_alt"
+          :disable="loading"
+          :label="t('filters')"
+          @click="showFilters" />
+      </template>
+      <template v-slot:body-cell-actions="props">
+        <q-td :props="props">
+          <q-btn
+            flat
+            round
+            icon="edit"
+            color="primary"
+            :size="siteBreakpoints.SM"
+            @click="editRow(props.row)"
+          />
+          <q-btn
+            flat
+            round
+            icon="assignment_ind"
+            color="primary"
+            :size="siteBreakpoints.SM"
+            @click="assignClinicians([props.row])"
+          />
+          <q-btn
+            flat
+            round
+            icon="note_alt"
+            color="primary"
+            :size="siteBreakpoints.SM"
+            @click="changeStatus([props.row])"
+          />
+        </q-td>
       </template>
     </q-table>
   </q-page>
@@ -56,7 +81,7 @@ import { onMounted, computed, ref } from 'vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import { siteBreakpointsPx } from 'components/constants.js'
+import { siteBreakpoints, siteBreakpointsPx } from 'components/constants.js'
 
 const $q = useQuasar()
 const loading = ref(false)
@@ -132,7 +157,7 @@ const columns = computed(() => [
     name: 'actions',
     required: true,
     label: t('actions'),
-    align: 'left',
+    align: 'center',
     field: row => row.actions,
     sortable: false,
   },
@@ -148,14 +173,17 @@ const showGrid = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
 const addClient = () => {
   console.log('Add client')
 }
-const assignClinicians = () => {
-  console.log('Assign Clinicians')
+const assignClinicians = (rows) => {
+  console.log('Assign Clinicians' + rows)
 }
 const changeStatus = () => {
   console.log('Change Status')
 }
 const showFilters = () => {
   console.log('Show Filters')
+}
+function editRow(row) {
+  console.log('Editar:', row)
 }
 
 </script>

@@ -26,6 +26,23 @@ input:-webkit-autofill {
 
 .q-table__container {
   max-height: calc(100vh - 100px);
+
+  &.table {
+    thead tr:last-child th:last-child {
+      background-color: $white;
+    }
+
+    td:last-child {
+      background-color: $white;
+    }
+
+    th:last-child,
+    td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+    }
+  }
 }
 
 .login-container {

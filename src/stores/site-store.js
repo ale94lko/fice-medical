@@ -21,7 +21,15 @@ export const useSiteStore = defineStore('site', {
               {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+              }
+            )
+            client.admission_date = new Date(client.admission_date).toLocaleDateString(
+              'en-US',
+              {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
               }
             )
             switch (client.status) {
