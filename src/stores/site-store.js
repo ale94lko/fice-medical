@@ -9,7 +9,7 @@ export const useSiteStore = defineStore('site', {
   actions: {
     async getClientList(t) {
       try {
-        const response = await apiInstance.get('/client/v1/all-clients')
+        const response = await apiInstance.get('/client/v1/all-clients?limit=10&offset=0')
 
         if (response) {
 
