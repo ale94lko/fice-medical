@@ -13,6 +13,7 @@
             <text-input
               v-model="email"
               icon-left="mail"
+              test-id="input_email"
               :label="t('email')"
               :error-message="emailErrorMessage"
               :error="isEmailInvalid"
@@ -34,6 +35,7 @@
               color="primary"
               type="submit"
               class="full-width"
+              test-id="input_password"
               :label="t('sign_in')"
               :loading="loading">
             </q-btn>

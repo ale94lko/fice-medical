@@ -3,6 +3,7 @@
     outlined
     lazy-rules
     v-model="model"
+    :data-testid="props.testId"
     :type="props.type"
     :label="props.label"
     :rules="props.rules || []">
@@ -27,6 +28,10 @@ const props = defineProps({
   iconLeft: {
     type: String,
     default: '',
+  },
+  testId: {
+    type: String,
+    default: 'input',
   },
   rules: {
     type: Array,
