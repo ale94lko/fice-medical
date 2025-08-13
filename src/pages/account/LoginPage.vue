@@ -22,6 +22,7 @@
               v-model="password"
               icon-left="lock"
               type="password"
+              test-id="input_password"
               :label="t('password')"
               :error-message="passwordErrorMessage"
               :error="isPasswordInvalid"
@@ -35,12 +36,15 @@
               color="primary"
               type="submit"
               class="full-width"
-              test-id="input_password"
+              data-testId="button_sign_in"
               :label="t('sign_in')"
               :loading="loading">
             </q-btn>
             <div class="forgot-password-container">
-              <q-item-label @click="handleForgotPassword" class="forgot-password">
+              <q-item-label
+                class="forgot-password"
+                data-testId="button_forgot_password"
+                @click="handleForgotPassword">
                 {{ t('forgot_password') }}
               </q-item-label>
             </div>
