@@ -65,7 +65,12 @@
             :label="t('client')"
             :content-inset-level="1"
             :header-class="isClientActive ? activeClass : ''">
-            <q-item clickable v-ripple to="/clients" :active-class="activeClass">
+            <q-item
+              clickable
+              v-ripple
+              to="/clients"
+              :active-class="activeClass"
+            >
               <q-item-section>{{ t('client_list') }}</q-item-section>
             </q-item>
             <q-item clickable v-ripple :active-class="activeClass">
@@ -86,8 +91,16 @@
             </q-item-section>
             <q-item-section>{{ t('client') }}</q-item-section>
             <q-item-section side>
-              <q-icon v-if="clientMenu" name="chevron_left" :class="isActiveClass(isClientActive)" />
-              <q-icon v-else name="chevron_right" :class="isActiveClass(isClientActive)" />
+              <q-icon
+                v-if="clientMenu"
+                name="chevron_left"
+                :class="isActiveClass(isClientActive)"
+              />
+              <q-icon
+                v-else
+                name="chevron_right"
+                :class="isActiveClass(isClientActive)"
+              />
             </q-item-section>
             <q-menu
               fit
@@ -95,7 +108,12 @@
               self="top left"
               class="bg-teal-9 text-white"
               v-model="clientMenu">
-              <q-item clickable v-ripple to="/clients" :active-class="activeClass">
+                <q-item
+                  clickable
+                  v-ripple
+                  to="/clients"
+                  :active-class="activeClass"
+                >
                 <q-item-section>{{ t('client_list') }}</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
@@ -340,8 +358,12 @@ const administrationMenu = ref(null)
 const windowWidth = computed(() => $q.screen.width)
 
 const mobileView = computed(() => $q.screen.name === siteBreakpoints.XS)
-const extraSmallView = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
-const accordionMenu = computed(() => (extraSmallView.value || mobileView.value) && sidebarExpanded.value)
+const extraSmallView = computed(
+  () => windowWidth.value <= siteBreakpointsPx.XXS
+)
+const accordionMenu = computed(
+  () => (extraSmallView.value || mobileView.value) && sidebarExpanded.value
+)
 const activeClass = computed(() => 'text-primary bg-blue-1')
 
 const isClientActive = computed(() => {

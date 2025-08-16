@@ -8,10 +8,12 @@ import {
 import routes from './routes'
 import { useAuthStore } from 'stores/auth-store.js'
 
-export default defineRouter(function (/* { store, ssrContext } */) {
+export default defineRouter(function(/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory)
+    : (process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory)
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -22,7 +24,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   const authStore = useAuthStore()
   authStore.init()
 
-  Router.beforeEach(async (to, from, next) => {
+  Router.beforeEach(async(to, from, next) => {
     if (to.meta.requiresAuth) {
       try {
         let expireAt = new Date(authStore.expireAt)

@@ -132,7 +132,7 @@ async function handleLogin() {
 }
 
 // Forgot password placeholder
-function handleForgotPassword () {
+function handleForgotPassword() {
   router.push('/reset-password')
 }
 </script>

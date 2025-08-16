@@ -56,7 +56,9 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('expireAt')
     },
     init() {
-      if (this._initialized) return
+      if (this._initialized) {
+        return
+      }
       this._initialized = true
       if (typeof window !== 'undefined') {
         window.addEventListener('storage', (event) => {

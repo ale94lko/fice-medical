@@ -66,7 +66,7 @@ const emailErrorMessage = computed(() => {
         : ''
 })
 
-async function handleSubmit () {
+async function handleSubmit() {
   isEmailInvalid.value = !!emailErrorMessage.value
 
   if (isEmailInvalid.value) {
