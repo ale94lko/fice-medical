@@ -20,6 +20,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   })
 
   const authStore = useAuthStore()
+  authStore.init()
 
   Router.beforeEach(async (to, from, next) => {
     if (to.meta.requiresAuth) {

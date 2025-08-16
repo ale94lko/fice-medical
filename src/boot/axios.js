@@ -4,7 +4,7 @@ import axios from 'axios'
 const api = axios.create({ baseURL: 'https://0ab9dc3f804f.ngrok-free.app' })
 
 api.interceptors.request.use(config => {
-  const token = sessionStorage.getItem('token')
+  const token = localStorage.getItem('token')
 
   if (token && !config.url.includes('/login')) {
     config.headers.Authorization = `Bearer ${token}`
