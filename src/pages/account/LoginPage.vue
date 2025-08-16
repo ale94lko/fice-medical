@@ -132,8 +132,8 @@ async function handleLogin() {
 }
 
 // Forgot password placeholder
-function handleForgotPassword() {
-  console.log('Forgot password clicked')
+function handleForgotPassword () {
+  router.push('/reset-password')
 }
 </script>
 
