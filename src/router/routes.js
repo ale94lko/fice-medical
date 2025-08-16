@@ -18,6 +18,15 @@ const routes = [
     meta: { requiresAuth: false },
   },
   {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('layouts/LoginLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/account/ResetPasswordPage.vue') },
+    ],
+    meta: { requiresAuth: false },
+  },
+  {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   }
