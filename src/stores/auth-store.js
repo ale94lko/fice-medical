@@ -5,6 +5,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null,
     expireAt: null,
+    _initialized: false
   }),
   getters: {
     isAuthenticated: (state) => !!state.token
@@ -20,8 +21,8 @@ export const useAuthStore = defineStore('auth', {
         this.token = response.data.token
         this.expireAt = response.data.expiration
 
-        sessionStorage.setItem('token', this.token)
-        sessionStorage.setItem('expireAt', this.expireAt)
+        localStorage.setItem('token', this.token)
+        localStorage.setItem('expireAt', this.expireAt)
 
         return true
       } catch (error) {
@@ -36,19 +37,38 @@ export const useAuthStore = defineStore('auth', {
     async logout(router) {
       await apiInstance.post('/logout')
 
-      this.token = null
-      this.expireAt = null
-      sessionStorage.clear()
+      this.clearSession()
       await router.push('/login')
     },
     restoreSession() {
-      const token = sessionStorage.getItem('token')
-      const expireAt = sessionStorage.getItem('expireAt')
+      const token = localStorage.getItem('token')
+      const expireAt = localStorage.getItem('expireAt')
 
       if (token && expireAt && new Date() < new Date(expireAt)) {
         this.token = token
         this.expireAt = expireAt
       }
     },
+    clearSession() {
+      this.token = null
+      this.expireAt = null
+      localStorage.removeItem('token')
+      localStorage.removeItem('expireAt')
+    },
+    init() {
+      if (this._initialized) return
+      this._initialized = true
+      if (typeof window !== 'undefined') {
+        window.addEventListener('storage', (event) => {
+          if (event.key === 'token' && event.newValue === null) {
+            this.token = null
+            this.expireAt = null
+            if (this.router) {
+              this.router.push('/login')
+            }
+          }
+        })
+      }
+    }
   }
 })
