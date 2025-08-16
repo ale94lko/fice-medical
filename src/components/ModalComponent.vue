@@ -1,5 +1,10 @@
 <template>
-  <q-dialog v-model="modelValue" persistent transition-show="scale" transition-hide="scale">
+  <q-dialog
+    v-model="modelValue"
+    persistent
+    transition-show="scale"
+    transition-hide="scale"
+  >
     <q-card class="modal-card">
       <q-toolbar class="q-px-md bg-teal-10 text-white">
         <q-toolbar-title>{{ title }}</q-toolbar-title>
@@ -31,29 +36,29 @@
 </template>
 
 <script setup>
-  import { toRef } from 'vue'
+import { toRef } from 'vue'
 
-  const props = defineProps({
-    modelValue: Boolean, // v-model
-    title: { type: String, default: 'Confirm' },
-    message: { type: String, required: true },
-    confirmText: { type: String, default: 'OK' },
-    cancelText: { type: String, default: 'Cancel' }
-  })
+const props = defineProps({
+  modelValue: Boolean, // v-model
+  title: { type: String, default: 'Confirm' },
+  message: { type: String, required: true },
+  confirmText: { type: String, default: 'OK' },
+  cancelText: { type: String, default: 'Cancel' }
+})
 
-  const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
+const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
 
-  const modelValue = toRef(props, 'modelValue')
+const modelValue = toRef(props, 'modelValue')
 
-  const onConfirm = () => {
-    emit('confirm')
-    emit('update:modelValue', false)
-  }
+const onConfirm = () => {
+  emit('confirm')
+  emit('update:modelValue', false)
+}
 
-  const onCancel = () => {
-    emit('cancel')
-    emit('update:modelValue', false)
-  }
+const onCancel = () => {
+  emit('cancel')
+  emit('update:modelValue', false)
+}
 </script>
 
 <style scoped>

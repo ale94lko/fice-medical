@@ -1,5 +1,8 @@
 <template>
-  <div class="fullscreen bg-teal-10 text-white text-center q-pa-md flex flex-center">
+  <div
+    class="fullscreen bg-teal-10 text-white text-center
+      q-pa-md flex flex-center"
+  >
     <div>
       <div style="font-size: 30vh">
         404

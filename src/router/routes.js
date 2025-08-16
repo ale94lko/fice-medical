@@ -3,8 +3,14 @@ const routes = [
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: 'dashboard', component: () => import('pages/dashboard/DashboardPage.vue') },
-      { path: 'clients', component: () => import('pages/client/ClientList.vue') },
+      {
+        path: 'dashboard',
+        component: () => import('pages/dashboard/DashboardPage.vue'),
+      },
+      {
+        path: 'clients',
+        component: () => import('pages/client/ClientList.vue'),
+      },
     ],
     meta: { requiresAuth: true },
   },
@@ -13,7 +19,10 @@ const routes = [
     name: 'Login',
     component: () => import('layouts/LoginLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/account/LoginPage.vue') },
+      {
+        path: '',
+        component: () => import('pages/account/LoginPage.vue'),
+      },
     ],
     meta: { requiresAuth: false },
   },
@@ -22,7 +31,10 @@ const routes = [
     name: 'ResetPassword',
     component: () => import('layouts/LoginLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/account/ResetPasswordPage.vue') },
+      {
+        path: '',
+        component: () => import('pages/account/ResetPasswordPage.vue'),
+      },
     ],
     meta: { requiresAuth: false },
   },

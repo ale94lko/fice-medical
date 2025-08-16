@@ -91,7 +91,7 @@ const siteStore = useSiteStore()
 const { t } = useI18n()
 
 // Load data when component is mounted
-onMounted(async () => {
+onMounted(async() => {
   await siteStore.getClientList(t)
 })
 
