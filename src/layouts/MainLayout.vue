@@ -22,7 +22,7 @@
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
-                <q-item-section>{{ t('sign_out') }}</q-item-section>
+                <q-item-section>{{ t('signOut') }}</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
@@ -71,13 +71,13 @@
               to="/clients"
               :active-class="activeClass"
             >
-              <q-item-section>{{ t('client_list') }}</q-item-section>
+              <q-item-section>{{ t('clientList') }}</q-item-section>
             </q-item>
             <q-item clickable v-ripple :active-class="activeClass">
-              <q-item-section>{{ t('prior_authorization') }}</q-item-section>
+              <q-item-section>{{ t('priorAuthorization') }}</q-item-section>
             </q-item>
             <q-item clickable v-ripple :active-class="activeClass">
-              <q-item-section>{{ t('client_assignment') }}</q-item-section>
+              <q-item-section>{{ t('clientAssignment') }}</q-item-section>
             </q-item>
           </q-expansion-item>
           <q-item
@@ -114,13 +114,13 @@
                   to="/clients"
                   :active-class="activeClass"
                 >
-                <q-item-section>{{ t('client_list') }}</q-item-section>
+                <q-item-section>{{ t('clientList') }}</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
-                <q-item-section>{{ t('prior_authorization') }}</q-item-section>
+              <q-item-section>{{ t('priorAuthorization') }}</q-item-section>
               </q-item>
               <q-item clickable v-ripple>
-                <q-item-section>{{ t('client_assignment') }}</q-item-section>
+              <q-item-section>{{ t('clientAssignment') }}</q-item-section>
               </q-item>
             </q-menu>
           </q-item>
@@ -321,8 +321,8 @@
     v-model="showSignOutConfirm"
     :confirm-text="t('confirm')"
     :cancel-text="t('cancel')"
-    :title="t('confirm_sign_out_title')"
-    :message="t('confirm_sign_out')"
+    :title="t('confirmSignOutTitle')"
+    :message="t('confirmSignOut')"
     @confirm="handleSignOutConfirm"
     @cancel="handleSignOutCancel"
   />

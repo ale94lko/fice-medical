@@ -10,14 +10,14 @@
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
-      :rows-per-page-label="t('rows_per_page')">
+      :rows-per-page-label="t('rowsPerPage')">
       <template v-slot:top>
         <q-btn
           no-caps
           color="primary"
           icon="add"
           :disable="loading"
-          :label="t('add_client')"
+          :label="t('addClient')"
           @click="addClient" />
         <q-btn
           no-caps
@@ -25,7 +25,7 @@
           color="primary"
           icon="assignment_ind"
           :disable="selected.length === 0 || loading"
-          :label="t('assign_clinicians')"
+          :label="t('assignClinicians')"
           @click="assignClinicians(selected)" />
         <q-btn
           no-caps
@@ -33,7 +33,7 @@
           color="primary"
           icon="note_alt"
           :disable="selected.length === 0 || loading"
-          :label="t('change_status')"
+          :label="t('changeStatus')"
           @click="changeStatus(selected)" />
         <q-space />
         <q-btn
@@ -100,7 +100,7 @@ const columns = computed(() => [
   {
     name: 'client_number',
     required: true,
-    label: t('client_number'),
+    label: t('clientNumber'),
     align: 'left',
     field: row => row.client_number,
     sortable: true,
@@ -140,7 +140,7 @@ const columns = computed(() => [
   {
     name: 'admission_date',
     required: true,
-    label: t('admission_date'),
+    label: t('admissionDate'),
     align: 'left',
     field: row => row.admission_date,
     sortable: false,
