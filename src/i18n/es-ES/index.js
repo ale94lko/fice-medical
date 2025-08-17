@@ -1,6 +1,7 @@
 export default {
   failed: 'Acción fallida',
   success: 'Acción satisfactoria',
+  networkError: 'Error de red, intenta de nuevo más tarde.',
   email: 'Correo electrónico',
   password: 'Contraseña',
   'sign_in': 'Iniciar sesión',
@@ -13,6 +14,7 @@ export default {
   'password_reset_email_sent':
     'Si el correo está registrado, recibirás un enlace para restablecer tu '
     + 'contraseña.',
+  backToLogin: 'Volver a Iniciar sesión',
   'invalid_credentials': 'Credenciales inválidas, intente de nuevo.',
   save: 'Guardar',
   confirm: 'Confirmar',

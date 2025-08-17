@@ -5,7 +5,6 @@
         class="logo"
         src="logo.png"
         spinner-color="white"
-        style="max-width: 115px"
       />
       <q-card class="my-card bg-grey-1">
         <form @submit.prevent.stop="handleSubmit">
@@ -17,10 +16,10 @@
               v-model="email"
               icon-left="mail"
               test-id="input_email"
+              maxlength="32"
               :label="t('email')"
               :error-message="emailErrorMessage"
               :error="isEmailInvalid"
-              maxlength="32"
             />
           </q-card-section>
           <q-card-actions>
@@ -30,10 +29,25 @@
               class="full-width"
               data-testId="button_continue"
               :label="t('continue')"
-              :loading="loading"/>
+              :loading="loading">
+            </q-btn>
+            <div class="forgot-password-container">
+              <q-item-label
+                class="forgot-password"
+                data-testId="button_back_to_login"
+                @click="router.push('/login')">
+                {{ t('backToLogin') }}
+              </q-item-label>
+            </div>
           </q-card-actions>
         </form>
       </q-card>
+    </q-page>
+
+    <q-page class="promo-container" v-if="showPromo">
+      <div class="promo">
+        <!-- contenido de promo aquí -->
+      </div>
     </q-page>
   </div>
 </template>
@@ -42,13 +56,18 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
-import { apiInstance } from 'boot/axios'
 import { useI18n } from 'vue-i18n'
+import { apiInstance } from 'boot/axios'
+import { siteBreakpointsPx } from 'components/constants.js'
 import TextInput from 'components/TextInput.vue'
 
 const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
+
+// Responsive logic
+const windowWidth = computed(() => $q.screen.width)
+const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
 
 const email = ref('')
 const isEmailInvalid = ref(false)

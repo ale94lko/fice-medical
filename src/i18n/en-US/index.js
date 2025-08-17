@@ -1,6 +1,7 @@
 export default {
   failed: 'Action failed',
   success: 'Action was successful',
+  networkError: 'Network error, please try again later.',
   email: 'Email',
   password: 'Password',
   'sign_in': 'Sign in',
@@ -13,6 +14,7 @@ export default {
   'password_reset_email_sent':
     'If an account exists for the provided email, you will receive a link to '
     + 'reset your password.',
+  backToLogin: 'Back to login',
   'invalid_credentials': 'Invalid credentials, please try again.',
   save: 'Save',
   confirm: 'Confirm',

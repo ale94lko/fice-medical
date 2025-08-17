@@ -5,7 +5,6 @@
         class="logo"
         src="logo.png"
         spinner-color="white"
-        style="max-width: 115px"
       />
       <q-card class="my-card bg-grey-1">
         <form @submit.prevent.stop="handleLogin">
@@ -44,7 +43,7 @@
               <q-item-label
                 class="forgot-password"
                 data-testId="button_forgot_password"
-                @click="handleForgotPassword">
+                @click="router.push('/reset-password')">
                 {{ t('forgot_password') }}
               </q-item-label>
             </div>
@@ -65,10 +64,10 @@
 import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth-store'
 import { siteBreakpointsPx } from 'components/constants'
 //import { useNotifications } from 'src/composables/useNotifications'
-import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 
 // Quasar + Router + Auth Store
@@ -124,17 +123,14 @@ async function handleLogin() {
         await router.push('/')
       }
     } catch (error) {
-      loginError.value = error.message
+      console.warn(error)
+      loginError.value = t('networkError')
       //notifyError(error.message || 'Error al iniciar sesión')
     }
   }
   loading.value = false
 }
 
-// Forgot password placeholder
-function handleForgotPassword() {
-  router.push('/reset-password')
-}
 </script>
 
 <style scoped>
