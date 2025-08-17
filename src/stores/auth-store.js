@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         switch (error.status) {
           case 401:
-            throw new Error(t('invalid_credentials'))
+            throw new Error(t('invalidCredentials'))
         }
 
         throw error

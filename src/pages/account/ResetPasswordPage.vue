@@ -9,7 +9,7 @@
       <q-card class="my-card bg-grey-1">
         <form @submit.prevent.stop="handleSubmit">
           <q-card-section>
-            <div class="text-h6">{{ t('reset_password') }}</div>
+            <div class="text-h6">{{ t('resetPassword') }}</div>
           </q-card-section>
           <q-card-section class="login-inputs">
             <text-input
@@ -103,7 +103,7 @@ async function handleSubmit() {
   }
 
   loading.value = false
-  $q.notify({ type: 'positive', message: t('password_reset_email_sent') })
+  $q.notify({ type: 'positive', message: t('passwordResetEmailSent') })
   await router.push('/login')
 }
 </script>
