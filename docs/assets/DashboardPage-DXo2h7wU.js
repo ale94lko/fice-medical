@@ -1,0 +1,1 @@
+import{F as e,Rt as t,yt as n}from"./index-BzftmbAP.js";import{t as r}from"./QPage-B11t6I8G.js";var i={};function a(e,i){return t(),n(r,{class:`flex flex-center`})}var o=e(i,[[`render`,a]]);export{o as default};
