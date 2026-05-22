@@ -21,13 +21,16 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :title="cancelText"
           :label="cancelText"
           @click="onCancel"
         />
         <q-btn
           no-caps
+          unelevated
           class="primary-action"
           color="primary"
+          :title="confirmText"
           :label="confirmText"
           @click="onConfirm"
         />

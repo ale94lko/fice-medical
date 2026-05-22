@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { apiPaths, typeNames } from 'components/constants.js'
+import { apiPaths, appModuleNames, typeNames } from 'components/constants.js'
 import { extractOAuthTokenPayload } from 'components/helpers.js'
 import {
   clearAuthLocalStorage,
   readStoredExpireAt,
+  readStoredModules,
   readStoredRefreshToken,
   readStoredToken,
   writeStoredExpireAt,
+  writeStoredModules,
   writeStoredRefreshToken,
   writeStoredToken,
 } from '../utils/auth-local-storage.js'
@@ -18,10 +20,21 @@ export const useAuthStore = defineStore('auth', {
     token: null,
     expireAt: null,
     refreshToken: null,
+    modules: [],
     _initialized: false,
   }),
   getters: {
     isAuthenticated: state => !!state.token,
+    hasModule: state => moduleName => {
+      const key = String(moduleName ?? '').trim()
+      if (!key) {
+        return false
+      }
+
+      return state.modules.some(m => String(m) === key)
+    },
+    showAdministrationMenu: state =>
+      state.modules.includes(appModuleNames.administration),
   },
   actions: {
     applyTokensFromApi(td) {
@@ -34,6 +47,10 @@ export const useAuthStore = defineStore('auth', {
       if (nextRefresh) {
         this.refreshToken = nextRefresh
         writeStoredRefreshToken(nextRefresh)
+      }
+      if (Array.isArray(td.modules)) {
+        this.modules = td.modules
+        writeStoredModules(td.modules)
       }
       writeStoredToken(this.token)
       writeStoredExpireAt(this.expireAt)
@@ -80,16 +97,19 @@ export const useAuthStore = defineStore('auth', {
       const token = readStoredToken()
       const expireAt = readStoredExpireAt()
       const refreshToken = readStoredRefreshToken()
+      const modules = readStoredModules()
       if (token) {
         this.token = token
         this.expireAt = expireAt
         this.refreshToken = refreshToken
+        this.modules = modules
       }
     },
     clearSession() {
       this.token = null
       this.expireAt = null
       this.refreshToken = null
+      this.modules = []
       clearAuthLocalStorage()
     },
     init() {
@@ -103,6 +123,7 @@ export const useAuthStore = defineStore('auth', {
             this.token = null
             this.expireAt = null
             this.refreshToken = null
+            this.modules = []
             if (this.router) {
               this.router.push('/login')
             }

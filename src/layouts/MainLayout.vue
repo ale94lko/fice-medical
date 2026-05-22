@@ -265,21 +265,24 @@
             <q-item-section>Reports</q-item-section>
           </q-item>
           <q-expansion-item
-            v-if="accordionMenu"
+            v-if="accordionMenu && showAdministrationMenu"
             v-model="administrationMenu"
             :content-inset-level="1"
             expand-separator
             icon="manage_accounts"
-            label="Administration">
+            :label="t('administration')">
             <q-item clickable v-ripple>
               <q-item-section>General</q-item-section>
             </q-item>
           </q-expansion-item>
-          <q-item clickable v-ripple v-else>
+          <q-item
+            v-else-if="showAdministrationMenu"
+            clickable
+            v-ripple>
             <q-item-section avatar>
               <q-icon name="manage_accounts" />
             </q-item-section>
-            <q-item-section>Administration</q-item-section>
+            <q-item-section>{{ t('administration') }}</q-item-section>
             <q-item-section side>
               <q-icon v-if="administrationMenu" name="chevron_left" />
               <q-icon v-else name="chevron_right" />
@@ -363,6 +366,9 @@ const extraSmallView = computed(
 )
 const accordionMenu = computed(
   () => (extraSmallView.value || mobileView.value) && sidebarExpanded.value
+)
+const showAdministrationMenu = computed(
+  () => authStore.showAdministrationMenu,
 )
 const activeClass = computed(() => 'app-nav-item--active')
 

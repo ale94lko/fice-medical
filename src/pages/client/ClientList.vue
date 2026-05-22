@@ -1,47 +1,58 @@
 <template>
-  <q-page>
+  <q-page class="admin-page">
     <q-table
-      class="table"
+      class="table admin-data-table"
       selection="multiple"
       row-key="id"
+      binary-state-sort
       v-model:selected="selected"
-      :rows-per-page-options="[20, 50, 100, t('all')]"
+      :rows-per-page-options="[20, 50, 100]"
       :grid="showGrid"
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
+      :loading="loading"
       :rows-per-page-label="t('rowsPerPage')">
       <template v-slot:top>
         <q-btn
           no-caps
+          unelevated
           color="primary"
+          class="app-btn-primary"
           icon="add"
           :disable="loading"
+          :title="t('addClient')"
           :label="t('addClient')"
           @click="addClient" />
         <q-btn
           no-caps
-          class="q-ml-sm"
+          unelevated
+          class="q-ml-sm app-btn-primary"
           color="primary"
           icon="assignment_ind"
           :disable="selected.length === 0 || loading"
+          :title="t('assignClinicians')"
           :label="t('assignClinicians')"
           @click="assignClinicians(selected)" />
         <q-btn
           no-caps
-          class="q-ml-sm"
+          unelevated
+          class="q-ml-sm app-btn-primary"
           color="primary"
           icon="note_alt"
           :disable="selected.length === 0 || loading"
+          :title="t('changeStatus')"
           :label="t('changeStatus')"
           @click="changeStatus(selected)" />
         <q-space />
         <q-btn
+          no-caps
           outline
           color="primary"
           class="app-btn-outline"
           icon="filter_alt"
           :disable="loading"
+          :title="t('filters')"
           :label="t('filters')"
           @click="showFilters" />
       </template>
@@ -52,7 +63,10 @@
             round
             icon="edit"
             color="primary"
+            class="app-btn-icon-action"
             :size="siteBreakpoints.SM"
+            :title="t('edit')"
+            :aria-label="t('edit')"
             @click="editRow(props.row)"
           />
           <q-btn
@@ -60,7 +74,10 @@
             round
             icon="assignment_ind"
             color="primary"
+            class="app-btn-icon-action"
             :size="siteBreakpoints.SM"
+            :title="t('assignClinicians')"
+            :aria-label="t('assignClinicians')"
             @click="assignClinicians([props.row])"
           />
           <q-btn
@@ -68,7 +85,10 @@
             round
             icon="note_alt"
             color="primary"
+            class="app-btn-icon-action"
             :size="siteBreakpoints.SM"
+            :title="t('changeStatus')"
+            :aria-label="t('changeStatus')"
             @click="changeStatus([props.row])"
           />
         </q-td>
@@ -91,12 +111,15 @@ const selected = ref([])
 const siteStore = useSiteStore()
 const { t } = useI18n()
 
-// Load data when component is mounted
 onMounted(async() => {
-  await siteStore.getClientList(t)
+  loading.value = true
+  try {
+    await siteStore.getClientList(t)
+  } finally {
+    loading.value = false
+  }
 })
 
-// Computed properties
 const columns = computed(() => [
   {
     name: 'client_number',
@@ -165,12 +188,9 @@ const columns = computed(() => [
 ])
 const rows = computed(() => siteStore.clientList)
 
-// Responsive logic
 const windowWidth = computed(() => $q.screen.width)
-// TODO: take into account drawer width
 const showGrid = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
 
-// Methods
 const addClient = () => {
   console.log('Add client')
 }

@@ -24,6 +24,8 @@
           </q-card-section>
           <q-card-actions>
             <q-btn
+              no-caps
+              unelevated
               color="primary"
               type="submit"
               class="full-width"

@@ -41,6 +41,12 @@ export const authStorageKeys = {
   expireAtLegacy: 'expiresAt',
   refresh: 'refreshToken',
   refreshLegacy: 'refresh_token',
+  modules: 'modules',
+}
+
+/** Module names returned by POST /oauth/v1/login (modules array). */
+export const appModuleNames = {
+  administration: 'Administration',
 }
 
 export const typeNames = {
@@ -49,6 +55,10 @@ export const typeNames = {
   function: 'function',
   string: 'string',
   number: 'number',
+}
+
+export const quasarTransitions = {
+  scale: 'scale',
 }
 
 export const quasarNotifyTypes = {

@@ -17,6 +17,14 @@ function pickExpiration(td, root) {
   return ''
 }
 
+function normalizeLoginModules(raw) {
+  if (!Array.isArray(raw)) {
+    return []
+  }
+
+  return raw.map(m => String(m).trim()).filter(Boolean)
+}
+
 function extractFromFiCeEnvelope(body) {
   const envelope = body.data
   if (!envelope?.token_data?.token) {
@@ -31,6 +39,7 @@ function extractFromFiCeEnvelope(body) {
     token: td.token,
     expiration: pickExpiration(td, {}),
     refreshToken,
+    modules: normalizeLoginModules(envelope.modules),
   }
 }
 
@@ -67,20 +76,51 @@ function extractFromRoots(body) {
       token,
       expiration: pickExpiration(td || {}, root),
       refreshToken,
+      modules: normalizeLoginModules(root.modules),
     }
   }
 
   return null
 }
 
+export function extractLoginModules(body) {
+  if (!body || typeof body !== 'object') {
+    return []
+  }
+  const candidates = [body, body.data, body.data?.data]
+  for (const root of candidates) {
+    if (root && Array.isArray(root.modules)) {
+      return normalizeLoginModules(root.modules)
+    }
+  }
+
+  return []
+}
+
 export function extractOAuthTokenPayload(body) {
   if (!body || typeof body !== 'object') {
     return null
   }
+  const fallbackModules = extractLoginModules(body)
   const fromEnvelope = extractFromFiCeEnvelope(body)
   if (fromEnvelope) {
-    return fromEnvelope
+    return {
+      ...fromEnvelope,
+      modules: fromEnvelope.modules?.length
+        ? fromEnvelope.modules
+        : fallbackModules,
+    }
   }
 
-  return extractFromRoots(body)
+  const fromRoots = extractFromRoots(body)
+  if (fromRoots) {
+    return {
+      ...fromRoots,
+      modules: fromRoots.modules?.length
+        ? fromRoots.modules
+        : fallbackModules,
+    }
+  }
+
+  return null
 }

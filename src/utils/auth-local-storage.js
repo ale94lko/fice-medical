@@ -32,6 +32,26 @@ export function writeStoredRefreshToken(value) {
   localStorage.setItem(keys.refreshLegacy, value)
 }
 
+export function readStoredModules() {
+  const raw = localStorage.getItem(keys.modules)
+  if (!raw) {
+    return []
+  }
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed)
+      ? parsed.map(m => String(m)).filter(Boolean)
+      : []
+  } catch {
+    return []
+  }
+}
+
+export function writeStoredModules(modules) {
+  const list = Array.isArray(modules) ? modules : []
+  localStorage.setItem(keys.modules, JSON.stringify(list))
+}
+
 export function clearAuthLocalStorage() {
   [
     keys.token,
@@ -39,5 +59,6 @@ export function clearAuthLocalStorage() {
     keys.expireAtLegacy,
     keys.refresh,
     keys.refreshLegacy,
+    keys.modules,
   ].forEach(k => localStorage.removeItem(k))
 }
