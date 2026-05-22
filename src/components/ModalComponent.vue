@@ -6,7 +6,7 @@
     transition-hide="scale"
   >
     <q-card class="modal-card">
-      <q-toolbar class="q-px-md bg-teal-10 text-white">
+      <q-toolbar class="q-px-md app-dialog-toolbar">
         <q-toolbar-title>{{ title }}</q-toolbar-title>
       </q-toolbar>
       <q-card-section class="q-px-xl q-py-md modal-body flex flex-center">
@@ -18,8 +18,9 @@
           no-caps
           padding="7px 30px"
           v-if="cancelText"
-          color="secondary"
-          class="text-teal-10"
+          outline
+          color="primary"
+          class="app-btn-outline"
           :label="cancelText"
           @click="onCancel"
         />

@@ -123,9 +123,7 @@ async function handleLogin() {
         await router.push('/')
       }
     } catch (error) {
-      console.warn(error)
-      loginError.value = t('networkError')
-      //notifyError(error.message || 'Error al iniciar sesión')
+      loginError.value = error.message || t('networkError')
     }
   }
   loading.value = false

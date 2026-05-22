@@ -37,8 +37,9 @@
           @click="changeStatus(selected)" />
         <q-space />
         <q-btn
-          color="secondary"
-          class="text-teal-10"
+          outline
+          color="primary"
+          class="app-btn-outline"
           icon="filter_alt"
           :disable="loading"
           :label="t('filters')"

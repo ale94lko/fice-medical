@@ -58,7 +58,7 @@ import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { apiInstance } from 'boot/axios'
-import { siteBreakpointsPx } from 'components/constants.js'
+import { apiPaths, siteBreakpointsPx } from 'components/constants.js'
 import TextInput from 'components/TextInput.vue'
 
 const router = useRouter()
@@ -95,7 +95,7 @@ async function handleSubmit() {
   loading.value = true
 
   try {
-    await apiInstance.post('/oauth/v1/reset-password', {
+    await apiInstance.post(apiPaths.oauthResetPassword, {
       email: email.value.trim()
     })
   } catch {

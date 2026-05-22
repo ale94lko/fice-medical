@@ -1,20 +1,33 @@
 <template>
   <q-input
     outlined
-    lazy-rules
     v-model="model"
+    :lazy-rules="'ondemand'"
     :data-testid="props.testId"
-    :type="props.type"
+    :type="resolvedType"
     :label="props.label"
-    :rules="props.rules || []">
+    :rules="props.rules || []"
+    :error="props.error"
+    :error-message="props.errorMessage">
     <template v-slot:prepend v-if="iconLeft">
       <q-icon :name="iconLeft" class="input-icon"/>
+    </template>
+    <template v-if="isPasswordField" #append>
+      <PasswordToggleIcon
+        :show-plain="showPlainPassword"
+        @toggle="showPlainPassword = !showPlainPassword"
+      />
     </template>
   </q-input>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import PasswordToggleIcon from './PasswordToggleIcon.vue'
+import {
+  isPasswordInputType,
+  passwordFieldInputType,
+} from 'src/composables/usePasswordVisibility.js'
 
 const props = defineProps({
   type: {
@@ -37,18 +50,38 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  error: {
+    type: Boolean,
+    default: false,
+  },
+  errorMessage: {
+    type: String,
+    default: '',
+  },
 })
 
-const model = ref('')
+const model = defineModel({ type: String, default: '' })
+
+const showPlainPassword = ref(false)
+
+const isPasswordField = computed(() => isPasswordInputType(props.type))
+
+const resolvedType = computed(() =>
+  isPasswordField.value
+    ? passwordFieldInputType(showPlainPassword.value)
+    : props.type,
+)
 </script>
 
-<style scoped>
-  .q-input {
-    min-width: 120px;
-    margin-bottom: 10px;
-  }
+<style lang="scss" scoped>
+@import 'src/css/quasar.variables';
 
-  .input-icon {
-    color: #004D40;
-  }
+.q-input {
+  min-width: 120px;
+  margin-bottom: 10px;
+}
+
+.input-icon {
+  color: $primary;
+}
 </style>
