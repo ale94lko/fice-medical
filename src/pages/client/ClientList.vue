@@ -6,13 +6,15 @@
       row-key="id"
       binary-state-sort
       v-model:selected="selected"
+      v-model:pagination="tablePagination"
       :rows-per-page-options="[20, 50, 100]"
       :grid="showGrid"
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
       :loading="loading"
-      :rows-per-page-label="t('rowsPerPage')">
+      :rows-per-page-label="t('rowsPerPage')"
+      @request="onTableRequest">
       <template v-slot:top>
         <q-btn
           no-caps
@@ -102,7 +104,14 @@ import { onMounted, computed, ref } from 'vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import { siteBreakpoints, siteBreakpointsPx } from 'components/constants.js'
+import {
+  clientFieldKeys,
+  clientListColumnKeys,
+  quasarNotifyTypes,
+  siteBreakpoints,
+  siteBreakpointsPx,
+} from 'components/constants.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 
 const $q = useQuasar()
 const loading = ref(false)
@@ -110,75 +119,123 @@ const selected = ref([])
 
 const siteStore = useSiteStore()
 const { t } = useI18n()
+const ck = clientFieldKeys
+const col = clientListColumnKeys
 
-onMounted(async() => {
+const tablePagination = ref({
+  sortBy: col.clientNumber,
+  descending: false,
+  page: 1,
+  rowsPerPage: 20,
+  rowsNumber: 0,
+})
+
+function clientTablePaginationFromStore(paginationPayload) {
+  const meta = siteStore.clientListPagination
+  const total = meta?.total != null && Number.isFinite(Number(meta.total))
+    ? Number(meta.total)
+    : siteStore.clientList.length
+  let resolvedPage = paginationPayload.page
+  if (meta && meta.limit > 0 && Number.isFinite(meta.offset)) {
+    resolvedPage = Math.floor(Number(meta.offset) / Number(meta.limit)) + 1
+  }
+
+  return {
+    sortBy: paginationPayload.sortBy,
+    descending: paginationPayload.descending,
+    page: resolvedPage,
+    rowsPerPage: paginationPayload.rowsPerPage,
+    rowsNumber: total,
+  }
+}
+
+async function loadClients(paginationPayload) {
   loading.value = true
   try {
-    await siteStore.getClientList(t)
+    await siteStore.getClientList({
+      page: paginationPayload.page,
+      limit: paginationPayload.rowsPerPage,
+    }, t)
+    tablePagination.value = clientTablePaginationFromStore(paginationPayload)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientListError'),
+      })
+    }
   } finally {
     loading.value = false
   }
+}
+
+function onTableRequest(props) {
+  return loadClients(props.pagination)
+}
+
+onMounted(() => {
+  loadClients(tablePagination.value)
 })
 
 const columns = computed(() => [
   {
-    name: 'client_number',
+    name: col.clientNumber,
     required: true,
     label: t('clientNumber'),
     align: 'left',
-    field: row => row.client_number,
+    field: row => row[ck.clientNumber],
     sortable: true,
   },
   {
-    name: 'name',
+    name: col.name,
     required: true,
     label: t('name'),
     align: 'left',
-    field: row => row.name,
+    field: row => row[ck.name],
     sortable: true,
   },
   {
-    name: 'email',
+    name: col.email,
     required: true,
     label: t('email'),
     align: 'left',
-    field: row => row.email,
+    field: row => row[ck.email],
     sortable: true,
   },
   {
-    name: 'dob',
+    name: col.dob,
     required: true,
     label: t('dob'),
     align: 'left',
-    field: row => row.dob,
+    field: row => row[ck.dob],
     sortable: true,
   },
   {
-    name: 'clinicians',
+    name: col.clinicians,
     required: true,
     label: t('clinicians'),
     align: 'left',
-    field: row => row.clinicians,
+    field: row => row[ck.clinicians],
     sortable: false,
   },
   {
-    name: 'admission_date',
+    name: col.admissionDate,
     required: true,
     label: t('admissionDate'),
     align: 'left',
-    field: row => row.admission_date,
+    field: row => row[ck.admissionDate],
     sortable: false,
   },
   {
-    name: 'status',
+    name: col.status,
     required: true,
     label: t('status'),
     align: 'left',
-    field: row => row.status,
+    field: row => row[ck.status],
     sortable: false,
   },
   {
-    name: 'actions',
+    name: col.actions,
     required: true,
     label: t('actions'),
     align: 'center',

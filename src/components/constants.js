@@ -16,6 +16,30 @@ export const clientStatus = {
   OPEN: 1,
 }
 
+export const clientFieldKeys = {
+  id: 'id',
+  clientNumber: 'clientNumber',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  name: 'name',
+  email: 'email',
+  dob: 'dob',
+  clinicians: 'clinicians',
+  admissionDate: 'admissionDate',
+  status: 'status',
+}
+
+export const clientListColumnKeys = {
+  clientNumber: 'clientNumber',
+  name: 'name',
+  email: 'email',
+  dob: 'dob',
+  clinicians: 'clinicians',
+  admissionDate: 'admissionDate',
+  status: 'status',
+  actions: 'actions',
+}
+
 export const defaultTenant = 'main'
 
 /** Host suffixes where the preceding label is the tenant subdomain. */
@@ -29,6 +53,7 @@ export const reservedTenantSubdomains = new Set([
 ])
 
 export const apiPaths = {
+  clientsList: '/client/v1/all-clients',
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthResetPassword: '/oauth/v1/reset-password',
@@ -46,6 +71,7 @@ export const authStorageKeys = {
 
 /** Module names returned by POST /oauth/v1/login (modules array). */
 export const appModuleNames = {
+  client: 'Client',
   administration: 'Administration',
 }
 

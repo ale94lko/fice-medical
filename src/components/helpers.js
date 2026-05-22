@@ -1,3 +1,9 @@
+import {
+  clientFieldKeys,
+  clientStatus,
+  typeNames,
+} from 'components/constants.js'
+
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
 }
@@ -95,6 +101,124 @@ export function extractLoginModules(body) {
   }
 
   return []
+}
+
+export function mapClient(client) {
+  if (!client || typeof client !== typeNames.object) {
+    return null
+  }
+  const ck = clientFieldKeys
+  const firstName = String(
+    client.first_name ?? client[ck.firstName] ?? '',
+  ).trim()
+  const lastName = String(
+    client.last_name ?? client[ck.lastName] ?? '',
+  ).trim()
+
+  return {
+    id: client.id,
+    [ck.clientNumber]:
+      client.client_number ?? client[ck.clientNumber] ?? '',
+    [ck.firstName]: firstName,
+    [ck.lastName]: lastName,
+    [ck.name]: `${firstName} ${lastName}`.trim(),
+    [ck.email]: client.email ?? '',
+    [ck.dob]: client.dob ?? '',
+    [ck.clinicians]: client.clinicians ?? '',
+    [ck.admissionDate]:
+      client.admission_date ?? client[ck.admissionDate] ?? '',
+    [ck.status]: client.status,
+  }
+}
+
+export function formatClientDisplay(mapped, t) {
+  if (!mapped || typeof mapped !== typeNames.object) {
+    return null
+  }
+  const ck = clientFieldKeys
+  const out = { ...mapped }
+
+  if (out[ck.dob]) {
+    out[ck.dob] = new Date(out[ck.dob]).toLocaleDateString('en-US', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
+
+  const admissionRaw = out[ck.admissionDate]
+  if (admissionRaw) {
+    out[ck.admissionDate] = new Date(admissionRaw).toLocaleDateString(
+      'en-US',
+      {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      },
+    )
+  }
+
+  switch (out[ck.status]) {
+    case clientStatus.CLOSED:
+      out[ck.status] = t('closed')
+      break
+    case clientStatus.OPEN:
+      out[ck.status] = t('open')
+      break
+    default:
+      out[ck.status] = 'unknown'
+  }
+
+  return out
+}
+
+export function extractEnvelopeList(root) {
+  if (!root) {
+    return []
+  }
+  if (Array.isArray(root)) {
+    return root
+  }
+  if (Array.isArray(root.items)) {
+    return root.items
+  }
+  if (Array.isArray(root.clients)) {
+    return root.clients
+  }
+  if (Array.isArray(root.tenants)) {
+    return root.tenants
+  }
+  if (typeof root === 'object') {
+    return Object.values(root).filter(
+      v => v && typeof v === 'object'
+        && !Array.isArray(v) && v.id != null,
+    )
+  }
+
+  return []
+}
+
+export function extractEnvelopeListPagination(root) {
+  if (!root || typeof root !== 'object') {
+    return null
+  }
+  const p = root.pagination
+  if (!p || typeof p !== 'object') {
+    return null
+  }
+  const limit = Number(p.limit)
+  const offset = Number(p.offset)
+  const total = Number(p.total)
+  const page = Number(p.page)
+  const totalPages = Number(p.total_pages)
+
+  return {
+    limit: Number.isFinite(limit) ? limit : 0,
+    offset: Number.isFinite(offset) ? offset : 0,
+    total: Number.isFinite(total) ? total : 0,
+    page: Number.isFinite(page) ? page : 0,
+    totalPages: Number.isFinite(totalPages) ? totalPages : 0,
+  }
 }
 
 export function extractOAuthTokenPayload(body) {

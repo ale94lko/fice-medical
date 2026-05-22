@@ -30,6 +30,7 @@ export default {
   client: 'Cliente',
   clients: 'Clientes',
   clientList: 'Listado de clientes',
+  clientListError: 'No se pudo cargar el listado de clientes.',
   clientNumber: 'No. Cliente',
   name: 'Nombre',
   dob: 'Cumpleaños',

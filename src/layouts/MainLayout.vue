@@ -58,7 +58,7 @@
             <q-item-section>{{ t('dashboard') }}</q-item-section>
           </q-item>
           <q-expansion-item
-            v-if="accordionMenu"
+            v-if="accordionMenu && showClientMenu"
             v-model="clientMenu"
             expand-separator
             icon="diversity_1"
@@ -81,7 +81,7 @@
             </q-item>
           </q-expansion-item>
           <q-item
-            v-else
+            v-else-if="showClientMenu"
             v-ripple
             clickable
             :active="isClientActive"
@@ -367,6 +367,7 @@ const extraSmallView = computed(
 const accordionMenu = computed(
   () => (extraSmallView.value || mobileView.value) && sidebarExpanded.value
 )
+const showClientMenu = computed(() => authStore.showClientMenu)
 const showAdministrationMenu = computed(
   () => authStore.showAdministrationMenu,
 )

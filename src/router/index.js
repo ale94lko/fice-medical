@@ -8,6 +8,46 @@ import {
 import routes from './routes'
 import { useAuthStore } from 'stores/auth-store.js'
 
+function getRequiredModule(to) {
+  return to.matched
+    .slice()
+    .reverse()
+    .find(record => record.meta.requiresModule)
+    ?.meta.requiresModule
+}
+
+function resolveSessionAccess(authStore) {
+  let expireAt = new Date(authStore.expireAt)
+  let token = authStore.token
+
+  if (authStore.token == null) {
+    authStore.restoreSession()
+    expireAt = new Date(authStore.expireAt)
+    token = authStore.token
+  }
+
+  const now = new Date()
+  const accessValid = token != null && expireAt
+    && !Number.isNaN(expireAt.getTime())
+    && now < expireAt
+  const canUseRefresh = token != null && authStore.refreshToken != null
+
+  return accessValid || canUseRefresh
+}
+
+function resolveProtectedNavigation(to, authStore) {
+  if (!resolveSessionAccess(authStore)) {
+    return '/login'
+  }
+
+  const requiredModule = getRequiredModule(to)
+  if (requiredModule && !authStore.hasModule(requiredModule)) {
+    return '/dashboard'
+  }
+
+  return true
+}
+
 export default defineRouter(function(/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
     ? createMemoryHistory
@@ -25,34 +65,21 @@ export default defineRouter(function(/* { store, ssrContext } */) {
   authStore.init()
 
   Router.beforeEach(async(to, from, next) => {
-    if (to.meta.requiresAuth) {
-      try {
-        let expireAt = new Date(authStore.expireAt)
-        let token = authStore.token
-        const now = new Date()
-
-        if (authStore.token == null) {
-          authStore.restoreSession()
-          expireAt = new Date(authStore.expireAt)
-          token = authStore.token
-        }
-
-        const accessValid = token != null && expireAt
-          && !Number.isNaN(expireAt.getTime())
-          && now < expireAt
-        const canUseRefresh = token != null && authStore.refreshToken != null
-
-        if (accessValid || canUseRefresh) {
-          next()
-        } else {
-          next('/login')
-        }
-      } catch (error) {
-        console.log(error)
-        next('/login')
-      }
-    } else {
+    if (!to.meta.requiresAuth) {
       next()
+      return
+    }
+
+    try {
+      const result = resolveProtectedNavigation(to, authStore)
+      if (result === true) {
+        next()
+      } else {
+        next(result)
+      }
+    } catch (error) {
+      console.log(error)
+      next('/login')
     }
   })
 

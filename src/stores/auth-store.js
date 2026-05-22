@@ -33,6 +33,8 @@ export const useAuthStore = defineStore('auth', {
 
       return state.modules.some(m => String(m) === key)
     },
+    showClientMenu: state =>
+      state.modules.includes(appModuleNames.client),
     showAdministrationMenu: state =>
       state.modules.includes(appModuleNames.administration),
   },

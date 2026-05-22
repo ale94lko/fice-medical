@@ -1,62 +1,53 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { clientStatus } from 'src/components/constants'
+import { apiPaths } from 'components/constants.js'
+import {
+  extractEnvelopeList,
+  extractEnvelopeListPagination,
+  formatClientDisplay,
+  mapClient,
+} from 'components/helpers.js'
 
 export const useSiteStore = defineStore('site', {
   state: () => ({
     clientList: [],
+    clientListPagination: null,
+    clientListQuery: { page: 1, limit: 20 },
   }),
   actions: {
-    async getClientList(t) {
+    async getClientList(params = {}, t) {
       try {
-        const response = await apiInstance.get(
-          '/client/v1/all-clients?limit=10&offset=0'
-        )
+        const page = Number(params.page ?? this.clientListQuery.page ?? 1)
+        const limit = Number(params.limit ?? this.clientListQuery.limit ?? 20)
+        const safePage = Number.isFinite(page) && page >= 1 ? page : 1
+        const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
+        this.clientListQuery = { page: safePage, limit: safeLimit }
 
-        if (!response) {
+        const apiPage = Math.max(0, safePage - 1)
+        const response = await apiInstance.get(apiPaths.clientsList, {
+          params: {
+            page: apiPage,
+            limit: safeLimit,
+          },
+        })
+
+        const root = response?.data?.data
+        if (!root) {
+          this.clientList = []
+          this.clientListPagination = null
+
           return
         }
 
-        for (const client of response.data) {
-          client.name = client.first_name + ' ' + client.last_name
-          client.clinicians = ''
-          client.dob = new Date(client.dob).toLocaleDateString(
-            'en-US',
-            {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            }
-          )
-          client['admission_date'] = new Date(
-            client['admission_date']
-          ).toLocaleDateString(
-            'en-US',
-            {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            }
-          )
-          switch (client.status) {
-            case clientStatus.CLOSED:
-              client.status = t('closed')
-              break
-
-            case clientStatus.OPEN:
-              client.status = t('open')
-              break
-
-            default:
-              client.status = 'unknown'
-          }
-        }
-
-        this.clientList = response.data
+        const list = extractEnvelopeList(root)
+        this.clientList = list
+          .map(client => formatClientDisplay(mapClient(client), t))
+          .filter(Boolean)
+        this.clientListPagination = extractEnvelopeListPagination(root)
       } catch (error) {
         console.error('Error fetching clients:', error)
         throw error
       }
     },
-  }
+  },
 })

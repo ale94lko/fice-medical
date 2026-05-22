@@ -1,3 +1,5 @@
+import { appModuleNames } from 'components/constants.js'
+
 const routes = [
   {
     path: '/',
@@ -10,6 +12,7 @@ const routes = [
       {
         path: 'clients',
         component: () => import('pages/client/ClientList.vue'),
+        meta: { requiresModule: appModuleNames.client },
       },
     ],
     meta: { requiresAuth: true },
