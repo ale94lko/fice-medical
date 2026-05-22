@@ -21,7 +21,7 @@ import {
   markErrorAsSessionLogoutHandled,
 } from '../utils/api-session-error.js'
 import { deepMapRequestKeysToSnakeCase } from '../utils/request-key-case.js'
-import { resolveTenantKeyFromHost } from '../utils/tenant-from-host.js'
+//import { resolveTenantKeyFromHost } from '../utils/tenant-from-host.js'
 import { i18nGlobalT } from './i18n.js'
 
 let lastSessionExpiredNotifyAt = 0
@@ -165,7 +165,7 @@ async function clearSessionAndRedirectToLogin() {
 api.interceptors.request.use(
   async config => {
     config.headers = config.headers || {}
-    config.headers['X-Tenant-Key'] = resolveTenantKeyFromHost()
+    config.headers['X-Tenant-Key'] = 'pruebas'//resolveTenantKeyFromHost()
 
     const url = config.url || ''
     const publicAuth = isPublicAuthUrl(url) || config.__refreshCall
