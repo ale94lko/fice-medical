@@ -1,1 +1,0 @@
-import{Bt as e,F as t,Rt as n,Ut as r,wt as i,yt as a}from"./index-BzftmbAP.js";import{i as o,t as s}from"./QLayout-B3DLjnPK.js";var c={};function l(t,c){let l=e(`router-view`);return n(),a(s,{view:`hHh Lpr lff`},{default:r(()=>[i(o,null,{default:r(()=>[i(l)]),_:1})]),_:1})}var u=t(c,[[`render`,l]]);export{u as default};

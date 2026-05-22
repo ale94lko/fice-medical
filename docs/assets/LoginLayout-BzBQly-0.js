@@ -1,0 +1,1 @@
+import{Et as e,Gt as t,H as n,Xt as r,jt as i,qt as a}from"./index-Bh-kPOAu.js";import{i as o,t as s}from"./QLayout-BTa00-Yz.js";var c={};function l(n,c){let l=a(`router-view`);return t(),e(s,{view:`hHh Lpr lff`},{default:r(()=>[i(o,null,{default:r(()=>[i(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};
