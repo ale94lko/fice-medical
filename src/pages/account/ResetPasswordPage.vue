@@ -130,11 +130,7 @@ const resetToken = computed(() => {
 const isTokenResetMode = computed(() => resetToken.value.length > 0)
 
 async function goToLogin() {
-  try {
-    await router.replace({ name: 'Login' })
-  } catch {
-    window.location.assign(router.resolve({ name: 'Login' }).href)
-  }
+  await router.replace({ name: 'LoginPage' })
 }
 
 const email = ref('')

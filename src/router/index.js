@@ -7,6 +7,10 @@ import {
 } from 'vue-router'
 import routes from './routes'
 import { useAuthStore } from 'stores/auth-store.js'
+import {
+  parseGithubPagesStoredRedirect,
+  readGithubPagesStoredRedirect,
+} from 'src/utils/gh-pages-router.js'
 
 function getRequiredModule(to) {
   return to.matched
@@ -64,7 +68,21 @@ export default defineRouter(function(/* { store, ssrContext } */) {
   const authStore = useAuthStore()
   authStore.init()
 
+  let githubPagesRedirectHandled = false
+
   Router.beforeEach(async(to, from, next) => {
+    if (!githubPagesRedirectHandled) {
+      githubPagesRedirectHandled = true
+      const stored = readGithubPagesStoredRedirect()
+      if (stored) {
+        const target = parseGithubPagesStoredRedirect(stored, Router)
+        if (target && target !== to.fullPath) {
+          next(target)
+          return
+        }
+      }
+    }
+
     if (!to.meta.requiresAuth) {
       next()
       return
