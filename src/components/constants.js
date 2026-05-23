@@ -96,6 +96,7 @@ export const apiPaths = {
   clientsCreate: '/client/v1/clients',
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
+  oauthForgotPassword: '/oauth/v1/forgot-password',
   oauthResetPassword: '/oauth/v1/reset-password',
   logout: '/logout',
 }

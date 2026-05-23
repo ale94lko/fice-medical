@@ -62,7 +62,10 @@ async function getRefreshJwtForRequest() {
 function isPublicAuthUrl(url) {
   const u = url || ''
 
-  return u.includes(apiPaths.oauthLogin) || u.includes(apiPaths.oauthRefresh)
+  return u.includes(apiPaths.oauthLogin)
+    || u.includes(apiPaths.oauthRefresh)
+    || u.includes(apiPaths.oauthForgotPassword)
+    || u.includes(apiPaths.oauthResetPassword)
 }
 
 function getRefreshInFlight() {
@@ -171,7 +174,9 @@ api.interceptors.request.use(
     const url = config.url || ''
     const publicAuth = isPublicAuthUrl(url) || config.__refreshCall
 
-    if (!publicAuth) {
+    if (publicAuth) {
+      stripAuthorizationHeader(config)
+    } else {
       await maybeRefreshAccessToken()
       const t2 = readStoredToken()
       if (t2) {
@@ -209,7 +214,11 @@ api.interceptors.response.use(
     if (!isUnauthorizedError(error) || !cfg || cfg.__retryAfterRefresh) {
       return Promise.reject(error)
     }
-    if (cfg.url?.includes(apiPaths.oauthLogin)) {
+    if (
+      cfg.url?.includes(apiPaths.oauthLogin)
+      || cfg.url?.includes(apiPaths.oauthForgotPassword)
+      || cfg.url?.includes(apiPaths.oauthResetPassword)
+    ) {
       return Promise.reject(error)
     }
 

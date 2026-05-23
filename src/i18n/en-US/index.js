@@ -13,10 +13,20 @@ export default {
   alreadySignOut: 'You have already signed out',
   forgotPassword: 'Forgot password?',
   resetPassword: 'Reset password',
+  repeatPassword: 'Repeat password',
+  accept: 'Accept',
   continue: 'Continue',
   passwordResetEmailSent:
     'If an account exists for the provided email, you will receive a link to '
     + 'reset your password.',
+  resetPasswordSuccess: 'Your password has been updated. You can sign in now.',
+  resetPasswordFailed:
+    'Could not reset your password. The link may have expired.',
+  passwordsDoNotMatch: 'Passwords do not match.',
+  passwordRequired: 'Password is required.',
+  emailRequired: 'Email is required',
+  emailMaxLength: 'Email must be at most 32 characters',
+  emailInvalid: 'Please enter a valid email address',
   backToLogin: 'Back to login',
   invalidCredentials: 'Invalid credentials, please try again.',
   sessionExpiredRelogin:

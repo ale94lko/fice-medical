@@ -12,15 +12,42 @@
             <div class="text-h6">{{ t('resetPassword') }}</div>
           </q-card-section>
           <q-card-section class="login-inputs">
-            <text-input
-              v-model="email"
-              icon-left="mail"
-              test-id="input_email"
-              maxlength="32"
-              :label="t('email')"
-              :error-message="emailErrorMessage"
-              :error="isEmailInvalid"
-            />
+            <template v-if="isTokenResetMode">
+              <text-input
+                v-model="password"
+                icon-left="lock"
+                type="password"
+                test-id="input_new_password"
+                :label="t('password')"
+                :error="isPasswordInvalid"
+                :error-message="passwordErrorMessage"
+              />
+              <text-input
+                v-model="passwordRepeat"
+                icon-left="lock"
+                type="password"
+                test-id="input_repeat_password"
+                :label="t('repeatPassword')"
+                :error="isPasswordRepeatInvalid"
+                :error-message="passwordRepeatErrorMessage"
+              />
+              <q-item-label
+                v-if="submitError"
+                class="login-error-msg">
+                {{ submitError }}
+              </q-item-label>
+            </template>
+            <template v-else>
+              <text-input
+                v-model="email"
+                icon-left="mail"
+                test-id="input_email"
+                maxlength="32"
+                :label="t('email')"
+                :error-message="emailErrorMessage"
+                :error="isEmailInvalid"
+              />
+            </template>
           </q-card-section>
           <q-card-actions>
             <q-btn
@@ -29,10 +56,12 @@
               color="primary"
               type="submit"
               class="full-width"
-              data-testId="button_continue"
-              :label="t('continue')"
-              :loading="loading">
-            </q-btn>
+              :data-testId="isTokenResetMode
+                ? 'button_accept_reset'
+                : 'button_continue'"
+              :label="isTokenResetMode ? t('accept') : t('continue')"
+              :loading="loading"
+            />
             <div class="forgot-password-container">
               <q-item-label
                 class="forgot-password"
@@ -46,70 +75,141 @@
       </q-card>
     </q-page>
 
-    <q-page class="promo-container" v-if="showPromo">
-      <div class="promo">
-        <!-- contenido de promo aquí -->
-      </div>
+    <q-page v-if="showPromo" class="promo-container">
+      <div class="promo" />
     </q-page>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { apiInstance } from 'boot/axios'
-import { apiPaths, siteBreakpointsPx } from 'components/constants.js'
+import {
+  apiPaths,
+  quasarNotifyTypes,
+  siteBreakpointsPx,
+} from 'components/constants.js'
 import TextInput from 'components/TextInput.vue'
 
+const route = useRoute()
 const router = useRouter()
 const $q = useQuasar()
 const { t } = useI18n()
 
-// Responsive logic
 const windowWidth = computed(() => $q.screen.width)
 const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
 
+const resetToken = computed(() => {
+  const raw = route.query.token
+  const value = Array.isArray(raw) ? raw[0] : raw
+
+  return typeof value === 'string' ? value.trim() : ''
+})
+
+const isTokenResetMode = computed(() => resetToken.value.length > 0)
+
 const email = ref('')
+const password = ref('')
+const passwordRepeat = ref('')
 const isEmailInvalid = ref(false)
+const isPasswordInvalid = ref(false)
+const isPasswordRepeatInvalid = ref(false)
 const loading = ref(false)
+const submitError = ref('')
 
 const emailErrorMessage = computed(() => {
   const value = email.value.trim()
   const regex = /^[A-Za-z0-9_-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-  return value === ''
-    ? 'Email is required'
-    : value.length > 32
-      ? 'Email must be at most 32 characters'
-      : !regex.test(value)
-        ? 'Please enter a valid email address'
-        : ''
+  if (value === '') {
+    return t('emailRequired')
+  }
+  if (value.length > 32) {
+    return t('emailMaxLength')
+  }
+  if (!regex.test(value)) {
+    return t('emailInvalid')
+  }
+
+  return ''
+})
+
+const passwordErrorMessage = computed(() =>
+  password.value.length > 0 ? '' : t('passwordRequired'),
+)
+
+const passwordRepeatErrorMessage = computed(() => {
+  if (passwordRepeat.value.length === 0) {
+    return t('passwordRequired')
+  }
+  if (passwordRepeat.value !== password.value) {
+    return t('passwordsDoNotMatch')
+  }
+
+  return ''
 })
 
 async function handleSubmit() {
-  isEmailInvalid.value = !!emailErrorMessage.value
+  submitError.value = ''
+  if (isTokenResetMode.value) {
+    await submitTokenReset()
+  } else {
+    await submitForgotPassword()
+  }
+}
 
+async function submitForgotPassword() {
+  isEmailInvalid.value = !!emailErrorMessage.value
   if (isEmailInvalid.value) {
     return
   }
 
   loading.value = true
-
   try {
-    await apiInstance.post(apiPaths.oauthResetPassword, {
-      email: email.value.trim()
+    await apiInstance.post(apiPaths.oauthForgotPassword, {
+      email: email.value.trim(),
     })
   } catch {
     // Ignore errors to avoid leaking account existence
   }
-
   loading.value = false
-  $q.notify({ type: 'positive', message: t('passwordResetEmailSent') })
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t('passwordResetEmailSent'),
+  })
   await router.push('/login')
+}
+
+async function submitTokenReset() {
+  isPasswordInvalid.value = !!passwordErrorMessage.value
+  isPasswordRepeatInvalid.value = !!passwordRepeatErrorMessage.value
+  if (isPasswordInvalid.value || isPasswordRepeatInvalid.value) {
+    return
+  }
+
+  loading.value = true
+  try {
+    await apiInstance.post(apiPaths.oauthResetPassword, {
+      token: resetToken.value,
+      newPassword: password.value,
+    })
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('resetPasswordSuccess'),
+    })
+    await router.push('/login')
+  } catch (err) {
+    const apiMsg = err?.response?.data?.message
+    submitError.value = typeof apiMsg === 'string' && apiMsg.trim()
+      ? apiMsg.trim()
+      : t('resetPasswordFailed')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
 <style scoped>
 </style>
-

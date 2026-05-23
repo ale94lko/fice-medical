@@ -13,10 +13,21 @@ export default {
   alreadySignOut: 'Ya has cerrado sesión',
   forgotPassword: '¿Olvidaste tu contraseña?',
   resetPassword: 'Restablecer contraseña',
+  repeatPassword: 'Repetir contraseña',
+  accept: 'Aceptar',
   continue: 'Continuar',
   passwordResetEmailSent:
     'Si el correo está registrado, recibirás un enlace para restablecer tu '
     + 'contraseña.',
+  resetPasswordSuccess:
+    'Tu contraseña se actualizó correctamente. Ya puedes iniciar sesión.',
+  resetPasswordFailed:
+    'No se pudo restablecer la contraseña. El enlace puede haber expirado.',
+  passwordsDoNotMatch: 'Las contraseñas no coinciden.',
+  passwordRequired: 'La contraseña es obligatoria.',
+  emailRequired: 'El correo es obligatorio',
+  emailMaxLength: 'El correo debe tener como máximo 32 caracteres',
+  emailInvalid: 'Introduce un correo electrónico válido',
   backToLogin: 'Volver a Iniciar sesión',
   invalidCredentials: 'Credenciales inválidas, intente de nuevo.',
   sessionExpiredRelogin:
