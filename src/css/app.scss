@@ -117,6 +117,13 @@
 // —— Admin pages & data tables ——
 .admin-page {
   padding: 20px 24px 28px;
+  min-height: 0;
+}
+
+@media (max-width: 1023px) {
+  .admin-page {
+    padding: 12px 12px 72px;
+  }
 }
 
 .admin-data-table {
@@ -124,7 +131,37 @@
   border-radius: $radius-lg;
   border: 1px solid $border-subtle;
   box-shadow: $shadow-sm;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+
+  .q-table__middle {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  &.q-table--grid {
+    max-height: none;
+    display: block;
+    overflow: visible;
+
+    .q-table__middle {
+      flex: none;
+      min-height: auto;
+      overflow: visible;
+      padding-bottom: 8px;
+    }
+
+    .q-table__grid-content {
+      padding-bottom: 4px;
+    }
+
+    .q-table__bottom {
+      flex: none;
+    }
+  }
 
   .q-table__top {
     padding: 16px 20px;
@@ -170,6 +207,17 @@
   .q-table--grid .data-row--inactive {
     background: #fef2f2;
     box-shadow: inset 3px 0 0 $negative;
+  }
+
+  .admin-table-grid-card {
+    border-radius: $radius-md;
+    background: $surface;
+  }
+
+  .admin-table-grid-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+    border-top: 1px solid $border-subtle;
   }
 
   .q-table__bottom {
@@ -262,6 +310,10 @@ input:-webkit-autofill {
 
 .q-table__container {
   max-height: calc(100vh - 140px);
+
+  &.q-table--grid {
+    max-height: none;
+  }
 
   &.table {
     thead tr:last-child th:last-child {

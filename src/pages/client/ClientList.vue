@@ -1,6 +1,6 @@
 <template>
   <q-page class="admin-page">
-    <q-table
+    <AdminQTable
       class="table admin-data-table"
       selection="multiple"
       row-key="id"
@@ -58,42 +58,40 @@
           :label="t('filters')"
           @click="showFilters" />
       </template>
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn
-            flat
-            round
-            icon="edit"
-            color="primary"
-            class="app-btn-icon-action"
-            :size="siteBreakpoints.SM"
-            :title="t('edit')"
-            :aria-label="t('edit')"
-            @click="editRow(props.row)"
-          />
-          <q-btn
-            flat
-            round
-            icon="assignment_ind"
-            color="primary"
-            class="app-btn-icon-action"
-            :size="siteBreakpoints.SM"
-            :title="t('assignClinicians')"
-            :aria-label="t('assignClinicians')"
-            @click="assignClinicians([props.row])"
-          />
-          <q-btn
-            flat
-            round
-            icon="note_alt"
-            color="primary"
-            class="app-btn-icon-action"
-            :size="siteBreakpoints.SM"
-            :title="t('changeStatus')"
-            :aria-label="t('changeStatus')"
-            @click="changeStatus([props.row])"
-          />
-        </q-td>
+      <template #row-actions="{ row }">
+        <q-btn
+          flat
+          round
+          icon="edit"
+          color="primary"
+          class="app-btn-icon-action"
+          :size="siteBreakpoints.SM"
+          :title="t('edit')"
+          :aria-label="t('edit')"
+          @click="editRow(row)"
+        />
+        <q-btn
+          flat
+          round
+          icon="assignment_ind"
+          color="primary"
+          class="app-btn-icon-action"
+          :size="siteBreakpoints.SM"
+          :title="t('assignClinicians')"
+          :aria-label="t('assignClinicians')"
+          @click="assignClinicians([row])"
+        />
+        <q-btn
+          flat
+          round
+          icon="note_alt"
+          color="primary"
+          class="app-btn-icon-action"
+          :size="siteBreakpoints.SM"
+          :title="t('changeStatus')"
+          :aria-label="t('changeStatus')"
+          @click="changeStatus([row])"
+        />
       </template>
       <template v-slot:no-data>
         <div class="full-width row flex-center text-grey-7 q-gutter-sm q-pa-lg">
@@ -101,7 +99,7 @@
           <span>{{ t('clientListEmpty') }}</span>
         </div>
       </template>
-    </q-table>
+    </AdminQTable>
 
     <AddClientDialog
       v-model="addClientOpen"
@@ -123,6 +121,7 @@ import {
   siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AdminQTable from 'components/AdminQTable.vue'
 import AddClientDialog from 'components/AddClientDialog.vue'
 
 const $q = useQuasar()
