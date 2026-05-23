@@ -66,7 +66,7 @@
               <q-item-label
                 class="forgot-password"
                 data-testId="button_back_to_login"
-                @click="router.push('/login')">
+                @click="goToLogin">
                 {{ t('backToLogin') }}
               </q-item-label>
             </div>
@@ -102,14 +102,40 @@ const { t } = useI18n()
 const windowWidth = computed(() => $q.screen.width)
 const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
 
-const resetToken = computed(() => {
+function readTokenFromRouteQuery() {
   const raw = route.query.token
   const value = Array.isArray(raw) ? raw[0] : raw
 
   return typeof value === 'string' ? value.trim() : ''
+}
+
+function readTokenFromWindowSearch() {
+  if (typeof window === 'undefined') {
+    return ''
+  }
+  const value = new URLSearchParams(window.location.search).get('token')
+
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+const resetToken = computed(() => {
+  const fromRoute = readTokenFromRouteQuery()
+  if (fromRoute) {
+    return fromRoute
+  }
+
+  return readTokenFromWindowSearch()
 })
 
 const isTokenResetMode = computed(() => resetToken.value.length > 0)
+
+async function goToLogin() {
+  try {
+    await router.replace({ name: 'Login' })
+  } catch {
+    window.location.assign(router.resolve({ name: 'Login' }).href)
+  }
+}
 
 const email = ref('')
 const password = ref('')
@@ -179,7 +205,7 @@ async function submitForgotPassword() {
     type: quasarNotifyTypes.positive,
     message: t('passwordResetEmailSent'),
   })
-  await router.push('/login')
+  await goToLogin()
 }
 
 async function submitTokenReset() {
@@ -195,11 +221,15 @@ async function submitTokenReset() {
       token: resetToken.value,
       newPassword: password.value,
     })
+    loading.value = false
+    password.value = ''
+    passwordRepeat.value = ''
+    submitError.value = ''
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('resetPasswordSuccess'),
     })
-    await router.push('/login')
+    await goToLogin()
   } catch (err) {
     const apiMsg = err?.response?.data?.message
     submitError.value = typeof apiMsg === 'string' && apiMsg.trim()
