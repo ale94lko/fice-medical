@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import {
+  buildClientCreateBody,
+  extractClientMutationResponse,
   extractEnvelopeList,
   extractEnvelopeListPagination,
   formatClientDisplay,
@@ -48,6 +50,20 @@ export const useSiteStore = defineStore('site', {
         console.error('Error fetching clients:', error)
         throw error
       }
+    },
+    async createClient(form, t) {
+      const body = buildClientCreateBody(form)
+      const response = await apiInstance.post(apiPaths.clientsCreate, body)
+      const created = extractClientMutationResponse(response.data)
+      await this.getClientList(
+        {
+          page: 1,
+          limit: this.clientListQuery.limit,
+        },
+        t,
+      )
+
+      return created
     },
   },
 })

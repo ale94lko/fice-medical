@@ -103,6 +103,67 @@ export function extractLoginModules(body) {
   return []
 }
 
+export function formatClientListName(firstName, middleName, lastName, suffix) {
+  const first = String(firstName ?? '').trim()
+  const middle = String(middleName ?? '').trim()
+  const last = String(lastName ?? '').trim()
+  const suf = String(suffix ?? '').trim()
+  if (!last && !first) {
+    return ''
+  }
+  const middlePart = middle ? ` ${middle}` : ''
+  const suffixPart = suf ? ` ${suf}` : ''
+
+  return `${last}, ${first}${middlePart}${suffixPart}`.trim()
+}
+
+export function buildClientCreateBody(form) {
+  if (!form || typeof form !== typeNames.object) {
+    return {}
+  }
+  const ck = clientFieldKeys
+  const admissionUs = String(form[ck.admissionDate] ?? '').trim()
+  const body = {
+    [ck.clientNumber]: form[ck.clientNumber],
+    [ck.firstName]: String(form[ck.firstName] ?? '').trim(),
+    [ck.middleName]: String(form[ck.middleName] ?? '').trim(),
+    [ck.lastName]: String(form[ck.lastName] ?? '').trim(),
+    [ck.suffix]: String(form[ck.suffix] ?? '').trim(),
+    [ck.sex]: form[ck.sex] || null,
+    [ck.admissionDate]: admissionUs,
+    [ck.status]: clientStatus.OPEN,
+  }
+  const dob = String(form[ck.dob] ?? '').trim()
+  if (dob) {
+    body[ck.dob] = dob
+  }
+  const ageRaw = form[ck.age]
+  if (ageRaw !== '' && ageRaw != null) {
+    body[ck.age] = Number(ageRaw)
+  }
+  const ssn = String(form[ck.socialSecurityNumber] ?? '').replace(/\D/g, '')
+  if (ssn) {
+    body[ck.socialSecurityNumber] = ssn
+  }
+
+  return body
+}
+
+export function extractClientMutationResponse(data) {
+  if (!data || typeof data !== typeNames.object) {
+    return null
+  }
+  let root = data.data
+  if (root == null || typeof root !== typeNames.object || Array.isArray(root)) {
+    root = data
+  }
+  if (root.client && typeof root.client === typeNames.object) {
+    return root.client
+  }
+
+  return root
+}
+
 export function mapClient(client) {
   if (!client || typeof client !== typeNames.object) {
     return null
@@ -111,17 +172,34 @@ export function mapClient(client) {
   const firstName = String(
     client.first_name ?? client[ck.firstName] ?? '',
   ).trim()
+  const middleName = String(
+    client.middle_name ?? client[ck.middleName] ?? '',
+  ).trim()
   const lastName = String(
     client.last_name ?? client[ck.lastName] ?? '',
   ).trim()
+  const suffix = String(client.suffix ?? client[ck.suffix] ?? '').trim()
 
   return {
     id: client.id,
     [ck.clientNumber]:
       client.client_number ?? client[ck.clientNumber] ?? '',
     [ck.firstName]: firstName,
+    [ck.middleName]: middleName,
     [ck.lastName]: lastName,
-    [ck.name]: `${firstName} ${lastName}`.trim(),
+    [ck.suffix]: suffix,
+    [ck.sex]: client.sex ?? client[ck.sex] ?? '',
+    [ck.age]: client.age ?? client[ck.age] ?? '',
+    [ck.socialSecurityNumber]:
+      client.social_security_number
+      ?? client[ck.socialSecurityNumber]
+      ?? '',
+    [ck.name]: formatClientListName(
+      firstName,
+      middleName,
+      lastName,
+      suffix,
+    ),
     [ck.email]: client.email ?? '',
     [ck.dob]: client.dob ?? '',
     [ck.clinicians]: client.clinicians ?? '',

@@ -20,7 +20,12 @@ export const clientFieldKeys = {
   id: 'id',
   clientNumber: 'clientNumber',
   firstName: 'firstName',
+  middleName: 'middleName',
   lastName: 'lastName',
+  suffix: 'suffix',
+  sex: 'sex',
+  age: 'age',
+  socialSecurityNumber: 'socialSecurityNumber',
   name: 'name',
   email: 'email',
   dob: 'dob',
@@ -28,6 +33,37 @@ export const clientFieldKeys = {
   admissionDate: 'admissionDate',
   status: 'status',
 }
+
+export const addClientTabKeys = {
+  basic: 'basic',
+  contact: 'contact',
+  medicalHistory: 'medicalHistory',
+}
+
+export const clientSexValues = {
+  male: 'Male',
+  female: 'Female',
+  unknown: 'Unknown',
+}
+
+export const clientMaxAge = 125
+
+export const clientNameMaxLength = 30
+
+export const clientSuffixMaxLength = 5
+
+/** Suffix dropdown options (empty value = none). */
+export const clientSuffixOptions = [
+  { labelKey: 'suffixSelect', value: '' },
+  { labelKey: 'suffixJr', value: 'Jr.' },
+  { labelKey: 'suffixSr', value: 'Sr.' },
+  { labelKey: 'suffixII', value: 'II' },
+  { labelKey: 'suffixIII', value: 'III' },
+  { labelKey: 'suffixMD', value: 'MD' },
+  { labelKey: 'suffixRN', value: 'RN' },
+  { labelKey: 'suffixDDS', value: 'DDS' },
+  { labelKey: 'suffixPhD', value: 'PhD' },
+]
 
 export const clientListColumnKeys = {
   clientNumber: 'clientNumber',
@@ -54,6 +90,7 @@ export const reservedTenantSubdomains = new Set([
 
 export const apiPaths = {
   clientsList: '/client/v1/all-clients',
+  clientsCreate: '/client/v1/clients',
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthResetPassword: '/oauth/v1/reset-password',

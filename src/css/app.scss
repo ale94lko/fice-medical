@@ -223,6 +223,11 @@
   box-shadow: $shadow-md;
 }
 
+.add-client-card {
+  width: 95vw;
+  max-width: 1040px;
+}
+
 .primary-action {
   margin-left: 16px;
   border-radius: $radius-md;

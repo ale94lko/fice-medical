@@ -95,7 +95,18 @@
           />
         </q-td>
       </template>
+      <template v-slot:no-data>
+        <div class="full-width row flex-center text-grey-7 q-gutter-sm q-pa-lg">
+          <q-icon name="inbox" size="md" />
+          <span>{{ t('clientListEmpty') }}</span>
+        </div>
+      </template>
     </q-table>
+
+    <AddClientDialog
+      v-model="addClientOpen"
+      @saved="onClientSaved"
+    />
   </q-page>
 </template>
 
@@ -112,10 +123,12 @@ import {
   siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AddClientDialog from 'components/AddClientDialog.vue'
 
 const $q = useQuasar()
 const loading = ref(false)
 const selected = ref([])
+const addClientOpen = ref(false)
 
 const siteStore = useSiteStore()
 const { t } = useI18n()
@@ -249,7 +262,11 @@ const windowWidth = computed(() => $q.screen.width)
 const showGrid = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
 
 const addClient = () => {
-  console.log('Add client')
+  addClientOpen.value = true
+}
+
+function onClientSaved() {
+  loadClients(tablePagination.value)
 }
 const assignClinicians = (rows) => {
   console.log('Assign Clinicians' + rows)
