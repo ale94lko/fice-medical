@@ -39,10 +39,8 @@
       v-model="sidebar"
       show-if-above
       bordered
-      :mini="sidebar && !sidebarExpanded"
-      :breakpoint="500"
-      @mouseover="openDrawer()"
-      @mouseout="closeDrawer()">
+      :mini="drawerMini"
+      :breakpoint="drawerOverlayBreakpoint">
       <q-scroll-area
         class="fit"
         :horizontal-thumb-style="{ opacity: 0 }">
@@ -301,19 +299,26 @@
         </q-list>
       </q-scroll-area>
       <div
-        v-if="sidebarExpanded && !extraSmallView" class="absolute icon-hide">
+        v-if="showDrawerExpandControl && sidebarExpanded"
+        class="absolute icon-hide">
         <q-btn
           dense
           flat
           icon="chevron_left"
-          @click="drawerClick(true)" />
+          :title="t('collapseMenu')"
+          :aria-label="t('collapseMenu')"
+          @click="collapseDrawerToMini" />
       </div>
-      <div v-else-if="!extraSmallView" class="absolute icon-hide">
+      <div
+        v-else-if="showDrawerExpandControl"
+        class="absolute icon-hide">
         <q-btn
           dense
           flat
           icon="chevron_right"
-          @click="drawerClick(false)" />
+          :title="t('expandMenu')"
+          :aria-label="t('expandMenu')"
+          @click="expandDrawer" />
       </div>
     </q-drawer>
     <q-page-container>
@@ -332,11 +337,14 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useQuasar } from 'quasar'
 import { useAuthStore } from 'stores/auth-store.js'
-import { siteBreakpoints, siteBreakpointsPx } from 'components/constants.js'
+import {
+  drawerMobileMaxPx,
+  siteBreakpointsPx,
+} from 'components/constants.js'
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
 
@@ -348,9 +356,9 @@ const authStore = useAuthStore()
 
 // State
 const sidebar = ref(false)
-const sidebarExpanded = ref(true)
-const openByMouseOver = ref(false)
+const sidebarExpanded = ref(false)
 const showSignOutConfirm = ref(false)
+const drawerOverlayBreakpoint = drawerMobileMaxPx + 1
 
 const clientMenu = ref(null)
 const providerMenu = ref(null)
@@ -360,12 +368,21 @@ const administrationMenu = ref(null)
 // Computed
 const windowWidth = computed(() => $q.screen.width)
 
-const mobileView = computed(() => $q.screen.name === siteBreakpoints.XS)
-const extraSmallView = computed(
-  () => windowWidth.value <= siteBreakpointsPx.XXS
+const mobileView = computed(
+  () => windowWidth.value <= drawerMobileMaxPx,
+)
+const tabletView = computed(
+  () => windowWidth.value > drawerMobileMaxPx
+    && windowWidth.value < siteBreakpointsPx.MD,
+)
+const drawerMini = computed(
+  () => sidebar.value && !sidebarExpanded.value && !mobileView.value,
+)
+const showDrawerExpandControl = computed(
+  () => sidebar.value && !mobileView.value,
 )
 const accordionMenu = computed(
-  () => (extraSmallView.value || mobileView.value) && sidebarExpanded.value
+  () => mobileView.value && sidebar.value,
 )
 const showClientMenu = computed(() => authStore.showClientMenu)
 const showAdministrationMenu = computed(
@@ -394,23 +411,41 @@ const handleSignOutCancel = () => {
 }
 
 const toggleLeftDrawer = () => {
+  if (mobileView.value) {
+    sidebar.value = !sidebar.value
+
+    return
+  }
   sidebar.value = !sidebar.value
-}
-
-const drawerClick = (state) => {
-  sidebarExpanded.value = !state
-  openByMouseOver.value = false
-}
-
-const openDrawer = () => {
-  if (!sidebarExpanded.value && !openByMouseOver.value) {
-    sidebarExpanded.value = true
-    openByMouseOver.value = true
+  if (sidebar.value && tabletView.value) {
+    sidebarExpanded.value = false
   }
 }
 
-const closeDrawer = () => {
-  if (sidebarExpanded.value && openByMouseOver.value) {
+function expandDrawer() {
+  if (mobileView.value) {
+    return
+  }
+  sidebar.value = true
+  sidebarExpanded.value = true
+}
+
+function collapseDrawerToMini() {
+  sidebarExpanded.value = false
+}
+
+function collapseDrawerForTablet() {
+  if (!tabletView.value) {
+    return
+  }
+  sidebarExpanded.value = false
+}
+
+function syncDrawerWithViewport() {
+  if (mobileView.value) {
+    return
+  }
+  if (tabletView.value) {
     sidebarExpanded.value = false
   }
 }
@@ -426,8 +461,17 @@ const handleLogout = () => {
   showSignOutConfirm.value = true
 }
 
-// Watchers
+onMounted(() => {
+  syncDrawerWithViewport()
+})
+
+watch(() => route.path, () => {
+  collapseDrawerForTablet()
+  hideAllMenu()
+})
+
 watch(windowWidth, () => {
+  syncDrawerWithViewport()
   hideAllMenu()
 })
 </script>

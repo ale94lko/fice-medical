@@ -27,6 +27,8 @@ export default {
   welcome: 'Bienvenido, {name}!',
   administration: 'Administración',
   dashboard: 'Panel',
+  expandMenu: 'Expandir menú',
+  collapseMenu: 'Contraer menú',
   client: 'Cliente',
   clients: 'Clientes',
   clientList: 'Listado de clientes',
