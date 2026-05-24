@@ -1,1 +1,0 @@
-import{It as e,J as t,nn as n}from"./index-BLd2PfzV.js";import{t as r}from"./QPage-Bcwfkwyb.js";var i={};function a(t,i){return n(),e(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
