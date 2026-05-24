@@ -1,1 +1,0 @@
-import{Sn as e,mt as t,nn as n}from"./index-BtcAUX8I.js";import{t as r}from"./QPage-CtZtalXQ.js";var i={};function a(t,i){return e(),n(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
