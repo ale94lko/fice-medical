@@ -1,0 +1,464 @@
+<template>
+  <div class="add-client-contact-tab">
+    <section class="add-client-form__section">
+      <AddClientSectionHeading icon="place" :title="t('clientAddress')" />
+      <div class="add-client-form__fields">
+        <div class="row q-col-gutter-md q-col-gutter-lg-md">
+          <div class="col-12 col-md-6">
+            <TextInput
+              v-model="contact.addressLine1"
+              :label="t('addressLine1')"
+              :rules="rules.addressLine1"
+              maxlength="100"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <TextInput
+              v-model="contact.addressLine2"
+              :label="t('addressLine2Optional')"
+              :rules="rules.addressLine2"
+              maxlength="100"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <q-select
+              v-model="contact.state"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              :options="stateOptions"
+              :label="t('state')"
+              @update:model-value="onClientStateChange"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <q-select
+              v-model="contact.city"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              :disable="!contact.state"
+              :options="cityOptions"
+              :label="t('city')"
+              @update:model-value="onClientCityChange"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <q-select
+              v-model="contact.county"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              :disable="!contact.state || !contact.city"
+              :options="countyOptions"
+              :label="t('county')"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <TextInput
+              v-model="contact.zipCode"
+              :label="t('zipCode')"
+              :rules="rules.zipCode"
+              maxlength="11"
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <q-separator class="q-my-lg" />
+
+    <section class="add-client-form__section">
+      <AddClientSectionHeading icon="phone" :title="t('contactMethods')" />
+      <div class="add-client-form__fields">
+        <div class="add-client-form__contact-methods-block">
+          <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
+          <div
+            v-for="(phone, index) in contact.phones"
+            :key="`phone-${index}`"
+            class="row q-col-gutter-md q-col-gutter-lg-md
+              add-client-form__contact-method-row">
+            <div class="col-12 col-md-6">
+              <q-input
+                outlined
+                hide-bottom-space
+                :model-value="phone.number"
+                :label="t('phoneNumber')"
+                :rules="rules.phoneNumber"
+                maxlength="14"
+                @update:model-value="val => onPhoneInput(index, val)"
+              />
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="row q-col-gutter-sm items-center">
+                <div class="col">
+                  <q-select
+                    v-model="phone.type"
+                    outlined
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    clearable
+                    :options="phoneTypeOptions"
+                    :label="t('phoneType')"
+                  />
+                </div>
+                <AddClientMethodRowActions
+                  :is-last="index === contact.phones.length - 1"
+                  :total="contact.phones.length"
+                  :add-label="t('addPhone')"
+                  :remove-label="t('removePhone')"
+                  @add="addPhone"
+                  @remove="removePhone(index)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="add-client-form__contact-methods-block">
+          <AddClientSubsectionHeading
+            icon="mail"
+            :title="t('contactEmailLabel')"
+          />
+          <div
+            v-for="(email, index) in contact.emails"
+            :key="`email-${index}`"
+            class="row q-col-gutter-md q-col-gutter-lg-md
+              add-client-form__contact-method-row">
+            <div class="col-12 col-md-6">
+              <TextInput
+                v-model="email.address"
+                :label="t('emailAddress')"
+                :rules="rules.emailAddress"
+                maxlength="32"
+              />
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="row q-col-gutter-sm items-center">
+                <div class="col">
+                  <q-select
+                    v-model="email.type"
+                    outlined
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    clearable
+                    :options="emailTypeOptions"
+                    :label="t('emailType')"
+                  />
+                </div>
+                <AddClientMethodRowActions
+                  :is-last="index === contact.emails.length - 1"
+                  :total="contact.emails.length"
+                  :add-label="t('addEmail')"
+                  :remove-label="t('removeEmail')"
+                  @add="addEmail"
+                  @remove="removeEmail(index)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <q-separator class="q-my-lg" />
+
+    <section class="add-client-form__section">
+      <AddClientSectionHeading
+        icon="chat"
+        :title="t('preferredCommunication')"
+      />
+      <p class="add-client-form__hint">
+        {{ t('preferredCommunicationHint') }}
+      </p>
+      <div class="add-client-form__fields">
+        <div class="add-client-form__preferred-grid">
+          <q-btn
+            v-for="opt in communicationOptions"
+            :key="opt.value"
+            no-caps
+            :color="isPreferredComm(opt.value) ? 'primary' : undefined"
+            :unelevated="isPreferredComm(opt.value)"
+            :outline="!isPreferredComm(opt.value)"
+            :class="[
+              'add-client-form__preferred-chip',
+              {
+                'add-client-form__preferred-chip--selected':
+                  isPreferredComm(opt.value),
+              },
+            ]"
+            @click="togglePreferredCommunication(opt.value)">
+            <q-icon
+              :name="opt.icon"
+              class="add-client-form__preferred-chip-icon"
+            />
+            <span class="add-client-form__preferred-chip-label">
+              {{ opt.label }}
+            </span>
+          </q-btn>
+        </div>
+      </div>
+    </section>
+
+    <q-separator class="q-my-lg" />
+
+    <section class="add-client-form__section">
+      <AddClientSectionHeading
+        icon="description"
+        :title="t('additionalNotes')"
+      />
+      <div class="add-client-form__fields">
+        <div class="row q-col-gutter-md q-col-gutter-lg-md">
+          <div class="col-12">
+            <q-input
+              v-model="contact.additionalNotes"
+              outlined
+              type="textarea"
+              rows="4"
+              class="add-client-form__notes-field"
+              :label="t('additionalNotesPlaceholder')"
+              :rules="rules.additionalNotes"
+              maxlength="500"
+              counter
+            />
+            <div class="row justify-between text-caption text-grey-6 q-mt-xs">
+              <span>{{ t('optional') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <template v-if="contact.otherContacts.length">
+      <q-separator class="q-my-lg" />
+      <div class="add-client-form__fields">
+        <q-tabs
+          v-model="contact.activeOtherContactId"
+          dense
+          no-caps
+          outside-arrows
+          mobile-arrows
+          class="add-client-tabs q-mb-md"
+          align="left">
+          <q-tab
+            v-for="(oc, index) in contact.otherContacts"
+            :key="oc.id"
+            :name="oc.id"
+            :label="otherContactTabLabel(oc, index)"
+          />
+        </q-tabs>
+
+        <q-tab-panels
+          v-model="contact.activeOtherContactId"
+          animated
+          class="bg-transparent">
+          <q-tab-panel
+            v-for="(oc, ocIndex) in contact.otherContacts"
+            :key="oc.id"
+            :name="oc.id"
+            class="q-pa-none">
+            <OtherContactPanel
+              :contact="oc"
+              :client-address="contact"
+              :rules="rules"
+              :state-options="stateOptions"
+              :phone-type-options="phoneTypeOptions"
+              :email-type-options="emailTypeOptions"
+              :contact-type-options="contactTypeOptions"
+              :relationship-type-options="relationshipTypeOptions"
+              @update:contact="patch => updateOtherContact(ocIndex, patch)"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
+      </div>
+    </template>
+
+    <div class="add-client-form__fields q-mt-lg">
+      <q-btn
+        outline
+        no-caps
+        color="primary"
+        class="full-width add-client-form__other-contact-btn"
+        icon="add"
+        :label="t('otherContact')"
+        @click="addOtherContact"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import TextInput from 'components/TextInput.vue'
+import OtherContactPanel from 'components/OtherContactPanel.vue'
+import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import AddClientSubsectionHeading
+  from 'components/AddClientSubsectionHeading.vue'
+import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
+import {
+  clientContactTypeValues,
+  clientEmailTypeValues,
+  clientPhoneTypeValues,
+  clientPreferredCommunicationValues,
+  clientRelationshipTypeValues,
+} from 'components/constants.js'
+import {
+  usStates,
+  getCitiesForState,
+  getCountiesForStateCity,
+} from 'src/data/us-geography.js'
+import {
+  createEmptyEmail,
+  createEmptyOtherContact,
+  createEmptyPhone,
+  formatPhoneUs,
+  resolveOtherContactTabLabel,
+} from 'src/utils/client-contact-form.js'
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true,
+  },
+  rules: {
+    type: Object,
+    default: () => ({}),
+  },
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const contact = computed({
+  get: () => props.modelValue,
+  set: val => emit('update:modelValue', val),
+})
+
+const { t } = useI18n()
+
+const stateOptions = usStates
+
+const cityOptions = computed(() => getCitiesForState(contact.value.state))
+
+const countyOptions = computed(() =>
+  getCountiesForStateCity(contact.value.state, contact.value.city),
+)
+
+const phoneTypeOptions = computed(() =>
+  Object.values(clientPhoneTypeValues).map(v => ({ label: v, value: v })),
+)
+
+const emailTypeOptions = computed(() =>
+  Object.values(clientEmailTypeValues).map(v => ({ label: v, value: v })),
+)
+
+const contactTypeOptions = computed(() =>
+  Object.values(clientContactTypeValues).map(v => ({ label: v, value: v })),
+)
+
+const relationshipTypeOptions = computed(() =>
+  Object.values(clientRelationshipTypeValues).map(v => ({
+    label: v,
+    value: v,
+  })),
+)
+
+const communicationOptions = computed(() => [
+  {
+    value: clientPreferredCommunicationValues.providerDidNotAsk,
+    icon: 'help_outline',
+    label: t('prefCommProviderDidNotAsk'),
+  },
+  {
+    value: clientPreferredCommunicationValues.patientDeclined,
+    icon: 'person_off',
+    label: t('prefCommPatientDeclined'),
+  },
+  {
+    value: clientPreferredCommunicationValues.workPhone,
+    icon: 'work',
+    label: t('prefCommWorkPhone'),
+  },
+  {
+    value: clientPreferredCommunicationValues.homePhone,
+    icon: 'home',
+    label: t('prefCommHomePhone'),
+  },
+  {
+    value: clientPreferredCommunicationValues.mobilePhone,
+    icon: 'smartphone',
+    label: t('prefCommMobilePhone'),
+  },
+  {
+    value: clientPreferredCommunicationValues.mail,
+    icon: 'mail',
+    label: t('prefCommMail'),
+  },
+  {
+    value: clientPreferredCommunicationValues.email,
+    icon: 'alternate_email',
+    label: t('prefCommEmail'),
+  },
+])
+
+function onClientStateChange() {
+  contact.value.city = ''
+  contact.value.county = ''
+}
+
+function onClientCityChange() {
+  contact.value.county = ''
+}
+
+function onPhoneInput(index, val) {
+  contact.value.phones[index].number = formatPhoneUs(val)
+}
+
+function addPhone() {
+  contact.value.phones.push(createEmptyPhone())
+}
+
+function removePhone(index) {
+  contact.value.phones.splice(index, 1)
+}
+
+function addEmail() {
+  contact.value.emails.push(createEmptyEmail())
+}
+
+function removeEmail(index) {
+  contact.value.emails.splice(index, 1)
+}
+
+function isPreferredComm(value) {
+  return contact.value.preferredCommunication === value
+}
+
+function togglePreferredCommunication(value) {
+  contact.value.preferredCommunication =
+    contact.value.preferredCommunication === value ? '' : value
+}
+
+function addOtherContact() {
+  const oc = createEmptyOtherContact()
+  contact.value.otherContacts.push(oc)
+  contact.value.activeOtherContactId = oc.id
+}
+
+function updateOtherContact(index, patch) {
+  Object.assign(contact.value.otherContacts[index], patch)
+}
+
+function otherContactTabLabel(oc, index) {
+  return resolveOtherContactTabLabel(oc, index, t)
+}
+
+</script>

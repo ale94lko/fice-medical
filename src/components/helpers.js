@@ -1,8 +1,10 @@
 import {
   clientFieldKeys,
+  clientFormSections,
   clientStatus,
   typeNames,
 } from 'components/constants.js'
+import { buildContactPayload } from 'src/utils/client-contact-form.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -144,6 +146,17 @@ export function buildClientCreateBody(form) {
   const ssn = String(form[ck.socialSecurityNumber] ?? '').replace(/\D/g, '')
   if (ssn) {
     body[ck.socialSecurityNumber] = ssn
+  }
+  const clinician = String(form[ck.assignedClinician] ?? '').trim()
+  if (clinician) {
+    body[ck.clinicians] = clinician
+  }
+
+  const contactPayload = buildContactPayload(
+    form[clientFormSections.contact],
+  )
+  if (contactPayload) {
+    body[clientFormSections.contact] = contactPayload
   }
 
   return body

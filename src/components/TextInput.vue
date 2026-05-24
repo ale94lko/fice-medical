@@ -1,6 +1,7 @@
 <template>
   <q-input
     outlined
+    hide-bottom-space
     v-model="model"
     :lazy-rules="'ondemand'"
     :data-testid="props.testId"
@@ -78,7 +79,6 @@ const resolvedType = computed(() =>
 
 .q-input {
   min-width: 120px;
-  margin-bottom: 10px;
 }
 
 .input-icon {

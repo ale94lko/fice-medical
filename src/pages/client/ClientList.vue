@@ -100,16 +100,12 @@
         </div>
       </template>
     </AdminQTable>
-
-    <AddClientDialog
-      v-model="addClientOpen"
-      @saved="onClientSaved"
-    />
   </q-page>
 </template>
 
 <script setup>
 import { onMounted, computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSiteStore } from 'stores/site-store.js'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
@@ -122,12 +118,11 @@ import {
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminQTable from 'components/AdminQTable.vue'
-import AddClientDialog from 'components/AddClientDialog.vue'
 
+const router = useRouter()
 const $q = useQuasar()
 const loading = ref(false)
 const selected = ref([])
-const addClientOpen = ref(false)
 
 const siteStore = useSiteStore()
 const { t } = useI18n()
@@ -261,12 +256,9 @@ const windowWidth = computed(() => $q.screen.width)
 const showGrid = computed(() => windowWidth.value <= siteBreakpointsPx.XXS)
 
 const addClient = () => {
-  addClientOpen.value = true
+  router.push('/clients/add')
 }
 
-function onClientSaved() {
-  loadClients(tablePagination.value)
-}
 const assignClinicians = (rows) => {
   console.log('Assign Clinicians' + rows)
 }

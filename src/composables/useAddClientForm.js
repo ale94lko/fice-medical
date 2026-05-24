@@ -1,7 +1,10 @@
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import {
   addClientTabKeys,
+  clientAgeUnitOptions,
+  clientAgeUnitValues,
   clientFieldKeys,
+  clientFormSections,
   clientMaxAge,
   clientNameMaxLength,
   clientSexValues,
@@ -17,12 +20,51 @@ import {
   snapshotAddClientForm,
   todayDateUs,
 } from 'src/utils/client-form.js'
+import { createEmptyContactSection } from 'src/utils/client-contact-form.js'
+import { useAddClientAgeSync } from 'src/composables/useAddClientAgeSync.js'
+import {
+  useAddClientContactRules,
+} from 'src/composables/useAddClientContactRules.js'
+import {
+  ADD_CLIENT_TAB_ORDER,
+  useAddClientTabAccess,
+} from 'src/composables/useAddClientTabAccess.js'
+import {
+  useAddClientTabValidation,
+} from 'src/composables/useAddClientTabValidation.js'
 
-const TAB_ORDER = [
-  addClientTabKeys.basic,
-  addClientTabKeys.contact,
-  addClientTabKeys.medicalHistory,
-]
+const TAB_ORDER = ADD_CLIENT_TAB_ORDER
+
+const TAB_LABEL_KEYS = {
+  [addClientTabKeys.basic]: 'tabBasicInfo',
+  [addClientTabKeys.contact]: 'tabContact',
+  [addClientTabKeys.allergies]: 'tabAllergies',
+  [addClientTabKeys.assessments]: 'tabAssessments',
+  [addClientTabKeys.clinical]: 'tabClinical',
+  [addClientTabKeys.careCoordination]: 'tabCareCoordination',
+  [addClientTabKeys.financials]: 'tabFinancials',
+  [addClientTabKeys.documents]: 'tabDocuments',
+}
+
+export function createEmptyAddClientForm() {
+  const ck = clientFieldKeys
+
+  return {
+    [ck.clientNumber]: generateClientNumber(),
+    [ck.firstName]: '',
+    [ck.middleName]: '',
+    [ck.lastName]: '',
+    [ck.suffix]: '',
+    [ck.sex]: '',
+    [ck.dob]: '',
+    [ck.age]: '',
+    [ck.ageUnit]: clientAgeUnitValues.years,
+    [ck.socialSecurityNumber]: '',
+    [ck.admissionDate]: todayDateUs(),
+    [ck.assignedClinician]: '',
+    [clientFormSections.contact]: createEmptyContactSection(),
+  }
+}
 
 export function useAddClientForm(t) {
   const ck = clientFieldKeys
@@ -30,13 +72,27 @@ export function useAddClientForm(t) {
   const initialSnapshot = ref('')
   const formRef = ref(null)
 
-  const form = ref(createEmptyForm())
+  const form = ref(createEmptyAddClientForm())
 
-  const ageReadonly = computed(() => {
-    const dob = String(form.value[ck.dob] ?? '').trim()
+  const {
+    resetTabAccess,
+    isTabEnabled,
+    unlockThroughIndex,
+  } = useAddClientTabAccess()
 
-    return dob.length > 0
+  const {
+    tabIndex,
+    validateTab,
+    validateCurrentTabAndUnlock,
+    validateTabsThrough,
+  } = useAddClientTabValidation({
+    activeTab,
+    formRef,
+    tabOrder: TAB_ORDER,
+    unlockThroughIndex,
   })
+
+  const { ageReadonly } = useAddClientAgeSync(form, ck.dob, ck.age)
 
   const sexOptions = computed(() => [
     { label: t('sexMale'), value: clientSexValues.male },
@@ -51,39 +107,20 @@ export function useAddClientForm(t) {
     })),
   )
 
-  watch(
-    () => form.value[ck.dob],
-    dob => {
-      const trimmed = String(dob ?? '').trim()
-      if (!trimmed) {
-        return
-      }
-      const age = ageFromUsDateString(trimmed)
-      if (age != null) {
-        form.value[ck.age] = String(age)
-      }
-    },
+  const ageUnitSelectOptions = computed(() =>
+    clientAgeUnitOptions.map(o => ({
+      label: t(o.labelKey),
+      value: o.value,
+    })),
   )
 
-  function createEmptyForm() {
-    return {
-      [ck.clientNumber]: generateClientNumber(),
-      [ck.firstName]: '',
-      [ck.middleName]: '',
-      [ck.lastName]: '',
-      [ck.suffix]: '',
-      [ck.sex]: '',
-      [ck.dob]: '',
-      [ck.age]: '',
-      [ck.socialSecurityNumber]: '',
-      [ck.admissionDate]: todayDateUs(),
-    }
-  }
+  const assignedClinicianOptions = computed(() => [])
 
   function resetForm() {
-    form.value = createEmptyForm()
+    form.value = createEmptyAddClientForm()
     activeTab.value = addClientTabKeys.basic
     initialSnapshot.value = snapshotAddClientForm(form.value)
+    resetTabAccess()
   }
 
   function markPristine() {
@@ -167,6 +204,8 @@ export function useAddClientForm(t) {
     }
   }
 
+  const { contactRules } = useAddClientContactRules(t, lettersRule)
+
   const rules = computed(() => ({
     firstName: [
       requiredRule(t('firstNameRequired')),
@@ -185,8 +224,10 @@ export function useAddClientForm(t) {
     ssn: [ssnRule()],
   }))
 
-  function tabIndex(tab) {
-    return TAB_ORDER.indexOf(tab)
+  function tabLabelFor(tab) {
+    const key = TAB_LABEL_KEYS[tab] ?? TAB_LABEL_KEYS[addClientTabKeys.basic]
+
+    return t(key)
   }
 
   function goNextTab() {
@@ -197,34 +238,52 @@ export function useAddClientForm(t) {
     activeTab.value = TAB_ORDER[idx + 1]
   }
 
+  function goPreviousTab() {
+    const idx = tabIndex(activeTab.value)
+    if (idx <= 0) {
+      return
+    }
+    activeTab.value = TAB_ORDER[idx - 1]
+  }
+
   function canGoNext() {
     return tabIndex(activeTab.value) < TAB_ORDER.length - 1
   }
 
-  async function validateBasicTab() {
-    if (!formRef.value) {
-      return false
-    }
-
-    return formRef.value.validate()
+  function canGoPrevious() {
+    return tabIndex(activeTab.value) > 0
   }
+
+  const contactSectionKey = clientFormSections.contact
 
   return {
     ck,
+    contactSectionKey,
     form,
     formRef,
     activeTab,
     addClientTabKeys,
     ageReadonly,
+    ageUnitSelectOptions,
+    assignedClinicianOptions,
     sexOptions,
     suffixSelectOptions,
     rules,
+    contactRules,
     resetForm,
     markPristine,
     isDirty,
     goNextTab,
     canGoNext,
-    validateBasicTab,
-    createEmptyForm,
+    goPreviousTab,
+    canGoPrevious,
+    isTabEnabled,
+    validateTab,
+    validateCurrentTabAndUnlock,
+    validateTabsThrough,
+    tabIndex,
+    tabLabelFor,
+    TAB_ORDER,
+    createEmptyForm: createEmptyAddClientForm,
   }
 }

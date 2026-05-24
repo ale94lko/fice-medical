@@ -14,6 +14,11 @@ const routes = [
         component: () => import('pages/client/ClientList.vue'),
         meta: { requiresModule: appModuleNames.client },
       },
+      {
+        path: 'clients/add',
+        component: () => import('pages/client/AddClientPage.vue'),
+        meta: { requiresModule: appModuleNames.client },
+      },
     ],
     meta: { requiresAuth: true },
   },

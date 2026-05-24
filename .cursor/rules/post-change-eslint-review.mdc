@@ -1,0 +1,48 @@
+---
+description: Tras editar código, ejecutar ESLint, corregir estilo y proponer optimizaciones
+alwaysApply: true
+---
+
+# Revisión ESLint y estilo tras cada cambio
+
+Después de **cualquier cambio de código** (crear, editar o borrar archivos en `src/`), antes de dar por terminada la tarea:
+
+## 1. Ejecutar el linter
+
+```bash
+npm run lint
+```
+
+En cambios acotados, también usar la herramienta de diagnósticos del IDE en los archivos tocados.
+
+## 2. Corregir obligatoriamente
+
+- **Errores** (`error`): corregirlos siempre; no cerrar la tarea con lint en rojo.
+- **Avisos frecuentes en este repo** (tratarlos como deuda a resolver en el mismo PR):
+  - `max-len` (80): partir líneas, acortar strings o extraer variables.
+  - `max-statements` (30): extraer funciones auxiliares pequeñas.
+  - `no-dupe-keys`: no repetir claves en i18n; usar nombres específicos (`clientEmailInvalid` vs `emailInvalid`).
+
+## 3. Patrones de arreglo
+
+**i18n** (`src/i18n/**/*.js`) — cadenas largas en varias líneas:
+
+```js
+addressLineInvalid:
+  'Letters, numbers, periods and hyphens only, max {max} characters',
+```
+
+**JS/Vue** — funciones largas: extraer validadores, mappers o bloques de UI en helpers/composables.
+
+## 4. Optimizaciones (breve, solo si aplica)
+
+Al cerrar, si hubo cambios sustantivos, mencionar en 1–3 frases si conviene:
+- reutilizar utilidades existentes en lugar de duplicar lógica;
+- reducir complejidad (extraer función, simplificar condicionales);
+- alinear con convenciones del archivo vecino.
+
+No alargar la respuesta con refactors no pedidos; priorizar que **lint pase sin errores**.
+
+## 5. Verificación final
+
+Si se tocó lógica de build o muchos archivos, ejecutar `npm run build` cuando sea razonable.

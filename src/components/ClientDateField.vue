@@ -1,6 +1,7 @@
 <template>
   <q-input
     outlined
+    hide-bottom-space
     :model-value="modelValue"
     :label="label"
     :readonly="readonly"

@@ -1,5 +1,6 @@
 // app global css in SCSS form
 @import 'quasar.variables';
+@import 'add-client-form';
 
 // —— Layout shell ——
 .app-layout .q-page-container {
@@ -128,6 +129,22 @@
 .admin-page {
   padding: 20px 24px 28px;
   min-height: 0;
+}
+
+.q-page.add-client-page {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: calc(100dvh - 56px - 40px - 48px);
+  max-height: calc(100dvh - 56px - 40px - 48px);
+  overflow: hidden;
+}
+
+@media (max-width: 1023px) {
+  .q-page.add-client-page {
+    height: calc(100dvh - 56px - 40px - 84px);
+    max-height: calc(100dvh - 56px - 40px - 84px);
+  }
 }
 
 @media (max-width: 1023px) {
@@ -279,11 +296,6 @@
   border-radius: $radius-lg !important;
   overflow: hidden;
   box-shadow: $shadow-md;
-}
-
-.add-client-card {
-  width: 95vw;
-  max-width: 1040px;
 }
 
 .primary-action {

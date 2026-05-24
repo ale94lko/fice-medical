@@ -34,14 +34,97 @@ export const clientFieldKeys = {
   dob: 'dob',
   clinicians: 'clinicians',
   admissionDate: 'admissionDate',
+  ageUnit: 'ageUnit',
+  assignedClinician: 'assignedClinician',
   status: 'status',
 }
 
 export const addClientTabKeys = {
   basic: 'basic',
   contact: 'contact',
-  medicalHistory: 'medicalHistory',
+  allergies: 'allergies',
+  assessments: 'assessments',
+  clinical: 'clinical',
+  careCoordination: 'careCoordination',
+  financials: 'financials',
+  documents: 'documents',
 }
+
+export const clientAgeUnitValues = {
+  years: 'years',
+  months: 'months',
+  days: 'days',
+}
+
+export const clientCountryDefault = 'United States'
+
+export const clientPhoneTypeValues = {
+  home: 'Home',
+  work: 'Work',
+  mobile: 'Mobile',
+  fax: 'Fax',
+  pager: 'Pager',
+  emergency: 'Emergency',
+}
+
+export const clientEmailTypeValues = {
+  personal: 'Personal',
+  work: 'Work',
+  other: 'Other',
+  billing: 'Billing',
+}
+
+export const clientPreferredCommunicationValues = {
+  providerDidNotAsk: 'Provider did not ask',
+  patientDeclined: 'Patient declined to specify',
+  workPhone: 'Work phone',
+  homePhone: 'Home Phone',
+  mobilePhone: 'Mobile phone',
+  mail: 'Mail',
+  email: 'Email',
+}
+
+export const clientContactTypeValues = {
+  primary: 'Primary Contact',
+  emergency: 'Emergency Contact',
+  billing: 'Billing Contact',
+  legal: 'Legal Representative',
+  caregiver: 'Caregiver',
+  nextOfKin: 'Next of Kin',
+  other: 'Other',
+}
+
+export const clientRelationshipTypeValues = {
+  parents: 'Parents',
+  otherFamily: 'Other Family Member',
+  others: 'Others',
+}
+
+export const clientContactFieldKeys = {
+  addressLine1: 'addressLine1',
+  addressLine2: 'addressLine2',
+  city: 'city',
+  state: 'state',
+  county: 'county',
+  zipCode: 'zipCode',
+  country: 'country',
+  phones: 'phones',
+  emails: 'emails',
+  preferredCommunication: 'preferredCommunication',
+  additionalNotes: 'additionalNotes',
+  otherContacts: 'otherContacts',
+  activeOtherContactId: 'activeOtherContactId',
+}
+
+export const clientFormSections = {
+  contact: 'contact',
+}
+
+export const clientAgeUnitOptions = [
+  { labelKey: 'ageUnitYears', value: clientAgeUnitValues.years },
+  { labelKey: 'ageUnitMonths', value: clientAgeUnitValues.months },
+  { labelKey: 'ageUnitDays', value: clientAgeUnitValues.days },
+]
 
 export const clientSexValues = {
   male: 'Male',
