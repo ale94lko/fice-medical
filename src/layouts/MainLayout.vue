@@ -54,6 +54,14 @@
               <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>{{ t('dashboard') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerMini"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('dashboard') }}
+            </q-tooltip>
           </q-item>
           <q-expansion-item
             v-if="accordionMenu && showClientMenu"
@@ -121,6 +129,14 @@
               <q-item-section>{{ t('clientAssignment') }}</q-item-section>
               </q-item>
             </q-menu>
+            <q-tooltip
+              v-if="drawerMini && !clientMenu"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('client') }}
+            </q-tooltip>
           </q-item>
           <q-expansion-item
             v-if="accordionMenu"
@@ -188,12 +204,28 @@
                 <q-item-section>RBT</q-item-section>
               </q-item>
             </q-menu>
+            <q-tooltip
+              v-if="drawerMini && !providerMenu"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              Providers
+            </q-tooltip>
           </q-item>
           <q-item clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="medical_services" />
             </q-item-section>
             <q-item-section>Services</q-item-section>
+            <q-tooltip
+              v-if="drawerMini"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              Services
+            </q-tooltip>
           </q-item>
           <q-expansion-item
             v-if="accordionMenu"
@@ -249,18 +281,42 @@
                 <q-item-section>Signatures</q-item-section>
               </q-item>
             </q-menu>
+            <q-tooltip
+              v-if="drawerMini && !humanResourcesMenu"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              Human Resources
+            </q-tooltip>
           </q-item>
           <q-item clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="account_balance" />
             </q-item-section>
             <q-item-section>Billing</q-item-section>
+            <q-tooltip
+              v-if="drawerMini"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              Billing
+            </q-tooltip>
           </q-item>
           <q-item clickable v-ripple>
             <q-item-section avatar>
               <q-icon name="equalizer" />
             </q-item-section>
             <q-item-section>Reports</q-item-section>
+            <q-tooltip
+              v-if="drawerMini"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              Reports
+            </q-tooltip>
           </q-item>
           <q-expansion-item
             v-if="accordionMenu && showAdministrationMenu"
@@ -295,6 +351,14 @@
                 <q-item-section>General</q-item-section>
               </q-item>
             </q-menu>
+            <q-tooltip
+              v-if="drawerMini && !administrationMenu"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('administration') }}
+            </q-tooltip>
           </q-item>
         </q-list>
       </q-scroll-area>
@@ -382,7 +446,7 @@ const showDrawerExpandControl = computed(
   () => sidebar.value && !mobileView.value,
 )
 const accordionMenu = computed(
-  () => mobileView.value && sidebar.value,
+  () => !drawerMini.value,
 )
 const showClientMenu = computed(() => authStore.showClientMenu)
 const showAdministrationMenu = computed(
@@ -430,8 +494,16 @@ function expandDrawer() {
   sidebarExpanded.value = true
 }
 
+function hideAllMenu() {
+  clientMenu.value = false
+  providerMenu.value = false
+  humanResourcesMenu.value = false
+  administrationMenu.value = false
+}
+
 function collapseDrawerToMini() {
   sidebarExpanded.value = false
+  hideAllMenu()
 }
 
 function collapseDrawerForTablet() {
@@ -448,13 +520,6 @@ function syncDrawerWithViewport() {
   if (tabletView.value) {
     sidebarExpanded.value = false
   }
-}
-
-const hideAllMenu = () => {
-  clientMenu.value = false
-  providerMenu.value = false
-  humanResourcesMenu.value = false
-  administrationMenu.value = false
 }
 
 const handleLogout = () => {
