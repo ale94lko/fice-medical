@@ -1,20 +1,52 @@
+import { useQuasar } from 'quasar'
 import {
   ADD_CLIENT_COMING_SOON_TABS,
   tabIndexInOrder,
 } from 'src/composables/useAddClientTabAccess.js'
+import {
+  addClientTabKeys,
+  clientFormSections,
+} from 'components/constants.js'
+import {
+  validateFamilyMedicalHistoryDraftClear,
+} from 'src/utils/client-family-medical-history.js'
+import { quasarNotifyTypes } from 'components/constants.js'
 
 export function useAddClientTabValidation({
   activeTab,
   formRef,
+  form,
   tabOrder,
   unlockThroughIndex,
+  t,
 }) {
+  const $q = useQuasar()
+
   function tabIndex(tab) {
     return tabIndexInOrder(tab, tabOrder)
   }
 
+  function notifyValidationError(message) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message,
+      position: 'top',
+    })
+  }
+
   async function validateTab(tab) {
     if (ADD_CLIENT_COMING_SOON_TABS.has(tab)) {
+      return true
+    }
+    if (tab === addClientTabKeys.familyMedicalHistory) {
+      const section = form.value[clientFormSections.familyMedicalHistory]
+      const result = validateFamilyMedicalHistoryDraftClear(section)
+      if (!result.ok && result.errorKey) {
+        notifyValidationError(t(result.errorKey))
+
+        return false
+      }
+
       return true
     }
     if (!formRef.value) {

@@ -57,13 +57,13 @@ export default {
   tabBasicInfo: 'Info básica',
   tabContact: 'Contacto',
   tabContactInformation: 'Información de contacto',
+  tabFamilyMedicalHistory: 'Historial médico familiar',
   tabAllergies: 'Alergias',
   tabAssessments: 'Evaluaciones',
   tabClinical: 'Clínico',
   tabCareCoordination: 'Coordinación de cuidados',
   tabFinancials: 'Finanzas',
   tabDocuments: 'Documentos',
-  tabFamilyMedicalHistory: 'Historial médico familiar',
   tabComingSoon: 'Esta sección estará disponible en una actualización futura.',
   ageUnit: 'Unidad de edad',
   ageUnitYears: 'Años',
@@ -108,6 +108,7 @@ export default {
   status: 'Estado',
   actions: 'Acciones',
   edit: 'Editar',
+  delete: 'Eliminar',
   addClient: 'Adicionar Cliente',
   addNewClient: 'Adicionar nuevo cliente',
   addNewClientSubtitle: 'Crear un nuevo perfil de cliente',
@@ -181,4 +182,37 @@ export default {
   phoneInvalid: 'El teléfono solo puede contener dígitos, +, -, () y espacios',
   countryMax: 'Máximo {max} caracteres',
   notesMax: 'Máximo {max} caracteres',
+  fmhAddSectionTitle: 'Agregar historial médico familiar',
+  fmhPersonalSectionTitle: 'Historial médico personal',
+  fmhFamilySectionTitle: 'Historial médico familiar',
+  fmhFamilyRelationship: 'Relación familiar',
+  fmhRelationshipTooltip: 'Seleccione el cliente o un familiar consanguíneo.',
+  fmhMedicalConditions: 'Condición(es) médica(s)',
+  fmhAdd: 'Agregar',
+  fmhColRelationship: 'Relación familiar',
+  fmhColConditions: 'Condiciones con antecedente familiar',
+  fmhPersonalEmpty: 'Aún no hay entradas de historial médico personal.',
+  fmhFamilyEmpty: 'Aún no hay entradas de historial médico familiar.',
+  fmhBothRequired:
+    'Seleccione una relación familiar e ingrese al menos una condición médica.',
+  fmhRelationshipRequired:
+    'La relación familiar es obligatoria cuando hay una condición.',
+  fmhConditionsRequired:
+    'La condición médica es obligatoria cuando hay una relación.',
+  fmhRelationshipMax: 'Máximo {max} caracteres',
+  fmhConditionsInvalid:
+    'Solo letras y números, máximo {max} caracteres',
+  fmhDuplicateEntry:
+    'Esta combinación de relación y condición ya existe.',
+  fmhAddedSuccess: 'Entrada de historial médico familiar agregada.',
+  fmhUpdatedSuccess: 'Entrada de historial médico familiar actualizada.',
+  fmhDeletedSuccess: 'Entrada de historial médico familiar eliminada.',
+  fmhEditTitle: 'Editar historial médico familiar',
+  fmhDeleteTitle: 'Mensaje de confirmación',
+  fmhDeleteMessage:
+    '¿Seguro que desea eliminar el elemento seleccionado? '
+    + 'Esta acción es permanente y no se puede deshacer. '
+    + 'Para fines de auditoría, indique el motivo de la eliminación.',
+  fmhDeleteReasonLabel: 'Motivo de eliminación',
+  fmhDeleteReasonRequired: 'El motivo de eliminación es obligatorio.',
 }

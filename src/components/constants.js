@@ -42,6 +42,7 @@ export const clientFieldKeys = {
 export const addClientTabKeys = {
   basic: 'basic',
   contact: 'contact',
+  familyMedicalHistory: 'familyMedicalHistory',
   allergies: 'allergies',
   assessments: 'assessments',
   clinical: 'clinical',
@@ -118,7 +119,39 @@ export const clientContactFieldKeys = {
 
 export const clientFormSections = {
   contact: 'contact',
+  familyMedicalHistory: 'familyMedicalHistory',
 }
+
+export const familyMedicalHistorySelfValue = 'Self'
+
+export const familyMedicalHistoryMaxRelationshipLength = 25
+
+export const familyMedicalHistoryMaxConditionsLength = 500
+
+export const clientFamilyRelationshipValues = {
+  self: 'Self',
+  father: 'Father',
+  mother: 'Mother',
+  brother: 'Brother',
+  sister: 'Sister',
+  son: 'Son',
+  daughter: 'Daughter',
+  halfBrother: 'Half-brother',
+  halfSister: 'Half-sister',
+  paternalGrandfather: 'Paternal grandfather',
+  paternalGrandmother: 'Paternal grandmother',
+  maternalGrandfather: 'Maternal grandfather',
+  maternalGrandmother: 'Maternal grandmother',
+  uncle: 'Uncle',
+  aunt: 'Aunt',
+  nephew: 'Nephew',
+  niece: 'Niece',
+  cousin: 'Cousin',
+}
+
+export const clientFamilyRelationshipOptions = Object.values(
+  clientFamilyRelationshipValues,
+).map(value => ({ label: value, value }))
 
 export const clientAgeUnitOptions = [
   { labelKey: 'ageUnitYears', value: clientAgeUnitValues.years },

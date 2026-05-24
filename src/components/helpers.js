@@ -5,6 +5,9 @@ import {
   typeNames,
 } from 'components/constants.js'
 import { buildContactPayload } from 'src/utils/client-contact-form.js'
+import {
+  buildFamilyMedicalHistoryPayload,
+} from 'src/utils/client-family-medical-history.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -157,6 +160,13 @@ export function buildClientCreateBody(form) {
   )
   if (contactPayload) {
     body[clientFormSections.contact] = contactPayload
+  }
+
+  const fmhPayload = buildFamilyMedicalHistoryPayload(
+    form[clientFormSections.familyMedicalHistory],
+  )
+  if (fmhPayload) {
+    body[clientFormSections.familyMedicalHistory] = fmhPayload
   }
 
   return body

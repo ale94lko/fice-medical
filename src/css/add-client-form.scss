@@ -400,3 +400,54 @@
   min-height: 56px;
   height: 100%;
 }
+
+.add-client-form__fmh-add-card,
+.add-client-form__fmh-list-card {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+  box-shadow: $shadow-sm;
+}
+
+.add-client-form__fmh-table-wrap {
+  overflow-x: auto;
+}
+
+.add-client-form__fmh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th,
+  td {
+    padding: 12px 14px;
+    border: 1px solid $border-subtle;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: rgba($primary, 0.08);
+    color: $text-strong;
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: $surface-muted;
+  }
+}
+
+.add-client-form__fmh-table-actions-col {
+  width: 120px;
+  text-align: center !important;
+}
+
+.add-client-form__fmh-table-actions {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.add-client-form__fmh-empty {
+  margin: 0;
+  text-align: center;
+}

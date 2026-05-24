@@ -56,13 +56,13 @@ export default {
   tabBasicInfo: 'Basic Info',
   tabContact: 'Contact',
   tabContactInformation: 'Contact Information',
+  tabFamilyMedicalHistory: 'Family Medical History',
   tabAllergies: 'Allergies',
   tabAssessments: 'Assessments',
   tabClinical: 'Clinical',
   tabCareCoordination: 'Care Coordination',
   tabFinancials: 'Financials',
   tabDocuments: 'Documents',
-  tabFamilyMedicalHistory: 'Family Medical History',
   tabComingSoon: 'This section will be available in a future update.',
   ageUnit: 'Age Unit',
   ageUnitYears: 'Years',
@@ -107,6 +107,7 @@ export default {
   status: 'Status',
   actions: 'Actions',
   edit: 'Edit',
+  delete: 'Delete',
   addClient: 'Add Client',
   addNewClient: 'Add New Client',
   addNewClientSubtitle: 'Create a new client profile',
@@ -178,4 +179,37 @@ export default {
   phoneInvalid: 'Phone may only contain digits, +, -, (), and spaces',
   countryMax: 'Maximum {max} characters',
   notesMax: 'Maximum {max} characters',
+  fmhAddSectionTitle: 'Add Family Medical History',
+  fmhPersonalSectionTitle: 'Personal Medical History',
+  fmhFamilySectionTitle: 'Family Medical History',
+  fmhFamilyRelationship: 'Family Relationship',
+  fmhRelationshipTooltip: 'Select the client or a blood relative.',
+  fmhMedicalConditions: 'Medical Condition(s)',
+  fmhAdd: 'Add',
+  fmhColRelationship: 'Family Relationship',
+  fmhColConditions: 'Conditions with a family history',
+  fmhPersonalEmpty: 'No personal medical history entries yet.',
+  fmhFamilyEmpty: 'No family medical history entries yet.',
+  fmhBothRequired:
+    'Select a family relationship and enter at least one medical condition.',
+  fmhRelationshipRequired:
+    'Family Relationship is required when a condition is entered.',
+  fmhConditionsRequired:
+    'Medical Condition(s) is required when a relationship is selected.',
+  fmhRelationshipMax: 'Maximum {max} characters',
+  fmhConditionsInvalid:
+    'Letters and numbers only, maximum {max} characters',
+  fmhDuplicateEntry:
+    'This family relationship and condition combination already exists.',
+  fmhAddedSuccess: 'Family medical history entry added.',
+  fmhUpdatedSuccess: 'Family medical history entry updated.',
+  fmhDeletedSuccess: 'Family medical history entry deleted.',
+  fmhEditTitle: 'Edit Family Medical History',
+  fmhDeleteTitle: 'Confirmation message',
+  fmhDeleteMessage:
+    'Are you sure you want to delete the selected item? '
+    + 'This action is permanent and cannot be undone. '
+    + 'For audit purposes, please provide a reason for the deletion.',
+  fmhDeleteReasonLabel: 'Reason for deletion',
+  fmhDeleteReasonRequired: 'A reason for deletion is required.',
 }

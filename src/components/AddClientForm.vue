@@ -33,6 +33,11 @@
           :disable="!isTabEnabled(addClientTabKeys.contact)"
         />
         <q-tab
+          :name="addClientTabKeys.familyMedicalHistory"
+          :label="t('tabFamilyMedicalHistory')"
+          :disable="!isTabEnabled(addClientTabKeys.familyMedicalHistory)"
+        />
+        <q-tab
           :name="addClientTabKeys.allergies"
           :label="t('tabAllergies')"
           class="add-client-tab--allergies"
@@ -245,6 +250,14 @@
         </q-tab-panel>
 
         <q-tab-panel
+          :name="addClientTabKeys.familyMedicalHistory"
+          class="q-pa-none">
+          <AddClientFamilyMedicalHistoryTab
+            v-model="form[clientFormSections.familyMedicalHistory]"
+          />
+        </q-tab-panel>
+
+        <q-tab-panel
           v-for="tab in comingSoonTabKeys"
           :key="tab"
           :name="tab"
@@ -277,11 +290,14 @@ import TextInput from 'components/TextInput.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import AddClientContactTab from 'components/AddClientContactTab.vue'
+import AddClientFamilyMedicalHistoryTab from
+  'components/AddClientFamilyMedicalHistoryTab.vue'
 import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
 import {
   addClientTabKeys,
+  clientFormSections,
   clientMaxAge,
   quasarNotifyTypes,
 } from 'components/constants.js'
@@ -404,8 +420,8 @@ async function onNext() {
 }
 
 async function onSave() {
-  const contactIdx = tabIndex(addClientTabKeys.contact)
-  const ok = await validateTabsThrough(contactIdx + 1)
+  const fmhIdx = tabIndex(addClientTabKeys.familyMedicalHistory)
+  const ok = await validateTabsThrough(fmhIdx + 1)
   if (!ok) {
     return
   }

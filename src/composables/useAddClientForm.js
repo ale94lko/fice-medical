@@ -21,6 +21,9 @@ import {
   todayDateUs,
 } from 'src/utils/client-form.js'
 import { createEmptyContactSection } from 'src/utils/client-contact-form.js'
+import {
+  createEmptyFamilyMedicalHistorySection,
+} from 'src/utils/client-family-medical-history.js'
 import { useAddClientAgeSync } from 'src/composables/useAddClientAgeSync.js'
 import {
   useAddClientContactRules,
@@ -38,6 +41,7 @@ const TAB_ORDER = ADD_CLIENT_TAB_ORDER
 const TAB_LABEL_KEYS = {
   [addClientTabKeys.basic]: 'tabBasicInfo',
   [addClientTabKeys.contact]: 'tabContact',
+  [addClientTabKeys.familyMedicalHistory]: 'tabFamilyMedicalHistory',
   [addClientTabKeys.allergies]: 'tabAllergies',
   [addClientTabKeys.assessments]: 'tabAssessments',
   [addClientTabKeys.clinical]: 'tabClinical',
@@ -63,6 +67,8 @@ export function createEmptyAddClientForm() {
     [ck.admissionDate]: todayDateUs(),
     [ck.assignedClinician]: '',
     [clientFormSections.contact]: createEmptyContactSection(),
+    [clientFormSections.familyMedicalHistory]:
+      createEmptyFamilyMedicalHistorySection(),
   }
 }
 
@@ -88,8 +94,10 @@ export function useAddClientForm(t) {
   } = useAddClientTabValidation({
     activeTab,
     formRef,
+    form,
     tabOrder: TAB_ORDER,
     unlockThroughIndex,
+    t,
   })
 
   const { ageReadonly } = useAddClientAgeSync(form, ck.dob, ck.age)

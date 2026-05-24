@@ -4,6 +4,7 @@ import { addClientTabKeys } from 'components/constants.js'
 export const ADD_CLIENT_TAB_ORDER = [
   addClientTabKeys.basic,
   addClientTabKeys.contact,
+  addClientTabKeys.familyMedicalHistory,
   addClientTabKeys.allergies,
   addClientTabKeys.assessments,
   addClientTabKeys.clinical,
