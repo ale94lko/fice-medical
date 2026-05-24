@@ -153,7 +153,16 @@ export default {
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',
   otherContact: 'Other Contact',
+  otherContactEmptyHint:
+    'Add emergency contacts, billing contacts, or other related people.',
+  addOtherContact: 'Add Contact',
+  removeOtherContact: 'Remove contact',
+  removeOtherContactTitle: 'Remove contact',
+  removeOtherContactMessage:
+    'Are you sure you want to remove "{name}"? This cannot be undone.',
+  removeOtherContactConfirm: 'Remove',
   otherContactTabGeneric: 'Contact {n}',
+  phoneNumberPlaceholder: '(000) 000-0000',
   contactType: 'Contact Type',
   relationshipType: 'Relationship Type',
   responsibleForPayments: 'Responsible for payments',

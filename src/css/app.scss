@@ -381,10 +381,14 @@ input:-webkit-autofill {
       border: 1px solid $border-subtle;
 
       .login-inputs {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
         padding-bottom: 0 !important;
 
         .login-error-msg {
           color: $negative;
+          margin-top: -8px;
         }
       }
 

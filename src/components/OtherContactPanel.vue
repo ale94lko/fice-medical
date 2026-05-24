@@ -3,19 +3,6 @@
     <div class="row q-col-gutter-md q-col-gutter-lg-md">
       <div class="col-12 col-md-6">
         <q-select
-          :model-value="contact.contactType"
-          outlined
-          hide-bottom-space
-          emit-value
-          map-options
-          clearable
-          :options="contactTypeOptions"
-          :label="t('contactType')"
-          @update:model-value="setField('contactType', $event)"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <q-select
           :model-value="contact.relationshipType"
           outlined
           hide-bottom-space
@@ -27,12 +14,27 @@
           @update:model-value="setField('relationshipType', $event)"
         />
       </div>
-      <div class="col-12">
-        <q-checkbox
-          :model-value="contact.responsibleForPayments"
-          :label="t('responsibleForPayments')"
-          @update:model-value="setField('responsibleForPayments', $event)"
+      <div class="col-12 col-md-6">
+        <q-select
+          :model-value="contact.contactType"
+          outlined
+          hide-bottom-space
+          emit-value
+          map-options
+          clearable
+          :options="contactTypeOptions"
+          :label="t('contactType')"
+          @update:model-value="setField('contactType', $event)"
         />
+      </div>
+      <div class="col-12">
+        <div class="add-client-form__checkbox-field">
+          <q-checkbox
+            :model-value="contact.responsibleForPayments"
+            :label="t('responsibleForPayments')"
+            @update:model-value="setField('responsibleForPayments', $event)"
+          />
+        </div>
       </div>
       <div class="col-12 col-md-6">
         <TextInput
@@ -45,6 +47,15 @@
       </div>
       <div class="col-12 col-md-6">
         <TextInput
+          :model-value="contact.lastName"
+          :label="t('otherContactLastName')"
+          :rules="rules.otherLastName"
+          maxlength="30"
+          @update:model-value="setField('lastName', $event)"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <TextInput
           :model-value="contact.middleName"
           :label="t('otherContactMiddleName')"
           :rules="rules.otherMiddleName"
@@ -53,191 +64,198 @@
         />
       </div>
       <div class="col-12 col-md-6">
-        <TextInput
-          :model-value="contact.lastName"
-          :label="t('otherContactLastName')"
-          :rules="rules.otherLastName"
-          maxlength="30"
-          @update:model-value="setField('lastName', $event)"
-        />
-      </div>
-      <div class="col-12">
-        <q-checkbox
-          :model-value="contact.sameAsClientAddress"
-          :label="t('sameAsClientAddress')"
-          @update:model-value="onSameAsClientAddress"
+        <q-select
+          :model-value="contact.suffix"
+          outlined
+          hide-bottom-space
+          emit-value
+          map-options
+          clearable
+          :options="suffixOptions"
+          :label="t('suffix')"
+          @update:model-value="setField('suffix', $event)"
         />
       </div>
     </div>
 
-    <AddClientSectionHeading
-      icon="place"
-      :title="t('contactAddress')"
-      class="q-mt-md"
-    />
-    <div class="row q-col-gutter-md q-col-gutter-lg-md">
-      <div class="col-12 col-md-6">
-        <TextInput
-          :model-value="contact.addressLine1"
-          :label="t('addressLine1')"
-          :rules="rules.addressLine1"
-          :disable="addressDisabled"
-          maxlength="100"
-          @update:model-value="setField('addressLine1', $event)"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <TextInput
-          :model-value="contact.addressLine2"
-          :label="t('addressLine2Optional')"
-          :rules="rules.addressLine2"
-          :disable="addressDisabled"
-          maxlength="100"
-          @update:model-value="setField('addressLine2', $event)"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <q-select
-          :model-value="contact.state"
-          outlined
-          hide-bottom-space
-          emit-value
-          map-options
-          clearable
-          :disable="addressDisabled"
-          :options="stateOptions"
-          :label="t('state')"
-          @update:model-value="onStateChange"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <q-select
-          :model-value="contact.city"
-          outlined
-          hide-bottom-space
-          emit-value
-          map-options
-          clearable
-          :disable="addressDisabled || !contact.state"
-          :options="cityOptions"
-          :label="t('city')"
-          @update:model-value="onCityChange"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <q-select
-          :model-value="contact.county"
-          outlined
-          hide-bottom-space
-          emit-value
-          map-options
-          clearable
-          :disable="addressDisabled || !contact.state || !contact.city"
-          :options="countyOptions"
-          :label="t('county')"
-          @update:model-value="setField('county', $event)"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <TextInput
-          :model-value="contact.zipCode"
-          :label="t('zipCode')"
-          :rules="rules.zipCode"
-          :disable="addressDisabled"
-          maxlength="11"
-          @update:model-value="setField('zipCode', $event)"
-        />
-      </div>
-    </div>
-
-    <div class="add-client-form__contact-methods-block q-mt-md">
-      <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
-      <div
-        v-for="(phone, index) in contact.phones"
-        :key="`oc-phone-${index}`"
-        class="row q-col-gutter-md q-col-gutter-lg-md
-          add-client-form__contact-method-row">
+    <div class="add-client-form__other-contact-address-box q-mt-md">
+      <AddClientSubsectionHeading
+        icon="place"
+        :title="t('contactAddress')"
+      />
+      <q-checkbox
+        :model-value="contact.sameAsClientAddress"
+        :label="t('sameAsClientAddress')"
+        class="q-mb-md"
+        @update:model-value="onSameAsClientAddress"
+      />
+      <div class="row q-col-gutter-md q-col-gutter-lg-md">
         <div class="col-12 col-md-6">
-          <q-input
-            outlined
-            hide-bottom-space
-            :model-value="phone.number"
-            :label="t('phoneNumber')"
-            :rules="rules.phoneNumber"
-            maxlength="14"
-            @update:model-value="val => onPhoneInput(index, val)"
+          <TextInput
+            :model-value="contact.addressLine1"
+            :label="t('addressLine1')"
+            :rules="rules.addressLine1"
+            :disable="addressDisabled"
+            maxlength="100"
+            @update:model-value="setField('addressLine1', $event)"
           />
         </div>
         <div class="col-12 col-md-6">
-          <div class="row q-col-gutter-sm items-center">
-            <div class="col">
-              <q-select
-                :model-value="phone.type"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :options="phoneTypeOptions"
-                :label="t('phoneType')"
-                @update:model-value="setPhoneField(index, 'type', $event)"
+          <TextInput
+            :model-value="contact.addressLine2"
+            :label="t('addressLine2Optional')"
+            :rules="rules.addressLine2"
+            :disable="addressDisabled"
+            maxlength="100"
+            @update:model-value="setField('addressLine2', $event)"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <q-select
+            :model-value="contact.state"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            clearable
+            :disable="addressDisabled"
+            :options="stateOptions"
+            :label="t('state')"
+            @update:model-value="onStateChange"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <q-select
+            :model-value="contact.city"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            clearable
+            :disable="addressDisabled || !contact.state"
+            :options="cityOptions"
+            :label="t('city')"
+            @update:model-value="onCityChange"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <q-select
+            :model-value="contact.county"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            clearable
+            :disable="addressDisabled || !contact.state || !contact.city"
+            :options="countyOptions"
+            :label="t('county')"
+            @update:model-value="setField('county', $event)"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <TextInput
+            :model-value="contact.zipCode"
+            :label="t('zipCode')"
+            :rules="rules.zipCode"
+            :disable="addressDisabled"
+            maxlength="11"
+            @update:model-value="setField('zipCode', $event)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="q-mt-md">
+      <div class="add-client-form__contact-methods-block">
+        <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
+        <div
+          v-for="(phone, index) in contact.phones"
+          :key="`oc-phone-${index}`"
+          class="row q-col-gutter-md q-col-gutter-lg-md
+            add-client-form__contact-method-row">
+          <div class="col-12 col-md-6">
+            <q-input
+              outlined
+              hide-bottom-space
+              :model-value="phone.number"
+              :label="t('phoneNumber')"
+              :rules="rules.phoneNumber"
+              :placeholder="t('phoneNumberPlaceholder')"
+              maxlength="14"
+              @update:model-value="val => onPhoneInput(index, val)"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="row q-col-gutter-sm items-center">
+              <div class="col">
+                <q-select
+                  :model-value="phone.type"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  clearable
+                  :options="phoneTypeOptions"
+                  :label="t('phoneType')"
+                  @update:model-value="setPhoneField(index, 'type', $event)"
+                />
+              </div>
+              <AddClientMethodRowActions
+                :is-last="index === contact.phones.length - 1"
+                :total="contact.phones.length"
+                :add-label="t('addPhone')"
+                :remove-label="t('removePhone')"
+                @add="addPhone"
+                @remove="removePhone(index)"
               />
             </div>
-            <AddClientMethodRowActions
-              :is-last="index === contact.phones.length - 1"
-              :total="contact.phones.length"
-              :add-label="t('addPhone')"
-              :remove-label="t('removePhone')"
-              @add="addPhone"
-              @remove="removePhone(index)"
-            />
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="add-client-form__contact-methods-block">
-      <AddClientSubsectionHeading
-        icon="mail"
-        :title="t('contactEmailLabel')"
-      />
-      <div
-        v-for="(email, index) in contact.emails"
-        :key="`oc-email-${index}`"
-        class="row q-col-gutter-md q-col-gutter-lg-md
-          add-client-form__contact-method-row">
-        <div class="col-12 col-md-6">
-          <TextInput
-            :model-value="email.address"
-            :label="t('emailAddress')"
-            :rules="rules.emailAddress"
-            maxlength="32"
-            @update:model-value="setEmailField(index, 'address', $event)"
-          />
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="row q-col-gutter-sm items-center">
-            <div class="col">
-              <q-select
-                :model-value="email.type"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :options="emailTypeOptions"
-                :label="t('emailType')"
-                @update:model-value="setEmailField(index, 'type', $event)"
+      <div class="add-client-form__contact-methods-block">
+        <AddClientSubsectionHeading
+          icon="mail"
+          :title="t('contactEmailLabel')"
+        />
+        <div
+          v-for="(email, index) in contact.emails"
+          :key="`oc-email-${index}`"
+          class="row q-col-gutter-md q-col-gutter-lg-md
+            add-client-form__contact-method-row">
+          <div class="col-12 col-md-6">
+            <TextInput
+              :model-value="email.address"
+              :label="t('emailAddress')"
+              :rules="rules.emailAddress"
+              maxlength="32"
+              @update:model-value="setEmailField(index, 'address', $event)"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="row q-col-gutter-sm items-center">
+              <div class="col">
+                <q-select
+                  :model-value="email.type"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  clearable
+                  :options="emailTypeOptions"
+                  :label="t('emailType')"
+                  @update:model-value="setEmailField(index, 'type', $event)"
+                />
+              </div>
+              <AddClientMethodRowActions
+                :is-last="index === contact.emails.length - 1"
+                :total="contact.emails.length"
+                :add-label="t('addEmail')"
+                :remove-label="t('removeEmail')"
+                @add="addEmail"
+                @remove="removeEmail(index)"
               />
             </div>
-            <AddClientMethodRowActions
-              :is-last="index === contact.emails.length - 1"
-              :total="contact.emails.length"
-              :add-label="t('addEmail')"
-              :remove-label="t('removeEmail')"
-              @add="addEmail"
-              @remove="removeEmail(index)"
-            />
           </div>
         </div>
       </div>
@@ -249,7 +267,6 @@
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
@@ -294,6 +311,10 @@ const props = defineProps({
     default: () => [],
   },
   relationshipTypeOptions: {
+    type: Array,
+    default: () => [],
+  },
+  suffixOptions: {
     type: Array,
     default: () => [],
   },

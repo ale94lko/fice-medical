@@ -15,6 +15,7 @@
             <template v-if="isTokenResetMode">
               <text-input
                 v-model="password"
+                stack-spacing
                 icon-left="lock"
                 type="password"
                 test-id="input_new_password"
@@ -24,6 +25,7 @@
               />
               <text-input
                 v-model="passwordRepeat"
+                stack-spacing
                 icon-left="lock"
                 type="password"
                 test-id="input_repeat_password"
@@ -40,6 +42,7 @@
             <template v-else>
               <text-input
                 v-model="email"
+                stack-spacing
                 icon-left="mail"
                 test-id="input_email"
                 maxlength="32"

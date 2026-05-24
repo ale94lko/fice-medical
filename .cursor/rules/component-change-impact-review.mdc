@@ -1,0 +1,51 @@
+---
+description: Al modificar un componente compartido, revisar todos sus usos para no romper otras pantallas
+alwaysApply: true
+---
+
+# Revisión de impacto al cambiar componentes
+
+Cuando **crees, edites o elimines** un componente reutilizable (`src/components/**`), un composable compartido, estilos globales (`src/css/**`) o un wrapper de Quasar usado en varias pantallas:
+
+## 1. Identificar usos
+
+Antes de cerrar la tarea, busca **todas** las referencias:
+
+```bash
+# Nombre del componente (PascalCase y kebab-case)
+rg "NombreComponente|nombre-componente" src/
+```
+
+Incluye imports, registro global, rutas, tests y estilos que apunten a la misma clase.
+
+## 2. Pantallas críticas a contrastar
+
+Si el cambio toca **inputs, formularios, márgenes, `hide-bottom-space`, `q-field` o CSS global**, revisa al menos:
+
+| Área | Archivos / rutas |
+|------|------------------|
+| Login / cuenta | `LoginPage.vue`, `ResetPasswordPage.vue`, `src/css/app.scss` (`.login-inputs`) |
+| Add Client | `AddClientForm.vue`, `AddClientContactTab.vue`, `add-client-form.scss` |
+| Listados / modales | Cualquier otro uso de `TextInput`, `ClientDateField`, etc. |
+
+No asumas que un estilo “solo del formulario” es inocuo: los estilos en `app.scss` y props en `TextInput.vue` afectan **todo** el proyecto.
+
+**Vue 3:** componentes de un solo root (p. ej. `TextInput` → `q-input`) **no generan** `<text-input>` en el DOM. Los selectores CSS deben apuntar a `.q-field`, usar `display: flex; gap:` en el contenedor, o un prop explícito (`stack-spacing` en login).
+
+## 3. Reglas de estilo compartido
+
+- Preferir **clases con prefijo de feature** (p. ej. `.add-client-form__fields`) para reglas que colapsan `q-field__bottom` o márgenes.
+- Si quitas margen/padding de un componente base, **restaura el espaciado en cada contexto** (login con `.login-inputs`, grids con `q-col-gutter`, etc.).
+- No mover estilos de formulario a `app.scss` sin comprobar login y otras páneas.
+
+## 4. Verificación mínima
+
+Tras el cambio:
+
+1. `npm run lint`
+2. Comprobar visualmente (o describir en la respuesta) las pantallas donde el componente se usa.
+3. Si solo tocaste Add Client, confirma explícitamente que **login sigue con separación entre campos**.
+
+## 5. Resumen en la respuesta
+
+Indica brevemente: **qué cambió**, **dónde más se usa el componente** y **qué pantallas revisaste**.

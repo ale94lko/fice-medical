@@ -11,6 +11,7 @@
           <q-card-section class="login-inputs">
             <text-input
               v-model="email"
+              stack-spacing
               icon-left="mail"
               test-id="input_email"
               :label="t('email')"
@@ -19,6 +20,7 @@
             />
             <text-input
               v-model="password"
+              stack-spacing
               icon-left="lock"
               type="password"
               test-id="input_password"

@@ -1,8 +1,9 @@
 <template>
   <q-input
     outlined
-    hide-bottom-space
+    :hide-bottom-space="!stackSpacing"
     v-model="model"
+    :class="{ 'text-input--stack-spacing': stackSpacing }"
     :lazy-rules="'ondemand'"
     :data-testid="props.testId"
     :type="resolvedType"
@@ -59,6 +60,11 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  /** Vertical spacing when fields are stacked (e.g. login). */
+  stackSpacing: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const model = defineModel({ type: String, default: '' })
@@ -79,6 +85,10 @@ const resolvedType = computed(() =>
 
 .q-input {
   min-width: 120px;
+}
+
+.text-input--stack-spacing {
+  margin-bottom: 0;
 }
 
 .input-icon {

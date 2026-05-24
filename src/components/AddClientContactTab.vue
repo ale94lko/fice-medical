@@ -210,6 +210,19 @@
 
     <q-separator class="q-my-lg" />
 
+    <OtherContactsSection
+      v-model="contact"
+      :rules="rules"
+      :state-options="stateOptions"
+      :phone-type-options="phoneTypeOptions"
+      :email-type-options="emailTypeOptions"
+      :contact-type-options="contactTypeOptions"
+      :relationship-type-options="relationshipTypeOptions"
+      :suffix-options="suffixSelectOptions"
+    />
+
+    <q-separator class="q-my-lg" />
+
     <section class="add-client-form__section">
       <AddClientSectionHeading
         icon="description"
@@ -236,62 +249,6 @@
         </div>
       </div>
     </section>
-
-    <template v-if="contact.otherContacts.length">
-      <q-separator class="q-my-lg" />
-      <div class="add-client-form__fields">
-        <q-tabs
-          v-model="contact.activeOtherContactId"
-          dense
-          no-caps
-          outside-arrows
-          mobile-arrows
-          class="add-client-tabs q-mb-md"
-          align="left">
-          <q-tab
-            v-for="(oc, index) in contact.otherContacts"
-            :key="oc.id"
-            :name="oc.id"
-            :label="otherContactTabLabel(oc, index)"
-          />
-        </q-tabs>
-
-        <q-tab-panels
-          v-model="contact.activeOtherContactId"
-          animated
-          class="bg-transparent">
-          <q-tab-panel
-            v-for="(oc, ocIndex) in contact.otherContacts"
-            :key="oc.id"
-            :name="oc.id"
-            class="q-pa-none">
-            <OtherContactPanel
-              :contact="oc"
-              :client-address="contact"
-              :rules="rules"
-              :state-options="stateOptions"
-              :phone-type-options="phoneTypeOptions"
-              :email-type-options="emailTypeOptions"
-              :contact-type-options="contactTypeOptions"
-              :relationship-type-options="relationshipTypeOptions"
-              @update:contact="patch => updateOtherContact(ocIndex, patch)"
-            />
-          </q-tab-panel>
-        </q-tab-panels>
-      </div>
-    </template>
-
-    <div class="add-client-form__fields q-mt-lg">
-      <q-btn
-        outline
-        no-caps
-        color="primary"
-        class="full-width add-client-form__other-contact-btn"
-        icon="add"
-        :label="t('otherContact')"
-        @click="addOtherContact"
-      />
-    </div>
   </div>
 </template>
 
@@ -299,7 +256,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
-import OtherContactPanel from 'components/OtherContactPanel.vue'
+import OtherContactsSection from 'components/OtherContactsSection.vue'
 import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'
@@ -310,6 +267,7 @@ import {
   clientPhoneTypeValues,
   clientPreferredCommunicationValues,
   clientRelationshipTypeValues,
+  clientSuffixOptions,
 } from 'components/constants.js'
 import {
   usStates,
@@ -318,10 +276,8 @@ import {
 } from 'src/data/us-geography.js'
 import {
   createEmptyEmail,
-  createEmptyOtherContact,
   createEmptyPhone,
   formatPhoneUs,
-  resolveOtherContactTabLabel,
 } from 'src/utils/client-contact-form.js'
 
 const props = defineProps({
@@ -369,6 +325,15 @@ const relationshipTypeOptions = computed(() =>
     label: v,
     value: v,
   })),
+)
+
+const suffixSelectOptions = computed(() =>
+  clientSuffixOptions
+    .filter(o => o.value)
+    .map(o => ({
+      label: t(o.labelKey),
+      value: o.value,
+    })),
 )
 
 const communicationOptions = computed(() => [
@@ -445,20 +410,6 @@ function isPreferredComm(value) {
 function togglePreferredCommunication(value) {
   contact.value.preferredCommunication =
     contact.value.preferredCommunication === value ? '' : value
-}
-
-function addOtherContact() {
-  const oc = createEmptyOtherContact()
-  contact.value.otherContacts.push(oc)
-  contact.value.activeOtherContactId = oc.id
-}
-
-function updateOtherContact(index, patch) {
-  Object.assign(contact.value.otherContacts[index], patch)
-}
-
-function otherContactTabLabel(oc, index) {
-  return resolveOtherContactTabLabel(oc, index, t)
 }
 
 </script>

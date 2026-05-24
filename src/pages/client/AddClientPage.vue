@@ -54,7 +54,8 @@
         no-caps
         outline
         color="primary"
-        class="app-btn-outline"
+        icon="arrow_back"
+        class="app-btn-outline add-client-page__nav-btn"
         :label="t('previous')"
         :disable="saving"
         @click="onPrevious"
@@ -65,7 +66,8 @@
         no-caps
         outline
         color="primary"
-        class="app-btn-outline"
+        icon-right="arrow_forward"
+        class="app-btn-outline add-client-page__nav-btn"
         :class="{ 'q-ml-auto': !showPrevious }"
         :label="t('next')"
         :disable="saving"
@@ -195,5 +197,10 @@ function onSaved() {
   box-shadow: $shadow-sm;
   justify-content: space-between;
   min-height: 56px;
+
+  .add-client-page__nav-btn .q-icon {
+    color: $primary;
+    font-size: 20px;
+  }
 }
 </style>

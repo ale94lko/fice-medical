@@ -49,6 +49,7 @@ export function createEmptyOtherContact() {
     firstName: '',
     middleName: '',
     lastName: '',
+    suffix: '',
     sameAsClientAddress: false,
     addressLine1: '',
     addressLine2: '',
@@ -196,6 +197,7 @@ function otherContactHasData(other) {
     || String(other.firstName ?? '').trim()
     || String(other.middleName ?? '').trim()
     || String(other.lastName ?? '').trim()
+    || String(other.suffix ?? '').trim()
     || other.responsibleForPayments
     || hasOtherAddressData(other)
     || (other.phones ?? []).some(p => String(p.number ?? '').trim())
@@ -237,6 +239,9 @@ function appendOtherContactIdentity(item, other) {
   }
   if (other.lastName) {
     item.lastName = other.lastName.trim()
+  }
+  if (other.suffix) {
+    item.suffix = String(other.suffix).trim()
   }
 }
 
