@@ -104,6 +104,8 @@ export default {
   sexFemale: 'Female',
   sexUnknown: 'Unknown',
   age: 'Age',
+  ageIncrement: 'Increase age',
+  ageDecrement: 'Decrease age',
   socialSecurityNumber: 'Social Security Number',
   next: 'Next',
   previous: 'Previous',

@@ -2,15 +2,17 @@
   <q-input
     outlined
     :hide-bottom-space="!stackSpacing"
-    v-model="model"
+    :model-value="model"
     :class="{ 'text-input--stack-spacing': stackSpacing }"
     :lazy-rules="'ondemand'"
     :data-testid="props.testId"
     :type="resolvedType"
     :label="props.label"
     :rules="props.rules || []"
+    :maxlength="maxlength"
     :error="props.error"
-    :error-message="props.errorMessage">
+    :error-message="props.errorMessage"
+    @update:model-value="onUpdate">
     <template v-slot:prepend v-if="iconLeft">
       <q-icon :name="iconLeft" class="input-icon"/>
     </template>
@@ -30,6 +32,7 @@ import {
   isPasswordInputType,
   passwordFieldInputType,
 } from 'src/composables/usePasswordVisibility.js'
+import { sanitizeLettersOnlyInput } from 'src/utils/client-form.js'
 
 const props = defineProps({
   type: {
@@ -65,6 +68,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  maxlength: {
+    type: Number,
+    default: undefined,
+  },
+  lettersOnly: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const model = defineModel({ type: String, default: '' })
@@ -78,6 +89,16 @@ const resolvedType = computed(() =>
     ? passwordFieldInputType(showPlainPassword.value)
     : props.type,
 )
+
+function onUpdate(value) {
+  let next = value == null ? '' : String(value)
+  if (props.lettersOnly) {
+    next = sanitizeLettersOnlyInput(next, props.maxlength)
+  } else if (props.maxlength != null) {
+    next = next.slice(0, props.maxlength)
+  }
+  model.value = next
+}
 </script>
 
 <style lang="scss" scoped>

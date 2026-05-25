@@ -815,3 +815,81 @@
   margin: 0;
   text-align: center;
 }
+
+.add-client-form__age-input {
+  input[type='number'] {
+    appearance: textfield;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  .q-field__append {
+    padding-left: 4px;
+  }
+}
+
+.add-client-form__age-stepper {
+  display: flex;
+  flex-direction: column;
+  width: 30px;
+  overflow: hidden;
+  border: 1px solid rgba($primary, 0.2);
+  border-radius: 8px;
+  background: linear-gradient(
+    180deg,
+    rgba($primary, 0.06) 0%,
+    $surface-muted 100%
+  );
+  box-shadow: $shadow-sm;
+}
+
+.add-client-form__age-stepper-divider {
+  display: block;
+  height: 1px;
+  background: rgba($primary, 0.14);
+}
+
+.add-client-form__age-stepper-btn {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: $primary;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+
+  .q-icon {
+    opacity: 0.88;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba($primary, 0.12);
+
+    .q-icon {
+      opacity: 1;
+    }
+  }
+
+  &:active:not(:disabled) {
+    background: rgba($primary, 0.2);
+  }
+
+  &:disabled {
+    color: $text-muted;
+    cursor: not-allowed;
+
+    .q-icon {
+      opacity: 0.35;
+    }
+  }
+}

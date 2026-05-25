@@ -95,6 +95,8 @@
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.firstName]"
+                    letters-only
+                    :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('firstName'))"
                     :rules="rules.firstName"
                   />
@@ -102,6 +104,8 @@
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.middleName]"
+                    letters-only
+                    :maxlength="clientNameMaxLength"
                     :label="t('middleName')"
                     :rules="rules.middleName"
                   />
@@ -109,6 +113,8 @@
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.lastName]"
+                    letters-only
+                    :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('lastName'))"
                     :rules="rules.lastName"
                   />
@@ -128,6 +134,8 @@
                 <div class="col-12 col-md-6">
                   <ClientDateField
                     v-model="form[ck.dob]"
+                    max-today
+                    :min-year="dobMinYear"
                     :label="t('dob')"
                     :rules="rules.dob"
                     :close-label="t('close')"
@@ -138,16 +146,42 @@
                     <div class="col-6">
                       <q-input
                         v-model="form[ck.age]"
+                        class="add-client-form__age-input"
                         outlined
                         hide-bottom-space
                         type="number"
-                        :readonly="ageReadonly"
                         :label="t('age')"
                         :rules="rules.age"
-                        :filled="ageReadonly"
                         min="0"
-                        :max="clientMaxAge"
-                      />
+                        :max="ageMaxForUnit"
+                      >
+                        <template #append>
+                          <div
+                            class="add-client-form__age-stepper"
+                            role="group"
+                            :aria-label="t('age')">
+                            <button
+                              type="button"
+                              class="add-client-form__age-stepper-btn"
+                              :disabled="ageAtMax"
+                              :aria-label="t('ageIncrement')"
+                              @click.stop="bumpAge(1)">
+                              <q-icon name="expand_less" size="18px" />
+                            </button>
+                            <span
+                              class="add-client-form__age-stepper-divider"
+                              aria-hidden="true" />
+                            <button
+                              type="button"
+                              class="add-client-form__age-stepper-btn"
+                              :disabled="ageAtMin"
+                              :aria-label="t('ageDecrement')"
+                              @click.stop="bumpAge(-1)">
+                              <q-icon name="expand_more" size="18px" />
+                            </button>
+                          </div>
+                        </template>
+                      </q-input>
                     </div>
                     <div class="col-6">
                       <q-select
@@ -159,6 +193,7 @@
                         :loading="catalogsLoading"
                         :options="ageUnitSelectOptions"
                         :label="t('ageUnit')"
+                        :key="`age-unit-${catalogsLoaded}-${form[ck.ageUnit]}`"
                       />
                     </div>
                   </div>
@@ -402,10 +437,12 @@ import {
   addClientTabKeys,
   clientFormSections,
   clientMaxAge,
+  clientNameMaxLength,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
   formatSsnMasked,
+  maxAgeForUnit,
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -433,7 +470,11 @@ const allergiesTabRef = ref(null)
 const fmhTabRef = ref(null)
 
 const catalogs = useAddClientCatalogs(t)
-const { loading: catalogsLoading, loadBasicInfoCatalogs } = catalogs
+const {
+  loading: catalogsLoading,
+  loaded: catalogsLoaded,
+  loadBasicInfoCatalogs,
+} = catalogs
 
 const {
   ck,
@@ -441,7 +482,6 @@ const {
   form,
   formRef,
   activeTab,
-  ageReadonly,
   ageUnitSelectOptions,
   assignedClinicianOptions,
   sexOptions,
@@ -463,6 +503,33 @@ const {
   currentSubTabs,
   activeSubTab,
 } = useAddClientForm(t, catalogs, { allergiesTabRef, fmhTabRef })
+
+const dobMinYear = computed(
+  () => new Date().getFullYear() - clientMaxAge,
+)
+
+const ageMaxForUnit = computed(() => maxAgeForUnit(form.value[ck.ageUnit]))
+
+const ageNumericValue = computed(() => {
+  const raw = String(form.value[ck.age] ?? '').trim()
+  if (!raw) {
+    return 0
+  }
+  const n = Number(raw)
+
+  return Number.isFinite(n) ? n : 0
+})
+
+const ageAtMin = computed(() => ageNumericValue.value <= 0)
+const ageAtMax = computed(
+  () => ageNumericValue.value >= ageMaxForUnit.value,
+)
+
+function bumpAge(delta) {
+  const max = ageMaxForUnit.value
+  const next = Math.min(max, Math.max(0, ageNumericValue.value + delta))
+  form.value[ck.age] = String(next)
+}
 
 const mainTabs = ADD_CLIENT_MAIN_TABS
 

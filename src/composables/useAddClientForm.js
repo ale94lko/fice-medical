@@ -4,16 +4,16 @@ import {
   clientAgeUnitValues,
   clientFieldKeys,
   clientFormSections,
-  clientMaxAge,
   clientNameMaxLength,
 } from 'components/constants.js'
 import {
-  ageFromUsDateString,
   generateClientNumber,
   isAdmissionDateValid,
   isLettersOnly,
   isValidSsnDigits,
+  maxAgeForUnit,
   normalizeSsnDigits,
+  parseUsDateString,
   snapshotAddClientForm,
   todayDateUs,
 } from 'src/utils/client-form.js'
@@ -110,7 +110,16 @@ export function useAddClientForm(t, catalogs, options = {}) {
     unlockThroughIndex,
   } = useAddClientTabAccess()
 
-  const { ageReadonly } = useAddClientAgeSync(form, ck.dob, ck.age)
+  useAddClientAgeSync(
+    form,
+    ck.dob,
+    ck.age,
+    ck.ageUnit,
+    {
+      resolveAgeUnitCode: code => catalogs?.resolveAgeUnitCode?.(code),
+      watchAgeUnitOptions: () => catalogs?.ageUnitSelectOptions?.value,
+    },
+  )
 
   const sexOptions = catalogs?.sexOptions
   const suffixSelectOptions = catalogs?.suffixSelectOptions
@@ -144,6 +153,20 @@ export function useAddClientForm(t, catalogs, options = {}) {
     }
   }
 
+  function lettersFormatRule(maxLen) {
+    return val => {
+      const s = String(val ?? '').trim()
+      if (!s) {
+        return true
+      }
+      if (!isLettersOnly(s, maxLen)) {
+        return t('lettersOnlyMax', { max: maxLen })
+      }
+
+      return true
+    }
+  }
+
   function lettersRule(message, maxLen, required = false) {
     return val => {
       const s = String(val ?? '').trim()
@@ -158,14 +181,20 @@ export function useAddClientForm(t, catalogs, options = {}) {
     }
   }
 
-  function usDateRule(message, required = false) {
+  function usDateRule(message, required = false, { maxToday = false } = {}) {
     return val => {
       const s = String(val ?? '').trim()
       if (!s) {
         return required ? message : true
       }
+      if (!parseUsDateString(s)) {
+        return message
+      }
+      if (maxToday && !isAdmissionDateValid(s)) {
+        return message
+      }
 
-      return ageFromUsDateString(s) != null || message
+      return true
     }
   }
 
@@ -185,16 +214,14 @@ export function useAddClientForm(t, catalogs, options = {}) {
 
   function ageRule() {
     return val => {
-      if (ageReadonly.value) {
-        return true
-      }
       const s = String(val ?? '').trim()
       if (!s) {
         return true
       }
       const n = Number(s)
-      if (!Number.isFinite(n) || n < 0 || n > clientMaxAge) {
-        return t('ageRange', { max: clientMaxAge })
+      const max = maxAgeForUnit(form.value[ck.ageUnit])
+      if (!Number.isFinite(n) || n < 0 || n > max) {
+        return t('ageRange', { max })
       }
 
       return true
@@ -202,8 +229,8 @@ export function useAddClientForm(t, catalogs, options = {}) {
   }
 
   function ssnRule() {
-    return val => {
-      const digits = normalizeSsnDigits(val)
+    return () => {
+      const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
 
       return isValidSsnDigits(digits) || t('ssnInvalid')
     }
@@ -214,16 +241,16 @@ export function useAddClientForm(t, catalogs, options = {}) {
   const rules = computed(() => ({
     firstName: [
       requiredRule(t('firstNameRequired')),
-      lettersRule(t('firstNameRequired'), clientNameMaxLength, true),
+      lettersFormatRule(clientNameMaxLength),
     ],
     middleName: [
-      lettersRule(t('firstNameRequired'), clientNameMaxLength, false),
+      lettersFormatRule(clientNameMaxLength),
     ],
     lastName: [
       requiredRule(t('lastNameRequired')),
-      lettersRule(t('lastNameRequired'), clientNameMaxLength, true),
+      lettersFormatRule(clientNameMaxLength),
     ],
-    dob: [usDateRule(t('dobInvalid'), false)],
+    dob: [usDateRule(t('dobInvalid'), false, { maxToday: true })],
     admissionDate: [admissionDateRule()],
     age: [ageRule()],
     ssn: [ssnRule()],
@@ -292,7 +319,6 @@ export function useAddClientForm(t, catalogs, options = {}) {
     hasSubTabs,
     currentSubTabs,
     addClientTabKeys,
-    ageReadonly,
     ageUnitSelectOptions,
     assignedClinicianOptions: [],
     sexOptions,

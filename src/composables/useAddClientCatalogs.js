@@ -89,16 +89,27 @@ export function useAddClientCatalogs(t) {
     return fallbackAgeUnitOptions(t)
   })
 
-  function defaultAgeUnitValue() {
-    const options = ageUnitSelectOptions.value
-    const years = options.find(
-      o => o.value === clientAgeUnitValues.years,
-    )
-    if (years) {
-      return years.value
+  function resolveAgeUnitCode(code) {
+    const needle = String(code ?? '').trim().toLowerCase()
+    if (!needle) {
+      return null
     }
+    const match = ageUnitSelectOptions.value.find(
+      option => String(option.value).trim().toLowerCase() === needle,
+    )
 
-    return options[0]?.value ?? clientAgeUnitValues.years
+    return match?.value ?? null
+  }
+
+  function yearsAgeUnitValue() {
+    return (
+      resolveAgeUnitCode(clientAgeUnitValues.years)
+      ?? clientAgeUnitValues.years
+    )
+  }
+
+  function defaultAgeUnitValue() {
+    return yearsAgeUnitValue()
   }
 
   return {
@@ -109,6 +120,8 @@ export function useAddClientCatalogs(t) {
     sexOptions,
     suffixSelectOptions,
     ageUnitSelectOptions,
+    resolveAgeUnitCode,
+    yearsAgeUnitValue,
     defaultAgeUnitValue,
   }
 }

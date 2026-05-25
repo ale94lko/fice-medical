@@ -9,7 +9,8 @@
     :lazy-rules="'ondemand'"
     mask="##/##/####"
     placeholder="mm/dd/yyyy"
-    @update:model-value="v => emit('update:modelValue', v)">
+    @update:model-value="onInput"
+    @blur="onBlur">
     <template v-if="!readonly" #append>
       <q-icon name="event" class="cursor-pointer input-icon">
         <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -36,7 +37,12 @@
 
 <script setup>
 import { computed } from 'vue'
-import { parseUsDateString, startOfDay } from 'src/utils/client-form.js'
+import {
+  isCompleteUsDateString,
+  parseUsDateString,
+  sanitizeUsDateInput,
+  startOfDay,
+} from 'src/utils/client-form.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -44,10 +50,22 @@ const props = defineProps({
   readonly: { type: Boolean, default: false },
   rules: { type: Array, default: () => [] },
   maxToday: { type: Boolean, default: false },
+  minYear: { type: Number, default: null },
   closeLabel: { type: String, default: 'Close' },
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const resolvedMinYear = computed(() => {
+  if (props.minYear != null && Number.isFinite(props.minYear)) {
+    return props.minYear
+  }
+  if (props.maxToday) {
+    return new Date().getFullYear() - 125
+  }
+
+  return 1900
+})
 
 const datePickerValue = computed(() => {
   const d = parseUsDateString(props.modelValue)
@@ -78,8 +96,39 @@ function dateOptions(dateStr) {
   return d.getTime() <= startOfDay(new Date()).getTime()
 }
 
+function sanitizeOptions() {
+  return {
+    maxToday: props.maxToday,
+    minYear: resolvedMinYear.value,
+  }
+}
+
+function onInput(value) {
+  const next = sanitizeUsDateInput(value, sanitizeOptions())
+  if (next !== props.modelValue) {
+    emit('update:modelValue', next)
+  }
+}
+
+function onBlur() {
+  const s = String(props.modelValue ?? '').trim()
+  if (!s) {
+    return
+  }
+  if (isCompleteUsDateString(s) && !parseUsDateString(s)) {
+    emit('update:modelValue', '')
+
+    return
+  }
+  const next = sanitizeUsDateInput(s, sanitizeOptions())
+  if (next !== s) {
+    emit('update:modelValue', next)
+  }
+}
+
 function onPickerChange(val) {
-  emit('update:modelValue', val || '')
+  const next = sanitizeUsDateInput(val || '', sanitizeOptions())
+  emit('update:modelValue', next)
 }
 </script>
 
