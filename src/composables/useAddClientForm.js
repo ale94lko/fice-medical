@@ -24,6 +24,7 @@ import { createEmptyContactSection } from 'src/utils/client-contact-form.js'
 import {
   createEmptyFamilyMedicalHistorySection,
 } from 'src/utils/client-family-medical-history.js'
+import { createEmptyAllergiesSection } from 'src/utils/client-allergies.js'
 import { useAddClientAgeSync } from 'src/composables/useAddClientAgeSync.js'
 import {
   useAddClientContactRules,
@@ -69,6 +70,7 @@ export function createEmptyAddClientForm() {
     [clientFormSections.contact]: createEmptyContactSection(),
     [clientFormSections.familyMedicalHistory]:
       createEmptyFamilyMedicalHistorySection(),
+    [clientFormSections.allergies]: createEmptyAllergiesSection(),
   }
 }
 

@@ -212,4 +212,34 @@ export default {
     + 'For audit purposes, please provide a reason for the deletion.',
   fmhDeleteReasonLabel: 'Reason for deletion',
   fmhDeleteReasonRequired: 'A reason for deletion is required.',
+  allergiesAddSectionTitle: 'Add allergy',
+  allergiesExistingTitle: 'Existing Allergies',
+  allergiesExistingEmpty: 'No allergies recorded yet.',
+  allergiesFooterHint:
+    'Add all known allergies to ensure accurate and safe care.',
+  allergyName: 'Allergy',
+  allergySeverity: 'Severity',
+  allergyStartYear: 'Start Year',
+  allergyStartYearHint: 'Optional. Year between {min} and {max}',
+  allergyAdd: 'Add',
+  allergyAddRequired: 'Enter an allergy and select a severity to add.',
+  allergyNameRequired: 'Allergy is required when other fields are filled.',
+  allergySeverityRequired: 'Severity is required when an allergy is entered.',
+  allergyNameInvalid:
+    'Letters and numbers only; - ( ) " \' allowed, max {maxName} characters',
+  allergyStartYearInvalid:
+    'Enter a valid 4-digit year between {min} and {max}',
+  allergyDuplicateEntry:
+    'This allergy, severity, and start year combination already exists.',
+  allergyAddedSuccess: 'Allergy added successfully.',
+  allergyUpdatedSuccess: 'Allergy updated successfully.',
+  allergyDeletedSuccess: 'Allergy deleted successfully.',
+  allergyEditTitle: 'Edit Allergy',
+  allergyDeleteTitle: 'Confirm Delete',
+  allergyDeleteMessage: 'Are you sure you want to delete the selected item?',
+  allergyDeleteMessageBold:
+    'This action is permanent and cannot be undone.',
+  allergyDeleteReasonHint:
+    'For audit purposes, please provide a reason for the deletion.',
+  allergyDeleteReasonLabel: 'Enter reason for deletion (optional)',
 }

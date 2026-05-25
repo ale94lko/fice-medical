@@ -8,6 +8,7 @@ import { buildContactPayload } from 'src/utils/client-contact-form.js'
 import {
   buildFamilyMedicalHistoryPayload,
 } from 'src/utils/client-family-medical-history.js'
+import { buildAllergiesPayload } from 'src/utils/client-allergies.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -167,6 +168,13 @@ export function buildClientCreateBody(form) {
   )
   if (fmhPayload) {
     body[clientFormSections.familyMedicalHistory] = fmhPayload
+  }
+
+  const allergiesPayload = buildAllergiesPayload(
+    form[clientFormSections.allergies],
+  )
+  if (allergiesPayload) {
+    body[clientFormSections.allergies] = allergiesPayload
   }
 
   return body

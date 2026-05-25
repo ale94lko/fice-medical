@@ -161,8 +161,31 @@
     cursor: not-allowed;
   }
 
-  .add-client-tab--allergies:not(.q-tab--active) {
+  .add-client-tab--allergies-mild:not(.q-tab--active) {
+    color: #92400e;
+  }
+
+  .add-client-tab--allergies-mild.q-tab--active {
+    background: #92400e;
+    color: $white;
+  }
+
+  .add-client-tab--allergies-moderate:not(.q-tab--active) {
     color: $warning;
+  }
+
+  .add-client-tab--allergies-moderate.q-tab--active {
+    background: $warning;
+    color: $white;
+  }
+
+  .add-client-tab--allergies-severe:not(.q-tab--active) {
+    color: $negative;
+  }
+
+  .add-client-tab--allergies-severe.q-tab--active {
+    background: $negative;
+    color: $white;
   }
 
   .add-client-form__other-contact-tab {
@@ -399,6 +422,162 @@
   align-items: center;
   min-height: 56px;
   height: 100%;
+}
+
+.add-client-form__allergy-add-expansion {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+.add-client-form__allergy-add-header {
+  font-weight: 600;
+  color: $text-strong;
+}
+
+.add-client-form__allergy-add-card {
+  border-top: 1px solid $border-subtle;
+  background: $surface-muted;
+}
+
+.add-client-form__allergy-input-row {
+  align-items: flex-start;
+}
+
+.add-client-form__allergy-year-hint {
+  margin: 4px 12px 0;
+  font-size: 12px;
+  line-height: 1.25;
+  color: $text-muted;
+}
+
+.add-client-form__allergy-severity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.add-client-form__allergy-severity-chip {
+  justify-content: flex-start;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+
+  &::before {
+    border-radius: 12px;
+  }
+
+  &--mild {
+    background: #faf6f0 !important;
+    color: #92400e;
+
+    &::before {
+      border-color: #d6c4a8;
+    }
+  }
+
+  &--moderate {
+    background: #fff8eb !important;
+    color: #b45309;
+
+    &::before {
+      border-color: #f0d49a;
+    }
+  }
+
+  &--severe {
+    background: #fef2f2 !important;
+    color: #b91c1c;
+
+    &::before {
+      border-color: #fecaca;
+    }
+  }
+
+  &--selected.q-btn--unelevated {
+    &.add-client-form__allergy-severity-chip--mild {
+      background: #f5ebe0 !important;
+      border-color: #92400e;
+    }
+
+    &.add-client-form__allergy-severity-chip--moderate {
+      background: #ffedd5 !important;
+      border-color: $warning;
+    }
+
+    &.add-client-form__allergy-severity-chip--severe {
+      background: #fee2e2 !important;
+      border-color: $negative;
+    }
+  }
+}
+
+.add-client-form__allergy-severity-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 10px;
+  flex-shrink: 0;
+
+  &--mild {
+    background: #92400e;
+  }
+
+  &--moderate {
+    background: $warning;
+  }
+
+  &--severe {
+    background: $negative;
+  }
+}
+
+.add-client-form__allergy-severity-label {
+  text-align: left;
+}
+
+.add-client-form__allergy-severity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+
+  &--mild {
+    background: #faf6f0;
+    color: #92400e;
+  }
+
+  &--moderate {
+    background: #fff8eb;
+    color: #b45309;
+  }
+
+  &--severe {
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+}
+
+.add-client-form__allergy-footer-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 16px auto 0;
+  max-width: 720px;
+  font-size: 0.875rem;
+  color: $text-muted;
+
+  .q-icon {
+    color: $primary;
+    flex-shrink: 0;
+  }
 }
 
 .add-client-form__fmh-add-card,

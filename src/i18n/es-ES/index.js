@@ -215,4 +215,37 @@ export default {
     + 'Para fines de auditoría, indique el motivo de la eliminación.',
   fmhDeleteReasonLabel: 'Motivo de eliminación',
   fmhDeleteReasonRequired: 'El motivo de eliminación es obligatorio.',
+  allergiesAddSectionTitle: 'Agregar alergia',
+  allergiesExistingTitle: 'Alergias existentes',
+  allergiesExistingEmpty: 'Aún no hay alergias registradas.',
+  allergiesFooterHint:
+    'Agregue todas las alergias conocidas para un cuidado seguro.',
+  allergyName: 'Alergia',
+  allergySeverity: 'Severidad',
+  allergyStartYear: 'Año de inicio',
+  allergyStartYearHint: 'Opcional. Año entre {min} y {max}',
+  allergyAdd: 'Agregar',
+  allergyAddRequired: 'Ingrese una alergia y seleccione la severidad.',
+  allergyNameRequired:
+    'La alergia es obligatoria cuando hay otros campos completados.',
+  allergySeverityRequired:
+    'La severidad es obligatoria cuando hay una alergia ingresada.',
+  allergyNameInvalid:
+    'Solo letras y números; se permiten - ( ) " \', máx. {maxName}',
+  allergyStartYearInvalid:
+    'Ingrese un año válido de 4 dígitos entre {min} y {max}',
+  allergyDuplicateEntry:
+    'Esta combinación de alergia, severidad y año ya existe.',
+  allergyAddedSuccess: 'Alergia agregada correctamente.',
+  allergyUpdatedSuccess: 'Alergia actualizada correctamente.',
+  allergyDeletedSuccess: 'Alergia eliminada correctamente.',
+  allergyEditTitle: 'Editar alergia',
+  allergyDeleteTitle: 'Confirmar eliminación',
+  allergyDeleteMessage:
+    '¿Seguro que desea eliminar el elemento seleccionado?',
+  allergyDeleteMessageBold:
+    'Esta acción es permanente y no se puede deshacer.',
+  allergyDeleteReasonHint:
+    'Para auditoría, indique el motivo de la eliminación.',
+  allergyDeleteReasonLabel: 'Motivo de eliminación (opcional)',
 }

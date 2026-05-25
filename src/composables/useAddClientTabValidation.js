@@ -10,6 +10,11 @@ import {
 import {
   validateFamilyMedicalHistoryDraftClear,
 } from 'src/utils/client-family-medical-history.js'
+import {
+  allergyMaxStartYear,
+  allergyMinStartYear,
+  validateAllergiesDraftClear,
+} from 'src/utils/client-allergies.js'
 import { quasarNotifyTypes } from 'components/constants.js'
 
 export function useAddClientTabValidation({
@@ -43,6 +48,21 @@ export function useAddClientTabValidation({
       const result = validateFamilyMedicalHistoryDraftClear(section)
       if (!result.ok && result.errorKey) {
         notifyValidationError(t(result.errorKey))
+
+        return false
+      }
+
+      return true
+    }
+    if (tab === addClientTabKeys.allergies) {
+      const section = form.value[clientFormSections.allergies]
+      const result = validateAllergiesDraftClear(section)
+      if (!result.ok && result.errorKey) {
+        notifyValidationError(t(result.errorKey, {
+          min: allergyMinStartYear(),
+          max: allergyMaxStartYear(),
+          maxName: 100,
+        }))
 
         return false
       }

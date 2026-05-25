@@ -120,7 +120,26 @@ export const clientContactFieldKeys = {
 export const clientFormSections = {
   contact: 'contact',
   familyMedicalHistory: 'familyMedicalHistory',
+  allergies: 'allergies',
 }
+
+export const clientAllergiesNkaStatus = 'NKA'
+
+export const clientAllergySeverityValues = {
+  mild: 'Mild',
+  moderate: 'Moderate',
+  severe: 'Severe',
+}
+
+export const clientAllergySeverityRank = {
+  [clientAllergySeverityValues.mild]: 1,
+  [clientAllergySeverityValues.moderate]: 2,
+  [clientAllergySeverityValues.severe]: 3,
+}
+
+export const clientAllergyMaxNameLength = 100
+
+export const clientAllergyMinStartYear = 1900
 
 export const familyMedicalHistorySelfValue = 'Self'
 

@@ -40,7 +40,7 @@
         <q-tab
           :name="addClientTabKeys.allergies"
           :label="t('tabAllergies')"
-          class="add-client-tab--allergies"
+          :class="allergiesTabClass"
           :disable="!isTabEnabled(addClientTabKeys.allergies)"
         />
         <q-tab
@@ -257,6 +257,12 @@
           />
         </q-tab-panel>
 
+        <q-tab-panel :name="addClientTabKeys.allergies" class="q-pa-none">
+          <AddClientAllergiesTab
+            v-model="form[clientFormSections.allergies]"
+          />
+        </q-tab-panel>
+
         <q-tab-panel
           v-for="tab in comingSoonTabKeys"
           :key="tab"
@@ -292,6 +298,7 @@ import ModalComponent from 'components/ModalComponent.vue'
 import AddClientContactTab from 'components/AddClientContactTab.vue'
 import AddClientFamilyMedicalHistoryTab from
   'components/AddClientFamilyMedicalHistoryTab.vue'
+import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
 import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
@@ -306,6 +313,10 @@ import {
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import {
+  highestAllergySeverity,
+  severityTabModifier,
+} from 'src/utils/client-allergies.js'
 
 const emit = defineEmits(['saved', 'cancel', 'tab-label'])
 
@@ -344,8 +355,20 @@ const {
   tabLabelFor,
 } = useAddClientForm(t)
 
+const allergiesTabClass = computed(() => {
+  const classes = ['add-client-tab--allergies']
+  const top = highestAllergySeverity(
+    form.value[clientFormSections.allergies]?.entries,
+  )
+  const modifier = severityTabModifier(top)
+  if (modifier) {
+    classes.push(`add-client-tab--allergies-${modifier}`)
+  }
+
+  return classes
+})
+
 const comingSoonTabKeys = [
-  addClientTabKeys.allergies,
   addClientTabKeys.assessments,
   addClientTabKeys.clinical,
   addClientTabKeys.careCoordination,
@@ -420,8 +443,8 @@ async function onNext() {
 }
 
 async function onSave() {
-  const fmhIdx = tabIndex(addClientTabKeys.familyMedicalHistory)
-  const ok = await validateTabsThrough(fmhIdx + 1)
+  const allergiesIdx = tabIndex(addClientTabKeys.allergies)
+  const ok = await validateTabsThrough(allergiesIdx + 1)
   if (!ok) {
     return
   }
