@@ -3,6 +3,8 @@ import {
   ADD_CLIENT_COMING_SOON_TABS,
   tabIndexInOrder,
 } from 'src/composables/useAddClientTabAccess.js'
+import { CLINICAL_FAMILY_HISTORY_SUB_TAB } from
+  'src/composables/useAddClientSubTabs.js'
 import {
   addClientTabKeys,
   clientFormSections,
@@ -17,8 +19,21 @@ import {
 } from 'src/utils/client-allergies.js'
 import { quasarNotifyTypes } from 'components/constants.js'
 
+function validateFamilyMedicalHistorySection(form, t, notifyValidationError) {
+  const section = form.value[clientFormSections.familyMedicalHistory]
+  const result = validateFamilyMedicalHistoryDraftClear(section)
+  if (!result.ok && result.errorKey) {
+    notifyValidationError(t(result.errorKey))
+
+    return false
+  }
+
+  return true
+}
+
 export function useAddClientTabValidation({
   activeTab,
+  activeSubTab,
   formRef,
   form,
   tabOrder,
@@ -43,16 +58,12 @@ export function useAddClientTabValidation({
     if (ADD_CLIENT_COMING_SOON_TABS.has(tab)) {
       return true
     }
-    if (tab === addClientTabKeys.familyMedicalHistory) {
-      const section = form.value[clientFormSections.familyMedicalHistory]
-      const result = validateFamilyMedicalHistoryDraftClear(section)
-      if (!result.ok && result.errorKey) {
-        notifyValidationError(t(result.errorKey))
-
-        return false
-      }
-
-      return true
+    if (tab === addClientTabKeys.clinical) {
+      return validateFamilyMedicalHistorySection(
+        form,
+        t,
+        notifyValidationError,
+      )
     }
     if (tab === addClientTabKeys.allergies) {
       const section = form.value[clientFormSections.allergies]
@@ -84,6 +95,13 @@ export function useAddClientTabValidation({
     }
     const ok = await validateTab(tab)
     if (!ok) {
+      if (
+        tab === addClientTabKeys.clinical
+        && activeSubTab?.value !== CLINICAL_FAMILY_HISTORY_SUB_TAB
+      ) {
+        activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
+      }
+
       return false
     }
     if (idx < tabOrder.length - 1) {
@@ -99,6 +117,12 @@ export function useAddClientTabValidation({
       const ok = await validateTab(tab)
       if (!ok) {
         activeTab.value = tab
+        if (
+          tab === addClientTabKeys.clinical
+          && activeSubTab
+        ) {
+          activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
+        }
 
         return false
       }

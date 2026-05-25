@@ -19,50 +19,48 @@
         indicator-color="transparent"
         align="left">
         <q-tab
-          :name="addClientTabKeys.basic"
-          :label="t('tabBasicInfo')"
-        />
-        <q-tab
-          :name="addClientTabKeys.contact"
-          :label="t('tabContact')"
-        />
-        <q-tab
-          :name="addClientTabKeys.familyMedicalHistory"
-          :label="t('tabFamilyMedicalHistory')"
-        />
-        <q-tab
-          :name="addClientTabKeys.allergies"
-          :label="t('tabAllergies')"
-          :class="allergiesTabClass"
-        />
-        <q-tab
-          :name="addClientTabKeys.assessments"
-          :label="t('tabAssessments')"
-        />
-        <q-tab :name="addClientTabKeys.clinical">
-          <span class="row items-center no-wrap">
-            {{ t('tabClinical') }}
-            <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
+          v-for="tab in mainTabs"
+          :key="tab.key"
+          :name="tab.key"
+          :class="mainTabClass(tab)">
+          <span class="add-client-tab__label row items-center no-wrap">
+            <q-icon
+              :name="tab.icon"
+              size="18px"
+              class="add-client-tab__icon"
+            />
+            <span class="add-client-tab__text">{{ t(tab.labelKey) }}</span>
+            <q-icon
+              v-if="tab.hasSubTabs"
+              name="arrow_drop_down"
+              size="18px"
+              class="add-client-tab__chevron q-ml-xs"
+            />
           </span>
         </q-tab>
-        <q-tab :name="addClientTabKeys.careCoordination">
-          <span class="row items-center no-wrap">
-            {{ t('tabCareCoordination') }}
-            <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
-          </span>
-        </q-tab>
-        <q-tab :name="addClientTabKeys.financials">
-          <span class="row items-center no-wrap">
-            {{ t('tabFinancials') }}
-            <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
-          </span>
-        </q-tab>
-        <q-tab :name="addClientTabKeys.documents">
-          <span class="row items-center no-wrap">
-            {{ t('tabDocuments') }}
-            <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
-          </span>
-        </q-tab>
+      </q-tabs>
+    </div>
+
+    <div
+      v-if="hasSubTabs"
+      class="add-client-form__subtabs-row">
+      <q-tabs
+        v-model="activeSubTab"
+        dense
+        no-caps
+        outside-arrows
+        mobile-arrows
+        class="add-client-subtabs"
+        active-color="primary"
+        indicator-color="primary"
+        align="left">
+        <q-tab
+          v-for="subTab in currentSubTabs"
+          :key="subTab.key"
+          :name="subTab.key"
+          :icon="subTab.icon"
+          :label="t(subTab.labelKey)"
+        />
       </q-tabs>
     </div>
 
@@ -226,14 +224,6 @@
           />
         </q-tab-panel>
 
-        <q-tab-panel
-          :name="addClientTabKeys.familyMedicalHistory"
-          class="q-pa-none">
-          <AddClientFamilyMedicalHistoryTab
-            v-model="form[clientFormSections.familyMedicalHistory]"
-          />
-        </q-tab-panel>
-
         <q-tab-panel :name="addClientTabKeys.allergies" class="q-pa-none">
           <AddClientAllergiesTab
             v-model="form[clientFormSections.allergies]"
@@ -241,13 +231,93 @@
         </q-tab-panel>
 
         <q-tab-panel
-          v-for="tab in comingSoonTabKeys"
-          :key="tab"
-          :name="tab"
+          :name="addClientTabKeys.assessments"
           class="q-pa-none">
           <div class="text-body1 text-grey-7 q-py-xl text-center">
             {{ t('tabComingSoon') }}
           </div>
+        </q-tab-panel>
+
+        <q-tab-panel
+          :name="addClientTabKeys.clinical"
+          class="q-pa-none">
+          <q-tab-panels
+            v-model="activeSubTab"
+            animated
+            class="bg-transparent add-client-form__sub-panels">
+            <q-tab-panel
+              v-for="subTab in clinicalSubTabs"
+              :key="subTab.key"
+              :name="subTab.key"
+              class="q-pa-none">
+              <AddClientFamilyMedicalHistoryTab
+                v-if="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
+                v-model="form[clientFormSections.familyMedicalHistory]"
+              />
+              <div
+                v-else
+                class="text-body1 text-grey-7 q-py-xl text-center">
+                {{ t('tabComingSoon') }}
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-tab-panel>
+
+        <q-tab-panel
+          :name="addClientTabKeys.careCoordination"
+          class="q-pa-none">
+          <q-tab-panels
+            v-model="activeSubTab"
+            animated
+            class="bg-transparent add-client-form__sub-panels">
+            <q-tab-panel
+              v-for="subTab in careCoordinationSubTabs"
+              :key="subTab.key"
+              :name="subTab.key"
+              class="q-pa-none">
+              <div class="text-body1 text-grey-7 q-py-xl text-center">
+                {{ t('tabComingSoon') }}
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-tab-panel>
+
+        <q-tab-panel
+          :name="addClientTabKeys.financials"
+          class="q-pa-none">
+          <q-tab-panels
+            v-model="activeSubTab"
+            animated
+            class="bg-transparent add-client-form__sub-panels">
+            <q-tab-panel
+              v-for="subTab in financialsSubTabs"
+              :key="subTab.key"
+              :name="subTab.key"
+              class="q-pa-none">
+              <div class="text-body1 text-grey-7 q-py-xl text-center">
+                {{ t('tabComingSoon') }}
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
+        </q-tab-panel>
+
+        <q-tab-panel
+          :name="addClientTabKeys.documents"
+          class="q-pa-none">
+          <q-tab-panels
+            v-model="activeSubTab"
+            animated
+            class="bg-transparent add-client-form__sub-panels">
+            <q-tab-panel
+              v-for="subTab in documentsSubTabs"
+              :key="subTab.key"
+              :name="subTab.key"
+              class="q-pa-none">
+              <div class="text-body1 text-grey-7 q-py-xl text-center">
+                {{ t('tabComingSoon') }}
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
         </q-tab-panel>
       </q-tab-panels>
       </q-form>
@@ -323,6 +393,11 @@ import {
   highestAllergySeverity,
   severityTabModifier,
 } from 'src/utils/client-allergies.js'
+import {
+  ADD_CLIENT_MAIN_TABS,
+  ADD_CLIENT_SUB_TABS,
+  CLINICAL_FAMILY_HISTORY_SUB_TAB,
+} from 'src/composables/useAddClientSubTabs.js'
 
 const emit = defineEmits(['saved', 'cancel', 'tab-label'])
 
@@ -358,7 +433,18 @@ const {
   validateTabsThrough,
   tabIndex,
   tabLabelFor,
+  hasSubTabs,
+  currentSubTabs,
+  activeSubTab,
 } = useAddClientForm(t)
+
+const mainTabs = ADD_CLIENT_MAIN_TABS
+
+const clinicalSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.clinical]
+const careCoordinationSubTabs =
+  ADD_CLIENT_SUB_TABS[addClientTabKeys.careCoordination]
+const financialsSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.financials]
+const documentsSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.documents]
 
 const allergiesTabClass = computed(() => {
   const classes = ['add-client-tab--allergies']
@@ -373,13 +459,13 @@ const allergiesTabClass = computed(() => {
   return classes
 })
 
-const comingSoonTabKeys = [
-  addClientTabKeys.assessments,
-  addClientTabKeys.clinical,
-  addClientTabKeys.careCoordination,
-  addClientTabKeys.financials,
-  addClientTabKeys.documents,
-]
+function mainTabClass(tab) {
+  if (tab.key === addClientTabKeys.allergies) {
+    return allergiesTabClass.value
+  }
+
+  return undefined
+}
 
 const ssnDisplayValue = computed(() => {
   const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
@@ -392,7 +478,7 @@ const ssnDisplayValue = computed(() => {
 
 const activeTabLabel = computed(() => tabLabelFor(activeTab.value))
 
-watch(activeTab, () => {
+watch([activeTab, activeSubTab], () => {
   emit('tab-label', activeTabLabel.value)
 }, { immediate: true })
 

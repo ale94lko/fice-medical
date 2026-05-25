@@ -13,6 +13,50 @@
   background: $surface;
 }
 
+.add-client-form__subtabs-row {
+  flex-shrink: 0;
+  padding: 2px 0 0;
+  border-bottom: 1px solid $border-subtle;
+  background: $surface;
+}
+
+.add-client-subtabs {
+  .q-tab {
+    min-height: 40px;
+    padding: 0 14px;
+    margin-right: 2px;
+    color: $text-muted;
+    font-weight: 600;
+    background: transparent;
+    border-radius: 0;
+
+    .q-tab__content {
+      flex-direction: row;
+      align-items: center;
+      padding: 0;
+    }
+
+    .q-tab__icon {
+      font-size: 18px;
+      margin: 0 6px 0 0;
+    }
+  }
+
+  .q-tab--active {
+    color: $primary;
+    background: transparent;
+  }
+
+  .q-tab__indicator {
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+  }
+}
+
+.add-client-form__sub-panels {
+  background: transparent;
+}
+
 .add-client-form__panel-scroll {
   padding-top: 8px;
 }
@@ -162,11 +206,42 @@
     font-weight: 600;
     color: $primary;
     background: rgba($primary, 0.12);
+
+    .q-tab__content {
+      flex-direction: row;
+      align-items: center;
+      padding: 0;
+    }
+
+    .q-tab__icon {
+      font-size: 18px;
+      margin: 0 6px 0 0;
+    }
+  }
+
+  .add-client-tab__label {
+    gap: 0;
+  }
+
+  .add-client-tab__icon {
+    flex-shrink: 0;
+    margin-right: 6px;
+    font-size: 18px;
+  }
+
+  .add-client-tab__text {
+    line-height: 1.2;
   }
 
   .q-tab--active {
     background: $primary;
     color: $white;
+
+    .add-client-tab__icon,
+    .add-client-tab__chevron,
+    .q-tab__icon {
+      color: $white;
+    }
   }
 
   .q-tab--disabled {
@@ -176,29 +251,56 @@
 
   .add-client-tab--allergies-mild:not(.q-tab--active) {
     color: #92400e;
+
+    .add-client-tab__icon {
+      color: #92400e;
+    }
   }
 
   .add-client-tab--allergies-mild.q-tab--active {
     background: #92400e;
     color: $white;
+
+    .add-client-tab__icon,
+    .add-client-tab__chevron {
+      color: $white;
+    }
   }
 
   .add-client-tab--allergies-moderate:not(.q-tab--active) {
     color: $warning;
+
+    .add-client-tab__icon {
+      color: $warning;
+    }
   }
 
   .add-client-tab--allergies-moderate.q-tab--active {
     background: $warning;
     color: $white;
+
+    .add-client-tab__icon,
+    .add-client-tab__chevron {
+      color: $white;
+    }
   }
 
   .add-client-tab--allergies-severe:not(.q-tab--active) {
     color: $negative;
+
+    .add-client-tab__icon {
+      color: $negative;
+    }
   }
 
   .add-client-tab--allergies-severe.q-tab--active {
     background: $negative;
     color: $white;
+
+    .add-client-tab__icon,
+    .add-client-tab__chevron {
+      color: $white;
+    }
   }
 
   .add-client-form__other-contact-tab {

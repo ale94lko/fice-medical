@@ -36,19 +36,38 @@ import {
 import {
   useAddClientTabValidation,
 } from 'src/composables/useAddClientTabValidation.js'
+import {
+  ADD_CLIENT_SUB_TABS,
+  ADD_CLIENT_TABS_WITH_SUBTABS,
+  useAddClientSubTabs,
+} from 'src/composables/useAddClientSubTabs.js'
 
 const TAB_ORDER = ADD_CLIENT_TAB_ORDER
 
 const TAB_LABEL_KEYS = {
   [addClientTabKeys.basic]: 'tabBasicInfo',
   [addClientTabKeys.contact]: 'tabContact',
-  [addClientTabKeys.familyMedicalHistory]: 'tabFamilyMedicalHistory',
   [addClientTabKeys.allergies]: 'tabAllergies',
   [addClientTabKeys.assessments]: 'tabAssessments',
   [addClientTabKeys.clinical]: 'tabClinical',
   [addClientTabKeys.careCoordination]: 'tabCareCoordination',
   [addClientTabKeys.financials]: 'tabFinancials',
   [addClientTabKeys.documents]: 'tabDocuments',
+}
+
+function resolveAddClientTabLabel(tab, t, activeSubTabKey) {
+  const key = TAB_LABEL_KEYS[tab] ?? TAB_LABEL_KEYS[addClientTabKeys.basic]
+  const main = t(key)
+  if (!ADD_CLIENT_TABS_WITH_SUBTABS.has(tab)) {
+    return main
+  }
+  const subTabs = ADD_CLIENT_SUB_TABS[tab] ?? []
+  const sub = subTabs.find(item => item.key === activeSubTabKey)
+  if (!sub) {
+    return main
+  }
+
+  return `${main} / ${t(sub.labelKey)}`
 }
 
 export function createEmptyAddClientForm() {
@@ -83,8 +102,14 @@ export function useAddClientForm(t) {
   const form = ref(createEmptyAddClientForm())
 
   const {
+    hasSubTabs,
+    currentSubTabs,
+    activeSubTab,
+    resetSubTabs,
+  } = useAddClientSubTabs(activeTab)
+
+  const {
     resetTabAccess,
-    isTabEnabled,
     unlockThroughIndex,
   } = useAddClientTabAccess()
 
@@ -95,6 +120,7 @@ export function useAddClientForm(t) {
     validateTabsThrough,
   } = useAddClientTabValidation({
     activeTab,
+    activeSubTab,
     formRef,
     form,
     tabOrder: TAB_ORDER,
@@ -124,13 +150,12 @@ export function useAddClientForm(t) {
     })),
   )
 
-  const assignedClinicianOptions = computed(() => [])
-
   function resetForm() {
     form.value = createEmptyAddClientForm()
     activeTab.value = addClientTabKeys.basic
     initialSnapshot.value = snapshotAddClientForm(form.value)
     resetTabAccess()
+    resetSubTabs()
   }
 
   function markPristine() {
@@ -235,9 +260,11 @@ export function useAddClientForm(t) {
   }))
 
   function tabLabelFor(tab) {
-    const key = TAB_LABEL_KEYS[tab] ?? TAB_LABEL_KEYS[addClientTabKeys.basic]
+    const subKey = tab === activeTab.value
+      ? activeSubTab.value
+      : ADD_CLIENT_SUB_TABS[tab]?.[0]?.key
 
-    return t(key)
+    return resolveAddClientTabLabel(tab, t, subKey)
   }
 
   function goNextTab() {
@@ -264,18 +291,19 @@ export function useAddClientForm(t) {
     return tabIndex(activeTab.value) > 0
   }
 
-  const contactSectionKey = clientFormSections.contact
-
   return {
     ck,
-    contactSectionKey,
+    contactSectionKey: clientFormSections.contact,
     form,
     formRef,
     activeTab,
+    activeSubTab,
+    hasSubTabs,
+    currentSubTabs,
     addClientTabKeys,
     ageReadonly,
     ageUnitSelectOptions,
-    assignedClinicianOptions,
+    assignedClinicianOptions: [],
     sexOptions,
     suffixSelectOptions,
     rules,
@@ -287,7 +315,6 @@ export function useAddClientForm(t) {
     canGoNext,
     goPreviousTab,
     canGoPrevious,
-    isTabEnabled,
     validateTab,
     validateCurrentTabAndUnlock,
     validateTabsThrough,
