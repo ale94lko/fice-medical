@@ -3,7 +3,7 @@
     <section class="add-client-form__section">
       <AddClientSectionHeading icon="place" :title="t('clientAddress')" />
       <div class="add-client-form__fields">
-        <div class="row q-col-gutter-md q-col-gutter-lg-md">
+        <div class="row q-col-gutter-sm q-col-gutter-md">
           <div class="col-12 col-md-6">
             <TextInput
               v-model="contact.addressLine1"
@@ -72,7 +72,7 @@
       </div>
     </section>
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <section class="add-client-form__section">
       <AddClientSectionHeading icon="phone" :title="t('contactMethods')" />
@@ -82,7 +82,7 @@
           <div
             v-for="(phone, index) in contact.phones"
             :key="`phone-${index}`"
-            class="row q-col-gutter-md q-col-gutter-lg-md
+            class="row q-col-gutter-sm q-col-gutter-md
               add-client-form__contact-method-row">
             <div class="col-12 col-md-6">
               <q-input
@@ -130,7 +130,7 @@
           <div
             v-for="(email, index) in contact.emails"
             :key="`email-${index}`"
-            class="row q-col-gutter-md q-col-gutter-lg-md
+            class="row q-col-gutter-sm q-col-gutter-md
               add-client-form__contact-method-row">
             <div class="col-12 col-md-6">
               <TextInput
@@ -169,7 +169,7 @@
       </div>
     </section>
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <section class="add-client-form__section">
       <AddClientSectionHeading
@@ -208,7 +208,7 @@
       </div>
     </section>
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <OtherContactsSection
       v-model="contact"
@@ -221,7 +221,7 @@
       :suffix-options="suffixSelectOptions"
     />
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <section class="add-client-form__section">
       <AddClientSectionHeading
@@ -229,7 +229,7 @@
         :title="t('additionalNotes')"
       />
       <div class="add-client-form__fields">
-        <div class="row q-col-gutter-md q-col-gutter-lg-md">
+        <div class="row q-col-gutter-sm q-col-gutter-md">
           <div class="col-12">
             <q-input
               v-model="contact.additionalNotes"

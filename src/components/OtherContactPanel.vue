@@ -1,6 +1,6 @@
 <template>
   <div class="other-contact-panel">
-    <div class="row q-col-gutter-md q-col-gutter-lg-md">
+    <div class="row q-col-gutter-sm q-col-gutter-md">
       <div class="col-12 col-md-6">
         <q-select
           :model-value="contact.relationshipType"
@@ -89,7 +89,7 @@
         class="q-mb-md"
         @update:model-value="onSameAsClientAddress"
       />
-      <div class="row q-col-gutter-md q-col-gutter-lg-md">
+      <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
           <TextInput
             :model-value="contact.addressLine1"
@@ -171,7 +171,7 @@
         <div
           v-for="(phone, index) in contact.phones"
           :key="`oc-phone-${index}`"
-          class="row q-col-gutter-md q-col-gutter-lg-md
+          class="row q-col-gutter-sm q-col-gutter-md
             add-client-form__contact-method-row">
           <div class="col-12 col-md-6">
             <q-input
@@ -221,7 +221,7 @@
         <div
           v-for="(email, index) in contact.emails"
           :key="`oc-email-${index}`"
-          class="row q-col-gutter-md q-col-gutter-lg-md
+          class="row q-col-gutter-sm q-col-gutter-md
             add-client-form__contact-method-row">
           <div class="col-12 col-md-6">
             <TextInput

@@ -12,7 +12,7 @@
         >
           <div class="add-client-form__allergy-add-card q-pa-md">
             <div
-              class="row q-col-gutter-md q-col-gutter-lg-md
+              class="row q-col-gutter-sm q-col-gutter-md
                 add-client-form__allergy-input-row">
               <div class="col-12 col-md-6">
                 <q-input
@@ -92,7 +92,7 @@
       </div>
     </section>
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <section class="add-client-form__section">
       <AddClientSectionHeading

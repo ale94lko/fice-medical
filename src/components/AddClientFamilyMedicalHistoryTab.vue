@@ -7,7 +7,7 @@
       />
       <div class="add-client-form__fields">
         <div class="add-client-form__fmh-add-card q-pa-md">
-          <div class="row q-col-gutter-md q-col-gutter-lg-md items-end">
+          <div class="row q-col-gutter-sm q-col-gutter-md items-end">
             <div class="col-12 col-md-6">
               <q-select
                 v-model="section.draft.familyRelationship"
@@ -55,7 +55,7 @@
       </div>
     </section>
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <section class="add-client-form__section">
       <AddClientSectionHeading
@@ -74,7 +74,7 @@
       </div>
     </section>
 
-    <q-separator class="q-my-lg" />
+    <q-separator class="add-client-form__section-separator" />
 
     <section class="add-client-form__section">
       <AddClientSectionHeading

@@ -38,7 +38,7 @@
     </header>
 
     <q-card flat bordered class="add-client-page__card">
-      <q-card-section class="add-client-page__card-body q-pa-lg">
+      <q-card-section class="add-client-page__card-body q-pa-md">
         <AddClientForm
           ref="addClientFormRef"
           @saved="onSaved"
@@ -135,29 +135,33 @@ function onSaved() {
 .add-client-page__header {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px 24px;
-  margin-bottom: 20px;
+  gap: 12px 20px;
+  margin-bottom: 12px;
   flex-shrink: 0;
 }
 
 .add-client-page__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  line-height: 1.2;
   color: $text-strong;
 }
 
 .add-client-page__subtitle {
-  margin: 4px 0 12px;
-  font-size: 0.95rem;
+  margin: 2px 0 4px;
+  font-size: 0.875rem;
+  line-height: 1.35;
   color: $text-muted;
 }
 
 .add-client-page__breadcrumbs {
-  font-size: 0.875rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.3;
   color: $text-muted;
 }
 
@@ -189,8 +193,8 @@ function onSaved() {
 
 .add-client-page__footer {
   flex-shrink: 0;
-  margin-top: 12px;
-  padding: 12px 16px;
+  margin-top: 8px;
+  padding: 8px 12px;
   background: $surface;
   border: 1px solid $border-subtle;
   border-radius: $radius-lg;

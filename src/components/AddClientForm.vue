@@ -84,7 +84,7 @@
       <q-badge
         outline
         color="grey-7"
-        class="client-number-badge text-body2 q-px-md q-py-sm">
+        class="client-number-badge text-body2 q-px-sm q-py-xs">
         {{ t('clientNumber') }}: {{ form[ck.clientNumber] }}
       </q-badge>
     </div>
@@ -104,7 +104,7 @@
               :title="t('personalInformation')"
             />
             <div class="add-client-form__fields">
-              <div class="row q-col-gutter-md q-col-gutter-lg-md">
+              <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.firstName]"
@@ -205,7 +205,7 @@
             </div>
           </section>
 
-          <q-separator class="q-my-lg" />
+          <q-separator class="add-client-form__section-separator" />
 
           <section class="add-client-form__section">
             <AddClientSectionHeading
@@ -213,7 +213,7 @@
               :title="t('administrativeInformation')"
             />
             <div class="add-client-form__fields">
-              <div class="row q-col-gutter-md q-col-gutter-lg-md">
+              <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <ClientDateField
                     v-model="form[ck.admissionDate]"

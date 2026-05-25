@@ -11,7 +11,7 @@
 .add-client-form__tabs-row {
   flex-shrink: 0;
   margin-bottom: 0;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
   border-bottom: 1px solid $border-subtle;
   background: $surface;
 }
@@ -20,16 +20,21 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
-  padding-top: 16px;
+  padding-top: 8px;
+}
+
+.add-client-form__section-separator {
+  margin: 12px auto;
+  max-width: 720px;
 }
 
 .add-client-form__section-heading {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 auto 16px;
+  gap: 8px;
+  margin: 0 auto 10px;
   max-width: 720px;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: normal;
@@ -47,8 +52,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: $radius-md;
   background: rgba($primary, 0.12);
   color: $primary;
@@ -90,7 +95,7 @@
 }
 
 .add-client-form__hint {
-  margin: -8px auto 16px;
+  margin: -4px auto 10px;
   max-width: 720px;
   font-size: 0.875rem;
   color: $text-muted;
@@ -143,9 +148,9 @@
 .add-client-tabs {
   .q-tab {
     border-radius: $radius-md;
-    margin-right: 8px;
-    min-height: 40px;
-    padding: 0 16px;
+    margin-right: 6px;
+    min-height: 36px;
+    padding: 0 14px;
     font-weight: 600;
     color: $primary;
     background: rgba($primary, 0.12);
@@ -327,7 +332,7 @@
 
 .add-client-form__contact-methods-block {
   & + & {
-    margin-top: 24px;
+    margin-top: 14px;
   }
 }
 
