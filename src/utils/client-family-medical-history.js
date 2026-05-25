@@ -137,6 +137,43 @@ export function validateFamilyMedicalHistoryDraftClear(section) {
   )
 }
 
+export function getFamilyMedicalHistoryDraftFieldErrorKeys(section) {
+  const draft = section?.draft ?? {}
+  const rel = trimFamilyMedicalField(draft.familyRelationship)
+  const cond = trimFamilyMedicalField(draft.medicalConditions)
+  const keys = {
+    relationship: null,
+    conditions: null,
+  }
+
+  if (!rel && !cond) {
+    return keys
+  }
+  if (!rel && cond) {
+    keys.relationship = 'fmhRelationshipRequired'
+  }
+  if (rel && !cond) {
+    keys.conditions = 'fmhConditionsRequired'
+  }
+  if (
+    rel
+    && rel.length > familyMedicalHistoryMaxRelationshipLength
+  ) {
+    keys.relationship = 'fmhRelationshipMax'
+  }
+  if (cond && !isValidMedicalConditions(cond)) {
+    keys.conditions = 'fmhConditionsInvalid'
+  }
+
+  return keys
+}
+
+export function countFamilyMedicalHistoryDraftFieldErrors(section) {
+  const keys = getFamilyMedicalHistoryDraftFieldErrorKeys(section)
+
+  return [keys.relationship, keys.conditions].filter(Boolean).length
+}
+
 export function splitFamilyMedicalHistoryEntries(entries) {
   const personal = []
   const family = []

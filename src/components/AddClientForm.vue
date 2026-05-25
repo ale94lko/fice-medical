@@ -30,6 +30,14 @@
               class="add-client-tab__icon"
             />
             <span class="add-client-tab__text">{{ t(tab.labelKey) }}</span>
+            <span
+              v-if="tabErrorCount(tab.key) > 0"
+              class="add-client-tab__error-badge"
+              :aria-label="t('tabErrorCountAria', {
+                count: tabErrorCount(tab.key),
+              })">
+              {{ tabErrorCount(tab.key) }}
+            </span>
             <q-icon
               v-if="tab.hasSubTabs"
               name="arrow_drop_down"
@@ -71,8 +79,15 @@
         novalidate
         autocomplete="off"
         @submit.prevent="onSave">
-        <q-tab-panels v-model="activeTab" animated class="bg-transparent">
-        <q-tab-panel :name="addClientTabKeys.basic" class="q-pa-none">
+        <q-tab-panels
+          v-model="activeTab"
+          keep-alive
+          animated
+          class="bg-transparent">
+        <q-tab-panel
+          :name="addClientTabKeys.basic"
+          class="q-pa-none"
+          :data-add-client-tab="addClientTabKeys.basic">
           <AddClientAccordionSection
             icon="person"
             :title="t('personalInformation')">
@@ -105,6 +120,7 @@
                     hide-bottom-space
                     emit-value
                     map-options
+                    :loading="catalogsLoading"
                     :options="suffixSelectOptions"
                     :label="t('suffix')"
                   />
@@ -140,6 +156,7 @@
                         hide-bottom-space
                         emit-value
                         map-options
+                        :loading="catalogsLoading"
                         :options="ageUnitSelectOptions"
                         :label="t('ageUnit')"
                       />
@@ -154,6 +171,7 @@
                     <q-option-group
                       v-model="form[ck.sex]"
                       :options="sexOptions"
+                      :disable="catalogsLoading"
                       type="radio"
                       inline
                       class="add-client-form__sex-group"
@@ -209,15 +227,22 @@
           </AddClientAccordionSection>
         </q-tab-panel>
 
-        <q-tab-panel :name="addClientTabKeys.contact" class="q-pa-none">
+        <q-tab-panel
+          :name="addClientTabKeys.contact"
+          class="q-pa-none"
+          :data-add-client-tab="addClientTabKeys.contact">
           <AddClientContactTab
             v-model="form[contactSectionKey]"
             :rules="contactRules"
           />
         </q-tab-panel>
 
-        <q-tab-panel :name="addClientTabKeys.allergies" class="q-pa-none">
+        <q-tab-panel
+          :name="addClientTabKeys.allergies"
+          class="q-pa-none"
+          :data-add-client-tab="addClientTabKeys.allergies">
           <AddClientAllergiesTab
+            ref="allergiesTabRef"
             v-model="form[clientFormSections.allergies]"
           />
         </q-tab-panel>
@@ -243,7 +268,9 @@
               :name="subTab.key"
               class="q-pa-none">
               <AddClientFamilyMedicalHistoryTab
-                v-if="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
+                v-show="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
+                v-if="activeTab === addClientTabKeys.clinical"
+                ref="fmhTabRef"
                 v-model="form[clientFormSections.familyMedicalHistory]"
               />
               <div
@@ -370,6 +397,7 @@ import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
+import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
 import {
   addClientTabKeys,
   clientFormSections,
@@ -401,6 +429,12 @@ const saving = ref(false)
 const successVisible = ref(false)
 const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
+const allergiesTabRef = ref(null)
+const fmhTabRef = ref(null)
+
+const catalogs = useAddClientCatalogs(t)
+const { loading: catalogsLoading, loadBasicInfoCatalogs } = catalogs
+
 const {
   ck,
   contactSectionKey,
@@ -422,13 +456,13 @@ const {
   goPreviousTab,
   canGoPrevious,
   validateCurrentTabAndUnlock,
-  validateTabsThrough,
-  tabIndex,
+  validateAllTabs,
+  tabErrorCount,
   tabLabelFor,
   hasSubTabs,
   currentSubTabs,
   activeSubTab,
-} = useAddClientForm(t)
+} = useAddClientForm(t, catalogs, { allergiesTabRef, fmhTabRef })
 
 const mainTabs = ADD_CLIENT_MAIN_TABS
 
@@ -474,7 +508,21 @@ watch([activeTab, activeSubTab], () => {
   emit('tab-label', activeTabLabel.value)
 }, { immediate: true })
 
-onMounted(() => {
+onMounted(async() => {
+  try {
+    await loadBasicInfoCatalogs()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      const msg = error?.response?.data?.message
+        || error?.message
+        || t('catalogLoadError')
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: String(msg),
+        position: 'top',
+      })
+    }
+  }
   resetForm()
   successVisible.value = false
   markPristine()
@@ -508,8 +556,7 @@ async function onNext() {
 }
 
 async function onSave() {
-  const allergiesIdx = tabIndex(addClientTabKeys.allergies)
-  const ok = await validateTabsThrough(allergiesIdx + 1)
+  const ok = await validateAllTabs()
   if (!ok) {
     return
   }

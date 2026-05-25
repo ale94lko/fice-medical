@@ -1,3 +1,4 @@
+import { nextTick, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import {
   ADD_CLIENT_COMING_SOON_TABS,
@@ -10,26 +11,16 @@ import {
   clientFormSections,
 } from 'components/constants.js'
 import {
-  validateFamilyMedicalHistoryDraftClear,
+  countFamilyMedicalHistoryDraftFieldErrors,
 } from 'src/utils/client-family-medical-history.js'
 import {
-  allergyMaxStartYear,
-  allergyMinStartYear,
-  validateAllergiesDraftClear,
+  countAllergyDraftFieldErrors,
 } from 'src/utils/client-allergies.js'
+import {
+  countBasicTabFieldErrors,
+  countContactTabFieldErrors,
+} from 'src/utils/add-client-form-validation.js'
 import { quasarNotifyTypes } from 'components/constants.js'
-
-function validateFamilyMedicalHistorySection(form, t, notifyValidationError) {
-  const section = form.value[clientFormSections.familyMedicalHistory]
-  const result = validateFamilyMedicalHistoryDraftClear(section)
-  if (!result.ok && result.errorKey) {
-    notifyValidationError(t(result.errorKey))
-
-    return false
-  }
-
-  return true
-}
 
 export function useAddClientTabValidation({
   activeTab,
@@ -39,11 +30,24 @@ export function useAddClientTabValidation({
   tabOrder,
   unlockThroughIndex,
   t,
+  allergiesTabRef,
+  fmhTabRef,
+  getBasicRules,
+  getContactRules,
 }) {
   const $q = useQuasar()
+  const tabErrorCounts = ref({})
 
   function tabIndex(tab) {
     return tabIndexInOrder(tab, tabOrder)
+  }
+
+  function resetTabErrorCounts() {
+    tabErrorCounts.value = {}
+  }
+
+  function tabErrorCount(tab) {
+    return tabErrorCounts.value[tab] ?? 0
   }
 
   function notifyValidationError(message) {
@@ -54,37 +58,131 @@ export function useAddClientTabValidation({
     })
   }
 
-  async function validateTab(tab) {
-    if (ADD_CLIENT_COMING_SOON_TABS.has(tab)) {
-      return true
+  function forEachQFormTabField(tab, fn) {
+    if (!formRef.value?.getValidationComponents) {
+      return
     }
-    if (tab === addClientTabKeys.clinical) {
-      return validateFamilyMedicalHistorySection(
-        form,
-        t,
-        notifyValidationError,
-      )
+    const components = formRef.value.getValidationComponents()
+
+    for (const field of components) {
+      const panel = field.$el?.closest?.('[data-add-client-tab]')
+      if (!panel) {
+        continue
+      }
+      if (panel.getAttribute('data-add-client-tab') !== tab) {
+        continue
+      }
+      fn(field)
+    }
+  }
+
+  async function showQFormTabFieldErrors(tab) {
+    if (!formRef.value?.getValidationComponents) {
+      return
+    }
+    const components = formRef.value.getValidationComponents()
+
+    for (const field of components) {
+      const panel = field.$el?.closest?.('[data-add-client-tab]')
+      if (!panel) {
+        continue
+      }
+      if (panel.getAttribute('data-add-client-tab') !== tab) {
+        continue
+      }
+      await field.validate()
+    }
+  }
+
+  function clearQFormTabFieldErrors(tab) {
+    forEachQFormTabField(tab, field => {
+      if (typeof field.resetValidation === 'function') {
+        field.resetValidation()
+      }
+    })
+  }
+
+  function countTabErrors(tab) {
+    if (ADD_CLIENT_COMING_SOON_TABS.has(tab)) {
+      return 0
     }
     if (tab === addClientTabKeys.allergies) {
       const section = form.value[clientFormSections.allergies]
-      const result = validateAllergiesDraftClear(section)
-      if (!result.ok && result.errorKey) {
-        notifyValidationError(t(result.errorKey, {
-          min: allergyMinStartYear(),
-          max: allergyMaxStartYear(),
-          maxName: 100,
-        }))
 
-        return false
+      return countAllergyDraftFieldErrors(section)
+    }
+    if (tab === addClientTabKeys.clinical) {
+      const section = form.value[clientFormSections.familyMedicalHistory]
+
+      return countFamilyMedicalHistoryDraftFieldErrors(section)
+    }
+    if (tab === addClientTabKeys.basic) {
+      return countBasicTabFieldErrors(
+        form.value,
+        getBasicRules?.(),
+      )
+    }
+    if (tab === addClientTabKeys.contact) {
+      return countContactTabFieldErrors(
+        form.value[clientFormSections.contact],
+        getContactRules?.(),
+      )
+    }
+
+    return 0
+  }
+
+  async function clearTabFieldErrors(tab) {
+    if (tab === addClientTabKeys.allergies) {
+      allergiesTabRef?.value?.clearSaveValidation?.()
+
+      return
+    }
+    if (tab === addClientTabKeys.clinical) {
+      fmhTabRef?.value?.clearSaveValidation?.()
+
+      return
+    }
+    if (
+      tab === addClientTabKeys.basic
+      || tab === addClientTabKeys.contact
+    ) {
+      clearQFormTabFieldErrors(tab)
+    }
+  }
+
+  async function applyTabFieldErrors(tab) {
+    if (tab === addClientTabKeys.allergies) {
+      allergiesTabRef?.value?.applySaveValidation?.()
+
+      return
+    }
+    if (tab === addClientTabKeys.clinical) {
+      if (activeSubTab) {
+        activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
       }
+      await nextTick()
+      fmhTabRef?.value?.applySaveValidation?.()
+
+      return
+    }
+    if (
+      tab === addClientTabKeys.basic
+      || tab === addClientTabKeys.contact
+    ) {
+      await showQFormTabFieldErrors(tab)
+    }
+  }
+
+  async function validateTab(tab) {
+    const count = countTabErrors(tab)
+    if (count === 0) {
+      await clearTabFieldErrors(tab)
 
       return true
     }
-    if (!formRef.value) {
-      return false
-    }
 
-    return formRef.value.validate()
+    return false
   }
 
   async function validateCurrentTabAndUnlock() {
@@ -95,6 +193,11 @@ export function useAddClientTabValidation({
     }
     const ok = await validateTab(tab)
     if (!ok) {
+      tabErrorCounts.value = {
+        ...tabErrorCounts.value,
+        [tab]: countTabErrors(tab),
+      }
+      await applyTabFieldErrors(tab)
       if (
         tab === addClientTabKeys.clinical
         && activeSubTab?.value !== CLINICAL_FAMILY_HISTORY_SUB_TAB
@@ -104,6 +207,9 @@ export function useAddClientTabValidation({
 
       return false
     }
+    const nextCounts = { ...tabErrorCounts.value }
+    delete nextCounts[tab]
+    tabErrorCounts.value = nextCounts
     if (idx < tabOrder.length - 1) {
       unlockThroughIndex(idx + 1)
     }
@@ -132,10 +238,45 @@ export function useAddClientTabValidation({
     return true
   }
 
+  async function validateAllTabs() {
+    resetTabErrorCounts()
+    const counts = {}
+    let totalErrors = 0
+
+    for (const tab of tabOrder) {
+      const count = countTabErrors(tab)
+      if (count > 0) {
+        counts[tab] = count
+        totalErrors += count
+      }
+    }
+
+    tabErrorCounts.value = counts
+
+    if (totalErrors === 0) {
+      return true
+    }
+
+    const firstInvalidTab = tabOrder.find(tab => (counts[tab] ?? 0) > 0)
+    if (firstInvalidTab) {
+      activeTab.value = firstInvalidTab
+      await nextTick()
+      await applyTabFieldErrors(firstInvalidTab)
+    }
+
+    notifyValidationError(t('addClientSaveValidationSummary'))
+
+    return false
+  }
+
   return {
     tabIndex,
+    tabErrorCounts,
+    tabErrorCount,
+    resetTabErrorCounts,
     validateTab,
     validateCurrentTabAndUnlock,
     validateTabsThrough,
+    validateAllTabs,
   }
 }

@@ -46,6 +46,10 @@ export default {
   clientListEmpty: 'No clients registered yet.',
   clientSavedSuccess: 'Client was successfully saved',
   clientSaveError: 'Could not save the client. Please check the form.',
+  catalogLoadError: 'Could not load form catalogs. Using default options.',
+  addClientSaveValidationSummary:
+    'Please fix the highlighted fields before saving.',
+  tabErrorCountAria: '{count} validation errors',
   cancelClientRegistrationTitle: 'Cancel client registration',
   cancelClientRegistrationMessage:
     'If you cancel now, all entered data will be permanently lost. '

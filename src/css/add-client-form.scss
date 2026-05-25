@@ -228,6 +228,23 @@
     line-height: 1.2;
   }
 
+  .add-client-tab__error-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 8px;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    color: $white;
+    background: $negative;
+    flex-shrink: 0;
+  }
+
   .q-tab--active {
     background: $primary;
     color: $white;
@@ -236,6 +253,12 @@
     .add-client-tab__chevron,
     .q-tab__icon {
       color: $white;
+    }
+
+    .add-client-tab__error-badge {
+      color: $white;
+      background: $negative;
+      box-shadow: 0 0 0 1px $white;
     }
   }
 

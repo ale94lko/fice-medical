@@ -226,7 +226,21 @@ export const reservedTenantSubdomains = new Set([
   'admin',
 ])
 
+/** Catalog names for POST /catalogs/v1/by-names */
+export const catalogNames = {
+  suffix: 'suffix',
+  ageUnit: 'age_unit',
+  sex: 'sex',
+}
+
+export const addClientBasicInfoCatalogNames = [
+  catalogNames.suffix,
+  catalogNames.ageUnit,
+  catalogNames.sex,
+]
+
 export const apiPaths = {
+  catalogsByNames: '/catalogs/v1/by-names',
   clientsList: '/client/v1/all-clients',
   clientsCreate: '/client/v1/clients',
   oauthLogin: '/oauth/v1/login',

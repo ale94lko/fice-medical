@@ -1,14 +1,11 @@
 import { computed, ref } from 'vue'
 import {
   addClientTabKeys,
-  clientAgeUnitOptions,
   clientAgeUnitValues,
   clientFieldKeys,
   clientFormSections,
   clientMaxAge,
   clientNameMaxLength,
-  clientSexValues,
-  clientSuffixOptions,
 } from 'components/constants.js'
 import {
   ageFromUsDateString,
@@ -93,7 +90,7 @@ export function createEmptyAddClientForm() {
   }
 }
 
-export function useAddClientForm(t) {
+export function useAddClientForm(t, catalogs, options = {}) {
   const ck = clientFieldKeys
   const activeTab = ref(addClientTabKeys.basic)
   const initialSnapshot = ref('')
@@ -113,45 +110,18 @@ export function useAddClientForm(t) {
     unlockThroughIndex,
   } = useAddClientTabAccess()
 
-  const {
-    tabIndex,
-    validateTab,
-    validateCurrentTabAndUnlock,
-    validateTabsThrough,
-  } = useAddClientTabValidation({
-    activeTab,
-    activeSubTab,
-    formRef,
-    form,
-    tabOrder: TAB_ORDER,
-    unlockThroughIndex,
-    t,
-  })
-
   const { ageReadonly } = useAddClientAgeSync(form, ck.dob, ck.age)
 
-  const sexOptions = computed(() => [
-    { label: t('sexMale'), value: clientSexValues.male },
-    { label: t('sexFemale'), value: clientSexValues.female },
-    { label: t('sexUnknown'), value: clientSexValues.unknown },
-  ])
-
-  const suffixSelectOptions = computed(() =>
-    clientSuffixOptions.map(o => ({
-      label: t(o.labelKey),
-      value: o.value,
-    })),
-  )
-
-  const ageUnitSelectOptions = computed(() =>
-    clientAgeUnitOptions.map(o => ({
-      label: t(o.labelKey),
-      value: o.value,
-    })),
-  )
+  const sexOptions = catalogs?.sexOptions
+  const suffixSelectOptions = catalogs?.suffixSelectOptions
+  const ageUnitSelectOptions = catalogs?.ageUnitSelectOptions
 
   function resetForm() {
-    form.value = createEmptyAddClientForm()
+    const next = createEmptyAddClientForm()
+    if (catalogs?.defaultAgeUnitValue) {
+      next[ck.ageUnit] = catalogs.defaultAgeUnitValue()
+    }
+    form.value = next
     activeTab.value = addClientTabKeys.basic
     initialSnapshot.value = snapshotAddClientForm(form.value)
     resetTabAccess()
@@ -259,6 +229,27 @@ export function useAddClientForm(t) {
     ssn: [ssnRule()],
   }))
 
+  const {
+    tabIndex,
+    tabErrorCount,
+    validateTab,
+    validateCurrentTabAndUnlock,
+    validateTabsThrough,
+    validateAllTabs,
+  } = useAddClientTabValidation({
+    activeTab,
+    activeSubTab,
+    formRef,
+    form,
+    tabOrder: TAB_ORDER,
+    unlockThroughIndex,
+    t,
+    allergiesTabRef: options.allergiesTabRef,
+    fmhTabRef: options.fmhTabRef,
+    getBasicRules: () => rules.value,
+    getContactRules: () => contactRules.value,
+  })
+
   function tabLabelFor(tab) {
     const subKey = tab === activeTab.value
       ? activeSubTab.value
@@ -318,6 +309,8 @@ export function useAddClientForm(t) {
     validateTab,
     validateCurrentTabAndUnlock,
     validateTabsThrough,
+    validateAllTabs,
+    tabErrorCount,
     tabIndex,
     tabLabelFor,
     TAB_ORDER,

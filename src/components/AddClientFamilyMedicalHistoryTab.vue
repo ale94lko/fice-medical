@@ -107,10 +107,13 @@ import FamilyMedicalHistoryDeleteDialog from
   'components/FamilyMedicalHistoryDeleteDialog.vue'
 import {
   clientFamilyRelationshipOptions,
+  familyMedicalHistoryMaxConditionsLength,
+  familyMedicalHistoryMaxRelationshipLength,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
   createEmptyFamilyMedicalHistoryDraft,
+  getFamilyMedicalHistoryDraftFieldErrorKeys,
   isDuplicateFamilyMedicalHistoryEntry,
   nextFamilyMedicalHistoryId,
   splitFamilyMedicalHistoryEntries,
@@ -165,6 +168,40 @@ function notifyError(message) {
     type: quasarNotifyTypes.negative,
     message,
     position: 'top',
+  })
+}
+
+function applyFmhDraftFieldErrorKeys(keys) {
+  draftRelationshipError.value = ''
+  draftConditionsError.value = ''
+  if (keys.relationship) {
+    draftRelationshipError.value = t(
+      keys.relationship,
+      keys.relationship === 'fmhRelationshipMax'
+        ? { max: familyMedicalHistoryMaxRelationshipLength }
+        : {},
+    )
+  }
+  if (keys.conditions) {
+    draftConditionsError.value = t(
+      keys.conditions,
+      keys.conditions === 'fmhConditionsInvalid'
+        ? { max: familyMedicalHistoryMaxConditionsLength }
+        : {},
+    )
+  }
+}
+
+function applySaveValidation() {
+  applyFmhDraftFieldErrorKeys(
+    getFamilyMedicalHistoryDraftFieldErrorKeys(section.value),
+  )
+}
+
+function clearSaveValidation() {
+  applyFmhDraftFieldErrorKeys({
+    relationship: null,
+    conditions: null,
   })
 }
 
@@ -278,4 +315,9 @@ function onDeleteConfirm(reason) {
   }
   deletingEntry.value = null
 }
+
+defineExpose({
+  applySaveValidation,
+  clearSaveValidation,
+})
 </script>

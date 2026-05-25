@@ -135,6 +135,7 @@ import {
   allergyMaxStartYear,
   allergyMinStartYear,
   createEmptyAllergyDraft,
+  getAllergyDraftFieldErrorKeys,
   isDuplicateAllergyEntry,
   nextAllergyId,
   trimAllergyField,
@@ -203,6 +204,41 @@ function notifySuccess(message) {
     type: quasarNotifyTypes.positive,
     message,
     position: 'top',
+  })
+}
+
+function applyAllergyDraftFieldErrorKeys(keys) {
+  draftNameError.value = ''
+  draftYearError.value = ''
+  draftSeverityError.value = ''
+  if (keys.name) {
+    draftNameError.value = t(keys.name, {
+      max: clientAllergyMaxNameLength,
+      maxName: clientAllergyMaxNameLength,
+    })
+  }
+  if (keys.severity) {
+    draftSeverityError.value = t(keys.severity)
+  }
+  if (keys.year) {
+    draftYearError.value = t(keys.year, {
+      min: allergyMinStartYear(),
+      max: allergyMaxStartYear(),
+    })
+  }
+}
+
+function applySaveValidation() {
+  applyAllergyDraftFieldErrorKeys(
+    getAllergyDraftFieldErrorKeys(section.value),
+  )
+}
+
+function clearSaveValidation() {
+  applyAllergyDraftFieldErrorKeys({
+    name: null,
+    severity: null,
+    year: null,
   })
 }
 
@@ -322,4 +358,9 @@ function onDeleteConfirm(reason) {
   deletingEntryId.value = null
   notifySuccess(t('allergyDeletedSuccess'))
 }
+
+defineExpose({
+  applySaveValidation,
+  clearSaveValidation,
+})
 </script>

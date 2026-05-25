@@ -47,6 +47,11 @@ export default {
   clientListEmpty: 'No hay clientes registrados.',
   clientSavedSuccess: 'El cliente se guardó correctamente',
   clientSaveError: 'No se pudo guardar el cliente. Revise el formulario.',
+  catalogLoadError:
+    'No se pudieron cargar los catálogos. Se usan opciones predeterminadas.',
+  addClientSaveValidationSummary:
+    'Corrija los campos marcados antes de guardar.',
+  tabErrorCountAria: '{count} errores de validación',
   cancelClientRegistrationTitle: 'Cancelar registro de cliente',
   cancelClientRegistrationMessage:
     'Si cancela ahora, todos los datos ingresados se perderán'

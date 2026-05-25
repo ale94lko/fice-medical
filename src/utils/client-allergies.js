@@ -174,6 +174,41 @@ export function validateAllergiesDraftClear(section) {
   )
 }
 
+export function getAllergyDraftFieldErrorKeys(section) {
+  const draft = section?.draft ?? {}
+  const name = trimAllergyField(draft.allergy)
+  const sev = trimAllergyField(draft.severity)
+  const year = trimAllergyField(draft.startYear)
+  const keys = {
+    name: null,
+    severity: null,
+    year: null,
+  }
+
+  if (!name && !sev && !year) {
+    return keys
+  }
+  if (!name) {
+    keys.name = 'allergyNameRequired'
+  } else if (!isValidAllergyName(name)) {
+    keys.name = 'allergyNameInvalid'
+  }
+  if (name && !sev) {
+    keys.severity = 'allergySeverityRequired'
+  }
+  if (!isValidAllergyStartYear(year)) {
+    keys.year = 'allergyStartYearInvalid'
+  }
+
+  return keys
+}
+
+export function countAllergyDraftFieldErrors(section) {
+  const keys = getAllergyDraftFieldErrorKeys(section)
+
+  return [keys.name, keys.severity, keys.year].filter(Boolean).length
+}
+
 export function highestAllergySeverity(entries) {
   let maxRank = 0
   let topSeverity = ''
