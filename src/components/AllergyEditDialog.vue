@@ -31,6 +31,7 @@
               :max-year="allergyMaxStartYear()"
               :error="Boolean(yearError)"
               :error-message="yearError"
+              :close-label="t('close')"
             />
             <p
               v-if="!yearError"

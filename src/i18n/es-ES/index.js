@@ -222,6 +222,8 @@ export default {
     'Agregue todas las alergias conocidas para un cuidado seguro.',
   allergyName: 'Alergia',
   allergySeverity: 'Severidad',
+  clientYearPickerTitle: 'Seleccionar año',
+  clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Año de inicio',
   allergyStartYearHint: 'Opcional. Año entre {min} y {max}',
   allergyAdd: 'Agregar',

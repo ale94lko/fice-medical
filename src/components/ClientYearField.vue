@@ -20,45 +20,32 @@
           transition-show="scale"
           transition-hide="scale"
           @before-show="onBeforeShow">
-          <q-card class="client-year-picker">
-            <div class="client-year-picker__nav row items-center no-wrap">
+          <q-date
+            ref="dateRef"
+            v-model="pickerModel"
+            class="client-year-field__picker"
+            color="primary"
+            mask="YYYY"
+            default-view="Years"
+            emit-immediately
+            :title="pickerTitle"
+            :subtitle="pickerSubtitle"
+            :default-year-month="defaultYearMonth"
+            :navigation-min-year-month="navMin"
+            :navigation-max-year-month="navMax"
+            :options="yearOptions"
+            @update:model-value="onPickerChange"
+            @navigation="onNavigation">
+            <div class="row items-center justify-end">
               <q-btn
-                flat
-                round
-                dense
-                icon="chevron_left"
-                :disable="!canShiftPrev"
-                @click="shiftRange(-12)"
-              />
-              <div class="col text-center text-weight-medium">
-                {{ rangeLabel }}
-              </div>
-              <q-btn
-                flat
-                round
-                dense
-                icon="chevron_right"
-                :disable="!canShiftNext"
-                @click="shiftRange(12)"
-              />
-            </div>
-            <div class="client-year-picker__grid">
-              <q-btn
-                v-for="year in rangeYears"
-                :key="year"
-                flat
+                v-close-popup
                 no-caps
-                class="client-year-picker__year-btn"
-                :class="{
-                  'client-year-picker__year-btn--selected':
-                    selectedYear === year,
-                }"
-                :disable="!isYearSelectable(year)"
-                :label="String(year)"
-                @click="selectYear(year)"
+                flat
+                color="primary"
+                :label="closeLabel"
               />
             </div>
-          </q-card>
+          </q-date>
         </q-popup-proxy>
       </q-icon>
     </template>
@@ -66,7 +53,8 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -75,12 +63,17 @@ const props = defineProps({
   maxYear: { type: Number, required: true },
   error: { type: Boolean, default: false },
   errorMessage: { type: String, default: '' },
+  closeLabel: { type: String, default: 'Close' },
 })
 
 const emit = defineEmits(['update:modelValue'])
 
+const { t } = useI18n()
+
 const yearPopupRef = ref(null)
-const rangeStart = ref(props.maxYear)
+const dateRef = ref(null)
+const pickerModel = ref(null)
+const anchorYear = ref(new Date().getFullYear())
 
 const selectedYear = computed(() => {
   const s = String(props.modelValue ?? '').trim()
@@ -95,63 +88,66 @@ const selectedYear = computed(() => {
   return year
 })
 
-const rangeYears = computed(() => {
-  const years = []
-  for (let y = rangeStart.value; y < rangeStart.value + 12; y += 1) {
-    years.push(y)
+const navMin = computed(() => `${props.minYear}/01`)
+
+const navMax = computed(() => `${props.maxYear}/12`)
+
+const defaultYearMonth = computed(() => `${anchorYear.value}/01`)
+
+const pickerTitle = computed(() => t('clientYearPickerTitle'))
+
+const pickerSubtitle = computed(() => {
+  if (selectedYear.value != null) {
+    return String(selectedYear.value)
   }
 
-  return years
+  return t('clientYearPickerSubtitleEmpty')
 })
-
-const rangeLabel = computed(() => {
-  const end = rangeStart.value + 11
-
-  return `${rangeStart.value} - ${end}`
-})
-
-const canShiftPrev = computed(() => rangeStart.value > props.minYear)
-
-const canShiftNext = computed(
-  () => rangeStart.value + 11 < props.maxYear,
-)
-
-function yearRangeStart(anchorYear) {
-  return Math.floor(anchorYear / 12) * 12
-}
 
 function onBeforeShow() {
-  const anchor = selectedYear.value
+  anchorYear.value = selectedYear.value
     ?? props.maxYear
     ?? new Date().getFullYear()
-  let start = yearRangeStart(anchor)
-  if (start + 11 < props.minYear) {
-    start = props.minYear
-  }
-  if (start > props.maxYear) {
-    start = Math.max(props.minYear, props.maxYear - 11)
-  }
-  rangeStart.value = start
+  pickerModel.value = selectedYear.value != null
+    ? String(selectedYear.value)
+    : null
+  nextTick(() => {
+    dateRef.value?.setView('Years')
+  })
 }
 
-function isYearSelectable(year) {
+function yearOptions(dateStr) {
+  const parts = String(dateStr).split('/')
+  if (parts.length < 1) {
+    return true
+  }
+  const year = Number(parts[0])
+  if (!Number.isFinite(year)) {
+    return true
+  }
+
   return year >= props.minYear && year <= props.maxYear
 }
 
-function shiftRange(delta) {
-  const next = rangeStart.value + delta
-  if (next + 11 < props.minYear || next > props.maxYear) {
+function onPickerChange(val) {
+  const yearStr = String(val ?? '').trim()
+  if (!/^\d{4}$/.test(yearStr)) {
     return
   }
-  rangeStart.value = next
+  const year = Number(yearStr)
+  if (year < props.minYear || year > props.maxYear) {
+    return
+  }
+  emit('update:modelValue', yearStr)
+  yearPopupRef.value?.hide()
 }
 
-function selectYear(year) {
-  if (!isYearSelectable(year)) {
-    return
+function onNavigation(ctx) {
+  if (ctx?.view !== 'Years') {
+    nextTick(() => {
+      dateRef.value?.setView('Years')
+    })
   }
-  emit('update:modelValue', String(year))
-  yearPopupRef.value?.hide()
 }
 </script>
 
@@ -162,31 +158,18 @@ function selectYear(year) {
   color: $primary;
 }
 
-.client-year-picker {
-  min-width: 290px;
-  padding: 8px 8px 12px;
-}
+.client-year-field__picker {
+  :deep(.q-date__calendar),
+  :deep(.q-date__months) {
+    display: none !important;
+  }
 
-.client-year-picker__nav {
-  padding: 4px 0 8px;
-  color: $text-strong;
-}
+  :deep(.q-date__header) {
+    pointer-events: none;
+  }
 
-.client-year-picker__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-}
-
-.client-year-picker__year-btn {
-  min-height: 40px;
-  border-radius: 8px;
-  font-weight: 500;
-
-  &--selected {
-    background: rgba($primary, 0.14) !important;
-    color: $primary;
-    font-weight: 700;
+  :deep(.q-date__navigation) {
+    pointer-events: auto;
   }
 }
 </style>

@@ -219,6 +219,8 @@ export default {
     'Add all known allergies to ensure accurate and safe care.',
   allergyName: 'Allergy',
   allergySeverity: 'Severity',
+  clientYearPickerTitle: 'Select year',
+  clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Start Year',
   allergyStartYearHint: 'Optional. Year between {min} and {max}',
   allergyAdd: 'Add',

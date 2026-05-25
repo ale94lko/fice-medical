@@ -33,6 +33,7 @@
                   :max-year="allergyMaxStartYear()"
                   :error="Boolean(draftYearError)"
                   :error-message="draftYearError"
+                  :close-label="t('close')"
                 />
                 <p
                   v-if="!draftYearError"
