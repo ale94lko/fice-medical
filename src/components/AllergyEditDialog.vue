@@ -40,16 +40,16 @@
             </p>
           </div>
           <div class="col-12">
-            <div class="text-caption text-grey-8 q-mb-sm">
-              {{ t('allergySeverity') }}
-            </div>
+            <AddClientSubsectionHeading
+              icon="warning_amber"
+              :title="t('allergySeverity')"
+            />
             <div class="add-client-form__allergy-severity-grid">
               <q-btn
                 v-for="opt in severityOptions"
                 :key="opt.value"
+                flat
                 no-caps
-                :outline="localSeverity !== opt.value"
-                :unelevated="localSeverity === opt.value"
                 :class="[
                   'add-client-form__allergy-severity-chip',
                   `add-client-form__allergy-severity-chip--${opt.modifier}`,
@@ -103,6 +103,8 @@
 
 <script setup>
 import ClientYearField from 'components/ClientYearField.vue'
+import AddClientSubsectionHeading
+  from 'components/AddClientSubsectionHeading.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {

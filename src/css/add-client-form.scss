@@ -94,11 +94,6 @@
   color: $text-strong;
 }
 
-.add-client-contact-tab .add-client-form__section-heading {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
 .add-client-form__section-icon {
   display: flex;
   align-items: center;
@@ -612,6 +607,8 @@
 
   &::before {
     border-radius: 12px;
+    border-width: 1px;
+    opacity: 1;
   }
 
   &--mild {
@@ -619,7 +616,7 @@
     color: #92400e;
 
     &::before {
-      border-color: #d6c4a8;
+      border-color: #e7d5bc;
     }
   }
 
@@ -641,20 +638,42 @@
     }
   }
 
-  &--selected.q-btn--unelevated {
+  &--selected {
+    font-weight: 700;
+
+    &::before {
+      border-style: solid !important;
+      border-width: 2px !important;
+    }
+
     &.add-client-form__allergy-severity-chip--mild {
       background: #f5ebe0 !important;
-      border-color: #92400e;
+      color: #78350f;
+      box-shadow: 0 0 0 1px #92400e;
+
+      &::before {
+        border-color: #92400e !important;
+      }
     }
 
     &.add-client-form__allergy-severity-chip--moderate {
       background: #ffedd5 !important;
-      border-color: $warning;
+      color: #9a3412;
+      box-shadow: 0 0 0 1px $warning;
+
+      &::before {
+        border-color: $warning !important;
+      }
     }
 
     &.add-client-form__allergy-severity-chip--severe {
       background: #fee2e2 !important;
-      border-color: $negative;
+      color: #991b1b;
+      box-shadow: 0 0 0 1px $negative;
+
+      &::before {
+        border-color: $negative !important;
+      }
     }
   }
 }
