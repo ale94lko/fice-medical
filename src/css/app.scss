@@ -136,19 +136,7 @@
 }
 
 .q-page.add-client-page {
-  display: flex;
-  flex-direction: column;
   box-sizing: border-box;
-  height: calc(100dvh - 56px - 40px - 48px);
-  max-height: calc(100dvh - 56px - 40px - 48px);
-  overflow: hidden;
-}
-
-@media (max-width: 1023px) {
-  .q-page.add-client-page {
-    height: calc(100dvh - 56px - 40px - 84px);
-    max-height: calc(100dvh - 56px - 40px - 84px);
-  }
 }
 
 @media (max-width: 1023px) {

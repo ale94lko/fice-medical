@@ -47,33 +47,6 @@
         />
       </q-card-section>
     </q-card>
-
-    <footer class="add-client-page__footer row items-center">
-      <q-btn
-        v-if="showPrevious"
-        no-caps
-        outline
-        color="primary"
-        icon="arrow_back"
-        class="app-btn-outline add-client-page__nav-btn"
-        :label="t('previous')"
-        :disable="saving"
-        @click="onPrevious"
-      />
-      <q-space v-if="showPrevious && showNext" />
-      <q-btn
-        v-if="showNext"
-        no-caps
-        outline
-        color="primary"
-        icon-right="arrow_forward"
-        class="app-btn-outline add-client-page__nav-btn"
-        :class="{ 'q-ml-auto': !showPrevious }"
-        :label="t('next')"
-        :disable="saving"
-        @click="onNext"
-      />
-    </footer>
   </q-page>
 </template>
 
@@ -90,32 +63,12 @@ const activeTabLabel = ref('')
 
 const saving = computed(() => addClientFormRef.value?.saving ?? false)
 
-const showPrevious = computed(() => {
-  activeTabLabel.value
-
-  return addClientFormRef.value?.canGoPrevious?.() ?? false
-})
-
-const showNext = computed(() => {
-  activeTabLabel.value
-
-  return addClientFormRef.value?.canGoNext?.() ?? true
-})
-
 function onSave() {
   addClientFormRef.value?.onSave()
 }
 
 function onClose() {
   addClientFormRef.value?.requestClose()
-}
-
-function onNext() {
-  addClientFormRef.value?.onNext()
-}
-
-function onPrevious() {
-  addClientFormRef.value?.goPreviousTab()
 }
 
 function goToClientList() {
@@ -172,39 +125,9 @@ function onSaved() {
 }
 
 .add-client-page__card {
-  flex: 1 1 auto;
-  min-height: 0;
   background: $surface;
   border-radius: $radius-lg;
   border-color: $border-subtle !important;
   box-shadow: $shadow-sm;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.add-client-page__card-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.add-client-page__footer {
-  flex-shrink: 0;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: $surface;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  justify-content: space-between;
-  min-height: 56px;
-
-  .add-client-page__nav-btn .q-icon {
-    color: $primary;
-    font-size: 20px;
-  }
 }
 </style>

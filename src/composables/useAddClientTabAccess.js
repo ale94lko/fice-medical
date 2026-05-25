@@ -33,9 +33,7 @@ export function useAddClientTabAccess() {
   }
 
   function isTabEnabled(tab) {
-    const idx = tabIndexInOrder(tab)
-
-    return idx >= 0 && idx <= unlockedTabMaxIndex.value
+    return tabIndexInOrder(tab) >= 0
   }
 
   function unlockThroughIndex(index) {

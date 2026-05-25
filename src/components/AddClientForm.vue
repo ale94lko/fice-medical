@@ -7,86 +7,63 @@
         {{ t('clientSavedSuccess') }}
       </q-banner>
 
-      <div
-        :class="[
-          'row items-center justify-between',
-          'add-client-form__tabs-row',
-        ]">
+      <div class="add-client-form__tabs-row">
         <q-tabs
         v-model="activeTab"
         dense
         no-caps
         outside-arrows
         mobile-arrows
-        class="add-client-tabs col"
+        class="add-client-tabs"
         active-color="white"
         indicator-color="transparent"
         align="left">
         <q-tab
           :name="addClientTabKeys.basic"
           :label="t('tabBasicInfo')"
-          :disable="!isTabEnabled(addClientTabKeys.basic)"
         />
         <q-tab
           :name="addClientTabKeys.contact"
           :label="t('tabContact')"
-          :disable="!isTabEnabled(addClientTabKeys.contact)"
         />
         <q-tab
           :name="addClientTabKeys.familyMedicalHistory"
           :label="t('tabFamilyMedicalHistory')"
-          :disable="!isTabEnabled(addClientTabKeys.familyMedicalHistory)"
         />
         <q-tab
           :name="addClientTabKeys.allergies"
           :label="t('tabAllergies')"
           :class="allergiesTabClass"
-          :disable="!isTabEnabled(addClientTabKeys.allergies)"
         />
         <q-tab
           :name="addClientTabKeys.assessments"
           :label="t('tabAssessments')"
-          :disable="!isTabEnabled(addClientTabKeys.assessments)"
         />
-        <q-tab
-          :name="addClientTabKeys.clinical"
-          :disable="!isTabEnabled(addClientTabKeys.clinical)">
+        <q-tab :name="addClientTabKeys.clinical">
           <span class="row items-center no-wrap">
             {{ t('tabClinical') }}
             <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
           </span>
         </q-tab>
-        <q-tab
-          :name="addClientTabKeys.careCoordination"
-          :disable="!isTabEnabled(addClientTabKeys.careCoordination)">
+        <q-tab :name="addClientTabKeys.careCoordination">
           <span class="row items-center no-wrap">
             {{ t('tabCareCoordination') }}
             <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
           </span>
         </q-tab>
-        <q-tab
-          :name="addClientTabKeys.financials"
-          :disable="!isTabEnabled(addClientTabKeys.financials)">
+        <q-tab :name="addClientTabKeys.financials">
           <span class="row items-center no-wrap">
             {{ t('tabFinancials') }}
             <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
           </span>
         </q-tab>
-        <q-tab
-          :name="addClientTabKeys.documents"
-          :disable="!isTabEnabled(addClientTabKeys.documents)">
+        <q-tab :name="addClientTabKeys.documents">
           <span class="row items-center no-wrap">
             {{ t('tabDocuments') }}
             <q-icon name="arrow_drop_down" size="18px" class="q-ml-xs" />
           </span>
         </q-tab>
       </q-tabs>
-      <q-badge
-        outline
-        color="grey-7"
-        class="client-number-badge text-body2 q-px-sm q-py-xs">
-        {{ t('clientNumber') }}: {{ form[ck.clientNumber] }}
-      </q-badge>
     </div>
 
     <div class="add-client-form__panel-scroll">
@@ -274,6 +251,35 @@
         </q-tab-panel>
       </q-tab-panels>
       </q-form>
+
+      <footer
+        v-if="canGoPrevious() || canGoNext()"
+        class="add-client-form__nav-footer row items-center">
+        <q-btn
+          v-if="canGoPrevious()"
+          no-caps
+          outline
+          color="primary"
+          icon="arrow_back"
+          class="app-btn-outline add-client-form__nav-btn"
+          :label="t('previous')"
+          :disable="saving"
+          @click="goPreviousTab"
+        />
+        <q-space v-if="canGoPrevious() && canGoNext()" />
+        <q-btn
+          v-if="canGoNext()"
+          no-caps
+          outline
+          color="primary"
+          icon-right="arrow_forward"
+          class="app-btn-outline add-client-form__nav-btn"
+          :class="{ 'q-ml-auto': !canGoPrevious() }"
+          :label="t('next')"
+          :disable="saving"
+          @click="onNext"
+        />
+      </footer>
     </div>
 
     <ModalComponent
@@ -348,7 +354,6 @@ const {
   canGoNext,
   goPreviousTab,
   canGoPrevious,
-  isTabEnabled,
   validateCurrentTabAndUnlock,
   validateTabsThrough,
   tabIndex,
@@ -390,24 +395,6 @@ const activeTabLabel = computed(() => tabLabelFor(activeTab.value))
 watch(activeTab, () => {
   emit('tab-label', activeTabLabel.value)
 }, { immediate: true })
-
-watch(activeTab, onActiveTabChange)
-
-async function onActiveTabChange(newTab, oldTab) {
-  if (newTab === oldTab) {
-    return
-  }
-  if (!isTabEnabled(newTab)) {
-    activeTab.value = oldTab
-
-    return
-  }
-  const newIdx = tabIndex(newTab)
-  const oldIdx = tabIndex(oldTab)
-  if (newIdx > oldIdx) {
-    await validateTabsThrough(newIdx)
-  }
-}
 
 onMounted(() => {
   resetForm()
@@ -506,24 +493,3 @@ defineExpose({
 })
 </script>
 
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.client-number-badge {
-  background: $surface-muted;
-  border-radius: $radius-md;
-  flex-shrink: 0;
-}
-
-@media (max-width: 599px) {
-  .add-client-form__tabs-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .client-number-badge {
-    align-self: flex-start;
-  }
-}
-</style>

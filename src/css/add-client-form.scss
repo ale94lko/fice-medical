@@ -3,9 +3,6 @@
 .add-client-form {
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  flex: 1 1 auto;
-  height: 100%;
 }
 
 .add-client-form__tabs-row {
@@ -17,10 +14,21 @@
 }
 
 .add-client-form__panel-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
   padding-top: 8px;
+}
+
+.add-client-form__nav-footer {
+  max-width: 720px;
+  margin: 20px auto 4px;
+  padding: 12px 0 4px;
+  border-top: 1px solid $border-subtle;
+  justify-content: space-between;
+  min-height: 48px;
+
+  .add-client-form__nav-btn .q-icon {
+    color: $primary;
+    font-size: 20px;
+  }
 }
 
 .add-client-form__section-separator {
