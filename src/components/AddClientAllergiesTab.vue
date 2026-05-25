@@ -1,119 +1,105 @@
 <template>
   <div class="add-client-allergies-tab">
-    <section class="add-client-form__section">
-      <div class="add-client-form__fields">
-        <q-expansion-item
-          v-model="section.addExpanded"
-          expand-separator
-          class="add-client-form__allergy-add-expansion"
-          header-class="add-client-form__allergy-add-header"
-          :label="t('allergiesAddSectionTitle')"
-          icon="add_circle_outline"
-        >
-          <div class="add-client-form__allergy-add-card q-pa-md">
-            <div
-              class="row q-col-gutter-sm q-col-gutter-md
-                add-client-form__allergy-input-row">
-              <div class="col-12 col-md-6">
-                <q-input
-                  v-model="section.draft.allergy"
-                  outlined
-                  hide-bottom-space
-                  :label="t('allergyName')"
-                  :error="Boolean(draftNameError)"
-                  :error-message="draftNameError"
-                  maxlength="100"
-                />
-              </div>
-              <div class="col-12 col-md-6">
-                <ClientYearField
-                  v-model="section.draft.startYear"
-                  :label="t('allergyStartYear')"
-                  :min-year="allergyMinStartYear()"
-                  :max-year="allergyMaxStartYear()"
-                  :error="Boolean(draftYearError)"
-                  :error-message="draftYearError"
-                  :close-label="t('close')"
-                />
-                <p
-                  v-if="!draftYearError"
-                  class="add-client-form__allergy-year-hint">
-                  {{ startYearHint }}
-                </p>
-              </div>
-              <div class="col-12">
-                <div class="text-caption text-grey-8 q-mb-sm">
-                  {{ t('allergySeverity') }}
-                </div>
-                <div class="add-client-form__allergy-severity-grid">
-                  <q-btn
-                    v-for="opt in severityOptions"
-                    :key="opt.value"
-                    no-caps
-                    :outline="section.draft.severity !== opt.value"
-                    :unelevated="section.draft.severity === opt.value"
-                    :class="[
-                      'add-client-form__allergy-severity-chip',
-                      `add-client-form__allergy-severity-chip--${opt.modifier}`,
-                      {
-                        'add-client-form__allergy-severity-chip--selected':
-                          section.draft.severity === opt.value,
-                      },
-                    ]"
-                    @click="section.draft.severity = opt.value">
-                    <span
-                      :class="severityDotClass(opt.modifier)"
-                    />
-                    <span class="add-client-form__allergy-severity-label">
-                      {{ opt.label }}
-                    </span>
-                  </q-btn>
-                </div>
-                <div
-                  v-if="draftSeverityError"
-                  class="text-negative text-caption q-mt-xs">
-                  {{ draftSeverityError }}
-                </div>
-              </div>
-              <div class="col-12 flex justify-end">
-                <q-btn
-                  no-caps
-                  unelevated
-                  color="primary"
-                  class="app-btn-primary"
-                  icon="add"
-                  :label="t('allergyAdd')"
-                  @click="onAddEntry"
-                />
-              </div>
-            </div>
+    <AddClientAccordionSection
+      v-model="section.addExpanded"
+      icon="add_circle_outline"
+      :title="t('allergiesAddSectionTitle')">
+      <div
+        class="row q-col-gutter-sm q-col-gutter-md
+          add-client-form__allergy-input-row">
+        <div class="col-12 col-md-6">
+          <q-input
+            v-model="section.draft.allergy"
+            outlined
+            hide-bottom-space
+            :label="t('allergyName')"
+            :error="Boolean(draftNameError)"
+            :error-message="draftNameError"
+            maxlength="100"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <ClientYearField
+            v-model="section.draft.startYear"
+            :label="t('allergyStartYear')"
+            :min-year="allergyMinStartYear()"
+            :max-year="allergyMaxStartYear()"
+            :error="Boolean(draftYearError)"
+            :error-message="draftYearError"
+            :close-label="t('close')"
+          />
+          <p
+            v-if="!draftYearError"
+            class="add-client-form__allergy-year-hint">
+            {{ startYearHint }}
+          </p>
+        </div>
+        <div class="col-12">
+          <div class="text-caption text-grey-8 q-mb-sm">
+            {{ t('allergySeverity') }}
           </div>
-        </q-expansion-item>
+          <div class="add-client-form__allergy-severity-grid">
+            <q-btn
+              v-for="opt in severityOptions"
+              :key="opt.value"
+              no-caps
+              :outline="section.draft.severity !== opt.value"
+              :unelevated="section.draft.severity === opt.value"
+              :class="[
+                'add-client-form__allergy-severity-chip',
+                `add-client-form__allergy-severity-chip--${opt.modifier}`,
+                {
+                  'add-client-form__allergy-severity-chip--selected':
+                    section.draft.severity === opt.value,
+                },
+              ]"
+              @click="section.draft.severity = opt.value">
+              <span
+                :class="severityDotClass(opt.modifier)"
+              />
+              <span class="add-client-form__allergy-severity-label">
+                {{ opt.label }}
+              </span>
+            </q-btn>
+          </div>
+          <div
+            v-if="draftSeverityError"
+            class="text-negative text-caption q-mt-xs">
+            {{ draftSeverityError }}
+          </div>
+        </div>
+        <div class="col-12 flex justify-end">
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :label="t('allergyAdd')"
+            @click="onAddEntry"
+          />
+        </div>
       </div>
-    </section>
+    </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
 
-    <section class="add-client-form__section">
-      <AddClientSectionHeading
-        icon="medical_services"
-        :title="t('allergiesExistingTitle')"
-      />
-      <div class="add-client-form__fields">
-        <div class="add-client-form__fmh-list-card q-pa-md">
-          <AllergiesTable
-            :entries="section.entries"
-            :empty-label="t('allergiesExistingEmpty')"
-            @edit="openEdit"
-            @delete="openDelete"
-          />
-        </div>
-        <p class="add-client-form__allergy-footer-hint">
-          <q-icon name="info_outline" size="18px" class="q-mr-xs" />
-          {{ t('allergiesFooterHint') }}
-        </p>
+    <AddClientAccordionSection
+      icon="medical_services"
+      :title="t('allergiesExistingTitle')">
+      <div class="add-client-form__fmh-list-card q-pa-md">
+        <AllergiesTable
+          :entries="section.entries"
+          :empty-label="t('allergiesExistingEmpty')"
+          @edit="openEdit"
+          @delete="openDelete"
+        />
       </div>
-    </section>
+      <p class="add-client-form__allergy-footer-hint">
+        <q-icon name="info_outline" size="18px" class="q-mr-xs" />
+        {{ t('allergiesFooterHint') }}
+      </p>
+    </AddClientAccordionSection>
 
     <AllergyEditDialog
       v-model="editDialogOpen"
@@ -134,11 +120,12 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import ClientYearField from 'components/ClientYearField.vue'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'
 import AllergyDeleteDialog from 'components/AllergyDeleteDialog.vue'
 import {
+  clientAllergyMaxNameLength,
   clientAllergySeverityValues,
   quasarNotifyTypes,
 } from 'components/constants.js'
@@ -164,13 +151,13 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const $q = useQuasar()
 
-const draftNameError = ref('')
-const draftSeverityError = ref('')
-const draftYearError = ref('')
 const editDialogOpen = ref(false)
 const deleteDialogOpen = ref(false)
 const editingEntry = ref(null)
-const deletingEntry = ref(null)
+const deletingEntryId = ref(null)
+const draftNameError = ref('')
+const draftYearError = ref('')
+const draftSeverityError = ref('')
 
 const severityOptions = [
   {
@@ -217,25 +204,19 @@ function notifySuccess(message) {
   })
 }
 
-function notifyError(message) {
-  $q.notify({
-    type: quasarNotifyTypes.negative,
-    message,
-    position: 'top',
-  })
-}
-
 function applyDraftErrors(result) {
   draftNameError.value = ''
-  draftSeverityError.value = ''
   draftYearError.value = ''
+  draftSeverityError.value = ''
   if (!result.ok && result.errorKey) {
     if (
       result.errorKey === 'allergyNameRequired'
       || result.errorKey === 'allergyNameInvalid'
       || result.errorKey === 'allergyAddRequired'
     ) {
-      draftNameError.value = t(result.errorKey, { max: 100 })
+      draftNameError.value = t(result.errorKey, {
+        maxName: clientAllergyMaxNameLength,
+      })
     } else if (result.errorKey === 'allergySeverityRequired') {
       draftSeverityError.value = t(result.errorKey)
     } else if (result.errorKey === 'allergyStartYearInvalid') {
@@ -243,15 +224,17 @@ function applyDraftErrors(result) {
         min: allergyMinStartYear(),
         max: allergyMaxStartYear(),
       })
+    } else {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t(result.errorKey),
+        position: 'top',
+      })
     }
   }
 }
 
 function onAddEntry() {
-  draftNameError.value = ''
-  draftSeverityError.value = ''
-  draftYearError.value = ''
-
   const draft = section.value.draft
   const result = validateAllergyForAdd(
     draft.allergy,
@@ -260,40 +243,34 @@ function onAddEntry() {
   )
   if (!result.ok) {
     applyDraftErrors(result)
-    notifyError(t(result.errorKey, {
-      min: allergyMinStartYear(),
-      max: allergyMaxStartYear(),
-      maxName: 100,
-    }))
 
     return
   }
 
-  const allergy = trimAllergyField(draft.allergy)
-  const severity = trimAllergyField(draft.severity)
+  const allergyRaw = trimAllergyField(draft.allergy)
+  const severityRaw = trimAllergyField(draft.severity)
   const yearRaw = trimAllergyField(draft.startYear)
-
   if (
     isDuplicateAllergyEntry(
       section.value.entries,
-      allergy,
-      severity,
+      allergyRaw,
+      severityRaw,
       yearRaw,
     )
   ) {
     draftNameError.value = t('allergyDuplicateEntry')
-    notifyError(t('allergyDuplicateEntry'))
 
     return
   }
 
   section.value.entries.push({
     id: nextAllergyId(),
-    allergy,
-    severity,
+    allergy: allergyRaw,
+    severity: severityRaw,
     startYear: yearRaw === '' ? null : Number(yearRaw),
   })
   section.value.draft = createEmptyAllergyDraft()
+  applyDraftErrors({ ok: true })
   notifySuccess(t('allergyAddedSuccess'))
 }
 
@@ -302,44 +279,40 @@ function openEdit(entry) {
   editDialogOpen.value = true
 }
 
-function onEditSave(payload) {
+function onEditSave(updated) {
   const index = section.value.entries.findIndex(
-    e => e.id === editingEntry.value?.id,
+    e => e.id === updated.id,
   )
   if (index < 0) {
     return
   }
-  section.value.entries[index] = {
-    ...section.value.entries[index],
-    ...payload,
-  }
+  section.value.entries[index] = { ...updated }
   notifySuccess(t('allergyUpdatedSuccess'))
 }
 
 function openDelete(entry) {
-  deletingEntry.value = entry
+  deletingEntryId.value = entry.id
   deleteDialogOpen.value = true
 }
 
 function onDeleteConfirm(reason) {
-  const entry = deletingEntry.value
-  if (!entry?.id) {
+  const id = deletingEntryId.value
+  if (!id) {
     return
   }
-  const index = section.value.entries.findIndex(e => e.id === entry.id)
-  if (index >= 0) {
-    if (!section.value.deletionAudit) {
-      section.value.deletionAudit = []
-    }
-    section.value.deletionAudit.push({
-      allergy: entry.allergy,
-      severity: entry.severity,
-      startYear: entry.startYear,
-      reason: String(reason ?? '').trim(),
-    })
-    section.value.entries.splice(index, 1)
-    notifySuccess(t('allergyDeletedSuccess'))
+  const index = section.value.entries.findIndex(e => e.id === id)
+  if (index < 0) {
+    return
   }
-  deletingEntry.value = null
+  const removed = section.value.entries[index]
+  section.value.entries.splice(index, 1)
+  section.value.deletionAudit.push({
+    allergy: removed.allergy,
+    severity: removed.severity,
+    startYear: removed.startYear,
+    reason: trimAllergyField(reason),
+  })
+  deletingEntryId.value = null
+  notifySuccess(t('allergyDeletedSuccess'))
 }
 </script>

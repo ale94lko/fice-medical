@@ -73,13 +73,10 @@
         @submit.prevent="onSave">
         <q-tab-panels v-model="activeTab" animated class="bg-transparent">
         <q-tab-panel :name="addClientTabKeys.basic" class="q-pa-none">
-          <section class="add-client-form__section">
-            <AddClientSectionHeading
-              icon="person"
-              :title="t('personalInformation')"
-            />
-            <div class="add-client-form__fields">
-              <div class="row q-col-gutter-sm q-col-gutter-md">
+          <AddClientAccordionSection
+            icon="person"
+            :title="t('personalInformation')">
+            <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.firstName]"
@@ -177,18 +174,14 @@
                   />
                 </div>
               </div>
-            </div>
-          </section>
+          </AddClientAccordionSection>
 
           <q-separator class="add-client-form__section-separator" />
 
-          <section class="add-client-form__section">
-            <AddClientSectionHeading
-              icon="admin_panel_settings"
-              :title="t('administrativeInformation')"
-            />
-            <div class="add-client-form__fields">
-              <div class="row q-col-gutter-sm q-col-gutter-md">
+          <AddClientAccordionSection
+            icon="admin_panel_settings"
+            :title="t('administrativeInformation')">
+            <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <ClientDateField
                     v-model="form[ck.admissionDate]"
@@ -213,8 +206,7 @@
                   />
                 </div>
               </div>
-            </div>
-          </section>
+          </AddClientAccordionSection>
         </q-tab-panel>
 
         <q-tab-panel :name="addClientTabKeys.contact" class="q-pa-none">
@@ -375,7 +367,7 @@ import AddClientContactTab from 'components/AddClientContactTab.vue'
 import AddClientFamilyMedicalHistoryTab from
   'components/AddClientFamilyMedicalHistoryTab.vue'
 import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
 import {

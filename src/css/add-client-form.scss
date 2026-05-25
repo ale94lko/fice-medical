@@ -477,6 +477,35 @@
   }
 }
 
+.add-client-form__accordion-header {
+  max-width: 720px;
+  margin: 0 auto 10px;
+  gap: 4px;
+}
+
+.add-client-form__accordion-header .add-client-form__section-heading {
+  margin-bottom: 0;
+}
+
+.add-client-form__accordion-chevron {
+  flex-shrink: 0;
+
+  .q-icon {
+    font-size: 28px;
+  }
+}
+
+.add-client-form__accordion-panel {
+  .add-client-form__hint {
+    max-width: 720px;
+    margin: -4px auto 10px;
+  }
+}
+
+.add-client-form__accordion-body {
+  padding-top: 0;
+}
+
 .add-client-form__other-contact-btn {
   border-style: dashed;
   max-width: 720px;
@@ -498,13 +527,12 @@
 }
 
 .add-client-form__other-contact-card {
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 16px;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-md;
-  background: $surface-muted;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  max-width: none;
+  margin: 0;
 }
 
 .add-client-form__other-contact-tabs-row {

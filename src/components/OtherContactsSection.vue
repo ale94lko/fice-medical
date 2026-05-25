@@ -1,113 +1,114 @@
 <template>
-  <section class="add-client-form__section">
-    <AddClientSectionHeading icon="groups" :title="t('otherContact')" />
-    <div class="add-client-form__fields">
+  <AddClientAccordionSection
+    v-model="contact.otherContactExpanded"
+    icon="groups"
+    :title="t('otherContact')">
+    <div
+      v-if="!contact.otherContacts.length"
+      class="add-client-form__other-contact-empty">
+      <p class="add-client-form__other-contact-empty-hint">
+        {{ t('otherContactEmptyHint') }}
+      </p>
+      <q-btn
+        outline
+        no-caps
+        color="primary"
+        class="full-width add-client-form__other-contact-btn"
+        icon="add"
+        :label="t('addOtherContact')"
+        @click="addOtherContact"
+      />
+    </div>
+
+    <div v-else class="add-client-form__other-contact-card">
       <div
-        v-if="!contact.otherContacts.length"
-        class="add-client-form__other-contact-empty">
-        <p class="add-client-form__other-contact-empty-hint">
-          {{ t('otherContactEmptyHint') }}
-        </p>
+        class="row items-center no-wrap
+          add-client-form__other-contact-tabs-row">
+        <q-tabs
+          v-model="contact.activeOtherContactId"
+          dense
+          no-caps
+          outside-arrows
+          mobile-arrows
+          class="add-client-tabs col"
+          align="left">
+          <q-tab
+            v-for="(oc, index) in contact.otherContacts"
+            :key="oc.id"
+            :name="oc.id"
+            class="add-client-form__other-contact-tab">
+            <div
+              class="add-client-form__other-contact-tab-label
+                row items-center no-wrap">
+              <span
+                class="add-client-form__other-contact-tab-text ellipsis">
+                {{ otherContactTabLabel(oc, index) }}
+              </span>
+              <button
+                type="button"
+                class="add-client-form__other-contact-tab-remove"
+                :aria-label="t('removeOtherContact')"
+                @click.stop="requestRemoveOtherContact(oc, index)"
+                @mousedown.stop
+              >
+                <q-icon name="close" size="14px" />
+              </button>
+            </div>
+          </q-tab>
+        </q-tabs>
         <q-btn
-          outline
+          flat
           no-caps
           color="primary"
-          class="full-width add-client-form__other-contact-btn"
+          class="add-client-form__other-contact-add-tab q-ml-sm"
           icon="add"
-          :label="t('otherContact')"
+          :label="t('addOtherContact')"
           @click="addOtherContact"
         />
       </div>
 
-      <div v-else class="add-client-form__other-contact-card">
-        <div
-          class="row items-center no-wrap
-            add-client-form__other-contact-tabs-row">
-          <q-tabs
-            v-model="contact.activeOtherContactId"
-            dense
-            no-caps
-            outside-arrows
-            mobile-arrows
-            class="add-client-tabs col"
-            align="left">
-            <q-tab
-              v-for="(oc, index) in contact.otherContacts"
-              :key="oc.id"
-              :name="oc.id"
-              class="add-client-form__other-contact-tab">
-              <div
-                class="add-client-form__other-contact-tab-label
-                  row items-center no-wrap">
-                <span class="add-client-form__other-contact-tab-text ellipsis">
-                  {{ otherContactTabLabel(oc, index) }}
-                </span>
-                <button
-                  type="button"
-                  class="add-client-form__other-contact-tab-remove"
-                  :aria-label="t('removeOtherContact')"
-                  @click.stop="requestRemoveOtherContact(oc, index)"
-                  @mousedown.stop
-                >
-                  <q-icon name="close" size="14px" />
-                </button>
-              </div>
-            </q-tab>
-          </q-tabs>
-          <q-btn
-            flat
-            no-caps
-            color="primary"
-            class="add-client-form__other-contact-add-tab q-ml-sm"
-            icon="add"
-            :label="t('addOtherContact')"
-            @click="addOtherContact"
+      <q-tab-panels
+        v-model="contact.activeOtherContactId"
+        animated
+        class="bg-transparent add-client-form__other-contact-panels">
+        <q-tab-panel
+          v-for="(oc, ocIndex) in contact.otherContacts"
+          :key="oc.id"
+          :name="oc.id"
+          class="add-client-form__other-contact-panel">
+          <OtherContactPanel
+            :contact="oc"
+            :client-address="contact"
+            :rules="rules"
+            :state-options="stateOptions"
+            :phone-type-options="phoneTypeOptions"
+            :email-type-options="emailTypeOptions"
+            :contact-type-options="contactTypeOptions"
+            :relationship-type-options="relationshipTypeOptions"
+            :suffix-options="suffixOptions"
+            @update:contact="patch => updateOtherContact(ocIndex, patch)"
           />
-        </div>
-
-        <q-tab-panels
-          v-model="contact.activeOtherContactId"
-          animated
-          class="bg-transparent add-client-form__other-contact-panels">
-          <q-tab-panel
-            v-for="(oc, ocIndex) in contact.otherContacts"
-            :key="oc.id"
-            :name="oc.id"
-            class="add-client-form__other-contact-panel">
-            <OtherContactPanel
-              :contact="oc"
-              :client-address="contact"
-              :rules="rules"
-              :state-options="stateOptions"
-              :phone-type-options="phoneTypeOptions"
-              :email-type-options="emailTypeOptions"
-              :contact-type-options="contactTypeOptions"
-              :relationship-type-options="relationshipTypeOptions"
-              :suffix-options="suffixOptions"
-              @update:contact="patch => updateOtherContact(ocIndex, patch)"
-            />
-          </q-tab-panel>
-        </q-tab-panels>
-      </div>
+        </q-tab-panel>
+      </q-tab-panels>
     </div>
+  </AddClientAccordionSection>
 
-    <ModalComponent
-      v-model="removeConfirmOpen"
-      :title="t('removeOtherContactTitle')"
-      :message="removeConfirmMessage"
-      :confirm-text="t('removeOtherContactConfirm')"
-      :cancel-text="t('cancel')"
-      @confirm="confirmRemoveOtherContact"
-      @cancel="dismissRemoveConfirm"
-    />
-  </section>
+  <ModalComponent
+    v-model="removeConfirmOpen"
+    :title="t('removeOtherContactTitle')"
+    :message="removeConfirmMessage"
+    :confirm-text="t('removeOtherContactConfirm')"
+    :cancel-text="t('cancel')"
+    @confirm="confirmRemoveOtherContact"
+    @cancel="dismissRemoveConfirm"
+  />
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OtherContactPanel from 'components/OtherContactPanel.vue'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import {
   createEmptyOtherContact,
@@ -170,6 +171,7 @@ function addOtherContact() {
   const oc = createEmptyOtherContact()
   contact.value.otherContacts.push(oc)
   contact.value.activeOtherContactId = oc.id
+  contact.value.otherContactExpanded = true
 }
 
 function updateOtherContact(index, patch) {

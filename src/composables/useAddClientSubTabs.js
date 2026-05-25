@@ -68,7 +68,7 @@ export const ADD_CLIENT_SUB_TABS = {
     {
       key: 'familyHistory',
       icon: 'groups',
-      labelKey: 'tabFamilyMedicalHistory',
+      labelKey: 'subTabFamilyHistory',
     },
     {
       key: 'clinicalNotes',

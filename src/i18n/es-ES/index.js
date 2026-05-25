@@ -64,6 +64,7 @@ export default {
   tabCareCoordination: 'Coordinación de cuidados',
   tabFinancials: 'Finanzas',
   tabDocuments: 'Documentos',
+  subTabFamilyHistory: 'Historial familiar',
   subTabVitals: 'Signos vitales',
   subTabLabs: 'Laboratorios',
   subTabCarePlans: 'Planes de cuidado',
@@ -168,6 +169,10 @@ export default {
   additionalNotesPlaceholder: 'Ingrese notas adicionales aquí...',
   optional: 'Opcional',
   otherContact: 'Otro contacto',
+  sectionAccordionExpand: 'Mostrar {title}',
+  sectionAccordionCollapse: 'Ocultar {title}',
+  otherContactExpand: 'Mostrar otro contacto',
+  otherContactCollapse: 'Ocultar otro contacto',
   otherContactEmptyHint:
     'Agregue contactos de emergencia, facturación u otras personas '
     + 'relacionadas.',

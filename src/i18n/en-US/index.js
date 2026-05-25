@@ -63,6 +63,7 @@ export default {
   tabCareCoordination: 'Care Coordination',
   tabFinancials: 'Financials',
   tabDocuments: 'Documents',
+  subTabFamilyHistory: 'Family History',
   subTabVitals: 'Vitals',
   subTabLabs: 'Labs',
   subTabCarePlans: 'Care Plans',
@@ -166,6 +167,10 @@ export default {
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',
   otherContact: 'Other Contact',
+  sectionAccordionExpand: 'Show {title}',
+  sectionAccordionCollapse: 'Hide {title}',
+  otherContactExpand: 'Show other contact',
+  otherContactCollapse: 'Hide other contact',
   otherContactEmptyHint:
     'Add emergency contacts, billing contacts, or other related people.',
   addOtherContact: 'Add Contact',

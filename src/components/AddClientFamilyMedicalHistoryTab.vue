@@ -1,13 +1,9 @@
 <template>
   <div class="add-client-family-medical-history-tab">
-    <section class="add-client-form__section">
-      <AddClientSectionHeading
-        icon="add_circle_outline"
-        :title="t('fmhAddSectionTitle')"
-      />
-      <div class="add-client-form__fields">
-        <div class="add-client-form__fmh-add-card q-pa-md">
-          <div class="row q-col-gutter-sm q-col-gutter-md items-end">
+    <AddClientAccordionSection
+      icon="add_circle_outline"
+      :title="t('fmhAddSectionTitle')">
+      <div class="row q-col-gutter-sm q-col-gutter-md items-end">
             <div class="col-12 col-md-6">
               <q-select
                 v-model="section.draft.familyRelationship"
@@ -50,48 +46,38 @@
                 @click="onAddEntry"
               />
             </div>
-          </div>
-        </div>
       </div>
-    </section>
+    </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
 
-    <section class="add-client-form__section">
-      <AddClientSectionHeading
-        icon="person"
-        :title="t('fmhPersonalSectionTitle')"
-      />
-      <div class="add-client-form__fields">
-        <div class="add-client-form__fmh-list-card q-pa-md">
-          <FamilyMedicalHistoryTable
-            :entries="personalEntries"
-            :empty-label="t('fmhPersonalEmpty')"
-            @edit="openEdit"
-            @delete="openDelete"
-          />
-        </div>
+    <AddClientAccordionSection
+      icon="person"
+      :title="t('fmhPersonalSectionTitle')">
+      <div class="add-client-form__fmh-list-card q-pa-md">
+        <FamilyMedicalHistoryTable
+          :entries="personalEntries"
+          :empty-label="t('fmhPersonalEmpty')"
+          @edit="openEdit"
+          @delete="openDelete"
+        />
       </div>
-    </section>
+    </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
 
-    <section class="add-client-form__section">
-      <AddClientSectionHeading
-        icon="groups"
-        :title="t('fmhFamilySectionTitle')"
-      />
-      <div class="add-client-form__fields">
-        <div class="add-client-form__fmh-list-card q-pa-md">
-          <FamilyMedicalHistoryTable
-            :entries="familyEntries"
-            :empty-label="t('fmhFamilyEmpty')"
-            @edit="openEdit"
-            @delete="openDelete"
-          />
-        </div>
+    <AddClientAccordionSection
+      icon="groups"
+      :title="t('fmhFamilySectionTitle')">
+      <div class="add-client-form__fmh-list-card q-pa-md">
+        <FamilyMedicalHistoryTable
+          :entries="familyEntries"
+          :empty-label="t('fmhFamilyEmpty')"
+          @edit="openEdit"
+          @delete="openDelete"
+        />
       </div>
-    </section>
+    </AddClientAccordionSection>
 
     <FamilyMedicalHistoryEditDialog
       v-model="editDialogOpen"
@@ -113,7 +99,7 @@
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import FamilyMedicalHistoryTable from 'components/FamilyMedicalHistoryTable.vue'
 import FamilyMedicalHistoryEditDialog from
   'components/FamilyMedicalHistoryEditDialog.vue'

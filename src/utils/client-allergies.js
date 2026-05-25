@@ -40,7 +40,7 @@ export function createEmptyAllergiesSection() {
   return {
     entries: [],
     draft: createEmptyAllergyDraft(),
-    addExpanded: false,
+    addExpanded: true,
     deletionAudit: [],
   }
 }

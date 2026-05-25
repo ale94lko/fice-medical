@@ -1,9 +1,7 @@
 <template>
   <div class="add-client-contact-tab">
-    <section class="add-client-form__section">
-      <AddClientSectionHeading icon="place" :title="t('clientAddress')" />
-      <div class="add-client-form__fields">
-        <div class="row q-col-gutter-sm q-col-gutter-md">
+    <AddClientAccordionSection icon="place" :title="t('clientAddress')">
+      <div class="row q-col-gutter-sm q-col-gutter-md">
           <div class="col-12 col-md-6">
             <TextInput
               v-model="contact.addressLine1"
@@ -69,15 +67,12 @@
             />
           </div>
         </div>
-      </div>
-    </section>
+    </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
 
-    <section class="add-client-form__section">
-      <AddClientSectionHeading icon="phone" :title="t('contactMethods')" />
-      <div class="add-client-form__fields">
-        <div class="add-client-form__contact-methods-block">
+    <AddClientAccordionSection icon="phone" :title="t('contactMethods')">
+      <div class="add-client-form__contact-methods-block">
           <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
           <div
             v-for="(phone, index) in contact.phones"
@@ -166,21 +161,19 @@
             </div>
           </div>
         </div>
-      </div>
-    </section>
+    </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
 
-    <section class="add-client-form__section">
-      <AddClientSectionHeading
-        icon="chat"
-        :title="t('preferredCommunication')"
-      />
-      <p class="add-client-form__hint">
-        {{ t('preferredCommunicationHint') }}
-      </p>
-      <div class="add-client-form__fields">
-        <div class="add-client-form__preferred-grid">
+    <AddClientAccordionSection
+      icon="chat"
+      :title="t('preferredCommunication')">
+      <template #hint>
+        <p class="add-client-form__hint">
+          {{ t('preferredCommunicationHint') }}
+        </p>
+      </template>
+      <div class="add-client-form__preferred-grid">
           <q-btn
             v-for="opt in communicationOptions"
             :key="opt.value"
@@ -205,8 +198,7 @@
             </span>
           </q-btn>
         </div>
-      </div>
-    </section>
+    </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
 
@@ -223,32 +215,25 @@
 
     <q-separator class="add-client-form__section-separator" />
 
-    <section class="add-client-form__section">
-      <AddClientSectionHeading
-        icon="description"
-        :title="t('additionalNotes')"
-      />
-      <div class="add-client-form__fields">
-        <div class="row q-col-gutter-sm q-col-gutter-md">
-          <div class="col-12">
-            <q-input
-              v-model="contact.additionalNotes"
-              outlined
-              type="textarea"
-              rows="4"
-              class="add-client-form__notes-field"
-              :label="t('additionalNotesPlaceholder')"
-              :rules="rules.additionalNotes"
-              maxlength="500"
-              counter
-            />
-            <div class="row justify-between text-caption text-grey-6 q-mt-xs">
-              <span>{{ t('optional') }}</span>
-            </div>
-          </div>
+    <AddClientAccordionSection
+      icon="description"
+      :title="t('additionalNotes')">
+      <div class="row q-col-gutter-sm q-col-gutter-md">
+        <div class="col-12">
+          <q-input
+            v-model="contact.additionalNotes"
+            outlined
+            type="textarea"
+            rows="4"
+            class="add-client-form__notes-field"
+            :label="t('additionalNotesPlaceholder')"
+            :rules="rules.additionalNotes"
+            maxlength="500"
+            counter
+          />
         </div>
       </div>
-    </section>
+    </AddClientAccordionSection>
   </div>
 </template>
 
@@ -257,7 +242,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 import OtherContactsSection from 'components/OtherContactsSection.vue'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'

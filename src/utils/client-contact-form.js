@@ -78,6 +78,7 @@ export function createEmptyContactSection() {
     additionalNotes: '',
     otherContacts: [],
     activeOtherContactId: null,
+    otherContactExpanded: true,
   }
 }
 
