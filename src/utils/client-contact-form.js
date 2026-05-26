@@ -191,7 +191,7 @@ function hasOtherAddressData(other) {
   )
 }
 
-function otherContactHasData(other) {
+export function otherContactHasData(other) {
   return Boolean(
     String(other.contactType ?? '').trim()
     || String(other.relationshipType ?? '').trim()

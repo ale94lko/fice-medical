@@ -1,14 +1,11 @@
 import {
   clientFieldKeys,
-  clientFormSections,
   clientStatus,
   typeNames,
 } from 'components/constants.js'
-import { buildContactPayload } from 'src/utils/client-contact-form.js'
 import {
-  buildFamilyMedicalHistoryPayload,
-} from 'src/utils/client-family-medical-history.js'
-import { buildAllergiesPayload } from 'src/utils/client-allergies.js'
+  buildClientRegisterBody,
+} from 'src/utils/build-client-register-body.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -52,6 +49,7 @@ function extractFromFiCeEnvelope(body) {
     expiration: pickExpiration(td, {}),
     refreshToken,
     modules: normalizeLoginModules(envelope.modules),
+    subtenants: normalizeLoginSubtenants(envelope.subtenants),
   }
 }
 
@@ -89,10 +87,75 @@ function extractFromRoots(body) {
       expiration: pickExpiration(td || {}, root),
       refreshToken,
       modules: normalizeLoginModules(root.modules),
+      subtenants: normalizeLoginSubtenants(root.subtenants),
     }
   }
 
   return null
+}
+
+export function normalizeLoginSubtenants(raw) {
+  if (!Array.isArray(raw)) {
+    return []
+  }
+
+  return raw
+    .map(item => {
+      if (!item || typeof item !== typeNames.object) {
+        return null
+      }
+      const id = Number(item.id)
+      if (!Number.isFinite(id)) {
+        return null
+      }
+      const code = String(item.code ?? item.subtenant_code ?? '').trim()
+      const name = String(
+        item.name
+        ?? item.subtenant_name
+        ?? item.label
+        ?? code
+        ?? '',
+      ).trim() || `Subtenant ${id}`
+
+      return {
+        id,
+        name,
+        code,
+      }
+    })
+    .filter(Boolean)
+}
+
+function findSubtenantsArray(node, depth = 0) {
+  if (!node || typeof node !== typeNames.object || depth > 5) {
+    return null
+  }
+  if (Array.isArray(node.subtenants)) {
+    return node.subtenants
+  }
+  if (Array.isArray(node.sub_tenants)) {
+    return node.sub_tenants
+  }
+  if (node.data && typeof node.data === typeNames.object) {
+    const nested = findSubtenantsArray(node.data, depth + 1)
+    if (nested) {
+      return nested
+    }
+  }
+
+  return null
+}
+
+export function extractLoginSubtenants(body) {
+  if (!body || typeof body !== typeNames.object) {
+    return []
+  }
+  const raw = findSubtenantsArray(body)
+  if (!raw) {
+    return []
+  }
+
+  return normalizeLoginSubtenants(raw)
 }
 
 export function extractLoginModules(body) {
@@ -124,60 +187,7 @@ export function formatClientListName(firstName, middleName, lastName, suffix) {
 }
 
 export function buildClientCreateBody(form) {
-  if (!form || typeof form !== typeNames.object) {
-    return {}
-  }
-  const ck = clientFieldKeys
-  const admissionUs = String(form[ck.admissionDate] ?? '').trim()
-  const body = {
-    [ck.clientNumber]: form[ck.clientNumber],
-    [ck.firstName]: String(form[ck.firstName] ?? '').trim(),
-    [ck.middleName]: String(form[ck.middleName] ?? '').trim(),
-    [ck.lastName]: String(form[ck.lastName] ?? '').trim(),
-    [ck.suffix]: String(form[ck.suffix] ?? '').trim(),
-    [ck.sex]: form[ck.sex] || null,
-    [ck.admissionDate]: admissionUs,
-    [ck.status]: clientStatus.OPEN,
-  }
-  const dob = String(form[ck.dob] ?? '').trim()
-  if (dob) {
-    body[ck.dob] = dob
-  }
-  const ageRaw = form[ck.age]
-  if (ageRaw !== '' && ageRaw != null) {
-    body[ck.age] = Number(ageRaw)
-  }
-  const ssn = String(form[ck.socialSecurityNumber] ?? '').replace(/\D/g, '')
-  if (ssn) {
-    body[ck.socialSecurityNumber] = ssn
-  }
-  const clinician = String(form[ck.assignedClinician] ?? '').trim()
-  if (clinician) {
-    body[ck.clinicians] = clinician
-  }
-
-  const contactPayload = buildContactPayload(
-    form[clientFormSections.contact],
-  )
-  if (contactPayload) {
-    body[clientFormSections.contact] = contactPayload
-  }
-
-  const fmhPayload = buildFamilyMedicalHistoryPayload(
-    form[clientFormSections.familyMedicalHistory],
-  )
-  if (fmhPayload) {
-    body[clientFormSections.familyMedicalHistory] = fmhPayload
-  }
-
-  const allergiesPayload = buildAllergiesPayload(
-    form[clientFormSections.allergies],
-  )
-  if (allergiesPayload) {
-    body[clientFormSections.allergies] = allergiesPayload
-  }
-
-  return body
+  return buildClientRegisterBody(form)
 }
 
 export function extractClientMutationResponse(data) {
@@ -195,21 +205,110 @@ export function extractClientMutationResponse(data) {
   return root
 }
 
+function clientPersonalInfo(client) {
+  return client.personal_information ?? client.basic_info ?? client
+}
+
+function firstEmailFromList(emails) {
+  if (!Array.isArray(emails) || !emails.length) {
+    return ''
+  }
+  const first = emails[0]
+  if (!first || typeof first !== typeNames.object) {
+    return ''
+  }
+
+  return String(first.email ?? first.address ?? '').trim()
+}
+
+function firstClientListEmail(client) {
+  const personal = clientPersonalInfo(client)
+  const fromPersonal = firstEmailFromList(personal.emails)
+  if (fromPersonal) {
+    return fromPersonal
+  }
+
+  return firstEmailFromList(client.emails)
+}
+
+function resolveClientListClinicians(client) {
+  const clinicians = client.clinicians
+    ?? client.clinician_assignments
+    ?? client.assigned_clinicians
+  if (!Array.isArray(clinicians) || !clinicians.length) {
+    return ''
+  }
+
+  return clinicians
+    .map(item => {
+      if (!item || typeof item !== typeNames.object) {
+        return ''
+      }
+
+      return String(
+        item.name
+        ?? item.full_name
+        ?? item.clinician_name
+        ?? '',
+      ).trim()
+    })
+    .filter(Boolean)
+    .join(', ')
+}
+
+function formatClientListDate(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) {
+    return raw
+  }
+
+  return d.toLocaleDateString('en-US', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+function formatClientListStatus(status, t) {
+  const raw = String(status ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+  const lower = raw.toLowerCase()
+  if (lower === 'closed' || raw === clientStatus.CLOSED) {
+    return t('closed')
+  }
+  if (lower === 'active' || lower === 'open' || raw === clientStatus.OPEN) {
+    return t('open')
+  }
+
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
+}
+
 export function mapClient(client) {
   if (!client || typeof client !== typeNames.object) {
     return null
   }
   const ck = clientFieldKeys
+  const personal = clientPersonalInfo(client)
   const firstName = String(
-    client.first_name ?? client[ck.firstName] ?? '',
+    personal.first_name ?? client.first_name ?? client[ck.firstName] ?? '',
   ).trim()
   const middleName = String(
-    client.middle_name ?? client[ck.middleName] ?? '',
+    personal.middle_name ?? client.middle_name ?? client[ck.middleName] ?? '',
   ).trim()
   const lastName = String(
-    client.last_name ?? client[ck.lastName] ?? '',
+    personal.last_name ?? client.last_name ?? client[ck.lastName] ?? '',
   ).trim()
-  const suffix = String(client.suffix ?? client[ck.suffix] ?? '').trim()
+  const suffix = String(
+    personal.suffix ?? client.suffix ?? client[ck.suffix] ?? '',
+  ).trim()
+  const dob = personal.dob ?? client.dob ?? ''
+  const ssn = client.ssn ?? client.social_security_number
 
   return {
     id: client.id,
@@ -219,24 +318,22 @@ export function mapClient(client) {
     [ck.middleName]: middleName,
     [ck.lastName]: lastName,
     [ck.suffix]: suffix,
-    [ck.sex]: client.sex ?? client[ck.sex] ?? '',
-    [ck.age]: client.age ?? client[ck.age] ?? '',
+    [ck.sex]: personal.sex ?? client.sex ?? client[ck.sex] ?? '',
+    [ck.age]: personal.age ?? client.age ?? client[ck.age] ?? '',
     [ck.socialSecurityNumber]:
-      client.social_security_number
-      ?? client[ck.socialSecurityNumber]
-      ?? '',
+      ssn != null && ssn !== '' ? String(ssn) : '',
     [ck.name]: formatClientListName(
       firstName,
       middleName,
       lastName,
       suffix,
     ),
-    [ck.email]: client.email ?? '',
-    [ck.dob]: client.dob ?? '',
-    [ck.clinicians]: client.clinicians ?? '',
+    [ck.email]: firstClientListEmail(client),
+    [ck.dob]: dob,
+    [ck.clinicians]: resolveClientListClinicians(client),
     [ck.admissionDate]:
       client.admission_date ?? client[ck.admissionDate] ?? '',
-    [ck.status]: client.status,
+    [ck.status]: client.status ?? '',
   }
 }
 
@@ -247,36 +344,9 @@ export function formatClientDisplay(mapped, t) {
   const ck = clientFieldKeys
   const out = { ...mapped }
 
-  if (out[ck.dob]) {
-    out[ck.dob] = new Date(out[ck.dob]).toLocaleDateString('en-US', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-  }
-
-  const admissionRaw = out[ck.admissionDate]
-  if (admissionRaw) {
-    out[ck.admissionDate] = new Date(admissionRaw).toLocaleDateString(
-      'en-US',
-      {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      },
-    )
-  }
-
-  switch (out[ck.status]) {
-    case clientStatus.CLOSED:
-      out[ck.status] = t('closed')
-      break
-    case clientStatus.OPEN:
-      out[ck.status] = t('open')
-      break
-    default:
-      out[ck.status] = 'unknown'
-  }
+  out[ck.dob] = formatClientListDate(out[ck.dob])
+  out[ck.admissionDate] = formatClientListDate(out[ck.admissionDate])
+  out[ck.status] = formatClientListStatus(out[ck.status], t)
 
   return out
 }
@@ -335,6 +405,7 @@ export function extractOAuthTokenPayload(body) {
     return null
   }
   const fallbackModules = extractLoginModules(body)
+  const fallbackSubtenants = extractLoginSubtenants(body)
   const fromEnvelope = extractFromFiCeEnvelope(body)
   if (fromEnvelope) {
     return {
@@ -342,6 +413,9 @@ export function extractOAuthTokenPayload(body) {
       modules: fromEnvelope.modules?.length
         ? fromEnvelope.modules
         : fallbackModules,
+      subtenants: fromEnvelope.subtenants?.length
+        ? fromEnvelope.subtenants
+        : fallbackSubtenants,
     }
   }
 
@@ -352,6 +426,9 @@ export function extractOAuthTokenPayload(body) {
       modules: fromRoots.modules?.length
         ? fromRoots.modules
         : fallbackModules,
+      subtenants: fromRoots.subtenants?.length
+        ? fromRoots.subtenants
+        : fallbackSubtenants,
     }
   }
 

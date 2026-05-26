@@ -1,6 +1,7 @@
 <template>
   <q-input
     outlined
+    :stack-label="stackSpacing"
     :hide-bottom-space="!stackSpacing"
     :model-value="model"
     :class="{ 'text-input--stack-spacing': stackSpacing }"
@@ -9,7 +10,7 @@
     :type="resolvedType"
     :label="props.label"
     :rules="props.rules || []"
-    :maxlength="maxlength"
+    :maxlength="maxlengthResolved"
     :error="props.error"
     :error-message="props.errorMessage"
     @update:model-value="onUpdate">
@@ -69,7 +70,7 @@ const props = defineProps({
     default: false,
   },
   maxlength: {
-    type: Number,
+    type: [Number, String],
     default: undefined,
   },
   lettersOnly: {
@@ -90,12 +91,22 @@ const resolvedType = computed(() =>
     : props.type,
 )
 
+const maxlengthResolved = computed(() => {
+  if (props.maxlength == null || props.maxlength === '') {
+    return undefined
+  }
+  const n = Number(props.maxlength)
+
+  return Number.isFinite(n) ? n : undefined
+})
+
 function onUpdate(value) {
   let next = value == null ? '' : String(value)
+  const maxLen = maxlengthResolved.value
   if (props.lettersOnly) {
-    next = sanitizeLettersOnlyInput(next, props.maxlength)
-  } else if (props.maxlength != null) {
-    next = next.slice(0, props.maxlength)
+    next = sanitizeLettersOnlyInput(next, maxLen)
+  } else if (maxLen != null) {
+    next = next.slice(0, maxLen)
   }
   model.value = next
 }

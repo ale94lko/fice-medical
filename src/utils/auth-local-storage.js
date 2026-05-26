@@ -52,6 +52,60 @@ export function writeStoredModules(modules) {
   localStorage.setItem(keys.modules, JSON.stringify(list))
 }
 
+export function readStoredSubtenants() {
+  const raw = localStorage.getItem(keys.subtenants)
+  if (!raw) {
+    return []
+  }
+  try {
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+
+    return parsed
+      .map(item => {
+        const id = Number(item?.id)
+        if (!Number.isFinite(id)) {
+          return null
+        }
+
+        return {
+          id,
+          name: String(item?.name ?? '').trim(),
+          code: String(item?.code ?? '').trim(),
+        }
+      })
+      .filter(item => item?.name)
+  } catch {
+    return []
+  }
+}
+
+export function writeStoredSubtenants(subtenants) {
+  const list = Array.isArray(subtenants) ? subtenants : []
+  localStorage.setItem(keys.subtenants, JSON.stringify(list))
+}
+
+export function readStoredActiveSubtenantId() {
+  const raw = localStorage.getItem(keys.activeSubtenantId)
+  if (raw == null || raw === '') {
+    return null
+  }
+  const id = Number(raw)
+
+  return Number.isFinite(id) ? id : null
+}
+
+export function writeStoredActiveSubtenantId(id) {
+  if (id == null || id === '') {
+    localStorage.removeItem(keys.activeSubtenantId)
+
+    return
+  }
+  localStorage.setItem(keys.activeSubtenantId, String(id))
+}
+
 export function clearAuthLocalStorage() {
   [
     keys.token,
@@ -60,5 +114,7 @@ export function clearAuthLocalStorage() {
     keys.refresh,
     keys.refreshLegacy,
     keys.modules,
+    keys.subtenants,
+    keys.activeSubtenantId,
   ].forEach(k => localStorage.removeItem(k))
 }

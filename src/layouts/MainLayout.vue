@@ -10,9 +10,11 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-        <q-toolbar-title>
+        <q-toolbar-title shrink>
           FiCE Medical
         </q-toolbar-title>
+        <q-space />
+        <SubtenantToolbar class="q-mr-xs" />
         <q-btn flat round dense icon="notifications">
         </q-btn>
         <q-btn flat round dense icon="manage_accounts">
@@ -411,6 +413,7 @@ import {
 } from 'components/constants.js'
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
+import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 
 // Composables
 const $q = useQuasar()

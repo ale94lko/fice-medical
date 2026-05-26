@@ -6,7 +6,7 @@
         src="logo.png"
         spinner-color="white"
       />
-      <q-card class="my-card bg-grey-1">
+      <q-card class="my-card">
         <form @submit.prevent.stop="handleLogin">
           <q-card-section class="login-inputs">
             <text-input

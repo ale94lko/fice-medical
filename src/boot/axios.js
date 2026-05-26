@@ -6,11 +6,17 @@ import {
   quasarNotifyTypes,
   typeNames,
 } from 'components/constants.js'
-import { extractOAuthTokenPayload } from 'components/helpers.js'
 import {
+  extractLoginSubtenants,
+  extractOAuthTokenPayload,
+} from 'components/helpers.js'
+import {
+  readStoredActiveSubtenantId,
   readStoredExpireAt,
   readStoredRefreshToken,
+  readStoredSubtenants,
   readStoredToken,
+  writeStoredActiveSubtenantId,
   writeStoredExpireAt,
   writeStoredRefreshToken,
   writeStoredToken,
@@ -37,6 +43,39 @@ function isUnauthorizedError(error) {
   const status = error.response?.status
 
   return status === 401 || status === '401'
+}
+
+function subtenantCodeForActiveId(subtenants, activeId) {
+  if (!Array.isArray(subtenants) || !subtenants.length) {
+    return null
+  }
+  const id = activeId ?? subtenants[0]?.id
+  const match = subtenants.find(item => item.id === id) ?? subtenants[0]
+  const code = String(match?.code ?? '').trim()
+
+  return code || null
+}
+
+async function resolveActiveSubtenantCode() {
+  const activeId = readStoredActiveSubtenantId()
+  const fromStorage = readStoredSubtenants()
+  const storedCode = subtenantCodeForActiveId(fromStorage, activeId)
+  if (storedCode) {
+    return storedCode
+  }
+  try {
+    const { useAuthStore } = await import('stores/auth-store.js')
+    const store = useAuthStore()
+    if (store.activeSubtenantId != null) {
+      writeStoredActiveSubtenantId(store.activeSubtenantId)
+    }
+
+    return subtenantCodeForActiveId(store.subtenants, store.activeSubtenantId)
+  } catch {
+    // Pinia may be unavailable during very early boot
+  }
+
+  return null
 }
 
 async function getRefreshJwtForRequest() {
@@ -86,7 +125,12 @@ async function persistTokensFromResponse(body) {
   writeStoredToken(td.token)
   writeStoredExpireAt(td.expiration ?? '')
   const { useAuthStore } = await import('stores/auth-store.js')
-  useAuthStore().applyTokensFromApi(td)
+  const authStore = useAuthStore()
+  authStore.applyTokensFromApi(td)
+  const subtenants = extractLoginSubtenants(body)
+  if (subtenants.length) {
+    authStore.applySubtenants(subtenants)
+  }
 }
 
 function stripAuthorizationHeader(cfg) {
@@ -181,6 +225,10 @@ api.interceptors.request.use(
       const t2 = readStoredToken()
       if (t2) {
         config.headers.Authorization = `Bearer ${t2}`
+      }
+      const subtenantCode = await resolveActiveSubtenantCode()
+      if (subtenantCode) {
+        config.headers['X-Subtenant-Key'] = subtenantCode
       }
     }
 

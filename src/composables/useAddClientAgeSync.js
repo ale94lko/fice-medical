@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { clientAgeUnitValues } from 'components/constants.js'
 import {
   ageAndUnitFromUsDateString,
@@ -15,6 +15,18 @@ export function useAddClientAgeSync(
 ) {
   const syncingFromDob = ref(false)
   const syncingFromAge = ref(false)
+
+  const ageFieldsLocked = computed(() => {
+    const trimmed = String(form.value[dobKey] ?? '').trim()
+
+    return trimmed.length > 0 && isCompleteUsDateString(trimmed)
+  })
+
+  function hasCompleteDob() {
+    const trimmed = String(form.value[dobKey] ?? '').trim()
+
+    return trimmed.length > 0 && isCompleteUsDateString(trimmed)
+  }
 
   function resolveAgeUnit(code) {
     const unit = String(code ?? '').trim().toLowerCase()
@@ -46,15 +58,21 @@ export function useAddClientAgeSync(
   }
 
   function syncDobFromAge() {
+    if (hasCompleteDob()) {
+      return
+    }
     const ageStr = String(form.value[ageKey] ?? '').trim()
     if (!ageStr) {
       return
     }
     const age = Number(ageStr)
-    if (!Number.isFinite(age) || age < 0) {
+    if (!Number.isFinite(age) || age < 0 || !Number.isInteger(age)) {
       return
     }
     const unit = form.value[ageUnitKey]
+    if (!String(unit ?? '').trim()) {
+      return
+    }
     const dob = dobUsDateFromAgeAndUnit(age, unit)
     if (!dob) {
       return
@@ -81,7 +99,7 @@ export function useAddClientAgeSync(
   watch(
     () => [form.value[ageKey], form.value[ageUnitKey]],
     () => {
-      if (syncingFromDob.value) {
+      if (syncingFromDob.value || hasCompleteDob()) {
         return
       }
       syncingFromAge.value = true
@@ -120,5 +138,5 @@ export function useAddClientAgeSync(
     { deep: true },
   )
 
-  return { syncAgeFromDob, syncDobFromAge }
+  return { ageFieldsLocked, syncAgeFromDob, syncDobFromAge }
 }

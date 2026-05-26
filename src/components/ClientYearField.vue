@@ -159,16 +159,16 @@ function onNavigation(ctx) {
 }
 
 .client-year-field__picker {
-  :deep(.q-date__calendar),
-  :deep(.q-date__months) {
+  .q-date__calendar,
+  .q-date__months {
     display: none !important;
   }
 
-  :deep(.q-date__header) {
+  .q-date__header {
     pointer-events: none;
   }
 
-  :deep(.q-date__navigation) {
+  .q-date__navigation {
     pointer-events: auto;
   }
 }

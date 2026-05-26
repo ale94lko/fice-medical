@@ -1,19 +1,12 @@
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import {
   addClientTabKeys,
   clientAgeUnitValues,
   clientFieldKeys,
   clientFormSections,
-  clientNameMaxLength,
 } from 'components/constants.js'
 import {
   generateClientNumber,
-  isAdmissionDateValid,
-  isLettersOnly,
-  isValidSsnDigits,
-  maxAgeForUnit,
-  normalizeSsnDigits,
-  parseUsDateString,
   snapshotAddClientForm,
   todayDateUs,
 } from 'src/utils/client-form.js'
@@ -24,8 +17,8 @@ import {
 import { createEmptyAllergiesSection } from 'src/utils/client-allergies.js'
 import { useAddClientAgeSync } from 'src/composables/useAddClientAgeSync.js'
 import {
-  useAddClientContactRules,
-} from 'src/composables/useAddClientContactRules.js'
+  useAddClientFormRules,
+} from 'src/composables/useAddClientFormRules.js'
 import {
   ADD_CLIENT_TAB_ORDER,
   useAddClientTabAccess,
@@ -95,7 +88,6 @@ export function useAddClientForm(t, catalogs, options = {}) {
   const activeTab = ref(addClientTabKeys.basic)
   const initialSnapshot = ref('')
   const formRef = ref(null)
-
   const form = ref(createEmptyAddClientForm())
 
   const {
@@ -110,7 +102,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     unlockThroughIndex,
   } = useAddClientTabAccess()
 
-  useAddClientAgeSync(
+  const { ageFieldsLocked } = useAddClientAgeSync(
     form,
     ck.dob,
     ck.age,
@@ -119,6 +111,12 @@ export function useAddClientForm(t, catalogs, options = {}) {
       resolveAgeUnitCode: code => catalogs?.resolveAgeUnitCode?.(code),
       watchAgeUnitOptions: () => catalogs?.ageUnitSelectOptions?.value,
     },
+  )
+
+  const { rules, contactRules } = useAddClientFormRules(
+    t,
+    form,
+    ageFieldsLocked,
   )
 
   const sexOptions = catalogs?.sexOptions
@@ -144,117 +142,6 @@ export function useAddClientForm(t, catalogs, options = {}) {
   function isDirty() {
     return snapshotAddClientForm(form.value) !== initialSnapshot.value
   }
-
-  function requiredRule(message) {
-    return val => {
-      const s = String(val ?? '').trim()
-
-      return s.length > 0 || message
-    }
-  }
-
-  function lettersFormatRule(maxLen) {
-    return val => {
-      const s = String(val ?? '').trim()
-      if (!s) {
-        return true
-      }
-      if (!isLettersOnly(s, maxLen)) {
-        return t('lettersOnlyMax', { max: maxLen })
-      }
-
-      return true
-    }
-  }
-
-  function lettersRule(message, maxLen, required = false) {
-    return val => {
-      const s = String(val ?? '').trim()
-      if (!s) {
-        return required ? message : true
-      }
-      if (!isLettersOnly(s, maxLen)) {
-        return t('lettersOnlyMax', { max: maxLen })
-      }
-
-      return true
-    }
-  }
-
-  function usDateRule(message, required = false, { maxToday = false } = {}) {
-    return val => {
-      const s = String(val ?? '').trim()
-      if (!s) {
-        return required ? message : true
-      }
-      if (!parseUsDateString(s)) {
-        return message
-      }
-      if (maxToday && !isAdmissionDateValid(s)) {
-        return message
-      }
-
-      return true
-    }
-  }
-
-  function admissionDateRule() {
-    return val => {
-      const s = String(val ?? '').trim()
-      if (!s) {
-        return t('admissionDateRequired')
-      }
-      if (!isAdmissionDateValid(s)) {
-        return t('admissionDateNotFuture')
-      }
-
-      return true
-    }
-  }
-
-  function ageRule() {
-    return val => {
-      const s = String(val ?? '').trim()
-      if (!s) {
-        return true
-      }
-      const n = Number(s)
-      const max = maxAgeForUnit(form.value[ck.ageUnit])
-      if (!Number.isFinite(n) || n < 0 || n > max) {
-        return t('ageRange', { max })
-      }
-
-      return true
-    }
-  }
-
-  function ssnRule() {
-    return () => {
-      const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
-
-      return isValidSsnDigits(digits) || t('ssnInvalid')
-    }
-  }
-
-  const { contactRules } = useAddClientContactRules(t, lettersRule)
-
-  const rules = computed(() => ({
-    firstName: [
-      requiredRule(t('firstNameRequired')),
-      lettersFormatRule(clientNameMaxLength),
-    ],
-    middleName: [
-      lettersFormatRule(clientNameMaxLength),
-    ],
-    lastName: [
-      requiredRule(t('lastNameRequired')),
-      lettersFormatRule(clientNameMaxLength),
-    ],
-    dob: [usDateRule(t('dobInvalid'), false, { maxToday: true })],
-    admissionDate: [admissionDateRule()],
-    age: [ageRule()],
-    ssn: [ssnRule()],
-  }))
 
   const {
     tabIndex,
@@ -319,6 +206,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     hasSubTabs,
     currentSubTabs,
     addClientTabKeys,
+    ageFieldsLocked,
     ageUnitSelectOptions,
     assignedClinicianOptions: [],
     sexOptions,

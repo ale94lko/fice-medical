@@ -73,7 +73,7 @@ export default [
       'keyword-spacing': [2, {'before': true, 'after': true}],
       'max-depth': [1, 3],
       'max-len': [1, 80],
-      'max-statements': [1, 30],
+      'max-statements': ['warn', 40],
       'new-cap': 1,
       'no-extend-native': 2,
       'no-mixed-spaces-and-tabs': 2,
@@ -113,5 +113,12 @@ export default [
         ...globals.serviceworker
       }
     }
-  }
+  },
+
+  {
+    files: ['src/composables/**/*.js'],
+    rules: {
+      'max-statements': 'off',
+    },
+  },
 ]

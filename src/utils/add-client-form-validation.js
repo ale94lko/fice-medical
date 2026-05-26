@@ -26,6 +26,7 @@ export function countBasicTabFieldErrors(form, rules) {
     { value: form[ck.dob], rules: rules.dob },
     { value: form[ck.admissionDate], rules: rules.admissionDate },
     { value: form[ck.age], rules: rules.age },
+    { value: form[ck.ageUnit], rules: rules.ageUnit },
     {
       value: form[ck.socialSecurityNumber],
       rules: rules.ssn,

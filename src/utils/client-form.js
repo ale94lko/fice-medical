@@ -76,7 +76,12 @@ export function calendarDaysBetween(dob, today) {
   return Math.floor((today.getTime() - dob.getTime()) / msPerDay)
 }
 
-/** Age value and unit from DOB: years (≥1y), months (<1y), days (<1m). */
+/**
+ * Age + unit from DOB:
+ * - days: under 1 month
+ * - months: 1+ months and at most 2 full years
+ * - years: over 2 full years
+ */
 export function ageAndUnitFromUsDateString(value) {
   const dob = parseUsDateString(value)
   if (!dob) {
@@ -84,13 +89,13 @@ export function ageAndUnitFromUsDateString(value) {
   }
   const today = startOfDay(new Date())
   const years = fullYearsBetween(dob, today)
-  if (years >= 1) {
+  const months = fullMonthsBetween(dob, today)
+  if (years > 2) {
     return {
       age: Math.min(125, years),
       unit: 'years',
     }
   }
-  const months = fullMonthsBetween(dob, today)
   if (months >= 1) {
     return { age: months, unit: 'months' }
   }
@@ -126,7 +131,7 @@ export function maxAgeForUnit(unitCode) {
     return 31
   }
   if (kind === 'months') {
-    return 11
+    return 24
   }
 
   return 125

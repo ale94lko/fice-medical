@@ -150,12 +150,17 @@
                         outlined
                         hide-bottom-space
                         type="number"
+                        step="1"
                         :label="t('age')"
                         :rules="rules.age"
+                        :readonly="ageFieldsLocked"
+                        :disable="ageFieldsLocked"
+                        :filled="ageFieldsLocked"
                         min="0"
                         :max="ageMaxForUnit"
+                        @update:model-value="onAgeInput"
                       >
-                        <template #append>
+                        <template v-if="!ageFieldsLocked" #append>
                           <div
                             class="add-client-form__age-stepper"
                             role="group"
@@ -193,6 +198,9 @@
                         :loading="catalogsLoading"
                         :options="ageUnitSelectOptions"
                         :label="t('ageUnit')"
+                        :rules="rules.ageUnit"
+                        :readonly="ageFieldsLocked"
+                        :disable="ageFieldsLocked"
                         :key="`age-unit-${catalogsLoaded}-${form[ck.ageUnit]}`"
                       />
                     </div>
@@ -482,6 +490,7 @@ const {
   form,
   formRef,
   activeTab,
+  ageFieldsLocked,
   ageUnitSelectOptions,
   assignedClinicianOptions,
   sexOptions,
@@ -524,6 +533,23 @@ const ageAtMin = computed(() => ageNumericValue.value <= 0)
 const ageAtMax = computed(
   () => ageNumericValue.value >= ageMaxForUnit.value,
 )
+
+function onAgeInput(val) {
+  if (ageFieldsLocked.value) {
+    return
+  }
+  const raw = String(val ?? '').trim()
+  if (!raw) {
+    form.value[ck.age] = ''
+
+    return
+  }
+  const n = Number(raw)
+  if (!Number.isFinite(n)) {
+    return
+  }
+  form.value[ck.age] = String(Math.max(0, Math.trunc(n)))
+}
 
 function bumpAge(delta) {
   const max = ageMaxForUnit.value

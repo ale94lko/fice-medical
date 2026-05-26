@@ -1,16 +1,23 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
 import { apiPaths, appModuleNames, typeNames } from 'components/constants.js'
-import { extractOAuthTokenPayload } from 'components/helpers.js'
+import {
+  extractLoginSubtenants,
+  extractOAuthTokenPayload,
+} from 'components/helpers.js'
 import {
   clearAuthLocalStorage,
+  readStoredActiveSubtenantId,
   readStoredExpireAt,
   readStoredModules,
   readStoredRefreshToken,
+  readStoredSubtenants,
   readStoredToken,
+  writeStoredActiveSubtenantId,
   writeStoredExpireAt,
   writeStoredModules,
   writeStoredRefreshToken,
+  writeStoredSubtenants,
   writeStoredToken,
 } from '../utils/auth-local-storage.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
@@ -21,10 +28,23 @@ export const useAuthStore = defineStore('auth', {
     expireAt: null,
     refreshToken: null,
     modules: [],
+    subtenants: [],
+    activeSubtenantId: null,
     _initialized: false,
   }),
   getters: {
     isAuthenticated: state => !!state.token,
+    activeSubtenant(state) {
+      if (!state.subtenants.length) {
+        return null
+      }
+      const match = state.subtenants.find(
+        item => item.id === state.activeSubtenantId,
+      )
+
+      return match ?? state.subtenants[0] ?? null
+    },
+    hasMultipleSubtenants: state => state.subtenants.length > 1,
     hasModule: state => moduleName => {
       const key = String(moduleName ?? '').trim()
       if (!key) {
@@ -39,6 +59,36 @@ export const useAuthStore = defineStore('auth', {
       state.modules.includes(appModuleNames.administration),
   },
   actions: {
+    applySubtenants(subtenants, preferredId = null) {
+      const list = Array.isArray(subtenants) ? subtenants : []
+      this.subtenants = list
+      writeStoredSubtenants(list)
+
+      if (!list.length) {
+        this.activeSubtenantId = null
+        writeStoredActiveSubtenantId(null)
+
+        return
+      }
+
+      const storedId = preferredId ?? readStoredActiveSubtenantId()
+      const match = list.find(item => item.id === storedId)
+
+      this.activeSubtenantId = match?.id ?? list[0].id
+      writeStoredActiveSubtenantId(this.activeSubtenantId)
+    },
+    setActiveSubtenant(id) {
+      const nextId = Number(id)
+      if (!Number.isFinite(nextId)) {
+        return
+      }
+      const match = this.subtenants.find(item => item.id === nextId)
+      if (!match) {
+        return
+      }
+      this.activeSubtenantId = nextId
+      writeStoredActiveSubtenantId(nextId)
+    },
     applyTokensFromApi(td) {
       if (!td) {
         return
@@ -66,6 +116,12 @@ export const useAuthStore = defineStore('auth', {
 
         const td = extractOAuthTokenPayload(response.data)
         this.applyTokensFromApi(td)
+        const subtenants = extractLoginSubtenants(response.data)
+        if (subtenants.length) {
+          this.applySubtenants(subtenants)
+        } else if (Array.isArray(td?.subtenants) && td.subtenants.length) {
+          this.applySubtenants(td.subtenants)
+        }
         clearSessionExpiredUiSuppression()
 
         return true
@@ -100,11 +156,14 @@ export const useAuthStore = defineStore('auth', {
       const expireAt = readStoredExpireAt()
       const refreshToken = readStoredRefreshToken()
       const modules = readStoredModules()
+      const subtenants = readStoredSubtenants()
+      const activeSubtenantId = readStoredActiveSubtenantId()
       if (token) {
         this.token = token
         this.expireAt = expireAt
         this.refreshToken = refreshToken
         this.modules = modules
+        this.applySubtenants(subtenants, activeSubtenantId)
       }
     },
     clearSession() {
@@ -112,6 +171,8 @@ export const useAuthStore = defineStore('auth', {
       this.expireAt = null
       this.refreshToken = null
       this.modules = []
+      this.subtenants = []
+      this.activeSubtenantId = null
       clearAuthLocalStorage()
     },
     init() {
@@ -126,6 +187,8 @@ export const useAuthStore = defineStore('auth', {
             this.expireAt = null
             this.refreshToken = null
             this.modules = []
+            this.subtenants = []
+            this.activeSubtenantId = null
             if (this.router) {
               this.router.push('/login')
             }

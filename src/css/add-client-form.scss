@@ -181,11 +181,11 @@
     margin: 0;
     width: 100%;
 
-    :deep(.q-radio) {
+    .q-radio {
       margin-right: 4px;
     }
 
-    :deep(.q-radio__label) {
+    .q-radio__label {
       font-size: 14px;
       color: $text-strong;
     }
@@ -446,12 +446,12 @@
 }
 
 .add-client-form__notes-field {
-  :deep(.q-field__control) {
+  .q-field__control {
     min-height: 120px;
     align-items: flex-start;
   }
 
-  :deep(textarea) {
+  textarea {
     min-height: 96px;
     line-height: 1.5;
     resize: vertical;

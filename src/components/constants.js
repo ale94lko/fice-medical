@@ -242,7 +242,7 @@ export const addClientBasicInfoCatalogNames = [
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   clientsList: '/client/v1/all-clients',
-  clientsCreate: '/client/v1/clients',
+  clientsCreate: '/client/v1/register',
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',
@@ -257,6 +257,8 @@ export const authStorageKeys = {
   refresh: 'refreshToken',
   refreshLegacy: 'refresh_token',
   modules: 'modules',
+  subtenants: 'subtenants',
+  activeSubtenantId: 'activeSubtenantId',
 }
 
 /** Module names returned by POST /oauth/v1/login (modules array). */

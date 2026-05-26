@@ -6,7 +6,7 @@
         src="logo.png"
         spinner-color="white"
       />
-      <q-card class="my-card bg-grey-1">
+      <q-card class="my-card">
         <form @submit.prevent.stop="handleSubmit">
           <q-card-section>
             <div class="text-h6">{{ t('resetPassword') }}</div>
