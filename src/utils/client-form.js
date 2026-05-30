@@ -351,6 +351,24 @@ export function usDateToIso(value) {
   return `${y}-${m}-${day}`
 }
 
+/** ISO date or datetime → mm/dd/yyyy for form fields. */
+export function isoDateToUsDateString(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+  if (US_DATE_RE.test(raw)) {
+    return raw
+  }
+  const datePart = raw.includes('T') ? raw.split('T')[0] : raw.slice(0, 10)
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart)
+  if (!m) {
+    return ''
+  }
+
+  return `${m[2]}/${m[3]}/${m[1]}`
+}
+
 export function snapshotAddClientForm(form) {
   return JSON.stringify(form)
 }

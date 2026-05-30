@@ -48,7 +48,15 @@ export default {
   clientListError: 'Could not load the client list.',
   clientListEmpty: 'No clients registered yet.',
   clientSavedSuccess: 'Client was successfully saved',
+  clientUpdatedSuccess: 'Client was successfully updated',
   clientSaveError: 'Could not save the client. Please check the form.',
+  clientLoadError:
+    'Could not load the client. Open the client list and try again.',
+  editClient: 'Edit Client',
+  editClientSubtitle: 'Update client information and save your changes.',
+  cancelClientEditTitle: 'Discard changes?',
+  cancelClientEditMessage:
+    'You have unsaved changes. If you leave now, they will be lost.',
   catalogLoadError: 'Could not load form catalogs. Using default options.',
   addClientSaveValidationSummary:
     'Please fix the highlighted fields before saving.',

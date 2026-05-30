@@ -19,6 +19,12 @@ const routes = [
         component: () => import('pages/client/AddClientPage.vue'),
         meta: { requiresModule: appModuleNames.client },
       },
+      {
+        path: 'clients/:id/edit',
+        name: 'EditClient',
+        component: () => import('pages/client/EditClientPage.vue'),
+        meta: { requiresModule: appModuleNames.client },
+      },
     ],
     meta: { requiresAuth: true },
   },

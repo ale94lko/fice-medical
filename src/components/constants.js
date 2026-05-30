@@ -243,6 +243,7 @@ export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   clientsList: '/client/v1/all-clients',
   clientsCreate: '/client/v1/register',
+  clientsUpdate: '/client/v1/update-client',
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',

@@ -1,5 +1,6 @@
 import {
   clientFieldKeys,
+  clientSexValues,
   clientStatus,
   typeNames,
 } from 'components/constants.js'
@@ -190,6 +191,9 @@ export function buildClientCreateBody(form) {
   return buildClientRegisterBody(form)
 }
 
+export { buildClientUpdateBody } from 'src/utils/build-client-update-body.js'
+export { mapClientApiToForm } from 'src/utils/map-client-api-to-form.js'
+
 export function extractClientMutationResponse(data) {
   if (!data || typeof data !== typeNames.object) {
     return null
@@ -207,6 +211,21 @@ export function extractClientMutationResponse(data) {
 
 function clientPersonalInfo(client) {
   return client.personal_information ?? client.basic_info ?? client
+}
+
+function mapSexLabelForList(value) {
+  const token = String(value ?? '').trim().toLowerCase()
+  if (token === 'male') {
+    return clientSexValues.male
+  }
+  if (token === 'female') {
+    return clientSexValues.female
+  }
+  if (token === 'unknown') {
+    return clientSexValues.unknown
+  }
+
+  return String(value ?? '').trim()
 }
 
 function firstEmailFromList(emails) {
@@ -318,7 +337,7 @@ export function mapClient(client) {
     [ck.middleName]: middleName,
     [ck.lastName]: lastName,
     [ck.suffix]: suffix,
-    [ck.sex]: personal.sex ?? client.sex ?? client[ck.sex] ?? '',
+    [ck.sex]: mapSexLabelForList(personal.sex ?? client.sex ?? client[ck.sex]),
     [ck.age]: personal.age ?? client.age ?? client[ck.age] ?? '',
     [ck.socialSecurityNumber]:
       ssn != null && ssn !== '' ? String(ssn) : '',

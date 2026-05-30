@@ -76,6 +76,7 @@ export function createEmptyAddClientForm() {
     [ck.socialSecurityNumber]: '',
     [ck.admissionDate]: todayDateUs(),
     [ck.assignedClinician]: '',
+    [ck.status]: 'active',
     [clientFormSections.contact]: createEmptyContactSection(),
     [clientFormSections.familyMedicalHistory]:
       createEmptyFamilyMedicalHistorySection(),
@@ -129,6 +130,17 @@ export function useAddClientForm(t, catalogs, options = {}) {
       next[ck.ageUnit] = catalogs.defaultAgeUnitValue()
     }
     form.value = next
+    activeTab.value = addClientTabKeys.basic
+    initialSnapshot.value = snapshotAddClientForm(form.value)
+    resetTabAccess()
+    resetSubTabs()
+  }
+
+  function applyForm(nextForm) {
+    if (!nextForm || typeof nextForm !== 'object') {
+      return
+    }
+    form.value = nextForm
     activeTab.value = addClientTabKeys.basic
     initialSnapshot.value = snapshotAddClientForm(form.value)
     resetTabAccess()
@@ -214,6 +226,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     rules,
     contactRules,
     resetForm,
+    applyForm,
     markPristine,
     isDirty,
     goNextTab,

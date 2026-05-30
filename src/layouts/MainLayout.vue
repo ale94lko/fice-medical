@@ -458,8 +458,7 @@ const showAdministrationMenu = computed(
 const activeClass = computed(() => 'app-nav-item--active')
 
 const isClientActive = computed(() => {
-  const productRoutes = ['/clients', '/clients/add']
-  return productRoutes.includes(route.path)
+  return route.path.startsWith('/clients')
 })
 
 const isActiveClass = (condition) => {

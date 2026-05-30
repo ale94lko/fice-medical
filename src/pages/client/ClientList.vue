@@ -269,7 +269,11 @@ const showFilters = () => {
   console.log('Show Filters')
 }
 function editRow(row) {
-  console.log('Editar:', row)
+  const id = row?.id
+  if (id == null || id === '') {
+    return
+  }
+  router.push({ name: 'EditClient', params: { id: String(id) } })
 }
 
 </script>

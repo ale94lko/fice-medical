@@ -1,10 +1,13 @@
 <template>
   <div class="add-client-form">
+    <q-inner-loading :showing="initialLoading" color="primary">
+      <q-spinner size="42px" />
+    </q-inner-loading>
     <q-banner
         v-if="successVisible"
         dense
         class="bg-positive text-white text-center q-mb-md rounded-borders">
-        {{ t('clientSavedSuccess') }}
+        {{ saveSuccessMessage }}
       </q-banner>
 
       <div class="add-client-form__tabs-row">
@@ -416,8 +419,8 @@
 
     <ModalComponent
       v-model="cancelConfirmOpen"
-      :title="t('cancelClientRegistrationTitle')"
-      :message="t('cancelClientRegistrationMessage')"
+      :title="cancelModalTitle"
+      :message="cancelModalMessage"
       :confirm-text="t('keepEditing')"
       :cancel-text="t('discardChanges')"
       @confirm="dismissCancelConfirm"
@@ -464,13 +467,28 @@ import {
   CLINICAL_FAMILY_HISTORY_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 
+const props = defineProps({
+  mode: {
+    type: String,
+    default: 'create',
+    validator: value => value === 'create' || value === 'edit',
+  },
+  clientId: {
+    type: [String, Number],
+    default: null,
+  },
+})
+
 const emit = defineEmits(['saved', 'cancel', 'tab-label'])
+
+const isEditMode = computed(() => props.mode === 'edit')
 
 const $q = useQuasar()
 const { t } = useI18n()
 const siteStore = useSiteStore()
 
 const saving = ref(false)
+const initialLoading = ref(false)
 const successVisible = ref(false)
 const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
@@ -498,6 +516,7 @@ const {
   rules,
   contactRules,
   resetForm,
+  applyForm,
   markPristine,
   isDirty,
   goNextTab,
@@ -597,9 +616,39 @@ const ssnDisplayValue = computed(() => {
 
 const activeTabLabel = computed(() => tabLabelFor(activeTab.value))
 
+const cancelModalTitle = computed(() =>
+  isEditMode.value
+    ? t('cancelClientEditTitle')
+    : t('cancelClientRegistrationTitle'),
+)
+
+const cancelModalMessage = computed(() =>
+  isEditMode.value
+    ? t('cancelClientEditMessage')
+    : t('cancelClientRegistrationMessage'),
+)
+
+const saveSuccessMessage = computed(() =>
+  isEditMode.value
+    ? t('clientUpdatedSuccess')
+    : t('clientSavedSuccess'),
+)
+
 watch([activeTab, activeSubTab], () => {
   emit('tab-label', activeTabLabel.value)
 }, { immediate: true })
+
+function loadClientForEdit() {
+  const id = props.clientId
+  if (id == null || id === '') {
+    throw new Error(t('clientLoadError'))
+  }
+  const mapped = siteStore.buildEditFormFromListClient(id, {
+    resolveAgeUnitCode: catalogs.resolveAgeUnitCode,
+    defaultAgeUnitValue: catalogs.defaultAgeUnitValue,
+  })
+  applyForm(mapped)
+}
 
 onMounted(async() => {
   try {
@@ -616,8 +665,34 @@ onMounted(async() => {
       })
     }
   }
-  resetForm()
+
   successVisible.value = false
+
+  if (isEditMode.value) {
+    initialLoading.value = true
+    try {
+      await loadClientForEdit()
+      markPristine()
+    } catch (error) {
+      if (!isAuthSessionEndUIError(error)) {
+        const msg = error?.response?.data?.message
+          || error?.message
+          || t('clientLoadError')
+        $q.notify({
+          type: quasarNotifyTypes.negative,
+          message: String(msg),
+          position: 'top',
+        })
+      }
+      emit('cancel')
+    } finally {
+      initialLoading.value = false
+    }
+
+    return
+  }
+
+  resetForm()
   markPristine()
 })
 
@@ -657,11 +732,15 @@ async function onSave() {
   saving.value = true
   successVisible.value = false
   try {
-    await siteStore.createClient(form.value, t)
+    if (isEditMode.value) {
+      await siteStore.updateClient(props.clientId, form.value, t)
+    } else {
+      await siteStore.createClient(form.value, t)
+    }
     successVisible.value = true
     $q.notify({
       type: quasarNotifyTypes.positive,
-      message: t('clientSavedSuccess'),
+      message: saveSuccessMessage.value,
       position: 'top',
     })
     emit('saved')
@@ -708,6 +787,7 @@ defineExpose({
   canGoNext,
   canGoPrevious,
   saving,
+  initialLoading,
 })
 </script>
 

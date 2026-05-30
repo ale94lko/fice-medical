@@ -49,7 +49,16 @@ export default {
   clientListError: 'No se pudo cargar el listado de clientes.',
   clientListEmpty: 'No hay clientes registrados.',
   clientSavedSuccess: 'El cliente se guardó correctamente',
+  clientUpdatedSuccess: 'El cliente se actualizó correctamente',
   clientSaveError: 'No se pudo guardar el cliente. Revise el formulario.',
+  clientLoadError:
+    'No se pudo cargar el cliente. Abra la lista e intente de nuevo.',
+  editClient: 'Editar cliente',
+  editClientSubtitle:
+    'Actualice la información del cliente y guarde los cambios.',
+  cancelClientEditTitle: '¿Descartar cambios?',
+  cancelClientEditMessage:
+    'Tiene cambios sin guardar. Si sale ahora, se perderán.',
   catalogLoadError:
     'No se pudieron cargar los catálogos. Se usan opciones predeterminadas.',
   addClientSaveValidationSummary:

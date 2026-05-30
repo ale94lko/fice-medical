@@ -231,7 +231,7 @@ function buildBasicInfo(form) {
     ssn: resolveSsn(form),
     admission_date: admissionDateToIso(form[ck.admissionDate]),
     clinician_id: resolveClinicianId(form),
-    status: 'active',
+    status: trim(form[ck.status]) || 'active',
     emails: mapEmailsAll(contact.emails),
     phones: mapPhonesAll(contact.phones),
     communication_preference: mapCommunicationPreference(
