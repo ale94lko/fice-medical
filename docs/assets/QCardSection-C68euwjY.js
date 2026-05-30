@@ -1,1 +1,0 @@
-import{Ot as e,Wn as t,er as n,jn as r}from"./index-DyCPoWDP.js";var i=r({name:`QCardSection`,props:{tag:{type:String,default:`div`},horizontal:Boolean},setup(r,{slots:i}){let a=t(()=>`q-card__section q-card__section--${r.horizontal===!0?`horiz row no-wrap`:`vert`}`);return()=>n(r.tag,{class:a.value},e(i.default))}});export{i as t};

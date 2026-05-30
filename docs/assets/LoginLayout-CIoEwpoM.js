@@ -1,1 +1,0 @@
-import{Kn as e,Zn as t,fr as n,gr as r,in as i,xr as a}from"./index-DyCPoWDP.js";import{r as o,t as s}from"./QLayout-DyYpiKiM.js";var c={};function l(i,c){let l=r(`router-view`);return n(),e(s,{view:`hHh Lpr lff`},{default:a(()=>[t(o,null,{default:a(()=>[t(l)]),_:1})]),_:1})}var u=i(c,[[`render`,l]]);export{u as default};
