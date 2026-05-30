@@ -1,1 +1,0 @@
-import{Pn as e,at as t,dn as n,wn as r}from"./index-Btc7EYy3.js";var i=n({name:`QCardSection`,props:{tag:{type:String,default:`div`},horizontal:Boolean},setup(n,{slots:i}){let a=r(()=>`q-card__section q-card__section--${n.horizontal===!0?`horiz row no-wrap`:`vert`}`);return()=>e(n.tag,{class:a.value},t(i.default))}});export{i as t};
