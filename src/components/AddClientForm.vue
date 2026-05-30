@@ -294,6 +294,14 @@
         </q-tab-panel>
 
         <q-tab-panel
+          :name="addClientTabKeys.insurance"
+          class="q-pa-none">
+          <div class="text-body1 text-grey-7 q-py-xl text-center">
+            {{ t('tabComingSoon') }}
+          </div>
+        </q-tab-panel>
+
+        <q-tab-panel
           :name="addClientTabKeys.assessments"
           class="q-pa-none">
           <div class="text-body1 text-grey-7 q-py-xl text-center">
@@ -314,8 +322,7 @@
               :name="subTab.key"
               class="q-pa-none">
               <AddClientFamilyMedicalHistoryTab
-                v-show="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
-                v-if="activeTab === addClientTabKeys.clinical"
+                v-if="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
                 ref="fmhTabRef"
                 v-model="form[clientFormSections.familyMedicalHistory]"
               />

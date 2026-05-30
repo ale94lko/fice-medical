@@ -1,5 +1,11 @@
 import { computed, ref, watch } from 'vue'
-import { addClientTabKeys } from 'components/constants.js'
+import {
+  addClientClinicalSubTabKeys,
+  addClientTabKeys,
+} from 'components/constants.js'
+
+export const CLINICAL_FAMILY_HISTORY_SUB_TAB =
+  addClientClinicalSubTabKeys.familyHistory
 
 export const ADD_CLIENT_MAIN_TABS = [
   {
@@ -16,6 +22,11 @@ export const ADD_CLIENT_MAIN_TABS = [
     key: addClientTabKeys.allergies,
     icon: 'medication',
     labelKey: 'tabAllergies',
+  },
+  {
+    key: addClientTabKeys.insurance,
+    icon: 'health_and_safety',
+    labelKey: 'tabInsurance',
   },
   {
     key: addClientTabKeys.assessments,
@@ -37,7 +48,7 @@ export const ADD_CLIENT_MAIN_TABS = [
   {
     key: addClientTabKeys.financials,
     icon: 'payments',
-    labelKey: 'tabFinancials',
+    labelKey: 'tabFinancial',
     hasSubTabs: true,
   },
   {
@@ -51,32 +62,47 @@ export const ADD_CLIENT_MAIN_TABS = [
 export const ADD_CLIENT_SUB_TABS = {
   [addClientTabKeys.clinical]: [
     {
-      key: 'vitals',
-      icon: 'monitor_heart',
-      labelKey: 'subTabVitals',
-    },
-    {
-      key: 'labs',
-      icon: 'science',
-      labelKey: 'subTabLabs',
-    },
-    {
-      key: 'carePlans',
-      icon: 'assignment',
-      labelKey: 'subTabCarePlans',
-    },
-    {
-      key: 'familyHistory',
+      key: addClientClinicalSubTabKeys.familyHistory,
       icon: 'groups',
       labelKey: 'subTabFamilyHistory',
     },
     {
-      key: 'clinicalNotes',
+      key: addClientClinicalSubTabKeys.vitals,
+      icon: 'monitor_heart',
+      labelKey: 'subTabVitals',
+    },
+    {
+      key: addClientClinicalSubTabKeys.labs,
+      icon: 'science',
+      labelKey: 'subTabLabs',
+    },
+    {
+      key: addClientClinicalSubTabKeys.carePlans,
+      icon: 'assignment',
+      labelKey: 'subTabCarePlans',
+    },
+    {
+      key: addClientClinicalSubTabKeys.clinicalNotes,
       icon: 'description',
       labelKey: 'subTabClinicalNotes',
     },
   ],
   [addClientTabKeys.careCoordination]: [
+    {
+      key: 'appointments',
+      icon: 'event',
+      labelKey: 'subTabAppointments',
+    },
+    {
+      key: 'tasks',
+      icon: 'task_alt',
+      labelKey: 'subTabTasks',
+    },
+    {
+      key: 'authorizations',
+      icon: 'verified',
+      labelKey: 'subTabAuthorizations',
+    },
     {
       key: 'referrals',
       icon: 'share',
@@ -88,9 +114,9 @@ export const ADD_CLIENT_SUB_TABS = {
       labelKey: 'subTabCareTeam',
     },
     {
-      key: 'coordinationNotes',
-      icon: 'description',
-      labelKey: 'subTabCoordinationNotes',
+      key: 'followUps',
+      icon: 'update',
+      labelKey: 'subTabFollowUps',
     },
   ],
   [addClientTabKeys.financials]: [
@@ -100,26 +126,41 @@ export const ADD_CLIENT_SUB_TABS = {
       labelKey: 'subTabBilling',
     },
     {
-      key: 'insurance',
-      icon: 'health_and_safety',
-      labelKey: 'subTabInsurance',
+      key: 'claims',
+      icon: 'receipt_long',
+      labelKey: 'subTabClaims',
     },
     {
-      key: 'authorizations',
-      icon: 'verified',
-      labelKey: 'subTabAuthorizations',
+      key: 'payments',
+      icon: 'paid',
+      labelKey: 'subTabPayments',
+    },
+    {
+      key: 'coverage',
+      icon: 'health_and_safety',
+      labelKey: 'subTabCoverage',
     },
   ],
   [addClientTabKeys.documents]: [
     {
-      key: 'clientDocuments',
-      icon: 'folder',
-      labelKey: 'subTabClientDocuments',
+      key: 'attachments',
+      icon: 'attach_file',
+      labelKey: 'subTabAttachments',
     },
     {
-      key: 'forms',
-      icon: 'description',
-      labelKey: 'subTabForms',
+      key: 'consents',
+      icon: 'draw',
+      labelKey: 'subTabConsents',
+    },
+    {
+      key: 'signedForms',
+      icon: 'fact_check',
+      labelKey: 'subTabSignedForms',
+    },
+    {
+      key: 'scannedDocs',
+      icon: 'document_scanner',
+      labelKey: 'subTabScannedDocs',
     },
   ],
 }
@@ -127,8 +168,6 @@ export const ADD_CLIENT_SUB_TABS = {
 export const ADD_CLIENT_TABS_WITH_SUBTABS = new Set(
   Object.keys(ADD_CLIENT_SUB_TABS),
 )
-
-export const CLINICAL_FAMILY_HISTORY_SUB_TAB = 'familyHistory'
 
 export function useAddClientSubTabs(activeTab) {
   const activeSubTabByParent = ref({})
