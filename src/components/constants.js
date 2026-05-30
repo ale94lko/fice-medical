@@ -127,10 +127,17 @@ export const clientContactFieldKeys = {
   activeOtherContactId: 'activeOtherContactId',
 }
 
+export const clientVitalsPainLevelValues = {
+  mild: 'mild',
+  moderate: 'moderate',
+  severe: 'severe',
+}
+
 export const clientFormSections = {
   contact: 'contact',
   familyMedicalHistory: 'familyMedicalHistory',
   allergies: 'allergies',
+  vitals: 'vitals',
 }
 
 export const clientAllergiesNkaStatus = 'NKA'

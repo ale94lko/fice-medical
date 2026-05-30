@@ -13,26 +13,28 @@
           class="row q-col-gutter-md q-col-gutter-lg-md
             add-client-form__allergy-input-row">
           <div class="col-12 col-md-6">
-            <q-input
-              v-model="localAllergy"
-              outlined
-              hide-bottom-space
-              :label="t('allergyName')"
-              :error="Boolean(nameError)"
-              :error-message="nameError"
-              maxlength="100"
-            />
+            <AddClientLabeledField :label="t('allergyName')">
+              <q-input
+                v-model="localAllergy"
+                outlined
+                hide-bottom-space
+                :error="Boolean(nameError)"
+                :error-message="nameError"
+                maxlength="100"
+              />
+            </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <ClientYearField
-              v-model="localStartYear"
-              :label="t('allergyStartYear')"
-              :min-year="allergyMinStartYear()"
-              :max-year="allergyMaxStartYear()"
-              :error="Boolean(yearError)"
-              :error-message="yearError"
-              :close-label="t('close')"
-            />
+            <AddClientLabeledField :label="t('allergyStartYear')">
+              <ClientYearField
+                v-model="localStartYear"
+                :min-year="allergyMinStartYear()"
+                :max-year="allergyMaxStartYear()"
+                :error="Boolean(yearError)"
+                :error-message="yearError"
+                :close-label="t('close')"
+              />
+            </AddClientLabeledField>
             <p
               v-if="!yearError"
               class="add-client-form__allergy-year-hint">
@@ -103,6 +105,7 @@
 
 <script setup>
 import ClientYearField from 'components/ClientYearField.vue'
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'
 import { computed, ref, watch } from 'vue'

@@ -18,15 +18,16 @@
         <p class="text-body2 q-mb-md">
           {{ t('allergyDeleteReasonHint') }}
         </p>
-        <q-input
-          v-model="reason"
-          outlined
-          type="textarea"
-          rows="3"
-          counter
-          maxlength="500"
-          :label="t('allergyDeleteReasonLabel')"
-        />
+        <AddClientLabeledField :label="t('allergyDeleteReasonLabel')">
+          <q-input
+            v-model="reason"
+            outlined
+            type="textarea"
+            rows="3"
+            counter
+            maxlength="500"
+          />
+        </AddClientLabeledField>
       </q-card-section>
       <q-separator />
       <q-card-actions align="right" class="q-pa-md">
@@ -52,6 +53,7 @@
 </template>
 
 <script setup>
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

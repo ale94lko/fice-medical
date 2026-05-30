@@ -130,7 +130,9 @@
   margin-left: auto;
   margin-right: auto;
 
-  .q-field {
+  .q-field,
+  .form-field__control .q-field,
+  .add-client-form__labeled-field-control .q-field {
     width: 100%;
   }
 
@@ -148,20 +150,7 @@
   color: $text-muted;
 }
 
-.add-client-form__outlined-field-label {
-  position: absolute;
-  top: -8px;
-  left: 10px;
-  padding: 0 4px;
-  font-size: 12px;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.6);
-  background: $surface;
-  pointer-events: none;
-}
-
 .add-client-form__sex-field {
-  position: relative;
   display: flex;
   align-items: center;
   min-height: 56px;
@@ -470,6 +459,15 @@
   }
 }
 
+.add-client-form__contact-method-type-row {
+  flex-wrap: nowrap;
+  align-items: center;
+
+  > .col {
+    min-width: 0;
+  }
+}
+
 .add-client-form__field-action {
   display: flex;
   align-items: center;
@@ -578,11 +576,48 @@
   background: $surface;
 }
 
-.add-client-form__checkbox-field {
+.add-client-form__toggle-field {
   display: flex;
   align-items: center;
   min-height: 56px;
   height: 100%;
+}
+
+.app-form-toggle {
+  .q-toggle__label {
+    color: $text-strong;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .q-toggle__inner {
+    font-size: 40px;
+    height: 1.05em;
+    padding-top: 0.275em;
+    padding-bottom: 0.275em;
+  }
+
+  .q-toggle__track {
+    height: 0.48em;
+    border-radius: 0.24em;
+  }
+
+  .q-toggle__thumb {
+    top: 0.275em;
+    width: 0.5em;
+    height: 0.5em;
+    color: $white;
+  }
+
+  .q-toggle__inner--falsy .q-toggle__track {
+    background: #cbd5e1;
+    opacity: 1;
+  }
+
+  .q-toggle__inner--truthy .q-toggle__track {
+    background: $positive;
+    opacity: 1;
+  }
 }
 
 .add-client-form__allergy-add-expansion {
@@ -779,8 +814,13 @@
 
 .add-client-form__fmh-table {
   width: 100%;
+  min-width: 560px;
   border-collapse: collapse;
   font-size: 0.875rem;
+
+  &--wide {
+    min-width: 720px;
+  }
 
   th,
   td {
@@ -799,10 +839,29 @@
   tbody tr:nth-child(even) {
     background: $surface-muted;
   }
+
+  tbody tr:nth-child(even) .add-client-form__fmh-table-actions {
+    background-color: $surface-muted !important;
+  }
+
+  tbody tr:hover .add-client-form__fmh-table-actions {
+    background-color: $surface-muted !important;
+  }
+}
+
+.add-client-form__fmh-table-actions-col,
+.add-client-form__fmh-table-actions {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  min-width: 120px;
+  width: 120px;
+  background-color: $white !important;
+  box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
 }
 
 .add-client-form__fmh-table-actions-col {
-  width: 120px;
+  z-index: 3;
   text-align: center !important;
 }
 
@@ -893,3 +952,77 @@
     }
   }
 }
+
+.add-client-vitals-tab__vitals-grid {
+  align-items: flex-start;
+}
+
+.add-client-vitals-tab__col {
+  min-width: 0;
+}
+
+.add-client-form__labeled-field {
+  @extend .form-field;
+}
+
+.add-client-form__labeled-field-control {
+  @extend .form-field__control;
+}
+
+.add-client-form__field-label {
+  @extend .form-field__label;
+}
+
+.add-client-form__field-hint {
+  @extend .form-field__hint;
+}
+
+.add-client-vitals-tab__datetime-row {
+  > [class*='col-'] {
+    min-width: 0;
+  }
+
+  .add-client-vitals-tab__datetime-input {
+    :deep(.q-field__control) {
+      min-height: 56px;
+    }
+
+    :deep(.q-field__control-container) {
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+
+    :deep(.q-field__native),
+    :deep(.q-field__input) {
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1.5;
+    }
+
+    :deep(.q-field__append) {
+      height: auto;
+    }
+  }
+}
+
+.add-client-vitals-tab__bp-sep {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  padding-top: 2px;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: $text-muted;
+}
+
+.add-client-vitals-tab__pain-level {
+  width: 100%;
+}
+
+.add-client-vitals-tab__bmi-field {
+  :deep(.q-field__control) {
+    background: $surface-muted;
+  }
+}
+

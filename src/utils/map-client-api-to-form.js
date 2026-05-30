@@ -27,6 +27,7 @@ import {
   createEmptyFamilyMedicalHistorySection,
   nextFamilyMedicalHistoryId,
 } from 'src/utils/client-family-medical-history.js'
+import { createEmptyVitalsSection } from 'src/utils/client-vitals.js'
 import {
   ageAndUnitFromUsDateString,
   isoDateToUsDateString,
@@ -503,5 +504,6 @@ export function mapClientApiToForm(client, options = {}) {
       ?? client.familyMedicalHistory,
     ),
     [clientFormSections.allergies]: mapAllergiesFromApi(client),
+    [clientFormSections.vitals]: createEmptyVitalsSection(),
   }
 }

@@ -5,35 +5,39 @@
       :title="t('fmhAddSectionTitle')">
       <div class="row q-col-gutter-sm q-col-gutter-md items-end">
             <div class="col-12 col-md-6">
-              <q-select
-                v-model="section.draft.familyRelationship"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :options="relationshipOptions"
-                :label="t('fmhFamilyRelationship')"
-                :error="Boolean(draftRelationshipError)"
-                :error-message="draftRelationshipError"
-              >
-                <template #append>
-                  <q-icon name="info_outline" class="cursor-pointer">
-                    <q-tooltip>{{ t('fmhRelationshipTooltip') }}</q-tooltip>
-                  </q-icon>
-                </template>
-              </q-select>
+              <AddClientLabeledField :label="t('fmhFamilyRelationship')">
+                <q-select
+                  v-model="section.draft.familyRelationship"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  clearable
+                  :options="relationshipOptions"
+                  :error="Boolean(draftRelationshipError)"
+                  :error-message="draftRelationshipError"
+                >
+                  <template #append>
+                    <q-icon name="info_outline" class="cursor-pointer">
+                      <q-tooltip>
+                        {{ t('fmhRelationshipTooltip') }}
+                      </q-tooltip>
+                    </q-icon>
+                  </template>
+                </q-select>
+              </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
-              <q-input
-                v-model="section.draft.medicalConditions"
-                outlined
-                hide-bottom-space
-                :label="t('fmhMedicalConditions')"
-                :error="Boolean(draftConditionsError)"
-                :error-message="draftConditionsError"
-                maxlength="500"
-              />
+              <AddClientLabeledField :label="t('fmhMedicalConditions')">
+                <q-input
+                  v-model="section.draft.medicalConditions"
+                  outlined
+                  hide-bottom-space
+                  :error="Boolean(draftConditionsError)"
+                  :error-message="draftConditionsError"
+                  maxlength="500"
+                />
+              </AddClientLabeledField>
             </div>
             <div class="col-12 flex justify-end">
               <q-btn
@@ -99,6 +103,7 @@
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import FamilyMedicalHistoryTable from 'components/FamilyMedicalHistoryTable.vue'
 import FamilyMedicalHistoryEditDialog from

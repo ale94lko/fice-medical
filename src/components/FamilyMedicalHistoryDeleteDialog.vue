@@ -12,16 +12,17 @@
         <p class="text-body1 q-mb-md">
           {{ t('fmhDeleteMessage') }}
         </p>
-        <q-input
-          v-model="reason"
-          outlined
-          type="textarea"
-          rows="3"
-          :label="t('fmhDeleteReasonLabel')"
-          :error="Boolean(reasonError)"
-          :error-message="reasonError"
-          maxlength="500"
-        />
+        <AddClientLabeledField :label="t('fmhDeleteReasonLabel')">
+          <q-input
+            v-model="reason"
+            outlined
+            type="textarea"
+            rows="3"
+            :error="Boolean(reasonError)"
+            :error-message="reasonError"
+            maxlength="500"
+          />
+        </AddClientLabeledField>
       </q-card-section>
       <q-separator />
       <q-card-actions align="right" class="q-pa-md">
@@ -47,6 +48,7 @@
 </template>
 
 <script setup>
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 

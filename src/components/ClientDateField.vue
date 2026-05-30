@@ -2,8 +2,10 @@
   <q-input
     outlined
     hide-bottom-space
+    class="client-date-field"
+    :class="{ 'client-date-field--no-label': !label }"
     :model-value="modelValue"
-    :label="label"
+    :label="label || undefined"
     :readonly="readonly"
     :rules="rules"
     :lazy-rules="'ondemand'"
@@ -137,5 +139,20 @@ function onPickerChange(val) {
 
 .input-icon {
   color: $primary;
+}
+
+.client-date-field--no-label {
+  :deep(.q-field__control-container) {
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  :deep(.q-field__native),
+  :deep(.q-field__input) {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.5;
+  }
 }
 </style>

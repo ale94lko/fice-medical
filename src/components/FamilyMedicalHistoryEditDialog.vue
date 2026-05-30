@@ -11,35 +11,39 @@
       <q-card-section class="q-px-lg q-pt-md q-pb-sm">
         <div class="row q-col-gutter-md q-col-gutter-lg-md">
           <div class="col-12 col-md-6">
-            <q-select
-              v-model="localRelationship"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              clearable
-              :options="relationshipOptions"
-              :label="t('fmhFamilyRelationship')"
-              :error="Boolean(relationshipError)"
-              :error-message="relationshipError"
-            >
-              <template #append>
-                <q-icon name="info_outline" class="cursor-pointer">
-                  <q-tooltip>{{ t('fmhRelationshipTooltip') }}</q-tooltip>
-                </q-icon>
-              </template>
-            </q-select>
+            <AddClientLabeledField :label="t('fmhFamilyRelationship')">
+              <q-select
+                v-model="localRelationship"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                clearable
+                :options="relationshipOptions"
+                :error="Boolean(relationshipError)"
+                :error-message="relationshipError"
+              >
+                <template #append>
+                  <q-icon name="info_outline" class="cursor-pointer">
+                    <q-tooltip>
+                      {{ t('fmhRelationshipTooltip') }}
+                    </q-tooltip>
+                  </q-icon>
+                </template>
+              </q-select>
+            </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <q-input
-              v-model="localConditions"
-              outlined
-              hide-bottom-space
-              :label="t('fmhMedicalConditions')"
-              :error="Boolean(conditionsError)"
-              :error-message="conditionsError"
-              maxlength="500"
-            />
+            <AddClientLabeledField :label="t('fmhMedicalConditions')">
+              <q-input
+                v-model="localConditions"
+                outlined
+                hide-bottom-space
+                :error="Boolean(conditionsError)"
+                :error-message="conditionsError"
+                maxlength="500"
+              />
+            </AddClientLabeledField>
           </div>
         </div>
       </q-card-section>
@@ -67,6 +71,7 @@
 </template>
 
 <script setup>
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {

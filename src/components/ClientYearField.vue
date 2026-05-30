@@ -2,8 +2,10 @@
   <q-input
     outlined
     hide-bottom-space
+    class="client-year-field"
+    :class="{ 'client-year-field--no-label': !label }"
     :model-value="modelValue"
-    :label="label"
+    :label="label || undefined"
     :error="error"
     :error-message="errorMessage"
     mask="####"
@@ -156,6 +158,21 @@ function onNavigation(ctx) {
 
 .input-icon {
   color: $primary;
+}
+
+.client-year-field--no-label {
+  :deep(.q-field__control-container) {
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  :deep(.q-field__native),
+  :deep(.q-field__input) {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.5;
+  }
 }
 
 .client-year-field__picker {

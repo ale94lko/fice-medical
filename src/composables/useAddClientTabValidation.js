@@ -4,8 +4,10 @@ import {
   ADD_CLIENT_COMING_SOON_TABS,
   tabIndexInOrder,
 } from 'src/composables/useAddClientTabAccess.js'
-import { CLINICAL_FAMILY_HISTORY_SUB_TAB } from
-  'src/composables/useAddClientSubTabs.js'
+import {
+  CLINICAL_FAMILY_HISTORY_SUB_TAB,
+  CLINICAL_VITALS_SUB_TAB,
+} from 'src/composables/useAddClientSubTabs.js'
 import {
   addClientTabKeys,
   clientFormSections,
@@ -16,6 +18,7 @@ import {
 import {
   countAllergyDraftFieldErrors,
 } from 'src/utils/client-allergies.js'
+import { countVitalsDraftFieldErrors } from 'src/utils/client-vitals.js'
 import {
   countBasicTabFieldErrors,
   countContactTabFieldErrors,
@@ -32,6 +35,7 @@ export function useAddClientTabValidation({
   t,
   allergiesTabRef,
   fmhTabRef,
+  vitalsTabRef,
   getBasicRules,
   getContactRules,
 }) {
@@ -112,9 +116,14 @@ export function useAddClientTabValidation({
       return countAllergyDraftFieldErrors(section)
     }
     if (tab === addClientTabKeys.clinical) {
-      const section = form.value[clientFormSections.familyMedicalHistory]
-
-      return countFamilyMedicalHistoryDraftFieldErrors(section)
+      return (
+        countFamilyMedicalHistoryDraftFieldErrors(
+          form.value[clientFormSections.familyMedicalHistory],
+        )
+        + countVitalsDraftFieldErrors(
+          form.value[clientFormSections.vitals],
+        )
+      )
     }
     if (tab === addClientTabKeys.basic) {
       return countBasicTabFieldErrors(
@@ -139,6 +148,7 @@ export function useAddClientTabValidation({
       return
     }
     if (tab === addClientTabKeys.clinical) {
+      vitalsTabRef?.value?.clearSaveValidation?.()
       fmhTabRef?.value?.clearSaveValidation?.()
 
       return
@@ -158,10 +168,19 @@ export function useAddClientTabValidation({
       return
     }
     if (tab === addClientTabKeys.clinical) {
-      if (activeSubTab) {
+      const vitalsCount = countVitalsDraftFieldErrors(
+        form.value[clientFormSections.vitals],
+      )
+      const fmhCount = countFamilyMedicalHistoryDraftFieldErrors(
+        form.value[clientFormSections.familyMedicalHistory],
+      )
+      if (vitalsCount > 0 && activeSubTab) {
+        activeSubTab.value = CLINICAL_VITALS_SUB_TAB
+      } else if (fmhCount > 0 && activeSubTab) {
         activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
       }
       await nextTick()
+      vitalsTabRef?.value?.applySaveValidation?.()
       fmhTabRef?.value?.applySaveValidation?.()
 
       return
@@ -198,11 +217,8 @@ export function useAddClientTabValidation({
         [tab]: countTabErrors(tab),
       }
       await applyTabFieldErrors(tab)
-      if (
-        tab === addClientTabKeys.clinical
-        && activeSubTab?.value !== CLINICAL_FAMILY_HISTORY_SUB_TAB
-      ) {
-        activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
+      if (tab === addClientTabKeys.clinical) {
+        focusClinicalSubTabWithErrors()
       }
 
       return false
@@ -217,17 +233,29 @@ export function useAddClientTabValidation({
     return true
   }
 
+  function focusClinicalSubTabWithErrors() {
+    if (!activeSubTab) {
+      return
+    }
+    const vitalsCount = countVitalsDraftFieldErrors(
+      form.value[clientFormSections.vitals],
+    )
+    if (vitalsCount > 0) {
+      activeSubTab.value = CLINICAL_VITALS_SUB_TAB
+
+      return
+    }
+    activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
+  }
+
   async function validateTabsThrough(targetIndex) {
     for (let i = 0; i < targetIndex; i += 1) {
       const tab = tabOrder[i]
       const ok = await validateTab(tab)
       if (!ok) {
         activeTab.value = tab
-        if (
-          tab === addClientTabKeys.clinical
-          && activeSubTab
-        ) {
-          activeSubTab.value = CLINICAL_FAMILY_HISTORY_SUB_TAB
+        if (tab === addClientTabKeys.clinical) {
+          focusClinicalSubTabWithErrors()
         }
 
         return false

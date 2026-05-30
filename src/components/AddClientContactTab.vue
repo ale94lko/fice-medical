@@ -5,6 +5,7 @@
           <div class="col-12 col-md-6">
             <TextInput
               v-model="contact.addressLine1"
+              :external-label="true"
               :label="t('addressLine1')"
               :rules="rules.addressLine1"
               maxlength="100"
@@ -13,54 +14,62 @@
           <div class="col-12 col-md-6">
             <TextInput
               v-model="contact.addressLine2"
+              :external-label="true"
               :label="t('addressLine2Optional')"
               :rules="rules.addressLine2"
               maxlength="100"
             />
           </div>
           <div class="col-12 col-md-6">
-            <q-select
-              v-model="contact.state"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              clearable
-              :options="stateOptions"
-              :label="t('state')"
-              @update:model-value="onClientStateChange"
-            />
+            <AddClientLabeledField :label="t('state')">
+              <q-select
+                v-model="contact.state"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                clearable
+                class="full-width"
+                :options="stateOptions"
+                @update:model-value="onClientStateChange"
+              />
+            </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <q-select
-              v-model="contact.city"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              clearable
-              :disable="!contact.state"
-              :options="cityOptions"
-              :label="t('city')"
-              @update:model-value="onClientCityChange"
-            />
+            <AddClientLabeledField :label="t('city')">
+              <q-select
+                v-model="contact.city"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                clearable
+                class="full-width"
+                :disable="!contact.state"
+                :options="cityOptions"
+                @update:model-value="onClientCityChange"
+              />
+            </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <q-select
-              v-model="contact.county"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              clearable
-              :disable="!contact.state || !contact.city"
-              :options="countyOptions"
-              :label="t('county')"
-            />
+            <AddClientLabeledField :label="t('county')">
+              <q-select
+                v-model="contact.county"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                clearable
+                class="full-width"
+                :disable="!contact.state || !contact.city"
+                :options="countyOptions"
+              />
+            </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
             <TextInput
               v-model="contact.zipCode"
+              :external-label="true"
               :label="t('zipCode')"
               :rules="rules.zipCode"
               maxlength="11"
@@ -80,39 +89,46 @@
             class="row q-col-gutter-sm q-col-gutter-md
               add-client-form__contact-method-row">
             <div class="col-12 col-md-6">
-              <q-input
-                outlined
-                hide-bottom-space
-                :model-value="phone.number"
-                :label="t('phoneNumber')"
-                :rules="rules.phoneNumber"
-                maxlength="14"
-                @update:model-value="val => onPhoneInput(index, val)"
-              />
+              <AddClientLabeledField :label="t('phoneNumber')">
+                <q-input
+                  outlined
+                  hide-bottom-space
+                  class="full-width"
+                  :model-value="phone.number"
+                  :placeholder="t('phoneNumberPlaceholder')"
+                  :rules="rules.phoneNumber"
+                  maxlength="14"
+                  @update:model-value="val => onPhoneInput(index, val)"
+                />
+              </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
-                  <q-select
-                    v-model="phone.type"
-                    outlined
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    clearable
-                    :options="phoneTypeOptions"
-                    :label="t('phoneType')"
+              <AddClientLabeledField :label="t('phoneType')">
+                <div
+                  class="row q-col-gutter-sm items-center
+                    add-client-form__contact-method-type-row">
+                  <div class="col">
+                    <q-select
+                      v-model="phone.type"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      clearable
+                      class="full-width"
+                      :options="phoneTypeOptions"
+                    />
+                  </div>
+                  <AddClientMethodRowActions
+                    :is-last="index === contact.phones.length - 1"
+                    :total="contact.phones.length"
+                    :add-label="t('addPhone')"
+                    :remove-label="t('removePhone')"
+                    @add="addPhone"
+                    @remove="removePhone(index)"
                   />
                 </div>
-                <AddClientMethodRowActions
-                  :is-last="index === contact.phones.length - 1"
-                  :total="contact.phones.length"
-                  :add-label="t('addPhone')"
-                  :remove-label="t('removePhone')"
-                  @add="addPhone"
-                  @remove="removePhone(index)"
-                />
-              </div>
+              </AddClientLabeledField>
             </div>
           </div>
         </div>
@@ -130,34 +146,40 @@
             <div class="col-12 col-md-6">
               <TextInput
                 v-model="email.address"
+                :external-label="true"
                 :label="t('emailAddress')"
+                :placeholder="t('emailAddressPlaceholder')"
                 :rules="rules.emailAddress"
                 maxlength="32"
               />
             </div>
             <div class="col-12 col-md-6">
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
-                  <q-select
-                    v-model="email.type"
-                    outlined
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    clearable
-                    :options="emailTypeOptions"
-                    :label="t('emailType')"
+              <AddClientLabeledField :label="t('emailType')">
+                <div
+                  class="row q-col-gutter-sm items-center
+                    add-client-form__contact-method-type-row">
+                  <div class="col">
+                    <q-select
+                      v-model="email.type"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      clearable
+                      class="full-width"
+                      :options="emailTypeOptions"
+                    />
+                  </div>
+                  <AddClientMethodRowActions
+                    :is-last="index === contact.emails.length - 1"
+                    :total="contact.emails.length"
+                    :add-label="t('addEmail')"
+                    :remove-label="t('removeEmail')"
+                    @add="addEmail"
+                    @remove="removeEmail(index)"
                   />
                 </div>
-                <AddClientMethodRowActions
-                  :is-last="index === contact.emails.length - 1"
-                  :total="contact.emails.length"
-                  :add-label="t('addEmail')"
-                  :remove-label="t('removeEmail')"
-                  @add="addEmail"
-                  @remove="removeEmail(index)"
-                />
-              </div>
+              </AddClientLabeledField>
             </div>
           </div>
         </div>
@@ -220,17 +242,19 @@
       :title="t('additionalNotes')">
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12">
-          <q-input
-            v-model="contact.additionalNotes"
-            outlined
-            type="textarea"
-            rows="4"
-            class="add-client-form__notes-field"
-            :label="t('additionalNotesPlaceholder')"
-            :rules="rules.additionalNotes"
-            maxlength="500"
-            counter
-          />
+          <AddClientLabeledField :label="t('additionalNotes')">
+            <q-input
+              v-model="contact.additionalNotes"
+              outlined
+              type="textarea"
+              rows="4"
+              class="full-width add-client-form__notes-field"
+              :placeholder="t('additionalNotesPlaceholder')"
+              :rules="rules.additionalNotes"
+              maxlength="500"
+              counter
+            />
+          </AddClientLabeledField>
         </div>
       </div>
     </AddClientAccordionSection>
@@ -241,6 +265,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import OtherContactsSection from 'components/OtherContactsSection.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AddClientSubsectionHeading

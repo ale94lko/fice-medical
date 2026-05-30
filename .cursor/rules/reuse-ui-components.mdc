@@ -1,0 +1,56 @@
+---
+description: Reutilizar componentes y estilos UI existentes antes de crear algo nuevo
+alwaysApply: true
+---
+
+# Consistencia de UI — reutilizar antes de crear
+
+Al **añadir o modificar** pantallas, formularios, tablas, campos o diálogos en este proyecto:
+
+## 1. Buscar si ya existe
+
+Antes de crear un componente, input, tabla o patrón nuevo:
+
+```bash
+rg "NombreAproximado|patrón-css" src/components src/css
+Glob: src/components/**/*.vue
+```
+
+Revisa también `src/composables/`, `src/i18n/` y estilos en `src/css/add-client-form.scss`, `src/css/form-field.scss`, `src/css/app.scss`.
+
+## 2. Componentes de referencia (formulario cliente)
+
+| Necesidad | Usar (no reinventar) |
+|-----------|----------------------|
+| Label externo + cualquier control | `FormField` o `AddClientLabeledField` |
+| Solo el label | `FormFieldLabel` |
+| Texto con label arriba | `TextInput` con `:external-label="true"` |
+| Fecha | `ClientDateField` |
+| Año | `ClientYearField` |
+| Booleano on/off | `FormToggle` (no `q-checkbox`) |
+| Sección colapsable | `AddClientAccordionSection` |
+| Título de bloque / subbloque | `AddClientSectionHeading` / `AddClientSubsectionHeading` |
+| Tabla en Add/Edit Client | Tabla HTML + clases `add-client-form__fmh-table-wrap`, `add-client-form__fmh-table`, `add-client-form__fmh-table-actions-col` (ver `FamilyMedicalHistoryTable.vue`) |
+| Contenedor de lista/tabla | `add-client-form__fmh-list-card` |
+| Fila teléfono/email con +/− | `AddClientMethodRowActions` + `add-client-form__contact-method-type-row` |
+| Modal confirmación / formulario modal | `ModalComponent` o patrón de `*EditDialog.vue` existentes |
+| Campo requerido en label | prop `required` en `FormField` (asterisco), no texto "(Optional)" en labels |
+
+## 3. Reglas de estilo
+
+- **Labels**: negrita, mismo tamaño → clase `form-field__label` vía `FormField` (no labels flotantes de Quasar en formularios cliente).
+- **Tablas cliente**: mismo borde, header teal claro, filas alternas, columna **Actions** sticky a la derecha con fondo blanco opaco (`add-client-form__fmh-table-actions-col` / `add-client-form__fmh-table-actions`). No usar `q-table` en formulario cliente si el patrón FMH ya cubre el caso.
+- **Espaciado entre campos**: prop `spaced` en `FormField` (`q-mt-md`), o `q-col-gutter-sm q-col-gutter-md` en filas.
+- **i18n**: textos visibles en `src/i18n/en-US` y `src/i18n/es-ES`; placeholders en claves dedicadas (ej. `emailAddressPlaceholder`, `phoneNumberPlaceholder`).
+- **Colores**: variables en `src/css/quasar.variables.scss` (`$primary`, `$positive`, `$text-strong`, `$border-subtle`).
+
+## 4. Si hace falta algo nuevo
+
+1. Extiende el componente existente más cercano (props/slots), no dupliques markup.
+2. Si es específico de una feature, prefijo de clase BEM: `add-client-form__…` o reutiliza clases FMH existentes.
+3. Alinea el nuevo componente con un **archivo referencia** del mismo tipo (p. ej. copiar estructura de `FamilyMedicalHistoryTable.vue` para otra tabla).
+4. Tras el cambio, contrasta al menos una pantalla que ya usaba el patrón (Add Client: Basic, Contact, Allergies, FMH, Vitals).
+
+## 5. Evitar
+
+- Nuevos `q-checkbox`, labels inline en `q-input`/`q-select` en tabs de cliente, tablas Quasar solo en una sección, clases de label ad hoc (`labeled-field-label` sin estilo), fondos semitransparentes en columnas sticky, duplicar "Enter value" / "(Optional)" en labels.

@@ -1,21 +1,51 @@
 <template>
+  <FormField v-if="externalLabel" :label="props.label">
+    <q-input
+      outlined
+      hide-bottom-space
+      class="full-width"
+      :model-value="model"
+      :data-testid="props.testId"
+      :type="resolvedType"
+      :rules="props.rules || []"
+      :maxlength="maxlengthResolved"
+      :error="props.error"
+      :error-message="props.errorMessage"
+      :placeholder="props.placeholder || undefined"
+      :disable="props.disable"
+      lazy-rules="ondemand"
+      @update:model-value="onUpdate">
+      <template v-if="iconLeft" #prepend>
+        <q-icon :name="iconLeft" class="input-icon" />
+      </template>
+      <template v-if="isPasswordField" #append>
+        <PasswordToggleIcon
+          :show-plain="showPlainPassword"
+          @toggle="showPlainPassword = !showPlainPassword"
+        />
+      </template>
+    </q-input>
+  </FormField>
   <q-input
+    v-else
     outlined
     :stack-label="stackSpacing"
     :hide-bottom-space="!stackSpacing"
     :model-value="model"
     :class="{ 'text-input--stack-spacing': stackSpacing }"
-    :lazy-rules="'ondemand'"
     :data-testid="props.testId"
     :type="resolvedType"
-    :label="props.label"
+    :label="props.label || undefined"
     :rules="props.rules || []"
     :maxlength="maxlengthResolved"
     :error="props.error"
     :error-message="props.errorMessage"
+    :placeholder="props.placeholder || undefined"
+    :disable="props.disable"
+    lazy-rules="ondemand"
     @update:model-value="onUpdate">
-    <template v-slot:prepend v-if="iconLeft">
-      <q-icon :name="iconLeft" class="input-icon"/>
+    <template v-if="iconLeft" #prepend>
+      <q-icon :name="iconLeft" class="input-icon" />
     </template>
     <template v-if="isPasswordField" #append>
       <PasswordToggleIcon
@@ -28,6 +58,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import FormField from 'components/FormField.vue'
 import PasswordToggleIcon from './PasswordToggleIcon.vue'
 import {
   isPasswordInputType,
@@ -42,7 +73,7 @@ const props = defineProps({
   },
   label: {
     type: String,
-    default: 'text',
+    default: '',
   },
   iconLeft: {
     type: String,
@@ -74,6 +105,18 @@ const props = defineProps({
     default: undefined,
   },
   lettersOnly: {
+    type: Boolean,
+    default: false,
+  },
+  externalLabel: {
+    type: Boolean,
+    default: false,
+  },
+  placeholder: {
+    type: String,
+    default: '',
+  },
+  disable: {
     type: Boolean,
     default: false,
   },

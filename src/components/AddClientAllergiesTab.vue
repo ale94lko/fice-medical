@@ -8,26 +8,28 @@
         class="row q-col-gutter-sm q-col-gutter-md
           add-client-form__allergy-input-row">
         <div class="col-12 col-md-6">
-          <q-input
-            v-model="section.draft.allergy"
-            outlined
-            hide-bottom-space
-            :label="t('allergyName')"
-            :error="Boolean(draftNameError)"
-            :error-message="draftNameError"
-            maxlength="100"
-          />
+          <AddClientLabeledField :label="t('allergyName')">
+            <q-input
+              v-model="section.draft.allergy"
+              outlined
+              hide-bottom-space
+              :error="Boolean(draftNameError)"
+              :error-message="draftNameError"
+              maxlength="100"
+            />
+          </AddClientLabeledField>
         </div>
         <div class="col-12 col-md-6">
-          <ClientYearField
-            v-model="section.draft.startYear"
-            :label="t('allergyStartYear')"
-            :min-year="allergyMinStartYear()"
-            :max-year="allergyMaxStartYear()"
-            :error="Boolean(draftYearError)"
-            :error-message="draftYearError"
-            :close-label="t('close')"
-          />
+          <AddClientLabeledField :label="t('allergyStartYear')">
+            <ClientYearField
+              v-model="section.draft.startYear"
+              :min-year="allergyMinStartYear()"
+              :max-year="allergyMaxStartYear()"
+              :error="Boolean(draftYearError)"
+              :error-message="draftYearError"
+              :close-label="t('close')"
+            />
+          </AddClientLabeledField>
           <p
             v-if="!draftYearError"
             class="add-client-form__allergy-year-hint">
@@ -120,6 +122,7 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import ClientYearField from 'components/ClientYearField.vue'
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'

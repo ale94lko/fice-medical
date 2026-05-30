@@ -98,6 +98,7 @@
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.firstName]"
+                    :external-label="true"
                     letters-only
                     :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('firstName'))"
@@ -107,6 +108,7 @@
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.middleName]"
+                    :external-label="true"
                     letters-only
                     :maxlength="clientNameMaxLength"
                     :label="t('middleName')"
@@ -116,6 +118,7 @@
                 <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.lastName]"
+                    :external-label="true"
                     letters-only
                     :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('lastName'))"
@@ -123,46 +126,49 @@
                   />
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-select
-                    v-model="form[ck.suffix]"
-                    outlined
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    :loading="catalogsLoading"
-                    :options="suffixSelectOptions"
-                    :label="t('suffix')"
-                  />
+                  <AddClientLabeledField :label="t('suffix')">
+                    <q-select
+                      v-model="form[ck.suffix]"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      class="full-width"
+                      :loading="catalogsLoading"
+                      :options="suffixSelectOptions"
+                    />
+                  </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <ClientDateField
-                    v-model="form[ck.dob]"
-                    max-today
-                    :min-year="dobMinYear"
-                    :label="t('dob')"
-                    :rules="rules.dob"
-                    :close-label="t('close')"
-                  />
+                  <AddClientLabeledField :label="t('dob')">
+                    <ClientDateField
+                      v-model="form[ck.dob]"
+                      max-today
+                      :min-year="dobMinYear"
+                      :rules="rules.dob"
+                      :close-label="t('close')"
+                    />
+                  </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
                   <div class="row q-col-gutter-sm">
                     <div class="col-6">
-                      <q-input
-                        v-model="form[ck.age]"
-                        class="add-client-form__age-input"
-                        outlined
-                        hide-bottom-space
-                        type="number"
-                        step="1"
-                        :label="t('age')"
-                        :rules="rules.age"
-                        :readonly="ageFieldsLocked"
-                        :disable="ageFieldsLocked"
-                        :filled="ageFieldsLocked"
-                        min="0"
-                        :max="ageMaxForUnit"
-                        @update:model-value="onAgeInput"
-                      >
+                      <AddClientLabeledField :label="t('age')">
+                        <q-input
+                          v-model="form[ck.age]"
+                          class="add-client-form__age-input"
+                          outlined
+                          hide-bottom-space
+                          type="number"
+                          step="1"
+                          :rules="rules.age"
+                          :readonly="ageFieldsLocked"
+                          :disable="ageFieldsLocked"
+                          :filled="ageFieldsLocked"
+                          min="0"
+                          :max="ageMaxForUnit"
+                          @update:model-value="onAgeInput"
+                        >
                         <template v-if="!ageFieldsLocked" #append>
                           <div
                             class="add-client-form__age-stepper"
@@ -189,53 +195,58 @@
                             </button>
                           </div>
                         </template>
-                      </q-input>
+                        </q-input>
+                      </AddClientLabeledField>
                     </div>
                     <div class="col-6">
-                      <q-select
-                        v-model="form[ck.ageUnit]"
-                        outlined
-                        hide-bottom-space
-                        emit-value
-                        map-options
-                        :loading="catalogsLoading"
-                        :options="ageUnitSelectOptions"
-                        :label="t('ageUnit')"
-                        :rules="rules.ageUnit"
-                        :readonly="ageFieldsLocked"
-                        :disable="ageFieldsLocked"
-                        :key="`age-unit-${catalogsLoaded}-${form[ck.ageUnit]}`"
-                      />
+                      <AddClientLabeledField :label="t('ageUnit')">
+                        <q-select
+                          v-model="form[ck.ageUnit]"
+                          outlined
+                          hide-bottom-space
+                          emit-value
+                          map-options
+                          class="full-width"
+                          :loading="catalogsLoading"
+                          :options="ageUnitSelectOptions"
+                          :rules="rules.ageUnit"
+                          :readonly="ageFieldsLocked"
+                          :disable="ageFieldsLocked"
+                          :key="
+                            `age-unit-${catalogsLoaded}-${form[ck.ageUnit]}`
+                          "
+                        />
+                      </AddClientLabeledField>
                     </div>
                   </div>
                 </div>
                 <div class="col-12 col-md-6">
-                  <div class="add-client-form__sex-field">
-                    <span class="add-client-form__outlined-field-label">
-                      {{ t('sex') }}
-                    </span>
-                    <q-option-group
-                      v-model="form[ck.sex]"
-                      :options="sexOptions"
-                      :disable="catalogsLoading"
-                      type="radio"
-                      inline
-                      class="add-client-form__sex-group"
-                    />
-                  </div>
+                  <AddClientLabeledField :label="t('sex')">
+                    <div class="add-client-form__sex-field">
+                      <q-option-group
+                        v-model="form[ck.sex]"
+                        :options="sexOptions"
+                        :disable="catalogsLoading"
+                        type="radio"
+                        inline
+                        class="add-client-form__sex-group"
+                      />
+                    </div>
+                  </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-input
-                    outlined
-                    hide-bottom-space
-                    :label="t('socialSecurityNumber')"
-                    :model-value="ssnDisplayValue"
-                    :rules="rules.ssn"
-                    maxlength="11"
-                    @focus="onSsnFocus"
-                    @blur="onSsnBlur"
-                    @update:model-value="onSsnInput"
-                  />
+                  <AddClientLabeledField :label="t('socialSecurityNumber')">
+                    <q-input
+                      outlined
+                      hide-bottom-space
+                      :model-value="ssnDisplayValue"
+                      :rules="rules.ssn"
+                      maxlength="11"
+                      @focus="onSsnFocus"
+                      @blur="onSsnBlur"
+                      @update:model-value="onSsnInput"
+                    />
+                  </AddClientLabeledField>
                 </div>
               </div>
           </AddClientAccordionSection>
@@ -247,27 +258,31 @@
             :title="t('administrativeInformation')">
             <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
-                  <ClientDateField
-                    v-model="form[ck.admissionDate]"
-                    :label="requiredLabel(t('admissionDate'))"
-                    :rules="rules.admissionDate"
-                    :max-today="true"
-                    :close-label="t('close')"
-                  />
+                  <AddClientLabeledField
+                    :label="requiredLabel(t('admissionDate'))">
+                    <ClientDateField
+                      v-model="form[ck.admissionDate]"
+                      :rules="rules.admissionDate"
+                      :max-today="true"
+                      :close-label="t('close')"
+                    />
+                  </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <q-select
-                    v-model="form[ck.assignedClinician]"
-                    outlined
-                    hide-bottom-space
-                    emit-value
-                    map-options
-                    clearable
-                    use-input
-                    input-debounce="0"
-                    :options="assignedClinicianOptions"
-                    :label="t('assignedClinician')"
-                  />
+                  <AddClientLabeledField :label="t('assignedClinician')">
+                    <q-select
+                      v-model="form[ck.assignedClinician]"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      clearable
+                      use-input
+                      class="full-width"
+                      input-debounce="0"
+                      :options="assignedClinicianOptions"
+                    />
+                  </AddClientLabeledField>
                 </div>
               </div>
           </AddClientAccordionSection>
@@ -325,6 +340,12 @@
                 v-if="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
                 ref="fmhTabRef"
                 v-model="form[clientFormSections.familyMedicalHistory]"
+              />
+              <AddClientVitalsTab
+                v-else-if="subTab.key === CLINICAL_VITALS_SUB_TAB"
+                ref="vitalsTabRef"
+                v-model="form[clientFormSections.vitals]"
+                :clinician-options="assignedClinicianOptions"
               />
               <div
                 v-else
@@ -442,10 +463,12 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 import ClientDateField from 'components/ClientDateField.vue'
+import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import AddClientContactTab from 'components/AddClientContactTab.vue'
 import AddClientFamilyMedicalHistoryTab from
   'components/AddClientFamilyMedicalHistoryTab.vue'
+import AddClientVitalsTab from 'components/AddClientVitalsTab.vue'
 import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import { useSiteStore } from 'stores/site-store.js'
@@ -472,6 +495,7 @@ import {
   ADD_CLIENT_MAIN_TABS,
   ADD_CLIENT_SUB_TABS,
   CLINICAL_FAMILY_HISTORY_SUB_TAB,
+  CLINICAL_VITALS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 
 const props = defineProps({
@@ -501,6 +525,7 @@ const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
 const allergiesTabRef = ref(null)
 const fmhTabRef = ref(null)
+const vitalsTabRef = ref(null)
 
 const catalogs = useAddClientCatalogs(t)
 const {
@@ -537,7 +562,11 @@ const {
   hasSubTabs,
   currentSubTabs,
   activeSubTab,
-} = useAddClientForm(t, catalogs, { allergiesTabRef, fmhTabRef })
+} = useAddClientForm(t, catalogs, {
+  allergiesTabRef,
+  fmhTabRef,
+  vitalsTabRef,
+})
 
 const dobMinYear = computed(
   () => new Date().getFullYear() - clientMaxAge,

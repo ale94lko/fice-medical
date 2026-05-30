@@ -2,7 +2,7 @@
   <div
     v-if="entries.length"
     class="add-client-form__fmh-table-wrap">
-    <table class="add-client-form__fmh-table add-client-form__allergy-table">
+    <table class="add-client-form__fmh-table">
       <thead>
         <tr>
           <th>{{ t('allergyName') }}</th>
