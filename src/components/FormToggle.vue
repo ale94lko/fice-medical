@@ -3,6 +3,7 @@
     :model-value="modelValue"
     :label="label"
     :disable="disable"
+    :data-testid="testId || undefined"
     color="positive"
     keep-color
     class="app-form-toggle"
@@ -23,6 +24,10 @@ defineProps({
   disable: {
     type: Boolean,
     default: false,
+  },
+  testId: {
+    type: String,
+    default: '',
   },
 })
 

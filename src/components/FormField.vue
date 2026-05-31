@@ -1,7 +1,8 @@
 <template>
   <div
     class="form-field"
-    :class="{ 'q-mt-md': spaced }">
+    :class="{ 'q-mt-md': spaced }"
+    :data-testid="testId || undefined">
     <FormFieldLabel v-if="displayLabel" :label="displayLabel" />
     <div class="form-field__control">
       <slot />
@@ -27,6 +28,10 @@ const props = defineProps({
   spaced: {
     type: Boolean,
     default: false,
+  },
+  testId: {
+    type: String,
+    default: '',
   },
 })
 

@@ -13,7 +13,7 @@
               v-model="email"
               stack-spacing
               icon-left="mail"
-              test-id="input_email"
+              :test-id="authTestIds.emailInput"
               :label="t('email')"
               :error-message="emailErrorMessage"
               :error="isEmailInvalid"
@@ -23,7 +23,7 @@
               stack-spacing
               icon-left="lock"
               type="password"
-              test-id="input_password"
+              :test-id="authTestIds.passwordInput"
               :label="t('password')"
               :error-message="passwordErrorMessage"
               :error="isPasswordInvalid"
@@ -39,14 +39,14 @@
               color="primary"
               type="submit"
               class="full-width"
-              data-testId="button_sign_in"
+              :data-testid="authTestIds.signInButton"
               :label="t('signIn')"
               :loading="loading">
             </q-btn>
             <div class="forgot-password-container">
               <q-item-label
                 class="forgot-password"
-                data-testId="button_forgot_password"
+                :data-testid="authTestIds.forgotPasswordLink"
                 @click="router.push('/reset-password')">
                 {{ t('forgotPassword') }}
               </q-item-label>
@@ -73,6 +73,7 @@ import { useAuthStore } from 'stores/auth-store'
 import { siteBreakpointsPx } from 'components/constants'
 //import { useNotifications } from 'src/composables/useNotifications'
 import TextInput from 'components/TextInput.vue'
+import { authTestIds } from 'src/test-ids/index.js'
 
 // Quasar + Router + Auth Store
 const $q = useQuasar()

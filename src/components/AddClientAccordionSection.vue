@@ -1,5 +1,7 @@
 <template>
-  <section class="add-client-form__section">
+  <section
+    class="add-client-form__section"
+    :data-testid="sectionTestId || undefined">
     <div
       class="add-client-form__accordion-header row items-center no-wrap">
       <AddClientSectionHeading
@@ -13,6 +15,7 @@
         dense
         color="grey-8"
         class="add-client-form__accordion-chevron"
+        :data-testid="toggleTestId || undefined"
         :icon="chevronIcon"
         :aria-label="toggleAriaLabel"
         @click="toggleExpanded"
@@ -47,6 +50,14 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     default: undefined,
+  },
+  sectionTestId: {
+    type: String,
+    default: '',
+  },
+  toggleTestId: {
+    type: String,
+    default: '',
   },
 })
 

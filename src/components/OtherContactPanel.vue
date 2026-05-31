@@ -2,9 +2,12 @@
   <div class="other-contact-panel">
     <div class="row q-col-gutter-sm q-col-gutter-md">
       <div class="col-12 col-md-6">
-        <AddClientLabeledField :label="t('relationshipType')">
+        <AddClientLabeledField
+          :label="t('relationshipType')"
+          :test-id="ocField('relationshipType')">
           <FormSelect
             :model-value="contact.relationshipType"
+            :test-id="ocField('relationshipType')"
             outlined
             hide-bottom-space
             emit-value
@@ -17,9 +20,12 @@
         </AddClientLabeledField>
       </div>
       <div class="col-12 col-md-6">
-        <AddClientLabeledField :label="t('contactType')">
+        <AddClientLabeledField
+          :label="t('contactType')"
+          :test-id="ocField('contactType')">
           <FormSelect
             :model-value="contact.contactType"
+            :test-id="ocField('contactType')"
             outlined
             hide-bottom-space
             emit-value
@@ -32,9 +38,12 @@
         </AddClientLabeledField>
       </div>
       <div class="col-12 col-md-6">
-        <AddClientLabeledField :label="t('prefix')">
+        <AddClientLabeledField
+          :label="t('prefix')"
+          :test-id="ocField('prefix')">
           <FormSelect
             :model-value="contact.prefix"
+            :test-id="ocField('prefix')"
             outlined
             hide-bottom-space
             emit-value
@@ -55,6 +64,7 @@
           :label="t('otherContactFirstName')"
           :rules="rules.otherFirstName"
           maxlength="30"
+          :test-id="ocField('firstName')"
           @update:model-value="setField('firstName', $event)"
         />
       </div>
@@ -65,6 +75,7 @@
           :label="t('otherContactMiddleName')"
           :rules="rules.otherMiddleName"
           maxlength="30"
+          :test-id="ocField('middleName')"
           @update:model-value="setField('middleName', $event)"
         />
       </div>
@@ -75,13 +86,17 @@
           :label="t('otherContactLastName')"
           :rules="rules.otherLastName"
           maxlength="30"
+          :test-id="ocField('lastName')"
           @update:model-value="setField('lastName', $event)"
         />
       </div>
       <div class="col-12 col-md-6">
-        <AddClientLabeledField :label="t('suffix')">
+        <AddClientLabeledField
+          :label="t('suffix')"
+          :test-id="ocField('suffix')">
           <FormSelect
             :model-value="contact.suffix"
+            :test-id="ocField('suffix')"
             outlined
             hide-bottom-space
             emit-value
@@ -100,6 +115,7 @@
           <FormToggle
             :model-value="contact.responsibleForPayments"
             :label="t('responsibleForPayments')"
+            :test-id="ocField('responsibleForPayments')"
             @update:model-value="setField('responsibleForPayments', $event)"
           />
         </div>
@@ -115,6 +131,7 @@
         :model-value="contact.sameAsClientAddress"
         :label="t('sameAsClientAddress')"
         class="q-mb-md"
+        :test-id="ocField('sameAsClientAddress')"
         @update:model-value="onSameAsClientAddress"
       />
       <div class="row q-col-gutter-sm q-col-gutter-md">
@@ -126,6 +143,7 @@
             :rules="rules.addressLine1"
             :disable="addressDisabled"
             maxlength="100"
+            :test-id="ocField('addressLine1')"
             @update:model-value="setField('addressLine1', $event)"
           />
         </div>
@@ -137,11 +155,14 @@
             :rules="rules.addressLine2"
             :disable="addressDisabled"
             maxlength="100"
+            :test-id="ocField('addressLine2')"
             @update:model-value="setField('addressLine2', $event)"
           />
         </div>
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('state')">
+          <AddClientLabeledField
+            :label="t('state')"
+            :test-id="ocField('state')">
             <FormSelect
               :model-value="contact.state"
               outlined
@@ -152,14 +173,18 @@
               class="full-width"
               :disable="addressDisabled"
               :options="stateOptions"
+              :test-id="ocField('state')"
               @update:model-value="onStateChange"
             />
           </AddClientLabeledField>
         </div>
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('city')">
+          <AddClientLabeledField
+            :label="t('city')"
+            :test-id="ocField('city')">
             <FormSelect
               :model-value="contact.city"
+              :test-id="ocField('city')"
               outlined
               hide-bottom-space
               emit-value
@@ -173,7 +198,9 @@
           </AddClientLabeledField>
         </div>
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('county')">
+          <AddClientLabeledField
+            :label="t('county')"
+            :test-id="ocField('county')">
             <FormSelect
               :model-value="contact.county"
               outlined
@@ -184,6 +211,7 @@
               class="full-width"
               :disable="addressDisabled || !contact.state || !contact.city"
               :options="countyOptions"
+              :test-id="ocField('county')"
               @update:model-value="setField('county', $event)"
             />
           </AddClientLabeledField>
@@ -196,6 +224,7 @@
             :rules="rules.zipCode"
             :disable="addressDisabled"
             maxlength="11"
+            :test-id="ocField('zipCode')"
             @update:model-value="setField('zipCode', $event)"
           />
         </div>
@@ -211,11 +240,14 @@
           class="row q-col-gutter-sm q-col-gutter-md
             add-client-form__contact-method-row">
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('phoneNumber')">
+            <AddClientLabeledField
+              :label="t('phoneNumber')"
+              :test-id="ocField(`phone-${index}-number`)">
               <q-input
                 outlined
                 hide-bottom-space
                 class="full-width"
+                :data-testid="ocField(`phone-${index}-number`)"
                 :model-value="phone.number"
                 :rules="rules.phoneNumber"
                 :placeholder="t('phoneNumberPlaceholder')"
@@ -225,7 +257,9 @@
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('phoneType')">
+            <AddClientLabeledField
+              :label="t('phoneType')"
+              :test-id="ocField(`phone-${index}-type`)">
               <div
                 class="row q-col-gutter-sm items-center
                   add-client-form__contact-method-type-row">
@@ -239,6 +273,7 @@
                     clearable
                     class="full-width"
                     :options="phoneTypeOptions"
+                    :test-id="ocField(`phone-${index}-type`)"
                     @update:model-value="setPhoneField(index, 'type', $event)"
                   />
                 </div>
@@ -247,6 +282,9 @@
                   :total="contact.phones.length"
                   :add-label="t('addPhone')"
                   :remove-label="t('removePhone')"
+                  :add-test-id="otherContactPhoneAddTestId(contact.id, index)"
+                  :remove-test-id="
+                    otherContactPhoneRemoveTestId(contact.id, index)"
                   @add="addPhone"
                   @remove="removePhone(index)"
                 />
@@ -274,11 +312,14 @@
               :placeholder="t('emailAddressPlaceholder')"
               :rules="rules.emailAddress"
               maxlength="32"
+              :test-id="ocField(`email-${index}-address`)"
               @update:model-value="setEmailField(index, 'address', $event)"
             />
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('emailType')">
+            <AddClientLabeledField
+              :label="t('emailType')"
+              :test-id="ocField(`email-${index}-type`)">
               <div
                 class="row q-col-gutter-sm items-center
                   add-client-form__contact-method-type-row">
@@ -292,6 +333,7 @@
                     clearable
                     class="full-width"
                     :options="emailTypeOptions"
+                    :test-id="ocField(`email-${index}-type`)"
                     @update:model-value="setEmailField(index, 'type', $event)"
                   />
                 </div>
@@ -300,6 +342,9 @@
                   :total="contact.emails.length"
                   :add-label="t('addEmail')"
                   :remove-label="t('removeEmail')"
+                  :add-test-id="otherContactEmailAddTestId(contact.id, index)"
+                  :remove-test-id="
+                    otherContactEmailRemoveTestId(contact.id, index)"
                   @add="addEmail"
                   @remove="removeEmail(index)"
                 />
@@ -332,6 +377,13 @@ import {
   createEmptyPhone,
   formatPhoneUs,
 } from 'src/utils/client-contact-form.js'
+import {
+  otherContactEmailAddTestId,
+  otherContactEmailRemoveTestId,
+  otherContactFieldTestId,
+  otherContactPhoneAddTestId,
+  otherContactPhoneRemoveTestId,
+} from 'src/test-ids/index.js'
 
 const props = defineProps({
   contact: {
@@ -383,6 +435,10 @@ const props = defineProps({
 const emit = defineEmits(['update:contact'])
 
 const { t } = useI18n()
+
+function ocField(name) {
+  return otherContactFieldTestId(`${props.contact.id}-${name}`)
+}
 
 const addressDisabled = computed(
   () => Boolean(props.contact.sameAsClientAddress),

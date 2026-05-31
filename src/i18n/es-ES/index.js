@@ -268,7 +268,7 @@ export default {
     + 'Para fines de auditoría, indique el motivo de la eliminación.',
   fmhDeleteReasonLabel: 'Motivo de eliminación',
   fmhDeleteReasonRequired: 'El motivo de eliminación es obligatorio.',
-  allergiesAddSectionTitle: 'Agregar alergia',
+  allergiesAddSectionTitle: 'Alergias',
   allergiesExistingTitle: 'Alergias existentes',
   allergiesExistingEmpty: 'Aún no hay alergias registradas.',
   allergiesFooterHint:

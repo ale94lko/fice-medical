@@ -39,6 +39,7 @@
               dense
               color="primary"
               icon="edit"
+              :data-testid="tid.allergyRowEdit(entry.id)"
               :aria-label="t('edit')"
               @click="emit('edit', entry)"
             />
@@ -48,6 +49,7 @@
               dense
               color="primary"
               icon="delete"
+              :data-testid="tid.allergyRowDelete(entry.id)"
               :aria-label="t('delete')"
               @click="emit('delete', entry)"
             />
@@ -66,6 +68,7 @@ import { useI18n } from 'vue-i18n'
 import {
   clientAllergySeverityValues,
 } from 'components/constants.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 defineProps({
   entries: {

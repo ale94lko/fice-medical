@@ -1,5 +1,5 @@
 <template>
-  <div class="add-client-form">
+  <div class="add-client-form" :data-testid="tid.form">
     <q-inner-loading :showing="initialLoading" color="primary">
       <q-spinner size="42px" />
     </q-inner-loading>
@@ -25,6 +25,7 @@
           v-for="tab in mainTabs"
           :key="tab.key"
           :name="tab.key"
+          :data-testid="tid.tab(tab.key)"
           :class="mainTabClass(tab)">
           <span class="add-client-tab__label row items-center no-wrap">
             <q-icon
@@ -69,6 +70,7 @@
           v-for="subTab in currentSubTabs"
           :key="subTab.key"
           :name="subTab.key"
+          :data-testid="tid.subTab(subTab.key)"
           :icon="subTab.icon"
           :label="t(subTab.labelKey)"
         />
@@ -81,6 +83,7 @@
         greedy
         novalidate
         autocomplete="off"
+        :data-testid="tid.formFields"
         @submit.prevent="onSave">
         <q-tab-panels
           v-model="activeTab"
@@ -93,10 +96,14 @@
           :data-add-client-tab="addClientTabKeys.basic">
           <AddClientAccordionSection
             icon="person"
-            :title="t('personalInformation')">
+            :title="t('personalInformation')"
+            section-test-id="add-client-accordion-personal-information"
+            :toggle-test-id="tid.accordionToggle('personal-information')">
             <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('prefix')">
+                  <AddClientLabeledField
+                    :label="t('prefix')"
+                    :test-id="tid.field(ck.prefix)">
                     <FormSelect
                       v-model="form[ck.prefix]"
                       outlined
@@ -108,6 +115,7 @@
                       :loading="catalogsLoading"
                       :options="prefixSelectOptions"
                       :placeholder="t('prefixSelect')"
+                      :test-id="tid.field(ck.prefix)"
                     />
                   </AddClientLabeledField>
                 </div>
@@ -119,6 +127,7 @@
                     :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('firstName'))"
                     :rules="rules.firstName"
+                    :test-id="tid.field(ck.firstName)"
                   />
                 </div>
                 <div class="col-12 col-md-6">
@@ -129,6 +138,7 @@
                     :maxlength="clientNameMaxLength"
                     :label="t('middleName')"
                     :rules="rules.middleName"
+                    :test-id="tid.field(ck.middleName)"
                   />
                 </div>
                 <div class="col-12 col-md-6">
@@ -139,10 +149,13 @@
                     :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('lastName'))"
                     :rules="rules.lastName"
+                    :test-id="tid.field(ck.lastName)"
                   />
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('suffix')">
+                  <AddClientLabeledField
+                    :label="t('suffix')"
+                    :test-id="tid.field(ck.suffix)">
                     <FormSelect
                       v-model="form[ck.suffix]"
                       outlined
@@ -154,15 +167,19 @@
                       :loading="catalogsLoading"
                       :options="suffixSelectOptions"
                       :placeholder="t('suffixSelect')"
+                      :test-id="tid.field(ck.suffix)"
                     />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('socialSecurityNumber')">
+                  <AddClientLabeledField
+                    :label="t('socialSecurityNumber')"
+                    :test-id="tid.field(ck.socialSecurityNumber)">
                     <q-input
                       outlined
                       hide-bottom-space
                       class="full-width"
+                      :data-testid="tid.field(ck.socialSecurityNumber)"
                       :model-value="ssnDisplayValue"
                       :rules="rules.ssn"
                       maxlength="11"
@@ -173,25 +190,31 @@
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('dob')">
+                  <AddClientLabeledField
+                    :label="t('dob')"
+                    :test-id="tid.field(ck.dob)">
                     <ClientDateField
                       v-model="form[ck.dob]"
                       max-today
                       :min-year="dobMinYear"
                       :rules="rules.dob"
                       :close-label="t('close')"
+                      :test-id="tid.field(ck.dob)"
                     />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
                   <div class="row q-col-gutter-sm">
                     <div class="col-6">
-                      <AddClientLabeledField :label="t('age')">
+                      <AddClientLabeledField
+                        :label="t('age')"
+                        :test-id="tid.field(ck.age)">
                         <q-input
                           v-model="form[ck.age]"
                           class="add-client-form__age-input"
                           outlined
                           hide-bottom-space
+                          :data-testid="tid.field(ck.age)"
                           type="number"
                           step="1"
                           :rules="rules.age"
@@ -232,7 +255,9 @@
                       </AddClientLabeledField>
                     </div>
                     <div class="col-6">
-                      <AddClientLabeledField :label="t('ageUnit')">
+                      <AddClientLabeledField
+                        :label="t('ageUnit')"
+                        :test-id="tid.field(ck.ageUnit)">
                         <FormSelect
                           v-model="form[ck.ageUnit]"
                           outlined
@@ -245,6 +270,7 @@
                           :rules="rules.ageUnit"
                           :readonly="ageFieldsLocked"
                           :disable="ageFieldsLocked"
+                          :test-id="tid.field(ck.ageUnit)"
                           :key="
                             `age-unit-${catalogsLoaded}-${form[ck.ageUnit]}`
                           "
@@ -254,7 +280,9 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('race')">
+                  <AddClientLabeledField
+                    :label="t('race')"
+                    :test-id="tid.field(ck.race)">
                     <FormSelect
                       v-model="form[ck.race]"
                       outlined
@@ -266,11 +294,14 @@
                       :loading="catalogsLoading"
                       :options="raceSelectOptions"
                       :placeholder="t('raceSelect')"
+                      :test-id="tid.field(ck.race)"
                     />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('ethnicity')">
+                  <AddClientLabeledField
+                    :label="t('ethnicity')"
+                    :test-id="tid.field(ck.ethnicity)">
                     <FormSelect
                       v-model="form[ck.ethnicity]"
                       outlined
@@ -282,11 +313,14 @@
                       :loading="catalogsLoading"
                       :options="ethnicitySelectOptions"
                       :placeholder="t('ethnicitySelect')"
+                      :test-id="tid.field(ck.ethnicity)"
                     />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12">
-                  <AddClientLabeledField :label="t('gender')">
+                  <AddClientLabeledField
+                    :label="t('gender')"
+                    :test-id="tid.field(ck.gender)">
                     <div
                       class="add-client-form__gender-chip-grid"
                       :style="genderChipGridStyle">
@@ -296,6 +330,7 @@
                         flat
                         no-caps
                         :disable="catalogsLoading"
+                        :data-testid="tid.genderOption(opt.value)"
                         :class="genderChipClass(opt.value)"
                         @click="form[ck.gender] = opt.value">
                         <span :class="genderDotClass(opt.value)" />
@@ -313,21 +348,28 @@
 
           <AddClientAccordionSection
             icon="admin_panel_settings"
-            :title="t('administrativeInformation')">
+            :title="t('administrativeInformation')"
+            section-test-id="add-client-accordion-administrative-information"
+            :toggle-test-id="
+              tid.accordionToggle('administrative-information')">
             <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField
-                    :label="requiredLabel(t('admissionDate'))">
+                    :label="requiredLabel(t('admissionDate'))"
+                    :test-id="tid.field(ck.admissionDate)">
                     <ClientDateField
                       v-model="form[ck.admissionDate]"
                       :rules="rules.admissionDate"
                       :max-today="true"
                       :close-label="t('close')"
+                      :test-id="tid.field(ck.admissionDate)"
                     />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('assignedClinician')">
+                  <AddClientLabeledField
+                    :label="t('assignedClinician')"
+                    :test-id="tid.field(ck.assignedClinician)">
                     <FormSelect
                       v-model="form[ck.assignedClinician]"
                       outlined
@@ -339,6 +381,7 @@
                       class="full-width"
                       input-debounce="0"
                       :options="assignedClinicianOptions"
+                      :test-id="tid.field(ck.assignedClinician)"
                     />
                   </AddClientLabeledField>
                 </div>
@@ -486,6 +529,7 @@
           color="primary"
           icon="arrow_back"
           class="app-btn-outline add-client-form__nav-btn"
+          :data-testid="tid.btn('previous')"
           :label="t('previous')"
           :disable="saving"
           @click="goPreviousTab"
@@ -499,6 +543,7 @@
           icon-right="arrow_forward"
           class="app-btn-outline add-client-form__nav-btn"
           :class="{ 'q-ml-auto': !canGoPrevious() }"
+          :data-testid="tid.btn('next')"
           :label="t('next')"
           :disable="saving"
           @click="onNext"
@@ -508,10 +553,13 @@
 
     <ModalComponent
       v-model="cancelConfirmOpen"
+      test-id="cancel-discard"
       :title="cancelModalTitle"
       :message="cancelModalMessage"
       :confirm-text="t('keepEditing')"
       :cancel-text="t('discardChanges')"
+      :confirm-button-test-id="tid.modalKeepEditing"
+      :cancel-button-test-id="tid.modalCancelDiscard"
       @confirm="dismissCancelConfirm"
       @cancel="confirmDiscard"
     />
@@ -559,6 +607,7 @@ import {
   CLINICAL_FAMILY_HISTORY_SUB_TAB,
   CLINICAL_VITALS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   mode: {

@@ -3,7 +3,9 @@
     <AddClientAccordionSection
       v-model="section.recordExpanded"
       icon="monitor_heart"
-      :title="recordSectionTitle">
+      :title="recordSectionTitle"
+      section-test-id="add-client-accordion-vitals-record"
+      :toggle-test-id="tid.accordionToggle('vitals-record')">
       <div class="row q-col-gutter-md add-client-vitals-tab__vitals-grid">
         <div class="col-12 col-md-6 add-client-vitals-tab__col">
           <AddClientLabeledField
@@ -15,6 +17,7 @@
                   v-model="section.draft.systolic"
                   outlined
                   hide-bottom-space
+                  :data-testid="tid.vitalsField('systolic')"
                   type="text"
                   inputmode="numeric"
                   :placeholder="t('vitalsSystolic')"
@@ -29,6 +32,7 @@
                   v-model="section.draft.diastolic"
                   outlined
                   hide-bottom-space
+                  :data-testid="tid.vitalsField('diastolic')"
                   type="text"
                   inputmode="numeric"
                   :placeholder="t('vitalsDiastolic')"
@@ -47,6 +51,7 @@
               v-model="section.draft.temperature"
               outlined
               hide-bottom-space
+              :data-testid="tid.vitalsField('temperature')"
               type="text"
               inputmode="decimal"
               :placeholder="t('vitalsUnitFahrenheit')"
@@ -62,6 +67,7 @@
               v-model="section.draft.oxygenSaturation"
               outlined
               hide-bottom-space
+              :data-testid="tid.vitalsField('oxygenSaturation')"
               type="text"
               inputmode="numeric"
               :placeholder="t('vitalsUnitPercent')"
@@ -75,6 +81,7 @@
               v-model="section.draft.height"
               outlined
               hide-bottom-space
+              :data-testid="tid.vitalsField('height')"
               type="text"
               inputmode="decimal"
               :placeholder="t('vitalsUnitInches')"
@@ -91,6 +98,7 @@
               v-model="section.draft.heartRate"
               outlined
               hide-bottom-space
+              :data-testid="tid.vitalsField('heartRate')"
               type="text"
               inputmode="numeric"
               :placeholder="t('vitalsUnitBpm')"
@@ -104,6 +112,7 @@
               v-model="section.draft.respiratoryRate"
               outlined
               hide-bottom-space
+              :data-testid="tid.vitalsField('respiratoryRate')"
               type="text"
               inputmode="numeric"
               :placeholder="t('vitalsUnitBrMin')"
@@ -117,6 +126,7 @@
               v-model="section.draft.weight"
               outlined
               hide-bottom-space
+              :data-testid="tid.vitalsField('weight')"
               type="text"
               inputmode="decimal"
               :placeholder="t('vitalsUnitLbs')"
@@ -131,6 +141,7 @@
               outlined
               readonly
               hide-bottom-space
+              :data-testid="tid.vitalsField('bmi')"
               :placeholder="t('vitalsUnitBmi')"
               class="add-client-vitals-tab__bmi-field"
             />
@@ -144,31 +155,32 @@
       </div>
 
       <div class="add-client-vitals-tab__pain-level q-mt-md">
-        <AddClientSubsectionHeading
-          icon="healing"
-          :title="t('vitalsPainLevel')"
-        />
-        <div class="add-client-form__allergy-severity-grid">
-          <q-btn
-            v-for="opt in painOptions"
-            :key="opt.value"
-            flat
-            no-caps
-            :class="[
-              'add-client-form__allergy-severity-chip',
-              `add-client-form__allergy-severity-chip--${opt.modifier}`,
-              {
-                'add-client-form__allergy-severity-chip--selected':
-                  section.draft.painLevel === opt.value,
-              },
-            ]"
-            @click="selectPainLevel(opt.value)">
-            <span :class="painDotClass(opt.modifier)" />
-            <span class="add-client-form__allergy-severity-label">
-              {{ opt.label }}
-            </span>
-          </q-btn>
-        </div>
+        <AddClientLabeledField
+          :label="t('vitalsPainLevel')"
+          :test-id="tid.vitalsField('painLevel')">
+          <div class="add-client-form__allergy-severity-grid">
+            <q-btn
+              v-for="opt in painOptions"
+              :key="opt.value"
+              flat
+              no-caps
+              :data-testid="tid.vitalsPainLevel(opt.modifier)"
+              :class="[
+                'add-client-form__allergy-severity-chip',
+                `add-client-form__allergy-severity-chip--${opt.modifier}`,
+                {
+                  'add-client-form__allergy-severity-chip--selected':
+                    section.draft.painLevel === opt.value,
+                },
+              ]"
+              @click="selectPainLevel(opt.value)">
+              <span :class="painDotClass(opt.modifier)" />
+              <span class="add-client-form__allergy-severity-label">
+                {{ opt.label }}
+              </span>
+            </q-btn>
+          </div>
+        </AddClientLabeledField>
       </div>
     </AddClientAccordionSection>
 
@@ -177,7 +189,9 @@
     <AddClientAccordionSection
       v-model="section.additionalInfoExpanded"
       icon="info_outline"
-      :title="t('vitalsAdditionalInfoTitle')">
+      :title="t('vitalsAdditionalInfoTitle')"
+      section-test-id="add-client-accordion-vitals-additional"
+      :toggle-test-id="tid.accordionToggle('vitals-additional')">
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
           <AddClientLabeledField
@@ -192,6 +206,7 @@
                   class="add-client-vitals-tab__datetime-input"
                   :max-today="true"
                   :close-label="t('close')"
+                  :test-id="tid.vitalsField('recordedDate')"
                 />
               </div>
               <div class="col-6">
@@ -200,6 +215,7 @@
                   outlined
                   hide-bottom-space
                   class="add-client-vitals-tab__datetime-input"
+                  :data-testid="tid.vitalsField('recordedTime')"
                   :placeholder="t('vitalsTimePlaceholder')"
                   :error="Boolean(fieldErrors.recordedTime)"
                   :error-message="errorMessage('recordedTime')"
@@ -253,6 +269,7 @@
               clearable
               class="full-width"
               :options="clinicianOptions"
+              :test-id="tid.vitalsField('recordedBy')"
               :placeholder="t('vitalsSelectClinician')"
               :error="Boolean(fieldErrors.recordedBy)"
               :error-message="errorMessage('recordedBy')"
@@ -269,6 +286,7 @@
               type="textarea"
               rows="4"
               class="full-width add-client-form__notes-field"
+              :data-testid="tid.vitalsField('notes')"
               :placeholder="t('vitalsNotesPlaceholder')"
               :maxlength="500"
               counter
@@ -285,6 +303,7 @@
             no-caps
             outline
             color="primary"
+            :data-testid="tid.vitalsBtnCancelEdit"
             :label="t('cancel')"
             @click="cancelEdit"
           />
@@ -293,6 +312,7 @@
             unelevated
             color="primary"
             class="app-btn-primary"
+            :data-testid="tid.vitalsBtnSave"
             :icon="section.editingId ? 'save' : 'add'"
             :label="saveButtonLabel"
             @click="onSaveEntry"
@@ -306,7 +326,9 @@
     <AddClientAccordionSection
       v-model="section.historyExpanded"
       icon="history"
-      :title="t('vitalsHistoryTitle')">
+      :title="t('vitalsHistoryTitle')"
+      section-test-id="add-client-accordion-vitals-history"
+      :toggle-test-id="tid.accordionToggle('vitals-history')">
       <div class="add-client-form__fmh-list-card q-pa-md">
         <VitalsHistoryTable
           :entries="sortedEntries"
@@ -320,6 +342,7 @@
 
     <ModalComponent
       v-model="deleteDialogOpen"
+      test-id="vitals-delete"
       :title="t('vitalsDeleteTitle')"
       :message="t('vitalsDeleteMessage')"
       :confirm-text="t('remove')"
@@ -338,8 +361,6 @@ import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
-import AddClientSubsectionHeading
-  from 'components/AddClientSubsectionHeading.vue'
 import VitalsHistoryTable from 'components/VitalsHistoryTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import {
@@ -362,6 +383,8 @@ import {
   sortVitalsEntriesDesc,
   validateVitalsDraft,
 } from 'src/utils/client-vitals.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
+
 const props = defineProps({
   modelValue: {
     type: Object,

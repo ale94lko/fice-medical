@@ -7,6 +7,7 @@
       color="primary"
       icon="remove"
       class="add-client-form__method-btn"
+      :data-testid="removeTestId || undefined"
       :aria-label="removeLabel"
       @click="emit('remove')"
     />
@@ -17,6 +18,7 @@
       color="primary"
       icon="add"
       class="add-client-form__method-btn"
+      :data-testid="addTestId || undefined"
       :aria-label="addLabel"
       @click="emit('add')"
     />
@@ -42,6 +44,14 @@ const props = defineProps({
   removeLabel: {
     type: String,
     default: 'Remove',
+  },
+  addTestId: {
+    type: String,
+    default: '',
+  },
+  removeTestId: {
+    type: String,
+    default: '',
   },
 })
 

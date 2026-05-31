@@ -2,6 +2,7 @@
   <q-dialog
     v-model="open"
     persistent
+    :data-testid="dialogTestId"
     transition-show="scale"
     transition-hide="scale">
     <q-card class="family-medical-history-dialog">
@@ -11,9 +12,12 @@
       <q-card-section class="q-px-lg q-pt-md q-pb-sm">
         <div class="row q-col-gutter-md q-col-gutter-lg-md">
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('fmhFamilyRelationship')">
+            <AddClientLabeledField
+              :label="t('fmhFamilyRelationship')"
+              :test-id="tid.fmhField('relationship')">
               <FormSelect
                 v-model="localRelationship"
+                :test-id="tid.fmhField('relationship')"
                 outlined
                 hide-bottom-space
                 emit-value
@@ -34,11 +38,14 @@
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('fmhMedicalConditions')">
+            <AddClientLabeledField
+              :label="t('fmhMedicalConditions')"
+              :test-id="tid.fmhField('conditions')">
               <q-input
                 v-model="localConditions"
                 outlined
                 hide-bottom-space
+                :data-testid="tid.fmhField('conditions')"
                 :error="Boolean(conditionsError)"
                 :error-message="conditionsError"
                 maxlength="500"
@@ -54,6 +61,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="cancelTestId"
           :label="t('cancel')"
           @click="onCancel"
         />
@@ -62,6 +70,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="confirmTestId"
           :label="t('save')"
           @click="onSave"
         />
@@ -80,6 +89,10 @@ import {
   trimFamilyMedicalField,
   validateFamilyMedicalHistoryForAdd,
 } from 'src/utils/client-family-medical-history.js'
+import {
+  addClientTestIds as tid,
+  modalTestIds,
+} from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {
@@ -122,6 +135,10 @@ const dialogTitle = computed(() =>
     ? t('fmhEditTitle')
     : t('fmhEditTitle'),
 )
+
+const dialogTestId = modalTestIds.dialog('fmh-edit')
+const cancelTestId = modalTestIds.cancel('fmh-edit')
+const confirmTestId = modalTestIds.confirm('fmh-edit')
 
 watch(
   () => props.modelValue,

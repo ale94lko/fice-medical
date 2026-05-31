@@ -20,6 +20,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="clientPageTestIds.save"
           :loading="saving"
           :disable="saving || initialLoading"
           :label="t('save')"
@@ -30,6 +31,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clientPageTestIds.close"
           :disable="saving || initialLoading"
           :label="t('close')"
           @click="onClose"
@@ -58,6 +60,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AddClientForm from 'components/AddClientForm.vue'
+import { clientPageTestIds } from 'src/test-ids/index.js'
 
 const route = useRoute()
 const router = useRouter()

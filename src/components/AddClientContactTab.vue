@@ -1,6 +1,10 @@
 <template>
   <div class="add-client-contact-tab">
-    <AddClientAccordionSection icon="place" :title="t('clientAddress')">
+    <AddClientAccordionSection
+      icon="place"
+      :title="t('clientAddress')"
+      section-test-id="add-client-accordion-client-address"
+      :toggle-test-id="tid.accordionToggle('client-address')">
       <div class="row q-col-gutter-sm q-col-gutter-md">
           <div class="col-12 col-md-6">
             <TextInput
@@ -9,6 +13,7 @@
               :label="t('addressLine1')"
               :rules="rules.addressLine1"
               maxlength="100"
+              :test-id="contactFieldTestId('addressLine1')"
             />
           </div>
           <div class="col-12 col-md-6">
@@ -18,10 +23,13 @@
               :label="t('addressLine2Optional')"
               :rules="rules.addressLine2"
               maxlength="100"
+              :test-id="contactFieldTestId('addressLine2')"
             />
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('state')">
+            <AddClientLabeledField
+              :label="t('state')"
+              :test-id="contactFieldTestId('state')">
               <FormSelect
                 v-model="contact.state"
                 outlined
@@ -31,12 +39,15 @@
                 clearable
                 class="full-width"
                 :options="stateOptions"
+                :test-id="contactFieldTestId('state')"
                 @update:model-value="onClientStateChange"
               />
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('city')">
+            <AddClientLabeledField
+              :label="t('city')"
+              :test-id="contactFieldTestId('city')">
               <FormSelect
                 v-model="contact.city"
                 outlined
@@ -47,12 +58,15 @@
                 class="full-width"
                 :disable="!contact.state"
                 :options="cityOptions"
+                :test-id="contactFieldTestId('city')"
                 @update:model-value="onClientCityChange"
               />
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('county')">
+            <AddClientLabeledField
+              :label="t('county')"
+              :test-id="contactFieldTestId('county')">
               <FormSelect
                 v-model="contact.county"
                 outlined
@@ -63,6 +77,7 @@
                 class="full-width"
                 :disable="!contact.state || !contact.city"
                 :options="countyOptions"
+                :test-id="contactFieldTestId('county')"
               />
             </AddClientLabeledField>
           </div>
@@ -73,6 +88,7 @@
               :label="t('zipCode')"
               :rules="rules.zipCode"
               maxlength="11"
+              :test-id="contactFieldTestId('zipCode')"
             />
           </div>
         </div>
@@ -80,7 +96,11 @@
 
     <q-separator class="add-client-form__section-separator" />
 
-    <AddClientAccordionSection icon="phone" :title="t('contactMethods')">
+    <AddClientAccordionSection
+      icon="phone"
+      :title="t('contactMethods')"
+      section-test-id="add-client-accordion-contact-methods"
+      :toggle-test-id="tid.accordionToggle('contact-methods')">
       <div class="add-client-form__contact-methods-block">
           <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
           <div
@@ -89,11 +109,14 @@
             class="row q-col-gutter-sm q-col-gutter-md
               add-client-form__contact-method-row">
             <div class="col-12 col-md-6">
-              <AddClientLabeledField :label="t('phoneNumber')">
+              <AddClientLabeledField
+                :label="t('phoneNumber')"
+                :test-id="contactFieldTestId(`phone-${index}-number`)">
                 <q-input
                   outlined
                   hide-bottom-space
                   class="full-width"
+                  :data-testid="contactFieldTestId(`phone-${index}-number`)"
                   :model-value="phone.number"
                   :placeholder="t('phoneNumberPlaceholder')"
                   :rules="rules.phoneNumber"
@@ -103,7 +126,9 @@
               </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
-              <AddClientLabeledField :label="t('phoneType')">
+              <AddClientLabeledField
+                :label="t('phoneType')"
+                :test-id="contactFieldTestId(`phone-${index}-type`)">
                 <div
                   class="row q-col-gutter-sm items-center
                     add-client-form__contact-method-type-row">
@@ -117,6 +142,7 @@
                       clearable
                       class="full-width"
                       :options="phoneTypeOptions"
+                      :test-id="contactFieldTestId(`phone-${index}-type`)"
                     />
                   </div>
                   <AddClientMethodRowActions
@@ -124,6 +150,8 @@
                     :total="contact.phones.length"
                     :add-label="t('addPhone')"
                     :remove-label="t('removePhone')"
+                    :add-test-id="tid.phoneAdd(index)"
+                    :remove-test-id="tid.phoneRemove(index)"
                     @add="addPhone"
                     @remove="removePhone(index)"
                   />
@@ -151,10 +179,13 @@
                 :placeholder="t('emailAddressPlaceholder')"
                 :rules="rules.emailAddress"
                 maxlength="32"
+                :test-id="contactFieldTestId(`email-${index}-address`)"
               />
             </div>
             <div class="col-12 col-md-6">
-              <AddClientLabeledField :label="t('emailType')">
+              <AddClientLabeledField
+                :label="t('emailType')"
+                :test-id="contactFieldTestId(`email-${index}-type`)">
                 <div
                   class="row q-col-gutter-sm items-center
                     add-client-form__contact-method-type-row">
@@ -168,6 +199,7 @@
                       clearable
                       class="full-width"
                       :options="emailTypeOptions"
+                      :test-id="contactFieldTestId(`email-${index}-type`)"
                     />
                   </div>
                   <AddClientMethodRowActions
@@ -175,6 +207,8 @@
                     :total="contact.emails.length"
                     :add-label="t('addEmail')"
                     :remove-label="t('removeEmail')"
+                    :add-test-id="tid.emailAdd(index)"
+                    :remove-test-id="tid.emailRemove(index)"
                     @add="addEmail"
                     @remove="removeEmail(index)"
                   />
@@ -189,7 +223,9 @@
 
     <AddClientAccordionSection
       icon="chat"
-      :title="t('preferredCommunication')">
+      :title="t('preferredCommunication')"
+      section-test-id="add-client-accordion-preferred-communication"
+      :toggle-test-id="tid.accordionToggle('preferred-communication')">
       <template #hint>
         <p class="add-client-form__hint">
           {{ t('preferredCommunicationHint') }}
@@ -200,6 +236,7 @@
             v-for="opt in communicationOptions"
             :key="opt.value"
             no-caps
+            :data-testid="tid.preferredComm(opt.value)"
             :color="isPreferredComm(opt.value) ? 'primary' : undefined"
             :unelevated="isPreferredComm(opt.value)"
             :outline="!isPreferredComm(opt.value)"
@@ -241,16 +278,21 @@
 
     <AddClientAccordionSection
       icon="description"
-      :title="t('additionalNotes')">
+      :title="t('additionalNotes')"
+      section-test-id="add-client-accordion-additional-notes"
+      :toggle-test-id="tid.accordionToggle('additional-notes')">
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12">
-          <AddClientLabeledField :label="t('additionalNotes')">
+          <AddClientLabeledField
+            :label="t('additionalNotes')"
+            :test-id="contactFieldTestId('additionalNotes')">
             <q-input
               v-model="contact.additionalNotes"
               outlined
               type="textarea"
               rows="4"
               class="full-width add-client-form__notes-field"
+              :data-testid="contactFieldTestId('additionalNotes')"
               :placeholder="t('additionalNotesPlaceholder')"
               :rules="rules.additionalNotes"
               maxlength="500"
@@ -292,6 +334,10 @@ import {
   createEmptyPhone,
   formatPhoneUs,
 } from 'src/utils/client-contact-form.js'
+import {
+  addClientTestIds as tid,
+  contactFieldTestId,
+} from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

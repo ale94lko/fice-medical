@@ -2,7 +2,8 @@
   <FormField
     :label="label"
     :required="required"
-    :spaced="spaced">
+    :spaced="spaced"
+    :test-id="testId">
     <slot />
     <template v-if="$slots.hint" #hint>
       <slot name="hint" />
@@ -25,6 +26,10 @@ defineProps({
   spaced: {
     type: Boolean,
     default: false,
+  },
+  testId: {
+    type: String,
+    default: '',
   },
 })
 </script>

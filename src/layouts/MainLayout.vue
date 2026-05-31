@@ -8,6 +8,7 @@
           round
           icon="menu"
           aria-label="Menu"
+          :data-testid="layoutTestIds.menuToggle"
           @click="toggleLeftDrawer"
         />
         <q-toolbar-title shrink>
@@ -15,12 +16,25 @@
         </q-toolbar-title>
         <q-space />
         <SubtenantToolbar class="q-mr-xs" />
-        <q-btn flat round dense icon="notifications">
-        </q-btn>
-        <q-btn flat round dense icon="manage_accounts">
+        <q-btn
+          flat
+          round
+          dense
+          icon="notifications"
+          :data-testid="layoutTestIds.notifications"
+        />
+        <q-btn
+          flat
+          round
+          dense
+          icon="manage_accounts"
+          :data-testid="layoutTestIds.userMenu">
           <q-menu class="user-menu">
             <q-list style="min-width: 100px">
-              <q-item clickable @click="handleLogout">
+              <q-item
+                clickable
+                :data-testid="layoutTestIds.signOut"
+                @click="handleLogout">
                 <q-item-section avatar>
                   <q-icon name="logout" />
                 </q-item-section>
@@ -51,6 +65,7 @@
             clickable
             v-ripple
             to="/dashboard"
+            :data-testid="layoutTestIds.navDashboard"
             :active-class="activeClass">
             <q-item-section avatar>
               <q-icon name="dashboard" />
@@ -71,20 +86,30 @@
             expand-separator
             icon="diversity_1"
             :label="t('client')"
+            :data-testid="layoutTestIds.navClientMenu"
             :content-inset-level="1"
             :header-class="isClientActive ? activeClass : ''">
             <q-item
               clickable
               v-ripple
               to="/clients"
+              :data-testid="layoutTestIds.navClientList"
               :active-class="activeClass"
             >
               <q-item-section>{{ t('clientList') }}</q-item-section>
             </q-item>
-            <q-item clickable v-ripple :active-class="activeClass">
+            <q-item
+              clickable
+              v-ripple
+              :data-testid="layoutTestIds.navPriorAuth"
+              :active-class="activeClass">
               <q-item-section>{{ t('priorAuthorization') }}</q-item-section>
             </q-item>
-            <q-item clickable v-ripple :active-class="activeClass">
+            <q-item
+              clickable
+              v-ripple
+              :data-testid="layoutTestIds.navClientAssignment"
+              :active-class="activeClass">
               <q-item-section>{{ t('clientAssignment') }}</q-item-section>
             </q-item>
           </q-expansion-item>
@@ -120,14 +145,21 @@
                   clickable
                   v-ripple
                   to="/clients"
+                  :data-testid="layoutTestIds.navClientList"
                   :active-class="activeClass"
                 >
                 <q-item-section>{{ t('clientList') }}</q-item-section>
               </q-item>
-              <q-item clickable v-ripple>
+              <q-item
+                clickable
+                v-ripple
+                :data-testid="layoutTestIds.navPriorAuth">
               <q-item-section>{{ t('priorAuthorization') }}</q-item-section>
               </q-item>
-              <q-item clickable v-ripple>
+              <q-item
+                clickable
+                v-ripple
+                :data-testid="layoutTestIds.navClientAssignment">
               <q-item-section>{{ t('clientAssignment') }}</q-item-section>
               </q-item>
             </q-menu>
@@ -414,6 +446,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
+import { layoutTestIds } from 'src/test-ids/index.js'
 
 // Composables
 const $q = useQuasar()

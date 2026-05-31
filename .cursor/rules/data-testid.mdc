@@ -1,0 +1,54 @@
+---
+description: Stable data-testid conventions for QA automation
+alwaysApply: false
+---
+
+# data-testid conventions
+
+Use **`data-testid`** (lowercase attribute name) on interactive elements and
+key containers so Playwright/Cypress tests can target the UI reliably.
+
+## Rules
+
+1. **Kebab-case** values only (e.g. `add-client-field-first-name`).
+2. **Prefix by feature/area**: `auth-`, `layout-`, `client-list-`,
+   `add-client-`, `contact-field-`, `other-contact-field-`, `modal-`, etc.
+3. **Centralize IDs** in `src/test-ids/index.js` — do not invent ad hoc
+   strings in templates. Use helpers:
+   - `addClientTestIds` (`tid`) — form, tabs, fields, buttons, accordions
+   - `contactFieldTestId(name)`, `otherContactFieldTestId(name)`
+   - `clientPageTestIds`, `clientListTestIds`, `layoutTestIds`, `authTestIds`
+   - `modalTestIds` via `ModalComponent` `test-id` prop
+4. **Shared components** accept `testId` / `test-id` and render
+   `data-testid` on the underlying Quasar control (`TextInput`, `FormSelect`,
+   `FormToggle`, `ClientDateField`, `AddClientLabeledField`,
+   `AddClientMethodRowActions`, `AddClientAccordionSection`, `ModalComponent`).
+5. **Row actions** include stable row identifiers when available
+   (e.g. `clientListTestIds.rowEdit(row.id)`).
+6. Avoid duplicate semantics: prefer one test id per logical control (field
+   wrapper vs input may share the same id only when intentional).
+
+## Adding new IDs
+
+1. Add a constant or builder in `src/test-ids/index.js` using `toTestId` from
+   `src/utils/test-id.js`.
+2. Wire the template via the matching helper or component prop.
+3. Run `npm run lint` after changes under `src/`.
+
+## Examples
+
+```vue
+<FormSelect
+  v-model="form[ck.race]"
+  :test-id="tid.field(ck.race)"
+/>
+<q-btn :data-testid="tid.btn('next')" />
+<ModalComponent test-id="cancel-discard" />
+```
+
+Login page:
+
+```vue
+<TextInput :test-id="authTestIds.emailInput" />
+<q-btn :data-testid="authTestIds.signInButton" />
+```

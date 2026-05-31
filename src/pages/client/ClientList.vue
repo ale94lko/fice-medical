@@ -1,5 +1,5 @@
 <template>
-  <q-page class="admin-page">
+  <q-page class="admin-page" :data-testid="clientListTestIds.page">
     <AdminQTable
       class="table admin-data-table"
       selection="multiple"
@@ -22,6 +22,7 @@
           color="primary"
           class="app-btn-primary"
           icon="add"
+          :data-testid="clientListTestIds.addClient"
           :disable="loading"
           :title="t('addClient')"
           :label="t('addClient')"
@@ -32,6 +33,7 @@
           class="q-ml-sm app-btn-primary"
           color="primary"
           icon="assignment_ind"
+          :data-testid="clientListTestIds.assignClinicians"
           :disable="selected.length === 0 || loading"
           :title="t('assignClinicians')"
           :label="t('assignClinicians')"
@@ -42,6 +44,7 @@
           class="q-ml-sm app-btn-primary"
           color="primary"
           icon="note_alt"
+          :data-testid="clientListTestIds.changeStatus"
           :disable="selected.length === 0 || loading"
           :title="t('changeStatus')"
           :label="t('changeStatus')"
@@ -53,6 +56,7 @@
           color="primary"
           class="app-btn-outline"
           icon="filter_alt"
+          :data-testid="clientListTestIds.filters"
           :disable="loading"
           :title="t('filters')"
           :label="t('filters')"
@@ -65,6 +69,7 @@
           icon="edit"
           color="primary"
           class="app-btn-icon-action"
+          :data-testid="clientListTestIds.rowEdit(row.id)"
           :size="siteBreakpoints.SM"
           :title="t('edit')"
           :aria-label="t('edit')"
@@ -76,6 +81,7 @@
           icon="assignment_ind"
           color="primary"
           class="app-btn-icon-action"
+          :data-testid="clientListTestIds.rowAssign(row.id)"
           :size="siteBreakpoints.SM"
           :title="t('assignClinicians')"
           :aria-label="t('assignClinicians')"
@@ -87,6 +93,7 @@
           icon="note_alt"
           color="primary"
           class="app-btn-icon-action"
+          :data-testid="clientListTestIds.rowStatus(row.id)"
           :size="siteBreakpoints.SM"
           :title="t('changeStatus')"
           :aria-label="t('changeStatus')"
@@ -118,6 +125,7 @@ import {
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminQTable from 'components/AdminQTable.vue'
+import { clientListTestIds } from 'src/test-ids/index.js'
 
 const router = useRouter()
 const $q = useQuasar()

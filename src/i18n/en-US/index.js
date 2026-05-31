@@ -263,7 +263,7 @@ export default {
     + 'For audit purposes, please provide a reason for the deletion.',
   fmhDeleteReasonLabel: 'Reason for deletion',
   fmhDeleteReasonRequired: 'A reason for deletion is required.',
-  allergiesAddSectionTitle: 'Add allergy',
+  allergiesAddSectionTitle: 'Allergies',
   allergiesExistingTitle: 'Existing Allergies',
   allergiesExistingEmpty: 'No allergies recorded yet.',
   allergiesFooterHint:

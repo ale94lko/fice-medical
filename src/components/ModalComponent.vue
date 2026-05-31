@@ -1,6 +1,7 @@
 <template>
   <q-dialog
     v-model="modelValue"
+    :data-testid="dialogTestId"
     persistent
     transition-show="scale"
     transition-hide="scale"
@@ -21,6 +22,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="cancelTestId"
           :title="cancelText"
           :label="cancelText"
           @click="onCancel"
@@ -30,6 +32,7 @@
           unelevated
           class="primary-action"
           color="primary"
+          :data-testid="confirmTestId"
           :title="confirmText"
           :label="confirmText"
           @click="onConfirm"
@@ -40,15 +43,27 @@
 </template>
 
 <script setup>
-import { toRef } from 'vue'
+import { computed, toRef } from 'vue'
+import { modalTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: Boolean, // v-model
   title: { type: String, default: 'Confirm' },
   message: { type: String, required: true },
   confirmText: { type: String, default: 'OK' },
-  cancelText: { type: String, default: 'Cancel' }
+  cancelText: { type: String, default: 'Cancel' },
+  testId: { type: String, default: 'default' },
+  confirmButtonTestId: { type: String, default: '' },
+  cancelButtonTestId: { type: String, default: '' },
 })
+
+const dialogTestId = computed(() => modalTestIds.dialog(props.testId))
+const confirmTestId = computed(() =>
+  props.confirmButtonTestId || modalTestIds.confirm(props.testId),
+)
+const cancelTestId = computed(() =>
+  props.cancelButtonTestId || modalTestIds.cancel(props.testId),
+)
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])
 

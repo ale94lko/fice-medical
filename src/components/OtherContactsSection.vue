@@ -2,7 +2,9 @@
   <AddClientAccordionSection
     v-model="contact.otherContactExpanded"
     icon="groups"
-    :title="t('otherContact')">
+    :title="t('otherContact')"
+    section-test-id="add-client-accordion-other-contact"
+    :toggle-test-id="tid.accordionToggle('other-contact')">
     <div
       v-if="!contact.otherContacts.length"
       class="add-client-form__other-contact-empty">
@@ -15,6 +17,7 @@
         color="primary"
         class="full-width add-client-form__other-contact-btn"
         icon="add"
+        :data-testid="tid.otherContactAdd"
         :label="t('addOtherContact')"
         @click="addOtherContact"
       />
@@ -36,6 +39,7 @@
             v-for="(oc, index) in contact.otherContacts"
             :key="oc.id"
             :name="oc.id"
+            :data-testid="tid.otherContactTab(oc.id)"
             class="add-client-form__other-contact-tab">
             <div
               class="add-client-form__other-contact-tab-label
@@ -47,6 +51,7 @@
               <button
                 type="button"
                 class="add-client-form__other-contact-tab-remove"
+                :data-testid="tid.otherContactRemove"
                 :aria-label="t('removeOtherContact')"
                 @click.stop="requestRemoveOtherContact(oc, index)"
                 @mousedown.stop
@@ -62,6 +67,7 @@
           color="primary"
           class="add-client-form__other-contact-add-tab q-ml-sm"
           icon="add"
+          :data-testid="tid.otherContactAdd"
           :label="t('addOtherContact')"
           @click="addOtherContact"
         />
@@ -97,6 +103,7 @@
 
   <ModalComponent
     v-model="removeConfirmOpen"
+    test-id="remove-other-contact"
     :title="t('removeOtherContactTitle')"
     :message="removeConfirmMessage"
     :confirm-text="t('removeOtherContactConfirm')"
@@ -116,6 +123,7 @@ import {
   createEmptyOtherContact,
   resolveOtherContactTabLabel,
 } from 'src/utils/client-contact-form.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

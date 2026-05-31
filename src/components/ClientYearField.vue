@@ -2,6 +2,7 @@
   <q-input
     outlined
     hide-bottom-space
+    :data-testid="testId || undefined"
     class="client-year-field"
     :class="{ 'client-year-field--no-label': !label }"
     :model-value="modelValue"
@@ -66,6 +67,7 @@ const props = defineProps({
   error: { type: Boolean, default: false },
   errorMessage: { type: String, default: '' },
   closeLabel: { type: String, default: 'Close' },
+  testId: { type: String, default: '' },
 })
 
 const emit = defineEmits(['update:modelValue'])

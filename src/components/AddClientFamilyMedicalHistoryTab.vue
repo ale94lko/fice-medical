@@ -2,12 +2,17 @@
   <div class="add-client-family-medical-history-tab">
     <AddClientAccordionSection
       icon="add_circle_outline"
-      :title="t('fmhAddSectionTitle')">
+      :title="t('fmhAddSectionTitle')"
+      section-test-id="add-client-accordion-fmh-add"
+      :toggle-test-id="tid.accordionToggle('fmh-add')">
       <div class="row q-col-gutter-sm q-col-gutter-md items-end">
             <div class="col-12 col-md-6">
-              <AddClientLabeledField :label="t('fmhFamilyRelationship')">
+              <AddClientLabeledField
+                :label="t('fmhFamilyRelationship')"
+                :test-id="tid.fmhField('relationship')">
                 <FormSelect
                   v-model="section.draft.familyRelationship"
+                  :test-id="tid.fmhField('relationship')"
                   outlined
                   hide-bottom-space
                   emit-value
@@ -28,11 +33,14 @@
               </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
-              <AddClientLabeledField :label="t('fmhMedicalConditions')">
+              <AddClientLabeledField
+                :label="t('fmhMedicalConditions')"
+                :test-id="tid.fmhField('conditions')">
                 <q-input
                   v-model="section.draft.medicalConditions"
                   outlined
                   hide-bottom-space
+                  :data-testid="tid.fmhField('conditions')"
                   :error="Boolean(draftConditionsError)"
                   :error-message="draftConditionsError"
                   maxlength="500"
@@ -46,6 +54,7 @@
                 color="primary"
                 class="app-btn-primary"
                 icon="add"
+                :data-testid="tid.fmhBtnAdd"
                 :label="t('fmhAdd')"
                 @click="onAddEntry"
               />
@@ -57,7 +66,9 @@
 
     <AddClientAccordionSection
       icon="person"
-      :title="t('fmhPersonalSectionTitle')">
+      :title="t('fmhPersonalSectionTitle')"
+      section-test-id="add-client-accordion-fmh-personal"
+      :toggle-test-id="tid.accordionToggle('fmh-personal')">
       <div class="add-client-form__fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="personalEntries"
@@ -72,7 +83,9 @@
 
     <AddClientAccordionSection
       icon="groups"
-      :title="t('fmhFamilySectionTitle')">
+      :title="t('fmhFamilySectionTitle')"
+      section-test-id="add-client-accordion-fmh-family"
+      :toggle-test-id="tid.accordionToggle('fmh-family')">
       <div class="add-client-form__fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="familyEntries"
@@ -126,6 +139,7 @@ import {
   trimFamilyMedicalField,
   validateFamilyMedicalHistoryForAdd,
 } from 'src/utils/client-family-medical-history.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

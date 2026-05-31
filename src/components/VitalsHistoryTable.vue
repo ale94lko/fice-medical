@@ -35,6 +35,7 @@
               dense
               color="primary"
               icon="edit"
+              :data-testid="tid.vitalsRowEdit(entry.id)"
               :aria-label="t('edit')"
               @click="emit('edit', entry)"
             />
@@ -44,6 +45,7 @@
               dense
               color="primary"
               icon="delete"
+              :data-testid="tid.vitalsRowDelete(entry.id)"
               :aria-label="t('delete')"
               @click="emit('delete', entry)"
             />
@@ -63,6 +65,7 @@ import {
   formatBmiDisplay,
   formatRecordedDateTimeDisplay,
 } from 'src/utils/client-vitals.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   entries: {

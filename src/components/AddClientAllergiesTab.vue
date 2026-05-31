@@ -2,17 +2,22 @@
   <div class="add-client-allergies-tab">
     <AddClientAccordionSection
       v-model="section.addExpanded"
-      icon="add_circle_outline"
-      :title="t('allergiesAddSectionTitle')">
+      icon="medication"
+      :title="t('allergiesAddSectionTitle')"
+      section-test-id="add-client-accordion-allergies-add"
+      :toggle-test-id="tid.accordionToggle('allergies-add')">
       <div
         class="row q-col-gutter-sm q-col-gutter-md
           add-client-form__allergy-input-row">
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('allergyName')">
+          <AddClientLabeledField
+            :label="t('allergyName')"
+            :test-id="tid.allergyField('name')">
             <q-input
               v-model="section.draft.allergy"
               outlined
               hide-bottom-space
+              :data-testid="tid.allergyField('name')"
               :error="Boolean(draftNameError)"
               :error-message="draftNameError"
               maxlength="100"
@@ -20,7 +25,9 @@
           </AddClientLabeledField>
         </div>
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('allergyStartYear')">
+          <AddClientLabeledField
+            :label="t('allergyStartYear')"
+            :test-id="tid.allergyField('startYear')">
             <ClientYearField
               v-model="section.draft.startYear"
               :min-year="allergyMinStartYear()"
@@ -28,6 +35,7 @@
               :error="Boolean(draftYearError)"
               :error-message="draftYearError"
               :close-label="t('close')"
+              :test-id="tid.allergyField('startYear')"
             />
           </AddClientLabeledField>
           <p
@@ -37,33 +45,34 @@
           </p>
         </div>
         <div class="col-12">
-          <AddClientSubsectionHeading
-            icon="warning_amber"
-            :title="t('allergySeverity')"
-          />
-          <div class="add-client-form__allergy-severity-grid">
-            <q-btn
-              v-for="opt in severityOptions"
-              :key="opt.value"
-              flat
-              no-caps
-              :class="[
-                'add-client-form__allergy-severity-chip',
-                `add-client-form__allergy-severity-chip--${opt.modifier}`,
-                {
-                  'add-client-form__allergy-severity-chip--selected':
-                    section.draft.severity === opt.value,
-                },
-              ]"
-              @click="section.draft.severity = opt.value">
-              <span
-                :class="severityDotClass(opt.modifier)"
-              />
-              <span class="add-client-form__allergy-severity-label">
-                {{ opt.label }}
-              </span>
-            </q-btn>
-          </div>
+          <AddClientLabeledField
+            :label="t('allergySeverity')"
+            :test-id="tid.allergyField('severity')">
+            <div class="add-client-form__allergy-severity-grid">
+              <q-btn
+                v-for="opt in severityOptions"
+                :key="opt.value"
+                flat
+                no-caps
+                :data-testid="tid.allergySeverity(opt.modifier)"
+                :class="[
+                  'add-client-form__allergy-severity-chip',
+                  `add-client-form__allergy-severity-chip--${opt.modifier}`,
+                  {
+                    'add-client-form__allergy-severity-chip--selected':
+                      section.draft.severity === opt.value,
+                  },
+                ]"
+                @click="section.draft.severity = opt.value">
+                <span
+                  :class="severityDotClass(opt.modifier)"
+                />
+                <span class="add-client-form__allergy-severity-label">
+                  {{ opt.label }}
+                </span>
+              </q-btn>
+            </div>
+          </AddClientLabeledField>
           <div
             v-if="draftSeverityError"
             class="text-negative text-caption q-mt-xs">
@@ -77,6 +86,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
+            :data-testid="tid.allergyBtnAdd"
             :label="t('allergyAdd')"
             @click="onAddEntry"
           />
@@ -88,7 +98,9 @@
 
     <AddClientAccordionSection
       icon="medical_services"
-      :title="t('allergiesExistingTitle')">
+      :title="t('allergiesExistingTitle')"
+      section-test-id="add-client-accordion-allergies-existing"
+      :toggle-test-id="tid.accordionToggle('allergies-existing')">
       <div class="add-client-form__fmh-list-card q-pa-md">
         <AllergiesTable
           :entries="section.entries"
@@ -124,8 +136,6 @@ import { useI18n } from 'vue-i18n'
 import ClientYearField from 'components/ClientYearField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
-import AddClientSubsectionHeading
-  from 'components/AddClientSubsectionHeading.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'
 import AllergyDeleteDialog from 'components/AllergyDeleteDialog.vue'
@@ -144,6 +154,7 @@ import {
   trimAllergyField,
   validateAllergyForAdd,
 } from 'src/utils/client-allergies.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

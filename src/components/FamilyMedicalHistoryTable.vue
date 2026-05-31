@@ -23,6 +23,7 @@
               dense
               color="primary"
               icon="edit"
+              :data-testid="tid.fmhRowEdit(entry.id)"
               :aria-label="t('edit')"
               @click="emit('edit', entry)"
             />
@@ -32,6 +33,7 @@
               dense
               color="primary"
               icon="delete"
+              :data-testid="tid.fmhRowDelete(entry.id)"
               :aria-label="t('delete')"
               @click="emit('delete', entry)"
             />
@@ -47,6 +49,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 defineProps({
   entries: {

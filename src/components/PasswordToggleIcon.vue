@@ -2,6 +2,7 @@
   <q-icon
     :name="iconName"
     class="cursor-pointer"
+    :data-testid="testId || undefined"
     :title="titleText"
     :aria-label="titleText"
     @click="emit('toggle')"
@@ -18,6 +19,10 @@ const props = defineProps({
   showPlain: {
     type: Boolean,
     default: false,
+  },
+  testId: {
+    type: String,
+    default: '',
   },
 })
 

@@ -2,6 +2,7 @@
   <q-input
     outlined
     hide-bottom-space
+    :data-testid="testId || undefined"
     class="client-date-field"
     :class="{ 'client-date-field--no-label': !label }"
     :model-value="modelValue"
@@ -54,6 +55,7 @@ const props = defineProps({
   maxToday: { type: Boolean, default: false },
   minYear: { type: Number, default: null },
   closeLabel: { type: String, default: 'Close' },
+  testId: { type: String, default: '' },
 })
 
 const emit = defineEmits(['update:modelValue'])
