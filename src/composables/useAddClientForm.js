@@ -173,7 +173,6 @@ export function useAddClientForm(t, catalogs, options = {}) {
     validateAllTabs,
   } = useAddClientTabValidation({
     activeTab,
-    activeSubTab,
     formRef,
     form,
     tabOrder: TAB_ORDER,

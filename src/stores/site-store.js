@@ -122,9 +122,16 @@ export const useSiteStore = defineStore('site', {
       return this.buildEditFormFromClient(raw, options)
     },
     async updateClient(clientId, form, t) {
-      const body = buildClientUpdateBody(clientId, form)
-      const response = await apiInstance.put(apiPaths.clientsUpdate, body)
+      const id = String(clientId ?? '').trim()
+      if (!id) {
+        throw new Error('Missing client id')
+      }
+      const body = buildClientUpdateBody(form)
+      const response = await apiInstance.patch(apiPaths.clientById(id), body)
       const updated = extractClientMutationResponse(response.data)
+      if (updated && typeof updated === 'object') {
+        this.clientListSourceById[id] = updated
+      }
       await this.getClientList(
         {
           page: this.clientListQuery.page,

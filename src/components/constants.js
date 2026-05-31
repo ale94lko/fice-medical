@@ -271,7 +271,6 @@ export const apiPaths = {
   clientsList: '/client/v1/all-clients',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientsCreate: '/client/v1/register',
-  clientsUpdate: '/client/v1/update-client',
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',
