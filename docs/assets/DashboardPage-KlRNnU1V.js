@@ -1,0 +1,1 @@
+import{Ar as e,Sn as t,ur as n}from"./index-DGp1RFUy.js";import{t as r}from"./QPage-BFBCaCPd.js";var i={};function a(t,i){return e(),n(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
