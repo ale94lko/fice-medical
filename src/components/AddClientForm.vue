@@ -96,6 +96,21 @@
             :title="t('personalInformation')">
             <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
+                  <AddClientLabeledField :label="t('prefix')">
+                    <q-select
+                      v-model="form[ck.prefix]"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      clearable
+                      class="full-width"
+                      :loading="catalogsLoading"
+                      :options="prefixSelectOptions"
+                    />
+                  </AddClientLabeledField>
+                </div>
+                <div class="col-12 col-md-6">
                   <TextInput
                     v-model="form[ck.firstName]"
                     :external-label="true"
@@ -133,9 +148,25 @@
                       hide-bottom-space
                       emit-value
                       map-options
+                      clearable
                       class="full-width"
                       :loading="catalogsLoading"
                       :options="suffixSelectOptions"
+                    />
+                  </AddClientLabeledField>
+                </div>
+                <div class="col-12 col-md-6">
+                  <AddClientLabeledField :label="t('socialSecurityNumber')">
+                    <q-input
+                      outlined
+                      hide-bottom-space
+                      class="full-width"
+                      :model-value="ssnDisplayValue"
+                      :rules="rules.ssn"
+                      maxlength="11"
+                      @focus="onSsnFocus"
+                      @blur="onSsnBlur"
+                      @update:model-value="onSsnInput"
                     />
                   </AddClientLabeledField>
                 </div>
@@ -221,31 +252,54 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('sex')">
-                    <div class="add-client-form__sex-field">
-                      <q-option-group
-                        v-model="form[ck.sex]"
-                        :options="sexOptions"
-                        :disable="catalogsLoading"
-                        type="radio"
-                        inline
-                        class="add-client-form__sex-group"
-                      />
-                    </div>
+                  <AddClientLabeledField :label="t('race')">
+                    <q-select
+                      v-model="form[ck.race]"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      clearable
+                      class="full-width"
+                      :loading="catalogsLoading"
+                      :options="raceSelectOptions"
+                    />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
-                  <AddClientLabeledField :label="t('socialSecurityNumber')">
-                    <q-input
+                  <AddClientLabeledField :label="t('ethnicity')">
+                    <q-select
+                      v-model="form[ck.ethnicity]"
                       outlined
                       hide-bottom-space
-                      :model-value="ssnDisplayValue"
-                      :rules="rules.ssn"
-                      maxlength="11"
-                      @focus="onSsnFocus"
-                      @blur="onSsnBlur"
-                      @update:model-value="onSsnInput"
+                      emit-value
+                      map-options
+                      clearable
+                      class="full-width"
+                      :loading="catalogsLoading"
+                      :options="ethnicitySelectOptions"
                     />
+                  </AddClientLabeledField>
+                </div>
+                <div class="col-12">
+                  <AddClientLabeledField :label="t('gender')">
+                    <div
+                      class="add-client-form__gender-chip-grid"
+                      :style="genderChipGridStyle">
+                      <q-btn
+                        v-for="opt in genderOptions"
+                        :key="opt.value"
+                        flat
+                        no-caps
+                        :disable="catalogsLoading"
+                        :class="genderChipClass(opt.value)"
+                        @click="form[ck.gender] = opt.value">
+                        <span :class="genderDotClass(opt.value)" />
+                        <span class="add-client-form__gender-chip-label">
+                          {{ opt.label }}
+                        </span>
+                      </q-btn>
+                    </div>
                   </AddClientLabeledField>
                 </div>
               </div>
@@ -479,6 +533,7 @@ import {
   clientFormSections,
   clientMaxAge,
   clientNameMaxLength,
+  clientGenderValues,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
@@ -543,8 +598,11 @@ const {
   ageFieldsLocked,
   ageUnitSelectOptions,
   assignedClinicianOptions,
-  sexOptions,
+  genderOptions,
+  prefixSelectOptions,
   suffixSelectOptions,
+  raceSelectOptions,
+  ethnicitySelectOptions,
   rules,
   contactRules,
   resetForm,
@@ -571,6 +629,49 @@ const {
 const dobMinYear = computed(
   () => new Date().getFullYear() - clientMaxAge,
 )
+
+const genderChipGridStyle = computed(() => {
+  const options = genderOptions?.value ?? []
+  const count = Math.max(options.length, 1)
+
+  return {
+    gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`,
+  }
+})
+
+function genderChipModifier(value) {
+  const token = String(value ?? '').trim().toLowerCase()
+  if (token === clientGenderValues.male || token === 'male') {
+    return 'male'
+  }
+  if (token === clientGenderValues.female || token === 'female') {
+    return 'female'
+  }
+
+  return 'unknown'
+}
+
+function genderDotClass(value) {
+  const modifier = genderChipModifier(value)
+
+  return [
+    'add-client-form__gender-chip-dot',
+    `add-client-form__gender-chip-dot--${modifier}`,
+  ]
+}
+
+function genderChipClass(value) {
+  const modifier = genderChipModifier(value)
+
+  return [
+    'add-client-form__gender-chip',
+    `add-client-form__gender-chip--${modifier}`,
+    {
+      'add-client-form__gender-chip--selected':
+        form.value[ck.gender] === value,
+    },
+  ]
+}
 
 const ageMaxForUnit = computed(() => maxAgeForUnit(form.value[ck.ageUnit]))
 

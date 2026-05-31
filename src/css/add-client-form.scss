@@ -150,35 +150,111 @@
   color: $text-muted;
 }
 
-.add-client-form__sex-field {
-  display: flex;
-  align-items: center;
-  min-height: 56px;
-  padding: 8px 14px;
-  border: 1px solid rgba(0, 0, 0, 0.24);
-  border-radius: 4px;
-  background: $surface;
-  transition: border-color 0.2s;
+.add-client-form__gender-chip-grid {
+  display: grid;
+  gap: 10px;
+}
 
-  &:focus-within {
-    border-color: $primary;
-    border-width: 2px;
-    padding: 7px 13px;
+.add-client-form__gender-chip {
+  justify-content: flex-start;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  text-transform: none;
+
+  &::before {
+    border-radius: 12px;
+    border-width: 1px;
+    opacity: 1;
   }
 
-  .add-client-form__sex-group {
-    margin: 0;
-    width: 100%;
+  &--male {
+    background: #ecfdf5 !important;
+    color: #047857;
 
-    .q-radio {
-      margin-right: 4px;
-    }
-
-    .q-radio__label {
-      font-size: 14px;
-      color: $text-strong;
+    &::before {
+      border-color: #a7f3d0;
     }
   }
+
+  &--female {
+    background: #f0fdf4 !important;
+    color: #15803d;
+
+    &::before {
+      border-color: #bbf7d0;
+    }
+  }
+
+  &--unknown {
+    background: #f7fee7 !important;
+    color: #4d7c0f;
+
+    &::before {
+      border-color: #d9f99d;
+    }
+  }
+
+  &--selected {
+    font-weight: 700;
+
+    &::before {
+      border-style: solid !important;
+      border-width: 2px !important;
+    }
+
+    &.add-client-form__gender-chip--male {
+      background: #d1fae5 !important;
+      color: #065f46;
+
+      &::before {
+        border-color: #6ee7b7;
+      }
+    }
+
+    &.add-client-form__gender-chip--female {
+      background: #dcfce7 !important;
+      color: #166534;
+
+      &::before {
+        border-color: #86efac;
+      }
+    }
+
+    &.add-client-form__gender-chip--unknown {
+      background: #ecfccb !important;
+      color: #3f6212;
+
+      &::before {
+        border-color: #bef264;
+      }
+    }
+  }
+}
+
+.add-client-form__gender-chip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 8px;
+
+  &--male {
+    background: #10b981;
+  }
+
+  &--female {
+    background: #22c55e;
+  }
+
+  &--unknown {
+    background: #84cc16;
+  }
+}
+
+.add-client-form__gender-chip-label {
+  line-height: 1.25;
 }
 
 .add-client-tabs {

@@ -8,7 +8,7 @@ import {
   clientPhoneTypeValues,
   clientPreferredCommunicationValues,
   clientRelationshipTypeValues,
-  clientSexValues,
+  clientGenderValues,
 } from 'components/constants.js'
 import {
   createEmptyAllergiesSection,
@@ -78,10 +78,10 @@ const RELATIONSHIP_FROM_API = {
   others: clientRelationshipTypeValues.others,
 }
 
-const SEX_FROM_API = {
-  male: clientSexValues.male,
-  female: clientSexValues.female,
-  unknown: clientSexValues.unknown,
+const GENDER_FROM_API = {
+  male: clientGenderValues.male,
+  female: clientGenderValues.female,
+  unknown: clientGenderValues.unknown,
 }
 
 function personalInfo(client) {
@@ -166,13 +166,13 @@ function mapRelationshipFromApi(value) {
   return RELATIONSHIP_FROM_API[token] ?? ''
 }
 
-function mapSexFromApi(value) {
+function mapGenderFromApi(value) {
   const token = toSnakeToken(value)
   if (!token) {
     return ''
   }
 
-  return SEX_FROM_API[token] ?? ''
+  return GENDER_FROM_API[token] ?? ''
 }
 
 function mapSeverityFromApi(value) {
@@ -484,11 +484,16 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.clientNumber]: String(
       client.client_number ?? client[ck.clientNumber] ?? '',
     ).trim(),
+    [ck.prefix]: String(personal.prefix ?? '').trim(),
     [ck.firstName]: String(personal.first_name ?? '').trim(),
     [ck.middleName]: String(personal.middle_name ?? '').trim(),
     [ck.lastName]: String(personal.last_name ?? '').trim(),
     [ck.suffix]: String(personal.suffix ?? '').trim(),
-    [ck.sex]: mapSexFromApi(personal.sex ?? client.sex),
+    [ck.gender]: mapGenderFromApi(
+      personal.gender ?? personal.sex ?? client.gender ?? client.sex,
+    ),
+    [ck.race]: String(personal.race ?? '').trim(),
+    [ck.ethnicity]: String(personal.ethnicity ?? '').trim(),
     [ck.dob]: dobResolved,
     [ck.age]: ageFields.age,
     [ck.ageUnit]: ageFields.ageUnit,

@@ -70,8 +70,11 @@ export function createEmptyAddClientForm() {
     [ck.firstName]: '',
     [ck.middleName]: '',
     [ck.lastName]: '',
+    [ck.prefix]: '',
     [ck.suffix]: '',
-    [ck.sex]: '',
+    [ck.gender]: '',
+    [ck.race]: '',
+    [ck.ethnicity]: '',
     [ck.dob]: '',
     [ck.age]: '',
     [ck.ageUnit]: clientAgeUnitValues.years,
@@ -123,8 +126,11 @@ export function useAddClientForm(t, catalogs, options = {}) {
     ageFieldsLocked,
   )
 
-  const sexOptions = catalogs?.sexOptions
+  const genderOptions = catalogs?.genderOptions
+  const prefixSelectOptions = catalogs?.prefixSelectOptions
   const suffixSelectOptions = catalogs?.suffixSelectOptions
+  const raceSelectOptions = catalogs?.raceSelectOptions
+  const ethnicitySelectOptions = catalogs?.ethnicitySelectOptions
   const ageUnitSelectOptions = catalogs?.ageUnitSelectOptions
 
   function resetForm() {
@@ -225,8 +231,11 @@ export function useAddClientForm(t, catalogs, options = {}) {
     ageFieldsLocked,
     ageUnitSelectOptions,
     assignedClinicianOptions: [],
-    sexOptions,
+    genderOptions,
+    prefixSelectOptions,
     suffixSelectOptions,
+    raceSelectOptions,
+    ethnicitySelectOptions,
     rules,
     contactRules,
     resetForm,

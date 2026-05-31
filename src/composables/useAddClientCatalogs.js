@@ -4,7 +4,7 @@ import {
   catalogNames,
   clientAgeUnitOptions,
   clientAgeUnitValues,
-  clientSexValues,
+  clientGenderValues,
   clientSuffixOptions,
 } from 'components/constants.js'
 import {
@@ -13,11 +13,11 @@ import {
   mapCatalogItemsToSelectOptions,
 } from 'src/utils/catalogs.js'
 
-function fallbackSexOptions(t) {
+function fallbackGenderOptions(t) {
   return [
-    { label: t('sexMale'), value: clientSexValues.male },
-    { label: t('sexFemale'), value: clientSexValues.female },
-    { label: t('sexUnknown'), value: clientSexValues.unknown },
+    { label: t('genderMale'), value: clientGenderValues.male },
+    { label: t('genderFemale'), value: clientGenderValues.female },
+    { label: t('genderUnknown'), value: clientGenderValues.unknown },
   ]
 }
 
@@ -55,15 +55,27 @@ export function useAddClientCatalogs(t) {
     }
   }
 
-  const sexOptions = computed(() => {
-    const catalog = catalogsByName.value[catalogNames.sex]
+  const genderOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.gender]
     if (catalog) {
       return mapCatalogItemsToSelectOptions(
         catalogItemsFromCatalog(catalog),
       )
     }
 
-    return fallbackSexOptions(t)
+    return fallbackGenderOptions(t)
+  })
+
+  const prefixSelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.prefix]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+        { emptyOption: { label: t('prefixSelect'), value: '' } },
+      )
+    }
+
+    return [{ label: t('prefixSelect'), value: '' }]
   })
 
   const suffixSelectOptions = computed(() => {
@@ -76,6 +88,30 @@ export function useAddClientCatalogs(t) {
     }
 
     return fallbackSuffixOptions(t)
+  })
+
+  const raceSelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.race]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+        { emptyOption: { label: t('raceSelect'), value: '' } },
+      )
+    }
+
+    return [{ label: t('raceSelect'), value: '' }]
+  })
+
+  const ethnicitySelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.ethnicity]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+        { emptyOption: { label: t('ethnicitySelect'), value: '' } },
+      )
+    }
+
+    return [{ label: t('ethnicitySelect'), value: '' }]
   })
 
   const ageUnitSelectOptions = computed(() => {
@@ -117,8 +153,11 @@ export function useAddClientCatalogs(t) {
     loaded,
     catalogsByName,
     loadBasicInfoCatalogs,
-    sexOptions,
+    genderOptions,
+    prefixSelectOptions,
     suffixSelectOptions,
+    raceSelectOptions,
+    ethnicitySelectOptions,
     ageUnitSelectOptions,
     resolveAgeUnitCode,
     yearsAgeUnitValue,

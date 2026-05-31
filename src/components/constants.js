@@ -25,8 +25,11 @@ export const clientFieldKeys = {
   firstName: 'firstName',
   middleName: 'middleName',
   lastName: 'lastName',
+  prefix: 'prefix',
   suffix: 'suffix',
-  sex: 'sex',
+  gender: 'gender',
+  race: 'race',
+  ethnicity: 'ethnicity',
   age: 'age',
   socialSecurityNumber: 'socialSecurityNumber',
   name: 'name',
@@ -195,7 +198,7 @@ export const clientAgeUnitOptions = [
   { labelKey: 'ageUnitDays', value: clientAgeUnitValues.days },
 ]
 
-export const clientSexValues = {
+export const clientGenderValues = {
   male: 'Male',
   female: 'Female',
   unknown: 'Unknown',
@@ -245,15 +248,21 @@ export const reservedTenantSubdomains = new Set([
 
 /** Catalog names for POST /catalogs/v1/by-names */
 export const catalogNames = {
+  prefix: 'prefix',
   suffix: 'suffix',
   ageUnit: 'age_unit',
-  sex: 'sex',
+  gender: 'gender',
+  race: 'race',
+  ethnicity: 'ethnicity',
 }
 
 export const addClientBasicInfoCatalogNames = [
+  catalogNames.prefix,
   catalogNames.suffix,
   catalogNames.ageUnit,
-  catalogNames.sex,
+  catalogNames.gender,
+  catalogNames.race,
+  catalogNames.ethnicity,
 ]
 
 export const apiPaths = {

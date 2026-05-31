@@ -222,11 +222,14 @@ function buildBasicInfo(form) {
   const dobIso = usDateToIso(form[ck.dob])
 
   return {
+    prefix: trim(form[ck.prefix]),
     first_name: trim(form[ck.firstName]),
     middle_name: trim(form[ck.middleName]),
     last_name: trim(form[ck.lastName]),
     suffix: trim(form[ck.suffix]),
-    sex: trim(form[ck.sex]),
+    gender: trim(form[ck.gender]),
+    race: trim(form[ck.race]),
+    ethnicity: trim(form[ck.ethnicity]),
     dob: dobIso || null,
     ssn: resolveSsn(form),
     admission_date: admissionDateToIso(form[ck.admissionDate]),

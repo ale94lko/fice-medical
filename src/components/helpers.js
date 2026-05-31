@@ -1,6 +1,6 @@
 import {
   clientFieldKeys,
-  clientSexValues,
+  clientGenderValues,
   clientStatus,
   typeNames,
 } from 'components/constants.js'
@@ -213,16 +213,16 @@ function clientPersonalInfo(client) {
   return client.personal_information ?? client.basic_info ?? client
 }
 
-function mapSexLabelForList(value) {
+function mapGenderLabelForList(value) {
   const token = String(value ?? '').trim().toLowerCase()
   if (token === 'male') {
-    return clientSexValues.male
+    return clientGenderValues.male
   }
   if (token === 'female') {
-    return clientSexValues.female
+    return clientGenderValues.female
   }
   if (token === 'unknown') {
-    return clientSexValues.unknown
+    return clientGenderValues.unknown
   }
 
   return String(value ?? '').trim()
@@ -337,7 +337,9 @@ export function mapClient(client) {
     [ck.middleName]: middleName,
     [ck.lastName]: lastName,
     [ck.suffix]: suffix,
-    [ck.sex]: mapSexLabelForList(personal.sex ?? client.sex ?? client[ck.sex]),
+    [ck.gender]: mapGenderLabelForList(
+      personal.gender ?? personal.sex ?? client.gender ?? client.sex,
+    ),
     [ck.age]: personal.age ?? client.age ?? client[ck.age] ?? '',
     [ck.socialSecurityNumber]:
       ssn != null && ssn !== '' ? String(ssn) : '',
