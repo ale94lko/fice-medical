@@ -6,6 +6,18 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+
+  .q-field__messages {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+}
+
+.app-dialog-card__body {
+  .q-field__messages {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
 }
 
 .add-client-form__chrome {

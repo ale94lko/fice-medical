@@ -386,7 +386,6 @@ export default {
     'Comience a escribir para buscar un pagador o plan.',
   insurancePriority: 'Prioridad del seguro',
   insurancePriorityPlaceholder: 'Seleccionar prioridad',
-  insurancePriorityHint: 'Primario, Secundario o Terciario',
   insuranceMemberId: 'ID de miembro',
   insuranceMemberIdPlaceholder: 'Ingrese ID de miembro',
   insuranceType: 'Tipo de seguro',
@@ -395,11 +394,8 @@ export default {
   insuranceExpirationDate: 'Fecha de vencimiento de la póliza',
   insuranceRelationship: 'Relación con el titular',
   insuranceRelationshipPlaceholder: 'Seleccionar relación',
-  insuranceRelationshipHint:
-    'Relación entre el paciente y el titular de la póliza',
   insuranceSubscriberName: 'Nombre del titular',
   insuranceSubscriberPlaceholder: 'Ingrese nombre del titular',
-  insuranceSubscriberHint: 'Nombre del titular de la póliza',
   insuranceIdentifiersTitle:
     'Identificadores adicionales (aplican a este perfil)',
   insuranceMedicaidId: 'ID de beneficiario Medicaid',
@@ -421,7 +417,6 @@ export default {
   insuranceCardFileType: 'Formatos permitidos: PNG, JPG o PDF.',
   insuranceCardFileSize: 'El archivo debe ser de 5MB o menos.',
   insuranceStatus: 'Estado del seguro',
-  insuranceStatusHint: 'Estado actual de esta cobertura',
   insuranceDeleteTitle: 'Eliminar perfil de seguro',
   insuranceDeleteMessage:
     '¿Seguro que desea eliminar este perfil de seguro? '

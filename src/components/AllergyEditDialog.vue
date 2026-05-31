@@ -84,7 +84,7 @@
             </AddClientLabeledField>
             <div
               v-if="severityError"
-              class="text-negative text-caption q-mt-xs">
+              class="form-field__error">
               {{ severityError }}
             </div>
           </div>

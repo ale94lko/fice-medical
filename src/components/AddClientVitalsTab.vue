@@ -251,7 +251,7 @@
             </div>
             <div
               v-if="fieldErrors.recordedDate"
-              class="text-negative text-caption q-mt-xs">
+              class="form-field__error">
               {{ errorMessage('recordedDate') }}
             </div>
           </AddClientLabeledField>

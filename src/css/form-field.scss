@@ -25,6 +25,26 @@
   }
 }
 
+.form-field__error {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: $negative;
+}
+
+.form-field {
+  .q-field__messages {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+
+  &:has(.q-field--error) .form-field__hint,
+  &:has(.form-field__error) .form-field__hint {
+    display: none;
+  }
+}
+
 .form-field__hint {
   display: flex;
   align-items: flex-start;

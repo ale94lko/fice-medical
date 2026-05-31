@@ -377,7 +377,6 @@ export default {
   insurancePayerSearchHint: 'Start typing to search for a payer or plan.',
   insurancePriority: 'Insurance Priority',
   insurancePriorityPlaceholder: 'Select priority',
-  insurancePriorityHint: 'Primary, Secondary, or Tertiary',
   insuranceMemberId: 'Member ID',
   insuranceMemberIdPlaceholder: 'Enter member ID',
   insuranceType: 'Insurance Type',
@@ -386,11 +385,8 @@ export default {
   insuranceExpirationDate: 'Policy Expiration Date',
   insuranceRelationship: 'Relationship to Subscriber',
   insuranceRelationshipPlaceholder: 'Select relationship',
-  insuranceRelationshipHint:
-    'Relationship between patient and policy holder',
   insuranceSubscriberName: 'Subscriber Name',
   insuranceSubscriberPlaceholder: 'Enter subscriber name',
-  insuranceSubscriberHint: 'Name of the policy holder',
   insuranceIdentifiersTitle:
     'Additional Identifiers (applies to this insurance profile)',
   insuranceMedicaidId: 'Medicaid Recipient ID',
@@ -412,7 +408,6 @@ export default {
   insuranceCardFileType: 'Allowed formats: PNG, JPG, or PDF.',
   insuranceCardFileSize: 'File must be 5MB or smaller.',
   insuranceStatus: 'Insurance Status',
-  insuranceStatusHint: 'Current status of this insurance coverage',
   insuranceDeleteTitle: 'Delete Insurance Profile',
   insuranceDeleteMessage:
     'Are you sure you want to delete this insurance profile? '

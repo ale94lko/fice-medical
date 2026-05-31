@@ -408,6 +408,13 @@
   }
 }
 
+// Blurred overlay behind modals (admin-style)
+.q-dialog__backdrop {
+  background: rgba($text-strong, 0.28) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 // Admin-style modal shell (white header, scroll body, fixed footer)
 .app-dialog-toolbar {
   flex-shrink: 0;

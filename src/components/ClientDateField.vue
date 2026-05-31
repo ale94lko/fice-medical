@@ -8,6 +8,8 @@
     :model-value="modelValue"
     :label="label || undefined"
     :readonly="readonly"
+    :error="error"
+    :error-message="errorMessage"
     :rules="rules"
     :lazy-rules="'ondemand'"
     mask="##/##/####"
@@ -51,6 +53,8 @@ const props = defineProps({
   modelValue: { type: String, default: '' },
   label: { type: String, default: '' },
   readonly: { type: Boolean, default: false },
+  error: { type: Boolean, default: false },
+  errorMessage: { type: String, default: '' },
   rules: { type: Array, default: () => [] },
   maxToday: { type: Boolean, default: false },
   minYear: { type: Number, default: null },

@@ -56,7 +56,7 @@
     </div>
     <div
       v-if="displayError"
-      class="text-negative text-caption q-mt-xs">
+      class="form-field__error">
       {{ displayError }}
     </div>
   </div>

@@ -75,7 +75,7 @@
           </AddClientLabeledField>
           <div
             v-if="draftSeverityError"
-            class="text-negative text-caption q-mt-xs">
+            class="form-field__error">
             {{ draftSeverityError }}
           </div>
         </div>

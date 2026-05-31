@@ -65,9 +65,6 @@
                 :error-message="errorText('priority')"
                 :test-id="tid.insuranceField('priority')"
               />
-              <template #hint>
-                {{ t('insurancePriorityHint') }}
-              </template>
             </AddClientLabeledField>
           </div>
 
@@ -118,14 +115,11 @@
               <ClientDateField
                 v-model="local.policyEffectiveDate"
                 :readonly="readonly"
+                :error="Boolean(fieldError('policyEffectiveDate'))"
+                :error-message="errorText('policyEffectiveDate')"
                 :close-label="t('close')"
                 :test-id="tid.insuranceField('effectiveDate')"
               />
-              <div
-                v-if="fieldError('policyEffectiveDate')"
-                class="text-negative text-caption q-mt-xs">
-                {{ errorText('policyEffectiveDate') }}
-              </div>
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
@@ -135,14 +129,11 @@
               <ClientDateField
                 v-model="local.policyExpirationDate"
                 :readonly="readonly"
+                :error="Boolean(fieldError('policyExpirationDate'))"
+                :error-message="errorText('policyExpirationDate')"
                 :close-label="t('close')"
                 :test-id="tid.insuranceField('expirationDate')"
               />
-              <div
-                v-if="fieldError('policyExpirationDate')"
-                class="text-negative text-caption q-mt-xs">
-                {{ errorText('policyExpirationDate') }}
-              </div>
             </AddClientLabeledField>
           </div>
 
@@ -164,9 +155,6 @@
                 :error-message="errorText('relationshipToSubscriber')"
                 :test-id="tid.insuranceField('relationship')"
               />
-              <template #hint>
-                {{ t('insuranceRelationshipHint') }}
-              </template>
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
@@ -185,9 +173,6 @@
                 :error-message="errorText('subscriberName')"
                 :data-testid="tid.insuranceField('subscriberName')"
               />
-              <template #hint>
-                {{ t('insuranceSubscriberHint') }}
-              </template>
             </AddClientLabeledField>
           </div>
         </div>
@@ -320,9 +305,6 @@
                 :error-message="errorText('status')"
                 :test-id="tid.insuranceField('status')"
               />
-              <template #hint>
-                {{ t('insuranceStatusHint') }}
-              </template>
             </AddClientLabeledField>
           </div>
         </div>
