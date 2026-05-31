@@ -1,1 +1,0 @@
-import{Lr as e,Mr as t,Or as n,fr as r,sr as i,yn as a}from"./index-Dr5RA1f5.js";import{r as o,t as s}from"./QLayout-ECDcOneE.js";var c={};function l(a,c){let l=t(`router-view`);return n(),i(s,{view:`hHh Lpr lff`},{default:e(()=>[r(o,null,{default:e(()=>[r(l)]),_:1})]),_:1})}var u=a(c,[[`render`,l]]);export{u as default};
