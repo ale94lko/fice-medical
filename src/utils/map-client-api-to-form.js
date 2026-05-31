@@ -60,6 +60,7 @@ const COMM_PREF_FROM_API = {
   mail: clientPreferredCommunicationValues.mail,
   declined: clientPreferredCommunicationValues.patientDeclined,
   not_asked: clientPreferredCommunicationValues.providerDidNotAsk,
+  point_of_contact: clientPreferredCommunicationValues.pointOfContact,
 }
 
 const CONTACT_TYPE_FROM_API = {
@@ -82,6 +83,7 @@ const GENDER_FROM_API = {
   male: clientGenderValues.male,
   female: clientGenderValues.female,
   unknown: clientGenderValues.unknown,
+  other: clientGenderValues.unknown,
 }
 
 function personalInfo(client) {
@@ -104,6 +106,20 @@ function optionalSelectValue(value) {
   const trimmed = String(value ?? '').trim()
 
   return trimmed || null
+}
+
+function resolveCatalogSelectField(
+  raw,
+  catalogOptions,
+  resolveCatalogSelectValue,
+) {
+  const trimmed = String(raw ?? '').trim()
+  if (!trimmed) {
+    return null
+  }
+  const fromCatalog = resolveCatalogSelectValue?.(catalogOptions, trimmed)
+
+  return fromCatalog ?? optionalSelectValue(trimmed)
 }
 
 function pickPrimaryAddress(source) {
@@ -179,6 +195,36 @@ function mapGenderFromApi(value) {
   }
 
   return GENDER_FROM_API[token] ?? ''
+}
+
+function resolveGenderField(
+  raw,
+  genderSelectOptions,
+  resolveCatalogSelectValue,
+) {
+  const fromCatalog = resolveCatalogSelectField(
+    raw,
+    genderSelectOptions,
+    resolveCatalogSelectValue,
+  )
+  if (fromCatalog) {
+    return fromCatalog
+  }
+  const token = toSnakeToken(raw)
+  if (!token) {
+    return ''
+  }
+  const match = (genderSelectOptions ?? []).find(option => {
+    const valueToken = toSnakeToken(option?.value)
+    const labelToken = toSnakeToken(option?.label)
+
+    return valueToken === token || labelToken === token
+  })
+  if (match?.value) {
+    return match.value
+  }
+
+  return mapGenderFromApi(raw)
 }
 
 function mapSeverityFromApi(value) {
@@ -263,18 +309,33 @@ function mapAddressFieldsToContact(contact, addr) {
   contact.country = mapCountryToForm(addr?.country)
 }
 
-function findPrimaryApiContact(contacts) {
+function findSelfApiContact(contacts, personalInfoId) {
   const list = Array.isArray(contacts) ? contacts : []
-  const primary = list.find(
-    item => toSnakeToken(item?.contact_type) === 'primary',
+  const selfContact = list.find(
+    item => toSnakeToken(item?.relationship_type) === 'self',
   )
+  if (selfContact) {
+    return selfContact
+  }
+  if (personalInfoId != null && personalInfoId !== '') {
+    const idStr = String(personalInfoId)
+    const byPi = list.find(
+      item => String(item?.personal_information_id ?? '') === idStr,
+    )
+    if (byPi) {
+      return byPi
+    }
+  }
 
-  return primary ?? list[0] ?? null
+  return null
 }
 
 function resolvePreferredCommunication(client, personal) {
-  const primaryContact = findPrimaryApiContact(client?.contacts)
-  const raw = primaryContact?.communication_preference
+  const selfContact = findSelfApiContact(
+    client?.contacts,
+    personal?.id ?? personal?.personal_information_id,
+  )
+  const raw = selfContact?.communication_preference
     ?? personal?.communication_preference
     ?? personal?.preferred_communication
     ?? client?.communication_preference
@@ -282,11 +343,9 @@ function resolvePreferredCommunication(client, personal) {
   return mapCommunicationFromApi(raw)
 }
 
+/** Client mirror row in contacts (relationship self), not other contacts. */
 function isClientPrimaryContact(item) {
-  const type = toSnakeToken(item?.contact_type)
-  const rel = toSnakeToken(item?.relationship_type)
-
-  return type === 'primary' || rel === 'self'
+  return toSnakeToken(item?.relationship_type) === 'self'
 }
 
 function mapClientContactFromApi(client, personal) {
@@ -326,8 +385,16 @@ function addressesMatch(clientAddr, otherAddr) {
   )
 }
 
-function mapOtherContactFromApi(item, clientContact) {
+function mapOtherContactFromApi(item, clientContact, catalogOptions = {}) {
+  if (isClientPrimaryContact(item)) {
+    return null
+  }
   const pi = contactPersonalInfo(item)
+  const {
+    resolveCatalogSelectValue,
+    prefixSelectOptions = [],
+    suffixSelectOptions = [],
+  } = catalogOptions
   const other = createEmptyOtherContact()
   other.id = nextContactId()
   other.contactType = mapContactTypeFromApi(
@@ -341,13 +408,21 @@ function mapOtherContactFromApi(item, clientContact) {
     ?? item?.responsible_for_payments
     ?? item?.responsibleForPayments,
   )
-  other.prefix = optionalSelectValue(pi.prefix ?? item?.prefix)
+  other.prefix = resolveCatalogSelectField(
+    pi.prefix ?? item?.prefix,
+    prefixSelectOptions,
+    resolveCatalogSelectValue,
+  )
   other.firstName = String(pi.first_name ?? item?.first_name ?? '').trim()
   other.middleName = String(
     pi.middle_name ?? item?.middle_name ?? '',
   ).trim()
   other.lastName = String(pi.last_name ?? item?.last_name ?? '').trim()
-  other.suffix = optionalSelectValue(pi.suffix ?? item?.suffix)
+  other.suffix = resolveCatalogSelectField(
+    pi.suffix ?? item?.suffix,
+    suffixSelectOptions,
+    resolveCatalogSelectValue,
+  )
   other.phones = mapPhonesFromApi(pi.phones ?? item?.phones)
   other.emails = mapEmailsFromApi(pi.emails ?? item?.emails)
 
@@ -455,7 +530,16 @@ function resolveClinicianValue(client, personal) {
  * Maps a client list/detail API payload into the add/edit client form shape.
  */
 export function mapClientApiToForm(client, options = {}) {
-  const { resolveAgeUnitCode, defaultAgeUnitValue } = options
+  const {
+    resolveAgeUnitCode,
+    defaultAgeUnitValue,
+    resolveCatalogSelectValue,
+    prefixSelectOptions = [],
+    suffixSelectOptions = [],
+    raceSelectOptions = [],
+    ethnicitySelectOptions = [],
+    genderSelectOptions = [],
+  } = options
   if (!client || typeof client !== 'object') {
     return null
   }
@@ -473,9 +557,14 @@ export function mapClientApiToForm(client, options = {}) {
 
   const contact = mapClientContactFromApi(client, personal)
   const otherRaw = client.contacts ?? client.other_contacts ?? []
+  const catalogOptions = {
+    resolveCatalogSelectValue,
+    prefixSelectOptions,
+    suffixSelectOptions,
+  }
   contact.otherContacts = (Array.isArray(otherRaw) ? otherRaw : [])
-    .filter(item => !isClientPrimaryContact(item))
-    .map(item => mapOtherContactFromApi(item, contact))
+    .map(item => mapOtherContactFromApi(item, contact, catalogOptions))
+    .filter(Boolean)
   if (contact.otherContacts.length) {
     contact.activeOtherContactId = contact.otherContacts[0].id
   }
@@ -491,16 +580,34 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.clientNumber]: String(
       client.client_number ?? client[ck.clientNumber] ?? '',
     ).trim(),
-    [ck.prefix]: optionalSelectValue(personal.prefix),
+    [ck.prefix]: resolveCatalogSelectField(
+      personal.prefix,
+      prefixSelectOptions,
+      resolveCatalogSelectValue,
+    ),
     [ck.firstName]: String(personal.first_name ?? '').trim(),
     [ck.middleName]: String(personal.middle_name ?? '').trim(),
     [ck.lastName]: String(personal.last_name ?? '').trim(),
-    [ck.suffix]: optionalSelectValue(personal.suffix),
-    [ck.gender]: mapGenderFromApi(
-      personal.gender ?? personal.sex ?? client.gender ?? client.sex,
+    [ck.suffix]: resolveCatalogSelectField(
+      personal.suffix,
+      suffixSelectOptions,
+      resolveCatalogSelectValue,
     ),
-    [ck.race]: optionalSelectValue(personal.race),
-    [ck.ethnicity]: optionalSelectValue(personal.ethnicity),
+    [ck.gender]: resolveGenderField(
+      personal.gender ?? personal.sex ?? client.gender ?? client.sex,
+      genderSelectOptions,
+      resolveCatalogSelectValue,
+    ),
+    [ck.race]: resolveCatalogSelectField(
+      personal.race,
+      raceSelectOptions,
+      resolveCatalogSelectValue,
+    ),
+    [ck.ethnicity]: resolveCatalogSelectField(
+      personal.ethnicity,
+      ethnicitySelectOptions,
+      resolveCatalogSelectValue,
+    ),
     [ck.dob]: dobResolved,
     [ck.age]: ageFields.age,
     [ck.ageUnit]: ageFields.ageUnit,

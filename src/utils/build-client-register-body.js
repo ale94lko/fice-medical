@@ -61,6 +61,9 @@ function mapCommunicationPreference(value) {
   if (raw.includes('did not ask')) {
     return 'not_asked'
   }
+  if (raw.includes('point') && raw.includes('contact')) {
+    return 'point_of_contact'
+  }
 
   return toSnakeToken(value)
 }
@@ -227,7 +230,7 @@ function buildBasicInfo(form) {
     middle_name: trim(form[ck.middleName]),
     last_name: trim(form[ck.lastName]),
     suffix: trim(form[ck.suffix]),
-    gender: trim(form[ck.gender]),
+    sex: trim(form[ck.gender]),
     race: trim(form[ck.race]),
     ethnicity: trim(form[ck.ethnicity]),
     dob: dobIso || null,

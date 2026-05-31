@@ -541,7 +541,6 @@ import {
   clientFormSections,
   clientMaxAge,
   clientNameMaxLength,
-  clientGenderValues,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
@@ -647,12 +646,30 @@ const genderChipGridStyle = computed(() => {
   }
 })
 
+function normalizeGenderToken(value) {
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+}
+
+function genderValuesMatch(stored, optionValue) {
+  const a = normalizeGenderToken(stored)
+  const b = normalizeGenderToken(optionValue)
+  if (!a || !b) {
+    return false
+  }
+
+  return a === b
+}
+
 function genderChipModifier(value) {
-  const token = String(value ?? '').trim().toLowerCase()
-  if (token === clientGenderValues.male || token === 'male') {
+  const token = normalizeGenderToken(value)
+  if (token === 'male') {
     return 'male'
   }
-  if (token === clientGenderValues.female || token === 'female') {
+  if (token === 'female') {
     return 'female'
   }
 
@@ -676,7 +693,7 @@ function genderChipClass(value) {
     `add-client-form__gender-chip--${modifier}`,
     {
       'add-client-form__gender-chip--selected':
-        form.value[ck.gender] === value,
+        genderValuesMatch(form.value[ck.gender], value),
     },
   ]
 }
@@ -783,14 +800,20 @@ watch([activeTab, activeSubTab], () => {
   emit('tab-label', activeTabLabel.value)
 }, { immediate: true })
 
-function loadClientForEdit() {
+async function loadClientForEdit() {
   const id = props.clientId
   if (id == null || id === '') {
     throw new Error(t('clientLoadError'))
   }
-  const mapped = siteStore.buildEditFormFromListClient(id, {
+  const mapped = await siteStore.buildEditFormForClient(id, {
     resolveAgeUnitCode: catalogs.resolveAgeUnitCode,
     defaultAgeUnitValue: catalogs.defaultAgeUnitValue,
+    resolveCatalogSelectValue: catalogs.resolveCatalogSelectValue,
+    prefixSelectOptions: prefixSelectOptions.value,
+    suffixSelectOptions: suffixSelectOptions.value,
+    raceSelectOptions: raceSelectOptions.value,
+    ethnicitySelectOptions: ethnicitySelectOptions.value,
+    genderSelectOptions: genderOptions.value,
   })
   applyForm(mapped)
 }

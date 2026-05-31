@@ -135,6 +135,29 @@ export function useAddClientCatalogs(t) {
     return match?.value ?? null
   }
 
+  function resolveCatalogSelectValue(options, raw) {
+    const trimmed = String(raw ?? '').trim()
+    if (!trimmed || !Array.isArray(options) || !options.length) {
+      return null
+    }
+    const needle = trimmed.toLowerCase()
+    const token = needle.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+    const match = options.find(option => {
+      const value = String(option?.value ?? '').trim()
+      if (!value) {
+        return false
+      }
+      const valueLower = value.toLowerCase()
+      const valueToken = valueLower
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '')
+
+      return valueLower === needle || valueToken === token
+    })
+
+    return match?.value ?? null
+  }
+
   function yearsAgeUnitValue() {
     return (
       resolveAgeUnitCode(clientAgeUnitValues.years)
@@ -158,6 +181,7 @@ export function useAddClientCatalogs(t) {
     ethnicitySelectOptions,
     ageUnitSelectOptions,
     resolveAgeUnitCode,
+    resolveCatalogSelectValue,
     yearsAgeUnitValue,
     defaultAgeUnitValue,
   }

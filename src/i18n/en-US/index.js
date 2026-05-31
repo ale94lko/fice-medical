@@ -196,6 +196,7 @@ export default {
   prefCommMobilePhone: 'Mobile phone',
   prefCommMail: 'Mail',
   prefCommEmail: 'Email',
+  prefCommPointOfContact: 'Point of Contact',
   additionalNotes: 'Additional notes',
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',

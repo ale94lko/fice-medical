@@ -96,6 +96,7 @@ export const clientPreferredCommunicationValues = {
   mobilePhone: 'Mobile phone',
   mail: 'Mail',
   email: 'Email',
+  pointOfContact: 'Point of Contact',
 }
 
 export const clientContactTypeValues = {
@@ -268,6 +269,7 @@ export const addClientBasicInfoCatalogNames = [
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   clientsList: '/client/v1/all-clients',
+  clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientsCreate: '/client/v1/register',
   clientsUpdate: '/client/v1/update-client',
   oauthLogin: '/oauth/v1/login',

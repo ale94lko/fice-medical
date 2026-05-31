@@ -405,6 +405,11 @@ const communicationOptions = computed(() => [
     icon: 'alternate_email',
     label: t('prefCommEmail'),
   },
+  {
+    value: clientPreferredCommunicationValues.pointOfContact,
+    icon: 'place',
+    label: t('prefCommPointOfContact'),
+  },
 ])
 
 function onClientStateChange() {

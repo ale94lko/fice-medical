@@ -82,6 +82,33 @@ export const useSiteStore = defineStore('site', {
 
       return created
     },
+    async fetchClientById(clientId) {
+      const id = String(clientId ?? '').trim()
+      if (!id) {
+        throw new Error('Missing client id')
+      }
+      const response = await apiInstance.get(apiPaths.clientById(id))
+      const client = extractClientMutationResponse(response.data)
+      if (!client || typeof client !== 'object') {
+        throw new Error('Client not found')
+      }
+      this.clientListSourceById[id] = client
+
+      return client
+    },
+    buildEditFormFromClient(raw, options = {}) {
+      const mapped = mapClientApiToForm(raw, options)
+      if (!mapped) {
+        throw new Error('Could not map client data')
+      }
+
+      return mapped
+    },
+    async buildEditFormForClient(clientId, options = {}) {
+      const raw = await this.fetchClientById(clientId)
+
+      return this.buildEditFormFromClient(raw, options)
+    },
     buildEditFormFromListClient(clientId, options = {}) {
       const id = String(clientId ?? '').trim()
       if (!id) {
@@ -91,12 +118,8 @@ export const useSiteStore = defineStore('site', {
       if (!raw) {
         throw new Error('Client not found in list')
       }
-      const mapped = mapClientApiToForm(raw, options)
-      if (!mapped) {
-        throw new Error('Could not map client data')
-      }
 
-      return mapped
+      return this.buildEditFormFromClient(raw, options)
     },
     async updateClient(clientId, form, t) {
       const body = buildClientUpdateBody(clientId, form)
