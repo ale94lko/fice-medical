@@ -3,6 +3,15 @@
 .add-client-form {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.add-client-form__chrome {
+  flex-shrink: 0;
+  z-index: 5;
+  background: $surface;
 }
 
 .add-client-form__tabs-row {
@@ -58,7 +67,12 @@
 }
 
 .add-client-form__panel-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding-top: 8px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .add-client-form__nav-footer {
@@ -143,11 +157,9 @@
   }
 }
 
-.add-client-form__hint {
-  margin: -4px auto 10px;
+.add-client-form__section-hint {
   max-width: 720px;
-  font-size: 0.875rem;
-  color: $text-muted;
+  margin: -4px auto 10px;
 }
 
 .add-client-form__gender-chip-grid {
@@ -588,7 +600,7 @@
 }
 
 .add-client-form__accordion-panel {
-  .add-client-form__hint {
+  .add-client-form__section-hint {
     max-width: 720px;
     margin: -4px auto 10px;
   }
@@ -719,10 +731,7 @@
 }
 
 .add-client-form__allergy-year-hint {
-  margin: 4px 12px 0;
-  font-size: 12px;
-  line-height: 1.25;
-  color: $text-muted;
+  margin: 4px 0 0;
 }
 
 .add-client-form__allergy-severity-grid {
@@ -1099,6 +1108,203 @@
 .add-client-vitals-tab__bmi-field {
   :deep(.q-field__control) {
     background: $surface-muted;
+  }
+}
+
+.add-client-insurance-tab {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 0 16px;
+}
+
+.add-client-form__insurance-header {
+  gap: 16px;
+}
+
+.add-client-form__insurance-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.add-client-form__insurance-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.add-client-form__insurance-table-card {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+}
+
+.add-client-form__insurance-table-wrap {
+  overflow-x: auto;
+}
+
+.add-client-form__insurance-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 14px 12px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid $border-subtle;
+  }
+
+  th {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.add-client-form__insurance-table-actions-col {
+  width: 132px;
+  text-align: right;
+}
+
+.add-client-form__insurance-table-actions {
+  text-align: right;
+  white-space: nowrap;
+
+  .q-btn + .q-btn {
+    margin-left: 2px;
+  }
+}
+
+.add-client-form__insurance-payer-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.add-client-form__insurance-payer-name {
+  font-weight: 600;
+  color: $text-strong;
+}
+
+.add-client-form__insurance-plan-name {
+  font-size: 0.875rem;
+  color: $text-muted;
+}
+
+.add-client-form__insurance-priority-badge,
+.add-client-form__insurance-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.add-client-form__insurance-priority-badge--primary {
+  background: rgba($positive, 0.12);
+  color: darken($positive, 8%);
+}
+
+.add-client-form__insurance-priority-badge--secondary {
+  background: rgba($info, 0.12);
+  color: darken($info, 10%);
+}
+
+.add-client-form__insurance-priority-badge--tertiary {
+  background: rgba(#7e57c2, 0.12);
+  color: #5e35b1;
+}
+
+.add-client-form__insurance-status-badge--active {
+  background: rgba($positive, 0.12);
+  color: darken($positive, 8%);
+}
+
+.add-client-form__insurance-status-badge--pending {
+  background: rgba($warning, 0.18);
+  color: darken($warning, 22%);
+}
+
+.add-client-form__insurance-status-badge--expired {
+  background: rgba($negative, 0.1);
+  color: darken($negative, 6%);
+}
+
+.add-client-form__insurance-status-badge--inactive {
+  background: $surface-muted;
+  color: $text-muted;
+}
+
+.add-client-form__insurance-empty {
+  margin: 0;
+  text-align: center;
+  padding: 24px 8px;
+}
+
+.add-client-form__insurance-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: $radius-md;
+  background: rgba($primary, 0.08);
+  color: darken($primary, 6%);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.insurance-card-upload__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 148px;
+  padding: 16px;
+  border: 1px dashed $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: $primary;
+    background: rgba($primary, 0.03);
+  }
+
+  &--drag {
+    border-color: $primary;
+    background: rgba($primary, 0.06);
+  }
+
+  &--error {
+    border-color: $negative;
+  }
+}
+
+.insurance-card-upload__input {
+  display: none;
+}
+
+.insurance-card-upload__label {
+  margin: 0 0 8px;
+  color: $text-strong;
+}
+
+.insurance-card-upload--readonly .insurance-card-upload__dropzone {
+  cursor: default;
+
+  &:hover {
+    border-color: $border-subtle;
+    background: $surface;
   }
 }
 

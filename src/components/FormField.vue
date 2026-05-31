@@ -7,7 +7,16 @@
     <div class="form-field__control">
       <slot />
     </div>
-    <slot name="hint" />
+    <div v-if="$slots.hint" class="form-field__hint">
+      <q-icon
+        name="info_outline"
+        size="14px"
+        class="form-field__hint-icon"
+      />
+      <div class="form-field__hint-content">
+        <slot name="hint" />
+      </div>
+    </div>
   </div>
 </template>
 

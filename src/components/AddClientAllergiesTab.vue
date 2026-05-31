@@ -38,11 +38,11 @@
               :test-id="tid.allergyField('startYear')"
             />
           </AddClientLabeledField>
-          <p
+          <FormFieldHint
             v-if="!draftYearError"
-            class="add-client-form__allergy-year-hint">
+            hint-class="add-client-form__allergy-year-hint">
             {{ startYearHint }}
-          </p>
+          </FormFieldHint>
         </div>
         <div class="col-12">
           <AddClientLabeledField
@@ -135,6 +135,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import ClientYearField from 'components/ClientYearField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormFieldHint from 'components/FormFieldHint.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'

@@ -15,6 +15,7 @@ import {
   createEmptyFamilyMedicalHistorySection,
 } from 'src/utils/client-family-medical-history.js'
 import { createEmptyAllergiesSection } from 'src/utils/client-allergies.js'
+import { createEmptyInsuranceSection } from 'src/utils/client-insurance.js'
 import { createEmptyVitalsSection } from 'src/utils/client-vitals.js'
 import { useAddClientAgeSync } from 'src/composables/useAddClientAgeSync.js'
 import {
@@ -86,6 +87,7 @@ export function createEmptyAddClientForm() {
     [clientFormSections.familyMedicalHistory]:
       createEmptyFamilyMedicalHistorySection(),
     [clientFormSections.allergies]: createEmptyAllergiesSection(),
+    [clientFormSections.insurance]: createEmptyInsuranceSection(),
     [clientFormSections.vitals]: createEmptyVitalsSection(),
   }
 }

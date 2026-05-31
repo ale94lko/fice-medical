@@ -141,8 +141,59 @@ export const clientFormSections = {
   contact: 'contact',
   familyMedicalHistory: 'familyMedicalHistory',
   allergies: 'allergies',
+  insurance: 'insurance',
   vitals: 'vitals',
 }
+
+export const clientInsurancePriorityValues = {
+  primary: 'Primary',
+  secondary: 'Secondary',
+  tertiary: 'Tertiary',
+}
+
+export const clientInsuranceTypeValues = {
+  commercial: 'Commercial',
+  medicare: 'Medicare',
+  medicaid: 'Medicaid',
+  dualEligible: 'Dual Eligible',
+  managedMedicaid: 'Managed Medicaid',
+  managedMedicare: 'Managed Medicare',
+  workersCompensation: 'Workers Compensation',
+  selfPay: 'Self Pay',
+  assistanceProgram: 'Assistance Program',
+  other: 'Other',
+}
+
+export const clientInsuranceStatusValues = {
+  active: 'Active',
+  inactive: 'Inactive',
+  pendingVerification: 'Pending Verification',
+  expired: 'Expired',
+}
+
+export const clientInsuranceRelationshipValues = {
+  self: 'Self',
+  spouse: 'Spouse',
+  parent: 'Parent',
+  child: 'Child',
+  guardian: 'Guardian',
+  other: 'Other',
+}
+
+export const clientInsuranceMaxPayerLength = 150
+
+export const clientInsuranceMaxMemberIdLength = 50
+
+export const clientInsuranceMaxSubscriberNameLength = 150
+
+export const clientInsuranceMaxCardFileBytes = 5 * 1024 * 1024
+
+export const clientInsuranceCardMimeTypes = [
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'application/pdf',
+]
 
 export const clientAllergiesNkaStatus = 'NKA'
 

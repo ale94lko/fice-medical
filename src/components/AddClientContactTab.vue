@@ -227,9 +227,7 @@
       section-test-id="add-client-accordion-preferred-communication"
       :toggle-test-id="tid.accordionToggle('preferred-communication')">
       <template #hint>
-        <p class="add-client-form__hint">
-          {{ t('preferredCommunicationHint') }}
-        </p>
+        {{ t('preferredCommunicationHint') }}
       </template>
       <div class="add-client-form__preferred-grid">
           <q-btn

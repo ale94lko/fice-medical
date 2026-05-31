@@ -74,6 +74,21 @@ export const addClientTestIds = {
   vitalsBtnCancelEdit: 'add-client-vitals-btn-cancel-edit',
   vitalsRowEdit: id => toTestId('add-client-vitals-row', id, 'btn-edit'),
   vitalsRowDelete: id => toTestId('add-client-vitals-row', id, 'btn-delete'),
+  insuranceField: name => toTestId('add-client-insurance-field', name),
+  insuranceBtnAdd: 'add-client-insurance-btn-add',
+  insuranceRowView: id => toTestId('add-client-insurance-row', id, 'btn-view'),
+  insuranceRowEdit: id => toTestId('add-client-insurance-row', id, 'btn-edit'),
+  insuranceRowDelete: id => toTestId(
+    'add-client-insurance-row',
+    id,
+    'btn-delete',
+  ),
+  insuranceModal: name => toTestId('add-client-insurance-modal', name),
+  insuranceModalBtn: name => toTestId(
+    'add-client-insurance-modal',
+    name,
+    'btn',
+  ),
 }
 
 export const modalTestIds = {

@@ -5,11 +5,13 @@
     :data-testid="dialogTestId"
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="allergy-dialog">
-      <q-toolbar class="q-px-md app-dialog-toolbar">
-        <q-toolbar-title>{{ t('allergyEditTitle') }}</q-toolbar-title>
-      </q-toolbar>
-      <q-card-section class="q-px-lg q-pt-md q-pb-sm">
+    <q-card class="allergy-dialog app-dialog-card">
+      <AppDialogHeader
+        :close-label="t('close')"
+        @close="onCancel">
+        {{ t('allergyEditTitle') }}
+      </AppDialogHeader>
+      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <div
           class="row q-col-gutter-md q-col-gutter-lg-md
             add-client-form__allergy-input-row">
@@ -42,11 +44,11 @@
                 :test-id="tid.allergyField('startYear')"
               />
             </AddClientLabeledField>
-            <p
+            <FormFieldHint
               v-if="!yearError"
-              class="add-client-form__allergy-year-hint">
+              hint-class="add-client-form__allergy-year-hint">
               {{ startYearHint }}
-            </p>
+            </FormFieldHint>
           </div>
           <div class="col-12">
             <AddClientLabeledField
@@ -88,8 +90,9 @@
           </div>
         </div>
       </q-card-section>
-      <q-separator />
-      <q-card-actions align="right" class="q-pa-md">
+      <q-card-actions
+        align="right"
+        class="app-dialog-card__actions">
         <q-btn
           no-caps
           outline
@@ -115,7 +118,9 @@
 
 <script setup>
 import ClientYearField from 'components/ClientYearField.vue'
+import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormFieldHint from 'components/FormFieldHint.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
@@ -276,10 +281,3 @@ function onSave() {
 }
 </script>
 
-<style lang="scss" scoped>
-.allergy-dialog {
-  min-width: 520px;
-  max-width: 720px;
-  width: 100%;
-}
-</style>

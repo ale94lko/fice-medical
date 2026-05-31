@@ -5,11 +5,13 @@
     :data-testid="dialogTestId"
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="family-medical-history-dialog">
-      <q-toolbar class="q-px-md app-dialog-toolbar">
-        <q-toolbar-title>{{ dialogTitle }}</q-toolbar-title>
-      </q-toolbar>
-      <q-card-section class="q-px-lg q-pt-md q-pb-sm">
+    <q-card class="family-medical-history-dialog app-dialog-card">
+      <AppDialogHeader
+        :close-label="t('close')"
+        @close="onCancel">
+        {{ dialogTitle }}
+      </AppDialogHeader>
+      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <div class="row q-col-gutter-md q-col-gutter-lg-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -54,8 +56,9 @@
           </div>
         </div>
       </q-card-section>
-      <q-separator />
-      <q-card-actions align="right" class="q-pa-md">
+      <q-card-actions
+        align="right"
+        class="app-dialog-card__actions">
         <q-btn
           no-caps
           outline
@@ -80,6 +83,7 @@
 </template>
 
 <script setup>
+import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import { computed, ref, watch } from 'vue'
@@ -203,10 +207,3 @@ function onSave() {
 }
 </script>
 
-<style lang="scss" scoped>
-.family-medical-history-dialog {
-  min-width: 520px;
-  max-width: 720px;
-  width: 100%;
-}
-</style>

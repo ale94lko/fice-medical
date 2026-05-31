@@ -3,13 +3,7 @@
     <q-inner-loading :showing="initialLoading" color="primary">
       <q-spinner size="42px" />
     </q-inner-loading>
-    <q-banner
-        v-if="successVisible"
-        dense
-        class="bg-positive text-white text-center q-mb-md rounded-borders">
-        {{ saveSuccessMessage }}
-      </q-banner>
-
+    <div class="add-client-form__chrome">
       <div class="add-client-form__tabs-row">
         <q-tabs
         v-model="activeTab"
@@ -51,11 +45,11 @@
           </span>
         </q-tab>
       </q-tabs>
-    </div>
+      </div>
 
-    <div
-      v-if="hasSubTabs"
-      class="add-client-form__subtabs-row">
+      <div
+        v-if="hasSubTabs"
+        class="add-client-form__subtabs-row">
       <q-tabs
         v-model="activeSubTab"
         dense
@@ -75,9 +69,19 @@
           :label="t(subTab.labelKey)"
         />
       </q-tabs>
+      </div>
     </div>
 
-    <div class="add-client-form__panel-scroll">
+    <div
+      ref="panelScrollRef"
+      class="add-client-form__panel-scroll">
+      <q-banner
+        v-if="successVisible"
+        dense
+        class="bg-positive text-white text-center q-mb-md rounded-borders">
+        {{ saveSuccessMessage }}
+      </q-banner>
+
       <q-form
         ref="formRef"
         greedy
@@ -414,10 +418,12 @@
 
         <q-tab-panel
           :name="addClientTabKeys.insurance"
-          class="q-pa-none">
-          <div class="text-body1 text-grey-7 q-py-xl text-center">
-            {{ t('tabComingSoon') }}
-          </div>
+          class="q-pa-none"
+          :data-add-client-tab="addClientTabKeys.insurance">
+          <AddClientInsuranceTab
+            v-model="form[clientFormSections.insurance]"
+            :patient-name="patientFullName"
+          />
         </q-tab-panel>
 
         <q-tab-panel
@@ -567,7 +573,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
@@ -580,6 +586,7 @@ import AddClientFamilyMedicalHistoryTab from
   'components/AddClientFamilyMedicalHistoryTab.vue'
 import AddClientVitalsTab from 'components/AddClientVitalsTab.vue'
 import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
+import AddClientInsuranceTab from 'components/AddClientInsuranceTab.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
@@ -637,6 +644,7 @@ const ssnEditing = ref(false)
 const allergiesTabRef = ref(null)
 const fmhTabRef = ref(null)
 const vitalsTabRef = ref(null)
+const panelScrollRef = ref(null)
 
 const catalogs = useAddClientCatalogs(t)
 const {
@@ -827,6 +835,23 @@ const ssnDisplayValue = computed(() => {
 
 const activeTabLabel = computed(() => tabLabelFor(activeTab.value))
 
+const patientFullName = computed(() => {
+  const parts = [
+    form.value[ck.firstName],
+    form.value[ck.middleName],
+    form.value[ck.lastName],
+  ]
+    .map(part => String(part ?? '').trim())
+    .filter(Boolean)
+  const suffix = String(form.value[ck.suffix] ?? '').trim()
+  let name = parts.join(' ')
+  if (suffix) {
+    name = `${name} ${suffix}`.trim()
+  }
+
+  return name
+})
+
 const cancelModalTitle = computed(() =>
   isEditMode.value
     ? t('cancelClientEditTitle')
@@ -845,8 +870,18 @@ const saveSuccessMessage = computed(() =>
     : t('clientSavedSuccess'),
 )
 
+function scrollFormPanelToTop() {
+  nextTick(() => {
+    const el = panelScrollRef.value
+    if (el) {
+      el.scrollTop = 0
+    }
+  })
+}
+
 watch([activeTab, activeSubTab], () => {
   emit('tab-label', activeTabLabel.value)
+  scrollFormPanelToTop()
 }, { immediate: true })
 
 async function loadClientForEdit() {

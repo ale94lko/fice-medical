@@ -6,15 +6,20 @@
     transition-show="scale"
     transition-hide="scale"
   >
-    <q-card class="modal-card">
-      <q-toolbar class="q-px-md app-dialog-toolbar">
-        <q-toolbar-title>{{ title }}</q-toolbar-title>
-      </q-toolbar>
-      <q-card-section class="q-px-xl q-py-md modal-body flex flex-center">
+    <q-card class="modal-card app-dialog-card">
+      <AppDialogHeader
+        :close-label="closeLabel"
+        @close="onCancel">
+        {{ title }}
+      </AppDialogHeader>
+      <q-card-section
+        class="app-dialog-card__body q-px-xl q-py-md modal-body
+          flex flex-center">
         <div class="text-body1">{{ message }}</div>
       </q-card-section>
-      <q-separator />
-      <q-card-actions align="center" class="q-pa-md">
+      <q-card-actions
+        align="right"
+        class="app-dialog-card__actions">
         <q-btn
           no-caps
           padding="7px 30px"
@@ -44,7 +49,12 @@
 
 <script setup>
 import { computed, toRef } from 'vue'
+import { useI18n } from 'vue-i18n'
+import AppDialogHeader from 'components/AppDialogHeader.vue'
 import { modalTestIds } from 'src/test-ids/index.js'
+
+const { t } = useI18n()
+const closeLabel = computed(() => t('close'))
 
 const props = defineProps({
   modelValue: Boolean, // v-model
@@ -81,17 +91,7 @@ const onCancel = () => {
 </script>
 
 <style scoped>
-  .modal-card {
-    min-width: 400px;
-    max-width: 500px;
-
-    .text-body1 {
-      margin: 10px auto;
-    }
-
-    .primary-action {
-      margin-left: 25px;
-      padding: 7px 30px;
-    }
+  .primary-action {
+    padding: 7px 30px;
   }
 </style>

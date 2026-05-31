@@ -24,7 +24,18 @@
 
     <q-slide-transition>
       <div v-show="isExpanded" class="add-client-form__accordion-panel">
-        <slot name="hint" />
+        <div
+          v-if="$slots.hint"
+          class="form-field__hint add-client-form__section-hint">
+          <q-icon
+            name="info_outline"
+            size="14px"
+            class="form-field__hint-icon"
+          />
+          <div class="form-field__hint-content">
+            <slot name="hint" />
+          </div>
+        </div>
         <div class="add-client-form__fields add-client-form__accordion-body">
           <slot />
         </div>

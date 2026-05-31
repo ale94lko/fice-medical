@@ -146,9 +146,7 @@
               class="add-client-vitals-tab__bmi-field"
             />
             <template #hint>
-              <p class="form-field__hint">
-                {{ t('vitalsBmiHint') }}
-              </p>
+              {{ t('vitalsBmiHint') }}
             </template>
           </AddClientLabeledField>
         </div>

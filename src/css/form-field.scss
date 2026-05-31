@@ -26,7 +26,32 @@
 }
 
 .form-field__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
   margin: 4px 0 0;
   font-size: 0.75rem;
-  color: $text-muted;
+  font-weight: 400;
+  line-height: 1.35;
+  color: $text-hint;
+}
+
+.form-field__hint-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: $text-hint;
+}
+
+.form-field__hint-content {
+  flex: 1;
+  min-width: 0;
+  color: $text-hint;
+
+  :deep(p) {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
+  }
 }

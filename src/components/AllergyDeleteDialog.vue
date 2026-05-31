@@ -4,11 +4,13 @@
     persistent
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="allergy-dialog">
-      <q-toolbar class="q-px-md app-dialog-toolbar">
-        <q-toolbar-title>{{ t('allergyDeleteTitle') }}</q-toolbar-title>
-      </q-toolbar>
-      <q-card-section class="q-px-lg q-pt-md q-pb-sm">
+    <q-card class="app-dialog-card app-dialog-card--sm">
+      <AppDialogHeader
+        :close-label="t('close')"
+        @close="onCancel">
+        {{ t('allergyDeleteTitle') }}
+      </AppDialogHeader>
+      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <p class="text-body1 q-mb-sm">
           {{ t('allergyDeleteMessage') }}
         </p>
@@ -29,8 +31,9 @@
           />
         </AddClientLabeledField>
       </q-card-section>
-      <q-separator />
-      <q-card-actions align="right" class="q-pa-md">
+      <q-card-actions
+        align="right"
+        class="app-dialog-card__actions">
         <q-btn
           no-caps
           outline
@@ -53,6 +56,7 @@
 </template>
 
 <script setup>
+import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -94,10 +98,3 @@ function onConfirm() {
 }
 </script>
 
-<style lang="scss" scoped>
-.allergy-dialog {
-  min-width: 440px;
-  max-width: 560px;
-  width: 100%;
-}
-</style>
