@@ -27,6 +27,7 @@ Revisa también `src/composables/`, `src/i18n/` y estilos en `src/css/add-client
 | Texto con label arriba | `TextInput` con `:external-label="true"` |
 | Fecha | `ClientDateField` |
 | Año | `ClientYearField` |
+| Select / dropdown (con o sin clear) | `FormSelect` (envuelve `q-select`; icono clear solo si hay valor) |
 | Booleano on/off | `FormToggle` (no `q-checkbox`) |
 | Sección colapsable | `AddClientAccordionSection` |
 | Título de bloque / subbloque | `AddClientSectionHeading` / `AddClientSubsectionHeading` |
@@ -53,4 +54,4 @@ Revisa también `src/composables/`, `src/i18n/` y estilos en `src/css/add-client
 
 ## 5. Evitar
 
-- Nuevos `q-checkbox`, labels inline en `q-input`/`q-select` en tabs de cliente, tablas Quasar solo en una sección, clases de label ad hoc (`labeled-field-label` sin estilo), fondos semitransparentes en columnas sticky, duplicar "Enter value" / "(Optional)" en labels.
+- Nuevos `q-checkbox`, `q-select` directo en tabs de cliente (usar `FormSelect`), labels inline en `q-input` en tabs de cliente, tablas Quasar solo en una sección, clases de label ad hoc (`labeled-field-label` sin estilo), fondos semitransparentes en columnas sticky, duplicar "Enter value" / "(Optional)" en labels.

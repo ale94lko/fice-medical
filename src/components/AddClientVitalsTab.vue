@@ -244,7 +244,7 @@
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField :label="t('vitalsRecordedBy')" required>
-            <q-select
+            <FormSelect
               v-model="section.draft.recordedBy"
               outlined
               hide-bottom-space
@@ -336,6 +336,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'

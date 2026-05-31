@@ -97,7 +97,7 @@
             <div class="row q-col-gutter-sm q-col-gutter-md">
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField :label="t('prefix')">
-                    <q-select
+                    <FormSelect
                       v-model="form[ck.prefix]"
                       outlined
                       hide-bottom-space
@@ -107,6 +107,7 @@
                       class="full-width"
                       :loading="catalogsLoading"
                       :options="prefixSelectOptions"
+                      :placeholder="t('prefixSelect')"
                     />
                   </AddClientLabeledField>
                 </div>
@@ -142,7 +143,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField :label="t('suffix')">
-                    <q-select
+                    <FormSelect
                       v-model="form[ck.suffix]"
                       outlined
                       hide-bottom-space
@@ -152,6 +153,7 @@
                       class="full-width"
                       :loading="catalogsLoading"
                       :options="suffixSelectOptions"
+                      :placeholder="t('suffixSelect')"
                     />
                   </AddClientLabeledField>
                 </div>
@@ -231,7 +233,7 @@
                     </div>
                     <div class="col-6">
                       <AddClientLabeledField :label="t('ageUnit')">
-                        <q-select
+                        <FormSelect
                           v-model="form[ck.ageUnit]"
                           outlined
                           hide-bottom-space
@@ -253,7 +255,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField :label="t('race')">
-                    <q-select
+                    <FormSelect
                       v-model="form[ck.race]"
                       outlined
                       hide-bottom-space
@@ -263,12 +265,13 @@
                       class="full-width"
                       :loading="catalogsLoading"
                       :options="raceSelectOptions"
+                      :placeholder="t('raceSelect')"
                     />
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField :label="t('ethnicity')">
-                    <q-select
+                    <FormSelect
                       v-model="form[ck.ethnicity]"
                       outlined
                       hide-bottom-space
@@ -278,6 +281,7 @@
                       class="full-width"
                       :loading="catalogsLoading"
                       :options="ethnicitySelectOptions"
+                      :placeholder="t('ethnicitySelect')"
                     />
                   </AddClientLabeledField>
                 </div>
@@ -324,7 +328,7 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField :label="t('assignedClinician')">
-                    <q-select
+                    <FormSelect
                       v-model="form[ck.assignedClinician]"
                       outlined
                       hide-bottom-space
@@ -518,6 +522,7 @@ import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import AddClientContactTab from 'components/AddClientContactTab.vue'
 import AddClientFamilyMedicalHistoryTab from

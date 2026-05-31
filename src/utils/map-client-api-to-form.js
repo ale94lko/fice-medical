@@ -100,6 +100,12 @@ function toSnakeToken(value) {
     .replace(/^_|_$/g, '')
 }
 
+function optionalSelectValue(value) {
+  const trimmed = String(value ?? '').trim()
+
+  return trimmed || null
+}
+
 function pickPrimaryAddress(source) {
   if (!source || typeof source !== 'object') {
     return {}
@@ -484,16 +490,16 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.clientNumber]: String(
       client.client_number ?? client[ck.clientNumber] ?? '',
     ).trim(),
-    [ck.prefix]: String(personal.prefix ?? '').trim(),
+    [ck.prefix]: optionalSelectValue(personal.prefix),
     [ck.firstName]: String(personal.first_name ?? '').trim(),
     [ck.middleName]: String(personal.middle_name ?? '').trim(),
     [ck.lastName]: String(personal.last_name ?? '').trim(),
-    [ck.suffix]: String(personal.suffix ?? '').trim(),
+    [ck.suffix]: optionalSelectValue(personal.suffix),
     [ck.gender]: mapGenderFromApi(
       personal.gender ?? personal.sex ?? client.gender ?? client.sex,
     ),
-    [ck.race]: String(personal.race ?? '').trim(),
-    [ck.ethnicity]: String(personal.ethnicity ?? '').trim(),
+    [ck.race]: optionalSelectValue(personal.race),
+    [ck.ethnicity]: optionalSelectValue(personal.ethnicity),
     [ck.dob]: dobResolved,
     [ck.age]: ageFields.age,
     [ck.ageUnit]: ageFields.ageUnit,

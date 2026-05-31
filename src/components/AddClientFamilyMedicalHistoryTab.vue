@@ -6,7 +6,7 @@
       <div class="row q-col-gutter-sm q-col-gutter-md items-end">
             <div class="col-12 col-md-6">
               <AddClientLabeledField :label="t('fmhFamilyRelationship')">
-                <q-select
+                <FormSelect
                   v-model="section.draft.familyRelationship"
                   outlined
                   hide-bottom-space
@@ -24,7 +24,7 @@
                       </q-tooltip>
                     </q-icon>
                   </template>
-                </q-select>
+                </FormSelect>
               </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
@@ -104,6 +104,7 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import FamilyMedicalHistoryTable from 'components/FamilyMedicalHistoryTable.vue'
 import FamilyMedicalHistoryEditDialog from

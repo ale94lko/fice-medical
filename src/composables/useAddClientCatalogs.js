@@ -22,10 +22,12 @@ function fallbackGenderOptions(t) {
 }
 
 function fallbackSuffixOptions(t) {
-  return clientSuffixOptions.map(o => ({
-    label: t(o.labelKey),
-    value: o.value,
-  }))
+  return clientSuffixOptions
+    .filter(o => o.value !== '')
+    .map(o => ({
+      label: t(o.labelKey),
+      value: o.value,
+    }))
 }
 
 function fallbackAgeUnitOptions(t) {
@@ -71,11 +73,10 @@ export function useAddClientCatalogs(t) {
     if (catalog) {
       return mapCatalogItemsToSelectOptions(
         catalogItemsFromCatalog(catalog),
-        { emptyOption: { label: t('prefixSelect'), value: '' } },
       )
     }
 
-    return [{ label: t('prefixSelect'), value: '' }]
+    return []
   })
 
   const suffixSelectOptions = computed(() => {
@@ -83,7 +84,6 @@ export function useAddClientCatalogs(t) {
     if (catalog) {
       return mapCatalogItemsToSelectOptions(
         catalogItemsFromCatalog(catalog),
-        { emptyOption: { label: t('suffixSelect'), value: '' } },
       )
     }
 
@@ -95,11 +95,10 @@ export function useAddClientCatalogs(t) {
     if (catalog) {
       return mapCatalogItemsToSelectOptions(
         catalogItemsFromCatalog(catalog),
-        { emptyOption: { label: t('raceSelect'), value: '' } },
       )
     }
 
-    return [{ label: t('raceSelect'), value: '' }]
+    return []
   })
 
   const ethnicitySelectOptions = computed(() => {
@@ -107,11 +106,10 @@ export function useAddClientCatalogs(t) {
     if (catalog) {
       return mapCatalogItemsToSelectOptions(
         catalogItemsFromCatalog(catalog),
-        { emptyOption: { label: t('ethnicitySelect'), value: '' } },
       )
     }
 
-    return [{ label: t('ethnicitySelect'), value: '' }]
+    return []
   })
 
   const ageUnitSelectOptions = computed(() => {

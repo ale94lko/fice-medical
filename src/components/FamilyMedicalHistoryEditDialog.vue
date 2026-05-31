@@ -12,7 +12,7 @@
         <div class="row q-col-gutter-md q-col-gutter-lg-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField :label="t('fmhFamilyRelationship')">
-              <q-select
+              <FormSelect
                 v-model="localRelationship"
                 outlined
                 hide-bottom-space
@@ -30,7 +30,7 @@
                     </q-tooltip>
                   </q-icon>
                 </template>
-              </q-select>
+              </FormSelect>
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
@@ -72,6 +72,7 @@
 
 <script setup>
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {

@@ -22,7 +22,7 @@
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField :label="t('state')">
-              <q-select
+              <FormSelect
                 v-model="contact.state"
                 outlined
                 hide-bottom-space
@@ -37,7 +37,7 @@
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField :label="t('city')">
-              <q-select
+              <FormSelect
                 v-model="contact.city"
                 outlined
                 hide-bottom-space
@@ -53,7 +53,7 @@
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField :label="t('county')">
-              <q-select
+              <FormSelect
                 v-model="contact.county"
                 outlined
                 hide-bottom-space
@@ -108,7 +108,7 @@
                   class="row q-col-gutter-sm items-center
                     add-client-form__contact-method-type-row">
                   <div class="col">
-                    <q-select
+                    <FormSelect
                       v-model="phone.type"
                       outlined
                       hide-bottom-space
@@ -159,7 +159,7 @@
                   class="row q-col-gutter-sm items-center
                     add-client-form__contact-method-type-row">
                   <div class="col">
-                    <q-select
+                    <FormSelect
                       v-model="email.type"
                       outlined
                       hide-bottom-space
@@ -266,6 +266,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import OtherContactsSection from 'components/OtherContactsSection.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
 import AddClientSubsectionHeading

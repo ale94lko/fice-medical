@@ -3,7 +3,7 @@
     <div class="row q-col-gutter-sm q-col-gutter-md">
       <div class="col-12 col-md-6">
         <AddClientLabeledField :label="t('relationshipType')">
-          <q-select
+          <FormSelect
             :model-value="contact.relationshipType"
             outlined
             hide-bottom-space
@@ -18,7 +18,7 @@
       </div>
       <div class="col-12 col-md-6">
         <AddClientLabeledField :label="t('contactType')">
-          <q-select
+          <FormSelect
             :model-value="contact.contactType"
             outlined
             hide-bottom-space
@@ -72,7 +72,7 @@
       </div>
       <div class="col-12 col-md-6">
         <AddClientLabeledField :label="t('suffix')">
-          <q-select
+          <FormSelect
             :model-value="contact.suffix"
             outlined
             hide-bottom-space
@@ -123,7 +123,7 @@
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField :label="t('state')">
-            <q-select
+            <FormSelect
               :model-value="contact.state"
               outlined
               hide-bottom-space
@@ -139,7 +139,7 @@
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField :label="t('city')">
-            <q-select
+            <FormSelect
               :model-value="contact.city"
               outlined
               hide-bottom-space
@@ -155,7 +155,7 @@
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField :label="t('county')">
-            <q-select
+            <FormSelect
               :model-value="contact.county"
               outlined
               hide-bottom-space
@@ -211,7 +211,7 @@
                 class="row q-col-gutter-sm items-center
                   add-client-form__contact-method-type-row">
                 <div class="col">
-                  <q-select
+                  <FormSelect
                     :model-value="phone.type"
                     outlined
                     hide-bottom-space
@@ -264,7 +264,7 @@
                 class="row q-col-gutter-sm items-center
                   add-client-form__contact-method-type-row">
                 <div class="col">
-                  <q-select
+                  <FormSelect
                     :model-value="email.type"
                     outlined
                     hide-bottom-space
@@ -299,6 +299,7 @@ import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 import FormToggle from 'components/FormToggle.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
