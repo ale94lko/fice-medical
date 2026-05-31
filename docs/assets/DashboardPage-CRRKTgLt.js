@@ -1,0 +1,1 @@
+import{Sn as e,jr as t,ur as n}from"./index-CodaIMzt.js";import{t as r}from"./QPage-CJptIWjS.js";var i={};function a(e,i){return t(),n(r,{class:`flex flex-center`})}var o=e(i,[[`render`,a]]);export{o as default};
