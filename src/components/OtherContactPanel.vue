@@ -31,14 +31,22 @@
           />
         </AddClientLabeledField>
       </div>
-      <div class="col-12">
-        <div class="add-client-form__toggle-field">
-          <FormToggle
-            :model-value="contact.responsibleForPayments"
-            :label="t('responsibleForPayments')"
-            @update:model-value="setField('responsibleForPayments', $event)"
+      <div class="col-12 col-md-6">
+        <AddClientLabeledField :label="t('prefix')">
+          <FormSelect
+            :model-value="contact.prefix"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            clearable
+            class="full-width"
+            :loading="catalogsLoading"
+            :options="prefixOptions"
+            :placeholder="t('prefixSelect')"
+            @update:model-value="setField('prefix', $event)"
           />
-        </div>
+        </AddClientLabeledField>
       </div>
       <div class="col-12 col-md-6">
         <TextInput
@@ -52,22 +60,22 @@
       </div>
       <div class="col-12 col-md-6">
         <TextInput
-          :model-value="contact.lastName"
-          :external-label="true"
-          :label="t('otherContactLastName')"
-          :rules="rules.otherLastName"
-          maxlength="30"
-          @update:model-value="setField('lastName', $event)"
-        />
-      </div>
-      <div class="col-12 col-md-6">
-        <TextInput
           :model-value="contact.middleName"
           :external-label="true"
           :label="t('otherContactMiddleName')"
           :rules="rules.otherMiddleName"
           maxlength="30"
           @update:model-value="setField('middleName', $event)"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <TextInput
+          :model-value="contact.lastName"
+          :external-label="true"
+          :label="t('otherContactLastName')"
+          :rules="rules.otherLastName"
+          maxlength="30"
+          @update:model-value="setField('lastName', $event)"
         />
       </div>
       <div class="col-12 col-md-6">
@@ -80,10 +88,21 @@
             map-options
             clearable
             class="full-width"
+            :loading="catalogsLoading"
             :options="suffixOptions"
+            :placeholder="t('suffixSelect')"
             @update:model-value="setField('suffix', $event)"
           />
         </AddClientLabeledField>
+      </div>
+      <div class="col-12 col-md-6">
+        <div class="add-client-form__toggle-field">
+          <FormToggle
+            :model-value="contact.responsibleForPayments"
+            :label="t('responsibleForPayments')"
+            @update:model-value="setField('responsibleForPayments', $event)"
+          />
+        </div>
       </div>
     </div>
 
@@ -347,9 +366,17 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  prefixOptions: {
+    type: Array,
+    default: () => [],
+  },
   suffixOptions: {
     type: Array,
     default: () => [],
+  },
+  catalogsLoading: {
+    type: Boolean,
+    default: false,
   },
 })
 

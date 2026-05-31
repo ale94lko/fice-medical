@@ -341,12 +341,13 @@ function mapOtherContactFromApi(item, clientContact) {
     ?? item?.responsible_for_payments
     ?? item?.responsibleForPayments,
   )
+  other.prefix = optionalSelectValue(pi.prefix ?? item?.prefix)
   other.firstName = String(pi.first_name ?? item?.first_name ?? '').trim()
   other.middleName = String(
     pi.middle_name ?? item?.middle_name ?? '',
   ).trim()
   other.lastName = String(pi.last_name ?? item?.last_name ?? '').trim()
-  other.suffix = String(pi.suffix ?? item?.suffix ?? '').trim()
+  other.suffix = optionalSelectValue(pi.suffix ?? item?.suffix)
   other.phones = mapPhonesFromApi(pi.phones ?? item?.phones)
   other.emails = mapEmailsFromApi(pi.emails ?? item?.emails)
 

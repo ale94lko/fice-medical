@@ -353,6 +353,9 @@
           <AddClientContactTab
             v-model="form[contactSectionKey]"
             :rules="contactRules"
+            :prefix-select-options="prefixSelectOptions"
+            :suffix-select-options="suffixSelectOptions"
+            :catalogs-loading="catalogsLoading"
           />
         </q-tab-panel>
 

@@ -232,7 +232,9 @@
       :email-type-options="emailTypeOptions"
       :contact-type-options="contactTypeOptions"
       :relationship-type-options="relationshipTypeOptions"
+      :prefix-options="prefixSelectOptions"
       :suffix-options="suffixSelectOptions"
+      :catalogs-loading="catalogsLoading"
     />
 
     <q-separator class="add-client-form__section-separator" />
@@ -300,6 +302,18 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  prefixSelectOptions: {
+    type: Array,
+    default: () => [],
+  },
+  suffixSelectOptions: {
+    type: Array,
+    default: () => [],
+  },
+  catalogsLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -338,14 +352,22 @@ const relationshipTypeOptions = computed(() =>
   })),
 )
 
-const suffixSelectOptions = computed(() =>
-  clientSuffixOptions
+const prefixSelectOptions = computed(
+  () => props.prefixSelectOptions ?? [],
+)
+
+const suffixSelectOptions = computed(() => {
+  if (props.suffixSelectOptions?.length) {
+    return props.suffixSelectOptions
+  }
+
+  return clientSuffixOptions
     .filter(o => o.value)
     .map(o => ({
       label: t(o.labelKey),
       value: o.value,
-    })),
-)
+    }))
+})
 
 const communicationOptions = computed(() => [
   {

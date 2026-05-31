@@ -85,7 +85,9 @@
             :email-type-options="emailTypeOptions"
             :contact-type-options="contactTypeOptions"
             :relationship-type-options="relationshipTypeOptions"
+            :prefix-options="prefixOptions"
             :suffix-options="suffixOptions"
+            :catalogs-loading="catalogsLoading"
             @update:contact="patch => updateOtherContact(ocIndex, patch)"
           />
         </q-tab-panel>
@@ -144,9 +146,17 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  prefixOptions: {
+    type: Array,
+    default: () => [],
+  },
   suffixOptions: {
     type: Array,
     default: () => [],
+  },
+  catalogsLoading: {
+    type: Boolean,
+    default: false,
   },
 })
 

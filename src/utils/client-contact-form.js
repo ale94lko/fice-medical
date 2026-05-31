@@ -45,11 +45,12 @@ export function createEmptyOtherContact() {
     id: nextContactId(),
     contactType: '',
     relationshipType: '',
-    responsibleForPayments: false,
+    prefix: null,
     firstName: '',
     middleName: '',
     lastName: '',
-    suffix: '',
+    suffix: null,
+    responsibleForPayments: false,
     sameAsClientAddress: false,
     addressLine1: '',
     addressLine2: '',
@@ -198,6 +199,7 @@ export function otherContactHasData(other) {
     || String(other.firstName ?? '').trim()
     || String(other.middleName ?? '').trim()
     || String(other.lastName ?? '').trim()
+    || String(other.prefix ?? '').trim()
     || String(other.suffix ?? '').trim()
     || other.responsibleForPayments
     || hasOtherAddressData(other)
@@ -232,6 +234,9 @@ function appendOtherContactIdentity(item, other) {
     item.relationshipType = other.relationshipType
   }
   item.responsibleForPayments = Boolean(other.responsibleForPayments)
+  if (other.prefix) {
+    item.prefix = String(other.prefix).trim()
+  }
   if (other.firstName) {
     item.firstName = other.firstName.trim()
   }

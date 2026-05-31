@@ -283,6 +283,7 @@ function buildRegisterContact(other, clientContact) {
     relationship_type: mapRelationshipType(other?.relationshipType),
     status: 'active',
     responsive_for_payment: Boolean(other?.responsibleForPayments),
+    prefix: trim(other?.prefix),
     first_name: trim(other?.firstName),
     middle_name: trim(other?.middleName),
     last_name: trim(other?.lastName),
