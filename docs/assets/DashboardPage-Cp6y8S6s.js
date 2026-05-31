@@ -1,0 +1,1 @@
+import{Sn as e,jr as t,ur as n}from"./index-4j-JTVQU.js";import{t as r}from"./QPage-JRhhqir2.js";var i={};function a(e,i){return t(),n(r,{class:`flex flex-center`})}var o=e(i,[[`render`,a]]);export{o as default};
