@@ -137,6 +137,11 @@ function onSaved() {
 }
 
 .add-client-page__card {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: $surface;
   border-radius: $radius-lg;
   border-color: $border-subtle !important;

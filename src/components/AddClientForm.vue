@@ -72,9 +72,10 @@
       </div>
     </div>
 
-    <div
-      ref="panelScrollRef"
-      class="add-client-form__panel-scroll">
+    <div class="add-client-form__content">
+      <div
+        ref="panelScrollRef"
+        class="add-client-form__panel-scroll">
       <q-banner
         v-if="successVisible"
         dense
@@ -516,6 +517,7 @@
         </q-tab-panel>
       </q-tab-panels>
       </q-form>
+      </div>
 
       <footer
         v-if="canGoPrevious() || canGoNext()"

@@ -238,18 +238,29 @@
   min-height: 0;
 }
 
+.app-layout .q-page-container:has(.add-client-page) {
+  height: calc(100vh - 56px);
+  max-height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  min-height: 0;
+  overflow: hidden;
+}
+
 .admin-page.add-client-page {
   display: flex;
   flex-direction: column;
   padding: 12px 20px 16px;
-  min-height: calc(100vh - 56px);
-  max-height: calc(100vh - 56px);
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
 }
 
 .q-page.add-client-page {
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .admin-page.add-client-page .add-client-page__header {
@@ -267,16 +278,32 @@
 }
 
 .admin-page.add-client-page .add-client-page__card-body {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+.admin-page.add-client-page .add-client-page__card > .q-card__section {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 @media (max-width: 1023px) {
-  .admin-page {
+  .admin-page:not(.add-client-page) {
     padding: 12px 12px 72px;
+  }
+
+  .admin-page.add-client-page {
+    padding: 12px 12px 16px;
+  }
+
+  .app-layout .q-page-container:has(.add-client-page) {
+    height: calc(100dvh - 56px);
+    max-height: calc(100dvh - 56px);
   }
 }
 

@@ -78,22 +78,34 @@
   background: transparent;
 }
 
+.add-client-form__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .add-client-form__panel-scroll {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   padding-top: 8px;
+  padding-bottom: 8px;
   -webkit-overflow-scrolling: touch;
 }
 
 .add-client-form__nav-footer {
+  flex-shrink: 0;
+  width: 100%;
   max-width: 720px;
-  margin: 20px auto 4px;
-  padding: 12px 0 4px;
+  margin: 0 auto;
+  padding: 12px 0 0;
   border-top: 1px solid $border-subtle;
   justify-content: space-between;
   min-height: 48px;
+  background: $surface;
 
   .add-client-form__nav-btn .q-icon {
     color: $primary;
