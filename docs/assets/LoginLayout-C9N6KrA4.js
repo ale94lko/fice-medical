@@ -1,1 +1,0 @@
-import{Pr as e,Vn as t,Xr as n,ai as r,ei as i,kr as a}from"./index-DKc-MYUL.js";import{r as o,t as s}from"./QLayout-BPtFkKJX.js";var c={};function l(t,c){let l=i(`router-view`);return n(),a(s,{view:`hHh Lpr lff`},{default:r(()=>[e(o,null,{default:r(()=>[e(l)]),_:1})]),_:1})}var u=t(c,[[`render`,l]]);export{u as default};
