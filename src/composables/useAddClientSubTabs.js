@@ -31,11 +31,6 @@ export const ADD_CLIENT_MAIN_TABS = [
     labelKey: 'tabInsurance',
   },
   {
-    key: addClientTabKeys.assessments,
-    icon: 'assignment',
-    labelKey: 'tabAssessments',
-  },
-  {
     key: addClientTabKeys.clinical,
     icon: 'medical_services',
     labelKey: 'tabClinical',
@@ -69,36 +64,46 @@ export const ADD_CLIENT_SUB_TABS = {
       labelKey: 'subTabFamilyHistory',
     },
     {
+      key: addClientClinicalSubTabKeys.assessments,
+      icon: 'assignment',
+      labelKey: 'subTabAssessments',
+    },
+    {
       key: addClientClinicalSubTabKeys.vitals,
       icon: 'monitor_heart',
       labelKey: 'subTabVitals',
-    },
-    {
-      key: addClientClinicalSubTabKeys.labs,
-      icon: 'science',
-      labelKey: 'subTabLabs',
-    },
-    {
-      key: addClientClinicalSubTabKeys.carePlans,
-      icon: 'assignment',
-      labelKey: 'subTabCarePlans',
     },
     {
       key: addClientClinicalSubTabKeys.clinicalNotes,
       icon: 'description',
       labelKey: 'subTabClinicalNotes',
     },
+    {
+      key: addClientClinicalSubTabKeys.carePlans,
+      icon: 'assignment_turned_in',
+      labelKey: 'subTabCarePlans',
+    },
+    {
+      key: addClientClinicalSubTabKeys.labs,
+      icon: 'science',
+      labelKey: 'subTabLabs',
+    },
   ],
   [addClientTabKeys.careCoordination]: [
+    {
+      key: 'referrals',
+      icon: 'share',
+      labelKey: 'subTabReferrals',
+    },
     {
       key: 'appointments',
       icon: 'event',
       labelKey: 'subTabAppointments',
     },
     {
-      key: 'tasks',
-      icon: 'task_alt',
-      labelKey: 'subTabTasks',
+      key: 'careTeam',
+      icon: 'groups',
+      labelKey: 'subTabCareTeam',
     },
     {
       key: 'authorizations',
@@ -106,14 +111,9 @@ export const ADD_CLIENT_SUB_TABS = {
       labelKey: 'subTabAuthorizations',
     },
     {
-      key: 'referrals',
-      icon: 'share',
-      labelKey: 'subTabReferrals',
-    },
-    {
-      key: 'careTeam',
-      icon: 'groups',
-      labelKey: 'subTabCareTeam',
+      key: 'tasks',
+      icon: 'task_alt',
+      labelKey: 'subTabTasks',
     },
     {
       key: 'followUps',
@@ -136,11 +136,6 @@ export const ADD_CLIENT_SUB_TABS = {
       key: 'payments',
       icon: 'paid',
       labelKey: 'subTabPayments',
-    },
-    {
-      key: 'coverage',
-      icon: 'health_and_safety',
-      labelKey: 'subTabCoverage',
     },
   ],
   [addClientTabKeys.documents]: [

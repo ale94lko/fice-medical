@@ -427,14 +427,6 @@
         </q-tab-panel>
 
         <q-tab-panel
-          :name="addClientTabKeys.assessments"
-          class="q-pa-none">
-          <div class="text-body1 text-grey-7 q-py-xl text-center">
-            {{ t('tabComingSoon') }}
-          </div>
-        </q-tab-panel>
-
-        <q-tab-panel
           :name="addClientTabKeys.clinical"
           class="q-pa-none">
           <q-tab-panels

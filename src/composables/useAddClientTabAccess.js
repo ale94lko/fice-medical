@@ -6,7 +6,6 @@ export const ADD_CLIENT_TAB_ORDER = [
   addClientTabKeys.contact,
   addClientTabKeys.allergies,
   addClientTabKeys.insurance,
-  addClientTabKeys.assessments,
   addClientTabKeys.clinical,
   addClientTabKeys.careCoordination,
   addClientTabKeys.financials,
@@ -14,7 +13,6 @@ export const ADD_CLIENT_TAB_ORDER = [
 ]
 
 export const ADD_CLIENT_COMING_SOON_TABS = new Set([
-  addClientTabKeys.assessments,
   addClientTabKeys.careCoordination,
   addClientTabKeys.financials,
   addClientTabKeys.documents,

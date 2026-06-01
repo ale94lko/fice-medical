@@ -48,7 +48,6 @@ export const addClientTabKeys = {
   familyMedicalHistory: 'familyMedicalHistory',
   allergies: 'allergies',
   insurance: 'insurance',
-  assessments: 'assessments',
   clinical: 'clinical',
   careCoordination: 'careCoordination',
   financials: 'financials',
@@ -58,10 +57,11 @@ export const addClientTabKeys = {
 /** Sub-tab keys under Clinical (Family History is implemented). */
 export const addClientClinicalSubTabKeys = {
   familyHistory: 'familyHistory',
+  assessments: 'assessments',
   vitals: 'vitals',
-  labs: 'labs',
-  carePlans: 'carePlans',
   clinicalNotes: 'clinicalNotes',
+  carePlans: 'carePlans',
+  labs: 'labs',
 }
 
 export const clientAgeUnitValues = {

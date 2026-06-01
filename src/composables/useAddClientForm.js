@@ -41,7 +41,6 @@ const TAB_LABEL_KEYS = {
   [addClientTabKeys.contact]: 'tabContact',
   [addClientTabKeys.allergies]: 'tabAllergies',
   [addClientTabKeys.insurance]: 'tabInsurance',
-  [addClientTabKeys.assessments]: 'tabAssessments',
   [addClientTabKeys.clinical]: 'tabClinical',
   [addClientTabKeys.careCoordination]: 'tabCareCoordination',
   [addClientTabKeys.financials]: 'tabFinancial',
