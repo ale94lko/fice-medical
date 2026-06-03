@@ -1,0 +1,1 @@
+import{Hr as e,er as t,li as n}from"./index-xf4Fl08m.js";import{t as r}from"./QPage-_LUXWtKL.js";var i={};function a(t,i){return n(),e(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
