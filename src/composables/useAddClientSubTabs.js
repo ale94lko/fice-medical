@@ -9,6 +9,9 @@ export const CLINICAL_FAMILY_HISTORY_SUB_TAB =
 
 export const CLINICAL_VITALS_SUB_TAB = addClientClinicalSubTabKeys.vitals
 
+export const CLINICAL_ASSESSMENTS_SUB_TAB =
+  addClientClinicalSubTabKeys.assessments
+
 export const ADD_CLIENT_MAIN_TABS = [
   {
     key: addClientTabKeys.basic,

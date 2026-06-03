@@ -93,6 +93,13 @@ export const addClientTestIds = {
   ),
 }
 
+export const assessmentTestIds = {
+  btn: name => toTestId('assessment-btn', name),
+  field: name => toTestId('assessment-field', name),
+  section: id => toTestId('assessment-section', id),
+  rowEdit: id => toTestId('assessment-row', id, 'btn-edit'),
+}
+
 export const modalTestIds = {
   dialog: name => toTestId('modal', name),
   confirm: name => toTestId('modal', name, 'btn-confirm'),

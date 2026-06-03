@@ -324,11 +324,63 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.contactType,
 ]
 
+export const assessmentFieldTypes = {
+  text: 'text',
+  textarea: 'textarea',
+  date: 'date',
+  number: 'number',
+  select: 'select',
+  radio: 'radio',
+  chips: 'chips',
+  yesNo: 'yes_no',
+}
+
+export const assessmentStatuses = {
+  draft: 'draft',
+  completed: 'completed',
+  cancelled: 'cancelled',
+}
+
+/** Reference keys for template clinical metadata (future Care Plans). */
+export const assessmentClinicalKeys = {
+  mood: 'mood',
+  sleepQuality: 'sleep_quality',
+  anxietyLevel: 'anxiety_level',
+  gad7: 'gad7',
+  phq9: 'phq9',
+}
+
+export const assessmentMeasurementDirections = {
+  higherIsBetter: 'higher_is_better',
+  higherIsWorse: 'higher_is_worse',
+  neutral: 'neutral',
+}
+
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   clientsList: '/client/v1/all-clients',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientsCreate: '/client/v1/register',
+  assessmentTemplates: '/assessment-templates',
+  assessmentTemplateById: id => `/assessment-templates/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  patientAssessments: patientId => `/patients/${encodeURIComponent(
+    String(patientId ?? '').trim(),
+  )}/assessments`,
+  patientAssessmentById: (patientId, assessmentId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/assessments/${encodeURIComponent(String(assessmentId ?? '').trim())}`,
+  patientAssessmentDraft: (patientId, assessmentId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/assessments/${encodeURIComponent(
+    String(assessmentId ?? '').trim(),
+  )}/draft`,
+  patientAssessmentComplete: (patientId, assessmentId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/assessments/${encodeURIComponent(
+    String(assessmentId ?? '').trim(),
+  )}/complete`,
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',
