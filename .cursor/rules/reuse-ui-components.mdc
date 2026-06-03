@@ -5,7 +5,7 @@ alwaysApply: true
 
 # Consistencia de UI — reutilizar antes de crear
 
-Al **añadir o modificar** pantallas, formularios, tablas, campos o diálogos en este proyecto:
+Al **añadir o modificar** pantallas, formularios, tablas, campos o diálogos en este proyecto, el diseño debe ser **indistinguible en estructura y espaciado** del patrón ya usado (ver también `match-existing-ui-design.mdc`).
 
 ## 1. Buscar si ya existe
 
@@ -34,7 +34,9 @@ Revisa también `src/composables/`, `src/i18n/` y estilos en `src/css/add-client
 | Tabla en Add/Edit Client | Tabla HTML + clases `add-client-form__fmh-table-wrap`, `add-client-form__fmh-table`, `add-client-form__fmh-table-actions-col` (ver `FamilyMedicalHistoryTable.vue`) |
 | Contenedor de lista/tabla | `add-client-form__fmh-list-card` |
 | Fila teléfono/email con +/− | `AddClientMethodRowActions` + `add-client-form__contact-method-type-row` |
-| Modal confirmación / formulario modal | `ModalComponent` o patrón de `*EditDialog.vue` existentes |
+| Modal confirmación | `ModalComponent`, `InsuranceDeleteDialog.vue` |
+| Modal formulario grande (Add Client) | `InsuranceProfileDialog.vue`: `insurance-dialog app-dialog-card`, `AppDialogHeader`, `app-dialog-card__body q-px-lg`, secciones `insurance-dialog__card-section q-mt-lg`, footer `app-dialog-card__actions` |
+| Modal formulario mediano | `family-medical-history-dialog app-dialog-card` (ver FMH / `LabComponentDialog.vue`) |
 | Campo requerido en label | prop `required` en `FormField` (asterisco), no texto "(Optional)" en labels |
 
 ## 3. Reglas de estilo
@@ -52,6 +54,13 @@ Revisa también `src/composables/`, `src/i18n/` y estilos en `src/css/add-client
 3. Alinea el nuevo componente con un **archivo referencia** del mismo tipo (p. ej. copiar estructura de `FamilyMedicalHistoryTable.vue` para otra tabla).
 4. Tras el cambio, contrasta al menos una pantalla que ya usaba el patrón (Add Client: Basic, Contact, Allergies, FMH, Vitals).
 
-## 5. Evitar
+## 5. Modales y espaciado
 
-- Nuevos `q-checkbox`, `q-select` directo en tabs de cliente (usar `FormSelect`), labels inline en `q-input` en tabs de cliente, tablas Quasar solo en una sección, clases de label ad hoc (`labeled-field-label` sin estilo), fondos semitransparentes en columnas sticky, duplicar "Enter value" / "(Optional)" en labels.
+- Misma transición que Insurance: `scale`, **sin** `maximized`.
+- Body: `q-px-lg q-pt-md q-pb-md`; grid `row q-col-gutter-md`; columnas `col-12 col-md-6` salvo caso documentado.
+- Subtítulo bajo el título del modal: `text-body2 text-grey-7 q-mb-md` dentro del body (no otro padding).
+- Botones: `app-btn-outline` + `app-btn-primary`; en solo lectura, un botón **Close** en el footer.
+
+## 6. Evitar
+
+- Nuevos `q-checkbox`, `q-select` directo en tabs de cliente (usar `FormSelect`), labels inline en `q-input` en tabs de cliente, tablas Quasar solo en una sección, clases de label ad hoc (`labeled-field-label` sin estilo), fondos semitransparentes en columnas sticky, duplicar "Enter value" / "(Optional)" en labels, modales a pantalla completa o sin el shell `insurance-dialog`.

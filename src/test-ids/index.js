@@ -100,6 +100,14 @@ export const assessmentTestIds = {
   rowEdit: id => toTestId('assessment-row', id, 'btn-edit'),
 }
 
+export const labTestIds = {
+  btn: name => toTestId('lab-btn', name),
+  field: name => toTestId('lab-field', name),
+  rowView: id => toTestId('lab-row', id, 'btn-view'),
+  rowEdit: id => toTestId('lab-row', id, 'btn-edit'),
+  rowDownload: id => toTestId('lab-row', id, 'btn-download'),
+}
+
 export const modalTestIds = {
   dialog: name => toTestId('modal', name),
   confirm: name => toTestId('modal', name, 'btn-confirm'),

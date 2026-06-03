@@ -356,6 +356,63 @@ export const assessmentMeasurementDirections = {
   neutral: 'neutral',
 }
 
+export const labStatuses = {
+  draft: 'draft',
+  ordered: 'ordered',
+  collected: 'collected',
+  resulted: 'resulted',
+  reviewed: 'reviewed',
+  cancelled: 'cancelled',
+}
+
+export const labCategories = {
+  bloodTest: 'blood_test',
+  urineTest: 'urine_test',
+  imaging: 'imaging',
+  microbiology: 'microbiology',
+  pathology: 'pathology',
+}
+
+export const labPriorities = {
+  routine: 'routine',
+  stat: 'stat',
+  urgent: 'urgent',
+}
+
+export const labFlags = {
+  normal: 'normal',
+  low: 'low',
+  high: 'high',
+  criticalLow: 'critical_low',
+  criticalHigh: 'critical_high',
+  abnormal: 'abnormal',
+}
+
+export const labAbnormalValues = {
+  yes: 'yes',
+  no: 'no',
+}
+
+/** Future Care Plan outcome measure linkage (component analyte keys). */
+export const labClinicalKeys = {
+  hemoglobin: 'hemoglobin',
+  wbc: 'wbc',
+  platelets: 'platelets',
+  a1c: 'a1c',
+}
+
+export const labMaxAttachmentBytes = 10 * 1024 * 1024
+
+export const labAttachmentMimeTypes = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+]
+
+export const labMaxResultSummaryLength = 500
+
+export const labMaxComponentNotesLength = 255
+
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   clientsList: '/client/v1/all-clients',
@@ -381,6 +438,23 @@ export const apiPaths = {
   }/assessments/${encodeURIComponent(
     String(assessmentId ?? '').trim(),
   )}/complete`,
+  patientLabs: patientId => `/patients/${encodeURIComponent(
+    String(patientId ?? '').trim(),
+  )}/labs`,
+  patientLabById: (patientId, labId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
+  patientLabDraft: (patientId, labId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/draft`,
+  patientLabAttachment: (patientId, labId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/attachments`,
+  patientLabAttachmentById: (patientId, labId, attachmentId) => `/patients/${
+    encodeURIComponent(String(patientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/attachments/${
+    encodeURIComponent(String(attachmentId ?? '').trim())
+  }`,
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',

@@ -1,0 +1,51 @@
+---
+description: Todo código UI nuevo debe igualar el diseño y patrones ya usados en el proyecto
+alwaysApply: true
+---
+
+# Paridad de diseño (obligatorio)
+
+**Cada línea de UI que agregues o modifiques** debe verse y comportarse como el código existente del mismo tipo. No inventes layouts, clases, modales ni componentes Quasar crudos si el proyecto ya tiene un patrón.
+
+## Antes de escribir código
+
+1. **Encuentra el archivo referencia** del mismo tipo (tabla, tab, modal, lista, upload).
+2. **Abre y lee** ese archivo (estructura HTML, clases CSS, props, footer, transiciones).
+3. **Copia la estructura** y solo cambia datos, textos i18n y lógica de negocio.
+4. Detalle de componentes y clases: regla `reuse-ui-components.mdc`.
+
+## Referencias por tipo (fice-medical)
+
+| Tipo | Copiar de |
+|------|-----------|
+| Modal / drawer de formulario (Add Client) | `InsuranceProfileDialog.vue` |
+| Modal confirmación / eliminar | `InsuranceDeleteDialog.vue` o `ModalComponent.vue` |
+| Tab con tabla + botón Add | `AddClientInsuranceTab.vue` + tabla del tab |
+| Tabla HTML en cliente | `FamilyMedicalHistoryTable.vue` / `InsuranceProfilesTable.vue` |
+| Tab clínico con API + lista | `AddClientAssessmentsTab.vue` o `AddClientInsuranceTab.vue` |
+| Upload de archivo | `InsuranceCardUploadField.vue` |
+| Header de modal | `AppDialogHeader.vue` + shell `app-dialog-card` |
+
+## Shell de modal (no negociable)
+
+```vue
+<q-dialog persistent transition-show="scale" transition-hide="scale">
+  <q-card class="insurance-dialog app-dialog-card">
+    <AppDialogHeader @close="onCancel">{{ título }}</AppDialogHeader>
+    <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+      <!-- secciones: insurance-dialog__card-section + q-mt-lg -->
+    </q-card-section>
+    <q-card-actions align="right" class="app-dialog-card__actions">
+      <!-- Cancel / Close + acciones primarias -->
+    </q-card-actions>
+  </q-card>
+</q-dialog>
+```
+
+**Evitar:** `maximized`, transiciones distintas, clases de modal propias sin necesidad, `q-px-lg` extra en actions, pantalla completa sin márgenes.
+
+## Al cerrar la tarea
+
+- Contrasta visualmente (o describe) la pantalla **referencia** vs la nueva.
+- `npm run lint`
+- Si tocaste un componente compartido: regla `component-change-impact-review.mdc`.
