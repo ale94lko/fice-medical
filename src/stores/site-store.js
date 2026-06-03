@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { apiPaths } from 'components/constants.js'
+import { apiPaths, catalogNames } from 'components/constants.js'
 import {
   buildClientCreateBody,
   buildClientUpdateBody,
@@ -11,6 +11,11 @@ import {
   mapClient,
   mapClientApiToForm,
 } from 'components/helpers.js'
+import {
+  catalogItemsFromCatalog,
+  fetchCatalogsByNames,
+  mapCatalogItemsToSelectOptions,
+} from 'src/utils/catalogs.js'
 
 function indexClientListSource(list) {
   const byId = {}
@@ -30,8 +35,27 @@ export const useSiteStore = defineStore('site', {
     clientListSourceById: {},
     clientListPagination: null,
     clientListQuery: { page: 1, limit: 20 },
+    suffixCatalogSelectOptions: null,
   }),
   actions: {
+    async resolveSuffixCatalogSelectOptions() {
+      if (this.suffixCatalogSelectOptions) {
+        return this.suffixCatalogSelectOptions
+      }
+      try {
+        const catalogs = await fetchCatalogsByNames([catalogNames.suffix])
+        const catalog = catalogs[catalogNames.suffix]
+        this.suffixCatalogSelectOptions = catalog
+          ? mapCatalogItemsToSelectOptions(
+            catalogItemsFromCatalog(catalog),
+          )
+          : []
+      } catch {
+        this.suffixCatalogSelectOptions = []
+      }
+
+      return this.suffixCatalogSelectOptions
+    },
     async getClientList(params = {}, t) {
       try {
         const page = Number(params.page ?? this.clientListQuery.page ?? 1)
@@ -58,9 +82,14 @@ export const useSiteStore = defineStore('site', {
         }
 
         const list = extractEnvelopeList(root)
+        const suffixSelectOptions =
+          await this.resolveSuffixCatalogSelectOptions()
         this.clientListSourceById = indexClientListSource(list)
         this.clientList = list
-          .map(client => formatClientDisplay(mapClient(client), t))
+          .map(client => formatClientDisplay(
+            mapClient(client, { suffixSelectOptions }),
+            t,
+          ))
           .filter(Boolean)
         this.clientListPagination = extractEnvelopeListPagination(root)
       } catch (error) {

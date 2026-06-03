@@ -18,7 +18,11 @@
     @blur="onBlur">
     <template v-if="!readonly" #append>
       <q-icon name="event" class="cursor-pointer input-icon">
-        <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+        <q-popup-proxy
+          ref="datePopupRef"
+          cover
+          transition-show="scale"
+          transition-hide="scale">
           <q-date
             :model-value="datePickerValue"
             mask="MM/DD/YYYY"
@@ -41,7 +45,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import {
   isCompleteUsDateString,
   parseUsDateString,
@@ -63,6 +67,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const datePopupRef = ref(null)
 
 const resolvedMinYear = computed(() => {
   if (props.minYear != null && Number.isFinite(props.minYear)) {
@@ -137,6 +143,9 @@ function onBlur() {
 function onPickerChange(val) {
   const next = sanitizeUsDateInput(val || '', sanitizeOptions())
   emit('update:modelValue', next)
+  if (isCompleteUsDateString(next) && parseUsDateString(next)) {
+    datePopupRef.value?.hide()
+  }
 }
 </script>
 

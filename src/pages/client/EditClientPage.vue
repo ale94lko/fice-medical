@@ -46,7 +46,6 @@
           ref="clientFormRef"
           mode="edit"
           :client-id="clientId"
-          @saved="onSaved"
           @cancel="goToClientList"
           @tab-label="activeTabLabel = $event"
         />
@@ -85,12 +84,6 @@ function onClose() {
 
 function goToClientList() {
   router.push('/clients')
-}
-
-function onSaved() {
-  setTimeout(() => {
-    goToClientList()
-  }, 800)
 }
 </script>
 

@@ -78,10 +78,12 @@ function goToClientList() {
   router.push('/clients')
 }
 
-function onSaved() {
-  setTimeout(() => {
-    goToClientList()
-  }, 800)
+function onSaved({ clientId } = {}) {
+  const id = String(clientId ?? '').trim()
+  if (!id) {
+    return
+  }
+  router.replace({ name: 'EditClient', params: { id } })
 }
 </script>
 

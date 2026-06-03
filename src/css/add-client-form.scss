@@ -187,111 +187,91 @@
   margin: -4px auto 10px;
 }
 
-.add-client-form__gender-chip-grid {
-  display: grid;
+.add-client-form__gender-options {
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
-.add-client-form__gender-chip {
-  justify-content: flex-start;
-  min-height: 48px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  font-weight: 600;
-  text-transform: none;
+.add-client-form__gender-option {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+  color: $text-strong;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 
-  &::before {
-    border-radius: 12px;
-    border-width: 1px;
-    opacity: 1;
+  &:hover:not(:disabled):not(&--selected) {
+    border-color: rgba($primary, 0.2);
+    background: $surface-muted;
   }
 
-  &--male {
-    background: #ecfdf5 !important;
-    color: #047857;
-
-    &::before {
-      border-color: #a7f3d0;
-    }
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.35);
+    outline-offset: 2px;
   }
 
-  &--female {
-    background: #f0fdf4 !important;
-    color: #15803d;
-
-    &::before {
-      border-color: #bbf7d0;
-    }
-  }
-
-  &--unknown {
-    background: #f7fee7 !important;
-    color: #4d7c0f;
-
-    &::before {
-      border-color: #d9f99d;
-    }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 
   &--selected {
-    font-weight: 700;
+    border-color: rgba($primary, 0.4);
+    background: rgba($primary, 0.06);
+    font-weight: 600;
 
-    &::before {
-      border-style: solid !important;
-      border-width: 2px !important;
-    }
+    .add-client-form__gender-option-radio {
+      border-color: $primary;
+      background: $primary;
 
-    &.add-client-form__gender-chip--male {
-      background: #d1fae5 !important;
-      color: #065f46;
-
-      &::before {
-        border-color: #6ee7b7;
-      }
-    }
-
-    &.add-client-form__gender-chip--female {
-      background: #dcfce7 !important;
-      color: #166534;
-
-      &::before {
-        border-color: #86efac;
-      }
-    }
-
-    &.add-client-form__gender-chip--unknown {
-      background: #ecfccb !important;
-      color: #3f6212;
-
-      &::before {
-        border-color: #bef264;
+      &::after {
+        opacity: 1;
       }
     }
   }
 }
 
-.add-client-form__gender-chip-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.add-client-form__gender-option-radio {
+  position: relative;
   flex-shrink: 0;
-  margin-right: 8px;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid $text-hint;
+  border-radius: 50%;
+  background: transparent;
 
-  &--male {
-    background: #10b981;
-  }
-
-  &--female {
-    background: #22c55e;
-  }
-
-  &--unknown {
-    background: #84cc16;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background: $white;
+    opacity: 0;
+    transition: opacity 0.15s ease;
   }
 }
 
-.add-client-form__gender-chip-label {
-  line-height: 1.25;
+.add-client-form__gender-option-label {
+  min-width: 0;
 }
 
 .add-client-tabs {

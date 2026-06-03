@@ -7,6 +7,7 @@ import {
 import {
   buildClientRegisterBody,
 } from 'src/utils/build-client-register-body.js'
+import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -292,26 +293,54 @@ function formatClientListDate(value) {
   })
 }
 
+export function resolveClientListStatusVariant(status) {
+  const raw = String(status ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+  const lower = raw.toLowerCase()
+  if (
+    lower === 'closed'
+    || raw === String(clientStatus.CLOSED)
+  ) {
+    return 'closed'
+  }
+  if (
+    lower === 'active'
+    || lower === 'open'
+    || raw === String(clientStatus.OPEN)
+  ) {
+    return 'open'
+  }
+
+  return 'other'
+}
+
 function formatClientListStatus(status, t) {
   const raw = String(status ?? '').trim()
   if (!raw) {
     return ''
   }
   const lower = raw.toLowerCase()
-  if (lower === 'closed' || raw === clientStatus.CLOSED) {
+  if (lower === 'closed' || raw === String(clientStatus.CLOSED)) {
     return t('closed')
   }
-  if (lower === 'active' || lower === 'open' || raw === clientStatus.OPEN) {
+  if (
+    lower === 'active'
+    || lower === 'open'
+    || raw === String(clientStatus.OPEN)
+  ) {
     return t('open')
   }
 
   return raw.charAt(0).toUpperCase() + raw.slice(1)
 }
 
-export function mapClient(client) {
+export function mapClient(client, options = {}) {
   if (!client || typeof client !== typeNames.object) {
     return null
   }
+  const { suffixSelectOptions = [] } = options
   const ck = clientFieldKeys
   const personal = clientPersonalInfo(client)
   const firstName = String(
@@ -323,9 +352,13 @@ export function mapClient(client) {
   const lastName = String(
     personal.last_name ?? client.last_name ?? client[ck.lastName] ?? '',
   ).trim()
-  const suffix = String(
+  const suffixRaw = String(
     personal.suffix ?? client.suffix ?? client[ck.suffix] ?? '',
   ).trim()
+  const suffix = resolveCatalogOptionLabel(
+    suffixSelectOptions,
+    suffixRaw,
+  ) || suffixRaw
   const dob = personal.dob ?? client.dob ?? ''
   const ssn = client.ssn ?? client.social_security_number
 
@@ -367,7 +400,9 @@ export function formatClientDisplay(mapped, t) {
 
   out[ck.dob] = formatClientListDate(out[ck.dob])
   out[ck.admissionDate] = formatClientListDate(out[ck.admissionDate])
-  out[ck.status] = formatClientListStatus(out[ck.status], t)
+  const rawStatus = out[ck.status]
+  out.statusVariant = resolveClientListStatusVariant(rawStatus)
+  out[ck.status] = formatClientListStatus(rawStatus, t)
 
   return out
 }

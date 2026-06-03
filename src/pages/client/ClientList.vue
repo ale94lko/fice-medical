@@ -62,6 +62,17 @@
           :label="t('filters')"
           @click="showFilters" />
       </template>
+      <template #body-cell-status="scope">
+        <q-td :props="scope">
+          <span
+            v-if="scope.row.statusVariant && scope.row[ck.status]"
+            class="client-list-status-badge"
+            :class="`client-list-status-badge--${scope.row.statusVariant}`">
+            {{ scope.row[ck.status] }}
+          </span>
+          <span v-else class="text-grey-7">—</span>
+        </q-td>
+      </template>
       <template #row-actions="{ row }">
         <q-btn
           flat
@@ -285,3 +296,33 @@ function editRow(row) {
 }
 
 </script>
+
+<style lang="scss" scoped>
+@import 'src/css/quasar.variables';
+
+.client-list-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &--open {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &--closed {
+    background: #f1f5f9;
+    color: $text-muted;
+  }
+
+  &--other {
+    background: $surface-muted;
+    color: $text-muted;
+  }
+}
+</style>

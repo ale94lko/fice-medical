@@ -76,13 +76,6 @@
       <div
         ref="panelScrollRef"
         class="add-client-form__panel-scroll">
-      <q-banner
-        v-if="successVisible"
-        dense
-        class="bg-positive text-white text-center q-mb-md rounded-borders">
-        {{ saveSuccessMessage }}
-      </q-banner>
-
       <q-form
         ref="formRef"
         greedy
@@ -325,24 +318,37 @@
                 <div class="col-12">
                   <AddClientLabeledField
                     :label="t('gender')"
+                    required
                     :test-id="tid.field(ck.gender)">
                     <div
-                      class="add-client-form__gender-chip-grid"
-                      :style="genderChipGridStyle">
-                      <q-btn
+                      class="add-client-form__gender-options"
+                      role="radiogroup"
+                      :aria-label="t('gender')">
+                      <button
                         v-for="opt in genderOptions"
                         :key="opt.value"
-                        flat
-                        no-caps
-                        :disable="catalogsLoading"
+                        type="button"
+                        role="radio"
+                        class="add-client-form__gender-option"
+                        :aria-checked="genderValuesMatch(
+                          form[ck.gender],
+                          opt.value,
+                        )"
+                        :disabled="catalogsLoading"
                         :data-testid="tid.genderOption(opt.value)"
-                        :class="genderChipClass(opt.value)"
+                        :class="{
+                          'add-client-form__gender-option--selected':
+                            genderValuesMatch(form[ck.gender], opt.value),
+                        }"
                         @click="form[ck.gender] = opt.value">
-                        <span :class="genderDotClass(opt.value)" />
-                        <span class="add-client-form__gender-chip-label">
+                        <span
+                          class="add-client-form__gender-option-radio"
+                          aria-hidden="true"
+                        />
+                        <span class="add-client-form__gender-option-label">
                           {{ opt.label }}
                         </span>
-                      </q-btn>
+                      </button>
                     </div>
                   </AddClientLabeledField>
                 </div>
@@ -634,7 +640,6 @@ const siteStore = useSiteStore()
 
 const saving = ref(false)
 const initialLoading = ref(false)
-const successVisible = ref(false)
 const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
 const allergiesTabRef = ref(null)
@@ -692,15 +697,6 @@ const dobMinYear = computed(
   () => new Date().getFullYear() - clientMaxAge,
 )
 
-const genderChipGridStyle = computed(() => {
-  const options = genderOptions?.value ?? []
-  const count = Math.max(options.length, 1)
-
-  return {
-    gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`,
-  }
-})
-
 function normalizeGenderToken(value) {
   return String(value ?? '')
     .trim()
@@ -717,40 +713,6 @@ function genderValuesMatch(stored, optionValue) {
   }
 
   return a === b
-}
-
-function genderChipModifier(value) {
-  const token = normalizeGenderToken(value)
-  if (token === 'male') {
-    return 'male'
-  }
-  if (token === 'female') {
-    return 'female'
-  }
-
-  return 'unknown'
-}
-
-function genderDotClass(value) {
-  const modifier = genderChipModifier(value)
-
-  return [
-    'add-client-form__gender-chip-dot',
-    `add-client-form__gender-chip-dot--${modifier}`,
-  ]
-}
-
-function genderChipClass(value) {
-  const modifier = genderChipModifier(value)
-
-  return [
-    'add-client-form__gender-chip',
-    `add-client-form__gender-chip--${modifier}`,
-    {
-      'add-client-form__gender-chip--selected':
-        genderValuesMatch(form.value[ck.gender], value),
-    },
-  ]
 }
 
 const ageMaxForUnit = computed(() => maxAgeForUnit(form.value[ck.ageUnit]))
@@ -918,8 +880,6 @@ onMounted(async() => {
     }
   }
 
-  successVisible.value = false
-
   if (isEditMode.value) {
     initialLoading.value = true
     try {
@@ -982,20 +942,20 @@ async function onSave() {
   }
 
   saving.value = true
-  successVisible.value = false
   try {
+    let savedClientId = props.clientId
     if (isEditMode.value) {
       await siteStore.updateClient(props.clientId, form.value, t)
     } else {
-      await siteStore.createClient(form.value, t)
+      const created = await siteStore.createClient(form.value, t)
+      savedClientId = created?.id ?? created?.client_id ?? savedClientId
     }
-    successVisible.value = true
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: saveSuccessMessage.value,
       position: 'top',
     })
-    emit('saved')
+    emit('saved', { clientId: savedClientId })
     markPristine()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
