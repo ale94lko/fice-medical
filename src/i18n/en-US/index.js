@@ -196,6 +196,14 @@ export default {
   prefCommMail: 'Mail',
   prefCommEmail: 'Email',
   prefCommPointOfContact: 'Point of Contact',
+  communicationAuthorizationMethod:
+    'Patient authorizes communications through the selected '
+    + 'preferred communication method.',
+  communicationAuthorizationPointOfContact:
+    'Patient authorizes communication with the selected contact person.',
+  communicationAuthorizedOn: 'Authorized on: {date}',
+  preferredPointOfContact: 'Preferred Point of Contact',
+  prefCommNoContactsAvailable: 'No contacts available',
   additionalNotes: 'Additional notes',
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',
@@ -227,6 +235,8 @@ export default {
   zipCodeInvalid: 'Enter a valid zip code',
   clientEmailInvalid: 'Enter a valid email (max 32 characters)',
   phoneInvalid: 'Phone may only contain digits, +, -, (), and spaces',
+  duplicatePhone: 'This phone number is already listed.',
+  duplicateEmail: 'This email address is already listed.',
   countryMax: 'Maximum {max} characters',
   notesMax: 'Maximum {max} characters',
   fmhAddSectionTitle: 'Add Family Medical History',

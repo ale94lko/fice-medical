@@ -14,6 +14,7 @@
             map-options
             clearable
             class="full-width"
+            :loading="catalogsLoading"
             :options="relationshipTypeOptions"
             @update:model-value="setField('relationshipType', $event)"
           />
@@ -32,6 +33,7 @@
             map-options
             clearable
             class="full-width"
+            :loading="catalogsLoading"
             :options="contactTypeOptions"
             @update:model-value="setField('contactType', $event)"
           />
@@ -116,7 +118,7 @@
             :model-value="contact.responsibleForPayments"
             :label="t('responsibleForPayments')"
             :test-id="ocField('responsibleForPayments')"
-            @update:model-value="setField('responsibleForPayments', $event)"
+            @update:model-value="onResponsibleForPaymentsChange"
           />
         </div>
       </div>
@@ -246,10 +248,11 @@
               <q-input
                 outlined
                 hide-bottom-space
+                lazy-rules="ondemand"
                 class="full-width"
                 :data-testid="ocField(`phone-${index}-number`)"
                 :model-value="phone.number"
-                :rules="rules.phoneNumber"
+                :rules="phoneNumberRules(index)"
                 :placeholder="t('phoneNumberPlaceholder')"
                 maxlength="14"
                 @update:model-value="val => onPhoneInput(index, val)"
@@ -310,7 +313,7 @@
               :external-label="true"
               :label="t('emailAddress')"
               :placeholder="t('emailAddressPlaceholder')"
-              :rules="rules.emailAddress"
+              :rules="emailAddressRules(index)"
               maxlength="32"
               :test-id="ocField(`email-${index}-address`)"
               @update:model-value="setEmailField(index, 'address', $event)"
@@ -372,11 +375,14 @@ import {
   getCountiesForStateCity,
 } from 'src/data/us-geography.js'
 import {
+  clearContactAddress,
   copyClientAddressToContact,
   createEmptyEmail,
   createEmptyPhone,
   formatPhoneUs,
 } from 'src/utils/client-contact-form.js'
+import { useContactMethodDuplicateRules }
+  from 'src/composables/useContactMethodDuplicateRules.js'
 import {
   otherContactEmailAddTestId,
   otherContactEmailRemoveTestId,
@@ -432,9 +438,32 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:contact'])
+const emit = defineEmits([
+  'update:contact',
+  'set-responsible-for-payments',
+])
 
 const { t } = useI18n()
+const {
+  phoneNumberRules: buildPhoneNumberRules,
+  emailAddressRules: buildEmailAddressRules,
+} = useContactMethodDuplicateRules(t)
+
+function phoneNumberRules(index) {
+  return buildPhoneNumberRules(
+    props.contact.phones,
+    index,
+    props.rules?.phoneNumber ?? [],
+  )
+}
+
+function emailAddressRules(index) {
+  return buildEmailAddressRules(
+    props.contact.emails,
+    index,
+    props.rules?.emailAddress ?? [],
+  )
+}
 
 function ocField(name) {
   return otherContactFieldTestId(`${props.contact.id}-${name}`)
@@ -456,6 +485,13 @@ function emitContact(next) {
 
 function setField(key, value) {
   emitContact({ ...props.contact, [key]: value })
+}
+
+function onResponsibleForPaymentsChange(value) {
+  emit('set-responsible-for-payments', {
+    contactId: props.contact.id,
+    value,
+  })
 }
 
 function setPhoneField(index, key, value) {
@@ -521,6 +557,8 @@ function onSameAsClientAddress(val) {
   const next = { ...props.contact, sameAsClientAddress: val }
   if (val) {
     copyClientAddressToContact(props.clientAddress, next)
+  } else {
+    clearContactAddress(next)
   }
   emitContact(next)
 }

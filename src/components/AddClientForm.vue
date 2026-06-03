@@ -403,6 +403,8 @@
             :rules="contactRules"
             :prefix-select-options="prefixSelectOptions"
             :suffix-select-options="suffixSelectOptions"
+            :contact-type-options="contactTypeSelectOptions"
+            :relationship-type-options="relationshipTypeSelectOptions"
             :catalogs-loading="catalogsLoading"
           />
         </q-tab-panel>
@@ -661,6 +663,8 @@ const {
   suffixSelectOptions,
   raceSelectOptions,
   ethnicitySelectOptions,
+  contactTypeSelectOptions,
+  relationshipTypeSelectOptions,
   rules,
   contactRules,
   resetForm,
@@ -892,6 +896,8 @@ async function loadClientForEdit() {
     raceSelectOptions: raceSelectOptions.value,
     ethnicitySelectOptions: ethnicitySelectOptions.value,
     genderSelectOptions: genderOptions.value,
+    contactTypeSelectOptions: contactTypeSelectOptions.value,
+    relationshipTypeSelectOptions: relationshipTypeSelectOptions.value,
   })
   applyForm(mapped)
 }

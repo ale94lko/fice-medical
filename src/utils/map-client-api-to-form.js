@@ -19,6 +19,7 @@ import {
   createEmptyEmail,
   createEmptyOtherContact,
   createEmptyPhone,
+  copyClientAddressToContact,
   formatPhoneUs,
   nextContactId,
   normalizePhoneDigits,
@@ -145,6 +146,53 @@ function pickPrimaryAddress(source) {
     zip_code: source.zip_code ?? source.zipCode ?? '',
     country: source.country ?? '',
   }
+}
+
+function addressRecordHasData(addr) {
+  if (!addr || typeof addr !== 'object') {
+    return false
+  }
+
+  return Boolean(
+    String(addr.address ?? addr.address_line1 ?? '').trim()
+    || String(addr.address2 ?? addr.address_line2 ?? '').trim()
+    || String(addr.city ?? '').trim()
+    || String(addr.state ?? '').trim()
+    || String(addr.zip_code ?? addr.zipCode ?? '').trim()
+    || String(addr.county ?? '').trim(),
+  )
+}
+
+function pickAddressFromApiContact(item) {
+  const pi = contactPersonalInfo(item)
+  const piAddresses = Array.isArray(pi.addresses) ? pi.addresses : []
+  const itemAddresses = Array.isArray(item?.addresses) ? item.addresses : []
+  const addresses = piAddresses.length ? piAddresses : itemAddresses
+
+  if (addresses.length) {
+    return pickPrimaryAddress({ addresses })
+  }
+
+  const nested = item?.address ?? pi?.address
+  if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+    const fromNested = pickPrimaryAddress(nested)
+    if (addressRecordHasData(fromNested)) {
+      return fromNested
+    }
+  }
+
+  return pickPrimaryAddress({ ...pi, ...item })
+}
+
+function readSameAsClientAddressFromApi(item) {
+  const pi = contactPersonalInfo(item)
+
+  return Boolean(
+    item?.same_as_client_address
+    ?? item?.sameAsClientAddress
+    ?? pi?.same_as_client_address
+    ?? pi?.sameAsClientAddress,
+  )
 }
 
 function mapPhoneTypeFromApi(value) {
@@ -360,6 +408,15 @@ function mapClientContactFromApi(client, personal) {
     client,
     personal,
   )
+  contact.communicationAuthorization = Boolean(
+    personal?.communication_authorization
+    ?? client?.communication_authorization,
+  )
+  contact.communicationAuthorizationDate = isoDateToUsDateString(
+    personal?.communication_authorization_date
+    ?? client?.communication_authorization_date
+    ?? '',
+  )
   contact.additionalNotes = String(
     client?.notes
     ?? client?.additional_notes
@@ -395,15 +452,28 @@ function mapOtherContactFromApi(item, clientContact, catalogOptions = {}) {
     resolveCatalogSelectValue,
     prefixSelectOptions = [],
     suffixSelectOptions = [],
+    contactTypeSelectOptions = [],
+    relationshipTypeSelectOptions = [],
   } = catalogOptions
   const other = createEmptyOtherContact()
   other.id = nextContactId()
-  other.contactType = mapContactTypeFromApi(
-    item?.contact_type ?? item?.contactType,
+  other.apiId = item?.id ?? item?.contact_id ?? null
+  const rawContactType = item?.contact_type ?? item?.contactType
+  other.contactType = resolveCatalogSelectField(
+    rawContactType,
+    contactTypeSelectOptions,
+    resolveCatalogSelectValue,
   )
-  other.relationshipType = mapRelationshipFromApi(
-    item?.relationship_type ?? item?.relationshipType,
+    ?? mapContactTypeFromApi(rawContactType)
+    ?? ''
+  const rawRelationshipType = item?.relationship_type ?? item?.relationshipType
+  other.relationshipType = resolveCatalogSelectField(
+    rawRelationshipType,
+    relationshipTypeSelectOptions,
+    resolveCatalogSelectValue,
   )
+    ?? mapRelationshipFromApi(rawRelationshipType)
+    ?? ''
   other.responsibleForPayments = Boolean(
     item?.responsive_for_payment
     ?? item?.responsible_for_payments
@@ -427,10 +497,14 @@ function mapOtherContactFromApi(item, clientContact, catalogOptions = {}) {
   other.phones = mapPhonesFromApi(pi.phones ?? item?.phones)
   other.emails = mapEmailsFromApi(pi.emails ?? item?.emails)
 
-  const addr = pickPrimaryAddress(pi)
+  const sameAsFromApi = readSameAsClientAddressFromApi(item)
+  const addr = pickAddressFromApiContact(item)
   mapAddressFieldsToContact(other, addr)
 
-  if (addressesMatch(clientContact, other)) {
+  if (sameAsFromApi) {
+    other.sameAsClientAddress = true
+    copyClientAddressToContact(clientContact, other)
+  } else if (addressesMatch(clientContact, other)) {
     other.sameAsClientAddress = true
   }
 
@@ -537,6 +611,8 @@ export function mapClientApiToForm(client, options = {}) {
     resolveCatalogSelectValue,
     prefixSelectOptions = [],
     suffixSelectOptions = [],
+    contactTypeSelectOptions = [],
+    relationshipTypeSelectOptions = [],
     raceSelectOptions = [],
     ethnicitySelectOptions = [],
     genderSelectOptions = [],
@@ -562,12 +638,35 @@ export function mapClientApiToForm(client, options = {}) {
     resolveCatalogSelectValue,
     prefixSelectOptions,
     suffixSelectOptions,
+    contactTypeSelectOptions,
+    relationshipTypeSelectOptions,
   }
   contact.otherContacts = (Array.isArray(otherRaw) ? otherRaw : [])
     .map(item => mapOtherContactFromApi(item, contact, catalogOptions))
     .filter(Boolean)
   if (contact.otherContacts.length) {
     contact.activeOtherContactId = contact.otherContacts[0].id
+  }
+
+  const preferredPointApiId = personal?.preferred_point_of_contact_id
+    ?? client?.preferred_point_of_contact_id
+  if (preferredPointApiId != null && String(preferredPointApiId).trim()) {
+    const match = contact.otherContacts.find(
+      item => String(item.apiId) === String(preferredPointApiId),
+    )
+    if (match) {
+      contact.preferredPointOfContactId = match.id
+    }
+  } else {
+    const prefIndex = personal?.preferred_point_of_contact_index
+      ?? client?.preferred_point_of_contact_index
+    if (
+      Number.isInteger(prefIndex)
+      && prefIndex >= 0
+      && prefIndex < contact.otherContacts.length
+    ) {
+      contact.preferredPointOfContactId = contact.otherContacts[prefIndex].id
+    }
   }
 
   const ssnRaw = personal.ssn ?? client.ssn ?? client.social_security_number

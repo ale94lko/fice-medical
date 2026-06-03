@@ -33,6 +33,38 @@ export function catalogsByNameFromList(catalogs) {
   return map
 }
 
+export function resolveCatalogOptionLabel(options, raw) {
+  const trimmed = String(raw ?? '').trim()
+  if (!trimmed) {
+    return ''
+  }
+  if (!Array.isArray(options) || !options.length) {
+    return trimmed
+  }
+  const needle = trimmed.toLowerCase()
+  const token = needle.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+  const match = options.find(option => {
+    const value = String(option?.value ?? '').trim()
+    const label = String(option?.label ?? '').trim()
+    if (!value && !label) {
+      return false
+    }
+    const valueLower = value.toLowerCase()
+    const labelLower = label.toLowerCase()
+    const valueToken = valueLower
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '')
+
+    return (
+      valueLower === needle
+      || labelLower === needle
+      || valueToken === token
+    )
+  })
+
+  return match?.label ?? trimmed
+}
+
 export function mapCatalogItemsToSelectOptions(items, { emptyOption } = {}) {
   const sorted = [...(items ?? [])].sort(
     (a, b) => Number(a?.id ?? 0) - Number(b?.id ?? 0),

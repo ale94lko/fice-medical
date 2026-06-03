@@ -1,4 +1,7 @@
 import { clientFieldKeys } from 'components/constants.js'
+import {
+  countDuplicateContactMethodErrors,
+} from 'src/utils/client-contact-method-validation.js'
 
 export function countFieldRuleErrors(value, rules) {
   if (!rules?.length) {
@@ -78,6 +81,8 @@ export function countContactTabFieldErrors(contact, rules) {
       count += countFieldRuleErrors(email?.address, rules.emailAddress)
     }
   }
+
+  count += countDuplicateContactMethodErrors(contact)
 
   return count
 }

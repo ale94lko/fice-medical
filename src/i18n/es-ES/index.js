@@ -200,6 +200,15 @@ export default {
   prefCommMail: 'Correo postal',
   prefCommEmail: 'Correo electrónico',
   prefCommPointOfContact: 'Punto de contacto',
+  communicationAuthorizationMethod:
+    'El paciente autoriza comunicaciones a través del método de '
+    + 'comunicación preferido seleccionado.',
+  communicationAuthorizationPointOfContact:
+    'El paciente autoriza la comunicación con la persona de contacto '
+    + 'seleccionada.',
+  communicationAuthorizedOn: 'Autorizado el: {date}',
+  preferredPointOfContact: 'Punto de contacto preferido',
+  prefCommNoContactsAvailable: 'No hay contactos disponibles',
   additionalNotes: 'Notas adicionales',
   additionalNotesPlaceholder: 'Ingrese notas adicionales aquí...',
   optional: 'Opcional',
@@ -232,6 +241,8 @@ export default {
   zipCodeInvalid: 'Ingrese un código postal válido',
   clientEmailInvalid: 'Ingrese un correo válido (máximo 32 caracteres)',
   phoneInvalid: 'El teléfono solo puede contener dígitos, +, -, () y espacios',
+  duplicatePhone: 'Este número de teléfono ya está en la lista.',
+  duplicateEmail: 'Esta dirección de correo ya está en la lista.',
   countryMax: 'Máximo {max} caracteres',
   notesMax: 'Máximo {max} caracteres',
   fmhAddSectionTitle: 'Agregar historial médico familiar',

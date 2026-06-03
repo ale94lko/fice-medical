@@ -95,6 +95,7 @@
             :suffix-options="suffixOptions"
             :catalogs-loading="catalogsLoading"
             @update:contact="patch => updateOtherContact(ocIndex, patch)"
+            @set-responsible-for-payments="onSetResponsibleForPayments"
           />
         </q-tab-panel>
       </q-tab-panels>
@@ -122,7 +123,12 @@ import ModalComponent from 'components/ModalComponent.vue'
 import {
   createEmptyOtherContact,
   resolveOtherContactTabLabel,
+  setOtherContactResponsibleForPayments,
 } from 'src/utils/client-contact-form.js'
+import {
+  clearPreferredPointOfContactIfRemoved,
+  syncPointOfContactSelection,
+} from 'src/utils/client-preferred-communication.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -190,14 +196,22 @@ function addOtherContact() {
   contact.value.otherContacts.push(oc)
   contact.value.activeOtherContactId = oc.id
   contact.value.otherContactExpanded = true
+  syncPointOfContactSelection(contact.value)
 }
 
 function updateOtherContact(index, patch) {
   Object.assign(contact.value.otherContacts[index], patch)
 }
 
+function onSetResponsibleForPayments({ contactId, value }) {
+  setOtherContactResponsibleForPayments(contact.value, contactId, value)
+}
+
 function otherContactTabLabel(oc, index) {
-  return resolveOtherContactTabLabel(oc, index, t)
+  return resolveOtherContactTabLabel(oc, index, t, {
+    contactTypeOptions: props.contactTypeOptions,
+    relationshipTypeOptions: props.relationshipTypeOptions,
+  })
 }
 
 function requestRemoveOtherContact(oc, index) {
@@ -213,6 +227,7 @@ function confirmRemoveOtherContact() {
   }
   const removedId = contact.value.otherContacts[index]?.id
   contact.value.otherContacts.splice(index, 1)
+  clearPreferredPointOfContactIfRemoved(contact.value, removedId)
   if (removedId && contact.value.activeOtherContactId === removedId) {
     const nextIndex = Math.min(
       index,

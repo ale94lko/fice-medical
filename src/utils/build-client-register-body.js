@@ -3,69 +3,19 @@ import {
   clientFieldKeys,
   clientFormSections,
 } from 'components/constants.js'
-import { normalizePhoneDigits } from 'src/utils/client-contact-form.js'
+import {
+  normalizePhoneDigits,
+  otherContactHasData,
+} from 'src/utils/client-contact-form.js'
+import {
+  resolvePreferredPointOfContactApiRef,
+} from 'src/utils/client-preferred-communication.js'
 import { usDateToIso } from 'src/utils/client-form.js'
 
 const ck = clientFieldKeys
 
 function trim(value) {
   return String(value ?? '').trim()
-}
-
-function toSnakeToken(value) {
-  return trim(value)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_|_$/g, '')
-}
-
-function mapPhoneType(value) {
-  const token = toSnakeToken(value)
-  if (!token) {
-    return ''
-  }
-  if (token === 'cell' || token === 'cell_phone') {
-    return 'mobile'
-  }
-
-  return token
-}
-
-function mapEmailType(value) {
-  return toSnakeToken(value) || ''
-}
-
-function mapCommunicationPreference(value) {
-  const raw = trim(value).toLowerCase()
-  if (!raw) {
-    return ''
-  }
-  if (raw.includes('email')) {
-    return 'email'
-  }
-  if (raw.includes('mobile')) {
-    return 'mobile'
-  }
-  if (raw.includes('home') && raw.includes('phone')) {
-    return 'home'
-  }
-  if (raw.includes('work') && raw.includes('phone')) {
-    return 'work'
-  }
-  if (raw === 'mail') {
-    return 'mail'
-  }
-  if (raw.includes('declined')) {
-    return 'declined'
-  }
-  if (raw.includes('did not ask')) {
-    return 'not_asked'
-  }
-  if (raw.includes('point') && raw.includes('contact')) {
-    return 'point_of_contact'
-  }
-
-  return toSnakeToken(value)
 }
 
 function mapCountry(value) {
@@ -86,63 +36,15 @@ function mapCountry(value) {
   return v
 }
 
-function mapContactType(value) {
-  const raw = trim(value).toLowerCase()
-  if (!raw) {
-    return ''
-  }
-  if (raw.includes('emergency')) {
-    return 'emergency'
-  }
-  if (raw.includes('billing')) {
-    return 'billing'
-  }
-  if (raw.includes('primary')) {
-    return 'primary'
-  }
-  if (raw.includes('legal')) {
-    return 'legal'
-  }
-  if (raw.includes('caregiver')) {
-    return 'caregiver'
-  }
-  if (raw.includes('next')) {
-    return 'next_of_kin'
-  }
-
-  return toSnakeToken(value.replace(/\s+contact$/i, ''))
-}
-
-function mapRelationshipType(value) {
-  const token = toSnakeToken(value)
-  if (!token) {
-    return ''
-  }
-  if (token === 'other_family_member') {
-    return 'other_family'
-  }
-
-  return token
-}
-
-function mapAllergySeverity(value) {
-  return toSnakeToken(value)
-}
-
 function formatPhoneForApi(value) {
-  const digits = normalizePhoneDigits(value)
-  if (digits.length === 10) {
-    return `+1-${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
-  }
-
-  return trim(value)
+  return normalizePhoneDigits(value)
 }
 
 function mapPhonesAll(phones) {
   return (phones ?? [])
     .map(p => ({
       phone_number: formatPhoneForApi(p?.number),
-      phone_type: mapPhoneType(p?.type),
+      phone_type: trim(p?.type),
     }))
     .filter(p => p.phone_number || p.phone_type)
 }
@@ -151,7 +53,7 @@ function mapEmailsAll(emails) {
   return (emails ?? [])
     .map(e => ({
       email: trim(e?.address),
-      email_type: mapEmailType(e?.type),
+      email_type: trim(e?.type),
     }))
     .filter(e => e.email || e.email_type)
 }
@@ -240,9 +142,12 @@ function buildBasicInfo(form) {
     status: trim(form[ck.status]) || 'active',
     emails: mapEmailsAll(contact.emails),
     phones: mapPhonesAll(contact.phones),
-    communication_preference: mapCommunicationPreference(
-      contact.preferredCommunication,
-    ),
+    communication_preference: trim(contact.preferredCommunication),
+    communication_authorization: Boolean(contact.communicationAuthorization),
+    communication_authorization_date: contact.communicationAuthorization
+      ? usDateToIso(contact.communicationAuthorizationDate) || null
+      : null,
+    ...resolvePreferredPointOfContactApiRef(contact),
     address: address.address,
     address2: address.address2,
     zip_code: address.zip_code,
@@ -256,58 +161,55 @@ function buildBasicInfo(form) {
 
 function resolveOtherContactAddress(other, clientContact) {
   if (other?.sameAsClientAddress && clientContact) {
-    const shared = buildAddressFields(clientContact)
-
-    return {
-      address: shared.address,
-      city: shared.city,
-      state: shared.state,
-      zip_code: shared.zip_code,
-      county: shared.county,
-      country: shared.country,
-    }
+    return buildAddressFields(clientContact)
   }
 
-  return {
-    address: trim(other?.addressLine1),
-    city: trim(other?.city),
-    state: trim(other?.state),
-    zip_code: trim(other?.zipCode),
-    county: trim(other?.county),
-    country: mapCountry(other?.country),
-  }
+  return buildAddressFields(other)
 }
 
 function buildRegisterContact(other, clientContact) {
   const address = resolveOtherContactAddress(other, clientContact)
 
-  return {
-    contact_type: mapContactType(other?.contactType),
-    relationship_type: mapRelationshipType(other?.relationshipType),
-    status: 'active',
+  const payload = {
+    contact_type: trim(other?.contactType),
+    relationship_type: trim(other?.relationshipType),
     responsive_for_payment: Boolean(other?.responsibleForPayments),
-    prefix: trim(other?.prefix),
     first_name: trim(other?.firstName),
     middle_name: trim(other?.middleName),
     last_name: trim(other?.lastName),
+    prefix: trim(other?.prefix),
     suffix: trim(other?.suffix),
     emails: mapEmailsAll(other?.emails),
     phones: mapPhonesAll(other?.phones),
     address: address.address,
+    address2: address.address2,
+    zip_code: address.zip_code,
     city: address.city,
     state: address.state,
-    zip_code: address.zip_code,
-    county: address.county,
     country: address.country,
+    county: address.county,
+    notes: '',
   }
+
+  if (other?.sameAsClientAddress) {
+    payload.same_as_client_address = true
+  }
+
+  const apiId = other?.apiId
+  if (apiId != null && String(apiId).trim()) {
+    const numericId = Number(apiId)
+    payload.id = Number.isFinite(numericId) ? numericId : apiId
+  }
+
+  return payload
 }
 
 function buildContacts(form) {
   const contact = form[clientFormSections.contact] ?? {}
 
-  return (contact.otherContacts ?? []).map(other =>
-    buildRegisterContact(other, contact),
-  )
+  return (contact.otherContacts ?? [])
+    .filter(other => otherContactHasData(other))
+    .map(other => buildRegisterContact(other, contact))
 }
 
 function buildAllergies(form) {
@@ -315,7 +217,7 @@ function buildAllergies(form) {
 
   return (section.entries ?? []).map(entry => ({
     name: trim(entry?.allergy),
-    severity: mapAllergySeverity(entry?.severity),
+    severity: trim(entry?.severity),
     start_date: allergyStartDateFromYear(entry?.startYear),
   }))
 }

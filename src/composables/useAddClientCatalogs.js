@@ -4,7 +4,9 @@ import {
   catalogNames,
   clientAgeUnitOptions,
   clientAgeUnitValues,
+  clientContactTypeValues,
   clientGenderValues,
+  clientRelationshipTypeValues,
   clientSuffixOptions,
 } from 'components/constants.js'
 import {
@@ -34,6 +36,20 @@ function fallbackAgeUnitOptions(t) {
   return clientAgeUnitOptions.map(o => ({
     label: t(o.labelKey),
     value: o.value,
+  }))
+}
+
+function fallbackContactTypeOptions() {
+  return Object.values(clientContactTypeValues).map(value => ({
+    label: value,
+    value,
+  }))
+}
+
+function fallbackRelationshipTypeOptions() {
+  return Object.values(clientRelationshipTypeValues).map(value => ({
+    label: value,
+    value,
   }))
 }
 
@@ -123,6 +139,28 @@ export function useAddClientCatalogs(t) {
     return fallbackAgeUnitOptions(t)
   })
 
+  const contactTypeSelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.contactType]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+      )
+    }
+
+    return fallbackContactTypeOptions()
+  })
+
+  const relationshipTypeSelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.relationshipType]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+      )
+    }
+
+    return fallbackRelationshipTypeOptions()
+  })
+
   function resolveAgeUnitCode(code) {
     const needle = String(code ?? '').trim().toLowerCase()
     if (!needle) {
@@ -180,6 +218,8 @@ export function useAddClientCatalogs(t) {
     raceSelectOptions,
     ethnicitySelectOptions,
     ageUnitSelectOptions,
+    contactTypeSelectOptions,
+    relationshipTypeSelectOptions,
     resolveAgeUnitCode,
     resolveCatalogSelectValue,
     yearsAgeUnitValue,

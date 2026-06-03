@@ -50,6 +50,8 @@ export const addClientTestIds = {
   ),
   btn: name => toTestId('add-client-btn', name),
   preferredComm: token => toTestId('add-client-pref-comm', token),
+  preferredCommAuth: 'add-client-pref-comm-auth',
+  preferredPointOfContact: 'add-client-pref-point-of-contact',
   otherContactTab: id => toTestId('add-client-other-contact-tab', id),
   otherContactAdd: 'add-client-other-contact-btn-add',
   otherContactRemove: 'add-client-other-contact-btn-remove',

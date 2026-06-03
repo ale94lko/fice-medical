@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import 'quasar.variables';
 
 .add-client-form {
@@ -483,6 +484,46 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.add-client-form__point-of-contact-error {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.add-client-form__comm-authorization {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 12px 16px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface-muted;
+
+  .app-form-toggle .q-toggle__label {
+    color: $text-strong;
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  &--active {
+    background: rgba($primary, 0.08);
+    border-color: rgba($primary, 0.22);
+  }
+}
+
+.add-client-form__comm-authorization-date {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $primary;
+  white-space: nowrap;
 }
 
 .add-client-form__preferred-chip {
@@ -1234,12 +1275,12 @@
 
 .add-client-form__insurance-priority-badge--primary {
   background: rgba($positive, 0.12);
-  color: darken($positive, 8%);
+  color: color.adjust($positive, $lightness: -8%);
 }
 
 .add-client-form__insurance-priority-badge--secondary {
   background: rgba($info, 0.12);
-  color: darken($info, 10%);
+  color: color.adjust($info, $lightness: -10%);
 }
 
 .add-client-form__insurance-priority-badge--tertiary {
@@ -1249,17 +1290,17 @@
 
 .add-client-form__insurance-status-badge--active {
   background: rgba($positive, 0.12);
-  color: darken($positive, 8%);
+  color: color.adjust($positive, $lightness: -8%);
 }
 
 .add-client-form__insurance-status-badge--pending {
   background: rgba($warning, 0.18);
-  color: darken($warning, 22%);
+  color: color.adjust($warning, $lightness: -22%);
 }
 
 .add-client-form__insurance-status-badge--expired {
   background: rgba($negative, 0.1);
-  color: darken($negative, 6%);
+  color: color.adjust($negative, $lightness: -6%);
 }
 
 .add-client-form__insurance-status-badge--inactive {
@@ -1280,7 +1321,7 @@
   padding: 12px 16px;
   border-radius: $radius-md;
   background: rgba($primary, 0.08);
-  color: darken($primary, 6%);
+  color: color.adjust($primary, $lightness: -6%);
   font-size: 0.875rem;
   line-height: 1.45;
 }

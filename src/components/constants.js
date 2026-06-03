@@ -126,6 +126,9 @@ export const clientContactFieldKeys = {
   phones: 'phones',
   emails: 'emails',
   preferredCommunication: 'preferredCommunication',
+  communicationAuthorization: 'communicationAuthorization',
+  communicationAuthorizationDate: 'communicationAuthorizationDate',
+  preferredPointOfContactId: 'preferredPointOfContactId',
   additionalNotes: 'additionalNotes',
   otherContacts: 'otherContacts',
   activeOtherContactId: 'activeOtherContactId',
@@ -306,6 +309,8 @@ export const catalogNames = {
   gender: 'gender',
   race: 'race',
   ethnicity: 'ethnicity',
+  relationshipType: 'relationship_type',
+  contactType: 'contact_type',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -315,6 +320,8 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.gender,
   catalogNames.race,
   catalogNames.ethnicity,
+  catalogNames.relationshipType,
+  catalogNames.contactType,
 ]
 
 export const apiPaths = {

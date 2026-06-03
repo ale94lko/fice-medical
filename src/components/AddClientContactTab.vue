@@ -115,11 +115,12 @@
                 <q-input
                   outlined
                   hide-bottom-space
+                  lazy-rules="ondemand"
                   class="full-width"
                   :data-testid="contactFieldTestId(`phone-${index}-number`)"
                   :model-value="phone.number"
                   :placeholder="t('phoneNumberPlaceholder')"
-                  :rules="rules.phoneNumber"
+                  :rules="phoneNumberRules(index)"
                   maxlength="14"
                   @update:model-value="val => onPhoneInput(index, val)"
                 />
@@ -177,7 +178,7 @@
                 :external-label="true"
                 :label="t('emailAddress')"
                 :placeholder="t('emailAddressPlaceholder')"
-                :rules="rules.emailAddress"
+                :rules="emailAddressRules(index)"
                 maxlength="32"
                 :test-id="contactFieldTestId(`email-${index}-address`)"
               />
@@ -255,6 +256,53 @@
             </span>
           </q-btn>
         </div>
+
+        <div
+          v-if="showPointOfContactNoContactsError"
+          class="add-client-form__point-of-contact-error
+            form-field__error q-mt-sm">
+          {{ t('prefCommNoContactsAvailable') }}
+        </div>
+
+        <div
+          v-if="showCommunicationAuthorization"
+          class="add-client-form__comm-authorization q-mt-md"
+          :class="{
+            'add-client-form__comm-authorization--active':
+              contact.communicationAuthorization,
+          }">
+          <FormToggle
+            :model-value="contact.communicationAuthorization"
+            :label="communicationAuthorizationLabel"
+            :test-id="tid.preferredCommAuth"
+            @update:model-value="onCommunicationAuthorizationChange"
+          />
+          <span
+            v-if="contact.communicationAuthorization
+              && contact.communicationAuthorizationDate"
+            class="add-client-form__comm-authorization-date">
+            {{ t('communicationAuthorizedOn', {
+              date: contact.communicationAuthorizationDate,
+            }) }}
+          </span>
+        </div>
+
+        <AddClientLabeledField
+          v-if="showPreferredPointOfContactSelect"
+          class="q-mt-md"
+          :label="t('preferredPointOfContact')"
+          :test-id="tid.preferredPointOfContact">
+          <FormSelect
+            v-model="contact.preferredPointOfContactId"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            class="full-width"
+            :options="pointOfContactOptions"
+            :test-id="tid.preferredPointOfContact"
+          />
+        </AddClientLabeledField>
     </AddClientAccordionSection>
 
     <q-separator class="add-client-form__section-separator" />
@@ -307,6 +355,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
+import FormToggle from 'components/FormToggle.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import OtherContactsSection from 'components/OtherContactsSection.vue'
@@ -315,11 +364,9 @@ import AddClientSubsectionHeading
   from 'components/AddClientSubsectionHeading.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
 import {
-  clientContactTypeValues,
   clientEmailTypeValues,
   clientPhoneTypeValues,
   clientPreferredCommunicationValues,
-  clientRelationshipTypeValues,
   clientSuffixOptions,
 } from 'components/constants.js'
 import {
@@ -332,6 +379,15 @@ import {
   createEmptyPhone,
   formatPhoneUs,
 } from 'src/utils/client-contact-form.js'
+import {
+  isPointOfContactPreferred,
+  onPreferredCommunicationChange,
+  resolvePointOfContactSelectLabel,
+  setCommunicationAuthorization,
+  shouldShowCommunicationAuthorization,
+} from 'src/utils/client-preferred-communication.js'
+import { useContactMethodDuplicateRules }
+  from 'src/composables/useContactMethodDuplicateRules.js'
 import {
   addClientTestIds as tid,
   contactFieldTestId,
@@ -354,6 +410,14 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  contactTypeOptions: {
+    type: Array,
+    default: () => [],
+  },
+  relationshipTypeOptions: {
+    type: Array,
+    default: () => [],
+  },
   catalogsLoading: {
     type: Boolean,
     default: false,
@@ -368,6 +432,26 @@ const contact = computed({
 })
 
 const { t } = useI18n()
+const {
+  phoneNumberRules: buildPhoneNumberRules,
+  emailAddressRules: buildEmailAddressRules,
+} = useContactMethodDuplicateRules(t)
+
+function phoneNumberRules(index) {
+  return buildPhoneNumberRules(
+    contact.value.phones,
+    index,
+    props.rules?.phoneNumber ?? [],
+  )
+}
+
+function emailAddressRules(index) {
+  return buildEmailAddressRules(
+    contact.value.emails,
+    index,
+    props.rules?.emailAddress ?? [],
+  )
+}
 
 const stateOptions = usStates
 
@@ -385,15 +469,12 @@ const emailTypeOptions = computed(() =>
   Object.values(clientEmailTypeValues).map(v => ({ label: v, value: v })),
 )
 
-const contactTypeOptions = computed(() =>
-  Object.values(clientContactTypeValues).map(v => ({ label: v, value: v })),
+const contactTypeOptions = computed(
+  () => props.contactTypeOptions ?? [],
 )
 
-const relationshipTypeOptions = computed(() =>
-  Object.values(clientRelationshipTypeValues).map(v => ({
-    label: v,
-    value: v,
-  })),
+const relationshipTypeOptions = computed(
+  () => props.relationshipTypeOptions ?? [],
 )
 
 const prefixSelectOptions = computed(
@@ -451,10 +532,46 @@ const communicationOptions = computed(() => [
   },
   {
     value: clientPreferredCommunicationValues.pointOfContact,
-    icon: 'place',
+    icon: 'people_outline',
     label: t('prefCommPointOfContact'),
   },
 ])
+
+const showCommunicationAuthorization = computed(() =>
+  shouldShowCommunicationAuthorization(contact.value.preferredCommunication),
+)
+
+const showPointOfContactSelected = computed(() =>
+  isPointOfContactPreferred(contact.value.preferredCommunication),
+)
+
+const hasOtherContacts = computed(
+  () => (contact.value.otherContacts ?? []).length > 0,
+)
+
+const showPointOfContactNoContactsError = computed(
+  () => showPointOfContactSelected.value && !hasOtherContacts.value,
+)
+
+const showPreferredPointOfContactSelect = computed(
+  () => showPointOfContactSelected.value && hasOtherContacts.value,
+)
+
+const communicationAuthorizationLabel = computed(() =>
+  showPointOfContactSelected.value
+    ? t('communicationAuthorizationPointOfContact')
+    : t('communicationAuthorizationMethod'),
+)
+
+const pointOfContactOptions = computed(() =>
+  (contact.value.otherContacts ?? []).map((other, index) => ({
+    label: resolvePointOfContactSelectLabel(other, index, t, {
+      contactTypeOptions: contactTypeOptions.value,
+      relationshipTypeOptions: relationshipTypeOptions.value,
+    }),
+    value: other.id,
+  })),
+)
 
 function onClientStateChange() {
   contact.value.city = ''
@@ -490,8 +607,11 @@ function isPreferredComm(value) {
 }
 
 function togglePreferredCommunication(value) {
-  contact.value.preferredCommunication =
-    contact.value.preferredCommunication === value ? '' : value
+  onPreferredCommunicationChange(contact.value, value)
+}
+
+function onCommunicationAuthorizationChange(checked) {
+  setCommunicationAuthorization(contact.value, checked)
 }
 
 </script>

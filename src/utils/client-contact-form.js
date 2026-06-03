@@ -2,6 +2,7 @@ import {
   clientContactFieldKeys as ck,
   clientCountryDefault,
 } from 'components/constants.js'
+import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
 
 const ADDRESS_LINE_RE = /^[a-zA-Z0-9.\-\s]*$/
 const LETTERS_ONLY_RE = /^[a-zA-Z\s]*$/
@@ -43,6 +44,7 @@ export function createEmptyEmail() {
 export function createEmptyOtherContact() {
   return {
     id: nextContactId(),
+    apiId: null,
     contactType: '',
     relationshipType: '',
     prefix: null,
@@ -76,6 +78,9 @@ export function createEmptyContactSection() {
     phones: [createEmptyPhone()],
     emails: [createEmptyEmail()],
     preferredCommunication: '',
+    communicationAuthorization: false,
+    communicationAuthorizationDate: '',
+    preferredPointOfContactId: null,
     additionalNotes: '',
     otherContacts: [],
     activeOtherContactId: null,
@@ -97,14 +102,33 @@ export function shouldPersistCountry(contact) {
   return hasClientAddressData(contact)
 }
 
-export function resolveOtherContactTabLabel(contact, index, t) {
+export function setOtherContactResponsibleForPayments(
+  contactSection,
+  contactId,
+  value,
+) {
+  for (const other of contactSection.otherContacts ?? []) {
+    other.responsibleForPayments = Boolean(value && other.id === contactId)
+  }
+}
+
+export function resolveOtherContactTabLabel(
+  contact,
+  index,
+  t,
+  catalogOptions = {},
+) {
+  const {
+    contactTypeOptions = [],
+    relationshipTypeOptions = [],
+  } = catalogOptions
   const type = String(contact.contactType ?? '').trim()
   if (type) {
-    return type
+    return resolveCatalogOptionLabel(contactTypeOptions, type)
   }
   const relationship = String(contact.relationshipType ?? '').trim()
   if (relationship) {
-    return relationship
+    return resolveCatalogOptionLabel(relationshipTypeOptions, relationship)
   }
 
   return t('otherContactTabGeneric', { n: index + 1 })
@@ -184,6 +208,13 @@ export function copyClientAddressToContact(clientAddress, target) {
   target.country = shouldPersistCountry(clientAddress)
     ? clientAddress.country
     : clientCountryDefault
+}
+
+export function clearContactAddress(target) {
+  for (const key of ADDRESS_FIELDS) {
+    target[key] = ''
+  }
+  target.country = clientCountryDefault
 }
 
 function hasOtherAddressData(other) {
@@ -338,6 +369,18 @@ export function buildContactPayload(contact) {
   const preferred = String(contact.preferredCommunication ?? '').trim()
   if (preferred) {
     payload.preferredCommunication = preferred
+  }
+
+  if (contact.communicationAuthorization) {
+    payload.communicationAuthorization = true
+    const authDate = String(contact.communicationAuthorizationDate ?? '').trim()
+    if (authDate) {
+      payload.communicationAuthorizationDate = authDate
+    }
+  }
+
+  if (contact.preferredPointOfContactId) {
+    payload.preferredPointOfContactId = contact.preferredPointOfContactId
   }
 
   const notes = String(contact.additionalNotes ?? '').trim()

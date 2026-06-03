@@ -133,6 +133,8 @@ export function useAddClientForm(t, catalogs, options = {}) {
   const raceSelectOptions = catalogs?.raceSelectOptions
   const ethnicitySelectOptions = catalogs?.ethnicitySelectOptions
   const ageUnitSelectOptions = catalogs?.ageUnitSelectOptions
+  const contactTypeSelectOptions = catalogs?.contactTypeSelectOptions
+  const relationshipTypeSelectOptions = catalogs?.relationshipTypeSelectOptions
 
   function resetForm() {
     const next = createEmptyAddClientForm()
@@ -236,6 +238,8 @@ export function useAddClientForm(t, catalogs, options = {}) {
     suffixSelectOptions,
     raceSelectOptions,
     ethnicitySelectOptions,
+    contactTypeSelectOptions,
+    relationshipTypeSelectOptions,
     rules,
     contactRules,
     resetForm,
