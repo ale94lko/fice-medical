@@ -29,7 +29,7 @@
           dense
           icon="manage_accounts"
           :data-testid="layoutTestIds.userMenu">
-          <q-menu class="user-menu">
+          <q-menu class="user-menu app-light-menu">
             <q-list style="min-width: 100px">
               <q-item
                 clickable
@@ -139,7 +139,7 @@
               fit
               anchor="top end"
               self="top left"
-              class="app-drawer-submenu"
+              class="app-drawer-submenu app-light-menu"
               v-model="clientMenu">
                 <q-item
                   clickable
@@ -214,7 +214,7 @@
               fit
               anchor="top end"
               self="top left"
-              class="app-drawer-submenu"
+              class="app-drawer-submenu app-light-menu"
               v-model="providerMenu">
               <q-item clickable v-ripple>
                 <q-item-section>TCM</q-item-section>
@@ -297,7 +297,7 @@
               fit
               anchor="top end"
               self="top left"
-              class="app-drawer-submenu"
+              class="app-drawer-submenu app-light-menu"
               v-model="humanResourcesMenu">
               <q-item clickable v-ripple>
                 <q-item-section>General</q-item-section>
@@ -379,7 +379,7 @@
               fit
               anchor="top end"
               self="top left"
-              class="app-drawer-submenu"
+              class="app-drawer-submenu app-light-menu"
               v-model="administrationMenu">
               <q-item clickable v-ripple>
                 <q-item-section>General</q-item-section>

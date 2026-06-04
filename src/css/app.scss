@@ -118,22 +118,10 @@
 
 .app-subtenant-menu {
   min-width: 220px;
-  border-radius: $radius-md;
-  border: 1px solid $border-subtle;
-  box-shadow: $shadow-md;
   overflow: hidden;
 
   .q-item {
     min-height: 48px;
-  }
-
-  .app-subtenant-menu__item--active {
-    background: rgba($primary, 0.08);
-
-    .q-item__label {
-      color: $primary;
-      font-weight: 600;
-    }
   }
 }
 
@@ -191,28 +179,81 @@
     padding-left: 12px;
     font-size: 0.9rem;
   }
-}
 
-.app-nav-item--active {
-  background: $nav-active-bg !important;
-  color: $shell-text !important;
-  font-weight: 600;
-
-  .q-icon {
+  .q-item.app-nav-item--active,
+  .q-item.q-router-link--active {
+    background: $nav-active-bg !important;
     color: $shell-text !important;
+    font-weight: 600;
+
+    .q-icon {
+      color: $shell-text !important;
+    }
   }
 }
 
-.app-drawer-submenu {
+@mixin app-light-menu-shell {
   background: $surface !important;
   color: $text-strong !important;
   border: 1px solid $border-subtle;
   border-radius: $radius-md;
   box-shadow: $shadow-md;
+}
+
+@mixin app-light-menu-item-active {
+  background: $primary !important;
+  color: $white !important;
+  font-weight: 600;
+
+  .q-item__section {
+    color: $white !important;
+  }
+
+  .q-item__label,
+  .q-item__label--caption {
+    color: $white !important;
+  }
+
+  .q-item__label--caption {
+    opacity: 0.9;
+  }
+
+  .q-icon,
+  .q-item__section--side .q-icon {
+    color: $white !important;
+  }
+}
+
+.app-light-menu,
+.app-drawer-submenu,
+.user-menu,
+.app-subtenant-menu {
+  @include app-light-menu-shell;
 
   .q-item {
-    min-height: 40px;
+    color: $text-strong;
+    border-radius: $radius-md;
+    margin: 2px 6px;
   }
+
+  .q-item:not(.app-nav-item--active):not(.q-router-link--active):not(
+    .app-subtenant-menu__item--active
+  ):hover {
+    background: rgba($primary, 0.06);
+  }
+
+  .q-item.app-nav-item--active,
+  .q-item.q-router-link--active {
+    @include app-light-menu-item-active;
+  }
+}
+
+.app-subtenant-menu .app-subtenant-menu__item--active {
+  @include app-light-menu-item-active;
+}
+
+.app-drawer-submenu .q-item {
+  min-height: 40px;
 }
 
 .q-tooltip.app-drawer-tooltip {
@@ -686,9 +727,6 @@ input:-webkit-autofill {
 
 .user-menu {
   min-width: 200px;
-  border-radius: $radius-md;
-  border: 1px solid $border-subtle;
-  box-shadow: $shadow-md;
 }
 
 .promo-container {

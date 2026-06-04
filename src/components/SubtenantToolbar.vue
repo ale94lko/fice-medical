@@ -17,7 +17,7 @@
       <q-menu
         anchor="bottom right"
         self="top right"
-        class="app-subtenant-menu"
+        class="app-subtenant-menu app-light-menu"
         :offset="[0, 8]">
         <q-list dense>
           <q-item
