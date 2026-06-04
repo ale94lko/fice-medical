@@ -342,7 +342,7 @@ export default {
   removeEmail: 'Quitar correo',
   preferredCommunication: 'Método de comunicación preferido',
   preferredCommunicationHint:
-    'Seleccione cómo debemos contactar a este cliente.',
+    'Seleccione una o más formas de contactar a este cliente.',
   prefCommProviderDidNotAsk: 'El proveedor no preguntó',
   prefCommPatientDeclined: 'El paciente declinó especificar',
   prefCommWorkPhone: 'Teléfono del trabajo',

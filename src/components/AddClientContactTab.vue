@@ -246,7 +246,7 @@
                   isPreferredComm(opt.value),
               },
             ]"
-            @click="togglePreferredCommunication(opt.value)">
+            @click="onPreferredCommToggle(opt.value)">
             <q-icon
               :name="opt.icon"
               class="add-client-form__preferred-chip-icon"
@@ -269,20 +269,19 @@
           class="add-client-form__comm-authorization q-mt-md"
           :class="{
             'add-client-form__comm-authorization--active':
-              contact.communicationAuthorization,
+              hasCommunicationConsent,
           }">
           <FormToggle
-            :model-value="contact.communicationAuthorization"
+            :model-value="hasCommunicationConsent"
             :label="communicationAuthorizationLabel"
             :test-id="tid.preferredCommAuth"
             @update:model-value="onCommunicationAuthorizationChange"
           />
           <span
-            v-if="contact.communicationAuthorization
-              && contact.communicationAuthorizationDate"
+            v-if="contact.consent"
             class="add-client-form__comm-authorization-date">
             {{ t('communicationAuthorizedOn', {
-              date: contact.communicationAuthorizationDate,
+              date: contact.consent,
             }) }}
           </span>
         </div>
@@ -352,7 +351,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
 import FormToggle from 'components/FormToggle.vue'
@@ -381,8 +380,11 @@ import {
 } from 'src/utils/client-contact-form.js'
 import {
   isPointOfContactPreferred,
-  onPreferredCommunicationChange,
+  isPreferredCommunicationSelected,
+  syncPreferredPointOfContactFlags,
+  togglePreferredCommunication,
   resolvePointOfContactSelectLabel,
+  hasConsent,
   setCommunicationAuthorization,
   shouldShowCommunicationAuthorization,
 } from 'src/utils/client-preferred-communication.js'
@@ -557,6 +559,10 @@ const showPreferredPointOfContactSelect = computed(
   () => showPointOfContactSelected.value && hasOtherContacts.value,
 )
 
+const hasCommunicationConsent = computed(
+  () => hasConsent(contact.value),
+)
+
 const communicationAuthorizationLabel = computed(() =>
   showPointOfContactSelected.value
     ? t('communicationAuthorizationPointOfContact')
@@ -603,15 +609,25 @@ function removeEmail(index) {
 }
 
 function isPreferredComm(value) {
-  return contact.value.preferredCommunication === value
+  return isPreferredCommunicationSelected(
+    contact.value.preferredCommunication,
+    value,
+  )
 }
 
-function togglePreferredCommunication(value) {
-  onPreferredCommunicationChange(contact.value, value)
+function onPreferredCommToggle(value) {
+  togglePreferredCommunication(contact.value, value)
 }
 
 function onCommunicationAuthorizationChange(checked) {
   setCommunicationAuthorization(contact.value, checked)
 }
+
+watch(
+  () => contact.value.preferredPointOfContactId,
+  () => {
+    syncPreferredPointOfContactFlags(contact.value)
+  },
+)
 
 </script>

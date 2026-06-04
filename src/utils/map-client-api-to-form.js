@@ -6,7 +6,6 @@ import {
   clientFieldKeys as ck,
   clientFormSections,
   clientPhoneTypeValues,
-  clientPreferredCommunicationValues,
   clientRelationshipTypeValues,
   clientGenderValues,
 } from 'components/constants.js'
@@ -14,6 +13,10 @@ import {
   createEmptyAllergiesSection,
   nextAllergyId,
 } from 'src/utils/client-allergies.js'
+import {
+  applyPreferredPointOfContactFromApi,
+  normalizePreferredCommunicationList,
+} from 'src/utils/client-preferred-communication.js'
 import {
   createEmptyContactSection,
   createEmptyEmail,
@@ -52,17 +55,6 @@ const EMAIL_TYPE_FROM_API = {
   work: clientEmailTypeValues.work,
   other: clientEmailTypeValues.other,
   billing: clientEmailTypeValues.billing,
-}
-
-const COMM_PREF_FROM_API = {
-  email: clientPreferredCommunicationValues.email,
-  mobile: clientPreferredCommunicationValues.mobilePhone,
-  home: clientPreferredCommunicationValues.homePhone,
-  work: clientPreferredCommunicationValues.workPhone,
-  mail: clientPreferredCommunicationValues.mail,
-  declined: clientPreferredCommunicationValues.patientDeclined,
-  not_asked: clientPreferredCommunicationValues.providerDidNotAsk,
-  point_of_contact: clientPreferredCommunicationValues.pointOfContact,
 }
 
 const CONTACT_TYPE_FROM_API = {
@@ -208,15 +200,6 @@ function mapEmailTypeFromApi(value) {
   const token = toSnakeToken(value)
 
   return EMAIL_TYPE_FROM_API[token] ?? ''
-}
-
-function mapCommunicationFromApi(value) {
-  const token = toSnakeToken(value)
-  if (!token) {
-    return ''
-  }
-
-  return COMM_PREF_FROM_API[token] ?? ''
 }
 
 function mapContactTypeFromApi(value) {
@@ -389,12 +372,31 @@ function resolvePreferredCommunication(client, personal) {
     ?? personal?.preferred_communication
     ?? client?.communication_preference
 
-  return mapCommunicationFromApi(raw)
+  return normalizePreferredCommunicationList(raw)
 }
 
 /** Client mirror row in contacts (relationship self), not other contacts. */
 function isClientPrimaryContact(item) {
   return toSnakeToken(item?.relationship_type) === 'self'
+}
+
+function resolveConsentFromApi(personal, client) {
+  const raw = personal?.consent ?? client?.consent
+  if (raw != null && String(raw).trim()) {
+    const usDate = isoDateToUsDateString(raw)
+
+    return usDate || null
+  }
+
+  const legacyDate = personal?.communication_authorization_date
+    ?? client?.communication_authorization_date
+  if (legacyDate != null && String(legacyDate).trim()) {
+    const usDate = isoDateToUsDateString(legacyDate)
+
+    return usDate || null
+  }
+
+  return null
 }
 
 function mapClientContactFromApi(client, personal) {
@@ -408,15 +410,7 @@ function mapClientContactFromApi(client, personal) {
     client,
     personal,
   )
-  contact.communicationAuthorization = Boolean(
-    personal?.communication_authorization
-    ?? client?.communication_authorization,
-  )
-  contact.communicationAuthorizationDate = isoDateToUsDateString(
-    personal?.communication_authorization_date
-    ?? client?.communication_authorization_date
-    ?? '',
-  )
+  contact.consent = resolveConsentFromApi(personal, client)
   contact.additionalNotes = String(
     client?.notes
     ?? client?.additional_notes
@@ -478,6 +472,10 @@ function mapOtherContactFromApi(item, clientContact, catalogOptions = {}) {
     item?.responsive_for_payment
     ?? item?.responsible_for_payments
     ?? item?.responsibleForPayments,
+  )
+  other.isPreferredPointOfContact = Boolean(
+    item?.is_preferred_point_of_contact
+    ?? item?.isPreferredPointOfContact,
   )
   other.prefix = resolveCatalogSelectField(
     pi.prefix ?? item?.prefix,
@@ -648,25 +646,33 @@ export function mapClientApiToForm(client, options = {}) {
     contact.activeOtherContactId = contact.otherContacts[0].id
   }
 
-  const preferredPointApiId = personal?.preferred_point_of_contact_id
-    ?? client?.preferred_point_of_contact_id
-  if (preferredPointApiId != null && String(preferredPointApiId).trim()) {
-    const match = contact.otherContacts.find(
-      item => String(item.apiId) === String(preferredPointApiId),
-    )
-    if (match) {
-      contact.preferredPointOfContactId = match.id
+  applyPreferredPointOfContactFromApi(contact)
+
+  if (!contact.preferredPointOfContactId) {
+    const preferredPointApiId = personal?.preferred_point_of_contact_id
+      ?? client?.preferred_point_of_contact_id
+    if (preferredPointApiId != null && String(preferredPointApiId).trim()) {
+      const match = contact.otherContacts.find(
+        item => String(item.apiId) === String(preferredPointApiId),
+      )
+      if (match) {
+        contact.preferredPointOfContactId = match.id
+        match.isPreferredPointOfContact = true
+      }
+    } else {
+      const prefIndex = personal?.preferred_point_of_contact_index
+        ?? client?.preferred_point_of_contact_index
+      if (
+        Number.isInteger(prefIndex)
+        && prefIndex >= 0
+        && prefIndex < contact.otherContacts.length
+      ) {
+        contact.preferredPointOfContactId =
+          contact.otherContacts[prefIndex].id
+        contact.otherContacts[prefIndex].isPreferredPointOfContact = true
+      }
     }
-  } else {
-    const prefIndex = personal?.preferred_point_of_contact_index
-      ?? client?.preferred_point_of_contact_index
-    if (
-      Number.isInteger(prefIndex)
-      && prefIndex >= 0
-      && prefIndex < contact.otherContacts.length
-    ) {
-      contact.preferredPointOfContactId = contact.otherContacts[prefIndex].id
-    }
+    applyPreferredPointOfContactFromApi(contact)
   }
 
   const ssnRaw = personal.ssn ?? client.ssn ?? client.social_security_number

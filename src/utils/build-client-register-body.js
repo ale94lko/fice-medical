@@ -9,6 +9,8 @@ import {
 } from 'src/utils/client-contact-form.js'
 import {
   resolvePreferredPointOfContactApiRef,
+  serializeCommunicationPreferenceForApi,
+  syncPreferredPointOfContactFlags,
 } from 'src/utils/client-preferred-communication.js'
 import { usDateToIso } from 'src/utils/client-form.js'
 
@@ -142,10 +144,11 @@ function buildBasicInfo(form) {
     status: trim(form[ck.status]) || 'active',
     emails: mapEmailsAll(contact.emails),
     phones: mapPhonesAll(contact.phones),
-    communication_preference: trim(contact.preferredCommunication),
-    communication_authorization: Boolean(contact.communicationAuthorization),
-    communication_authorization_date: contact.communicationAuthorization
-      ? usDateToIso(contact.communicationAuthorizationDate) || null
+    communication_preference: serializeCommunicationPreferenceForApi(
+      contact.preferredCommunication,
+    ),
+    consent: contact.consent
+      ? usDateToIso(contact.consent) || null
       : null,
     ...resolvePreferredPointOfContactApiRef(contact),
     address: address.address,
@@ -189,6 +192,9 @@ function buildRegisterContact(other, clientContact) {
     country: address.country,
     county: address.county,
     notes: '',
+    is_preferred_point_of_contact: Boolean(
+      other?.isPreferredPointOfContact,
+    ),
   }
 
   if (other?.sameAsClientAddress) {
@@ -206,6 +212,7 @@ function buildRegisterContact(other, clientContact) {
 
 function buildContacts(form) {
   const contact = form[clientFormSections.contact] ?? {}
+  syncPreferredPointOfContactFlags(contact)
 
   return (contact.otherContacts ?? [])
     .filter(other => otherContactHasData(other))

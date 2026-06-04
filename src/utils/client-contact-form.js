@@ -3,6 +3,9 @@ import {
   clientCountryDefault,
 } from 'components/constants.js'
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
+import {
+  syncPreferredPointOfContactFlags,
+} from 'src/utils/client-preferred-communication.js'
 
 const ADDRESS_LINE_RE = /^[a-zA-Z0-9.\-\s]*$/
 const LETTERS_ONLY_RE = /^[a-zA-Z\s]*$/
@@ -53,6 +56,7 @@ export function createEmptyOtherContact() {
     lastName: '',
     suffix: null,
     responsibleForPayments: false,
+    isPreferredPointOfContact: false,
     sameAsClientAddress: false,
     addressLine1: '',
     addressLine2: '',
@@ -77,9 +81,8 @@ export function createEmptyContactSection() {
     country: clientCountryDefault,
     phones: [createEmptyPhone()],
     emails: [createEmptyEmail()],
-    preferredCommunication: '',
-    communicationAuthorization: false,
-    communicationAuthorizationDate: '',
+    preferredCommunication: [],
+    consent: null,
     preferredPointOfContactId: null,
     additionalNotes: '',
     otherContacts: [],
@@ -265,6 +268,7 @@ function appendOtherContactIdentity(item, other) {
     item.relationshipType = other.relationshipType
   }
   item.responsibleForPayments = Boolean(other.responsibleForPayments)
+  item.isPreferredPointOfContact = Boolean(other.isPreferredPointOfContact)
   if (other.prefix) {
     item.prefix = String(other.prefix).trim()
   }
@@ -319,7 +323,9 @@ function buildOtherContactPayload(other, clientAddress) {
     return null
   }
 
-  const item = {}
+  const item = {
+    isPreferredPointOfContact: Boolean(other.isPreferredPointOfContact),
+  }
   appendOtherContactIdentity(item, other)
   appendOtherContactAddress(item, other, clientAddress)
 
@@ -340,6 +346,8 @@ export function buildContactPayload(contact) {
   if (!contact) {
     return null
   }
+
+  syncPreferredPointOfContactFlags(contact)
 
   const payload = {}
 
@@ -366,17 +374,14 @@ export function buildContactPayload(contact) {
     payload.emails = emails
   }
 
-  const preferred = String(contact.preferredCommunication ?? '').trim()
-  if (preferred) {
+  const preferred = contact.preferredCommunication
+  if (Array.isArray(preferred) && preferred.length) {
     payload.preferredCommunication = preferred
   }
 
-  if (contact.communicationAuthorization) {
-    payload.communicationAuthorization = true
-    const authDate = String(contact.communicationAuthorizationDate ?? '').trim()
-    if (authDate) {
-      payload.communicationAuthorizationDate = authDate
-    }
+  const consentDate = String(contact.consent ?? '').trim()
+  if (consentDate) {
+    payload.consent = consentDate
   }
 
   if (contact.preferredPointOfContactId) {

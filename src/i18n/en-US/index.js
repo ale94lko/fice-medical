@@ -336,7 +336,8 @@ export default {
   addEmail: 'Add email',
   removeEmail: 'Remove email',
   preferredCommunication: 'Preferred method of communication',
-  preferredCommunicationHint: 'Select the way we should contact this client.',
+  preferredCommunicationHint:
+    'Select one or more ways we should contact this client.',
   prefCommProviderDidNotAsk: 'Provider did not ask',
   prefCommPatientDeclined: 'Patient declined to specify',
   prefCommWorkPhone: 'Work phone',
