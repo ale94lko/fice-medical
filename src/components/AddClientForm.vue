@@ -533,39 +533,39 @@
           </q-tab-panels>
         </q-tab-panel>
       </q-tab-panels>
+
+        <footer
+          v-if="canGoPrevious() || canGoNext()"
+          class="add-client-form__nav-footer row items-center">
+          <q-btn
+            v-if="canGoPrevious()"
+            no-caps
+            outline
+            color="primary"
+            icon="arrow_back"
+            class="app-btn-outline add-client-form__nav-btn"
+            :data-testid="tid.btn('previous')"
+            :label="t('previous')"
+            :disable="saving"
+            @click="goPreviousTab"
+          />
+          <q-space v-if="canGoPrevious() && canGoNext()" />
+          <q-btn
+            v-if="canGoNext()"
+            no-caps
+            outline
+            color="primary"
+            icon-right="arrow_forward"
+            class="app-btn-outline add-client-form__nav-btn"
+            :class="{ 'q-ml-auto': !canGoPrevious() }"
+            :data-testid="tid.btn('next')"
+            :label="t('next')"
+            :disable="saving"
+            @click="onNext"
+          />
+        </footer>
       </q-form>
       </div>
-
-      <footer
-        v-if="canGoPrevious() || canGoNext()"
-        class="add-client-form__nav-footer row items-center">
-        <q-btn
-          v-if="canGoPrevious()"
-          no-caps
-          outline
-          color="primary"
-          icon="arrow_back"
-          class="app-btn-outline add-client-form__nav-btn"
-          :data-testid="tid.btn('previous')"
-          :label="t('previous')"
-          :disable="saving"
-          @click="goPreviousTab"
-        />
-        <q-space v-if="canGoPrevious() && canGoNext()" />
-        <q-btn
-          v-if="canGoNext()"
-          no-caps
-          outline
-          color="primary"
-          icon-right="arrow_forward"
-          class="app-btn-outline add-client-form__nav-btn"
-          :class="{ 'q-ml-auto': !canGoPrevious() }"
-          :data-testid="tid.btn('next')"
-          :label="t('next')"
-          :disable="saving"
-          @click="onNext"
-        />
-      </footer>
     </div>
 
     <ModalComponent

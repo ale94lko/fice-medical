@@ -39,11 +39,31 @@ export const LAB_TEST_OPTIONS = [
 ]
 
 export const LAB_COMPONENT_OPTIONS = [
-  { label: 'Hemoglobin', value: 'Hemoglobin', clinicalKey: labClinicalKeys.hemoglobin },
-  { label: 'WBC', value: 'WBC', clinicalKey: labClinicalKeys.wbc },
-  { label: 'Platelets', value: 'Platelets', clinicalKey: labClinicalKeys.platelets },
-  { label: 'Hemoglobin A1C', value: 'Hemoglobin A1C', clinicalKey: labClinicalKeys.a1c },
-  { label: 'Glucose', value: 'Glucose', clinicalKey: 'glucose' },
+  {
+    label: 'Hemoglobin',
+    value: 'Hemoglobin',
+    clinicalKey: labClinicalKeys.hemoglobin,
+  },
+  {
+    label: 'WBC',
+    value: 'WBC',
+    clinicalKey: labClinicalKeys.wbc,
+  },
+  {
+    label: 'Platelets',
+    value: 'Platelets',
+    clinicalKey: labClinicalKeys.platelets,
+  },
+  {
+    label: 'Hemoglobin A1C',
+    value: 'Hemoglobin A1C',
+    clinicalKey: labClinicalKeys.a1c,
+  },
+  {
+    label: 'Glucose',
+    value: 'Glucose',
+    clinicalKey: 'glucose',
+  },
 ]
 
 export function createEmptyLabOrder() {
@@ -108,7 +128,11 @@ export function suggestFlagFromReference(value, low, high) {
   const num = Number(value)
   const lowN = Number(low)
   const highN = Number(high)
-  if (!Number.isFinite(num) || !Number.isFinite(lowN) || !Number.isFinite(highN)) {
+  if (
+    !Number.isFinite(num)
+    || !Number.isFinite(lowN)
+    || !Number.isFinite(highN)
+  ) {
     return null
   }
   if (num < lowN) {
