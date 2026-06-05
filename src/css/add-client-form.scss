@@ -104,7 +104,7 @@
   padding: 16px 0 8px;
   border-top: 1px solid $border-subtle;
   justify-content: space-between;
-  min-height: 48px;
+  min-height: $app-button-height;
 
   .add-client-form__nav-btn .q-icon {
     color: $primary;
@@ -197,8 +197,11 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  min-height: 44px;
-  padding: 10px 14px;
+  box-sizing: border-box;
+  height: $app-input-height;
+  min-height: $app-input-height;
+  max-height: $app-input-height;
+  padding: 0 14px;
   border: 1px solid $border-subtle;
   border-radius: $radius-md;
   background: $surface;
@@ -506,8 +509,11 @@
 
 .add-client-form__preferred-chip {
   justify-content: flex-start;
-  min-height: 48px;
-  padding: 12px 14px;
+  box-sizing: border-box;
+  height: $app-input-height !important;
+  min-height: $app-input-height !important;
+  max-height: $app-input-height !important;
+  padding: 0 14px !important;
   border-radius: 12px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -566,15 +572,9 @@
 }
 
 .add-client-form__notes-field {
-  .q-field__control {
+  textarea.q-field__native {
     min-height: 120px;
-    align-items: flex-start;
-  }
-
-  textarea {
-    min-height: 96px;
     line-height: 1.5;
-    resize: vertical;
   }
 }
 
@@ -607,10 +607,10 @@
 }
 
 .add-client-form__method-btn.q-btn--outline {
-  width: 56px;
-  height: 56px;
-  min-width: 56px;
-  min-height: 56px;
+  width: $app-input-height;
+  height: $app-input-height;
+  min-width: $app-input-height;
+  min-height: $app-input-height;
   padding: 0;
   border-radius: $radius-md;
   background: $white !important;
@@ -710,7 +710,7 @@
 .add-client-form__toggle-field {
   display: flex;
   align-items: center;
-  min-height: 56px;
+  min-height: $app-input-height;
   height: 100%;
 }
 
@@ -1013,16 +1013,16 @@
     margin: 0;
     appearance: none;
   }
-
-  .q-field__append {
-    padding-left: 4px;
-  }
 }
 
 .add-client-form__age-stepper {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   width: 30px;
+  height: calc(
+    #{$app-input-height} - #{$app-field-marginal-inset * 2}
+  );
   overflow: hidden;
   border: 1px solid rgba($primary, 0.2);
   border-radius: 8px;
@@ -1042,10 +1042,10 @@
 
 .add-client-form__age-stepper-btn {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
   align-items: center;
   justify-content: center;
-  min-height: 20px;
+  min-height: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -1111,23 +1111,6 @@
   }
 
   .add-client-vitals-tab__datetime-input {
-    :deep(.q-field__control) {
-      min-height: 56px;
-    }
-
-    :deep(.q-field__control-container) {
-      align-items: center;
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-
-    :deep(.q-field__native),
-    :deep(.q-field__input) {
-      padding-top: 0;
-      padding-bottom: 0;
-      line-height: 1.5;
-    }
-
     :deep(.q-field__append) {
       height: auto;
     }
@@ -1137,7 +1120,7 @@
 .add-client-vitals-tab__bp-sep {
   display: flex;
   align-items: center;
-  min-height: 56px;
+  min-height: $app-input-height;
   padding-top: 2px;
   font-size: 1.125rem;
   font-weight: 500;

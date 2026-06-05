@@ -1,5 +1,79 @@
 @import 'quasar.variables';
 
+@mixin app-single-line-field-control($height) {
+  .q-field__control {
+    min-height: $height !important;
+    height: $height !important;
+  }
+
+  .q-field__control-container {
+    align-items: center;
+    min-height: $height;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .q-field__native,
+  .q-field__input {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1.4;
+  }
+
+  .q-field__prepend {
+    height: auto;
+    align-self: center;
+  }
+
+  .q-field__append {
+    height: auto !important;
+    align-self: center;
+    padding-top: $app-field-marginal-inset;
+    padding-bottom: $app-field-marginal-inset;
+    padding-right: $app-field-marginal-inset;
+  }
+}
+
+// Single-line inputs and selects — textarea is the only exclusion.
+// (q-select also uses q-field--auto-height; do not treat that as textarea.)
+.q-field:not(:has(textarea)) {
+  @include app-single-line-field-control($app-input-height);
+}
+
+.login-container .q-field:not(:has(textarea)) {
+  @include app-single-line-field-control($app-login-input-height);
+}
+
+// Textarea: border is on .q-field__control, resize grip is on <textarea>.
+// Do not give the control a taller min-height than the textarea or the
+// grip will sit above the visible bottom border.
+.q-field:has(textarea) {
+  .q-field__control {
+    height: auto !important;
+    min-height: 0;
+    align-items: flex-start;
+  }
+
+  .q-field__control-container {
+    min-height: 0;
+    height: auto;
+    align-items: flex-start;
+  }
+
+  .q-field__prepend,
+  .q-field__append {
+    height: auto !important;
+    align-self: flex-start;
+  }
+
+  textarea.q-field__native {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+}
+
 .form-field {
   width: 100%;
 

@@ -455,15 +455,35 @@
   }
 }
 
+@mixin app-standard-button-height {
+  box-sizing: border-box;
+  min-height: $app-button-height !important;
+  height: $app-button-height !important;
+  max-height: $app-button-height !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.q-btn:not(.q-btn--round):not(.q-btn--dense):not(
+  .add-client-form__method-btn
+):not(.add-client-form__preferred-chip):not(
+  .add-client-form__allergy-severity-chip
+) {
+  @include app-standard-button-height;
+}
+
 .app-btn-primary {
   border-radius: $radius-md;
   font-weight: 600;
-  padding: 8px 18px;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
 }
 
 .app-btn-outline {
   border-radius: $radius-md;
   font-weight: 500;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
 }
 
 .app-btn-icon-action {
@@ -589,7 +609,8 @@
   margin-left: 16px;
   border-radius: $radius-md;
   font-weight: 600;
-  padding: 8px 28px;
+  padding-left: 28px !important;
+  padding-right: 28px !important;
 }
 
 input:-webkit-autofill {
