@@ -1,1 +1,0 @@
-import{Pi as e,Ti as t,gr as n,ii as r,ki as i,li as a}from"./index-CDlGLqNE.js";import{r as o,t as s}from"./QLayout-Crkw6W9i.js";var c={};function l(n,c){let l=i(`router-view`);return t(),r(s,{view:`hHh Lpr lff`},{default:e(()=>[a(o,null,{default:e(()=>[a(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};
