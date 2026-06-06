@@ -2,6 +2,7 @@ import {
   labAbnormalValues,
   labStatuses,
 } from 'components/constants.js'
+import { cloneLab, computeLabAbnormalResult } from 'src/utils/lab-orders.js'
 
 function parseOptionalNumber(value) {
   if (value == null || value === '') {
@@ -171,4 +172,22 @@ export function labToApiPayload(lab, { draft = false } = {}) {
   }
 
   return body
+}
+
+/**
+ * Maps labs from GET client (or list endpoint) into the in-app lab order shape.
+ */
+export function mapClientLabsListFromApi(rawList) {
+  const list = Array.isArray(rawList) ? rawList : []
+
+  return list.map(raw => {
+    const detail = normalizeLabDetail(raw)
+    const copy = cloneLab(detail)
+    copy.abnormalResult = computeLabAbnormalResult(
+      copy.components ?? [],
+      copy.abnormalResultManual,
+    )
+
+    return { ...copy, abnormalResult: copy.abnormalResult }
+  })
 }

@@ -30,6 +30,7 @@
                 emit-value
                 map-options
                 :readonly="readonly"
+                :loading="payerCatalogLoading"
                 :options="payerOptions"
                 :placeholder="t('insurancePayerPlaceholder')"
                 :error="Boolean(fieldError('payer'))"
@@ -392,6 +393,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  payerCatalogItems: {
+    type: Array,
+    default: () => [],
+  },
+  payerCatalogLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
@@ -473,18 +482,36 @@ watch(
     }
     validationErrors.value = {}
     local.value = JSON.parse(JSON.stringify(props.profile ?? {}))
-    const payer = resolvePayerFromProfile(local.value)
-    payerSelection.value = payer?.id ?? null
-    payerOptions.value = payer
-      ? [{
-        label: formatPayerPlanLabel(payer),
-        value: payer.id,
-        payer,
-      }]
-      : []
+    syncPayerUiFromProfile()
     syncSubscriberFromRelationship()
   },
 )
+
+watch(
+  () => props.payerCatalogItems,
+  () => {
+    if (!props.modelValue) {
+      return
+    }
+    syncPayerUiFromProfile()
+  },
+  { deep: true },
+)
+
+function syncPayerUiFromProfile() {
+  const payer = resolvePayerFromProfile(
+    local.value,
+    props.payerCatalogItems,
+  )
+  payerSelection.value = payer?.id ?? null
+  payerOptions.value = payer
+    ? [{
+      label: formatPayerPlanLabel(payer),
+      value: payer.id,
+      payer,
+    }]
+    : []
+}
 
 watch(
   () => local.value.relationshipToSubscriber,
@@ -521,7 +548,10 @@ function onPayerInput(val) {
 function onPayerFilter(val, update) {
   payerSearch.value = val
   update(() => {
-    const matches = filterInsurancePayers(val).map(item => ({
+    const matches = filterInsurancePayers(
+      val,
+      props.payerCatalogItems,
+    ).map(item => ({
       label: formatPayerPlanLabel(item),
       value: item.id,
       payer: item,

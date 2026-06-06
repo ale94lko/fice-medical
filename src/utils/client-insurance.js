@@ -169,9 +169,9 @@ export function applyPayerSelection(profile, payerOption) {
   return profile
 }
 
-export function resolvePayerFromProfile(profile) {
+export function resolvePayerFromProfile(profile, catalogItems = []) {
   if (profile.payerId) {
-    const found = findPayerById(profile.payerId)
+    const found = findPayerById(profile.payerId, catalogItems)
     if (found) {
       return found
     }

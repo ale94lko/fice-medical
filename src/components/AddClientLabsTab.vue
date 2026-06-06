@@ -21,86 +21,11 @@
           color="primary"
           class="app-btn-primary"
           icon="add"
-          :loading="saving"
           :disable="loading"
           :data-testid="tid.btn('add')"
           :label="t('labAdd')"
           @click="openAdd"
         />
-      </div>
-
-      <div class="labs-panel labs-panel--filters q-pa-md q-mb-md">
-        <div class="row q-col-gutter-md items-end">
-          <div class="col-12 col-md-3">
-            <q-input
-              v-model="filters.search"
-              outlined
-              dense
-              hide-bottom-space
-              :placeholder="t('labSearchPlaceholder')"
-              :data-testid="tid.field('search')">
-              <template #prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-2">
-            <AddClientLabeledField :label="t('status')">
-              <FormSelect
-                v-model="filters.status"
-                outlined
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :options="statusFilterOptions"
-                :test-id="tid.field('status-filter')"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-2">
-            <AddClientLabeledField :label="t('labCategory')">
-              <FormSelect
-                v-model="filters.category"
-                outlined
-                dense
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :options="categoryFilterOptions"
-                :test-id="tid.field('category-filter')"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-2">
-            <ClientDateField
-              v-model="filters.dateFrom"
-              :label="t('labDateFrom')"
-              :test-id="tid.field('date-from')"
-            />
-          </div>
-          <div class="col-12 col-md-2">
-            <ClientDateField
-              v-model="filters.dateTo"
-              :label="t('labDateTo')"
-              :test-id="tid.field('date-to')"
-            />
-          </div>
-          <div class="col-12 col-md-1">
-            <q-btn
-              no-caps
-              outline
-              color="primary"
-              class="app-btn-outline full-width"
-              icon="filter_list"
-              :label="t('labFilters')"
-              :data-testid="tid.btn('filters')"
-              @click="page = 1"
-            />
-          </div>
-        </div>
       </div>
 
       <div v-if="loading" class="labs-panel q-pa-xl flex flex-center">
@@ -117,14 +42,14 @@
         />
 
         <div
-          v-if="filteredLabs.length"
+          v-if="labs.length"
           class="row items-center justify-between q-mt-md">
           <p class="text-body2 text-grey-7 q-mb-none">
             {{
               t('labPaginationSummary', {
                 from: pageFrom,
                 to: pageTo,
-                total: filteredLabs.length,
+                total: labs.length,
               })
             }}
           </p>
@@ -146,9 +71,7 @@
       :mode="dialogMode"
       :lab="activeLab"
       :clinician-options="resolvedClinicianOptions"
-      :saving="saving"
       @save="onSave"
-      @save-draft="onSaveDraft"
       @cancel="dialogOpen = false"
       @upload-attachment="onUploadAttachment"
       @download-attachment="onDownloadAttachment"
@@ -159,38 +82,26 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineModel, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import ClientDateField from 'components/ClientDateField.vue'
-import FormSelect from 'components/FormSelect.vue'
 import LabOrderDialog from 'components/LabOrderDialog.vue'
 import LabsTable from 'components/LabsTable.vue'
+import { quasarNotifyTypes } from 'components/constants.js'
 import {
-  labCategories,
-  labStatuses,
-  quasarNotifyTypes,
-} from 'components/constants.js'
-import {
-  createPatientLab,
   deleteLabAttachment,
   downloadLabAttachment,
   fetchPatientLab,
-  listPatientLabs,
-  savePatientLabDraft,
   triggerBlobDownload,
-  updatePatientLab,
   uploadLabAttachment,
 } from 'src/utils/lab-api.js'
 import {
   cloneLab,
   createEmptyLabOrder,
-  filterLabs,
+  nextLocalId,
 } from 'src/utils/lab-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
-import { labI18nKey } from 'src/utils/lab-i18n.js'
 
 const props = defineProps({
   patientId: {
@@ -203,21 +114,17 @@ const props = defineProps({
   },
 })
 
+const labs = defineModel({
+  type: Array,
+  default: () => [],
+})
+
 const { t } = useI18n()
 const $q = useQuasar()
 
 const loading = ref(false)
-const saving = ref(false)
-const labs = ref([])
 const page = ref(1)
 const pageSize = 10
-const filters = ref({
-  search: '',
-  status: null,
-  category: null,
-  dateFrom: '',
-  dateTo: '',
-})
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -238,36 +145,18 @@ const resolvedClinicianOptions = computed(() => {
   return [{ label: 'Dr. John Smith', value: 'clin-1' }]
 })
 
-const statusFilterOptions = computed(() =>
-  Object.values(labStatuses).map(value => ({
-    label: t(labI18nKey('labStatus', value)),
-    value,
-  })),
-)
-
-const categoryFilterOptions = computed(() =>
-  Object.values(labCategories).map(value => ({
-    label: t(labI18nKey('labCategory', value)),
-    value,
-  })),
-)
-
-const filteredLabs = computed(() =>
-  filterLabs(labs.value, filters.value),
-)
-
 const pageCount = computed(() =>
-  Math.max(1, Math.ceil(filteredLabs.value.length / pageSize)),
+  Math.max(1, Math.ceil(labs.value.length / pageSize)),
 )
 
 const paginatedLabs = computed(() => {
   const start = (page.value - 1) * pageSize
 
-  return filteredLabs.value.slice(start, start + pageSize)
+  return labs.value.slice(start, start + pageSize)
 })
 
 const pageFrom = computed(() => {
-  if (!filteredLabs.value.length) {
+  if (!labs.value.length) {
     return 0
   }
 
@@ -275,33 +164,17 @@ const pageFrom = computed(() => {
 })
 
 const pageTo = computed(() =>
-  Math.min(page.value * pageSize, filteredLabs.value.length),
+  Math.min(page.value * pageSize, labs.value.length),
 )
 
-watch(filteredLabs, () => {
-  if (page.value > pageCount.value) {
+watch(pageCount, maxPage => {
+  if (page.value > maxPage) {
     page.value = 1
   }
 })
 
-async function loadLabs() {
-  if (!hasPatientId.value) {
-    return
-  }
-  loading.value = true
-  try {
-    labs.value = await listPatientLabs(patientId.value)
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t('labListError'),
-        position: 'top',
-      })
-    }
-  } finally {
-    loading.value = false
-  }
+function labRowHasDetail(row) {
+  return Array.isArray(row?.components)
 }
 
 function openAdd() {
@@ -310,12 +183,32 @@ function openAdd() {
   dialogOpen.value = true
 }
 
+function labIdLooksServerNumeric(id) {
+  const s = String(id ?? '').trim()
+
+  return s !== '' && Number.isFinite(Number(s))
+}
+
 async function openView(row) {
-  await loadLabDetail(row.id, 'view')
+  if (labIdLooksServerNumeric(row.id) && !labRowHasDetail(row)) {
+    await loadLabDetail(row.id, 'view')
+
+    return
+  }
+  activeLab.value = cloneLab(row)
+  dialogMode.value = 'view'
+  dialogOpen.value = true
 }
 
 async function openEdit(row) {
-  await loadLabDetail(row.id, 'edit')
+  if (labIdLooksServerNumeric(row.id) && !labRowHasDetail(row)) {
+    await loadLabDetail(row.id, 'edit')
+
+    return
+  }
+  activeLab.value = cloneLab(row)
+  dialogMode.value = 'edit'
+  dialogOpen.value = true
 }
 
 async function loadLabDetail(labId, mode) {
@@ -337,68 +230,28 @@ async function loadLabDetail(labId, mode) {
   }
 }
 
-async function onSave(lab) {
-  saving.value = true
-  try {
-    if (lab.id) {
-      await updatePatientLab(patientId.value, lab.id, lab)
+function onSave(lab) {
+  const copy = cloneLab(lab)
+  const id = String(copy.id ?? '').trim()
+  if (!id) {
+    copy.id = nextLocalId('lab')
+    labs.value = [...labs.value, copy]
+  } else {
+    const idx = labs.value.findIndex(item => String(item.id) === id)
+    if (idx >= 0) {
+      const next = [...labs.value]
+      next[idx] = copy
+      labs.value = next
     } else {
-      const created = await createPatientLab(patientId.value, lab)
-      await updatePatientLab(patientId.value, created.labId, lab)
+      labs.value = [...labs.value, copy]
     }
-    dialogOpen.value = false
-    $q.notify({
-      type: quasarNotifyTypes.positive,
-      message: t('labSaved'),
-      position: 'top',
-    })
-    await loadLabs()
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t('labSaveError'),
-        position: 'top',
-      })
-    }
-  } finally {
-    saving.value = false
   }
-}
-
-async function onSaveDraft(lab) {
-  saving.value = true
-  try {
-    if (lab.id) {
-      await savePatientLabDraft(patientId.value, lab.id, lab)
-    } else {
-      const created = await createPatientLab(patientId.value, {
-        ...lab,
-        status: labStatuses.draft,
-      })
-      await savePatientLabDraft(patientId.value, created.labId, {
-        ...lab,
-        status: labStatuses.draft,
-      })
-    }
-    dialogOpen.value = false
-    $q.notify({
-      type: quasarNotifyTypes.positive,
-      message: t('labDraftSaved'),
-      position: 'top',
-    })
-    await loadLabs()
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t('labSaveError'),
-        position: 'top',
-      })
-    }
-  } finally {
-    saving.value = false
-  }
+  dialogOpen.value = false
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t('labSaved'),
+    position: 'top',
+  })
 }
 
 async function onRowDownload(row) {
@@ -511,7 +364,6 @@ async function onRemoveAttachment(attachmentId) {
   }
 }
 
-onMounted(loadLabs)
 </script>
 
 <style lang="scss" scoped>

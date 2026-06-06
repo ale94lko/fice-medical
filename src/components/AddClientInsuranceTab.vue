@@ -44,6 +44,8 @@
       :profile="activeProfile"
       :section="section"
       :patient-name="patientName"
+      :payer-catalog-items="payerCatalogItems"
+      :payer-catalog-loading="payerCatalogLoading"
       @save="onDialogSave"
     />
 
@@ -73,6 +75,14 @@ defineProps({
   patientName: {
     type: String,
     default: '',
+  },
+  payerCatalogItems: {
+    type: Array,
+    default: () => [],
+  },
+  payerCatalogLoading: {
+    type: Boolean,
+    default: false,
   },
 })
 

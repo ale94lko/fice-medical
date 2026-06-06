@@ -88,6 +88,7 @@ export function createEmptyAddClientForm() {
     [clientFormSections.allergies]: createEmptyAllergiesSection(),
     [clientFormSections.insurance]: createEmptyInsuranceSection(),
     [clientFormSections.vitals]: createEmptyVitalsSection(),
+    [clientFormSections.labs]: [],
   }
 }
 

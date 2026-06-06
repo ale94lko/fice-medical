@@ -207,6 +207,12 @@ export function useAddClientCatalogs(t) {
     return yearsAgeUnitValue()
   }
 
+  const payerCatalogItems = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.payer]
+
+    return catalogItemsFromCatalog(catalog)
+  })
+
   return {
     loading,
     loaded,
@@ -220,6 +226,7 @@ export function useAddClientCatalogs(t) {
     ageUnitSelectOptions,
     contactTypeSelectOptions,
     relationshipTypeSelectOptions,
+    payerCatalogItems,
     resolveAgeUnitCode,
     resolveCatalogSelectValue,
     yearsAgeUnitValue,

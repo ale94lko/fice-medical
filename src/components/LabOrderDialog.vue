@@ -393,24 +393,12 @@
         <q-btn
           v-if="!readonly"
           no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          :loading="saving"
-          :label="t('labSaveDraft')"
-          :data-testid="tid.btn('save-draft')"
-          @click="emitSave(true)"
-        />
-        <q-btn
-          v-if="!readonly"
-          no-caps
           unelevated
           color="primary"
           class="app-btn-primary"
-          :loading="saving"
-          :label="t('labSave')"
+          :label="t('save')"
           :data-testid="tid.btn('save')"
-          @click="emitSave(false)"
+          @click="emitSave"
         />
       </q-card-actions>
     </q-card>
@@ -472,15 +460,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  saving: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 const emit = defineEmits([
   'save',
-  'save-draft',
   'cancel',
   'upload-attachment',
   'download-attachment',
@@ -623,16 +606,12 @@ function onCancel() {
   open.value = false
 }
 
-function emitSave(asDraft) {
+function emitSave() {
   errors.value = validateLabOrder(local.value)
   if (Object.keys(errors.value).length) {
     return
   }
-  if (asDraft) {
-    emit('save-draft', cloneLab(local.value))
-  } else {
-    emit('save', cloneLab(local.value))
-  }
+  emit('save', cloneLab(local.value))
 }
 
 function openComponentDialog(component = null) {

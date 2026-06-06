@@ -432,6 +432,8 @@
           <AddClientInsuranceTab
             v-model="form[clientFormSections.insurance]"
             :patient-name="patientFullName"
+            :payer-catalog-items="payerCatalogItems"
+            :payer-catalog-loading="catalogsLoading"
           />
         </q-tab-panel>
 
@@ -464,6 +466,7 @@
               />
               <AddClientLabsTab
                 v-else-if="subTab.key === CLINICAL_LABS_SUB_TAB"
+                v-model="form[clientFormSections.labs]"
                 :patient-id="props.clientId"
                 :clinician-options="assignedClinicianOptions"
               />
@@ -665,6 +668,7 @@ const {
   loading: catalogsLoading,
   loaded: catalogsLoaded,
   loadBasicInfoCatalogs,
+  payerCatalogItems,
 } = catalogs
 
 const {

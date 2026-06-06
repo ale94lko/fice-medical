@@ -1,4 +1,3 @@
-/* eslint-disable camelcase -- API request body uses snake_case */
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import {
@@ -13,10 +12,9 @@ import {
 } from 'src/utils/lab-mock-store.js'
 import {
   labToApiPayload,
+  mapClientLabsListFromApi,
   normalizeLabDetail,
-  normalizeLabSummary,
 } from 'src/utils/lab-normalize.js'
-import { cloneLab, computeLabAbnormalResult } from 'src/utils/lab-orders.js'
 
 function useMockFallback(error) {
   const status = error?.response?.status
@@ -38,32 +36,19 @@ function unwrapData(body) {
   return body
 }
 
-function enrichLabSummary(lab) {
-  const detail = cloneLab(lab)
-  detail.abnormalResult = computeLabAbnormalResult(
-    detail.components,
-    detail.abnormalResultManual,
-  )
-
-  return normalizeLabSummary({
-    ...detail,
-    abnormal_result: detail.abnormalResult,
-  })
-}
-
 export async function listPatientLabs(patientId) {
   try {
     const response = await apiInstance.get(apiPaths.patientLabs(patientId))
     const data = unwrapData(response.data)
     const list = Array.isArray(data) ? data : data?.items ?? []
 
-    return list.map(item => enrichLabSummary(normalizeLabSummary(item)))
+    return mapClientLabsListFromApi(list)
   } catch (error) {
     if (!useMockFallback(error)) {
       throw error
     }
 
-    return mockListPatientLabs(patientId)
+    return mapClientLabsListFromApi(mockListPatientLabs(patientId))
   }
 }
 

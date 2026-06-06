@@ -34,6 +34,7 @@ import {
 } from 'src/utils/client-family-medical-history.js'
 import { createEmptyInsuranceSection } from 'src/utils/client-insurance.js'
 import { createEmptyVitalsSection } from 'src/utils/client-vitals.js'
+import { mapClientLabsListFromApi } from 'src/utils/lab-normalize.js'
 import {
   ageAndUnitFromUsDateString,
   isoDateToUsDateString,
@@ -764,5 +765,11 @@ export function mapClientApiToForm(client, options = {}) {
     [clientFormSections.allergies]: mapAllergiesFromApi(client),
     [clientFormSections.insurance]: createEmptyInsuranceSection(),
     [clientFormSections.vitals]: createEmptyVitalsSection(),
+    [clientFormSections.labs]: mapClientLabsListFromApi(
+      client.labs
+      ?? client.lab_orders
+      ?? client.labOrders
+      ?? [],
+    ),
   }
 }

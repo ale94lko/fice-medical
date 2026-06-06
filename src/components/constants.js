@@ -310,6 +310,7 @@ export const catalogNames = {
   ethnicity: 'ethnicity',
   relationshipType: 'relationship_type',
   contactType: 'contact_type',
+  payer: 'payer',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -321,6 +322,7 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.ethnicity,
   catalogNames.relationshipType,
   catalogNames.contactType,
+  catalogNames.payer,
 ]
 
 export const assessmentFieldTypes = {
