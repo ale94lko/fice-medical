@@ -1,5 +1,6 @@
 /* eslint-disable camelcase -- API request body uses snake_case */
 import {
+  clientAgeUnitValues,
   clientFieldKeys,
   clientFormSections,
 } from 'components/constants.js'
@@ -97,6 +98,33 @@ function resolveClinicianId(form) {
   return Number.isFinite(clinicianId) ? clinicianId : null
 }
 
+function resolveAgeForApi(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return null
+  }
+  const n = Number(raw)
+  if (!Number.isFinite(n) || n < 0) {
+    return null
+  }
+
+  return n
+}
+
+function resolveAgeUnitForApi(value) {
+  const v = trim(value).toLowerCase()
+  if (!v) {
+    return null
+  }
+  const allowed = new Set([
+    clientAgeUnitValues.years,
+    clientAgeUnitValues.months,
+    clientAgeUnitValues.days,
+  ])
+
+  return allowed.has(v) ? v : null
+}
+
 function buildAddressFields(source) {
   if (!source) {
     return {
@@ -138,6 +166,8 @@ function buildBasicInfo(form) {
     race: trim(form[ck.race]),
     ethnicity: trim(form[ck.ethnicity]),
     dob: dobIso || null,
+    age: resolveAgeForApi(form[ck.age]),
+    age_unit: resolveAgeUnitForApi(form[ck.ageUnit]),
     ssn: resolveSsn(form),
     admission_date: admissionDateToIso(form[ck.admissionDate]),
     clinician_id: resolveClinicianId(form),
