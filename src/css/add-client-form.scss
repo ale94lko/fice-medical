@@ -8,6 +8,20 @@
   min-height: 0;
   overflow: hidden;
 
+  // Quasar hardcodes .q-panel.scroll (use-panel.js): global .q-panel is
+  // height:100% and .scroll is overflow:auto. Inside our flex scroll region
+  // (.add-client-form__panel-scroll) that already scrolls, the percentage
+  // height chain often creates a nested scrollbar. Sizing the panel to its
+  // tab content (height:auto) restores a single outer scroll without touching
+  // overflow with !important.
+  .q-tab-panels .q-panel.scroll {
+    height: auto;
+
+    > div {
+      height: auto;
+    }
+  }
+
   .q-field__messages {
     font-size: 0.8125rem;
     line-height: 1.4;
@@ -88,6 +102,8 @@
 }
 
 .add-client-form__panel-scroll {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 0;
   min-height: 0;
   overflow-x: hidden;

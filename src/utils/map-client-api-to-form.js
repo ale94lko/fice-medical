@@ -3,6 +3,7 @@ import {
   clientContactTypeValues,
   clientCountryDefault,
   clientEmailTypeValues,
+  clientFamilyRelationshipValues,
   clientFieldKeys as ck,
   clientFormSections,
   clientPhoneTypeValues,
@@ -38,6 +39,8 @@ import {
   isoDateToUsDateString,
   parseUsDateString,
 } from 'src/utils/client-form.js'
+import { relationshipTokenForApi } from
+  'src/utils/build-client-register-clinical.js'
 
 /* eslint-disable camelcase -- API token keys */
 const PHONE_TYPE_FROM_API = {
@@ -78,6 +81,24 @@ const GENDER_FROM_API = {
   female: clientGenderValues.female,
   unknown: clientGenderValues.unknown,
   other: clientGenderValues.unknown,
+}
+
+const FMH_RELATIONSHIP_LABEL_BY_API_TOKEN = (() => {
+  const m = new Map()
+  for (const label of Object.values(clientFamilyRelationshipValues)) {
+    m.set(relationshipTokenForApi(label), label)
+  }
+
+  return m
+})()
+
+function mapFmhRelationshipFromApi(raw) {
+  const token = relationshipTokenForApi(raw)
+  if (token && FMH_RELATIONSHIP_LABEL_BY_API_TOKEN.has(token)) {
+    return FMH_RELATIONSHIP_LABEL_BY_API_TOKEN.get(token)
+  }
+
+  return String(raw ?? '').trim()
 }
 
 function personalInfo(client) {
@@ -540,18 +561,28 @@ function mapAllergiesFromApi(client) {
 function mapFamilyMedicalHistoryFromApi(entries) {
   const section = createEmptyFamilyMedicalHistorySection()
   const list = Array.isArray(entries) ? entries : []
-  section.entries = list.map(item => ({
-    id: nextFamilyMedicalHistoryId(),
-    familyRelationship: String(
-      item?.family_relationship
+  section.entries = list.map(item => {
+    const relRaw = item?.family_relationship
       ?? item?.relationship
       ?? item?.familyRelationship
-      ?? '',
-    ).trim(),
-    medicalConditions: String(
-      item?.medical_conditions ?? item?.medicalConditions ?? '',
-    ).trim(),
-  }))
+      ?? ''
+    const entry = {
+      id: nextFamilyMedicalHistoryId(),
+      familyRelationship: mapFmhRelationshipFromApi(relRaw),
+      medicalConditions: String(
+        item?.medical_conditions
+        ?? item?.medical_condition
+        ?? item?.medicalConditions
+        ?? '',
+      ).trim(),
+    }
+    const apiId = item?.id ?? item?.ID
+    if (apiId != null && String(apiId).trim() !== '') {
+      entry.apiId = String(apiId)
+    }
+
+    return entry
+  })
 
   return section
 }
@@ -725,8 +756,10 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.status]: String(client.status ?? personal.status ?? 'active').trim(),
     [clientFormSections.contact]: contact,
     [clientFormSections.familyMedicalHistory]: mapFamilyMedicalHistoryFromApi(
-      client.family_medical_history
-      ?? client.familyMedicalHistory,
+      client.medical_history
+      ?? client.family_medical_history
+      ?? client.familyMedicalHistory
+      ?? client.medicalHistory,
     ),
     [clientFormSections.allergies]: mapAllergiesFromApi(client),
     [clientFormSections.insurance]: createEmptyInsuranceSection(),

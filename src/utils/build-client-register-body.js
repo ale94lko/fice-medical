@@ -14,6 +14,11 @@ import {
   syncPreferredPointOfContactFlags,
 } from 'src/utils/client-preferred-communication.js'
 import { usDateToIso } from 'src/utils/client-form.js'
+import {
+  buildInsuranceForRegister,
+  buildMedicalHistoryForRegister,
+  buildVitalsForRegister,
+} from 'src/utils/build-client-register-clinical.js'
 
 const ck = clientFieldKeys
 
@@ -265,6 +270,9 @@ export function buildClientRegisterBody(form) {
       basic_info: buildBasicInfo({}),
       contacts: [],
       allergies: [],
+      insurance: [],
+      medical_history: [],
+      vitals: [],
     }
   }
 
@@ -272,5 +280,8 @@ export function buildClientRegisterBody(form) {
     basic_info: buildBasicInfo(form),
     contacts: buildContacts(form),
     allergies: buildAllergies(form),
+    insurance: buildInsuranceForRegister(form),
+    medical_history: buildMedicalHistoryForRegister(form),
+    vitals: buildVitalsForRegister(form),
   }
 }
