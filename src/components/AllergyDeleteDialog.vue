@@ -72,8 +72,8 @@ const props = defineProps({
     default: false,
   },
   /**
-   * When true (edit client), show audit reason field and require it to confirm.
-   * When false (add client, not yet saved), confirm without reason.
+   * When true, show audit reason field and require it to confirm.
+   * Allergies tab sets this only when deleting a row with persisted apiId.
    */
   requireDeletionReason: {
     type: Boolean,

@@ -548,11 +548,23 @@ function mapAllergiesFromApi(client) {
       }
     }
 
+    const apiRaw = item?.id ?? item?.ID ?? null
+    const hasApi = apiRaw != null && String(apiRaw).trim() !== ''
+    let apiId = null
+    if (hasApi) {
+      const n = Number(apiRaw)
+      apiId = Number.isFinite(n) ? n : apiRaw
+    }
+
     return {
-      id: nextAllergyId(),
+      id: hasApi ? `allergy-api-${String(apiRaw)}` : nextAllergyId(),
+      apiId,
       allergy: String(item?.name ?? item?.allergy ?? '').trim(),
       severity: mapSeverityFromApi(item?.severity),
       startYear,
+      deletion_reason: String(
+        item?.deletion_reason ?? item?.deletionReason ?? '',
+      ).trim(),
     }
   })
 

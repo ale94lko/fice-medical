@@ -52,7 +52,6 @@ export function createEmptyAllergiesSection() {
     entries: [],
     draft: createEmptyAllergyDraft(),
     addExpanded: true,
-    deletionAudit: [],
   }
 }
 
@@ -72,7 +71,26 @@ export function normalizeAllergyEntry(entry) {
     allergy: trimAllergyField(entry.allergy),
     severity: trimAllergyField(entry.severity),
     startYear: Number.isFinite(startYear) ? startYear : null,
+    // eslint-disable-next-line camelcase -- mirrors API / PATCH payload
+    deletion_reason: trimAllergyField(entry.deletion_reason),
   }
+}
+
+/** Rows still shown in the allergies list (not soft-deleted). */
+export function visibleAllergyEntries(entries) {
+  return (entries ?? []).filter(
+    row => !trimAllergyField(row?.deletion_reason),
+  )
+}
+
+function rowHasBackendAllergyId(entry) {
+  const raw = entry?.apiId ?? entry?.api_id
+  return raw != null && String(raw).trim() !== ''
+}
+
+/** True when this row came from the API (PATCH/DELETE semantics on save). */
+export function allergyRowHasPersistedApiId(entry) {
+  return rowHasBackendAllergyId(entry)
 }
 
 export function isValidAllergyName(value) {
@@ -126,6 +144,9 @@ export function isDuplicateAllergyEntry(
   const key = entryDuplicateKey(allergy, severity, startYear)
 
   return (entries ?? []).some(entry => {
+    if (trimAllergyField(entry?.deletion_reason)) {
+      return false
+    }
     if (excludeId && entry.id === excludeId) {
       return false
     }
@@ -236,6 +257,9 @@ export function highestAllergySeverity(entries) {
   let topSeverity = ''
 
   for (const entry of entries ?? []) {
+    if (trimAllergyField(entry?.deletion_reason)) {
+      continue
+    }
     const sev = trimAllergyField(entry.severity)
     const rank = clientAllergySeverityRank[sev] ?? 0
     if (rank > maxRank) {
@@ -262,45 +286,51 @@ export function severityTabModifier(severity) {
   return ''
 }
 
+function allergyStartDateIsoFromYear(year) {
+  const y = Number(year)
+  if (!Number.isFinite(y) || y < 1) {
+    return null
+  }
+
+  return `${y}-01-01`
+}
+
 export function buildAllergiesPayload(section) {
-  const items = (section?.entries ?? [])
+  const rows = (section?.entries ?? [])
     .map(entry => {
       const normalized = normalizeAllergyEntry(entry)
       if (!normalized.allergy || !normalized.severity) {
         return null
       }
       const row = {
-        allergy: normalized.allergy,
+        name: normalized.allergy,
         severity: normalized.severity,
+        // eslint-disable-next-line camelcase -- register API shape
+        start_date: allergyStartDateIsoFromYear(normalized.startYear),
       }
-      if (normalized.startYear != null) {
-        row.startYear = normalized.startYear
+      if (normalized.deletion_reason) {
+        // eslint-disable-next-line camelcase -- register API shape
+        row.deletion_reason = normalized.deletion_reason
+      }
+      if (rowHasBackendAllergyId(entry)) {
+        const raw = entry.apiId ?? entry.api_id
+        const numericId = Number(raw)
+        row.id = Number.isFinite(numericId) ? numericId : raw
       }
 
       return row
     })
-    .filter(Boolean)
+    .filter(row => {
+      if (trimAllergyField(row.deletion_reason)) {
+        return row.id != null
+      }
 
-  const deletions = (section?.deletionAudit ?? [])
-    .map(row => ({
-      allergy: trimAllergyField(row.allergy),
-      severity: trimAllergyField(row.severity),
-      startYear: row.startYear ?? null,
-      reason: trimAllergyField(row.reason),
-    }))
-    .filter(row => row.allergy && row.severity)
+      return row.name && row.severity
+    })
 
-  if (!items.length && !deletions.length) {
+  if (!rows.length) {
     return { status: clientAllergiesNkaStatus }
   }
 
-  const payload = {}
-  if (items.length) {
-    payload.entries = items
-  }
-  if (deletions.length) {
-    payload.deletions = deletions
-  }
-
-  return payload
+  return { entries: rows }
 }

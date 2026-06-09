@@ -257,11 +257,34 @@ function buildContacts(form) {
 function buildAllergies(form) {
   const section = form[clientFormSections.allergies] ?? {}
 
-  return (section.entries ?? []).map(entry => ({
-    name: trim(entry?.allergy),
-    severity: trim(entry?.severity),
-    start_date: allergyStartDateFromYear(entry?.startYear),
-  }))
+  return (section.entries ?? [])
+    .map(entry => {
+      const name = trim(entry?.allergy)
+      const severity = trim(entry?.severity)
+      const payload = {
+        name,
+        severity,
+        start_date: allergyStartDateFromYear(entry?.startYear),
+      }
+      const dr = trim(entry?.deletion_reason)
+      if (dr) {
+        payload.deletion_reason = dr
+      }
+      const apiRaw = entry?.apiId ?? entry?.api_id
+      if (apiRaw != null && String(apiRaw).trim() !== '') {
+        const numericId = Number(apiRaw)
+        payload.id = Number.isFinite(numericId) ? numericId : apiRaw
+      }
+
+      return payload
+    })
+    .filter(row => {
+      if (trim(row.deletion_reason)) {
+        return row.id != null
+      }
+
+      return row.name && row.severity
+    })
 }
 
 export function buildClientRegisterBody(form) {

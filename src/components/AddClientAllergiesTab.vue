@@ -103,7 +103,7 @@
       :toggle-test-id="tid.accordionToggle('allergies-existing')">
       <div class="add-client-form__fmh-list-card q-pa-md">
         <AllergiesTable
-          :entries="section.entries"
+          :entries="visibleEntries"
           :empty-label="t('allergiesExistingEmpty')"
           @edit="openEdit"
           @delete="openDelete"
@@ -118,14 +118,14 @@
     <AllergyEditDialog
       v-model="editDialogOpen"
       :entry="editingEntry"
-      :entries="section.entries"
+      :entries="visibleEntries"
       :patient-dob="patientDob"
       @save="onEditSave"
     />
 
     <AllergyDeleteDialog
       v-model="deleteDialogOpen"
-      :require-deletion-reason="requireDeletionReason"
+      :require-deletion-reason="deleteDialogRequiresReason"
       @confirm="onDeleteConfirm"
     />
   </div>
@@ -150,12 +150,14 @@ import {
 import {
   allergyMaxStartYear,
   allergyMinStartYear,
+  allergyRowHasPersistedApiId,
   createEmptyAllergyDraft,
   getAllergyDraftFieldErrorKeys,
   isDuplicateAllergyEntry,
   nextAllergyId,
   trimAllergyField,
   validateAllergyForAdd,
+  visibleAllergyEntries,
 } from 'src/utils/client-allergies.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
@@ -168,11 +170,6 @@ const props = defineProps({
   patientDob: {
     type: String,
     default: '',
-  },
-  /** When editing an existing client, deletion requires an audit reason. */
-  requireDeletionReason: {
-    type: Boolean,
-    default: true,
   },
 })
 
@@ -210,6 +207,21 @@ const severityOptions = [
 const section = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
+})
+
+const visibleEntries = computed(() =>
+  visibleAllergyEntries(section.value.entries),
+)
+
+/** Audit reason only when deleting an allergy already persisted (has apiId). */
+const deleteDialogRequiresReason = computed(() => {
+  const rowId = deletingEntryId.value
+  if (!rowId) {
+    return false
+  }
+  const row = (section.value.entries ?? []).find(e => e.id === rowId)
+
+  return allergyRowHasPersistedApiId(row)
 })
 
 const allergyMinYear = computed(() =>
@@ -335,9 +347,12 @@ function onAddEntry() {
 
   section.value.entries.push({
     id: nextAllergyId(),
+    apiId: null,
     allergy: allergyRaw,
     severity: severityRaw,
     startYear: yearRaw === '' ? null : Number(yearRaw),
+    // eslint-disable-next-line camelcase -- mirrors API row shape
+    deletion_reason: '',
   })
   section.value.draft = createEmptyAllergyDraft()
   applyDraftErrors({ ok: true })
@@ -358,9 +373,13 @@ function onEditSave(updated) {
   if (index < 0) {
     return
   }
+  const prev = section.value.entries[index]
   section.value.entries[index] = {
+    ...prev,
     id,
-    ...updated,
+    allergy: updated.allergy,
+    severity: updated.severity,
+    startYear: updated.startYear,
   }
   notifySuccess(t('allergyUpdatedSuccess'))
 }
@@ -371,9 +390,6 @@ function openDelete(entry) {
 }
 
 function onDeleteConfirm(reason) {
-  if (props.requireDeletionReason && !trimAllergyField(reason)) {
-    return
-  }
   const id = deletingEntryId.value
   if (!id) {
     return
@@ -382,15 +398,22 @@ function onDeleteConfirm(reason) {
   if (index < 0) {
     return
   }
-  const removed = section.value.entries[index]
-  section.value.entries.splice(index, 1)
-  if (props.requireDeletionReason) {
-    section.value.deletionAudit.push({
-      allergy: removed.allergy,
-      severity: removed.severity,
-      startYear: removed.startYear,
-      reason: trimAllergyField(reason),
-    })
+  const row = section.value.entries[index]
+  const reasonText = trimAllergyField(reason)
+  if (allergyRowHasPersistedApiId(row) && !reasonText) {
+    return
+  }
+  if (!allergyRowHasPersistedApiId(row)) {
+    section.value.entries.splice(index, 1)
+    deletingEntryId.value = null
+    notifySuccess(t('allergyDeletedSuccess'))
+
+    return
+  }
+  section.value.entries[index] = {
+    ...row,
+    // eslint-disable-next-line camelcase -- mirrors API row shape
+    deletion_reason: reasonText,
   }
   deletingEntryId.value = null
   notifySuccess(t('allergyDeletedSuccess'))
