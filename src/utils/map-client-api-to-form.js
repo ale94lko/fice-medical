@@ -6,6 +6,10 @@ import {
   clientFamilyRelationshipValues,
   clientFieldKeys as ck,
   clientFormSections,
+  clientInsurancePriorityValues,
+  clientInsuranceRelationshipValues,
+  clientInsuranceStatusValues,
+  clientInsuranceTypeValues,
   clientPhoneTypeValues,
   clientRelationshipTypeValues,
   clientGenderValues,
@@ -32,7 +36,7 @@ import {
   createEmptyFamilyMedicalHistorySection,
   nextFamilyMedicalHistoryId,
 } from 'src/utils/client-family-medical-history.js'
-import { createEmptyInsuranceSection } from 'src/utils/client-insurance.js'
+import { nextInsuranceId } from 'src/utils/client-insurance.js'
 import { createEmptyVitalsSection } from 'src/utils/client-vitals.js'
 import { mapClientLabsListFromApi } from 'src/utils/lab-normalize.js'
 import {
@@ -559,6 +563,111 @@ function mapAllergiesFromApi(client) {
   return section
 }
 
+/**
+ * Map API catalog key (or camelCase / label) to form display label.
+ */
+function insuranceLabelFromApiKey(mapObj, rawKey) {
+  const key = String(rawKey ?? '').trim()
+  if (!key) {
+    return null
+  }
+  if (Object.prototype.hasOwnProperty.call(mapObj, key)) {
+    return mapObj[key]
+  }
+  const camel = key.replace(/_([a-z])/g, (_, ch) => ch.toUpperCase())
+  if (Object.prototype.hasOwnProperty.call(mapObj, camel)) {
+    return mapObj[camel]
+  }
+  const lower = key.toLowerCase()
+  for (const [k, label] of Object.entries(mapObj)) {
+    if (k.toLowerCase() === lower || String(label).toLowerCase() === lower) {
+      return label
+    }
+  }
+
+  return null
+}
+
+function insuranceUrlOrNull(value) {
+  const s = String(value ?? '').trim()
+
+  return s || null
+}
+
+function mapInsuranceProfileFromApi(row) {
+  const payerPlan = String(
+    row?.payer_plan_name ?? row?.payerPlanName ?? '',
+  ).trim()
+
+  return {
+    id: nextInsuranceId(),
+    apiId: row?.id ?? row?.ID ?? null,
+    payerId: null,
+    payerName: payerPlan,
+    planName: '',
+    priority: insuranceLabelFromApiKey(
+      clientInsurancePriorityValues,
+      row?.insurance_priority ?? row?.insurancePriority,
+    ),
+    memberId: String(row?.member_id ?? row?.memberId ?? '').trim(),
+    insuranceType: insuranceLabelFromApiKey(
+      clientInsuranceTypeValues,
+      row?.insurance_type ?? row?.insuranceType,
+    ),
+    policyEffectiveDate: isoDateToUsDateString(
+      row?.policy_effective_date ?? row?.policyEffectiveDate,
+    ),
+    policyExpirationDate: isoDateToUsDateString(
+      row?.policy_expiration_date ?? row?.policyExpirationDate,
+    ),
+    relationshipToSubscriber: insuranceLabelFromApiKey(
+      clientInsuranceRelationshipValues,
+      row?.relationship_to_subscriber ?? row?.relationshipToSubscriber,
+    ),
+    subscriberName: String(
+      row?.subscriber_name ?? row?.subscriberName ?? '',
+    ).trim(),
+    medicaidRecipientId: String(
+      row?.medicaid_id ?? row?.medicaidId ?? '',
+    ).trim(),
+    medicareMemberId: String(
+      row?.medicare_id ?? row?.medicareId ?? '',
+    ).trim(),
+    goldenCardMemberId: String(
+      row?.assistance_program_id ?? row?.assistanceProgramId ?? '',
+    ).trim(),
+    otherInsuranceId: String(
+      row?.other_insurance_id ?? row?.otherInsuranceId ?? '',
+    ).trim(),
+    status:
+      insuranceLabelFromApiKey(
+        clientInsuranceStatusValues,
+        row?.insurance_status ?? row?.insuranceStatus,
+      )
+      ?? clientInsuranceStatusValues.active,
+    frontCardFile: insuranceUrlOrNull(
+      row?.front_card_url ?? row?.frontCardUrl,
+    ),
+    backCardFile: insuranceUrlOrNull(
+      row?.back_card_url ?? row?.backCardUrl,
+    ),
+    deleted: false,
+    deletedAt: null,
+  }
+}
+
+function mapInsuranceSectionFromApi(client) {
+  const list = Array.isArray(client?.insurance)
+    ? client.insurance
+    : Array.isArray(client?.insurances)
+      ? client.insurances
+      : []
+
+  return {
+    profiles: list.map(mapInsuranceProfileFromApi),
+  }
+}
+
 function mapFamilyMedicalHistoryFromApi(entries) {
   const section = createEmptyFamilyMedicalHistorySection()
   const list = Array.isArray(entries) ? entries : []
@@ -763,7 +872,7 @@ export function mapClientApiToForm(client, options = {}) {
       ?? client.medicalHistory,
     ),
     [clientFormSections.allergies]: mapAllergiesFromApi(client),
-    [clientFormSections.insurance]: createEmptyInsuranceSection(),
+    [clientFormSections.insurance]: mapInsuranceSectionFromApi(client),
     [clientFormSections.vitals]: createEmptyVitalsSection(),
     [clientFormSections.labs]: mapClientLabsListFromApi(
       client.labs
