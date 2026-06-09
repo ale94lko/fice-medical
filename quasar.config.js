@@ -3,8 +3,36 @@
 
 import { defineConfig } from '#q-app/wrappers'
 import { fileURLToPath } from 'node:url'
+import { loadEnv } from 'vite'
+
+function devApiProxyOptions(target) {
+  const normalized = target.replace(/\/$/, '')
+
+  return {
+    target: normalized,
+    changeOrigin: true,
+    secure: true,
+  }
+}
+
+function devApiProxy(target) {
+  const o = devApiProxyOptions(target)
+
+  return {
+    '/client': { ...o },
+    '/catalogs': { ...o },
+    '/oauth': { ...o },
+    '/patients': { ...o },
+    '/assessment-templates': { ...o },
+    '/logout': { ...o },
+  }
+}
 
 export default defineConfig((ctx) => {
+  const mode = ctx.dev ? 'development' : 'production'
+  const viteEnv = loadEnv(mode, process.cwd(), '')
+  const apiProxyTarget = String(viteEnv.API_PROXY_TARGET ?? '').trim()
+
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
     // preFetch: true,
@@ -92,7 +120,10 @@ export default defineConfig((ctx) => {
     devServer: {
       // https: true,
       port: 8090,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      ...(ctx.dev && apiProxyTarget
+        ? { proxy: devApiProxy(apiProxyTarget) }
+        : {}),
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

@@ -32,9 +32,20 @@ import { i18nGlobalT } from './i18n.js'
 
 let lastSessionExpiredNotifyAt = 0
 
+function resolveApiBaseUrl() {
+  const fromEnv = String(import.meta.env.VITE_API_BASE_URL ?? '').trim()
+  if (fromEnv) {
+    return fromEnv.replace(/\/$/, '')
+  }
+  if (import.meta.env.DEV) {
+    return ''
+  }
+
+  return ''
+}
+
 const api = axios.create({
-  baseURL:
-    'https://b2dc-79-112-135-22.ngrok-free.app',
+  baseURL: resolveApiBaseUrl(),
 })
 
 let refreshInFlight = null
