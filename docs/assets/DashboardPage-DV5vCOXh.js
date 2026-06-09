@@ -1,0 +1,1 @@
+import{Pr as e,Si as t,Ui as n}from"./index-DYXDe_7-.js";import{t as r}from"./QPage-Drgl2ugg.js";var i={};function a(e,i){return n(),t(r,{class:`flex flex-center`})}var o=e(i,[[`render`,a]]);export{o as default};
