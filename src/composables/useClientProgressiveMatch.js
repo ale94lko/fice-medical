@@ -36,7 +36,6 @@ export function useClientProgressiveMatch(form, isEnabled) {
   const loading = ref(false)
   const fetchError = ref(false)
   const ignoredBanner = ref(false)
-  const ignoredNameSnapshot = ref({ first: '', last: '' })
   const discardedPatientIds = ref(new Set())
   const openedAnyMatchForSaveGate = ref(false)
   let debounceTimer = null
@@ -78,30 +77,26 @@ export function useClientProgressiveMatch(form, isEnabled) {
     openedAnyMatchForSaveGate.value = true
   }
 
+  /** Stops all further match API calls for this add-client session. */
   function ignoreMatchesBanner() {
+    if (debounceTimer) {
+      clearTimeout(debounceTimer)
+      debounceTimer = null
+    }
+    requestSeq += 1
     ignoredBanner.value = true
-    ignoredNameSnapshot.value = {
-      first: trim(form.value?.[ck.firstName]),
-      last: trim(form.value?.[ck.lastName]),
-    }
-  }
-
-  function maybeResetIgnoreOnNameChange() {
-    if (!ignoredBanner.value) {
-      return
-    }
-    const first = trim(form.value?.[ck.firstName])
-    const last = trim(form.value?.[ck.lastName])
-    const snap = ignoredNameSnapshot.value
-    if (first !== snap.first || last !== snap.last) {
-      ignoredBanner.value = false
-    }
+    rawMatches.value = []
+    loading.value = false
+    fetchError.value = false
   }
 
   async function runFetch() {
     if (!isEnabled.value) {
       rawMatches.value = []
 
+      return
+    }
+    if (ignoredBanner.value) {
       return
     }
     const first = trim(form.value?.[ck.firstName])
@@ -136,6 +131,9 @@ export function useClientProgressiveMatch(form, isEnabled) {
   }
 
   function scheduleFetch() {
+    if (ignoredBanner.value) {
+      return
+    }
     if (debounceTimer) {
       clearTimeout(debounceTimer)
     }
@@ -153,7 +151,15 @@ export function useClientProgressiveMatch(form, isEnabled) {
 
         return
       }
-      maybeResetIgnoreOnNameChange()
+      if (ignoredBanner.value) {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer)
+          debounceTimer = null
+        }
+        rawMatches.value = []
+
+        return
+      }
       const first = trim(form.value?.[ck.firstName])
       const last = trim(form.value?.[ck.lastName])
       if (!first || !last) {
