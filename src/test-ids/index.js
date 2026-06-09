@@ -91,6 +91,19 @@ export const addClientTestIds = {
     name,
     'btn',
   ),
+  duplicateMatch: {
+    banner: 'add-client-duplicate-match-banner',
+    row: id => toTestId('add-client-duplicate-match', id, 'row'),
+    btnViewMatches: 'add-client-duplicate-match-btn-view-matches',
+    btnViewAll: 'add-client-duplicate-match-btn-view-all',
+    btnIgnore: 'add-client-duplicate-match-btn-ignore',
+    btnNotMatch: 'add-client-duplicate-match-review-btn-not-match',
+    btnOpenExisting: 'add-client-duplicate-match-review-btn-open-existing',
+    btnSaveConfirmCreate: 'add-client-duplicate-save-confirm-btn-create',
+    btnSaveConfirmCancel: 'add-client-duplicate-save-confirm-btn-cancel',
+    btnNavigateConfirm: 'add-client-duplicate-navigate-confirm-btn-confirm',
+    btnNavigateCancel: 'add-client-duplicate-navigate-confirm-btn-cancel',
+  },
 }
 
 export const assessmentTestIds = {

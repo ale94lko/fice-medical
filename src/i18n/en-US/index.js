@@ -304,6 +304,38 @@ export default {
   addClient: 'Add Client',
   addNewClient: 'Add New Client',
   addNewClientSubtitle: 'Create a new client profile',
+  duplicateMatchBannerTitle:
+    'Possible existing clients found ({count})',
+  duplicateMatchBannerHint:
+    'Review potential matches before continuing.',
+  duplicateMatchViewMatches: 'View Matches',
+  duplicateMatchIgnore: 'Ignore Matches',
+  duplicateMatchMenuTitle: 'Potential matches',
+  duplicateMatchViewAll: 'View all matches',
+  duplicateMatchDobUnknown: 'DOB: not on file',
+  duplicateMatchConfidenceHigh: 'High confidence',
+  duplicateMatchConfidenceMedium: 'Medium confidence',
+  duplicateMatchConfidenceLow: 'Low confidence',
+  duplicateMatchConfidenceUnknown: 'Match',
+  duplicateMatchSaveConfirmTitle: 'Possible duplicate clients found',
+  duplicateMatchSaveConfirmMessage:
+    'There are existing clients with similar information. Are you sure you '
+    + 'want to create a new client and ignore these possible matches?',
+  duplicateMatchCreateAnyway: 'Create New Client Anyway',
+  duplicateMatchReviewTitle: 'Existing client',
+  duplicateMatchReviewSubtitle:
+    '{name} — {score}% match. Review the information below.',
+  duplicateMatchNotMatch: 'Not a Match',
+  duplicateMatchOpenExisting: 'Open Existing Client',
+  duplicateMatchNoPhones: 'No phone numbers on file.',
+  duplicateMatchNoEmails: 'No email addresses on file.',
+  duplicateMatchContactPhones: 'Phone numbers',
+  duplicateMatchContactEmails: 'Email addresses',
+  duplicateMatchNavigateTitle: 'Open existing client?',
+  duplicateMatchNavigateMessage:
+    'You are about to leave this new client form and open the selected '
+    + 'existing client. Any unsaved information entered here will be '
+    + 'discarded.',
   personalInformation: 'Personal Information',
   administrativeInformation: 'Administrative Information',
   assignClinicians: 'Assign Clinicians',

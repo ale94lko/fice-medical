@@ -312,6 +312,38 @@ export default {
   addClient: 'Adicionar Cliente',
   addNewClient: 'Adicionar nuevo cliente',
   addNewClientSubtitle: 'Crear un nuevo perfil de cliente',
+  duplicateMatchBannerTitle:
+    'Posibles clientes existentes encontrados ({count})',
+  duplicateMatchBannerHint:
+    'Revise las posibles coincidencias antes de continuar.',
+  duplicateMatchViewMatches: 'Ver coincidencias',
+  duplicateMatchIgnore: 'Ignorar coincidencias',
+  duplicateMatchMenuTitle: 'Posibles coincidencias',
+  duplicateMatchViewAll: 'Ver todas las coincidencias',
+  duplicateMatchDobUnknown: 'F. nac.: sin dato',
+  duplicateMatchConfidenceHigh: 'Alta confianza',
+  duplicateMatchConfidenceMedium: 'Confianza media',
+  duplicateMatchConfidenceLow: 'Baja confianza',
+  duplicateMatchConfidenceUnknown: 'Coincidencia',
+  duplicateMatchSaveConfirmTitle: 'Posibles clientes duplicados',
+  duplicateMatchSaveConfirmMessage:
+    'Existen clientes con información similar. ¿Seguro que desea crear un '
+    + 'nuevo cliente e ignorar estas posibles coincidencias?',
+  duplicateMatchCreateAnyway: 'Crear cliente nuevo de todos modos',
+  duplicateMatchReviewTitle: 'Cliente existente',
+  duplicateMatchReviewSubtitle:
+    '{name} — coincidencia {score} %. Revise la información siguiente.',
+  duplicateMatchNotMatch: 'No es una coincidencia',
+  duplicateMatchOpenExisting: 'Abrir cliente existente',
+  duplicateMatchNoPhones: 'Sin números de teléfono registrados.',
+  duplicateMatchNoEmails: 'Sin direcciones de correo registradas.',
+  duplicateMatchContactPhones: 'Teléfonos',
+  duplicateMatchContactEmails: 'Correos electrónicos',
+  duplicateMatchNavigateTitle: '¿Abrir cliente existente?',
+  duplicateMatchNavigateMessage:
+    'Va a salir de este formulario de cliente nuevo y abrir el cliente '
+    + 'existente seleccionado. Toda la información no guardada introducida '
+    + 'aquí se descartará.',
   personalInformation: 'Información personal',
   administrativeInformation: 'Información administrativa',
   assignClinicians: 'Asignar Clínicos',

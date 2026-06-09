@@ -46,6 +46,7 @@
           @saved="onSaved"
           @cancel="goToClientList"
           @tab-label="activeTabLabel = $event"
+          @navigate-existing="onNavigateExistingClient"
         />
       </q-card-section>
     </q-card>
@@ -76,6 +77,14 @@ function onClose() {
 
 function goToClientList() {
   router.push('/clients')
+}
+
+function onNavigateExistingClient({ clientId } = {}) {
+  const id = String(clientId ?? '').trim()
+  if (!id) {
+    return
+  }
+  router.push({ name: 'EditClient', params: { id } })
 }
 
 function onSaved({ clientId } = {}) {

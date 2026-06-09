@@ -83,6 +83,14 @@
         autocomplete="off"
         :data-testid="tid.formFields"
         @submit.prevent="onSave">
+        <AddClientDuplicateMatchBanner
+          v-if="!isEditMode"
+          :matches="duplicateFilteredMatches"
+          :loading="duplicateMatchLoading"
+          :ignored="duplicateIgnoredBanner"
+          @review="onDuplicateReview"
+          @ignore="onDuplicateIgnore"
+        />
         <q-tab-panels
           v-model="activeTab"
           keep-alive
@@ -572,6 +580,39 @@
     </div>
 
     <ModalComponent
+      v-model="duplicateSaveConfirmOpen"
+      test-id="duplicate-save-confirm"
+      :title="t('duplicateMatchSaveConfirmTitle')"
+      :message="t('duplicateMatchSaveConfirmMessage')"
+      :confirm-text="t('duplicateMatchCreateAnyway')"
+      :cancel-text="t('cancel')"
+      :confirm-button-test-id="tid.duplicateMatch.btnSaveConfirmCreate"
+      :cancel-button-test-id="tid.duplicateMatch.btnSaveConfirmCancel"
+      @confirm="onDuplicateSaveConfirm"
+      @cancel="duplicateSaveConfirmOpen = false"
+    />
+    <ModalComponent
+      v-model="duplicateNavigateConfirmOpen"
+      test-id="duplicate-navigate-confirm"
+      :title="t('duplicateMatchNavigateTitle')"
+      :message="t('duplicateMatchNavigateMessage')"
+      :confirm-text="t('confirm')"
+      :cancel-text="t('cancel')"
+      :confirm-button-test-id="tid.duplicateMatch.btnNavigateConfirm"
+      :cancel-button-test-id="tid.duplicateMatch.btnNavigateCancel"
+      @confirm="onDuplicateNavigateConfirm"
+      @cancel="duplicateNavigateConfirmOpen = false"
+    />
+    <AddClientDuplicateMatchReviewDialog
+      v-model="duplicateReviewOpen"
+      :loading="duplicateReviewLoading"
+      :preview-form="duplicateReviewPreview"
+      :selected-match="duplicateReviewMatch"
+      @not-match="onDuplicateReviewNotMatch"
+      @open-existing="onDuplicateOpenExistingRequest"
+      @cancel="onDuplicateReviewCancel"
+    />
+    <ModalComponent
       v-model="cancelConfirmOpen"
       test-id="cancel-discard"
       :title="cancelModalTitle"
@@ -604,6 +645,10 @@ import AddClientLabsTab from 'components/AddClientLabsTab.vue'
 import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from 'components/AddClientInsuranceTab.vue'
 import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AddClientDuplicateMatchBanner from
+  'components/AddClientDuplicateMatchBanner.vue'
+import AddClientDuplicateMatchReviewDialog from
+  'components/AddClientDuplicateMatchReviewDialog.vue'
 import { useSiteStore } from 'stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
@@ -633,6 +678,13 @@ import {
   CLINICAL_LABS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useClientProgressiveMatch } from
+  'src/composables/useClientProgressiveMatch.js'
+import { emitClientDuplicateAudit } from 'src/utils/client-duplicate-audit.js'
+import { summarizeNewClientDataForAudit } from
+  'src/utils/client-duplicate-audit-summary.js'
+import { hasAddClientDataBeyondFirstLastName } from
+  'src/utils/add-client-beyond-minimal-identity.js'
 
 const props = defineProps({
   mode: {
@@ -646,7 +698,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['saved', 'cancel', 'tab-label'])
+const emit = defineEmits(['saved', 'cancel', 'tab-label', 'navigate-existing'])
 
 const isEditMode = computed(() => props.mode === 'edit')
 
@@ -709,6 +761,27 @@ const {
   fmhTabRef,
   vitalsTabRef,
 })
+
+const progressiveMatchEnabled = computed(() => !isEditMode.value)
+const {
+  filteredMatches: duplicateFilteredMatches,
+  loading: duplicateMatchLoading,
+  hasActiveMatches: duplicateHasActiveMatches,
+  highestMatchScore: duplicateHighestMatchScore,
+  ignoredBanner: duplicateIgnoredBanner,
+  openedAnyMatchForSaveGate: duplicateOpenedAnyMatch,
+  ignoreMatchesBanner: duplicateIgnoreMatchesBanner,
+  discardMatch: duplicateDiscardMatch,
+  markOpenedMatch: duplicateMarkOpenedMatch,
+} = useClientProgressiveMatch(form, progressiveMatchEnabled)
+
+const duplicateSaveConfirmOpen = ref(false)
+const duplicateNavigateConfirmOpen = ref(false)
+const duplicatePendingNavigateClientId = ref(null)
+const duplicateReviewOpen = ref(false)
+const duplicateReviewLoading = ref(false)
+const duplicateReviewPreview = ref(null)
+const duplicateReviewMatch = ref(null)
 
 const dobMinYear = computed(
   () => new Date().getFullYear() - clientMaxAge,
@@ -861,12 +934,8 @@ watch([activeTab, activeSubTab], () => {
   scrollFormPanelToTop()
 }, { immediate: true })
 
-async function loadClientForEdit() {
-  const id = props.clientId
-  if (id == null || id === '') {
-    throw new Error(t('clientLoadError'))
-  }
-  const mapped = await siteStore.buildEditFormForClient(id, {
+function getClientMapOptions() {
+  return {
     resolveAgeUnitCode: catalogs.resolveAgeUnitCode,
     defaultAgeUnitValue: catalogs.defaultAgeUnitValue,
     resolveCatalogSelectValue: catalogs.resolveCatalogSelectValue,
@@ -877,7 +946,18 @@ async function loadClientForEdit() {
     genderSelectOptions: genderOptions.value,
     contactTypeSelectOptions: contactTypeSelectOptions.value,
     relationshipTypeSelectOptions: relationshipTypeSelectOptions.value,
-  })
+  }
+}
+
+async function loadClientForEdit() {
+  const id = props.clientId
+  if (id == null || id === '') {
+    throw new Error(t('clientLoadError'))
+  }
+  const mapped = await siteStore.buildEditFormForClient(
+    id,
+    getClientMapOptions(),
+  )
   applyForm(mapped)
 }
 
@@ -952,12 +1032,101 @@ async function onNext() {
   goNextTab()
 }
 
-async function onSave() {
-  const ok = await validateAllTabs()
-  if (!ok) {
+function duplicateSaveGateActive() {
+  return (
+    !isEditMode.value
+    && duplicateHasActiveMatches.value
+    && !duplicateIgnoredBanner.value
+    && !duplicateOpenedAnyMatch.value
+  )
+}
+
+function emitNavigateExistingClient(clientId) {
+  emit('navigate-existing', { clientId: String(clientId) })
+}
+
+function onDuplicateIgnore() {
+  duplicateIgnoreMatchesBanner()
+}
+
+async function onDuplicateReview(match) {
+  duplicateMarkOpenedMatch()
+  duplicateReviewMatch.value = match
+  duplicateReviewOpen.value = true
+  duplicateReviewLoading.value = true
+  duplicateReviewPreview.value = null
+  try {
+    duplicateReviewPreview.value = await siteStore.buildEditFormForClient(
+      String(match.patientId),
+      getClientMapOptions(),
+    )
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      const msg = error?.response?.data?.message
+        || error?.message
+        || t('clientLoadError')
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: String(msg),
+        position: 'top',
+      })
+    }
+    duplicateReviewOpen.value = false
+  } finally {
+    duplicateReviewLoading.value = false
+  }
+}
+
+function onDuplicateReviewNotMatch() {
+  const id = duplicateReviewMatch.value?.patientId
+  if (id != null) {
+    duplicateDiscardMatch(id)
+  }
+  duplicateReviewMatch.value = null
+  duplicateReviewPreview.value = null
+}
+
+function onDuplicateReviewCancel() {
+  duplicateReviewMatch.value = null
+  duplicateReviewPreview.value = null
+}
+
+function onDuplicateOpenExistingRequest() {
+  const rawId = duplicateReviewMatch.value?.patientId
+  duplicateReviewOpen.value = false
+  if (rawId == null || rawId === '') {
     return
   }
+  if (hasAddClientDataBeyondFirstLastName(form.value)) {
+    duplicatePendingNavigateClientId.value = rawId
+    duplicateNavigateConfirmOpen.value = true
 
+    return
+  }
+  emitNavigateExistingClient(rawId)
+}
+
+function onDuplicateNavigateConfirm() {
+  const id = duplicatePendingNavigateClientId.value
+  duplicateNavigateConfirmOpen.value = false
+  duplicatePendingNavigateClientId.value = null
+  if (id != null && id !== '') {
+    emitNavigateExistingClient(id)
+  }
+}
+
+function onDuplicateSaveConfirm() {
+  duplicateSaveConfirmOpen.value = false
+  emitClientDuplicateAudit('CREATE_NEW_CLIENT_DESPITE_DUPLICATES', {
+    actionTaken: 'Create New Client Anyway',
+    newClientDataSummary: summarizeNewClientDataForAudit(form.value),
+    matchedClientIds: duplicateFilteredMatches.value.map(m => m.patientId),
+    highestMatchPercentage: duplicateHighestMatchScore.value,
+  })
+  void executeSave()
+}
+
+async function executeSave() {
   saving.value = true
   try {
     let savedClientId = props.clientId
@@ -988,6 +1157,19 @@ async function onSave() {
   } finally {
     saving.value = false
   }
+}
+
+async function onSave() {
+  const ok = await validateAllTabs()
+  if (!ok) {
+    return
+  }
+  if (duplicateSaveGateActive()) {
+    duplicateSaveConfirmOpen.value = true
+
+    return
+  }
+  await executeSave()
 }
 
 function dismissCancelConfirm() {

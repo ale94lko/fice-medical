@@ -145,6 +145,7 @@ export const clientFormSections = {
   allergies: 'allergies',
   insurance: 'insurance',
   vitals: 'vitals',
+  labs: 'labs',
 }
 
 export const clientInsurancePriorityValues = {
@@ -419,6 +420,7 @@ export const apiPaths = {
   clientsList: '/client/v1/all-clients',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientsCreate: '/client/v1/register',
+  clientMatch: '/client/v1/match',
   assessmentTemplates: '/assessment-templates',
   assessmentTemplateById: id => `/assessment-templates/${encodeURIComponent(
     String(id ?? '').trim(),
