@@ -1,1 +1,0 @@
-import{Bi as e,Wi as t,Yi as n,jr as r,wi as i,yi as a}from"./index-BYb-dXm9.js";import{r as o,t as s}from"./QLayout-BskOGzzO.js";var c={};function l(r,c){let l=t(`router-view`);return e(),a(s,{view:`hHh Lpr lff`},{default:n(()=>[i(o,null,{default:n(()=>[i(l)]),_:1})]),_:1})}var u=r(c,[[`render`,l]]);export{u as default};

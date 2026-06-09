@@ -1,1 +1,0 @@
-import{Bi as e,jr as t,yi as n}from"./index-BYb-dXm9.js";import{t as r}from"./QPage-CQpKg1-I.js";var i={};function a(t,i){return e(),n(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
