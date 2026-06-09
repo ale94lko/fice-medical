@@ -60,6 +60,8 @@ export default {
   catalogLoadError: 'Could not load form catalogs. Using default options.',
   addClientSaveValidationSummary:
     'Please fix the highlighted fields before saving.',
+  validationFixErrorsBeforeProceed:
+    'Please fix validation errors before proceed',
   tabErrorCountAria: '{count} validation errors',
   cancelClientRegistrationTitle: 'Cancel client registration',
   cancelClientRegistrationMessage:
@@ -465,6 +467,7 @@ export default {
   clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Start Year',
   allergyStartYearHint: 'Optional. Year between {min} and {max}',
+  allergyStartYearHintCurrentYearOnly: 'Optional. Only current year',
   allergyAdd: 'Add',
   allergyAddRequired: 'Enter an allergy and select a severity to add.',
   allergyNameRequired: 'Allergy is required when other fields are filled.',

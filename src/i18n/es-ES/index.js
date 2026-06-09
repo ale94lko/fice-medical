@@ -63,6 +63,8 @@ export default {
     'No se pudieron cargar los catálogos. Se usan opciones predeterminadas.',
   addClientSaveValidationSummary:
     'Corrija los campos marcados antes de guardar.',
+  validationFixErrorsBeforeProceed:
+    'Corrija los errores de validación antes de continuar',
   tabErrorCountAria: '{count} errores de validación',
   cancelClientRegistrationTitle: 'Cancelar registro de cliente',
   cancelClientRegistrationMessage:
@@ -475,6 +477,7 @@ export default {
   clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Año de inicio',
   allergyStartYearHint: 'Opcional. Año entre {min} y {max}',
+  allergyStartYearHintCurrentYearOnly: 'Opcional. Solo el año actual',
   allergyAdd: 'Agregar',
   allergyAddRequired: 'Ingrese una alergia y seleccione la severidad.',
   allergyNameRequired:

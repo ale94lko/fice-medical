@@ -382,6 +382,8 @@ import {
   validateVitalsDraft,
 } from 'src/utils/client-vitals.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -398,6 +400,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const deleteDialogOpen = ref(false)
 const deletingEntryId = ref(null)
@@ -569,10 +572,11 @@ function resetDraft() {
   clearSaveValidation()
 }
 
-function onSaveEntry() {
+async function onSaveEntry() {
   const result = validateVitalsDraft(section.value.draft)
   if (!result.ok) {
     applyFieldErrors(result.errors)
+    await notifyAndScrollToValidationErrors(null)
 
     return
   }

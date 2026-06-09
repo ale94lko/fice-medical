@@ -104,6 +104,7 @@
       <div class="add-client-form__fmh-list-card q-pa-md">
         <AllergiesTable
           :entries="visibleEntries"
+          :invalid-row-ids="invalidDobRowIds"
           :empty-label="t('allergiesExistingEmpty')"
           @edit="openEdit"
           @delete="openDelete"
@@ -132,7 +133,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import ClientYearField from 'components/ClientYearField.vue'
@@ -148,6 +149,7 @@ import {
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
+  allergyEntriesDobInvalidIds,
   allergyMaxStartYear,
   allergyMinStartYear,
   allergyRowHasPersistedApiId,
@@ -160,6 +162,8 @@ import {
   visibleAllergyEntries,
 } from 'src/utils/client-allergies.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -177,6 +181,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const editDialogOpen = ref(false)
 const deleteDialogOpen = ref(false)
@@ -185,6 +190,7 @@ const deletingEntryId = ref(null)
 const draftNameError = ref('')
 const draftYearError = ref('')
 const draftSeverityError = ref('')
+const invalidDobRowIds = ref([])
 
 const severityOptions = [
   {
@@ -224,16 +230,33 @@ const deleteDialogRequiresReason = computed(() => {
   return allergyRowHasPersistedApiId(row)
 })
 
+watch(
+  () => [props.patientDob, section.value.entries],
+  () => {
+    if (!invalidDobRowIds.value.length) {
+      return
+    }
+    invalidDobRowIds.value = allergyEntriesDobInvalidIds(
+      section.value.entries ?? [],
+      props.patientDob ?? '',
+    )
+  },
+  { deep: true },
+)
+
 const allergyMinYear = computed(() =>
   allergyMinStartYear(props.patientDob ?? ''),
 )
 
-const startYearHint = computed(() =>
-  t('allergyStartYearHint', {
-    min: allergyMinYear.value,
-    max: allergyMaxStartYear(),
-  }),
-)
+const startYearHint = computed(() => {
+  const min = allergyMinYear.value
+  const max = allergyMaxStartYear()
+  if (min === max) {
+    return t('allergyStartYearHintCurrentYearOnly')
+  }
+
+  return t('allergyStartYearHint', { min, max })
+})
 
 function severityDotClass(modifier) {
   return [
@@ -275,6 +298,10 @@ function applySaveValidation() {
   applyAllergyDraftFieldErrorKeys(
     getAllergyDraftFieldErrorKeys(section.value, props.patientDob ?? ''),
   )
+  invalidDobRowIds.value = allergyEntriesDobInvalidIds(
+    section.value.entries ?? [],
+    props.patientDob ?? '',
+  )
 }
 
 function clearSaveValidation() {
@@ -283,6 +310,7 @@ function clearSaveValidation() {
     severity: null,
     year: null,
   })
+  invalidDobRowIds.value = []
 }
 
 function applyDraftErrors(result) {
@@ -305,17 +333,11 @@ function applyDraftErrors(result) {
         min: allergyMinYear.value,
         max: allergyMaxStartYear(),
       })
-    } else {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t(result.errorKey),
-        position: 'top',
-      })
     }
   }
 }
 
-function onAddEntry() {
+async function onAddEntry() {
   const draft = section.value.draft
   const result = validateAllergyForAdd(
     draft.allergy,
@@ -325,6 +347,7 @@ function onAddEntry() {
   )
   if (!result.ok) {
     applyDraftErrors(result)
+    await notifyAndScrollToValidationErrors(null)
 
     return
   }
@@ -341,6 +364,7 @@ function onAddEntry() {
     )
   ) {
     draftNameError.value = t('allergyDuplicateEntry')
+    await notifyAndScrollToValidationErrors(null)
 
     return
   }

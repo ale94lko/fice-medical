@@ -9,7 +9,9 @@
         {{ t('labComponentDialogTitle') }}
       </AppDialogHeader>
 
-      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+      <q-card-section
+        ref="dialogBodyScrollRef"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
           {{ t('labComponentDialogSubtitle') }}
         </p>
@@ -257,6 +259,8 @@ import {
 } from 'src/utils/lab-orders.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -278,7 +282,9 @@ const emit = defineEmits(['save', 'cancel'])
 const open = defineModel({ type: Boolean, default: false })
 
 const { t } = useI18n()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
+const dialogBodyScrollRef = ref(null)
 const local = ref(createEmptyLabComponent())
 const errors = ref({})
 const componentFilter = ref('')
@@ -383,9 +389,11 @@ function onCancel() {
   open.value = false
 }
 
-function onSave(another) {
+async function onSave(another) {
   errors.value = validateLabComponent(local.value)
   if (Object.keys(errors.value).length) {
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
+
     return
   }
   if (!local.value.clinicalKey) {

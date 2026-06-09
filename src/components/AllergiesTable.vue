@@ -14,7 +14,13 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="entry in entries" :key="entry.id">
+        <tr
+          v-for="entry in entries"
+          :key="entry.id"
+          :class="{
+            'add-client-form__fmh-table-row--error':
+              invalidRowIdSet.has(entry.id),
+          }">
           <td>{{ entry.allergy }}</td>
           <td>
             <span
@@ -66,13 +72,14 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   clientAllergySeverityValues,
 } from 'components/constants.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
-defineProps({
+const props = defineProps({
   entries: {
     type: Array,
     default: () => [],
@@ -81,9 +88,17 @@ defineProps({
     type: String,
     default: '',
   },
+  invalidRowIds: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['edit', 'delete'])
+
+const invalidRowIdSet = computed(
+  () => new Set(props.invalidRowIds ?? []),
+)
 
 const { t } = useI18n()
 

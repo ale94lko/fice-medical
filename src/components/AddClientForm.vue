@@ -761,6 +761,7 @@ const {
   allergiesTabRef,
   fmhTabRef,
   vitalsTabRef,
+  panelScrollRef,
 })
 
 const progressiveMatchEnabled = computed(() => !isEditMode.value)

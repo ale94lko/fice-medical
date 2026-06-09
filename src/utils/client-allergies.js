@@ -93,6 +93,41 @@ export function allergyRowHasPersistedApiId(entry) {
   return rowHasBackendAllergyId(entry)
 }
 
+/**
+ * True when optional start year is set but outside the range allowed for
+ * patient DOB (e.g. DOB was raised after the year was chosen).
+ */
+export function allergyEntryStartYearViolatesDob(entry, patientDobUs) {
+  if (trimAllergyField(entry?.deletion_reason)) {
+    return false
+  }
+  const raw = entry?.startYear
+  if (raw == null || raw === '') {
+    return false
+  }
+  const s = String(raw).trim()
+  if (!/^\d{4}$/.test(s)) {
+    return true
+  }
+  const year = Number(s)
+  const min = allergyMinStartYear(patientDobUs)
+  const max = allergyMaxStartYear()
+
+  return year < min || year > max
+}
+
+/** Ids of visible allergy rows whose start year conflicts with current DOB. */
+export function allergyEntriesDobInvalidIds(entries, patientDobUs) {
+  const out = []
+  for (const e of entries ?? []) {
+    if (allergyEntryStartYearViolatesDob(e, patientDobUs)) {
+      out.push(e.id)
+    }
+  }
+
+  return out
+}
+
 export function isValidAllergyName(value) {
   const s = trimAllergyField(value)
   if (!s) {

@@ -1036,6 +1036,29 @@
   tbody tr:hover .add-client-form__fmh-table-actions {
     background-color: $surface-muted !important;
   }
+
+  tbody tr.add-client-form__fmh-table-row--error,
+  tbody tr.add-client-form__fmh-table-row--error:nth-child(even) {
+    background: rgba($negative, 0.07);
+  }
+
+  tbody tr.add-client-form__fmh-table-row--error td {
+    background-color: rgba($negative, 0.08);
+  }
+
+  tbody tr.add-client-form__fmh-table-row--error
+    .add-client-form__fmh-table-actions {
+    background-color: rgba($negative, 0.1) !important;
+  }
+
+  tbody tr.add-client-form__fmh-table-row--error:nth-child(even) td {
+    background-color: rgba($negative, 0.08);
+  }
+
+  tbody tr.add-client-form__fmh-table-row--error:nth-child(even)
+    .add-client-form__fmh-table-actions {
+    background-color: rgba($negative, 0.1) !important;
+  }
 }
 
 .add-client-form__fmh-table-actions-col,

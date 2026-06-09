@@ -11,7 +11,9 @@
         @close="onCancel">
         {{ t('allergyEditTitle') }}
       </AppDialogHeader>
-      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
+      <q-card-section
+        ref="dialogBodyScrollRef"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <div
           class="row q-col-gutter-md q-col-gutter-lg-md
             add-client-form__allergy-input-row">
@@ -137,6 +139,8 @@ import {
   addClientTestIds as tid,
   modalTestIds,
 } from 'src/test-ids/index.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -161,7 +165,9 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
+const dialogBodyScrollRef = ref(null)
 const localAllergy = ref('')
 const localSeverity = ref('')
 const localStartYear = ref('')
@@ -191,12 +197,15 @@ const allergyMinYear = computed(() =>
   allergyMinStartYear(props.patientDob ?? ''),
 )
 
-const startYearHint = computed(() =>
-  t('allergyStartYearHint', {
-    min: allergyMinYear.value,
-    max: allergyMaxStartYear(),
-  }),
-)
+const startYearHint = computed(() => {
+  const min = allergyMinYear.value
+  const max = allergyMaxStartYear()
+  if (min === max) {
+    return t('allergyStartYearHintCurrentYearOnly')
+  }
+
+  return t('allergyStartYearHint', { min, max })
+})
 
 const open = computed({
   get: () => props.modelValue,
@@ -251,7 +260,7 @@ function applyErrors(result) {
   }
 }
 
-function onSave() {
+async function onSave() {
   const result = validateAllergyForAdd(
     localAllergy.value,
     localSeverity.value,
@@ -260,6 +269,7 @@ function onSave() {
   )
   if (!result.ok) {
     applyErrors(result)
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 
     return
   }
@@ -278,6 +288,7 @@ function onSave() {
     )
   ) {
     nameError.value = t('allergyDuplicateEntry')
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 
     return
   }

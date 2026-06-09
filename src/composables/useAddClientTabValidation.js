@@ -1,18 +1,23 @@
 import { nextTick, ref } from 'vue'
-import { useQuasar } from 'quasar'
 import {
   ADD_CLIENT_COMING_SOON_TABS,
   tabIndexInOrder,
 } from 'src/composables/useAddClientTabAccess.js'
 import {
   addClientTabKeys,
+  clientFieldKeys,
   clientFormSections,
 } from 'components/constants.js'
+import {
+  allergyEntriesDobInvalidIds,
+  countAllergyDraftFieldErrors,
+} from 'src/utils/client-allergies.js'
 import {
   countBasicTabFieldErrors,
   countContactTabFieldErrors,
 } from 'src/utils/add-client-form-validation.js'
-import { quasarNotifyTypes } from 'components/constants.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 export function useAddClientTabValidation({
   activeTab,
@@ -20,14 +25,15 @@ export function useAddClientTabValidation({
   form,
   tabOrder,
   unlockThroughIndex,
-  t,
   allergiesTabRef,
   fmhTabRef,
   vitalsTabRef,
+  panelScrollRef,
   getBasicRules,
   getContactRules,
 }) {
-  const $q = useQuasar()
+  const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
+  const ck = clientFieldKeys
   const tabErrorCounts = ref({})
 
   function tabIndex(tab) {
@@ -40,14 +46,6 @@ export function useAddClientTabValidation({
 
   function tabErrorCount(tab) {
     return tabErrorCounts.value[tab] ?? 0
-  }
-
-  function notifyValidationError(message) {
-    $q.notify({
-      type: quasarNotifyTypes.negative,
-      message,
-      position: 'top',
-    })
   }
 
   function forEachQFormTabField(tab, fn) {
@@ -95,17 +93,14 @@ export function useAddClientTabValidation({
   }
 
   /**
-   * Tab validation for Next / tab unlock — simple q-form fields only.
-   * List add-forms (allergies, vitals, FMH drafts) validate on Add only.
+   * Tab validation for Next / tab unlock — q-form fields plus allergies
+   * (draft + existing rows vs DOB). Clinical lists validate on Add only.
    */
   function countTabErrors(tab) {
     if (ADD_CLIENT_COMING_SOON_TABS.has(tab)) {
       return 0
     }
-    if (
-      tab === addClientTabKeys.allergies
-      || tab === addClientTabKeys.clinical
-    ) {
+    if (tab === addClientTabKeys.clinical) {
       return 0
     }
     if (tab === addClientTabKeys.basic) {
@@ -119,6 +114,15 @@ export function useAddClientTabValidation({
         form.value[clientFormSections.contact],
         getContactRules?.(),
       )
+    }
+    if (tab === addClientTabKeys.allergies) {
+      const dob = String(form.value[ck.dob] ?? '').trim()
+      const sec = form.value[clientFormSections.allergies]
+      const draftErrs = countAllergyDraftFieldErrors(sec, dob)
+      const rowErrs = allergyEntriesDobInvalidIds(sec?.entries ?? [], dob)
+        .length
+
+      return draftErrs + rowErrs
     }
 
     return 0
@@ -145,6 +149,11 @@ export function useAddClientTabValidation({
   }
 
   async function applyTabFieldErrors(tab) {
+    if (tab === addClientTabKeys.allergies) {
+      allergiesTabRef?.value?.applySaveValidation?.()
+
+      return
+    }
     if (
       tab === addClientTabKeys.basic
       || tab === addClientTabKeys.contact
@@ -233,7 +242,7 @@ export function useAddClientTabValidation({
       await applyTabFieldErrors(firstInvalidTab)
     }
 
-    notifyValidationError(t('addClientSaveValidationSummary'))
+    await notifyAndScrollToValidationErrors(panelScrollRef)
 
     return false
   }

@@ -11,7 +11,9 @@
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
-      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
+      <q-card-section
+        ref="dialogBodyScrollRef"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <div class="row q-col-gutter-md q-col-gutter-lg-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -97,6 +99,8 @@ import {
   addClientTestIds as tid,
   modalTestIds,
 } from 'src/test-ids/index.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -124,7 +128,9 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
+const dialogBodyScrollRef = ref(null)
 const localRelationship = ref('')
 const localConditions = ref('')
 const relationshipError = ref('')
@@ -161,7 +167,7 @@ function onCancel() {
   open.value = false
 }
 
-function onSave() {
+async function onSave() {
   relationshipError.value = ''
   conditionsError.value = ''
   const result = validateFamilyMedicalHistoryForAdd(
@@ -181,6 +187,7 @@ function onSave() {
     } else if (result.errorKey === 'fmhConditionsInvalid') {
       conditionsError.value = t(result.errorKey, { max: 500 })
     }
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 
     return
   }
@@ -195,6 +202,7 @@ function onSave() {
     )
   ) {
     conditionsError.value = t('fmhDuplicateEntry')
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 
     return
   }

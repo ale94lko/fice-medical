@@ -181,10 +181,10 @@ export function useAddClientForm(t, catalogs, options = {}) {
     form,
     tabOrder: TAB_ORDER,
     unlockThroughIndex,
-    t,
     allergiesTabRef: options.allergiesTabRef,
     fmhTabRef: options.fmhTabRef,
     vitalsTabRef: options.vitalsTabRef,
+    panelScrollRef: options.panelScrollRef,
     getBasicRules: () => rules.value,
     getContactRules: () => contactRules.value,
   })

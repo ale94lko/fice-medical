@@ -12,7 +12,9 @@
         {{ dialogTitle }}
       </AppDialogHeader>
 
-      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+      <q-card-section
+        ref="dialogBodyScrollRef"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -373,6 +375,8 @@ import {
   filterInsurancePayers,
   formatPayerPlanLabel,
 } from 'src/utils/insurance-payers.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -408,7 +412,9 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
+const dialogBodyScrollRef = ref(null)
 const local = ref({})
 const validationErrors = ref({})
 const payerOptions = ref([])
@@ -586,7 +592,7 @@ function onCancel() {
   open.value = false
 }
 
-function onSave() {
+async function onSave() {
   const option = payerOptions.value.find(
     item => item.value === payerSelection.value,
   )
@@ -605,6 +611,7 @@ function onSave() {
   )
   if (!result.ok) {
     validationErrors.value = result.errors
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 
     return
   }

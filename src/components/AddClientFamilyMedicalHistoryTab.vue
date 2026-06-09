@@ -140,6 +140,8 @@ import {
   validateFamilyMedicalHistoryForAdd,
 } from 'src/utils/client-family-medical-history.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -152,6 +154,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const draftRelationshipError = ref('')
 const draftConditionsError = ref('')
@@ -178,14 +181,6 @@ const familyEntries = computed(
 function notifySuccess(message) {
   $q.notify({
     type: quasarNotifyTypes.positive,
-    message,
-    position: 'top',
-  })
-}
-
-function notifyError(message) {
-  $q.notify({
-    type: quasarNotifyTypes.negative,
     message,
     position: 'top',
   })
@@ -248,7 +243,7 @@ function applyDraftValidationErrors(result) {
   }
 }
 
-function onAddEntry() {
+async function onAddEntry() {
   draftRelationshipError.value = ''
   draftConditionsError.value = ''
 
@@ -259,9 +254,7 @@ function onAddEntry() {
   )
   if (!result.ok) {
     applyDraftValidationErrors(result)
-    notifyError(t(result.errorKey, {
-      max: result.errorKey === 'fmhConditionsInvalid' ? 500 : 25,
-    }))
+    await notifyAndScrollToValidationErrors(null)
 
     return
   }
@@ -277,7 +270,7 @@ function onAddEntry() {
     )
   ) {
     draftConditionsError.value = t('fmhDuplicateEntry')
-    notifyError(t('fmhDuplicateEntry'))
+    await notifyAndScrollToValidationErrors(null)
 
     return
   }

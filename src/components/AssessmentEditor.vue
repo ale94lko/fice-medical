@@ -120,6 +120,8 @@ import {
 } from 'src/utils/assessment-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { assessmentTestIds as tid } from 'src/test-ids/index.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   patientId: {
@@ -144,6 +146,7 @@ const emit = defineEmits(['back', 'saved'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const answers = reactive({ ...props.initialAnswers })
 const measurements = reactive(measurementsToFormValues(props.assessment))
@@ -227,6 +230,8 @@ function validateMeasurementsBeforeSave() {
 
 async function onSaveDraft() {
   if (!validateMeasurementsBeforeSave()) {
+    await notifyAndScrollToValidationErrors(null)
+
     return
   }
   saving.value = true
@@ -268,6 +273,8 @@ async function onSaveDraft() {
 
 async function onComplete() {
   if (!validateMeasurementsBeforeSave()) {
+    await notifyAndScrollToValidationErrors(null)
+
     return
   }
   Object.keys(fieldErrors).forEach(key => {
@@ -276,11 +283,7 @@ async function onComplete() {
   const errors = validateRequiredAnswers(props.template, answers)
   Object.assign(fieldErrors, errors)
   if (Object.keys(errors).length) {
-    $q.notify({
-      type: quasarNotifyTypes.warning,
-      message: t('assessmentCompleteValidation'),
-      position: 'top',
-    })
+    await notifyAndScrollToValidationErrors(null)
 
     return
   }

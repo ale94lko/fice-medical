@@ -9,7 +9,9 @@
         {{ dialogTitle }}
       </AppDialogHeader>
 
-      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+      <q-card-section
+        ref="dialogBodyScrollRef"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
           {{ dialogSubtitle }}
         </p>
@@ -444,6 +446,8 @@ import {
 } from 'src/utils/lab-orders.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
+import { useValidationSaveFeedback } from
+  'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {
@@ -475,7 +479,9 @@ const emit = defineEmits([
 const open = defineModel({ type: Boolean, default: false })
 
 const { t } = useI18n()
+const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
+const dialogBodyScrollRef = ref(null)
 const local = ref(createEmptyLabOrder())
 const errors = ref({})
 const testFilter = ref('')
@@ -608,9 +614,11 @@ function onCancel() {
   open.value = false
 }
 
-function emitSave() {
+async function emitSave() {
   errors.value = validateLabOrder(local.value)
   if (Object.keys(errors.value).length) {
+    await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
+
     return
   }
   emit('save', cloneLab(local.value))
