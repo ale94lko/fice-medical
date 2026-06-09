@@ -997,6 +997,10 @@
   overflow-x: auto;
 }
 
+.add-client-form__fmh-table-wrap--wide {
+  min-width: 0;
+}
+
 .add-client-form__fmh-table {
   width: 100%;
   min-width: 560px;
@@ -1039,8 +1043,8 @@
   position: sticky;
   right: 0;
   z-index: 2;
-  min-width: 120px;
-  width: 120px;
+  min-width: 140px;
+  width: 140px;
   background-color: $white !important;
   box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
 }
@@ -1053,6 +1057,17 @@
 .add-client-form__fmh-table-actions {
   text-align: center;
   white-space: nowrap;
+
+  // Client list uses `size="sm"` + `app-btn-icon-action` on a table without
+  // 0.875rem body text. Here `.fmh-table` sets 14px on cells, which shrinks
+  // Material icons. Match ClientList (~18px icon, ~30px target).
+  .q-btn.app-btn-icon-action {
+    font-size: 18px;
+  }
+
+  .q-btn + .q-btn {
+    margin-left: 4px;
+  }
 }
 
 .add-client-form__fmh-empty {
@@ -1222,48 +1237,6 @@
   background: $surface;
 }
 
-.add-client-form__insurance-table-wrap {
-  overflow-x: auto;
-}
-
-.add-client-form__insurance-table {
-  width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 14px 12px;
-    text-align: left;
-    vertical-align: middle;
-    border-bottom: 1px solid $border-subtle;
-  }
-
-  th {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: $text-muted;
-    white-space: nowrap;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-}
-
-.add-client-form__insurance-table-actions-col {
-  width: 132px;
-  text-align: right;
-}
-
-.add-client-form__insurance-table-actions {
-  text-align: right;
-  white-space: nowrap;
-
-  .q-btn + .q-btn {
-    margin-left: 2px;
-  }
-}
-
 .add-client-form__insurance-payer-cell {
   display: flex;
   flex-direction: column;
@@ -1324,12 +1297,6 @@
 .add-client-form__insurance-status-badge--inactive {
   background: $surface-muted;
   color: $text-muted;
-}
-
-.add-client-form__insurance-empty {
-  margin: 0;
-  text-align: center;
-  padding: 24px 8px;
 }
 
 .add-client-form__insurance-info-banner {

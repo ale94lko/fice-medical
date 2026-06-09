@@ -36,7 +36,8 @@
             <q-btn
               flat
               round
-              dense
+              size="sm"
+              class="app-btn-icon-action"
               color="primary"
               icon="edit"
               :data-testid="tid.allergyRowEdit(entry.id)"
@@ -46,7 +47,8 @@
             <q-btn
               flat
               round
-              dense
+              size="sm"
+              class="app-btn-icon-action"
               color="primary"
               icon="delete"
               :data-testid="tid.allergyRowDelete(entry.id)"

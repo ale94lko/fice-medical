@@ -339,17 +339,19 @@
                   <q-btn
                     flat
                     round
-                    dense
+                    size="sm"
+                    class="app-btn-icon-action"
                     icon="edit"
-                    color="grey-7"
+                    color="primary"
                     @click="openComponentDialog(comp)"
                   />
                   <q-btn
                     flat
                     round
-                    dense
+                    size="sm"
+                    class="app-btn-icon-action"
                     icon="delete"
-                    color="grey-7"
+                    color="primary"
                     @click="removeComponent(comp.id)"
                   />
                 </td>

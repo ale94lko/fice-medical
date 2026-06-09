@@ -55,8 +55,9 @@
             <q-btn
               flat
               round
-              dense
-              color="grey-7"
+              size="sm"
+              class="app-btn-icon-action"
+              color="primary"
               icon="visibility"
               :data-testid="tid.rowView(row.id)"
               :aria-label="t('labActionView')"
@@ -65,8 +66,9 @@
             <q-btn
               flat
               round
-              dense
-              color="grey-7"
+              size="sm"
+              class="app-btn-icon-action"
+              color="primary"
               icon="edit"
               :data-testid="tid.rowEdit(row.id)"
               :aria-label="t('edit')"
@@ -75,8 +77,9 @@
             <q-btn
               flat
               round
-              dense
-              color="grey-7"
+              size="sm"
+              class="app-btn-icon-action"
+              color="primary"
               icon="download"
               :data-testid="tid.rowDownload(row.id)"
               :aria-label="t('labActionDownload')"
@@ -87,7 +90,7 @@
       </tbody>
     </table>
   </div>
-  <p v-else class="text-body2 text-grey-7 q-mb-none">
+  <p v-else class="add-client-form__fmh-empty text-body2 text-grey-7">
     {{ emptyLabel }}
   </p>
 </template>

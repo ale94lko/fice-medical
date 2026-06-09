@@ -89,6 +89,8 @@
                     <q-btn
                       flat
                       round
+                      size="sm"
+                      class="app-btn-icon-action"
                       icon="edit"
                       color="primary"
                       :data-testid="tid.rowEdit(row.id)"

@@ -20,7 +20,8 @@
             <q-btn
               flat
               round
-              dense
+              size="sm"
+              class="app-btn-icon-action"
               color="primary"
               icon="edit"
               :data-testid="tid.fmhRowEdit(entry.id)"
@@ -30,7 +31,8 @@
             <q-btn
               flat
               round
-              dense
+              size="sm"
+              class="app-btn-icon-action"
               color="primary"
               icon="delete"
               :data-testid="tid.fmhRowDelete(entry.id)"

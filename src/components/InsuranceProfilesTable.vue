@@ -1,8 +1,10 @@
 <template>
   <div
     v-if="profiles.length"
-    class="add-client-form__insurance-table-wrap">
-    <table class="add-client-form__insurance-table">
+    class="add-client-form__fmh-table-wrap">
+    <table
+      class="add-client-form__fmh-table
+        add-client-form__fmh-table--wide">
       <thead>
         <tr>
           <th>{{ t('insuranceColPriority') }}</th>
@@ -10,7 +12,7 @@
           <th>{{ t('insuranceColType') }}</th>
           <th>{{ t('insuranceColMemberId') }}</th>
           <th>{{ t('insuranceColStatus') }}</th>
-          <th class="add-client-form__insurance-table-actions-col">
+          <th class="add-client-form__fmh-table-actions-col">
             {{ t('actions') }}
           </th>
         </tr>
@@ -49,12 +51,13 @@
               {{ statusLabel(profile.status) }}
             </span>
           </td>
-          <td class="add-client-form__insurance-table-actions">
+          <td class="add-client-form__fmh-table-actions">
             <q-btn
               flat
               round
-              dense
-              color="grey-7"
+              size="sm"
+              class="app-btn-icon-action"
+              color="primary"
               icon="visibility"
               :data-testid="tid.insuranceRowView(profile.id)"
               :aria-label="t('insuranceActionView')"
@@ -63,8 +66,9 @@
             <q-btn
               flat
               round
-              dense
-              color="grey-7"
+              size="sm"
+              class="app-btn-icon-action"
+              color="primary"
               icon="edit"
               :data-testid="tid.insuranceRowEdit(profile.id)"
               :aria-label="t('edit')"
@@ -74,8 +78,9 @@
               v-if="canDeactivate(profile)"
               flat
               round
-              dense
-              color="grey-7"
+              size="sm"
+              class="app-btn-icon-action"
+              color="primary"
               icon="toggle_off"
               :data-testid="tid.insuranceRowDeactivate(profile.id)"
               :aria-label="t('insuranceActionDeactivate')"
@@ -86,7 +91,7 @@
       </tbody>
     </table>
   </div>
-  <p v-else class="add-client-form__insurance-empty text-body2 text-grey-7">
+  <p v-else class="add-client-form__fmh-empty text-body2 text-grey-7">
     {{ emptyLabel }}
   </p>
 </template>
