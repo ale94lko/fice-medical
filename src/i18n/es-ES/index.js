@@ -61,6 +61,8 @@ export default {
     'Tiene cambios sin guardar. Si sale ahora, se perderán.',
   catalogLoadError:
     'No se pudieron cargar los catálogos. Se usan opciones predeterminadas.',
+  cliniciansLoadError:
+    'No se pudo cargar la lista de clínicos. Intente de nuevo más tarde.',
   addClientSaveValidationSummary:
     'Corrija los campos marcados antes de guardar.',
   validationFixErrorsBeforeProceed:

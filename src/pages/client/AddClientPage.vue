@@ -14,6 +14,10 @@
           />
         </q-breadcrumbs>
       </div>
+      <div
+        id="add-client-duplicate-banner-anchor"
+        class="add-client-page__duplicate-banner-anchor"
+      />
       <div class="add-client-page__actions">
         <q-btn
           no-caps
@@ -54,7 +58,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, provide, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AddClientForm from 'components/AddClientForm.vue'
@@ -64,6 +68,8 @@ const router = useRouter()
 const { t } = useI18n()
 const addClientFormRef = ref(null)
 const activeTabLabel = ref('')
+
+provide('addClientDuplicateBannerInHeader', true)
 
 const saving = computed(() => addClientFormRef.value?.saving ?? false)
 
@@ -103,10 +109,20 @@ function onSaved({ clientId } = {}) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
+  gap: 12px 16px;
   margin-bottom: 12px;
   flex-shrink: 0;
+}
+
+.add-client-page__duplicate-banner-anchor {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.add-client-page__intro {
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .add-client-page__title {
@@ -136,6 +152,8 @@ function onSaved({ clientId } = {}) {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .add-client-page__card {

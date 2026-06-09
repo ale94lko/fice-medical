@@ -1,5 +1,20 @@
 <template>
   <div class="add-client-form" :data-testid="tid.form">
+    <template v-if="!isEditMode">
+      <Teleport
+        v-if="duplicateBannerTeleportReady"
+        to="#add-client-duplicate-banner-anchor"
+        :disabled="!duplicateBannerTeleportEnabled">
+        <AddClientDuplicateMatchBanner
+          :matches="duplicateFilteredMatches"
+          :loading="duplicateMatchLoading"
+          :ignored="duplicateIgnoredBanner"
+          :in-page-header="duplicateBannerTeleportEnabled"
+          @review="onDuplicateReview"
+          @ignore="onDuplicateIgnore"
+        />
+      </Teleport>
+    </template>
     <q-inner-loading :showing="initialLoading" color="primary">
       <q-spinner size="42px" />
     </q-inner-loading>
@@ -83,14 +98,6 @@
         autocomplete="off"
         :data-testid="tid.formFields"
         @submit.prevent="onSave">
-        <AddClientDuplicateMatchBanner
-          v-if="!isEditMode"
-          :matches="duplicateFilteredMatches"
-          :loading="duplicateMatchLoading"
-          :ignored="duplicateIgnoredBanner"
-          @review="onDuplicateReview"
-          @ignore="onDuplicateIgnore"
-        />
         <q-tab-panels
           v-model="activeTab"
           keep-alive
@@ -396,9 +403,8 @@
                       emit-value
                       map-options
                       clearable
-                      use-input
                       class="full-width"
-                      input-debounce="0"
+                      :loading="cliniciansLoading"
                       :options="assignedClinicianOptions"
                       :test-id="tid.field(ck.assignedClinician)"
                     />
@@ -629,7 +635,15 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  inject,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import TextInput from 'components/TextInput.vue'
@@ -703,6 +717,16 @@ const emit = defineEmits(['saved', 'cancel', 'tab-label', 'navigate-existing'])
 
 const isEditMode = computed(() => props.mode === 'edit')
 
+const duplicateBannerInHeader = inject(
+  'addClientDuplicateBannerInHeader',
+  false,
+)
+const duplicateBannerTeleportEnabled = computed(
+  () => !isEditMode.value && duplicateBannerInHeader === true,
+)
+/** Avoid Teleport mount until after initial resetForm (Vue patch race). */
+const duplicateBannerTeleportReady = ref(false)
+
 const $q = useQuasar()
 const { t } = useI18n()
 const siteStore = useSiteStore()
@@ -720,7 +744,9 @@ const catalogs = useAddClientCatalogs(t)
 const {
   loading: catalogsLoading,
   loaded: catalogsLoaded,
+  cliniciansLoading,
   loadBasicInfoCatalogs,
+  loadCliniciansForAddClient,
   payerCatalogItems,
 } = catalogs
 
@@ -963,6 +989,11 @@ async function loadClientForEdit() {
   applyForm(mapped)
 }
 
+let addClientFormMountAlive = true
+onBeforeUnmount(() => {
+  addClientFormMountAlive = false
+})
+
 onMounted(async() => {
   try {
     await loadBasicInfoCatalogs()
@@ -977,6 +1008,29 @@ onMounted(async() => {
         position: 'top',
       })
     }
+  }
+
+  if (!addClientFormMountAlive) {
+    return
+  }
+
+  try {
+    await loadCliniciansForAddClient()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      const msg = error?.response?.data?.message
+        || error?.message
+        || t('cliniciansLoadError')
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: String(msg),
+        position: 'top',
+      })
+    }
+  }
+
+  if (!addClientFormMountAlive) {
+    return
   }
 
   if (isEditMode.value) {
@@ -1003,8 +1057,17 @@ onMounted(async() => {
     return
   }
 
+  await nextTick()
+  if (!addClientFormMountAlive) {
+    return
+  }
   resetForm()
   markPristine()
+  await nextTick()
+  if (!addClientFormMountAlive) {
+    return
+  }
+  duplicateBannerTeleportReady.value = true
 })
 
 function requiredLabel(text) {

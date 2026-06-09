@@ -1,7 +1,8 @@
 <template>
   <div
     v-if="visible"
-    class="add-client-duplicate-banner q-mb-md"
+    class="add-client-duplicate-banner"
+    :class="{ 'add-client-duplicate-banner--in-header': inPageHeader }"
     :data-testid="tid.banner">
     <div class="add-client-duplicate-banner__row row items-start no-wrap">
       <q-icon
@@ -23,18 +24,17 @@
           q-gutter-sm">
         <q-btn
           no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
+          unelevated
+          class="add-client-duplicate-banner__action-btn"
           :data-testid="tid.btnIgnore"
           :label="t('duplicateMatchIgnore')"
           @click="emit('ignore')"
         />
         <q-btn
           no-caps
-          outline
-          color="primary"
-          class="app-btn-outline add-client-duplicate-banner__toggle"
+          unelevated
+          class="add-client-duplicate-banner__action-btn
+            add-client-duplicate-banner__toggle"
           :data-testid="tid.btnViewMatches"
           icon-right="expand_more"
           :label="t('duplicateMatchViewMatches')">
@@ -115,7 +115,7 @@
         </q-btn>
       </div>
     </div>
-    <q-inner-loading :showing="loading" color="primary" />
+    <q-inner-loading :showing="loading" color="warning" />
   </div>
 </template>
 
@@ -135,6 +135,11 @@ const props = defineProps({
     default: false,
   },
   ignored: {
+    type: Boolean,
+    default: false,
+  },
+  /** When true, no outer margin (banner sits in page header row). */
+  inPageHeader: {
     type: Boolean,
     default: false,
   },
@@ -212,11 +217,43 @@ function confidenceLabel(confidence) {
   border-radius: $radius-md;
   background: color.adjust($warning, $alpha: -0.88);
   padding: 12px 14px;
+  margin-bottom: 12px;
 }
+
+.add-client-duplicate-banner--in-header {
+  margin-bottom: 0;
+}
+
+$dup-banner-btn-bg: #fff8e6;
+$dup-banner-btn-border: #f0c75e;
+$dup-banner-btn-text: #7c6a35;
+$dup-banner-btn-icon: #b7791f;
 
 .add-client-duplicate-banner__title {
   font-size: 0.9375rem;
   color: $text-strong;
+}
+
+.add-client-duplicate-banner__action-btn {
+  background: $dup-banner-btn-bg !important;
+  border: 1px solid $dup-banner-btn-border !important;
+  border-radius: $radius-md !important;
+  color: $dup-banner-btn-text !important;
+  box-shadow: none !important;
+
+  :deep(.q-btn__wrapper) {
+    padding: 6px 14px;
+    min-height: 36px;
+    border-radius: inherit;
+  }
+
+  :deep(.q-icon) {
+    color: $dup-banner-btn-icon !important;
+  }
+
+  :deep(.q-btn__content) {
+    color: $dup-banner-btn-text !important;
+  }
 }
 
 .add-client-duplicate-banner__list {

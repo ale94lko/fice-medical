@@ -58,6 +58,7 @@ export default {
   cancelClientEditMessage:
     'You have unsaved changes. If you leave now, they will be lost.',
   catalogLoadError: 'Could not load form catalogs. Using default options.',
+  cliniciansLoadError: 'Could not load the clinician list. Try again later.',
   addClientSaveValidationSummary:
     'Please fix the highlighted fields before saving.',
   validationFixErrorsBeforeProceed:

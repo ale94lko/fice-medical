@@ -14,6 +14,7 @@ import {
   fetchCatalogsByNames,
   mapCatalogItemsToSelectOptions,
 } from 'src/utils/catalogs.js'
+import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
 
 function fallbackGenderOptions(t) {
   return [
@@ -57,6 +58,9 @@ export function useAddClientCatalogs(t) {
   const loading = ref(false)
   const loaded = ref(false)
   const catalogsByName = ref({})
+  const cliniciansLoading = ref(false)
+  const cliniciansLoaded = ref(false)
+  const assignedClinicianSelectOptions = ref([])
 
   async function loadBasicInfoCatalogs() {
     if (loading.value) {
@@ -70,6 +74,20 @@ export function useAddClientCatalogs(t) {
     } finally {
       loading.value = false
       loaded.value = true
+    }
+  }
+
+  async function loadCliniciansForAddClient() {
+    if (cliniciansLoading.value) {
+      return
+    }
+    cliniciansLoading.value = true
+    try {
+      assignedClinicianSelectOptions.value =
+        await fetchAllCliniciansSelectOptions()
+      cliniciansLoaded.value = true
+    } finally {
+      cliniciansLoading.value = false
     }
   }
 
@@ -217,7 +235,11 @@ export function useAddClientCatalogs(t) {
     loading,
     loaded,
     catalogsByName,
+    cliniciansLoading,
+    cliniciansLoaded,
+    assignedClinicianSelectOptions,
     loadBasicInfoCatalogs,
+    loadCliniciansForAddClient,
     genderOptions,
     prefixSelectOptions,
     suffixSelectOptions,

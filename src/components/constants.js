@@ -421,6 +421,7 @@ export const labMaxComponentNotesLength = 255
 
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
+  cliniciansList: '/clinicians/v1',
   clientsList: '/client/v1/all-clients',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientsCreate: '/client/v1/register',

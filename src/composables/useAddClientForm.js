@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import {
   addClientTabKeys,
   clientAgeUnitValues,
@@ -137,6 +137,15 @@ export function useAddClientForm(t, catalogs, options = {}) {
   const contactTypeSelectOptions = catalogs?.contactTypeSelectOptions
   const relationshipTypeSelectOptions = catalogs?.relationshipTypeSelectOptions
 
+  const assignedClinicianOptions = computed(() => {
+    const opts = catalogs?.assignedClinicianSelectOptions
+    if (opts && typeof opts.value !== 'undefined') {
+      return opts.value
+    }
+
+    return []
+  })
+
   function resetForm() {
     const next = createEmptyAddClientForm()
     if (catalogs?.defaultAgeUnitValue) {
@@ -233,7 +242,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     addClientTabKeys,
     ageFieldsLocked,
     ageUnitSelectOptions,
-    assignedClinicianOptions: [],
+    assignedClinicianOptions,
     genderOptions,
     prefixSelectOptions,
     suffixSelectOptions,
