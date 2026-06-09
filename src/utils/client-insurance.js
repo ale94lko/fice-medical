@@ -1,7 +1,10 @@
 import {
+  clientInsuranceGoldenCardMemberIdLength,
   clientInsuranceMaxMemberIdLength,
   clientInsuranceMaxPayerLength,
   clientInsuranceMaxSubscriberNameLength,
+  clientInsuranceMedicaidRecipientIdLength,
+  clientInsuranceMedicareMemberIdLength,
   clientInsurancePriorityValues,
   clientInsuranceRelationshipValues,
   clientInsuranceStatusValues,
@@ -14,7 +17,18 @@ import {
 } from 'src/utils/client-form.js'
 import { findPayerById } from 'src/utils/insurance-payers.js'
 
-const MEMBER_ID_RE = /^[A-Za-z0-9 -]+$/
+const GENERIC_MEMBER_ID_RE = new RegExp(
+  `^[A-Za-z0-9]{1,${clientInsuranceMaxMemberIdLength}}$`,
+)
+const MEDICARE_MEMBER_ID_RE = new RegExp(
+  `^[A-Za-z0-9]{${clientInsuranceMedicareMemberIdLength}}$`,
+)
+const MEDICAID_RECIPIENT_ID_RE = new RegExp(
+  `^\\d{${clientInsuranceMedicaidRecipientIdLength}}$`,
+)
+const GOLDEN_CARD_ID_RE = new RegExp(
+  `^\\d{${clientInsuranceGoldenCardMemberIdLength}}$`,
+)
 
 const MEDICARE_TYPES = new Set([
   clientInsuranceTypeValues.medicare,
@@ -58,6 +72,8 @@ export function createEmptyInsuranceProfile() {
     backCardFile: null,
     deleted: false,
     deletedAt: null,
+    deactivationReason: '',
+    deactivatedAt: null,
   }
 }
 
@@ -126,10 +142,34 @@ export function isValidMemberId(value) {
     return false
   }
 
-  return (
-    MEMBER_ID_RE.test(s)
-    && s.length <= clientInsuranceMaxMemberIdLength
-  )
+  return GENERIC_MEMBER_ID_RE.test(s)
+}
+
+export function isValidMedicareMemberId(value) {
+  const s = trimInsuranceField(value)
+  if (!s) {
+    return false
+  }
+
+  return MEDICARE_MEMBER_ID_RE.test(s)
+}
+
+export function isValidMedicaidRecipientId(value) {
+  const s = trimInsuranceField(value)
+  if (!s) {
+    return false
+  }
+
+  return MEDICAID_RECIPIENT_ID_RE.test(s)
+}
+
+export function isValidGoldenCardMemberId(value) {
+  const s = trimInsuranceField(value)
+  if (!s) {
+    return false
+  }
+
+  return GOLDEN_CARD_ID_RE.test(s)
 }
 
 export function isValidOptionalIdentifier(value) {
@@ -138,10 +178,7 @@ export function isValidOptionalIdentifier(value) {
     return true
   }
 
-  return (
-    MEMBER_ID_RE.test(s)
-    && s.length <= clientInsuranceMaxMemberIdLength
-  )
+  return GENERIC_MEMBER_ID_RE.test(s)
 }
 
 function compareUsDates(a, b) {
@@ -187,31 +224,52 @@ export function resolvePayerFromProfile(profile, catalogItems = []) {
   return null
 }
 
-function validateInsuranceIdentifiers(errors, profile) {
+function validateMedicaidField(errors, profile) {
   const type = profile.insuranceType
+  const s = trimInsuranceField(profile.medicaidRecipientId)
   if (requiresMedicaidRecipientId(type)) {
-    if (!isValidMemberId(profile.medicaidRecipientId)) {
+    if (!s) {
       errors.medicaidRecipientId = 'insuranceMedicaidIdRequired'
+    } else if (!isValidMedicaidRecipientId(s)) {
+      errors.medicaidRecipientId = 'insuranceMedicaidIdInvalid'
     }
-  } else if (!isValidOptionalIdentifier(profile.medicaidRecipientId)) {
-    errors.medicaidRecipientId = 'insuranceIdentifierInvalid'
+  } else if (s && !isValidMedicaidRecipientId(s)) {
+    errors.medicaidRecipientId = 'insuranceMedicaidIdInvalid'
   }
+}
 
+function validateMedicareField(errors, profile) {
+  const type = profile.insuranceType
+  const s = trimInsuranceField(profile.medicareMemberId)
   if (requiresMedicareMemberId(type)) {
-    if (!isValidMemberId(profile.medicareMemberId)) {
+    if (!s) {
       errors.medicareMemberId = 'insuranceMedicareIdRequired'
+    } else if (!isValidMedicareMemberId(s)) {
+      errors.medicareMemberId = 'insuranceMedicareIdInvalid'
     }
-  } else if (!isValidOptionalIdentifier(profile.medicareMemberId)) {
-    errors.medicareMemberId = 'insuranceIdentifierInvalid'
+  } else if (s && !isValidMedicareMemberId(s)) {
+    errors.medicareMemberId = 'insuranceMedicareIdInvalid'
   }
+}
 
+function validateGoldenCardField(errors, profile) {
+  const type = profile.insuranceType
+  const s = trimInsuranceField(profile.goldenCardMemberId)
   if (requiresGoldenCardMemberId(type)) {
-    if (!isValidMemberId(profile.goldenCardMemberId)) {
+    if (!s) {
       errors.goldenCardMemberId = 'insuranceGoldenCardRequired'
+    } else if (!isValidGoldenCardMemberId(s)) {
+      errors.goldenCardMemberId = 'insuranceGoldenCardInvalid'
     }
-  } else if (!isValidOptionalIdentifier(profile.goldenCardMemberId)) {
-    errors.goldenCardMemberId = 'insuranceIdentifierInvalid'
+  } else if (s && !isValidGoldenCardMemberId(s)) {
+    errors.goldenCardMemberId = 'insuranceGoldenCardInvalid'
   }
+}
+
+function validateInsuranceIdentifiers(errors, profile) {
+  validateMedicaidField(errors, profile)
+  validateMedicareField(errors, profile)
+  validateGoldenCardField(errors, profile)
 
   if (!isValidOptionalIdentifier(profile.otherInsuranceId)) {
     errors.otherInsuranceId = 'insuranceIdentifierInvalid'
@@ -303,6 +361,15 @@ export function validateInsuranceProfile(
 export function softDeleteInsuranceProfile(profile) {
   profile.deleted = true
   profile.deletedAt = new Date().toISOString()
+}
+
+/**
+ * Marks profile inactive for billing; keeps row visible (not soft-deleted).
+ */
+export function deactivateInsuranceProfile(profile, reason) {
+  profile.status = clientInsuranceStatusValues.inactive
+  profile.deactivationReason = trimInsuranceField(reason)
+  profile.deactivatedAt = new Date().toISOString()
 }
 
 export const insurancePriorityOptions = Object.values(

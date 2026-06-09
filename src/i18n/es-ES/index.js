@@ -614,20 +614,22 @@ export default {
   insuranceCardFileType: 'Formatos permitidos: PNG, JPG o PDF.',
   insuranceCardFileSize: 'El archivo debe ser de 5MB o menos.',
   insuranceStatus: 'Estado del seguro',
-  insuranceDeleteTitle: 'Eliminar perfil de seguro',
-  insuranceDeleteMessage:
-    '¿Seguro que desea eliminar este perfil de seguro? '
-    + 'Esta acción no se puede deshacer.',
-  insuranceDeleteConfirm: 'Eliminar',
+  insuranceDeactivateTitle: 'Desactivar perfil de seguro',
+  insuranceDeactivateMessage:
+    'Este perfil de seguro se marcará como inactivo y ya no estará disponible '
+    + 'para nuevas facturaciones, reclamaciones o autorizaciones.',
+  insuranceDeactivationReasonLabel: 'Motivo de desactivación',
+  insuranceDeactivateConfirm: 'Desactivar',
+  insuranceActionDeactivate: 'Desactivar perfil de seguro',
   insuranceAddedSuccess: 'Perfil de seguro agregado.',
   insuranceUpdatedSuccess: 'Perfil de seguro actualizado.',
-  insuranceDeletedSuccess: 'Perfil de seguro eliminado.',
+  insuranceDeactivatedSuccess: 'Perfil de seguro desactivado.',
   insurancePayerRequired: 'Seleccione o ingrese un pagador / plan.',
   insurancePriorityRequired: 'La prioridad del seguro es obligatoria.',
   insurancePriorityDuplicate:
     'Este paciente ya tiene un seguro activo con esta prioridad.',
   insuranceMemberIdInvalid:
-    'Ingrese un ID válido (letras, números, espacios, guiones; máx. 50).',
+    'Ingrese 1 a 20 letras o números solamente (sin espacios).',
   insuranceTypeRequired: 'El tipo de seguro es obligatorio.',
   insuranceEffectiveDateRequired:
     'La fecha efectiva de la póliza es obligatoria.',
@@ -639,9 +641,14 @@ export default {
   insuranceSubscriberNameMax:
     'El nombre del titular debe tener como máximo 150 caracteres.',
   insuranceMedicaidIdRequired: 'El ID de beneficiario Medicaid es obligatorio.',
+  insuranceMedicaidIdInvalid: 'El ID Medicaid debe ser exactamente 10 dígitos.',
   insuranceMedicareIdRequired: 'El ID de miembro Medicare es obligatorio.',
+  insuranceMedicareIdInvalid:
+    'El ID Medicare debe tener exactamente 11 letras y/o números.',
   insuranceGoldenCardRequired: 'El ID Golden Card es obligatorio.',
+  insuranceGoldenCardInvalid:
+    'El ID Golden Card debe ser exactamente 8 dígitos.',
   insuranceIdentifierInvalid:
-    'Use solo letras, números, espacios y guiones (máx. 50).',
+    'Use solo letras y números, de 1 a 20 caracteres.',
   insuranceStatusRequired: 'El estado del seguro es obligatorio.',
 }

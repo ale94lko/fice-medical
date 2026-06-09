@@ -195,7 +195,7 @@
                   hide-bottom-space
                   :readonly="readonly"
                   :placeholder="t('insuranceMedicaidPlaceholder')"
-                  :maxlength="clientInsuranceMaxMemberIdLength"
+                  :maxlength="clientInsuranceMedicaidRecipientIdLength"
                   :error="Boolean(fieldError('medicaidRecipientId'))"
                   :error-message="errorText('medicaidRecipientId')"
                   :data-testid="tid.insuranceField('medicaidId')"
@@ -213,7 +213,7 @@
                   hide-bottom-space
                   :readonly="readonly"
                   :placeholder="t('insuranceMedicarePlaceholder')"
-                  :maxlength="clientInsuranceMaxMemberIdLength"
+                  :maxlength="clientInsuranceMedicareMemberIdLength"
                   :error="Boolean(fieldError('medicareMemberId'))"
                   :error-message="errorText('medicareMemberId')"
                   :data-testid="tid.insuranceField('medicareId')"
@@ -231,8 +231,7 @@
                   hide-bottom-space
                   :readonly="readonly"
                   :placeholder="t('insuranceGoldenCardPlaceholder')"
-                  :maxlength="clientInsuranceMaxMemberIdLength"
-                  :error="Boolean(fieldError('goldenCardMemberId'))"
+                  :maxlength="clientInsuranceGoldenCardMemberIdLength"
                   :error-message="errorText('goldenCardMemberId')"
                   :data-testid="tid.insuranceField('goldenCardId')"
                 />
@@ -349,8 +348,11 @@ import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import InsuranceCardUploadField from 'components/InsuranceCardUploadField.vue'
 import {
+  clientInsuranceGoldenCardMemberIdLength,
   clientInsuranceMaxMemberIdLength,
   clientInsuranceMaxSubscriberNameLength,
+  clientInsuranceMedicaidRecipientIdLength,
+  clientInsuranceMedicareMemberIdLength,
   clientInsuranceRelationshipValues,
 } from 'components/constants.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'

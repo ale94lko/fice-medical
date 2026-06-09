@@ -29,7 +29,7 @@
         :empty-label="t('insuranceProfilesEmpty')"
         @view="openView"
         @edit="openEdit"
-        @delete="openDelete"
+        @deactivate="openDeactivate"
       />
     </div>
 
@@ -49,9 +49,9 @@
       @save="onDialogSave"
     />
 
-    <InsuranceDeleteDialog
-      v-model="deleteDialogOpen"
-      @confirm="onDeleteConfirm"
+    <InsuranceDeactivateDialog
+      v-model="deactivateDialogOpen"
+      @confirm="onDeactivateConfirm"
     />
   </div>
 </template>
@@ -60,14 +60,15 @@
 import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import InsuranceDeleteDialog from 'components/InsuranceDeleteDialog.vue'
+import InsuranceDeactivateDialog from
+  'components/InsuranceDeactivateDialog.vue'
 import InsuranceProfileDialog from 'components/InsuranceProfileDialog.vue'
 import InsuranceProfilesTable from 'components/InsuranceProfilesTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   createEmptyInsuranceProfile,
-  softDeleteInsuranceProfile,
+  deactivateInsuranceProfile,
   visibleInsuranceProfiles,
 } from 'src/utils/client-insurance.js'
 
@@ -97,7 +98,7 @@ const $q = useQuasar()
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
 const activeProfile = ref(null)
-const deleteDialogOpen = ref(false)
+const deactivateDialogOpen = ref(false)
 const deletingProfile = ref(null)
 
 const visibleProfiles = computed(() =>
@@ -122,9 +123,9 @@ function openEdit(profile) {
   dialogOpen.value = true
 }
 
-function openDelete(profile) {
+function openDeactivate(profile) {
   deletingProfile.value = profile
-  deleteDialogOpen.value = true
+  deactivateDialogOpen.value = true
 }
 
 function onDialogSave(profile) {
@@ -148,15 +149,15 @@ function onDialogSave(profile) {
   })
 }
 
-function onDeleteConfirm() {
+function onDeactivateConfirm(reason) {
   const profile = deletingProfile.value
-  if (!profile) {
+  if (!profile || !String(reason ?? '').trim()) {
     return
   }
-  softDeleteInsuranceProfile(profile)
+  deactivateInsuranceProfile(profile, reason)
   $q.notify({
     type: quasarNotifyTypes.positive,
-    message: t('insuranceDeletedSuccess'),
+    message: t('insuranceDeactivatedSuccess'),
     position: 'top',
   })
   deletingProfile.value = null

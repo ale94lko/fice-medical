@@ -34,7 +34,7 @@ Revisa también `src/composables/`, `src/i18n/` y estilos en `src/css/add-client
 | Tabla en Add/Edit Client | Tabla HTML + clases `add-client-form__fmh-table-wrap`, `add-client-form__fmh-table`, `add-client-form__fmh-table-actions-col` (ver `FamilyMedicalHistoryTable.vue`) |
 | Contenedor de lista/tabla | `add-client-form__fmh-list-card` |
 | Fila teléfono/email con +/− | `AddClientMethodRowActions` + `add-client-form__contact-method-type-row` |
-| Modal confirmación | `ModalComponent`, `InsuranceDeleteDialog.vue` |
+| Modal confirmación | `ModalComponent`, `InsuranceDeactivateDialog.vue` |
 | Modal formulario grande (Add Client) | `InsuranceProfileDialog.vue`: `insurance-dialog app-dialog-card`, `AppDialogHeader`, `app-dialog-card__body q-px-lg`, secciones `insurance-dialog__card-section q-mt-lg`, footer `app-dialog-card__actions` |
 | Modal formulario mediano | `family-medical-history-dialog app-dialog-card` (ver FMH / `LabComponentDialog.vue`) |
 | Campo requerido en label | prop `required` en `FormField` (asterisco), no texto "(Optional)" en labels |

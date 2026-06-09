@@ -185,7 +185,11 @@ export const clientInsuranceRelationshipValues = {
 
 export const clientInsuranceMaxPayerLength = 150
 
-export const clientInsuranceMaxMemberIdLength = 50
+/** Member ID & other plan IDs: letters and digits only, max length. */
+export const clientInsuranceMaxMemberIdLength = 20
+export const clientInsuranceMedicareMemberIdLength = 11
+export const clientInsuranceMedicaidRecipientIdLength = 10
+export const clientInsuranceGoldenCardMemberIdLength = 8
 
 export const clientInsuranceMaxSubscriberNameLength = 150
 

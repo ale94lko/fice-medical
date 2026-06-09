@@ -80,10 +80,10 @@ export const addClientTestIds = {
   insuranceBtnAdd: 'add-client-insurance-btn-add',
   insuranceRowView: id => toTestId('add-client-insurance-row', id, 'btn-view'),
   insuranceRowEdit: id => toTestId('add-client-insurance-row', id, 'btn-edit'),
-  insuranceRowDelete: id => toTestId(
+  insuranceRowDeactivate: id => toTestId(
     'add-client-insurance-row',
     id,
-    'btn-delete',
+    'btn-deactivate',
   ),
   insuranceModal: name => toTestId('add-client-insurance-modal', name),
   insuranceModalBtn: name => toTestId(

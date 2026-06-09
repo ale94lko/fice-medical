@@ -101,6 +101,7 @@ function mapInsuranceProfile(profile) {
       clientInsuranceStatusValues,
       profile.status,
     ) || 'active',
+    deactivation_reason: trimInsuranceField(profile.deactivationReason) || null,
     front_card_url: insuranceCardUrl(profile.frontCardFile),
     back_card_url: insuranceCardUrl(profile.backCardFile),
   }

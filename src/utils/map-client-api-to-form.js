@@ -653,6 +653,12 @@ function mapInsuranceProfileFromApi(row) {
     ),
     deleted: false,
     deletedAt: null,
+    deactivationReason: String(
+      row?.deactivation_reason ?? row?.deactivationReason ?? '',
+    ).trim(),
+    deactivatedAt: String(
+      row?.deactivated_at ?? row?.deactivatedAt ?? '',
+    ).trim() || null,
   }
 }
 

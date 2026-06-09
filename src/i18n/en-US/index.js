@@ -600,20 +600,22 @@ export default {
   insuranceCardFileType: 'Allowed formats: PNG, JPG, or PDF.',
   insuranceCardFileSize: 'File must be 5MB or smaller.',
   insuranceStatus: 'Insurance Status',
-  insuranceDeleteTitle: 'Delete Insurance Profile',
-  insuranceDeleteMessage:
-    'Are you sure you want to delete this insurance profile? '
-    + 'This action cannot be undone.',
-  insuranceDeleteConfirm: 'Delete',
+  insuranceDeactivateTitle: 'Deactivate Insurance Profile',
+  insuranceDeactivateMessage:
+    'This insurance profile will be marked as inactive and will no longer be '
+    + 'available for new billing, claims, or authorizations.',
+  insuranceDeactivationReasonLabel: 'Deactivation Reason',
+  insuranceDeactivateConfirm: 'Deactivate',
+  insuranceActionDeactivate: 'Deactivate insurance profile',
   insuranceAddedSuccess: 'Insurance profile added.',
   insuranceUpdatedSuccess: 'Insurance profile updated.',
-  insuranceDeletedSuccess: 'Insurance profile deleted.',
+  insuranceDeactivatedSuccess: 'Insurance profile deactivated.',
   insurancePayerRequired: 'Select or enter a payer / plan name.',
   insurancePriorityRequired: 'Insurance priority is required.',
   insurancePriorityDuplicate:
     'This patient already has an active insurance with this priority.',
   insuranceMemberIdInvalid:
-    'Enter a valid member ID (letters, numbers, spaces, hyphens; max 50).',
+    'Enter 1–20 letters or numbers only (no spaces).',
   insuranceTypeRequired: 'Insurance type is required.',
   insuranceEffectiveDateRequired: 'Policy effective date is required.',
   insuranceExpirationDateInvalid:
@@ -623,9 +625,13 @@ export default {
   insuranceSubscriberNameMax:
     'Subscriber name must be at most 150 characters.',
   insuranceMedicaidIdRequired: 'Medicaid Recipient ID is required.',
+  insuranceMedicaidIdInvalid: 'Medicaid ID must be exactly 10 digits.',
   insuranceMedicareIdRequired: 'Medicare Member ID is required.',
+  insuranceMedicareIdInvalid:
+    'Medicare ID must be exactly 11 letters and/or digits.',
   insuranceGoldenCardRequired: 'Golden Card Member ID is required.',
+  insuranceGoldenCardInvalid: 'Golden Card ID must be exactly 8 digits.',
   insuranceIdentifierInvalid:
-    'Use letters, numbers, spaces, and hyphens only (max 50).',
+    'Use letters and numbers only, 1–20 characters.',
   insuranceStatusRequired: 'Insurance status is required.',
 }

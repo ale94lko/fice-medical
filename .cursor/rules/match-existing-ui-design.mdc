@@ -19,7 +19,7 @@ alwaysApply: true
 | Tipo | Copiar de |
 |------|-----------|
 | Modal / drawer de formulario (Add Client) | `InsuranceProfileDialog.vue` |
-| Modal confirmación / eliminar | `InsuranceDeleteDialog.vue` o `ModalComponent.vue` |
+| Modal confirmación / desactivar seguro | `InsuranceDeactivateDialog.vue` o `ModalComponent.vue` |
 | Tab con tabla + botón Add | `AddClientInsuranceTab.vue` + tabla del tab |
 | Tabla HTML en cliente | `FamilyMedicalHistoryTable.vue` / `InsuranceProfilesTable.vue` |
 | Tab clínico con API + lista | `AddClientAssessmentsTab.vue` o `AddClientInsuranceTab.vue` |

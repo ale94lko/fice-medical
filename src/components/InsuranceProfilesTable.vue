@@ -71,14 +71,15 @@
               @click="emit('edit', profile)"
             />
             <q-btn
+              v-if="canDeactivate(profile)"
               flat
               round
               dense
               color="grey-7"
-              icon="delete"
-              :data-testid="tid.insuranceRowDelete(profile.id)"
-              :aria-label="t('delete')"
-              @click="emit('delete', profile)"
+              icon="toggle_off"
+              :data-testid="tid.insuranceRowDeactivate(profile.id)"
+              :aria-label="t('insuranceActionDeactivate')"
+              @click="emit('deactivate', profile)"
             />
           </td>
         </tr>
@@ -109,7 +110,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['view', 'edit', 'delete'])
+const emit = defineEmits(['view', 'edit', 'deactivate'])
 
 const { t } = useI18n()
 
@@ -147,5 +148,14 @@ function statusLabel(status) {
   }
 
   return status || '—'
+}
+
+function canDeactivate(profile) {
+  const s = profile?.status
+
+  return (
+    s === clientInsuranceStatusValues.active
+    || s === clientInsuranceStatusValues.pendingVerification
+  )
 }
 </script>
