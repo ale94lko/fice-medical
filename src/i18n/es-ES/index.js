@@ -497,7 +497,8 @@ export default {
   allergyDeleteMessageBold:
     'Esta acción es permanente y no se puede deshacer.',
   allergyDeleteReasonHint:
-    'Para auditoría, indique el motivo de la eliminación.',
+    'Para auditoría, el motivo es obligatorio. No puede eliminar esta '
+    + 'alergia sin una explicación.',
   allergyDeleteReasonLabel: 'Motivo de eliminación',
   vitalsRecordSectionTitle: 'Registrar signos vitales',
   vitalsAdditionalInfoTitle: 'Información adicional',

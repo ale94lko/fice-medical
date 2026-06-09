@@ -36,7 +36,7 @@
               :test-id="tid.allergyField('startYear')">
               <ClientYearField
                 v-model="localStartYear"
-                :min-year="allergyMinStartYear()"
+                :min-year="allergyMinYear"
                 :max-year="allergyMaxStartYear()"
                 :error="Boolean(yearError)"
                 :error-message="yearError"
@@ -151,6 +151,11 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  /** Patient DOB (mm/dd/yyyy); allergy start year cannot precede birth year. */
+  patientDob: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
@@ -182,9 +187,13 @@ const severityOptions = [
   },
 ]
 
+const allergyMinYear = computed(() =>
+  allergyMinStartYear(props.patientDob ?? ''),
+)
+
 const startYearHint = computed(() =>
   t('allergyStartYearHint', {
-    min: allergyMinStartYear(),
+    min: allergyMinYear.value,
     max: allergyMaxStartYear(),
   }),
 )
@@ -235,7 +244,7 @@ function applyErrors(result) {
       severityError.value = t(result.errorKey)
     } else if (result.errorKey === 'allergyStartYearInvalid') {
       yearError.value = t(result.errorKey, {
-        min: allergyMinStartYear(),
+        min: allergyMinYear.value,
         max: allergyMaxStartYear(),
       })
     }
@@ -247,6 +256,7 @@ function onSave() {
     localAllergy.value,
     localSeverity.value,
     localStartYear.value,
+    props.patientDob ?? '',
   )
   if (!result.ok) {
     applyErrors(result)

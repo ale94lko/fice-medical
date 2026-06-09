@@ -368,56 +368,96 @@
   }
 
   .add-client-tab--allergies-mild:not(.q-tab--active) {
-    color: #92400e;
+    color: #ca8a04 !important;
+    background: #fefce8 !important;
+    border: 1px solid #facc15;
 
-    .add-client-tab__icon {
-      color: #92400e;
+    .add-client-tab__icon,
+    .add-client-tab__chevron,
+    .add-client-tab__text {
+      color: #ca8a04 !important;
     }
   }
 
+  /* Active = mismo esquema que chip / badge (fondo claro, texto e icono oscuros). */
   .add-client-tab--allergies-mild.q-tab--active {
-    background: #92400e;
-    color: $white;
+    background: #fefce8 !important;
+    color: #ca8a04 !important;
+    border: 2px solid #facc15;
+    font-weight: 700;
 
     .add-client-tab__icon,
-    .add-client-tab__chevron {
+    .add-client-tab__chevron,
+    .add-client-tab__text {
+      color: #ca8a04 !important;
+    }
+
+    .add-client-tab__error-badge {
       color: $white;
+      background: $negative;
+      box-shadow: 0 0 0 1px #fefce8;
     }
   }
 
   .add-client-tab--allergies-moderate:not(.q-tab--active) {
-    color: $warning;
+    color: #ea580c !important;
+    background: #fff7ed !important;
+    border: 1px solid #fb923c;
 
-    .add-client-tab__icon {
-      color: $warning;
+    .add-client-tab__icon,
+    .add-client-tab__chevron,
+    .add-client-tab__text {
+      color: #ea580c !important;
     }
   }
 
   .add-client-tab--allergies-moderate.q-tab--active {
-    background: $warning;
-    color: $white;
+    background: #fff7ed !important;
+    color: #ea580c !important;
+    border: 2px solid #fb923c;
+    font-weight: 700;
 
     .add-client-tab__icon,
-    .add-client-tab__chevron {
+    .add-client-tab__chevron,
+    .add-client-tab__text {
+      color: #ea580c !important;
+    }
+
+    .add-client-tab__error-badge {
       color: $white;
+      background: $negative;
+      box-shadow: 0 0 0 1px #fff7ed;
     }
   }
 
   .add-client-tab--allergies-severe:not(.q-tab--active) {
-    color: $negative;
+    color: #dc2626 !important;
+    background: #fef2f2 !important;
+    border: 1px solid #f87171;
 
-    .add-client-tab__icon {
-      color: $negative;
+    .add-client-tab__icon,
+    .add-client-tab__chevron,
+    .add-client-tab__text {
+      color: #dc2626 !important;
     }
   }
 
   .add-client-tab--allergies-severe.q-tab--active {
-    background: $negative;
-    color: $white;
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 2px solid #f87171;
+    font-weight: 700;
 
     .add-client-tab__icon,
-    .add-client-tab__chevron {
+    .add-client-tab__chevron,
+    .add-client-tab__text {
+      color: #dc2626 !important;
+    }
+
+    .add-client-tab__error-badge {
       color: $white;
+      background: $negative;
+      box-shadow: 0 0 0 1px #fef2f2;
     }
   }
 
@@ -815,29 +855,29 @@
   }
 
   &--mild {
-    background: #faf6f0 !important;
-    color: #92400e;
+    background: #fefce8 !important;
+    color: #ca8a04;
 
     &::before {
-      border-color: #e7d5bc;
+      border-color: #facc15;
     }
   }
 
   &--moderate {
-    background: #fff8eb !important;
-    color: #b45309;
+    background: #fff7ed !important;
+    color: #ea580c;
 
     &::before {
-      border-color: #f0d49a;
+      border-color: #fb923c;
     }
   }
 
   &--severe {
     background: #fef2f2 !important;
-    color: #b91c1c;
+    color: #dc2626;
 
     &::before {
-      border-color: #fecaca;
+      border-color: #f87171;
     }
   }
 
@@ -850,32 +890,32 @@
     }
 
     &.add-client-form__allergy-severity-chip--mild {
-      background: #f5ebe0 !important;
-      color: #78350f;
-      box-shadow: 0 0 0 1px #92400e;
+      background: #fefce8 !important;
+      color: #ca8a04;
+      box-shadow: none;
 
       &::before {
-        border-color: #92400e !important;
+        border-color: #facc15 !important;
       }
     }
 
     &.add-client-form__allergy-severity-chip--moderate {
-      background: #ffedd5 !important;
-      color: #9a3412;
-      box-shadow: 0 0 0 1px $warning;
+      background: #fff7ed !important;
+      color: #ea580c;
+      box-shadow: none;
 
       &::before {
-        border-color: $warning !important;
+        border-color: #fb923c !important;
       }
     }
 
     &.add-client-form__allergy-severity-chip--severe {
-      background: #fee2e2 !important;
-      color: #991b1b;
-      box-shadow: 0 0 0 1px $negative;
+      background: #fef2f2 !important;
+      color: #dc2626;
+      box-shadow: none;
 
       &::before {
-        border-color: $negative !important;
+        border-color: #f87171 !important;
       }
     }
   }
@@ -889,15 +929,15 @@
   flex-shrink: 0;
 
   &--mild {
-    background: #92400e;
+    background: #ca8a04;
   }
 
   &--moderate {
-    background: $warning;
+    background: #ea580c;
   }
 
   &--severe {
-    background: $negative;
+    background: #dc2626;
   }
 }
 
@@ -915,18 +955,18 @@
   font-weight: 600;
 
   &--mild {
-    background: #faf6f0;
-    color: #92400e;
+    background: #fefce8;
+    color: #ca8a04;
   }
 
   &--moderate {
-    background: #fff8eb;
-    color: #b45309;
+    background: #fff7ed;
+    color: #ea580c;
   }
 
   &--severe {
     background: #fef2f2;
-    color: #b91c1c;
+    color: #dc2626;
   }
 }
 

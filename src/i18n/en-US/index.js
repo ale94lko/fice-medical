@@ -484,8 +484,9 @@ export default {
   allergyDeleteMessageBold:
     'This action is permanent and cannot be undone.',
   allergyDeleteReasonHint:
-    'For audit purposes, please provide a reason for the deletion.',
-  allergyDeleteReasonLabel: 'Enter reason for deletion',
+    'For audit purposes, a reason is required. You cannot delete this '
+    + 'allergy without an explanation.',
+  allergyDeleteReasonLabel: 'Reason for deletion',
   vitalsRecordSectionTitle: 'Record Vitals',
   vitalsAdditionalInfoTitle: 'Additional Information',
   vitalsEditSectionTitle: 'Edit Vitals',

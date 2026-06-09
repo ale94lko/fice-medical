@@ -30,7 +30,7 @@
             :test-id="tid.allergyField('startYear')">
             <ClientYearField
               v-model="section.draft.startYear"
-              :min-year="allergyMinStartYear()"
+              :min-year="allergyMinYear"
               :max-year="allergyMaxStartYear()"
               :error="Boolean(draftYearError)"
               :error-message="draftYearError"
@@ -119,11 +119,13 @@
       v-model="editDialogOpen"
       :entry="editingEntry"
       :entries="section.entries"
+      :patient-dob="patientDob"
       @save="onEditSave"
     />
 
     <AllergyDeleteDialog
       v-model="deleteDialogOpen"
+      :require-deletion-reason="requireDeletionReason"
       @confirm="onDeleteConfirm"
     />
   </div>
@@ -161,6 +163,16 @@ const props = defineProps({
   modelValue: {
     type: Object,
     required: true,
+  },
+  /** Patient DOB (mm/dd/yyyy); allergy start year cannot precede birth year. */
+  patientDob: {
+    type: String,
+    default: '',
+  },
+  /** When editing an existing client, deletion requires an audit reason. */
+  requireDeletionReason: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -200,9 +212,13 @@ const section = computed({
   set: val => emit('update:modelValue', val),
 })
 
+const allergyMinYear = computed(() =>
+  allergyMinStartYear(props.patientDob ?? ''),
+)
+
 const startYearHint = computed(() =>
   t('allergyStartYearHint', {
-    min: allergyMinStartYear(),
+    min: allergyMinYear.value,
     max: allergyMaxStartYear(),
   }),
 )
@@ -237,7 +253,7 @@ function applyAllergyDraftFieldErrorKeys(keys) {
   }
   if (keys.year) {
     draftYearError.value = t(keys.year, {
-      min: allergyMinStartYear(),
+      min: allergyMinYear.value,
       max: allergyMaxStartYear(),
     })
   }
@@ -245,7 +261,7 @@ function applyAllergyDraftFieldErrorKeys(keys) {
 
 function applySaveValidation() {
   applyAllergyDraftFieldErrorKeys(
-    getAllergyDraftFieldErrorKeys(section.value),
+    getAllergyDraftFieldErrorKeys(section.value, props.patientDob ?? ''),
   )
 }
 
@@ -274,7 +290,7 @@ function applyDraftErrors(result) {
       draftSeverityError.value = t(result.errorKey)
     } else if (result.errorKey === 'allergyStartYearInvalid') {
       draftYearError.value = t(result.errorKey, {
-        min: allergyMinStartYear(),
+        min: allergyMinYear.value,
         max: allergyMaxStartYear(),
       })
     } else {
@@ -293,6 +309,7 @@ function onAddEntry() {
     draft.allergy,
     draft.severity,
     draft.startYear,
+    props.patientDob ?? '',
   )
   if (!result.ok) {
     applyDraftErrors(result)
@@ -354,6 +371,9 @@ function openDelete(entry) {
 }
 
 function onDeleteConfirm(reason) {
+  if (props.requireDeletionReason && !trimAllergyField(reason)) {
+    return
+  }
   const id = deletingEntryId.value
   if (!id) {
     return
@@ -364,12 +384,14 @@ function onDeleteConfirm(reason) {
   }
   const removed = section.value.entries[index]
   section.value.entries.splice(index, 1)
-  section.value.deletionAudit.push({
-    allergy: removed.allergy,
-    severity: removed.severity,
-    startYear: removed.startYear,
-    reason: trimAllergyField(reason),
-  })
+  if (props.requireDeletionReason) {
+    section.value.deletionAudit.push({
+      allergy: removed.allergy,
+      severity: removed.severity,
+      startYear: removed.startYear,
+      reason: trimAllergyField(reason),
+    })
+  }
   deletingEntryId.value = null
   notifySuccess(t('allergyDeletedSuccess'))
 }

@@ -47,6 +47,13 @@ export function parseUsDateString(value) {
   return d
 }
 
+/** Calendar year from patient DOB (mm/dd/yyyy), or null if missing/invalid. */
+export function birthYearFromUsDob(dobUs) {
+  const d = parseUsDateString(dobUs)
+
+  return d ? d.getFullYear() : null
+}
+
 export function fullYearsBetween(dob, today) {
   let age = today.getFullYear() - dob.getFullYear()
   const monthDelta = today.getMonth() - dob.getMonth()

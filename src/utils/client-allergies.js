@@ -6,6 +6,7 @@ import {
   clientAllergiesNkaStatus,
   clientMaxAge,
 } from 'components/constants.js'
+import { birthYearFromUsDob } from 'src/utils/client-form.js'
 
 const ALLERGY_NAME_RE = /^[a-zA-Z0-9\s\-()"']*$/
 
@@ -21,11 +22,21 @@ export function allergyMaxStartYear() {
   return new Date().getFullYear()
 }
 
-export function allergyMinStartYear() {
-  return Math.max(
+/**
+ * @param {string} [patientDobUs] Patient DOB as mm/dd/yyyy when known.
+ *   Allergy start year cannot be before this calendar year.
+ */
+export function allergyMinStartYear(patientDobUs) {
+  const base = Math.max(
     clientAllergyMinStartYear,
     allergyMaxStartYear() - clientMaxAge,
   )
+  const birthYear = birthYearFromUsDob(patientDobUs)
+  if (birthYear == null) {
+    return base
+  }
+
+  return Math.max(base, birthYear)
 }
 
 export function createEmptyAllergyDraft() {
@@ -76,7 +87,7 @@ export function isValidAllergyName(value) {
   )
 }
 
-export function isValidAllergyStartYear(value) {
+export function isValidAllergyStartYear(value, patientDobUs) {
   const s = trimAllergyField(value)
   if (!s) {
     return true
@@ -85,7 +96,7 @@ export function isValidAllergyStartYear(value) {
     return false
   }
   const year = Number(s)
-  const min = allergyMinStartYear()
+  const min = allergyMinStartYear(patientDobUs)
   const max = allergyMaxStartYear()
 
   return Number.isInteger(year) && year >= min && year <= max
@@ -128,7 +139,12 @@ export function isDuplicateAllergyEntry(
   })
 }
 
-export function validateAllergyPair(allergy, severity, startYear) {
+export function validateAllergyPair(
+  allergy,
+  severity,
+  startYear,
+  patientDobUs,
+) {
   const name = trimAllergyField(allergy)
   const sev = trimAllergyField(severity)
   const year = trimAllergyField(startYear)
@@ -145,14 +161,19 @@ export function validateAllergyPair(allergy, severity, startYear) {
   if (!isValidAllergyName(name)) {
     return { ok: false, errorKey: 'allergyNameInvalid' }
   }
-  if (!isValidAllergyStartYear(year)) {
+  if (!isValidAllergyStartYear(year, patientDobUs)) {
     return { ok: false, errorKey: 'allergyStartYearInvalid' }
   }
 
   return { ok: true }
 }
 
-export function validateAllergyForAdd(allergy, severity, startYear) {
+export function validateAllergyForAdd(
+  allergy,
+  severity,
+  startYear,
+  patientDobUs,
+) {
   const name = trimAllergyField(allergy)
   const sev = trimAllergyField(severity)
   const year = trimAllergyField(startYear)
@@ -161,20 +182,21 @@ export function validateAllergyForAdd(allergy, severity, startYear) {
     return { ok: false, errorKey: 'allergyAddRequired' }
   }
 
-  return validateAllergyPair(allergy, severity, startYear)
+  return validateAllergyPair(allergy, severity, startYear, patientDobUs)
 }
 
-export function validateAllergiesDraftClear(section) {
+export function validateAllergiesDraftClear(section, patientDobUs) {
   const draft = section?.draft ?? {}
 
   return validateAllergyPair(
     draft.allergy,
     draft.severity,
     draft.startYear,
+    patientDobUs,
   )
 }
 
-export function getAllergyDraftFieldErrorKeys(section) {
+export function getAllergyDraftFieldErrorKeys(section, patientDobUs) {
   const draft = section?.draft ?? {}
   const name = trimAllergyField(draft.allergy)
   const sev = trimAllergyField(draft.severity)
@@ -196,15 +218,15 @@ export function getAllergyDraftFieldErrorKeys(section) {
   if (name && !sev) {
     keys.severity = 'allergySeverityRequired'
   }
-  if (!isValidAllergyStartYear(year)) {
+  if (!isValidAllergyStartYear(year, patientDobUs)) {
     keys.year = 'allergyStartYearInvalid'
   }
 
   return keys
 }
 
-export function countAllergyDraftFieldErrors(section) {
-  const keys = getAllergyDraftFieldErrorKeys(section)
+export function countAllergyDraftFieldErrors(section, patientDobUs) {
+  const keys = getAllergyDraftFieldErrorKeys(section, patientDobUs)
 
   return [keys.name, keys.severity, keys.year].filter(Boolean).length
 }

@@ -430,6 +430,8 @@
           <AddClientAllergiesTab
             ref="allergiesTabRef"
             v-model="form[clientFormSections.allergies]"
+            :patient-dob="form[ck.dob]"
+            :require-deletion-reason="isEditMode"
           />
         </q-tab-panel>
 

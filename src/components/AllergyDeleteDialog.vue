@@ -17,19 +17,23 @@
         <p class="text-body2 text-weight-bold q-mb-md">
           {{ t('allergyDeleteMessageBold') }}
         </p>
-        <p class="text-body2 q-mb-md">
-          {{ t('allergyDeleteReasonHint') }}
-        </p>
-        <AddClientLabeledField :label="t('allergyDeleteReasonLabel')">
-          <q-input
-            v-model="reason"
-            outlined
-            type="textarea"
-            rows="3"
-            counter
-            maxlength="500"
-          />
-        </AddClientLabeledField>
+        <template v-if="requireDeletionReason">
+          <p class="text-body2 q-mb-md">
+            {{ t('allergyDeleteReasonHint') }}
+          </p>
+          <AddClientLabeledField
+            required
+            :label="t('allergyDeleteReasonLabel')">
+            <q-input
+              v-model="reason"
+              outlined
+              type="textarea"
+              rows="3"
+              counter
+              maxlength="500"
+            />
+          </AddClientLabeledField>
+        </template>
       </q-card-section>
       <q-card-actions
         align="right"
@@ -47,6 +51,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :disable="requireDeletionReason && !hasDeletionReason"
           :label="t('confirm')"
           @click="onConfirm"
         />
@@ -66,6 +71,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  /**
+   * When true (edit client), show audit reason field and require it to confirm.
+   * When false (add client, not yet saved), confirm without reason.
+   */
+  requireDeletionReason: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
@@ -73,6 +86,10 @@ const emit = defineEmits(['update:modelValue', 'confirm'])
 const { t } = useI18n()
 
 const reason = ref('')
+
+const hasDeletionReason = computed(
+  () => String(reason.value ?? '').trim().length > 0,
+)
 
 const open = computed({
   get: () => props.modelValue,
@@ -93,6 +110,9 @@ function onCancel() {
 }
 
 function onConfirm() {
+  if (props.requireDeletionReason && !hasDeletionReason.value) {
+    return
+  }
   emit('confirm', String(reason.value ?? '').trim())
   open.value = false
 }
