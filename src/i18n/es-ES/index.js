@@ -328,7 +328,13 @@ export default {
   duplicateMatchConfidenceHigh: 'Alta confianza',
   duplicateMatchConfidenceMedium: 'Confianza media',
   duplicateMatchConfidenceLow: 'Baja confianza',
+  duplicateMatchBadgePotentialDuplicate: 'Posible duplicado',
+  duplicateMatchBadgePossibleMatch: 'Coincidencia posible',
+  duplicateMatchBadgeLowConfidence: 'Baja confianza',
   duplicateMatchConfidenceUnknown: 'Coincidencia',
+  duplicateMatchMenuSubtitle:
+    'Revise estas coincidencias potenciales antes de continuar.',
+  duplicateMatchMatchesFound: '{count} coincidencias encontradas',
   duplicateMatchSaveConfirmTitle: 'Posibles clientes duplicados',
   duplicateMatchSaveConfirmMessage:
     'Existen clientes con información similar. ¿Seguro que desea crear un '

@@ -319,7 +319,13 @@ export default {
   duplicateMatchConfidenceHigh: 'High confidence',
   duplicateMatchConfidenceMedium: 'Medium confidence',
   duplicateMatchConfidenceLow: 'Low confidence',
+  duplicateMatchBadgePotentialDuplicate: 'Potential Duplicate',
+  duplicateMatchBadgePossibleMatch: 'Possible Match',
+  duplicateMatchBadgeLowConfidence: 'Low Confidence',
   duplicateMatchConfidenceUnknown: 'Match',
+  duplicateMatchMenuSubtitle:
+    'Review these potential matches before continuing.',
+  duplicateMatchMatchesFound: '{count} matches found',
   duplicateMatchSaveConfirmTitle: 'Possible duplicate clients found',
   duplicateMatchSaveConfirmMessage:
     'There are existing clients with similar information. Are you sure you '
