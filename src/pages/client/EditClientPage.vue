@@ -58,7 +58,7 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import AddClientForm from 'components/AddClientForm.vue'
+import AddClientForm from '../../components/client/AddClientForm.vue'
 import { clientPageTestIds } from 'src/test-ids/index.js'
 
 const route = useRoute()

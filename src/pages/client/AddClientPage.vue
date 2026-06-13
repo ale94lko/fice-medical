@@ -14,8 +14,7 @@
           />
         </q-breadcrumbs>
       </div>
-      <div
-        id="add-client-duplicate-banner-anchor"
+      <div id="banner-anchor"
         class="add-client-page__duplicate-banner-anchor"
       />
       <div class="add-client-page__actions">
@@ -61,7 +60,7 @@
 import { computed, provide, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import AddClientForm from 'components/AddClientForm.vue'
+import AddClientForm from '../../components/client/AddClientForm.vue'
 import { clientPageTestIds } from 'src/test-ids/index.js'
 
 const router = useRouter()

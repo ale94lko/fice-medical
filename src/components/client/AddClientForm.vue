@@ -3,9 +3,9 @@
     <template v-if="!isEditMode">
       <Teleport
         v-if="duplicateBannerTeleportReady"
-        to="#add-client-duplicate-banner-anchor"
+        to="#banner-anchor"
         :disabled="!duplicateBannerTeleportEnabled">
-        <AddClientDuplicateMatchBanner
+        <BannerComponent
           :matches="duplicateFilteredMatches"
           :loading="duplicateMatchLoading"
           :ignored="duplicateIgnoredBanner"
@@ -21,45 +21,45 @@
     <div class="chrome">
       <div class="tabs-row">
         <q-tabs
-        v-model="activeTab"
-        dense
-        no-caps
-        outside-arrows
-        mobile-arrows
-        class="add-client-tabs"
-        active-color="white"
-        indicator-color="transparent"
-        align="left">
-        <q-tab
-          v-for="tab in mainTabs"
-          :key="tab.key"
-          :name="tab.key"
-          :data-testid="tid.tab(tab.key)"
-          :class="mainTabClass(tab)">
-          <span class="label row items-center no-wrap">
-            <q-icon
-              :name="tab.icon"
-              size="18px"
-              class="icon"
-            />
-            <span class="text">{{ t(tab.labelKey) }}</span>
-            <span
-              v-if="tabErrorCount(tab.key) > 0"
-              class="error-badge"
-              :aria-label="t('tabErrorCountAria', {
-                count: tabErrorCount(tab.key),
-              })">
-              {{ tabErrorCount(tab.key) }}
+          v-model="activeTab"
+          dense
+          no-caps
+          outside-arrows
+          mobile-arrows
+          class="add-client-tabs"
+          active-color="white"
+          indicator-color="transparent"
+          align="left">
+          <q-tab
+            v-for="tab in mainTabs"
+            :key="tab.key"
+            :name="tab.key"
+            :data-testid="tid.tab(tab.key)"
+            :class="mainTabClass(tab)">
+            <span class="label row items-center no-wrap">
+              <q-icon
+                :name="tab.icon"
+                size="18px"
+                class="icon"
+              />
+              <span class="text">{{ t(tab.labelKey) }}</span>
+              <span
+                v-if="tabErrorCount(tab.key) > 0"
+                class="error-badge"
+                :aria-label="t('tabErrorCountAria', {
+                  count: tabErrorCount(tab.key),
+                })">
+                {{ tabErrorCount(tab.key) }}
+              </span>
+              <q-icon
+                v-if="tab.hasSubTabs"
+                name="arrow_drop_down"
+                size="18px"
+                class="chevron q-ml-xs"
+              />
             </span>
-            <q-icon
-              v-if="tab.hasSubTabs"
-              name="arrow_drop_down"
-              size="18px"
-              class="chevron q-ml-xs"
-            />
-          </span>
-        </q-tab>
-      </q-tabs>
+          </q-tab>
+        </q-tabs>
       </div>
 
       <div
@@ -646,25 +646,24 @@ import {
 } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import TextInput from 'components/FormInput.vue'
-import ClientDateField from 'components/ClientDateField.vue'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import FormSelect from 'components/FormSelect.vue'
-import ModalComponent from 'components/ModalComponent.vue'
-import AddClientContactTab from 'components/AddClientContactTab.vue'
-import AddClientFamilyMedicalHistoryTab from
-  'components/AddClientFamilyMedicalHistoryTab.vue'
-import AddClientVitalsTab from 'components/AddClientVitalsTab.vue'
-import AddClientAssessmentsTab from 'components/AddClientAssessmentsTab.vue'
-import AddClientLabsTab from 'components/AddClientLabsTab.vue'
-import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
-import AddClientInsuranceTab from 'components/AddClientInsuranceTab.vue'
-import AddClientAccordionSection from 'components/AccordionSection.vue'
-import AddClientDuplicateMatchBanner from
-  'components/AddClientDuplicateMatchBanner.vue'
-import AddClientDuplicateMatchReviewDialog from
-  'components/AddClientDuplicateMatchReviewDialog.vue'
-import { useSiteStore } from 'stores/site-store.js'
+import TextInput from '../FormInput.vue'
+import ClientDateField from '../ClientDateField.vue'
+import AddClientLabeledField from '../AddClientLabeledField.vue'
+import FormSelect from '../FormSelect.vue'
+import ModalComponent from '../ModalComponent.vue'
+import AddClientContactTab from '../AddClientContactTab.vue'
+import AddClientFamilyMedicalHistoryTab
+  from '../AddClientFamilyMedicalHistoryTab.vue'
+import AddClientVitalsTab from '../AddClientVitalsTab.vue'
+import AddClientAssessmentsTab from '../AddClientAssessmentsTab.vue'
+import AddClientLabsTab from '../AddClientLabsTab.vue'
+import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
+import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
+import AddClientAccordionSection from '../AccordionSection.vue'
+import BannerComponent from '../BannerComponent.vue'
+import AddClientDuplicateMatchReviewDialog
+  from '../AddClientDuplicateMatchReviewDialog.vue'
+import { useSiteStore } from '../../stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
 import {
@@ -673,7 +672,7 @@ import {
   clientMaxAge,
   clientNameMaxLength,
   quasarNotifyTypes,
-} from 'components/constants.js'
+} from '../constants.js'
 import {
   formatSsnMasked,
   maxAgeForUnit,
@@ -693,13 +692,13 @@ import {
   CLINICAL_LABS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
-import { useClientProgressiveMatch } from
-  'src/composables/useClientProgressiveMatch.js'
+import { useClientProgressiveMatch }
+  from 'src/composables/useClientProgressiveMatch.js'
 import { emitClientDuplicateAudit } from 'src/utils/client-duplicate-audit.js'
-import { summarizeNewClientDataForAudit } from
-  'src/utils/client-duplicate-audit-summary.js'
-import { hasAddClientDataBeyondFirstLastName } from
-  'src/utils/add-client-beyond-minimal-identity.js'
+import { summarizeNewClientDataForAudit }
+  from 'src/utils/client-duplicate-audit-summary.js'
+import { hasAddClientDataBeyondFirstLastName }
+  from 'src/utils/add-client-beyond-minimal-identity.js'
 
 const props = defineProps({
   mode: {
@@ -724,7 +723,6 @@ const duplicateBannerInHeader = inject(
 const duplicateBannerTeleportEnabled = computed(
   () => !isEditMode.value && duplicateBannerInHeader === true,
 )
-/** Avoid Teleport mount until after initial resetForm (Vue patch race). */
 const duplicateBannerTeleportReady = ref(false)
 
 const $q = useQuasar()
