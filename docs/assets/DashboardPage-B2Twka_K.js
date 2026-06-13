@@ -1,1 +1,0 @@
-import{Ei as e,Rr as t,qi as n}from"./index-MfvFWqMC.js";import{t as r}from"./QPage-WOWmRlOn.js";var i={};function a(t,i){return n(),e(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
