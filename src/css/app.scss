@@ -921,9 +921,25 @@ input:-webkit-autofill {
   color: $primary;
 }
 
+.data-item-actions {
+  display: flex;
+  align-items: end;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .section-title-text {
   flex: 1;
   min-width: 0;
+}
+
+.data-item-component {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .subsection-heading {

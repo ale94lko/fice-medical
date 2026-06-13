@@ -4,190 +4,182 @@
     class="banner"
     :class="{ 'banner--in-header': inPageHeader }"
     :data-testid="tid.banner">
-    <div class="banner__row row items-start no-wrap">
-      <q-icon
-        name="warning"
-        color="warning"
-        size="22px"
-        class="banner__icon q-mr-sm"
-      />
-      <div class="col">
-        <div class="banner__title text-weight-bold">
-          {{ t('duplicateMatchBannerTitle', { count: matches.length }) }}
-        </div>
-        <div class="banner__hint text-body2 text-grey-7">
-          {{ t('duplicateMatchBannerHint') }}
-        </div>
-      </div>
-      <div class="banner__actions row items-center no-wrap q-gutter-sm">
-        <q-btn
-          no-caps
-          unelevated
-          icon="warning_amber"
-          class="banner__action-btn"
-          :data-testid="tid.btnIgnore"
-          :label="t('duplicateMatchIgnore')"
-          @click="emit('ignore')"
-        />
-        <q-btn
-          no-caps
-          unelevated
-          icon-right="expand_more"
-          class="banner__action-btn banner__toggle"
-          :data-testid="tid.btnViewMatches"
-          :label="t('duplicateMatchViewMatches')">
-          <q-menu
-            v-model="menuOpen"
-            anchor="bottom end"
-            self="top end"
-            class="banner__menu"
-            @hide="menuShowAll = false">
-            <q-card flat class="banner__menu-card">
-              <q-item
-                v-ripple
-                :class="[
+    <data-item-component
+      :title="t('duplicateMatchBannerTitle', { count: matches.length })"
+      :sub-title="t('duplicateMatchBannerHint')"
+      icon="warning"
+      icon-style="warning">
+      <template #actions>
+        <div class="banner__actions row items-center no-wrap q-gutter-sm">
+          <q-btn
+            no-caps
+            unelevated
+            icon="warning_amber"
+            class="banner__action-btn"
+            :data-testid="tid.btnIgnore"
+            :label="t('duplicateMatchIgnore')"
+            @click="emit('ignore')"
+          />
+          <q-btn
+            no-caps
+            unelevated
+            icon-right="expand_more"
+            class="banner__action-btn banner__toggle"
+            :data-testid="tid.btnViewMatches"
+            :label="t('duplicateMatchViewMatches')">
+            <q-menu
+              v-model="menuOpen"
+              anchor="bottom end"
+              self="top end"
+              class="banner__menu"
+              @hide="menuShowAll = false">
+              <q-card flat class="banner__menu-card">
+                <q-item
+                  v-ripple
+                  :class="[
                   'banner__menu-header',
                 ]">
-                <q-item-section avatar>
-                  <q-avatar
-                    icon="person"
-                    size="40px"
-                    class="banner__avatar"
-                    :style="{
-                      backgroundColor: 'var(--dup-avatar-bg)',
-                      color: 'var(--dup-avatar-icon-color)',
-                    }"
-                  />
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label
-                    class="banner__full-name">
-                    {{ t('duplicateMatchMenuTitle') }}
-                  </q-item-label>
-                  <q-item-label
-                    caption
-                    class="banner__meta">
-                    <span>
-                      {{ t('duplicateMatchMenuSubtitle') }}
-                    </span>
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side>
-                  <div class="banner__menu-header-row
-                    row items-start no-wrap">
-                    <div class="banner__menu-count-badge
-                      row items-center no-wrap">
-                      <q-icon
-                        name="people"
-                        size="18px"
-                        class="banner__menu-count-icon"
-                      />
-                      <span>
-                        {{
-                          t('duplicateMatchMatchesFound', {
-                            count: matches.length,
-                          })
-                        }}
-                      </span>
-                    </div>
-                  </div>
-                </q-item-section>
-              </q-item>
-              <q-separator />
-              <q-list
-                dense
-                class="banner__list"
-                :style="{ maxHeight: menuListMaxHeight }">
-                <q-item
-                  v-for="m in displayedMatches"
-                  clickable
-                  v-ripple
-                  :key="m.patientId"
-                  :class="[
-                    'banner__item',
-                    tierClass(m.matchConfidence),
-                  ]"
-                  :data-testid="tid.row(m.patientId)"
-                  @click="onPickMatch(m)">
                   <q-item-section avatar>
                     <q-avatar
                       icon="person"
                       size="40px"
                       class="banner__avatar"
                       :style="{
-                        backgroundColor: 'var(--dup-avatar-bg)',
-                        color: 'var(--dup-avatar-icon-color)',
-                      }"
+                      backgroundColor: 'var(--dup-avatar-bg)',
+                      color: 'var(--dup-avatar-icon-color)',
+                    }"
                     />
                   </q-item-section>
                   <q-item-section>
                     <q-item-label
                       class="banner__full-name">
-                      {{ displayMatchName(m.fullName) }}
+                      {{ t('duplicateMatchMenuTitle') }}
                     </q-item-label>
                     <q-item-label
                       caption
                       class="banner__meta">
-                      <q-icon
-                        name="event"
-                        size="14px"
-                        class="banner__dob-icon"
-                      />
-                      <span>
-                        {{ dobLabel(m.dateOfBirth) }}
-                      </span>
+                    <span>
+                      {{ t('duplicateMatchMenuSubtitle') }}
+                    </span>
                     </q-item-label>
                   </q-item-section>
-                  <q-item-section
-                    side
-                    class="banner__score">
-                    <div class="banner__badge">
-                      <q-icon
-                        :name="badgeIconForConfidence(m.matchConfidence)"
-                        class="banner__badge-icon"
-                      />
-                      <span class="banner__badge-score">
-                        {{ Math.round(Number(m.matchScore) || 0) }}%
-                      </span>
-                      <span class="banner__badge-sep">
-                        •
-                      </span>
-                      <span class="banner__badge-term">
-                        {{ badgeTermForConfidence(m.matchConfidence) }}
-                      </span>
-                    </div>
-                    <div class="banner__confidence-label">
-                      <span class="banner__status-dot" />
-                      <span>
-                        {{ confidenceLabel(m.matchConfidence) }}
-                      </span>
-                    </div>
-                  </q-item-section>
                   <q-item-section side>
-                    <q-icon name="chevron_right" color="grey-6" />
+                    <div class="banner__menu-header-row
+                    row items-start no-wrap">
+                      <div class="banner__menu-count-badge
+                      row items-center no-wrap">
+                        <q-icon
+                          name="people"
+                          size="18px"
+                          class="banner__menu-count-icon"
+                        />
+                        <span>
+                        {{
+                            t('duplicateMatchMatchesFound', {
+                              count: matches.length,
+                            })
+                          }}
+                      </span>
+                      </div>
+                    </div>
                   </q-item-section>
                 </q-item>
-              </q-list>
-              <template
-                v-if="hasMoreMatchesThanPreview && !menuShowAll">
                 <q-separator />
-                <q-card-actions align="center" class="q-py-sm">
-                  <q-btn
-                    flat
-                    no-caps
-                    dense
-                    color="primary"
-                    :data-testid="tid.btnViewAll"
-                    :label="t('duplicateMatchViewAll')"
-                    @click="menuShowAll = true"
-                  />
-                </q-card-actions>
-              </template>
-            </q-card>
-          </q-menu>
-        </q-btn>
-      </div>
-    </div>
+                <q-list
+                  dense
+                  class="banner__list"
+                  :style="{ maxHeight: menuListMaxHeight }">
+                  <q-item
+                    v-for="m in displayedMatches"
+                    clickable
+                    v-ripple
+                    :key="m.patientId"
+                    :class="[
+                    'banner__item',
+                    tierClass(m.matchConfidence),
+                  ]"
+                    :data-testid="tid.row(m.patientId)"
+                    @click="onPickMatch(m)">
+                    <q-item-section avatar>
+                      <q-avatar
+                        icon="person"
+                        size="40px"
+                        class="banner__avatar"
+                        :style="{
+                        backgroundColor: 'var(--dup-avatar-bg)',
+                        color: 'var(--dup-avatar-icon-color)',
+                      }"
+                      />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label
+                        class="banner__full-name">
+                        {{ displayMatchName(m.fullName) }}
+                      </q-item-label>
+                      <q-item-label
+                        caption
+                        class="banner__meta">
+                        <q-icon
+                          name="event"
+                          size="14px"
+                          class="banner__dob-icon"
+                        />
+                        <span>
+                        {{ dobLabel(m.dateOfBirth) }}
+                      </span>
+                      </q-item-label>
+                    </q-item-section>
+                    <q-item-section
+                      side
+                      class="banner__score">
+                      <div class="banner__badge">
+                        <q-icon
+                          :name="badgeIconForConfidence(m.matchConfidence)"
+                          class="banner__badge-icon"
+                        />
+                        <span class="banner__badge-score">
+                        {{ Math.round(Number(m.matchScore) || 0) }}%
+                      </span>
+                        <span class="banner__badge-sep">
+                        •
+                      </span>
+                        <span class="banner__badge-term">
+                        {{ badgeTermForConfidence(m.matchConfidence) }}
+                      </span>
+                      </div>
+                      <div class="banner__confidence-label">
+                        <span class="banner__status-dot" />
+                        <span>
+                        {{ confidenceLabel(m.matchConfidence) }}
+                      </span>
+                      </div>
+                    </q-item-section>
+                    <q-item-section side>
+                      <q-icon name="chevron_right" color="grey-6" />
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+                <template
+                  v-if="hasMoreMatchesThanPreview && !menuShowAll">
+                  <q-separator />
+                  <q-card-actions align="center" class="q-py-sm">
+                    <q-btn
+                      flat
+                      no-caps
+                      dense
+                      color="primary"
+                      :data-testid="tid.btnViewAll"
+                      :label="t('duplicateMatchViewAll')"
+                      @click="menuShowAll = true"
+                    />
+                  </q-card-actions>
+                </template>
+              </q-card>
+            </q-menu>
+          </q-btn>
+        </div>
+      </template>
+    </data-item-component>
     <q-inner-loading :showing="loading" color="primary" />
   </div>
 </template>
@@ -198,6 +190,7 @@ import { useI18n } from 'vue-i18n'
 import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { sortDuplicateMatches } from 'src/utils/client-duplicate-match-sort.js'
 import { addClientTestIds } from 'src/test-ids/index.js'
+import DataItemComponent from 'components/template/DataItemComponent.vue'
 
 const props = defineProps({
   matches: {
