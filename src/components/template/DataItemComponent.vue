@@ -20,6 +20,11 @@
           {{ title }}
         </q-item-label>
         <q-item-label caption class="banner__meta">
+          <q-icon
+            v-if="subTitleIcon"
+            size="14px"
+            :name="subTitleIcon"
+          />
           <span>{{ subTitle }}</span>
         </q-item-label>
       </q-item-section>
@@ -51,6 +56,10 @@ const props = defineProps({
     type: String,
     required: false,
   },
+  subTitleIcon: {
+    type: String,
+    required: false,
+  },
   dataTestId: {
     type: String,
     required: false,
@@ -72,7 +81,7 @@ const iconColor = computed(() => {
       break
 
     default:
-      color = 'primary'
+      color = 'teal-1'
       break
   }
 
@@ -83,8 +92,11 @@ const iconTextColor = computed(() => {
   let color
   switch (props.iconStyle) {
     case 'warning':
-    default:
       color = 'white'
+      break
+
+    default:
+      color = 'primary'
       break
   }
 

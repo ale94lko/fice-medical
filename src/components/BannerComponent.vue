@@ -33,57 +33,31 @@
               self="top end"
               class="banner__menu"
               @hide="menuShowAll = false">
-              <q-card flat class="banner__menu-card">
-                <q-item
-                  v-ripple
-                  :class="[
-                  'banner__menu-header',
-                ]">
-                  <q-item-section avatar>
-                    <q-avatar
-                      icon="person"
-                      size="40px"
-                      class="banner__avatar"
-                      :style="{
-                      backgroundColor: 'var(--dup-avatar-bg)',
-                      color: 'var(--dup-avatar-icon-color)',
-                    }"
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <q-item-label
-                      class="banner__full-name">
-                      {{ t('duplicateMatchMenuTitle') }}
-                    </q-item-label>
-                    <q-item-label
-                      caption
-                      class="banner__meta">
-                    <span>
-                      {{ t('duplicateMatchMenuSubtitle') }}
-                    </span>
-                    </q-item-label>
-                  </q-item-section>
-                  <q-item-section side>
-                    <div class="banner__menu-header-row
-                    row items-start no-wrap">
-                      <div class="banner__menu-count-badge
+              <data-item-component
+                :title="t('duplicateMatchMenuTitle')"
+                :sub-title="t('duplicateMatchMenuSubtitle')"
+                icon="person_search">
+                <template #actions>
+                  <div class="row items-start no-wrap">
+                    <div class="banner__menu-count-badge
                       row items-center no-wrap">
-                        <q-icon
-                          name="people"
-                          size="18px"
-                          class="banner__menu-count-icon"
-                        />
-                        <span>
+                      <q-icon
+                        name="people"
+                        size="18px"
+                        class="banner__menu-count-icon"
+                      />
+                      <span>
                         {{
-                            t('duplicateMatchMatchesFound', {
-                              count: matches.length,
-                            })
-                          }}
+                          t('duplicateMatchMatchesFound', {
+                            count: matches.length,
+                          })
+                        }}
                       </span>
-                      </div>
                     </div>
-                  </q-item-section>
-                </q-item>
+                  </div>
+                </template>
+              </data-item-component>
+              <q-card flat class="banner__menu-card">
                 <q-separator />
                 <q-list
                   dense
@@ -95,68 +69,40 @@
                     v-ripple
                     :key="m.patientId"
                     :class="[
-                    'banner__item',
-                    tierClass(m.matchConfidence),
-                  ]"
+                      'banner__item',
+                      tierClass(m.matchConfidence),
+                    ]"
                     :data-testid="tid.row(m.patientId)"
                     @click="onPickMatch(m)">
-                    <q-item-section avatar>
-                      <q-avatar
-                        icon="person"
-                        size="40px"
-                        class="banner__avatar"
-                        :style="{
-                        backgroundColor: 'var(--dup-avatar-bg)',
-                        color: 'var(--dup-avatar-icon-color)',
-                      }"
-                      />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label
-                        class="banner__full-name">
-                        {{ displayMatchName(m.fullName) }}
-                      </q-item-label>
-                      <q-item-label
-                        caption
-                        class="banner__meta">
-                        <q-icon
-                          name="event"
-                          size="14px"
-                          class="banner__dob-icon"
-                        />
-                        <span>
-                        {{ dobLabel(m.dateOfBirth) }}
-                      </span>
-                      </q-item-label>
-                    </q-item-section>
-                    <q-item-section
-                      side
-                      class="banner__score">
-                      <div class="banner__badge">
-                        <q-icon
-                          :name="badgeIconForConfidence(m.matchConfidence)"
-                          class="banner__badge-icon"
-                        />
-                        <span class="banner__badge-score">
-                        {{ Math.round(Number(m.matchScore) || 0) }}%
-                      </span>
-                        <span class="banner__badge-sep">
-                        •
-                      </span>
-                        <span class="banner__badge-term">
-                        {{ badgeTermForConfidence(m.matchConfidence) }}
-                      </span>
-                      </div>
-                      <div class="banner__confidence-label">
-                        <span class="banner__status-dot" />
-                        <span>
-                        {{ confidenceLabel(m.matchConfidence) }}
-                      </span>
-                      </div>
-                    </q-item-section>
-                    <q-item-section side>
-                      <q-icon name="chevron_right" color="grey-6" />
-                    </q-item-section>
+                    <data-item-component
+                      :title="displayMatchName(m.fullName)"
+                      :sub-title="dobLabel(m.dateOfBirth)"
+                      sub-title-icon="event"
+                      icon="person">
+                      <template #actions>
+                        <div class="column items-start no-wrap">
+                          <div class="banner__badge">
+                            <q-icon
+                              :name="badgeIconForConfidence(m.matchConfidence)"
+                              class="banner__badge-icon"
+                            />
+                            <span class="banner__badge-score">
+                              {{ Math.round(Number(m.matchScore) || 0) }}%
+                            </span>
+                            <span class="banner__badge-sep"> • </span>
+                            <span class="banner__badge-term">
+                              {{ badgeTermForConfidence(m.matchConfidence) }}
+                            </span>
+                          </div>
+                          <div class="banner__confidence-label">
+                            <span class="banner__status-dot" />
+                            <span>
+                              {{ confidenceLabel(m.matchConfidence) }}
+                            </span>
+                          </div>
+                        </div>
+                      </template>
+                    </data-item-component>
                   </q-item>
                 </q-list>
                 <template

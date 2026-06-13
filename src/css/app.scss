@@ -937,7 +937,9 @@ input:-webkit-autofill {
   display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   margin: 0;
+  padding: 5px 14px 5px 0;
   font-size: 0.875rem;
   font-weight: 600;
 }
@@ -2157,7 +2159,6 @@ input:-webkit-autofill {
   border-radius: $radius-md;
   background-color: $banner-bg;
   border: 1px solid $banner-border;
-  padding: 10px 12px;
   font-family: Inter, sans-serif;
 }
 
@@ -2248,8 +2249,7 @@ input:-webkit-autofill {
 .banner__item {
   min-height: 66px;
   margin: 8px 12px;
-  padding-left: 12px;
-  padding-right: 10px;
+  padding: 0;
   background: #fff;
   border: 1px solid #E5E7EB;
   border-radius: $radius-md;
@@ -2270,7 +2270,7 @@ input:-webkit-autofill {
 .banner__score {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start !important;
   text-align: right;
   min-width: 220px;
 }
@@ -2351,7 +2351,7 @@ input:-webkit-autofill {
   border: 1px solid var(--dup-badge-border);
   color: var(--dup-badge-color);
   border-radius: 999px;
-  padding: 7px 12px;
+  padding: 5px 10px;
   font-weight: 600;
   font-size: 0.8125rem;
   line-height: 1.2;
@@ -2380,7 +2380,7 @@ input:-webkit-autofill {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 8px;
+  margin: 8px 0 0 5px;
   color: var(--dup-badge-color);
   font-weight: 600;
   font-size: 0.75rem;
