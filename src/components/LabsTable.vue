@@ -1,11 +1,11 @@
 <template>
   <div
     v-if="rows.length"
-    class="add-client-form__fmh-table-wrap
-      add-client-form__fmh-table-wrap--wide">
+    class="fmh-table-wrap
+      fmh-table-wrap--wide">
     <table
-      class="add-client-form__fmh-table
-        add-client-form__fmh-table--wide">
+      class="fmh-table
+        fmh-table--wide">
       <thead>
         <tr>
           <th>{{ t('labColTestName') }}</th>
@@ -15,7 +15,7 @@
           <th>{{ t('labColResultDate') }}</th>
           <th>{{ t('status') }}</th>
           <th>{{ t('labColAbnormal') }}</th>
-          <th class="add-client-form__fmh-table-actions-col">
+          <th class="fmh-table-actions-col">
             {{ t('actions') }}
           </th>
         </tr>
@@ -51,7 +51,7 @@
               {{ row.abnormalResult ? t('yes') : t('no') }}
             </span>
           </td>
-          <td class="add-client-form__fmh-table-actions">
+          <td class="fmh-table-actions">
             <q-btn
               flat
               round
@@ -90,7 +90,7 @@
       </tbody>
     </table>
   </div>
-  <p v-else class="add-client-form__fmh-empty text-body2 text-grey-7">
+  <p v-else class="fmh-empty text-body2 text-grey-7">
     {{ emptyLabel }}
   </p>
 </template>

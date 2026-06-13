@@ -1,4 +1,4 @@
-import { toTestId, withTestIdPrefix } from 'src/utils/test-id.js'
+import { toTestId, withTestIdPrefix } from 'src/utils/base.js'
 
 export const authTestIds = {
   emailInput: 'auth-input-email',

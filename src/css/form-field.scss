@@ -34,8 +34,6 @@
   }
 }
 
-// Single-line inputs and selects — textarea is the only exclusion.
-// (q-select also uses q-field--auto-height; do not treat that as textarea.)
 .q-field:not(:has(textarea)) {
   @include app-single-line-field-control($app-input-height);
 }
@@ -44,9 +42,6 @@
   @include app-single-line-field-control($app-login-input-height);
 }
 
-// Textarea: border is on .q-field__control, resize grip is on <textarea>.
-// Do not give the control a taller min-height than the textarea or the
-// grip will sit above the visible bottom border.
 .q-field:has(textarea) {
   .q-field__control {
     height: auto !important;

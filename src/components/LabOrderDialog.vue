@@ -17,7 +17,7 @@
         </p>
 
         <div class="insurance-dialog__card-section">
-          <AddClientSubsectionHeading
+          <SubsectionHeading
             icon="science"
             :title="t('labSectionInfo')"
           />
@@ -142,7 +142,7 @@
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
-          <AddClientSubsectionHeading
+          <SubsectionHeading
             icon="biotech"
             :title="t('labSectionSpecimen')"
           />
@@ -192,7 +192,7 @@
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
-          <AddClientSubsectionHeading
+          <SubsectionHeading
             icon="assignment_turned_in"
             :title="t('labSectionResults')"
           />
@@ -275,7 +275,7 @@
 
         <div class="insurance-dialog__card-section q-mt-lg">
           <div class="row items-center justify-between q-mb-md">
-          <AddClientSubsectionHeading
+          <SubsectionHeading
             icon="format_list_bulleted"
             :title="t('labSectionComponents')"
           />
@@ -294,8 +294,8 @@
 
         <div
           v-if="visibleComponents.length"
-          class="add-client-form__fmh-table-wrap">
-          <table class="add-client-form__fmh-table">
+          class="fmh-table-wrap">
+          <table class="fmh-table">
             <thead>
               <tr>
                 <th>{{ t('labColComponent') }}</th>
@@ -305,7 +305,7 @@
                 <th>{{ t('labComponentFlag') }}</th>
                 <th
                   v-if="!readonly"
-                  class="add-client-form__fmh-table-actions-col">
+                  class="fmh-table-actions-col">
                   {{ t('actions') }}
                 </th>
               </tr>
@@ -337,7 +337,7 @@
                 </td>
                 <td
                   v-if="!readonly"
-                  class="add-client-form__fmh-table-actions">
+                  class="fmh-table-actions">
                   <q-btn
                     flat
                     round
@@ -367,7 +367,7 @@
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
-          <AddClientSubsectionHeading
+          <SubsectionHeading
             icon="attach_file"
             :title="t('labAttachmentsTitle')"
           />
@@ -421,8 +421,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import AddClientSubsectionHeading from
-  'components/AddClientSubsectionHeading.vue'
+import SubsectionHeading from './SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import LabAttachmentUploadField from 'components/LabAttachmentUploadField.vue'
@@ -446,8 +445,9 @@ import {
 } from 'src/utils/lab-orders.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
-import { useValidationSaveFeedback } from
-  'src/composables/useValidationSaveFeedback.js'
+import {
+  useValidationSaveFeedback,
+} from 'src/composables/useValidationSaveFeedback.js'
 
 const props = defineProps({
   modelValue: {

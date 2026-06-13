@@ -22,8 +22,8 @@
 
 <script setup>
 import { computed } from 'vue'
-import FormFieldLabel from 'components/FormFieldLabel.vue'
-import { formatRequiredFieldLabel } from 'src/utils/form-field.js'
+import FormFieldLabel from './FormFieldLabel.vue'
+import { formatRequiredFieldLabel } from 'src/utils/base.js'
 
 const props = defineProps({
   label: {

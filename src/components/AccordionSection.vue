@@ -1,20 +1,16 @@
 <template>
   <section
-    class="add-client-form__section"
+    class="section"
     :data-testid="sectionTestId || undefined">
     <div
-      class="add-client-form__accordion-header row items-center no-wrap">
-      <AddClientSectionHeading
-        class="col"
-        :icon="icon"
-        :title="title"
-      />
+      class="accordion-header row items-center no-wrap">
+      <SectionHeading class="col" :icon="icon" :title="title" />
       <q-btn
         flat
         round
         dense
         color="grey-8"
-        class="add-client-form__accordion-chevron"
+        class="accordion-chevron"
         :data-testid="toggleTestId || undefined"
         :icon="chevronIcon"
         :aria-label="toggleAriaLabel"
@@ -23,10 +19,10 @@
     </div>
 
     <q-slide-transition>
-      <div v-show="isExpanded" class="add-client-form__accordion-panel">
+      <div v-show="isExpanded" class="accordion-panel">
         <div
           v-if="$slots.hint"
-          class="form-field__hint add-client-form__section-hint">
+          class="form-field__hint section-hint">
           <q-icon
             name="info_outline"
             size="14px"
@@ -36,7 +32,7 @@
             <slot name="hint" />
           </div>
         </div>
-        <div class="add-client-form__fields add-client-form__accordion-body">
+        <div class="fields accordion-body">
           <slot />
         </div>
       </div>
@@ -47,7 +43,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AddClientSectionHeading from 'components/AddClientSectionHeading.vue'
+import SectionHeading from './SectionHeading.vue'
 
 const props = defineProps({
   icon: {

@@ -3,7 +3,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { quasarNotifyTypes } from 'components/constants.js'
 
-const PANEL_SCROLL_SELECTOR = '.add-client-form__panel-scroll'
+const PANEL_SCROLL_SELECTOR = '.panel-scroll'
 
 /**
  * Scrolls a dialog body or the Add Client tab panel to top so validation

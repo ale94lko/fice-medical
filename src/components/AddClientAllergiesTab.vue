@@ -1,6 +1,6 @@
 <template>
   <div class="add-client-allergies-tab">
-    <AddClientAccordionSection
+    <AccordionSection
       v-model="section.addExpanded"
       icon="medication"
       :title="t('allergiesAddSectionTitle')"
@@ -8,7 +8,7 @@
       :toggle-test-id="tid.accordionToggle('allergies-add')">
       <div
         class="row q-col-gutter-sm q-col-gutter-md
-          add-client-form__allergy-input-row">
+          allergy-input-row">
         <div class="col-12 col-md-6">
           <AddClientLabeledField
             :label="t('allergyName')"
@@ -40,7 +40,7 @@
           </AddClientLabeledField>
           <FormFieldHint
             v-if="!draftYearError"
-            hint-class="add-client-form__allergy-year-hint">
+            hint-class="allergy-year-hint">
             {{ startYearHint }}
           </FormFieldHint>
         </div>
@@ -48,7 +48,7 @@
           <AddClientLabeledField
             :label="t('allergySeverity')"
             :test-id="tid.allergyField('severity')">
-            <div class="add-client-form__allergy-severity-grid">
+            <div class="allergy-severity-grid">
               <q-btn
                 v-for="opt in severityOptions"
                 :key="opt.value"
@@ -56,10 +56,10 @@
                 no-caps
                 :data-testid="tid.allergySeverity(opt.modifier)"
                 :class="[
-                  'add-client-form__allergy-severity-chip',
-                  `add-client-form__allergy-severity-chip--${opt.modifier}`,
+                  'allergy-severity-chip',
+                  `allergy-severity-chip--${opt.modifier}`,
                   {
-                    'add-client-form__allergy-severity-chip--selected':
+                    'allergy-severity-chip--selected':
                       section.draft.severity === opt.value,
                   },
                 ]"
@@ -67,7 +67,7 @@
                 <span
                   :class="severityDotClass(opt.modifier)"
                 />
-                <span class="add-client-form__allergy-severity-label">
+                <span class="allergy-severity-label">
                   {{ opt.label }}
                 </span>
               </q-btn>
@@ -92,16 +92,16 @@
           />
         </div>
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       icon="medical_services"
       :title="t('allergiesExistingTitle')"
       section-test-id="add-client-accordion-allergies-existing"
       :toggle-test-id="tid.accordionToggle('allergies-existing')">
-      <div class="add-client-form__fmh-list-card q-pa-md">
+      <div class="fmh-list-card q-pa-md">
         <AllergiesTable
           :entries="visibleEntries"
           :invalid-row-ids="invalidDobRowIds"
@@ -110,11 +110,11 @@
           @delete="openDelete"
         />
       </div>
-      <p class="add-client-form__allergy-footer-hint">
+      <p class="allergy-footer-hint">
         <q-icon name="info_outline" size="18px" class="q-mr-xs" />
         {{ t('allergiesFooterHint') }}
       </p>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
     <AllergyEditDialog
       v-model="editDialogOpen"
@@ -139,7 +139,7 @@ import { useI18n } from 'vue-i18n'
 import ClientYearField from 'components/ClientYearField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormFieldHint from 'components/FormFieldHint.vue'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AccordionSection from './AccordionSection.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'
 import AllergyDeleteDialog from 'components/AllergyDeleteDialog.vue'
@@ -260,8 +260,8 @@ const startYearHint = computed(() => {
 
 function severityDotClass(modifier) {
   return [
-    'add-client-form__allergy-severity-dot',
-    `add-client-form__allergy-severity-dot--${modifier}`,
+    'allergy-severity-dot',
+    `allergy-severity-dot--${modifier}`,
   ]
 }
 

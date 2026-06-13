@@ -1,6 +1,6 @@
 <template>
   <div class="add-client-vitals-tab">
-    <AddClientAccordionSection
+    <AccordionSection
       v-model="section.recordExpanded"
       icon="monitor_heart"
       :title="recordSectionTitle"
@@ -156,7 +156,7 @@
         <AddClientLabeledField
           :label="t('vitalsPainLevel')"
           :test-id="tid.vitalsField('painLevel')">
-          <div class="add-client-form__allergy-severity-grid">
+          <div class="allergy-severity-grid">
             <q-btn
               v-for="opt in painOptions"
               :key="opt.value"
@@ -164,27 +164,27 @@
               no-caps
               :data-testid="tid.vitalsPainLevel(opt.modifier)"
               :class="[
-                'add-client-form__allergy-severity-chip',
-                `add-client-form__allergy-severity-chip--${opt.modifier}`,
+                'allergy-severity-chip',
+                `allergy-severity-chip--${opt.modifier}`,
                 {
-                  'add-client-form__allergy-severity-chip--selected':
+                  'allergy-severity-chip--selected':
                     section.draft.painLevel === opt.value,
                 },
               ]"
               @click="selectPainLevel(opt.value)">
               <span :class="painDotClass(opt.modifier)" />
-              <span class="add-client-form__allergy-severity-label">
+              <span class="allergy-severity-label">
                 {{ opt.label }}
               </span>
             </q-btn>
           </div>
         </AddClientLabeledField>
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       v-model="section.additionalInfoExpanded"
       icon="info_outline"
       :title="t('vitalsAdditionalInfoTitle')"
@@ -283,7 +283,7 @@
               outlined
               type="textarea"
               rows="4"
-              class="full-width add-client-form__notes-field"
+              class="full-width notes-field"
               :data-testid="tid.vitalsField('notes')"
               :placeholder="t('vitalsNotesPlaceholder')"
               :maxlength="500"
@@ -317,17 +317,17 @@
           />
         </div>
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       v-model="section.historyExpanded"
       icon="history"
       :title="t('vitalsHistoryTitle')"
       section-test-id="add-client-accordion-vitals-history"
       :toggle-test-id="tid.accordionToggle('vitals-history')">
-      <div class="add-client-form__fmh-list-card q-pa-md">
+      <div class="fmh-list-card q-pa-md">
         <VitalsHistoryTable
           :entries="sortedEntries"
           :empty-label="t('vitalsHistoryEmpty')"
@@ -336,7 +336,7 @@
           @delete="openDelete"
         />
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
     <ModalComponent
       v-model="deleteDialogOpen"
@@ -358,7 +358,7 @@ import { useI18n } from 'vue-i18n'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AccordionSection from './AccordionSection.vue'
 import VitalsHistoryTable from 'components/VitalsHistoryTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import {
@@ -463,8 +463,8 @@ const timePickerValue = computed({
 
 function painDotClass(modifier) {
   return [
-    'add-client-form__allergy-severity-dot',
-    `add-client-form__allergy-severity-dot--${modifier}`,
+    'allergy-severity-dot',
+    `allergy-severity-dot--${modifier}`,
   ]
 }
 

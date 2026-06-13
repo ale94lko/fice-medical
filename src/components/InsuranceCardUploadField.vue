@@ -68,7 +68,7 @@ import { useI18n } from 'vue-i18n'
 import {
   clientInsuranceCardMimeTypes,
   clientInsuranceMaxCardFileBytes,
-} from 'components/constants.js'
+} from './constants.js'
 
 const props = defineProps({
   modelValue: {

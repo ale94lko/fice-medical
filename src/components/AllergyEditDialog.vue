@@ -16,7 +16,7 @@
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <div
           class="row q-col-gutter-md q-col-gutter-lg-md
-            add-client-form__allergy-input-row">
+            allergy-input-row">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('allergyName')"
@@ -48,7 +48,7 @@
             </AddClientLabeledField>
             <FormFieldHint
               v-if="!yearError"
-              hint-class="add-client-form__allergy-year-hint">
+              hint-class="allergy-year-hint">
               {{ startYearHint }}
             </FormFieldHint>
           </div>
@@ -56,7 +56,7 @@
             <AddClientLabeledField
               :label="t('allergySeverity')"
               :test-id="tid.allergyField('severity')">
-              <div class="add-client-form__allergy-severity-grid">
+              <div class="allergy-severity-grid">
                 <q-btn
                   v-for="opt in severityOptions"
                   :key="opt.value"
@@ -64,21 +64,21 @@
                   no-caps
                   :data-testid="tid.allergySeverity(opt.modifier)"
                   :class="[
-                    'add-client-form__allergy-severity-chip',
-                    `add-client-form__allergy-severity-chip--${opt.modifier}`,
+                    'allergy-severity-chip',
+                    `allergy-severity-chip--${opt.modifier}`,
                     {
-                      'add-client-form__allergy-severity-chip--selected':
+                      'allergy-severity-chip--selected':
                         localSeverity === opt.value,
                     },
                   ]"
                   @click="localSeverity = opt.value">
                   <span
                     :class="[
-                      'add-client-form__allergy-severity-dot',
-                      `add-client-form__allergy-severity-dot--${opt.modifier}`,
+                      'allergy-severity-dot',
+                      `allergy-severity-dot--${opt.modifier}`,
                     ]"
                   />
-                  <span class="add-client-form__allergy-severity-label">
+                  <span class="allergy-severity-label">
                     {{ opt.label }}
                   </span>
                 </q-btn>

@@ -1,6 +1,6 @@
 <template>
   <div class="add-client-family-medical-history-tab">
-    <AddClientAccordionSection
+    <AccordionSection
       icon="add_circle_outline"
       :title="t('fmhAddSectionTitle')"
       section-test-id="add-client-accordion-fmh-add"
@@ -60,16 +60,16 @@
               />
             </div>
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       icon="person"
       :title="t('fmhPersonalSectionTitle')"
       section-test-id="add-client-accordion-fmh-personal"
       :toggle-test-id="tid.accordionToggle('fmh-personal')">
-      <div class="add-client-form__fmh-list-card q-pa-md">
+      <div class="fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="personalEntries"
           :empty-label="t('fmhPersonalEmpty')"
@@ -77,16 +77,16 @@
           @delete="openDelete"
         />
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       icon="groups"
       :title="t('fmhFamilySectionTitle')"
       section-test-id="add-client-accordion-fmh-family"
       :toggle-test-id="tid.accordionToggle('fmh-family')">
-      <div class="add-client-form__fmh-list-card q-pa-md">
+      <div class="fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="familyEntries"
           :empty-label="t('fmhFamilyEmpty')"
@@ -94,7 +94,7 @@
           @delete="openDelete"
         />
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
     <FamilyMedicalHistoryEditDialog
       v-model="editDialogOpen"
@@ -118,7 +118,7 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AccordionSection from './AccordionSection.vue'
 import FamilyMedicalHistoryTable from 'components/FamilyMedicalHistoryTable.vue'
 import FamilyMedicalHistoryEditDialog from
   'components/FamilyMedicalHistoryEditDialog.vue'

@@ -4,8 +4,7 @@
     :data-testid="dialogTestId"
     persistent
     transition-show="scale"
-    transition-hide="scale"
-  >
+    transition-hide="scale">
     <q-card class="modal-card app-dialog-card">
       <AppDialogHeader
         :close-label="closeLabel"
@@ -13,8 +12,7 @@
         {{ title }}
       </AppDialogHeader>
       <q-card-section
-        class="app-dialog-card__body q-px-xl q-py-md modal-body
-          flex flex-center">
+        :class=cardSectionClass>
         <div class="text-body1">{{ message }}</div>
       </q-card-section>
       <q-card-actions
@@ -73,6 +71,9 @@ const confirmTestId = computed(() =>
 )
 const cancelTestId = computed(() =>
   props.cancelButtonTestId || modalTestIds.cancel(props.testId),
+)
+const cardSectionClass = computed(() =>
+  'app-dialog-card__body q-px-xl q-py-md modal-body flex flex-center'
 )
 
 const emit = defineEmits(['update:modelValue', 'confirm', 'cancel'])

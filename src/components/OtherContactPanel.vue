@@ -60,7 +60,7 @@
         </AddClientLabeledField>
       </div>
       <div class="col-12 col-md-6">
-        <TextInput
+        <FormInput
           :model-value="contact.firstName"
           :external-label="true"
           :label="t('otherContactFirstName')"
@@ -71,7 +71,7 @@
         />
       </div>
       <div class="col-12 col-md-6">
-        <TextInput
+        <FormInput
           :model-value="contact.middleName"
           :external-label="true"
           :label="t('otherContactMiddleName')"
@@ -82,7 +82,7 @@
         />
       </div>
       <div class="col-12 col-md-6">
-        <TextInput
+        <FormInput
           :model-value="contact.lastName"
           :external-label="true"
           :label="t('otherContactLastName')"
@@ -113,7 +113,7 @@
         </AddClientLabeledField>
       </div>
       <div class="col-12 col-md-6">
-        <div class="add-client-form__toggle-field">
+        <div class="toggle-field">
           <FormToggle
             :model-value="contact.responsibleForPayments"
             :label="t('responsibleForPayments')"
@@ -124,8 +124,8 @@
       </div>
     </div>
 
-    <div class="add-client-form__other-contact-address-box q-mt-md">
-      <AddClientSubsectionHeading
+    <div class="other-contact-address-box q-mt-md">
+      <SubsectionHeading
         icon="place"
         :title="t('contactAddress')"
       />
@@ -138,7 +138,7 @@
       />
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
-          <TextInput
+          <FormInput
             :model-value="contact.addressLine1"
             :external-label="true"
             :label="t('addressLine1')"
@@ -150,7 +150,7 @@
           />
         </div>
         <div class="col-12 col-md-6">
-          <TextInput
+          <FormInput
             :model-value="contact.addressLine2"
             :external-label="true"
             :label="t('addressLine2Optional')"
@@ -219,7 +219,7 @@
           </AddClientLabeledField>
         </div>
         <div class="col-12 col-md-6">
-          <TextInput
+          <FormInput
             :model-value="contact.zipCode"
             :external-label="true"
             :label="t('zipCode')"
@@ -234,13 +234,13 @@
     </div>
 
     <div class="q-mt-md">
-      <div class="add-client-form__contact-methods-block">
-        <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
+      <div class="contact-methods-block">
+        <SubsectionHeading icon="phone" :title="t('phone')" />
         <div
           v-for="(phone, index) in contact.phones"
           :key="`oc-phone-${index}`"
           class="row q-col-gutter-sm q-col-gutter-md
-            add-client-form__contact-method-row">
+            contact-method-row">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('phoneNumber')"
@@ -265,7 +265,7 @@
               :test-id="ocField(`phone-${index}-type`)">
               <div
                 class="row q-col-gutter-sm items-center
-                  add-client-form__contact-method-type-row">
+                  contact-method-type-row">
                 <div class="col">
                   <FormSelect
                     :model-value="phone.type"
@@ -297,8 +297,8 @@
         </div>
       </div>
 
-      <div class="add-client-form__contact-methods-block">
-        <AddClientSubsectionHeading
+      <div class="contact-methods-block">
+        <SubsectionHeading
           icon="mail"
           :title="t('contactEmailLabel')"
         />
@@ -306,9 +306,9 @@
           v-for="(email, index) in contact.emails"
           :key="`oc-email-${index}`"
           class="row q-col-gutter-sm q-col-gutter-md
-            add-client-form__contact-method-row">
+            contact-method-row">
           <div class="col-12 col-md-6">
-            <TextInput
+            <FormInput
               :model-value="email.address"
               :external-label="true"
               :label="t('emailAddress')"
@@ -325,7 +325,7 @@
               :test-id="ocField(`email-${index}-type`)">
               <div
                 class="row q-col-gutter-sm items-center
-                  add-client-form__contact-method-type-row">
+                  contact-method-type-row">
                 <div class="col">
                   <FormSelect
                     :model-value="email.type"
@@ -363,12 +363,12 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import TextInput from 'components/TextInput.vue'
+import FormInput from './FormInput.vue'
 import FormToggle from 'components/FormToggle.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
-import AddClientSubsectionHeading
-  from 'components/AddClientSubsectionHeading.vue'
+import SubsectionHeading
+  from './SubsectionHeading.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
 import {
   getCitiesForState,

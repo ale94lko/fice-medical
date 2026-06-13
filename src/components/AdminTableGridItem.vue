@@ -29,6 +29,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { isEmpty } from 'src/utils/base.js'
 
 const props = defineProps({
   tableProps: {
@@ -53,7 +54,7 @@ const displayCols = computed(() =>
 
 function formatColValue(col) {
   const value = col.value
-  if (value === null || value === undefined || value === '') {
+  if (isEmpty(value)) {
     return '—'
   }
 

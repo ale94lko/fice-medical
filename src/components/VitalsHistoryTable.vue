@@ -1,10 +1,10 @@
 <template>
   <div
     v-if="entries.length"
-    class="add-client-form__fmh-table-wrap">
+    class="fmh-table-wrap">
     <table
-      class="add-client-form__fmh-table
-        add-client-form__fmh-table--wide">
+      class="fmh-table
+        fmh-table--wide">
       <thead>
         <tr>
           <th>{{ t('vitalsColDateTime') }}</th>
@@ -14,7 +14,7 @@
           <th>{{ t('vitalsColSpO2') }}</th>
           <th>{{ t('vitalsColBmi') }}</th>
           <th>{{ t('vitalsColRecordedBy') }}</th>
-          <th class="add-client-form__fmh-table-actions-col">
+          <th class="fmh-table-actions-col">
             {{ t('actions') }}
           </th>
         </tr>
@@ -28,7 +28,7 @@
           <td>{{ displayValue(entry.oxygenSaturation) }}</td>
           <td>{{ formatBmiDisplay(entry.bmi) }}</td>
           <td>{{ clinicianLabel(entry.recordedBy) }}</td>
-          <td class="add-client-form__fmh-table-actions">
+          <td class="fmh-table-actions">
             <q-btn
               flat
               round
@@ -56,7 +56,7 @@
       </tbody>
     </table>
   </div>
-  <p v-else class="add-client-form__fmh-empty text-body2 text-grey-7">
+  <p v-else class="fmh-empty text-body2 text-grey-7">
     {{ emptyLabel }}
   </p>
 </template>

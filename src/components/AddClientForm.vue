@@ -18,8 +18,8 @@
     <q-inner-loading :showing="initialLoading" color="primary">
       <q-spinner size="42px" />
     </q-inner-loading>
-    <div class="add-client-form__chrome">
-      <div class="add-client-form__tabs-row">
+    <div class="chrome">
+      <div class="tabs-row">
         <q-tabs
         v-model="activeTab"
         dense
@@ -36,16 +36,16 @@
           :name="tab.key"
           :data-testid="tid.tab(tab.key)"
           :class="mainTabClass(tab)">
-          <span class="add-client-tab__label row items-center no-wrap">
+          <span class="label row items-center no-wrap">
             <q-icon
               :name="tab.icon"
               size="18px"
-              class="add-client-tab__icon"
+              class="icon"
             />
-            <span class="add-client-tab__text">{{ t(tab.labelKey) }}</span>
+            <span class="text">{{ t(tab.labelKey) }}</span>
             <span
               v-if="tabErrorCount(tab.key) > 0"
-              class="add-client-tab__error-badge"
+              class="error-badge"
               :aria-label="t('tabErrorCountAria', {
                 count: tabErrorCount(tab.key),
               })">
@@ -55,7 +55,7 @@
               v-if="tab.hasSubTabs"
               name="arrow_drop_down"
               size="18px"
-              class="add-client-tab__chevron q-ml-xs"
+              class="chevron q-ml-xs"
             />
           </span>
         </q-tab>
@@ -64,7 +64,7 @@
 
       <div
         v-if="hasSubTabs"
-        class="add-client-form__subtabs-row">
+        class="subtabs-row">
       <q-tabs
         v-model="activeSubTab"
         dense
@@ -87,10 +87,10 @@
       </div>
     </div>
 
-    <div class="add-client-form__content">
+    <div class="content">
       <div
         ref="panelScrollRef"
-        class="add-client-form__panel-scroll">
+        class="panel-scroll">
       <q-form
         ref="formRef"
         greedy
@@ -224,7 +224,7 @@
                         :test-id="tid.field(ck.age)">
                         <q-input
                           v-model="form[ck.age]"
-                          class="add-client-form__age-input"
+                          class="age-input"
                           outlined
                           hide-bottom-space
                           :data-testid="tid.field(ck.age)"
@@ -240,23 +240,23 @@
                         >
                         <template v-if="!ageFieldsLocked" #append>
                           <div
-                            class="add-client-form__age-stepper"
+                            class="age-stepper"
                             role="group"
                             :aria-label="t('age')">
                             <button
                               type="button"
-                              class="add-client-form__age-stepper-btn"
+                              class="age-stepper-btn"
                               :disabled="ageAtMax"
                               :aria-label="t('ageIncrement')"
                               @click.stop="bumpAge(1)">
                               <q-icon name="expand_less" size="18px" />
                             </button>
                             <span
-                              class="add-client-form__age-stepper-divider"
+                              class="age-stepper-divider"
                               aria-hidden="true" />
                             <button
                               type="button"
-                              class="add-client-form__age-stepper-btn"
+                              class="age-stepper-btn"
                               :disabled="ageAtMin"
                               :aria-label="t('ageDecrement')"
                               @click.stop="bumpAge(-1)">
@@ -336,7 +336,7 @@
                     required
                     :test-id="tid.field(ck.gender)">
                     <div
-                      class="add-client-form__gender-options"
+                      class="gender-options"
                       role="radiogroup"
                       :aria-label="t('gender')">
                       <button
@@ -344,7 +344,7 @@
                         :key="opt.value"
                         type="button"
                         role="radio"
-                        class="add-client-form__gender-option"
+                        class="gender-option"
                         :aria-checked="genderValuesMatch(
                           form[ck.gender],
                           opt.value,
@@ -352,15 +352,15 @@
                         :disabled="catalogsLoading"
                         :data-testid="tid.genderOption(opt.value)"
                         :class="{
-                          'add-client-form__gender-option--selected':
+                          'gender-option--selected':
                             genderValuesMatch(form[ck.gender], opt.value),
                         }"
                         @click="form[ck.gender] = opt.value">
                         <span
-                          class="add-client-form__gender-option-radio"
+                          class="gender-option-radio"
                           aria-hidden="true"
                         />
-                        <span class="add-client-form__gender-option-label">
+                        <span class="gender-option-label">
                           {{ opt.label }}
                         </span>
                       </button>
@@ -370,7 +370,7 @@
               </div>
           </AddClientAccordionSection>
 
-          <q-separator class="add-client-form__section-separator" />
+          <q-separator class="section-separator" />
 
           <AddClientAccordionSection
             icon="admin_panel_settings"
@@ -458,7 +458,7 @@
           <q-tab-panels
             v-model="activeSubTab"
             animated
-            class="bg-transparent add-client-form__sub-panels">
+            class="bg-transparent sub-panels">
             <q-tab-panel
               v-for="subTab in clinicalSubTabs"
               :key="subTab.key"
@@ -500,7 +500,7 @@
           <q-tab-panels
             v-model="activeSubTab"
             animated
-            class="bg-transparent add-client-form__sub-panels">
+            class="bg-transparent sub-panels">
             <q-tab-panel
               v-for="subTab in careCoordinationSubTabs"
               :key="subTab.key"
@@ -519,7 +519,7 @@
           <q-tab-panels
             v-model="activeSubTab"
             animated
-            class="bg-transparent add-client-form__sub-panels">
+            class="bg-transparent sub-panels">
             <q-tab-panel
               v-for="subTab in financialsSubTabs"
               :key="subTab.key"
@@ -538,7 +538,7 @@
           <q-tab-panels
             v-model="activeSubTab"
             animated
-            class="bg-transparent add-client-form__sub-panels">
+            class="bg-transparent sub-panels">
             <q-tab-panel
               v-for="subTab in documentsSubTabs"
               :key="subTab.key"
@@ -554,14 +554,14 @@
 
         <footer
           v-if="canGoPrevious() || canGoNext()"
-          class="add-client-form__nav-footer row items-center">
+          class="nav-footer row items-center">
           <q-btn
             v-if="canGoPrevious()"
             no-caps
             outline
             color="primary"
             icon="arrow_back"
-            class="app-btn-outline add-client-form__nav-btn"
+            class="app-btn-outline nav-btn"
             :data-testid="tid.btn('previous')"
             :label="t('previous')"
             :disable="saving"
@@ -574,7 +574,7 @@
             outline
             color="primary"
             icon-right="arrow_forward"
-            class="app-btn-outline add-client-form__nav-btn"
+            class="app-btn-outline nav-btn"
             :class="{ 'q-ml-auto': !canGoPrevious() }"
             :data-testid="tid.btn('next')"
             :label="t('next')"
@@ -646,7 +646,7 @@ import {
 } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import TextInput from 'components/TextInput.vue'
+import TextInput from 'components/FormInput.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
@@ -659,7 +659,7 @@ import AddClientAssessmentsTab from 'components/AddClientAssessmentsTab.vue'
 import AddClientLabsTab from 'components/AddClientLabsTab.vue'
 import AddClientAllergiesTab from 'components/AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from 'components/AddClientInsuranceTab.vue'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AddClientAccordionSection from 'components/AccordionSection.vue'
 import AddClientDuplicateMatchBanner from
   'components/AddClientDuplicateMatchBanner.vue'
 import AddClientDuplicateMatchReviewDialog from
@@ -882,13 +882,13 @@ const financialsSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.financials]
 const documentsSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.documents]
 
 const allergiesTabClass = computed(() => {
-  const classes = ['add-client-tab--allergies']
+  const classes = ['allergies']
   const top = highestAllergySeverity(
     form.value[clientFormSections.allergies]?.entries,
   )
   const modifier = severityTabModifier(top)
   if (modifier) {
-    classes.push(`add-client-tab--allergies-${modifier}`)
+    classes.push(`allergies-${modifier}`)
   }
 
   return classes

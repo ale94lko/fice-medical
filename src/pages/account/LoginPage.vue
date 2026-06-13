@@ -9,7 +9,7 @@
       <q-card class="my-card">
         <form @submit.prevent.stop="handleLogin">
           <q-card-section class="login-inputs">
-            <text-input
+            <form-input
               v-model="email"
               stack-spacing
               icon-left="mail"
@@ -18,7 +18,7 @@
               :error-message="emailErrorMessage"
               :error="isEmailInvalid"
             />
-            <text-input
+            <form-input
               v-model="password"
               stack-spacing
               icon-left="lock"
@@ -69,10 +69,9 @@ import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useAuthStore } from 'stores/auth-store'
-import { siteBreakpointsPx } from 'components/constants'
-//import { useNotifications } from 'src/composables/useNotifications'
-import TextInput from 'components/TextInput.vue'
+import { useAuthStore } from 'stores/auth-store.js'
+import { siteBreakpointsPx } from 'components/constants.js'
+import FormInput from '../../components/FormInput.vue'
 import { authTestIds } from 'src/test-ids/index.js'
 
 // Quasar + Router + Auth Store
@@ -89,9 +88,6 @@ const isEmailInvalid = ref(false)
 const isPasswordInvalid = ref(false)
 const loginError = ref('')
 const loading = ref(false)
-
-//Notifications
-//const { notifyError } = useNotifications()
 
 // Validation error messages
 const emailErrorMessage = computed(() => {
@@ -135,7 +131,3 @@ async function handleLogin() {
 }
 
 </script>
-
-<style scoped>
-/* Tus estilos aquí si necesitas */
-</style>

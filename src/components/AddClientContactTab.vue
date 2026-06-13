@@ -1,13 +1,13 @@
 <template>
   <div class="add-client-contact-tab">
-    <AddClientAccordionSection
+    <AccordionSection
       icon="place"
       :title="t('clientAddress')"
       section-test-id="add-client-accordion-client-address"
       :toggle-test-id="tid.accordionToggle('client-address')">
       <div class="row q-col-gutter-sm q-col-gutter-md">
           <div class="col-12 col-md-6">
-            <TextInput
+            <FormInput
               v-model="contact.addressLine1"
               :external-label="true"
               :label="t('addressLine1')"
@@ -17,7 +17,7 @@
             />
           </div>
           <div class="col-12 col-md-6">
-            <TextInput
+            <FormInput
               v-model="contact.addressLine2"
               :external-label="true"
               :label="t('addressLine2Optional')"
@@ -82,7 +82,7 @@
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <TextInput
+            <FormInput
               v-model="contact.zipCode"
               :external-label="true"
               :label="t('zipCode')"
@@ -92,22 +92,22 @@
             />
           </div>
         </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       icon="phone"
       :title="t('contactMethods')"
       section-test-id="add-client-accordion-contact-methods"
       :toggle-test-id="tid.accordionToggle('contact-methods')">
-      <div class="add-client-form__contact-methods-block">
-          <AddClientSubsectionHeading icon="phone" :title="t('phone')" />
+      <div class="contact-methods-block">
+          <SubsectionHeading icon="phone" :title="t('phone')" />
           <div
             v-for="(phone, index) in contact.phones"
             :key="`phone-${index}`"
             class="row q-col-gutter-sm q-col-gutter-md
-              add-client-form__contact-method-row">
+              contact-method-row">
             <div class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('phoneNumber')"
@@ -132,7 +132,7 @@
                 :test-id="contactFieldTestId(`phone-${index}-type`)">
                 <div
                   class="row q-col-gutter-sm items-center
-                    add-client-form__contact-method-type-row">
+                    contact-method-type-row">
                   <div class="col">
                     <FormSelect
                       v-model="phone.type"
@@ -162,8 +162,8 @@
           </div>
         </div>
 
-        <div class="add-client-form__contact-methods-block">
-          <AddClientSubsectionHeading
+        <div class="contact-methods-block">
+          <SubsectionHeading
             icon="mail"
             :title="t('contactEmailLabel')"
           />
@@ -171,9 +171,9 @@
             v-for="(email, index) in contact.emails"
             :key="`email-${index}`"
             class="row q-col-gutter-sm q-col-gutter-md
-              add-client-form__contact-method-row">
+              contact-method-row">
             <div class="col-12 col-md-6">
-              <TextInput
+              <FormInput
                 v-model="email.address"
                 :external-label="true"
                 :label="t('emailAddress')"
@@ -189,7 +189,7 @@
                 :test-id="contactFieldTestId(`email-${index}-type`)">
                 <div
                   class="row q-col-gutter-sm items-center
-                    add-client-form__contact-method-type-row">
+                    contact-method-type-row">
                   <div class="col">
                     <FormSelect
                       v-model="email.type"
@@ -218,11 +218,11 @@
             </div>
           </div>
         </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       icon="chat"
       :title="t('preferredCommunication')"
       section-test-id="add-client-accordion-preferred-communication"
@@ -230,7 +230,7 @@
       <template #hint>
         {{ t('preferredCommunicationHint') }}
       </template>
-      <div class="add-client-form__preferred-grid">
+      <div class="preferred-grid">
           <q-btn
             v-for="opt in communicationOptions"
             :key="opt.value"
@@ -240,18 +240,18 @@
             :unelevated="isPreferredComm(opt.value)"
             :outline="!isPreferredComm(opt.value)"
             :class="[
-              'add-client-form__preferred-chip',
+              'preferred-chip',
               {
-                'add-client-form__preferred-chip--selected':
+                'preferred-chip--selected':
                   isPreferredComm(opt.value),
               },
             ]"
             @click="onPreferredCommToggle(opt.value)">
             <q-icon
               :name="opt.icon"
-              class="add-client-form__preferred-chip-icon"
+              class="preferred-chip-icon"
             />
-            <span class="add-client-form__preferred-chip-label">
+            <span class="preferred-chip-label">
               {{ opt.label }}
             </span>
           </q-btn>
@@ -259,16 +259,16 @@
 
         <div
           v-if="showPointOfContactNoContactsError"
-          class="add-client-form__point-of-contact-error
+          class="point-of-contact-error
             form-field__error q-mt-sm">
           {{ t('prefCommNoContactsAvailable') }}
         </div>
 
         <div
           v-if="showCommunicationAuthorization"
-          class="add-client-form__comm-authorization q-mt-md"
+          class="comm-authorization q-mt-md"
           :class="{
-            'add-client-form__comm-authorization--active':
+            'comm-authorization--active':
               hasCommunicationConsent,
           }">
           <FormToggle
@@ -279,7 +279,7 @@
           />
           <span
             v-if="contact.consent"
-            class="add-client-form__comm-authorization-date">
+            class="comm-authorization-date">
             {{ t('communicationAuthorizedOn', {
               date: contact.consent,
             }) }}
@@ -302,9 +302,9 @@
             :test-id="tid.preferredPointOfContact"
           />
         </AddClientLabeledField>
-    </AddClientAccordionSection>
+    </AccordionSection>
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
     <OtherContactsSection
       v-model="contact"
@@ -319,9 +319,9 @@
       :catalogs-loading="catalogsLoading"
     />
 
-    <q-separator class="add-client-form__section-separator" />
+    <q-separator class="section-separator" />
 
-    <AddClientAccordionSection
+    <AccordionSection
       icon="description"
       :title="t('additionalNotes')"
       section-test-id="add-client-accordion-additional-notes"
@@ -336,7 +336,7 @@
               outlined
               type="textarea"
               rows="4"
-              class="full-width add-client-form__notes-field"
+              class="full-width notes-field"
               :data-testid="contactFieldTestId('additionalNotes')"
               :placeholder="t('additionalNotesPlaceholder')"
               :rules="rules.additionalNotes"
@@ -346,28 +346,27 @@
           </AddClientLabeledField>
         </div>
       </div>
-    </AddClientAccordionSection>
+    </AccordionSection>
   </div>
 </template>
 
 <script setup>
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import TextInput from 'components/TextInput.vue'
-import FormToggle from 'components/FormToggle.vue'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import FormSelect from 'components/FormSelect.vue'
-import OtherContactsSection from 'components/OtherContactsSection.vue'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
-import AddClientSubsectionHeading
-  from 'components/AddClientSubsectionHeading.vue'
-import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
+import FormInput from './FormInput.vue'
+import FormToggle from './FormToggle.vue'
+import AddClientLabeledField from './AddClientLabeledField.vue'
+import FormSelect from './FormSelect.vue'
+import OtherContactsSection from './OtherContactsSection.vue'
+import AccordionSection from './AccordionSection.vue'
+import SubsectionHeading from './SubsectionHeading.vue'
+import AddClientMethodRowActions from './AddClientMethodRowActions.vue'
 import {
   clientEmailTypeValues,
   clientPhoneTypeValues,
   clientPreferredCommunicationValues,
   clientSuffixOptions,
-} from 'components/constants.js'
+} from './constants.js'
 import {
   usStates,
   getCitiesForState,

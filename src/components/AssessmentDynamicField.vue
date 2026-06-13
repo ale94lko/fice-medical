@@ -8,7 +8,7 @@
       {{ question.helpText }}
     </template>
 
-    <TextInput
+    <FormInput
       v-if="question.fieldType === fieldTypes.text"
       :model-value="stringValue"
       :external-label="false"
@@ -18,7 +18,7 @@
       @update:model-value="emitString"
     />
 
-    <TextInput
+    <FormInput
       v-else-if="question.fieldType === fieldTypes.textarea"
       :model-value="stringValue"
       type="textarea"
@@ -106,13 +106,13 @@
         :unelevated="isChipSelected(opt)"
         :color="isChipSelected(opt) ? 'primary' : undefined"
         :class="[
-          'add-client-form__preferred-chip',
+          'preferred-chip',
           {
-            'add-client-form__preferred-chip--selected': isChipSelected(opt),
+            'preferred-chip--selected': isChipSelected(opt),
           },
         ]"
         @click="onChipToggle(opt)">
-        <span class="add-client-form__preferred-chip-label">
+        <span class="preferred-chip-label">
           {{ optionLabel(opt) }}
         </span>
       </q-btn>
@@ -134,14 +134,14 @@
         :unelevated="stringValue === opt.value"
         :color="stringValue === opt.value ? 'primary' : undefined"
         :class="[
-          'add-client-form__preferred-chip',
+          'preferred-chip',
           {
-            'add-client-form__preferred-chip--selected':
+            'preferred-chip--selected':
               stringValue === opt.value,
           },
         ]"
         @click="emitString(opt.value)">
-        <span class="add-client-form__preferred-chip-label">
+        <span class="preferred-chip-label">
           {{ opt.label }}
         </span>
       </q-btn>
@@ -155,7 +155,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import TextInput from 'components/TextInput.vue'
+import FormInput from './FormInput.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'

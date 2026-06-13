@@ -1,5 +1,5 @@
 <template>
-  <AddClientAccordionSection
+  <AccordionSection
     v-model="expanded"
     icon="straighten"
     :title="t('assessmentPatientMeasurements')"
@@ -63,13 +63,13 @@
         </AddClientLabeledField>
       </div>
     </div>
-  </AddClientAccordionSection>
+  </AccordionSection>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AccordionSection from './AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { assessmentTestIds as tid } from 'src/test-ids/index.js'
 

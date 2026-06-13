@@ -260,7 +260,7 @@
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
-          <AddClientSubsectionHeading
+          <SubsectionHeading
             icon="credit_card"
             :title="t('insuranceCardSectionTitle')"
           />
@@ -342,13 +342,12 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AppDialogHeader from 'components/AppDialogHeader.vue'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import AddClientSubsectionHeading from
-  'components/AddClientSubsectionHeading.vue'
-import ClientDateField from 'components/ClientDateField.vue'
-import FormSelect from 'components/FormSelect.vue'
-import InsuranceCardUploadField from 'components/InsuranceCardUploadField.vue'
+import AppDialogHeader from './AppDialogHeader.vue'
+import AddClientLabeledField from './AddClientLabeledField.vue'
+import SubsectionHeading from './SubsectionHeading.vue'
+import ClientDateField from './ClientDateField.vue'
+import FormSelect from './FormSelect.vue'
+import InsuranceCardUploadField from './InsuranceCardUploadField.vue'
 import {
   clientInsuranceGoldenCardMemberIdLength,
   clientInsuranceMaxMemberIdLength,
@@ -356,7 +355,7 @@ import {
   clientInsuranceMedicaidRecipientIdLength,
   clientInsuranceMedicareMemberIdLength,
   clientInsuranceRelationshipValues,
-} from 'components/constants.js'
+} from './constants.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   applyPayerSelection,

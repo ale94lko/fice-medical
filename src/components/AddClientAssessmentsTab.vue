@@ -60,14 +60,14 @@
         <div
           v-else
           class="assessment-panel">
-          <div class="add-client-form__fmh-table-wrap">
-            <table class="add-client-form__fmh-table">
+          <div class="fmh-table-wrap">
+            <table class="fmh-table">
               <thead>
                 <tr>
                   <th>{{ t('assessmentTemplateColumn') }}</th>
                   <th>{{ t('assessmentDateColumn') }}</th>
                   <th>{{ t('status') }}</th>
-                  <th class="add-client-form__fmh-table-actions-col">
+                  <th class="fmh-table-actions-col">
                     {{ t('actions') }}
                   </th>
                 </tr>
@@ -85,7 +85,7 @@
                       {{ assessmentStatusLabel(row.status) }}
                     </span>
                   </td>
-                  <td class="add-client-form__fmh-table-actions">
+                  <td class="fmh-table-actions">
                     <q-btn
                       flat
                       round

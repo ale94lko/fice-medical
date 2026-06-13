@@ -58,7 +58,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import FormField from 'components/FormField.vue'
+import FormField from './FormField.vue'
 import PasswordToggleIcon from './PasswordToggleIcon.vue'
 import {
   isPasswordInputType,
@@ -95,7 +95,6 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  /** Vertical spacing when fields are stacked (e.g. login). */
   stackSpacing: {
     type: Boolean,
     default: false,
@@ -156,17 +155,17 @@ function onUpdate(value) {
 </script>
 
 <style lang="scss" scoped>
-@import 'src/css/quasar.variables';
+  @import 'src/css/quasar.variables';
 
-.q-input {
-  min-width: 120px;
-}
+  .q-input {
+    min-width: 120px;
+  }
 
-.text-input--stack-spacing {
-  margin-bottom: 0;
-}
+  .text-input--stack-spacing {
+    margin-bottom: 0;
+  }
 
-.input-icon {
-  color: $primary;
-}
+  .input-icon {
+    color: $primary;
+  }
 </style>

@@ -11,7 +11,6 @@ export const siteBreakpointsPx = {
   MD: 1024,
 }
 
-/** Below this width the drawer uses overlay (mobile) behavior. */
 export const drawerMobileMaxPx = 499
 
 export const clientStatus = {
@@ -54,7 +53,6 @@ export const addClientTabKeys = {
   documents: 'documents',
 }
 
-/** Sub-tab keys under Clinical (Family History is implemented). */
 export const addClientClinicalSubTabKeys = {
   familyHistory: 'familyHistory',
   assessments: 'assessments',
@@ -185,7 +183,6 @@ export const clientInsuranceRelationshipValues = {
 
 export const clientInsuranceMaxPayerLength = 150
 
-/** Member ID & other plan IDs: letters and digits only, max length. */
 export const clientInsuranceMaxMemberIdLength = 20
 export const clientInsuranceMedicareMemberIdLength = 11
 export const clientInsuranceMedicaidRecipientIdLength = 10
@@ -305,7 +302,6 @@ export const reservedTenantSubdomains = new Set([
   'admin',
 ])
 
-/** Catalog names for POST /catalogs/v1/by-names */
 export const catalogNames = {
   prefix: 'prefix',
   suffix: 'suffix',
@@ -347,7 +343,6 @@ export const assessmentStatuses = {
   cancelled: 'cancelled',
 }
 
-/** Reference keys for template clinical metadata (future Care Plans). */
 export const assessmentClinicalKeys = {
   mood: 'mood',
   sleepQuality: 'sleep_quality',
@@ -399,7 +394,6 @@ export const labAbnormalValues = {
   no: 'no',
 }
 
-/** Future Care Plan outcome measure linkage (component analyte keys). */
 export const labClinicalKeys = {
   hemoglobin: 'hemoglobin',
   wbc: 'wbc',
@@ -481,7 +475,6 @@ export const authStorageKeys = {
   activeSubtenantId: 'activeSubtenantId',
 }
 
-/** Module names returned by POST /oauth/v1/login (modules array). */
 export const appModuleNames = {
   client: 'Client',
   administration: 'Administration',
@@ -493,10 +486,6 @@ export const typeNames = {
   function: 'function',
   string: 'string',
   number: 'number',
-}
-
-export const quasarTransitions = {
-  scale: 'scale',
 }
 
 export const quasarNotifyTypes = {

@@ -1,12 +1,12 @@
 <template>
-  <div class="add-client-form__field-action">
+  <div class="field-action">
     <q-btn
       v-if="showRemove"
       outline
       no-caps
       color="primary"
       icon="remove"
-      class="add-client-form__method-btn"
+      class="method-btn"
       :data-testid="removeTestId || undefined"
       :aria-label="removeLabel"
       @click="emit('remove')"
@@ -17,7 +17,7 @@
       no-caps
       color="primary"
       icon="add"
-      class="add-client-form__method-btn"
+      class="method-btn"
       :data-testid="addTestId || undefined"
       :aria-label="addLabel"
       @click="emit('add')"

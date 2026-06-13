@@ -10,7 +10,7 @@
 
 <script setup>
 import { computed, useAttrs } from 'vue'
-import { hasSelectValue } from 'src/utils/select-field.js'
+import { hasSelectValue, isEmpty } from 'src/utils/base.js'
 
 defineOptions({
   inheritAttrs: false,
@@ -20,7 +20,6 @@ const props = defineProps({
   modelValue: {
     default: null,
   },
-  /** When true, shows clear icon only while a value is selected. */
   clearable: {
     type: Boolean,
     default: true,
@@ -52,7 +51,7 @@ const showClearable = computed(
 )
 
 function onUpdate(value) {
-  if (value === '' || value === undefined) {
+  if (isEmpty(value)) {
     emit('update:modelValue', null)
 
     return

@@ -7,15 +7,15 @@
     :toggle-test-id="tid.accordionToggle('other-contact')">
     <div
       v-if="!contact.otherContacts.length"
-      class="add-client-form__other-contact-empty">
-      <p class="add-client-form__other-contact-empty-hint">
+      class="other-contact-empty">
+      <p class="other-contact-empty-hint">
         {{ t('otherContactEmptyHint') }}
       </p>
       <q-btn
         outline
         no-caps
         color="primary"
-        class="full-width add-client-form__other-contact-btn"
+        class="full-width other-contact-btn"
         icon="add"
         :data-testid="tid.otherContactAdd"
         :label="t('addOtherContact')"
@@ -23,10 +23,10 @@
       />
     </div>
 
-    <div v-else class="add-client-form__other-contact-card">
+    <div v-else class="other-contact-card">
       <div
         class="row items-center no-wrap
-          add-client-form__other-contact-tabs-row">
+          other-contact-tabs-row">
         <q-tabs
           v-model="contact.activeOtherContactId"
           dense
@@ -40,17 +40,17 @@
             :key="oc.id"
             :name="oc.id"
             :data-testid="tid.otherContactTab(oc.id)"
-            class="add-client-form__other-contact-tab">
+            class="other-contact-tab">
             <div
-              class="add-client-form__other-contact-tab-label
+              class="other-contact-tab-label
                 row items-center no-wrap">
               <span
-                class="add-client-form__other-contact-tab-text ellipsis">
+                class="other-contact-tab-text ellipsis">
                 {{ otherContactTabLabel(oc, index) }}
               </span>
               <button
                 type="button"
-                class="add-client-form__other-contact-tab-remove"
+                class="other-contact-tab-remove"
                 :data-testid="tid.otherContactRemove"
                 :aria-label="t('removeOtherContact')"
                 @click.stop="requestRemoveOtherContact(oc, index)"
@@ -65,7 +65,7 @@
           flat
           no-caps
           color="primary"
-          class="add-client-form__other-contact-add-tab q-ml-sm"
+          class="other-contact-add-tab q-ml-sm"
           icon="add"
           :data-testid="tid.otherContactAdd"
           :label="t('addOtherContact')"
@@ -76,12 +76,12 @@
       <q-tab-panels
         v-model="contact.activeOtherContactId"
         animated
-        class="bg-transparent add-client-form__other-contact-panels">
+        class="bg-transparent other-contact-panels">
         <q-tab-panel
           v-for="(oc, ocIndex) in contact.otherContacts"
           :key="oc.id"
           :name="oc.id"
-          class="add-client-form__other-contact-panel">
+          class="other-contact-panel">
           <OtherContactPanel
             :contact="oc"
             :client-address="contact"
@@ -118,7 +118,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OtherContactPanel from 'components/OtherContactPanel.vue'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AddClientAccordionSection from 'components/AccordionSection.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import {
   createEmptyOtherContact,

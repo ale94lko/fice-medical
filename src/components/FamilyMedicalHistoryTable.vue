@@ -1,13 +1,13 @@
 <template>
   <div
     v-if="entries.length"
-    class="add-client-form__fmh-table-wrap">
-    <table class="add-client-form__fmh-table">
+    class="fmh-table-wrap">
+    <table class="fmh-table">
       <thead>
         <tr>
           <th>{{ t('fmhColRelationship') }}</th>
           <th>{{ t('fmhColConditions') }}</th>
-          <th class="add-client-form__fmh-table-actions-col">
+          <th class="fmh-table-actions-col">
             {{ t('actions') }}
           </th>
         </tr>
@@ -16,7 +16,7 @@
         <tr v-for="entry in entries" :key="entry.id">
           <td>{{ entry.familyRelationship }}</td>
           <td>{{ entry.medicalConditions }}</td>
-          <td class="add-client-form__fmh-table-actions">
+          <td class="fmh-table-actions">
             <q-btn
               flat
               round
@@ -44,7 +44,7 @@
       </tbody>
     </table>
   </div>
-  <p v-else class="add-client-form__fmh-empty text-body2 text-grey-7">
+  <p v-else class="fmh-empty text-body2 text-grey-7">
     {{ emptyLabel }}
   </p>
 </template>

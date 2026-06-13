@@ -1,11 +1,11 @@
 <template>
   <div class="add-client-insurance-tab">
-    <div class="add-client-form__insurance-header row items-start">
+    <div class="insurance-header row items-start">
       <div class="col">
-        <h2 class="add-client-form__insurance-title">
+        <h2 class="insurance-title">
           {{ t('insuranceProfilesTitle') }}
         </h2>
-        <p class="add-client-form__insurance-subtitle text-body2">
+        <p class="insurance-subtitle text-body2">
           {{ t('insuranceProfilesSubtitle') }}
         </p>
       </div>
@@ -23,7 +23,7 @@
       </div>
     </div>
 
-    <div class="add-client-form__insurance-table-card q-pa-md q-mt-md">
+    <div class="insurance-table-card q-pa-md q-mt-md">
       <InsuranceProfilesTable
         :profiles="visibleProfiles"
         :empty-label="t('insuranceProfilesEmpty')"
@@ -33,7 +33,7 @@
       />
     </div>
 
-    <div class="add-client-form__insurance-info-banner q-mt-md">
+    <div class="insurance-info-banner q-mt-md">
       <q-icon name="info" size="20px" class="q-mr-sm" />
       <span>{{ t('insurancePriorityBillingHint') }}</span>
     </div>

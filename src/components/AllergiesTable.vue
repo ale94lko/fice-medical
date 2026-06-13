@@ -1,14 +1,14 @@
 <template>
   <div
     v-if="entries.length"
-    class="add-client-form__fmh-table-wrap">
-    <table class="add-client-form__fmh-table">
+    class="fmh-table-wrap">
+    <table class="fmh-table">
       <thead>
         <tr>
           <th>{{ t('allergyName') }}</th>
           <th>{{ t('allergySeverity') }}</th>
           <th>{{ t('allergyStartYear') }}</th>
-          <th class="add-client-form__fmh-table-actions-col">
+          <th class="fmh-table-actions-col">
             {{ t('actions') }}
           </th>
         </tr>
@@ -18,19 +18,19 @@
           v-for="entry in entries"
           :key="entry.id"
           :class="{
-            'add-client-form__fmh-table-row--error':
+            'fmh-table-row--error':
               invalidRowIdSet.has(entry.id),
           }">
           <td>{{ entry.allergy }}</td>
           <td>
             <span
               :class="[
-                'add-client-form__allergy-severity-badge',
+                'allergy-severity-badge',
                 severityBadgeClass(entry.severity),
               ]">
               <span
                 :class="[
-                  'add-client-form__allergy-severity-dot',
+                  'allergy-severity-dot',
                   severityDotClass(entry.severity),
                 ]"
               />
@@ -38,7 +38,7 @@
             </span>
           </td>
           <td>{{ formatStartYear(entry.startYear) }}</td>
-          <td class="add-client-form__fmh-table-actions">
+          <td class="fmh-table-actions">
             <q-btn
               flat
               round
@@ -66,7 +66,7 @@
       </tbody>
     </table>
   </div>
-  <p v-else class="add-client-form__fmh-empty text-body2 text-grey-7">
+  <p v-else class="fmh-empty text-body2 text-grey-7">
     {{ emptyLabel }}
   </p>
 </template>
@@ -112,23 +112,23 @@ function formatStartYear(year) {
 
 function severityBadgeClass(severity) {
   if (severity === clientAllergySeverityValues.severe) {
-    return 'add-client-form__allergy-severity-badge--severe'
+    return 'allergy-severity-badge--severe'
   }
   if (severity === clientAllergySeverityValues.moderate) {
-    return 'add-client-form__allergy-severity-badge--moderate'
+    return 'allergy-severity-badge--moderate'
   }
 
-  return 'add-client-form__allergy-severity-badge--mild'
+  return 'allergy-severity-badge--mild'
 }
 
 function severityDotClass(severity) {
   if (severity === clientAllergySeverityValues.severe) {
-    return 'add-client-form__allergy-severity-dot--severe'
+    return 'allergy-severity-dot--severe'
   }
   if (severity === clientAllergySeverityValues.moderate) {
-    return 'add-client-form__allergy-severity-dot--moderate'
+    return 'allergy-severity-dot--moderate'
   }
 
-  return 'add-client-form__allergy-severity-dot--mild'
+  return 'allergy-severity-dot--mild'
 }
 </script>

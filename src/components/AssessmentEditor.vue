@@ -73,7 +73,7 @@
       v-for="section in template?.sections ?? []"
       :key="section.id"
       class="q-mb-md">
-      <AddClientAccordionSection
+      <AccordionSection
         v-model="sectionExpanded[section.id]"
         icon="assignment"
         :title="section.title"
@@ -90,7 +90,7 @@
           :has-error="Boolean(fieldErrors[question.id])"
           :error-message="t('assessmentFieldRequired')"
         />
-      </AddClientAccordionSection>
+      </AccordionSection>
     </div>
   </div>
 </template>
@@ -99,7 +99,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import AddClientAccordionSection from 'components/AddClientAccordionSection.vue'
+import AccordionSection from './AccordionSection.vue'
 import AssessmentDynamicField from 'components/AssessmentDynamicField.vue'
 import AssessmentPatientMeasurements
   from 'components/AssessmentPatientMeasurements.vue'
