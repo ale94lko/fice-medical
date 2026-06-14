@@ -614,6 +614,7 @@
       v-model="duplicateReviewOpen"
       :loading="duplicateReviewLoading"
       :preview-form="duplicateReviewPreview"
+      :new-form="form"
       :selected-match="duplicateReviewMatch"
       @not-match="onDuplicateReviewNotMatch"
       @open-existing="onDuplicateOpenExistingRequest"

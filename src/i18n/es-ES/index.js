@@ -343,6 +343,17 @@ export default {
   duplicateMatchReviewTitle: 'Cliente existente',
   duplicateMatchReviewSubtitle:
     '{name} — coincidencia {score} %. Revise la información siguiente.',
+  duplicateMatchReviewCompareSubtitle:
+    'Revise la información a continuación y compárela con el nuevo '
+    + 'cliente antes de continuar.',
+  duplicateMatchExistingClientInformation:
+    'Información del cliente existente',
+  duplicateMatchNewClientInformation: 'Información del nuevo cliente',
+  duplicateMatchMatchedCardTitle: 'Coincidió ({count})',
+  duplicateMatchMissingCardTitle: 'Falta ({count})',
+  duplicateMatchAddressShort: 'Dirección',
+  duplicateMatchPhoneShort: 'Teléfono',
+  duplicateMatchEmailShort: 'Correo electrónico',
   duplicateMatchNotMatch: 'No es una coincidencia',
   duplicateMatchOpenExisting: 'Abrir cliente existente',
   duplicateMatchNoPhones: 'Sin números de teléfono registrados.',

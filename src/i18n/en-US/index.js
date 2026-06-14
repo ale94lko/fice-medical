@@ -331,9 +331,19 @@ export default {
     'There are existing clients with similar information. Are you sure you '
     + 'want to create a new client and ignore these possible matches?',
   duplicateMatchCreateAnyway: 'Create New Client Anyway',
-  duplicateMatchReviewTitle: 'Existing client',
+  duplicateMatchReviewTitle: 'Existing Client',
   duplicateMatchReviewSubtitle:
     '{name} — {score}% match. Review the information below.',
+  duplicateMatchReviewCompareSubtitle:
+    'Review the information below and compare it with the new client '
+    + 'before continuing.',
+  duplicateMatchExistingClientInformation: 'Existing Client Information',
+  duplicateMatchNewClientInformation: 'New Client Information',
+  duplicateMatchMatchedCardTitle: 'Matched ({count})',
+  duplicateMatchMissingCardTitle: 'Missing ({count})',
+  duplicateMatchAddressShort: 'Address',
+  duplicateMatchPhoneShort: 'Phone',
+  duplicateMatchEmailShort: 'Email',
   duplicateMatchNotMatch: 'Not a Match',
   duplicateMatchOpenExisting: 'Open Existing Client',
   duplicateMatchNoPhones: 'No phone numbers on file.',
