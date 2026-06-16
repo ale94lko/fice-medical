@@ -1,1 +1,0 @@
-import{Ei as e,Rr as t,Zi as n,ji as r,na as i,qi as a}from"./index-DXuLET_q.js";import{r as o,t as s}from"./QLayout-BJ0hnOak.js";var c={};function l(t,c){let l=n(`router-view`);return a(),e(s,{view:`hHh Lpr lff`},{default:i(()=>[r(o,null,{default:i(()=>[r(l)]),_:1})]),_:1})}var u=t(c,[[`render`,l]]);export{u as default};

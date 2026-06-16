@@ -1,1 +1,0 @@
-import{Ei as e,Rr as t,qi as n}from"./index-DXuLET_q.js";import{t as r}from"./QPage-1ylKF8ZY.js";var i={};function a(t,i){return n(),e(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
