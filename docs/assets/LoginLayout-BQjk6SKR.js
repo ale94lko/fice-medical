@@ -1,0 +1,1 @@
+import{Ei as e,Rr as t,Zi as n,ji as r,na as i,qi as a}from"./index-BaroD2oe.js";import{r as o,t as s}from"./QLayout-B70fSyPU.js";var c={};function l(t,c){let l=n(`router-view`);return a(),e(s,{view:`hHh Lpr lff`},{default:i(()=>[r(o,null,{default:i(()=>[r(l)]),_:1})]),_:1})}var u=t(c,[[`render`,l]]);export{u as default};
