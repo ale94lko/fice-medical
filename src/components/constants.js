@@ -312,6 +312,7 @@ export const catalogNames = {
   relationshipType: 'relationship_type',
   contactType: 'contact_type',
   payer: 'payer',
+  allergyName: 'allergy_name',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -324,6 +325,7 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.relationshipType,
   catalogNames.contactType,
   catalogNames.payer,
+  catalogNames.allergyName,
 ]
 
 export const assessmentFieldTypes = {

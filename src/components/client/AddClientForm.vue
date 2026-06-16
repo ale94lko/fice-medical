@@ -437,6 +437,8 @@
             ref="allergiesTabRef"
             v-model="form[clientFormSections.allergies]"
             :patient-dob="form[ck.dob]"
+            :allergy-catalog-options="allergyNameSelectOptions"
+            :allergy-catalog-loading="catalogsLoading"
           />
         </q-tab-panel>
 
@@ -747,6 +749,7 @@ const {
   loadBasicInfoCatalogs,
   loadCliniciansForAddClient,
   payerCatalogItems,
+  allergyNameSelectOptions,
 } = catalogs
 
 const {

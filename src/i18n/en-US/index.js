@@ -479,6 +479,9 @@ export default {
   allergiesFooterHint:
     'Add all known allergies to ensure accurate and safe care.',
   allergyName: 'Allergy',
+  allergySearchPlaceholder: 'Search or enter allergy...',
+  allergySearchHint:
+    'Start typing to search common allergies or enter a new allergy.',
   allergySeverity: 'Severity',
   clientYearPickerTitle: 'Select year',
   clientYearPickerSubtitleEmpty: '—',

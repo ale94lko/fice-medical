@@ -12,17 +12,34 @@
         <div class="col-12 col-md-6">
           <AddClientLabeledField
             :label="t('allergyName')"
+            required
             :test-id="tid.allergyField('name')">
-            <q-input
+            <q-select
               v-model="section.draft.allergy"
               outlined
               hide-bottom-space
               :data-testid="tid.allergyField('name')"
               :error="Boolean(draftNameError)"
               :error-message="draftNameError"
-              maxlength="100"
+              :placeholder="t('allergySearchPlaceholder')"
+              :options="filteredAllergyOptions"
+              :loading="allergyCatalogLoading"
+              use-input
+              fill-input
+              hide-selected
+              hide-dropdown-icon
+              emit-value
+              map-options
+              clearable
+              input-debounce="0"
+              @filter="onAllergyFilter"
             />
           </AddClientLabeledField>
+          <FormFieldHint
+            v-if="!draftNameError"
+            hint-class="allergy-name-hint">
+            {{ t('allergySearchHint') }}
+          </FormFieldHint>
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField
@@ -170,6 +187,15 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  /** Allergy autocomplete options from the `allergy_name` catalog. */
+  allergyCatalogOptions: {
+    type: Array,
+    default: () => [],
+  },
+  allergyCatalogLoading: {
+    type: Boolean,
+    default: false,
+  },
   /** Patient DOB (mm/dd/yyyy); allergy start year cannot precede birth year. */
   patientDob: {
     type: String,
@@ -191,6 +217,8 @@ const draftNameError = ref('')
 const draftYearError = ref('')
 const draftSeverityError = ref('')
 const invalidDobRowIds = ref([])
+
+const filteredAllergyOptions = ref([])
 
 const severityOptions = [
   {
@@ -218,6 +246,58 @@ const section = computed({
 const visibleEntries = computed(() =>
   visibleAllergyEntries(section.value.entries),
 )
+
+function normalizeAllergyForCompare(value) {
+  return trimAllergyField(value).toLowerCase()
+}
+
+function resolveCanonicalAllergyName(typed) {
+  const needle = normalizeAllergyForCompare(typed)
+  if (!needle) {
+    return null
+  }
+
+  const match = (props.allergyCatalogOptions ?? []).find(opt => {
+    const raw = opt?.value ?? opt?.label ?? ''
+    return normalizeAllergyForCompare(raw) === needle
+  })
+
+  return match?.value ?? match?.label ?? null
+}
+
+watch(
+  () => props.allergyCatalogOptions,
+  () => {
+    const current = normalizeAllergyForCompare(section.value?.draft?.allergy)
+    if (!current) {
+      filteredAllergyOptions.value = []
+      return
+    }
+
+    const all = props.allergyCatalogOptions ?? []
+    filteredAllergyOptions.value = all.filter(opt => {
+      const raw = String(opt?.label ?? opt?.value ?? '')
+      return raw && normalizeAllergyForCompare(raw).includes(current)
+    })
+  },
+  { immediate: true, deep: true },
+)
+
+function onAllergyFilter(val, update) {
+  const needle = normalizeAllergyForCompare(val)
+  update(() => {
+    if (!needle) {
+      filteredAllergyOptions.value = []
+      return
+    }
+
+    const all = props.allergyCatalogOptions ?? []
+    filteredAllergyOptions.value = all.filter(opt => {
+      const raw = String(opt?.label ?? opt?.value ?? '')
+      return raw && normalizeAllergyForCompare(raw).includes(needle)
+    })
+  })
+}
 
 /** Audit reason only when deleting an allergy already persisted (has apiId). */
 const deleteDialogRequiresReason = computed(() => {
@@ -339,6 +419,11 @@ function applyDraftErrors(result) {
 
 async function onAddEntry() {
   const draft = section.value.draft
+
+  const typed = trimAllergyField(draft.allergy)
+  const canonical = resolveCanonicalAllergyName(typed)
+  draft.allergy = canonical ?? typed
+
   const result = validateAllergyForAdd(
     draft.allergy,
     draft.severity,

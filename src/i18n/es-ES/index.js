@@ -491,6 +491,10 @@ export default {
   allergiesFooterHint:
     'Agregue todas las alergias conocidas para un cuidado seguro.',
   allergyName: 'Alergia',
+  allergySearchPlaceholder: 'Buscar o escribir alergia...',
+  allergySearchHint:
+    'Empieza a escribir para buscar alergias comunes o escribe una nueva '
+    + 'alergia.',
   allergySeverity: 'Severidad',
   clientYearPickerTitle: 'Seleccionar año',
   clientYearPickerSubtitleEmpty: '—',

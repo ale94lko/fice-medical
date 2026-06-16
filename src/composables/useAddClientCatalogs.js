@@ -231,6 +231,37 @@ export function useAddClientCatalogs(t) {
     return catalogItemsFromCatalog(catalog)
   })
 
+  const allergyNameSelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.allergyName]
+    const items = catalogItemsFromCatalog(catalog)
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return []
+    }
+
+    const opts = []
+    const seen = new Set()
+
+    for (const item of items) {
+      const raw = item?.allergy_name ?? item?.name ?? item?.label ?? item?.code
+      const label = String(raw ?? '').trim()
+      if (!label) {
+        continue
+      }
+
+      const key = label.toLowerCase()
+      if (seen.has(key)) {
+        continue
+      }
+      seen.add(key)
+
+      opts.push({ label, value: label })
+    }
+
+    opts.sort((a, b) => a.label.localeCompare(b.label))
+    return opts
+  })
+
   return {
     loading,
     loaded,
@@ -249,6 +280,7 @@ export function useAddClientCatalogs(t) {
     contactTypeSelectOptions,
     relationshipTypeSelectOptions,
     payerCatalogItems,
+    allergyNameSelectOptions,
     resolveAgeUnitCode,
     resolveCatalogSelectValue,
     yearsAgeUnitValue,
