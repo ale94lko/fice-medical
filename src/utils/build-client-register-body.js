@@ -257,6 +257,10 @@ function buildContacts(form) {
 function buildAllergies(form) {
   const section = form[clientFormSections.allergies] ?? {}
 
+  if (section.noKnownAllergies) {
+    return []
+  }
+
   return (section.entries ?? [])
     .map(entry => {
       const name = trim(entry?.allergy)
@@ -293,6 +297,7 @@ export function buildClientRegisterBody(form) {
       basic_info: buildBasicInfo({}),
       contacts: [],
       allergies: [],
+      no_allergies: false,
       insurance: [],
       medical_history: [],
       vitals: [],
@@ -303,6 +308,9 @@ export function buildClientRegisterBody(form) {
     basic_info: buildBasicInfo(form),
     contacts: buildContacts(form),
     allergies: buildAllergies(form),
+    no_allergies: Boolean(
+      form?.[clientFormSections.allergies]?.noKnownAllergies,
+    ),
     insurance: buildInsuranceForRegister(form),
     medical_history: buildMedicalHistoryForRegister(form),
     vitals: buildVitalsForRegister(form),

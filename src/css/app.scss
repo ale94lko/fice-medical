@@ -1762,6 +1762,39 @@ input:-webkit-autofill {
   }
 }
 
+.allergies-nka-toggle-hint {
+  margin: 8px 0 0;
+  color: $text-muted;
+  font-size: 0.875rem;
+}
+
+.allergies-nka-confirmation-card {
+  background: $surface;
+}
+
+.allergies-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px auto 18px;
+  max-width: 720px;
+  color: $text-muted;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.allergies-or-divider__line {
+  height: 1px;
+  flex: 1 1 auto;
+  background: $border-subtle;
+}
+
+.allergies-or-divider__text {
+  flex: 0 0 auto;
+  padding: 0 8px;
+}
+
 .fmh-add-card,
 .fmh-list-card {
   border: 1px solid $border-subtle;

@@ -52,6 +52,7 @@ export function createEmptyAllergiesSection() {
     entries: [],
     draft: createEmptyAllergyDraft(),
     addExpanded: true,
+    noKnownAllergies: false,
   }
 }
 
@@ -155,6 +156,31 @@ export function isValidAllergyStartYear(value, patientDobUs) {
   return Number.isInteger(year) && year >= min && year <= max
 }
 
+function allergyStartYearErrorKey(value, patientDobUs) {
+  const s = trimAllergyField(value)
+  if (!s) {
+    return null
+  }
+
+  if (!/^\d{4}$/.test(s)) {
+    return 'allergyStartYearInvalid'
+  }
+
+  const year = Number(s)
+  const birthYear = birthYearFromUsDob(patientDobUs)
+  if (birthYear != null && year < birthYear) {
+    return 'allergyStartYearBeforeBirth'
+  }
+
+  const max = allergyMaxStartYear()
+  if (Number.isFinite(year) && year > max) {
+    return 'allergyStartYearAfterCurrent'
+  }
+
+  // Fallback for any remaining invalid ranges (e.g. max-age constraints).
+  return 'allergyStartYearInvalid'
+}
+
 export function entryDuplicateKey(allergy, severity, startYear) {
   const normalized = normalizeAllergyEntry({
     allergy,
@@ -218,7 +244,7 @@ export function validateAllergyPair(
     return { ok: false, errorKey: 'allergyNameInvalid' }
   }
   if (!isValidAllergyStartYear(year, patientDobUs)) {
-    return { ok: false, errorKey: 'allergyStartYearInvalid' }
+    return { ok: false, errorKey: allergyStartYearErrorKey(year, patientDobUs) }
   }
 
   return { ok: true }
@@ -275,7 +301,7 @@ export function getAllergyDraftFieldErrorKeys(section, patientDobUs) {
     keys.severity = 'allergySeverityRequired'
   }
   if (!isValidAllergyStartYear(year, patientDobUs)) {
-    keys.year = 'allergyStartYearInvalid'
+    keys.year = allergyStartYearErrorKey(year, patientDobUs)
   }
 
   return keys
@@ -331,6 +357,10 @@ function allergyStartDateIsoFromYear(year) {
 }
 
 export function buildAllergiesPayload(section) {
+  if (section?.noKnownAllergies) {
+    return { status: clientAllergiesNkaStatus }
+  }
+
   const rows = (section?.entries ?? [])
     .map(entry => {
       const normalized = normalizeAllergyEntry(entry)
@@ -362,10 +392,6 @@ export function buildAllergiesPayload(section) {
 
       return row.name && row.severity
     })
-
-  if (!rows.length) {
-    return { status: clientAllergiesNkaStatus }
-  }
 
   return { entries: rows }
 }

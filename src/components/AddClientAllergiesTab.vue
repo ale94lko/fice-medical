@@ -6,9 +6,28 @@
       :title="t('allergiesAddSectionTitle')"
       section-test-id="add-client-accordion-allergies-add"
       :toggle-test-id="tid.accordionToggle('allergies-add')">
+      <div class="allergies-nka-toggle-card fmh-list-card q-pa-md">
+        <q-checkbox
+          :model-value="noKnownAllergiesChecked"
+          :label="t('noKnownAllergiesLabel')"
+          @update:model-value="onNoKnownAllergiesToggle"
+        />
+        <p class="allergies-nka-toggle-hint">
+          {{ t('noKnownAllergiesHint') }}
+        </p>
+      </div>
       <div
-        class="row q-col-gutter-sm q-col-gutter-md
-          allergy-input-row">
+        v-if="!noKnownAllergiesChecked"
+        class="allergies-or-divider">
+        <div class="allergies-or-divider__line" />
+        <div class="allergies-or-divider__text">
+          {{ t('orSeparator') }}
+        </div>
+        <div class="allergies-or-divider__line" />
+      </div>
+      <div
+        v-if="!noKnownAllergiesChecked"
+        class="row q-col-gutter-sm q-col-gutter-md allergy-input-row">
         <div class="col-12 col-md-6">
           <AddClientLabeledField
             :label="t('allergyName')"
@@ -118,22 +137,44 @@
       :title="t('allergiesExistingTitle')"
       section-test-id="add-client-accordion-allergies-existing"
       :toggle-test-id="tid.accordionToggle('allergies-existing')">
-      <div class="fmh-list-card q-pa-md">
-        <AllergiesTable
-          :entries="visibleEntries"
-          :invalid-row-ids="invalidDobRowIds"
-          :empty-label="t('allergiesExistingEmpty')"
-          @edit="openEdit"
-          @delete="openDelete"
-        />
-      </div>
-      <p class="allergy-footer-hint">
-        <q-icon name="info_outline" size="18px" class="q-mr-xs" />
-        {{ t('allergiesFooterHint') }}
-      </p>
+      <template v-if="!noKnownAllergiesChecked">
+        <div class="fmh-list-card q-pa-md">
+          <AllergiesTable
+            :entries="visibleEntries"
+            :invalid-row-ids="invalidDobRowIds"
+            :empty-label="t('allergiesExistingEmpty')"
+            @edit="openEdit"
+            @delete="openDelete"
+          />
+        </div>
+        <p class="allergy-footer-hint">
+          <q-icon name="info_outline" size="18px" class="q-mr-xs" />
+          {{ t('allergiesFooterHint') }}
+        </p>
+      </template>
+
+      <template v-else>
+        <div class="fmh-list-card q-pa-md">
+          <div class="row items-start no-wrap q-col-gutter-sm">
+            <q-icon
+              name="check_circle"
+              color="positive"
+              size="22px" />
+            <div>
+              <div class="text-body1 text-strong">
+                {{ t('noKnownAllergiesConfirmedTitle') }}
+              </div>
+              <div class="text-body2 text-grey-7 q-mt-xs">
+                {{ t('noKnownAllergiesConfirmedSubtitle') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
     </AccordionSection>
 
     <AllergyEditDialog
+      v-if="!noKnownAllergiesChecked"
       v-model="editDialogOpen"
       :entry="editingEntry"
       :entries="visibleEntries"
@@ -142,9 +183,20 @@
     />
 
     <AllergyDeleteDialog
+      v-if="!noKnownAllergiesChecked"
       v-model="deleteDialogOpen"
       :require-deletion-reason="deleteDialogRequiresReason"
       @confirm="onDeleteConfirm"
+    />
+
+    <ModalComponent
+      v-model="noKnownAllergiesRemoveConfirmOpen"
+      test-id="no-known-allergies-remove"
+      :title="t('noKnownAllergiesRemoveModalTitle')"
+      :message="t('noKnownAllergiesRemoveModalMessage')"
+      :confirm-text="t('noKnownAllergiesRemoveModalConfirm')"
+      :cancel-text="t('cancel')"
+      @confirm="onConfirmNoKnownAllergiesRemove"
     />
   </div>
 </template>
@@ -160,6 +212,7 @@ import AccordionSection from './AccordionSection.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'
 import AllergyDeleteDialog from 'components/AllergyDeleteDialog.vue'
+import ModalComponent from 'components/ModalComponent.vue'
 import {
   clientAllergyMaxNameLength,
   clientAllergySeverityValues,
@@ -243,9 +296,56 @@ const section = computed({
   set: val => emit('update:modelValue', val),
 })
 
-const visibleEntries = computed(() =>
-  visibleAllergyEntries(section.value.entries),
+const noKnownAllergiesChecked = computed(
+  () => Boolean(section.value.noKnownAllergies),
 )
+
+const visibleEntries = computed(() =>
+  noKnownAllergiesChecked.value
+    ? []
+    : visibleAllergyEntries(section.value.entries),
+)
+
+const noKnownAllergiesRemoveConfirmOpen = ref(false)
+
+function hasVisibleAllergies() {
+  return visibleAllergyEntries(section.value.entries).length > 0
+}
+
+function applyNoKnownAllergiesConfirmed() {
+  section.value.noKnownAllergies = true
+  section.value.entries = []
+  section.value.draft = createEmptyAllergyDraft()
+  invalidDobRowIds.value = []
+  applyDraftErrors({ ok: true })
+}
+
+function onConfirmNoKnownAllergiesRemove() {
+  applyNoKnownAllergiesConfirmed()
+}
+
+function onNoKnownAllergiesToggle(nextValue) {
+  const next = Boolean(nextValue)
+
+  // Unchecking: remove confirmation and return to normal flow.
+  if (!next) {
+    section.value.noKnownAllergies = false
+    section.value.draft = createEmptyAllergyDraft()
+    invalidDobRowIds.value = []
+    applyDraftErrors({ ok: true })
+    editDialogOpen.value = false
+    deleteDialogOpen.value = false
+    return
+  }
+
+  // Checking: if there are existing allergies, confirm before deleting them.
+  if (hasVisibleAllergies()) {
+    noKnownAllergiesRemoveConfirmOpen.value = true
+    return
+  }
+
+  applyNoKnownAllergiesConfirmed()
+}
 
 function normalizeAllergyForCompare(value) {
   return trimAllergyField(value).toLowerCase()
@@ -375,6 +475,11 @@ function applyAllergyDraftFieldErrorKeys(keys) {
 }
 
 function applySaveValidation() {
+  if (noKnownAllergiesChecked.value) {
+    clearSaveValidation()
+    return
+  }
+
   applyAllergyDraftFieldErrorKeys(
     getAllergyDraftFieldErrorKeys(section.value, props.patientDob ?? ''),
   )
@@ -408,7 +513,11 @@ function applyDraftErrors(result) {
       })
     } else if (result.errorKey === 'allergySeverityRequired') {
       draftSeverityError.value = t(result.errorKey)
-    } else if (result.errorKey === 'allergyStartYearInvalid') {
+    } else if (
+      result.errorKey === 'allergyStartYearInvalid'
+      || result.errorKey === 'allergyStartYearBeforeBirth'
+      || result.errorKey === 'allergyStartYearAfterCurrent'
+    ) {
       draftYearError.value = t(result.errorKey, {
         min: allergyMinYear.value,
         max: allergyMaxStartYear(),

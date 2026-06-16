@@ -19,6 +19,7 @@ export default {
   repeatPassword: 'Repeat password',
   accept: 'Accept',
   continue: 'Continue',
+  orSeparator: 'OR',
   passwordResetEmailSent:
     'If an account exists for the provided email, you will receive a link to '
     + 'reset your password.',
@@ -479,6 +480,18 @@ export default {
   allergiesFooterHint:
     'Add all known allergies to ensure accurate and safe care.',
   allergyName: 'Allergy',
+  noKnownAllergiesLabel: 'No known allergies',
+  noKnownAllergiesHint:
+    'Check this if the patient has confirmed they have no known allergies.',
+  noKnownAllergiesConfirmedTitle: 'No known allergies confirmed',
+  noKnownAllergiesConfirmedSubtitle:
+    'Uncheck "No known allergies" to add allergy information',
+  noKnownAllergiesRemoveModalTitle:
+    'Existing allergies will be removed',
+  noKnownAllergiesRemoveModalMessage:
+    'This patient has recorded allergies. Selecting "No known allergies" '
+    + 'will remove all existing allergy records.',
+  noKnownAllergiesRemoveModalConfirm: 'Remove allergies & continue',
   allergySearchPlaceholder: 'Search or enter allergy...',
   allergySearchHint:
     'Start typing to search common allergies or enter a new allergy.',
@@ -486,8 +499,10 @@ export default {
   clientYearPickerTitle: 'Select year',
   clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Start Year',
-  allergyStartYearHint: 'Optional. Year between {min} and {max}',
-  allergyStartYearHintCurrentYearOnly: 'Optional. Only current year',
+  allergyStartYearHint:
+    'Optional. Year the allergy was first identified.',
+  allergyStartYearHintCurrentYearOnly:
+    'Optional. Year the allergy was first identified.',
   allergyAdd: 'Add',
   allergyAddRequired: 'Enter an allergy and select a severity to add.',
   allergyNameRequired: 'Allergy is required when other fields are filled.',
@@ -496,6 +511,10 @@ export default {
     'Letters and numbers only; - ( ) " \' allowed, max {maxName} characters',
   allergyStartYearInvalid:
     'Enter a valid 4-digit year between {min} and {max}',
+  allergyStartYearBeforeBirth:
+    "Start year cannot be earlier than the patient's birth year.",
+  allergyStartYearAfterCurrent:
+    'Start year cannot be later than the current year.',
   allergyDuplicateEntry:
     'This allergy, severity, and start year combination already exists.',
   allergyAddedSuccess: 'Allergy added successfully.',

@@ -537,6 +537,7 @@ function mapOtherContactFromApi(item, clientContact, catalogOptions = {}) {
 
 function mapAllergiesFromApi(client) {
   const section = createEmptyAllergiesSection()
+  section.noKnownAllergies = Boolean(client?.no_allergies)
   const list = Array.isArray(client?.allergies) ? client.allergies : []
   section.entries = list.map(item => {
     const startRaw = item?.start_date ?? item?.startDate ?? ''
@@ -568,7 +569,7 @@ function mapAllergiesFromApi(client) {
     }
   })
 
-  if (!section.entries.length && client?.no_allergies) {
+  if (section.noKnownAllergies) {
     section.entries = []
   }
 
