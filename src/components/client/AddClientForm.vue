@@ -713,6 +713,10 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  initialActiveTab: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['saved', 'cancel', 'tab-label', 'navigate-existing'])
@@ -790,6 +794,7 @@ const {
   fmhTabRef,
   vitalsTabRef,
   panelScrollRef,
+  initialActiveTab: props.initialActiveTab,
 })
 
 const progressiveMatchEnabled = computed(() => !isEditMode.value)
@@ -1198,7 +1203,26 @@ async function executeSave() {
   try {
     let savedClientId = props.clientId
     if (isEditMode.value) {
-      await siteStore.updateClient(props.clientId, form.value, t)
+      const updated = await siteStore.updateClient(
+        props.clientId,
+        form.value,
+        t,
+      )
+
+      // Keep allergy rows in sync with backend-generated ids so:
+      // - the table refreshes after save
+      // - delete reason requirements apply to persisted rows
+      const mapped = (updated && typeof updated === 'object')
+        ? siteStore.buildEditFormFromClient(
+          updated,
+          getClientMapOptions(),
+        )
+        : null
+
+      const nextAllergies = mapped?.[clientFormSections.allergies]
+      if (nextAllergies) {
+        form.value[clientFormSections.allergies] = nextAllergies
+      }
     } else {
       const created = await siteStore.createClient(form.value, t)
       savedClientId = created?.id ?? created?.client_id ?? savedClientId
@@ -1208,7 +1232,10 @@ async function executeSave() {
       message: saveSuccessMessage.value,
       position: 'top',
     })
-    emit('saved', { clientId: savedClientId })
+    emit('saved', {
+      clientId: savedClientId,
+      activeTab: activeTab.value,
+    })
     markPristine()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {

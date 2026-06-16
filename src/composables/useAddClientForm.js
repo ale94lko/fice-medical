@@ -99,6 +99,18 @@ export function useAddClientForm(t, catalogs, options = {}) {
   const formRef = ref(null)
   const form = ref(createEmptyAddClientForm())
 
+  function resolveInitialTab() {
+    const candidate = String(options?.initialActiveTab ?? '').trim()
+    if (
+      candidate
+      && Object.values(addClientTabKeys).includes(candidate)
+    ) {
+      return candidate
+    }
+
+    return addClientTabKeys.basic
+  }
+
   const {
     hasSubTabs,
     currentSubTabs,
@@ -163,7 +175,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
       return
     }
     form.value = nextForm
-    activeTab.value = addClientTabKeys.basic
+    activeTab.value = resolveInitialTab()
     initialSnapshot.value = snapshotAddClientForm(form.value)
     resetTabAccess()
     resetSubTabs()

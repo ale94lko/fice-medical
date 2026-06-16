@@ -48,7 +48,7 @@
               hide-selected
               hide-dropdown-icon
               emit-value
-              map-options
+              new-value-mode="add-unique"
               clearable
               input-debounce="0"
               @filter="onAllergyFilter"

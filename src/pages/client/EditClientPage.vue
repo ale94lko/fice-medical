@@ -46,6 +46,7 @@
           ref="clientFormRef"
           mode="edit"
           :client-id="clientId"
+          :initial-active-tab="initialActiveTab"
           @cancel="goToClientList"
           @tab-label="activeTabLabel = $event"
         />
@@ -68,6 +69,9 @@ const clientFormRef = ref(null)
 const activeTabLabel = ref('')
 
 const clientId = computed(() => route.params.id)
+const initialActiveTab = computed(() =>
+  String(route.query.tab ?? '').trim(),
+)
 
 const saving = computed(() => clientFormRef.value?.saving ?? false)
 const initialLoading = computed(
