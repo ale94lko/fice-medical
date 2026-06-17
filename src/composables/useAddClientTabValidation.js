@@ -18,6 +18,12 @@ import {
 } from 'src/utils/add-client-form-validation.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
+import {
+  resolvePointOfContactSaveErrorKey,
+} from 'src/utils/client-preferred-communication.js'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { quasarNotifyTypes } from 'components/constants.js'
 
 export function useAddClientTabValidation({
   activeTab,
@@ -32,6 +38,8 @@ export function useAddClientTabValidation({
   getBasicRules,
   getContactRules,
 }) {
+  const { t } = useI18n()
+  const $q = useQuasar()
   const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
   const ck = clientFieldKeys
   const tabErrorCounts = ref({})
@@ -218,6 +226,25 @@ export function useAddClientTabValidation({
 
   async function validateAllTabs() {
     resetTabErrorCounts()
+
+    const contactSection = form.value[clientFormSections.contact]
+    const pocSaveErrorKey = resolvePointOfContactSaveErrorKey(contactSection)
+    if (pocSaveErrorKey) {
+      tabErrorCounts.value = {
+        [addClientTabKeys.contact]: 1,
+      }
+      activeTab.value = addClientTabKeys.contact
+      await nextTick()
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t(pocSaveErrorKey),
+        position: 'top',
+      })
+      await notifyAndScrollToValidationErrors(panelScrollRef)
+
+      return false
+    }
+
     const counts = {}
     let totalErrors = 0
 

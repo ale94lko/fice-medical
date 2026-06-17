@@ -20,7 +20,8 @@ import {
 } from 'src/utils/client-allergies.js'
 import {
   applyPreferredPointOfContactFromApi,
-  normalizePreferredCommunicationList,
+  defaultPreferredCommunicationList,
+  sanitizePreferredCommunicationList,
 } from 'src/utils/client-preferred-communication.js'
 import {
   createEmptyContactSection,
@@ -399,7 +400,9 @@ function resolvePreferredCommunication(client, personal) {
     ?? personal?.preferred_communication
     ?? client?.communication_preference
 
-  return normalizePreferredCommunicationList(raw)
+  const list = sanitizePreferredCommunicationList(raw)
+
+  return list.length ? list : defaultPreferredCommunicationList()
 }
 
 /** Client mirror row in contacts (relationship self), not other contacts. */
@@ -519,6 +522,7 @@ function mapOtherContactFromApi(item, clientContact, catalogOptions = {}) {
     suffixSelectOptions,
     resolveCatalogSelectValue,
   )
+  other.notes = String(item?.notes ?? '').trim()
   other.phones = mapPhonesFromApi(pi.phones ?? item?.phones)
   other.emails = mapEmailsFromApi(pi.emails ?? item?.emails)
 
@@ -804,7 +808,7 @@ export function mapClientApiToForm(client, options = {}) {
     .map(item => mapOtherContactFromApi(item, contact, catalogOptions))
     .filter(Boolean)
   if (contact.otherContacts.length) {
-    contact.activeOtherContactId = contact.otherContacts[0].id
+    contact.activeContactSubTab = 'self'
   }
 
   applyPreferredPointOfContactFromApi(contact)

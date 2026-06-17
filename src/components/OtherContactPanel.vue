@@ -112,14 +112,28 @@
           />
         </AddClientLabeledField>
       </div>
-      <div class="col-12 col-md-6">
-        <div class="toggle-field">
-          <FormToggle
-            :model-value="contact.responsibleForPayments"
-            :label="t('responsibleForPayments')"
-            :test-id="ocField('responsibleForPayments')"
-            @update:model-value="onResponsibleForPaymentsChange"
-          />
+      <div class="col-12">
+        <div class="row q-col-gutter-sm q-col-gutter-md">
+          <div class="col-12 col-md-6">
+            <div class="toggle-field">
+              <FormToggle
+                :model-value="contact.responsibleForPayments"
+                :label="t('responsibleForPayments')"
+                :test-id="ocField('responsibleForPayments')"
+                @update:model-value="onResponsibleForPaymentsChange"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="toggle-field">
+              <FormToggle
+                :model-value="contact.isPreferredPointOfContact"
+                :label="t('preferredPointOfContact')"
+                :test-id="ocField('preferredPointOfContact')"
+                @update:model-value="onPreferredPointOfContactChange"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -283,6 +297,7 @@
                 <AddClientMethodRowActions
                   :is-last="index === contact.phones.length - 1"
                   :total="contact.phones.length"
+                  :can-add="canAddPhone(index)"
                   :add-label="t('addPhone')"
                   :remove-label="t('removePhone')"
                   :add-test-id="otherContactPhoneAddTestId(contact.id, index)"
@@ -343,6 +358,7 @@
                 <AddClientMethodRowActions
                   :is-last="index === contact.emails.length - 1"
                   :total="contact.emails.length"
+                  :can-add="canAddEmail(index)"
                   :add-label="t('addEmail')"
                   :remove-label="t('removeEmail')"
                   :add-test-id="otherContactEmailAddTestId(contact.id, index)"
@@ -356,6 +372,38 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="q-mt-md">
+      <AddClientLabeledField
+        :label="t('additionalNotes')"
+        :test-id="ocField('notes')">
+        <q-input
+          :model-value="contact.notes"
+          outlined
+          type="textarea"
+          rows="4"
+          class="full-width notes-field"
+          :data-testid="ocField('notes')"
+          :placeholder="t('additionalNotesPlaceholder')"
+          :rules="rules.additionalNotes"
+          maxlength="500"
+          counter
+          @update:model-value="setField('notes', $event)"
+        />
+      </AddClientLabeledField>
+    </div>
+
+    <div v-if="showDelete" class="q-mt-lg flex justify-end">
+      <q-btn
+        outline
+        no-caps
+        color="negative"
+        icon="delete"
+        :data-testid="ocField('remove')"
+        :label="t('removeOtherContact')"
+        @click="emit('remove')"
+      />
     </div>
   </div>
 </template>
@@ -375,6 +423,7 @@ import {
   getCountiesForStateCity,
 } from 'src/data/us-geography.js'
 import {
+  canAddContactMethodRow,
   clearContactAddress,
   copyClientAddressToContact,
   createEmptyEmail,
@@ -436,11 +485,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showDelete: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits([
   'update:contact',
   'set-responsible-for-payments',
+  'set-preferred-point-of-contact',
+  'remove',
 ])
 
 const { t } = useI18n()
@@ -479,8 +534,8 @@ const countyOptions = computed(() =>
   getCountiesForStateCity(props.contact.state, props.contact.city),
 )
 
-function emitContact(next) {
-  emit('update:contact', next)
+function emitContact(patch) {
+  emit('update:contact', patch)
 }
 
 function setField(key, value) {
@@ -491,7 +546,36 @@ function onResponsibleForPaymentsChange(value) {
   emit('set-responsible-for-payments', {
     contactId: props.contact.id,
     value,
+    label: [
+      props.contact.firstName,
+      props.contact.middleName,
+      props.contact.lastName,
+    ].filter(part => String(part ?? '').trim()).join(' ')
+      || t('otherContactTabGeneric', { n: 1 }),
   })
+}
+
+function onPreferredPointOfContactChange(value) {
+  emit('set-preferred-point-of-contact', {
+    contactId: props.contact.id,
+    value,
+    label: [
+      props.contact.firstName,
+      props.contact.middleName,
+      props.contact.lastName,
+    ].filter(part => String(part ?? '').trim()).join(' ')
+      || t('otherContactTabGeneric', { n: 1 }),
+  })
+}
+
+function canAddPhone(index) {
+  return index === props.contact.phones.length - 1
+    && canAddContactMethodRow(props.contact.phones, 'phone')
+}
+
+function canAddEmail(index) {
+  return index === props.contact.emails.length - 1
+    && canAddContactMethodRow(props.contact.emails, 'email')
 }
 
 function setPhoneField(index, key, value) {
@@ -513,9 +597,12 @@ function onPhoneInput(index, val) {
 }
 
 function addPhone() {
+  if (!canAddPhone(props.contact.phones.length - 1)) {
+    return
+  }
   emitContact({
     ...props.contact,
-    phones: [...props.contact.phones, createEmptyPhone()],
+    phones: [...(props.contact.phones ?? []), createEmptyPhone()],
   })
 }
 
@@ -525,9 +612,12 @@ function removePhone(index) {
 }
 
 function addEmail() {
+  if (!canAddEmail(props.contact.emails.length - 1)) {
+    return
+  }
   emitContact({
     ...props.contact,
-    emails: [...props.contact.emails, createEmptyEmail()],
+    emails: [...(props.contact.emails ?? []), createEmptyEmail()],
   })
 }
 

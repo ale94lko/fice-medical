@@ -33,6 +33,31 @@ const COMM_PREF_TO_API = {
 
 const UI_VALUE_SET = new Set(Object.values(pref))
 
+const EXCLUSIVE_PREFERRED_COMMUNICATION = [
+  pref.providerDidNotAsk,
+  pref.patientDeclined,
+]
+
+export function defaultPreferredCommunicationList() {
+  return [pref.providerDidNotAsk]
+}
+
+export function isExclusivePreferredCommunication(value) {
+  return EXCLUSIVE_PREFERRED_COMMUNICATION.includes(value)
+}
+
+export function sanitizePreferredCommunicationList(raw) {
+  const normalized = normalizePreferredCommunicationList(raw)
+  const exclusive = normalized.find(item =>
+    isExclusivePreferredCommunication(item),
+  )
+  if (exclusive) {
+    return [exclusive]
+  }
+
+  return normalized
+}
+
 function toSnakeToken(value) {
   return String(value ?? '')
     .trim()
@@ -111,15 +136,7 @@ export function isPreferredCommunicationSelected(list, value) {
 }
 
 export function isExcludedFromCommunicationAuthorization(value) {
-  const selected = String(value ?? '').trim()
-  if (!selected) {
-    return true
-  }
-
-  return (
-    selected === pref.providerDidNotAsk
-    || selected === pref.patientDeclined
-  )
+  return isExclusivePreferredCommunication(String(value ?? '').trim())
 }
 
 export function isPointOfContactPreferred(list) {
@@ -191,13 +208,13 @@ export function clearPreferredPointOfContactIfRemoved(
 }
 
 export function syncPreferredPointOfContactFlags(contactSection) {
+  if (!isPointOfContactPreferred(contactSection.preferredCommunication)) {
+    return
+  }
   const preferredId = contactSection.preferredPointOfContactId
-  const pocEnabled = isPointOfContactPreferred(
-    contactSection.preferredCommunication,
-  )
   for (const other of contactSection.otherContacts ?? []) {
     other.isPreferredPointOfContact = Boolean(
-      pocEnabled && preferredId && other.id === preferredId,
+      preferredId && other.id === preferredId,
     )
   }
 }
@@ -218,10 +235,47 @@ export function applyPreferredPointOfContactFromApi(contactSection) {
   }
 }
 
+export function setOtherContactPreferredPointOfContact(
+  contactSection,
+  contactId,
+  value,
+) {
+  for (const other of contactSection.otherContacts ?? []) {
+    other.isPreferredPointOfContact = Boolean(
+      value && other.id === contactId,
+    )
+  }
+  if (value) {
+    contactSection.preferredPointOfContactId = contactId
+  } else if (contactSection.preferredPointOfContactId === contactId) {
+    contactSection.preferredPointOfContactId = null
+  }
+  syncPreferredPointOfContactFlags(contactSection)
+}
+
+export function applyDefaultPreferredPointOfContact(
+  contactSection,
+  contactId,
+) {
+  if (!isPointOfContactPreferred(contactSection.preferredCommunication)) {
+    return
+  }
+  const hasPreferred = (contactSection.otherContacts ?? []).some(
+    item => item.isPreferredPointOfContact,
+  )
+  if (hasPreferred) {
+    return
+  }
+  setOtherContactPreferredPointOfContact(
+    contactSection,
+    contactId,
+    true,
+  )
+}
+
 export function syncPointOfContactSelection(contactSection) {
   if (!isPointOfContactPreferred(contactSection.preferredCommunication)) {
     contactSection.preferredPointOfContactId = null
-    syncPreferredPointOfContactFlags(contactSection)
 
     return
   }
@@ -234,22 +288,22 @@ export function syncPointOfContactSelection(contactSection) {
 }
 
 function syncPreferredCommunicationSideEffects(contactSection) {
-  const list = normalizePreferredCommunicationList(
+  const list = sanitizePreferredCommunicationList(
     contactSection.preferredCommunication,
   )
-  contactSection.preferredCommunication = list
+  contactSection.preferredCommunication = list.length
+    ? list
+    : defaultPreferredCommunicationList()
 
   if (!shouldShowCommunicationAuthorization(list)) {
     setCommunicationAuthorization(contactSection, false)
     contactSection.preferredPointOfContactId = null
-    syncPreferredPointOfContactFlags(contactSection)
 
     return
   }
 
   if (!isPointOfContactPreferred(list)) {
     contactSection.preferredPointOfContactId = null
-    syncPreferredPointOfContactFlags(contactSection)
 
     return
   }
@@ -258,24 +312,58 @@ function syncPreferredCommunicationSideEffects(contactSection) {
 }
 
 export function togglePreferredCommunication(contactSection, value) {
-  const list = [
-    ...normalizePreferredCommunicationList(
-      contactSection.preferredCommunication,
-    ),
-  ]
+  const list = sanitizePreferredCommunicationList(
+    contactSection.preferredCommunication,
+  )
   const idx = list.indexOf(value)
-  if (idx >= 0) {
-    list.splice(idx, 1)
+  const isSelected = idx >= 0
+  let nextList
+
+  if (isExclusivePreferredCommunication(value)) {
+    nextList = isSelected ? [] : [value]
   } else {
-    list.push(value)
+    const withoutExclusive = list.filter(
+      item => !isExclusivePreferredCommunication(item),
+    )
+    if (isSelected) {
+      nextList = withoutExclusive.filter(item => item !== value)
+    } else {
+      nextList = [...withoutExclusive, value]
+    }
   }
-  contactSection.preferredCommunication = list
+
+  contactSection.preferredCommunication = nextList.length
+    ? nextList
+    : defaultPreferredCommunicationList()
   syncPreferredCommunicationSideEffects(contactSection)
 }
 
 /** @deprecated Use togglePreferredCommunication for multiselect. */
 export function onPreferredCommunicationChange(contactSection, value) {
   togglePreferredCommunication(contactSection, value)
+}
+
+export function resolvePointOfContactSaveErrorKey(contactSection) {
+  if (!isPointOfContactPreferred(contactSection?.preferredCommunication)) {
+    return null
+  }
+  const others = contactSection?.otherContacts ?? []
+  if (!others.length) {
+    return 'prefCommPointOfContactSaveRequiresContact'
+  }
+  const hasPreferred = others.some(
+    other => Boolean(other.isPreferredPointOfContact),
+  )
+  if (!hasPreferred) {
+    return 'prefCommPointOfContactSaveRequiresSelection'
+  }
+
+  return null
+}
+
+export function requiresPointOfContactContactOnSave(contactSection) {
+  return resolvePointOfContactSaveErrorKey(contactSection)
+    === 'prefCommPointOfContactSaveRequiresContact'
 }
 
 export function resolvePreferredPointOfContactApiRef(contactSection) {

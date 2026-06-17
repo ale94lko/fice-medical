@@ -75,6 +75,18 @@ export default {
   tabBasicInfo: 'Basic Info',
   tabContact: 'Contact',
   tabContactInformation: 'Contact Information',
+  contactSubTabSelf: 'Self Contact',
+  contactSubTabAdd: 'Add Contact',
+  contactAddPanelHint:
+    'Enter the contact details below. A new tab will be created '
+    + 'once name and at least one contact method or address are provided.',
+  contactAddMinimumRequired:
+    'Complete first name, last name, and at least one address, '
+    + 'phone, or email to add a new contact.',
+  preferredPointOfContactChanged:
+    '{name} is now the preferred point of contact.',
+  responsibleForPaymentsChanged:
+    '{name} is now responsible for payments.',
   tabFamilyMedicalHistory: 'Family Medical History',
   tabAllergies: 'Allergies',
   tabInsurance: 'Insurance',
@@ -587,6 +599,12 @@ export default {
   communicationAuthorizedOn: 'Authorized on: {date}',
   preferredPointOfContact: 'Preferred Point of Contact',
   prefCommNoContactsAvailable: 'No contacts available',
+  prefCommPointOfContactSaveRequiresContact:
+    'Add at least one additional contact when Point of Contact is selected '
+    + 'as the preferred communication method.',
+  prefCommPointOfContactSaveRequiresSelection:
+    'Select a preferred point of contact when Point of Contact is selected '
+    + 'as the preferred communication method.',
   additionalNotes: 'Additional notes',
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',

@@ -85,6 +85,58 @@
         />
       </q-tabs>
       </div>
+
+      <div
+        v-else-if="isContactTabActive"
+        class="subtabs-row">
+        <q-tabs
+          v-model="activeContactSubTab"
+          dense
+          no-caps
+          outside-arrows
+          mobile-arrows
+          class="add-client-subtabs add-client-subtabs--contact"
+          active-color="primary"
+          indicator-color="primary"
+          align="left">
+          <q-tab
+            v-for="subTab in contactSubTabs"
+            :key="contactSubTabRenderKey(subTab)"
+            :name="subTab.key"
+            :disable="Boolean(subTab.disabled)"
+            :data-testid="tid.subTab(subTab.key)"
+            :icon="subTab.removable ? undefined : subTab.icon"
+            :label="subTab.removable ? undefined : subTab.label"
+            :class="{
+              'contact-subtab--removable': subTab.removable,
+            }">
+            <div
+              v-if="subTab.removable"
+              class="contact-subtab-label row items-center no-wrap">
+              <q-icon
+                name="contacts"
+                size="18px"
+                class="contact-subtab-icon"
+              />
+              <span class="contact-subtab-text ellipsis">
+                {{ contactSubTabLabel(subTab.key) }}
+              </span>
+              <q-btn
+                flat
+                round
+                dense
+                size="sm"
+                class="contact-subtab-remove app-btn-icon-action"
+                icon="close"
+                :aria-label="t('removeOtherContact')"
+                :data-testid="tid.otherContactRemove"
+                @click.stop="onRemoveContactTab(subTab.key, $event)"
+                @mousedown.stop
+              />
+            </div>
+          </q-tab>
+        </q-tabs>
+      </div>
     </div>
 
     <div class="content">
@@ -419,13 +471,19 @@
           class="q-pa-none"
           :data-add-client-tab="addClientTabKeys.contact">
           <AddClientContactTab
+            ref="addClientContactTabRef"
             v-model="form[contactSectionKey]"
+            :active-sub-tab="activeContactSubTab"
             :rules="contactRules"
             :prefix-select-options="prefixSelectOptions"
             :suffix-select-options="suffixSelectOptions"
             :contact-type-options="contactTypeSelectOptions"
             :relationship-type-options="relationshipTypeSelectOptions"
             :catalogs-loading="catalogsLoading"
+            @remove-other-contact="removeOtherContact"
+            @responsible-for-payments-change="onResponsibleForPaymentsChange"
+            @preferred-point-of-contact-change="
+              onPreferredPointOfContactChange"
           />
         </q-tab-panel>
 
@@ -687,6 +745,8 @@ import AddClientDuplicateMatchReviewDialog
 import { useSiteStore } from '../../stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
+import { useContactSubTabs } from 'src/composables/useContactSubTabs.js'
+import { resolveOtherContactTabLabel } from 'src/utils/client-contact-form.js'
 import {
   addClientTabKeys,
   clientFormSections,
@@ -761,6 +821,7 @@ const initialLoading = ref(false)
 const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
 const allergiesTabRef = ref(null)
+const addClientContactTabRef = ref(null)
 const fmhTabRef = ref(null)
 const vitalsTabRef = ref(null)
 const panelScrollRef = ref(null)
@@ -843,6 +904,63 @@ const followUpReferenceContext = computed(() => {
     carePlans: rawClient?.care_plans ?? rawClient?.carePlans ?? [],
   }
 })
+
+const isContactTabActive = computed(
+  () => activeTab.value === addClientTabKeys.contact,
+)
+
+const contactCatalogOptions = computed(() => ({
+  contactTypeOptions: contactTypeSelectOptions.value,
+  relationshipTypeOptions: relationshipTypeSelectOptions.value,
+}))
+
+const {
+  activeContactSubTab,
+  contactSubTabs,
+  removeOtherContact,
+  onResponsibleForPaymentsChange,
+  onPreferredPointOfContactChange,
+  CONTACT_SUB_TAB_SELF,
+} = useContactSubTabs(
+  () => form.value[contactSectionKey],
+  contactCatalogOptions,
+)
+
+watch(activeTab, (tab, prev) => {
+  if (tab === addClientTabKeys.contact && prev !== tab) {
+    activeContactSubTab.value = CONTACT_SUB_TAB_SELF
+  }
+})
+
+function onRemoveContactTab(contactId, event) {
+  event?.preventDefault?.()
+  addClientContactTabRef.value?.requestRemoveOtherContactById(contactId)
+}
+
+function contactSubTabLabel(tabKey) {
+  const section = form.value[contactSectionKey] ?? {}
+  const others = section.otherContacts ?? []
+  const index = others.findIndex(row => row.id === tabKey)
+  if (index < 0) {
+    return ''
+  }
+
+  return resolveOtherContactTabLabel(
+    others[index],
+    index,
+    t,
+    contactCatalogOptions.value,
+    others,
+  )
+}
+
+function contactSubTabRenderKey(subTab) {
+  if (!subTab.removable) {
+    return subTab.key
+  }
+
+  return `${subTab.key}-${contactSubTabLabel(subTab.key)}`
+}
 
 const duplicateSaveConfirmOpen = ref(false)
 const duplicateNavigateConfirmOpen = ref(false)

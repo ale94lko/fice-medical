@@ -227,7 +227,7 @@ function buildRegisterContact(other, clientContact) {
     state: address.state,
     country: address.country,
     county: address.county,
-    notes: '',
+    notes: trim(other?.notes),
     is_preferred_point_of_contact: Boolean(
       other?.isPreferredPointOfContact,
     ),

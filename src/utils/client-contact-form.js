@@ -5,6 +5,7 @@ import {
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
 import {
   syncPreferredPointOfContactFlags,
+  defaultPreferredCommunicationList,
 } from 'src/utils/client-preferred-communication.js'
 
 const ADDRESS_LINE_RE = /^[a-zA-Z0-9.\-\s]*$/
@@ -67,6 +68,7 @@ export function createEmptyOtherContact() {
     country: clientCountryDefault,
     phones: [createEmptyPhone()],
     emails: [createEmptyEmail()],
+    notes: '',
   }
 }
 
@@ -81,11 +83,12 @@ export function createEmptyContactSection() {
     country: clientCountryDefault,
     phones: [createEmptyPhone()],
     emails: [createEmptyEmail()],
-    preferredCommunication: [],
+    preferredCommunication: defaultPreferredCommunicationList(),
     consent: null,
     preferredPointOfContactId: null,
     additionalNotes: '',
     otherContacts: [],
+    activeContactSubTab: 'self',
     activeOtherContactId: null,
     otherContactExpanded: true,
   }
@@ -115,26 +118,117 @@ export function setOtherContactResponsibleForPayments(
   }
 }
 
+export function contactMethodRowHasValue(row, kind) {
+  if (kind === 'phone') {
+    return Boolean(String(row?.number ?? '').trim())
+  }
+
+  return Boolean(String(row?.address ?? '').trim())
+}
+
+export function canAddContactMethodRow(rows, kind) {
+  const list = rows ?? []
+  if (!list.length) {
+    return false
+  }
+  const last = list[list.length - 1]
+
+  return contactMethodRowHasValue(last, kind)
+}
+
+export function otherContactMeetsMinimumRequirements(other) {
+  const hasFirstName = Boolean(String(other?.firstName ?? '').trim())
+  const hasLastName = Boolean(String(other?.lastName ?? '').trim())
+  const hasAddress = hasOtherAddressData(other)
+  const hasPhone = (other?.phones ?? []).some(
+    phone => contactMethodRowHasValue(phone, 'phone'),
+  )
+  const hasEmail = (other?.emails ?? []).some(
+    email => contactMethodRowHasValue(email, 'email'),
+  )
+
+  return hasFirstName
+    && hasLastName
+    && (hasAddress || hasPhone || hasEmail)
+}
+
+export function canAddAnotherOtherContact(contactSection) {
+  const others = contactSection?.otherContacts ?? []
+  if (!others.length) {
+    return true
+  }
+
+  return others.every(other => otherContactMeetsMinimumRequirements(other))
+}
+
+export function resolveOtherContactTabGroupKey(contact) {
+  const relationship = String(contact?.relationshipType ?? '').trim()
+  if (relationship) {
+    return { kind: 'relationship', value: relationship }
+  }
+  const contactType = String(contact?.contactType ?? '').trim()
+  if (contactType) {
+    return { kind: 'contactType', value: contactType }
+  }
+
+  return null
+}
+
+function contactsInSameTabGroup(list, contact) {
+  const key = resolveOtherContactTabGroupKey(contact)
+  if (!key) {
+    return list.filter(row => !resolveOtherContactTabGroupKey(row))
+  }
+
+  return list.filter(row => {
+    const rowKey = resolveOtherContactTabGroupKey(row)
+    if (!rowKey) {
+      return false
+    }
+
+    return rowKey.kind === key.kind && rowKey.value === key.value
+  })
+}
+
 export function resolveOtherContactTabLabel(
   contact,
   index,
   t,
   catalogOptions = {},
+  allContacts = null,
 ) {
   const {
     contactTypeOptions = [],
     relationshipTypeOptions = [],
   } = catalogOptions
-  const type = String(contact.contactType ?? '').trim()
-  if (type) {
-    return resolveCatalogOptionLabel(contactTypeOptions, type)
-  }
+  const list = allContacts ?? []
   const relationship = String(contact.relationshipType ?? '').trim()
+  const contactType = String(contact.contactType ?? '').trim()
+  let label = ''
+
   if (relationship) {
-    return resolveCatalogOptionLabel(relationshipTypeOptions, relationship)
+    label = resolveCatalogOptionLabel(relationshipTypeOptions, relationship)
+  } else if (contactType) {
+    label = resolveCatalogOptionLabel(contactTypeOptions, contactType)
   }
 
-  return t('otherContactTabGeneric', { n: index + 1 })
+  if (label) {
+    const sameGroup = contactsInSameTabGroup(list, contact)
+    if (sameGroup.length > 1) {
+      const groupIndex = sameGroup.findIndex(row => row.id === contact.id) + 1
+
+      return `${label} ${groupIndex}`
+    }
+
+    return label
+  }
+
+  const withoutLabel = list.filter(row => !resolveOtherContactTabGroupKey(row))
+  const genericIndex = withoutLabel.findIndex(row => row.id === contact.id) + 1
+
+  return t('otherContactTabGeneric', {
+    n: genericIndex > 0 ? genericIndex : index + 1,
+  })
 }
 
 export function isValidAddressLine(value, maxLen = 100) {
@@ -238,7 +332,8 @@ export function otherContactHasData(other) {
     || other.responsibleForPayments
     || hasOtherAddressData(other)
     || (other.phones ?? []).some(p => String(p.number ?? '').trim())
-    || (other.emails ?? []).some(e => String(e.address ?? '').trim()),
+    || (other.emails ?? []).some(e => String(e.address ?? '').trim())
+    || String(other.notes ?? '').trim(),
   )
 }
 

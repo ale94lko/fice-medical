@@ -79,6 +79,18 @@ export default {
   tabBasicInfo: 'Info básica',
   tabContact: 'Contacto',
   tabContactInformation: 'Información de contacto',
+  contactSubTabSelf: 'Contacto propio',
+  contactSubTabAdd: 'Agregar contacto',
+  contactAddPanelHint:
+    'Ingrese los datos del contacto. Se creará una pestaña nueva '
+    + 'cuando tenga nombre y al menos una dirección, teléfono o correo.',
+  contactAddMinimumRequired:
+    'Complete nombre, apellido y al menos una dirección, '
+    + 'teléfono o correo para añadir un nuevo contacto.',
+  preferredPointOfContactChanged:
+    '{name} es ahora el punto de contacto preferido.',
+  responsibleForPaymentsChanged:
+    '{name} es ahora responsable de pagos.',
   tabFamilyMedicalHistory: 'Historial médico familiar',
   tabAllergies: 'Alergias',
   tabInsurance: 'Seguro',
@@ -601,6 +613,12 @@ export default {
   communicationAuthorizedOn: 'Autorizado el: {date}',
   preferredPointOfContact: 'Punto de contacto preferido',
   prefCommNoContactsAvailable: 'No hay contactos disponibles',
+  prefCommPointOfContactSaveRequiresContact:
+    'Agregue al menos un contacto adicional cuando Punto de contacto '
+    + 'esté seleccionado como método de comunicación preferido.',
+  prefCommPointOfContactSaveRequiresSelection:
+    'Seleccione un punto de contacto preferido cuando Punto de contacto '
+    + 'esté seleccionado como método de comunicación preferido.',
   additionalNotes: 'Notas adicionales',
   additionalNotesPlaceholder: 'Ingrese notas adicionales aquí...',
   optional: 'Opcional',

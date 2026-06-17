@@ -18,6 +18,7 @@
       color="primary"
       icon="add"
       class="method-btn"
+      :disable="!canAdd"
       :data-testid="addTestId || undefined"
       :aria-label="addLabel"
       @click="emit('add')"
@@ -52,6 +53,10 @@ const props = defineProps({
   removeTestId: {
     type: String,
     default: '',
+  },
+  canAdd: {
+    type: Boolean,
+    default: true,
   },
 })
 
