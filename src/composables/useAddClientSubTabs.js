@@ -18,6 +18,9 @@ export const CLINICAL_LABS_SUB_TAB = addClientClinicalSubTabKeys.labs
 export const CARE_COORDINATION_FOLLOW_UPS_SUB_TAB =
   addClientCareCoordinationSubTabKeys.followUps
 
+export const CARE_COORDINATION_APPOINTMENTS_SUB_TAB =
+  addClientCareCoordinationSubTabKeys.appointments
+
 export const ADD_CLIENT_MAIN_TABS = [
   {
     key: addClientTabKeys.basic,

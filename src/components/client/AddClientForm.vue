@@ -508,8 +508,12 @@
               :key="subTab.key"
               :name="subTab.key"
               class="q-pa-none">
+              <AddClientAppointmentsTab
+                v-if="subTab.key === CARE_COORDINATION_APPOINTMENTS_SUB_TAB"
+                :client-id="props.clientId"
+              />
               <AddClientFollowUpsTab
-                v-if="
+                v-else-if="
                   subTab.key === CARE_COORDINATION_FOLLOW_UPS_SUB_TAB
                     && form[clientFormSections.followUps]?.visible
                 "
@@ -673,6 +677,7 @@ import AddClientVitalsTab from '../AddClientVitalsTab.vue'
 import AddClientAssessmentsTab from '../AddClientAssessmentsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
+import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
@@ -707,6 +712,7 @@ import {
   CLINICAL_ASSESSMENTS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
+  CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useClientProgressiveMatch }

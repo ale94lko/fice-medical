@@ -482,7 +482,36 @@ export const clientPermissionNames = {
   viewFollowUps: 'VIEW_FOLLOW_UPS',
   addFollowUps: 'ADD_FOLLOW_UPS',
   editFollowUps: 'EDIT_FOLLOW_UPS',
+  viewAppointmentSlot: 'VIEW_APPOINTMENT_SLOT',
+  bookAppointment: 'BOOK_APPOINTMENT',
+  cancelAppointment: 'CANCEL_APPOINTMENT',
+  rescheduleAppointment: 'RESCHEDULE_APPOINTMENT',
+  manageAppointmentSlots: 'MANAGE_APPOINTMENT_SLOTS',
 }
+
+export const appointmentStatuses = {
+  pending: 'PENDING',
+  confirmed: 'CONFIRMED',
+  checkedIn: 'CHECKED_IN',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+  noShow: 'NO_SHOW',
+  rescheduled: 'RESCHEDULED',
+}
+
+export const appointmentSlotStatuses = {
+  available: 'AVAILABLE',
+}
+
+export const appointmentNotesMaxLength = 250
+
+export const appointmentSlotLookaheadDays = 60
+
+export const appointmentTerminalStatuses = new Set([
+  appointmentStatuses.cancelled,
+  appointmentStatuses.completed,
+  appointmentStatuses.noShow,
+])
 
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
@@ -495,6 +524,35 @@ export const apiPaths = {
   clientAppointments: id => `/appointments/v1/clients/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
+  appointmentsList: '/appointments/v1',
+  appointmentById: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  appointmentTypes: '/appointments/v1/types',
+  appointmentClinicians: '/appointments/v1/clinicians',
+  appointmentSlots: '/appointments/v1/slots',
+  appointmentBook: '/appointments/v1/book',
+  appointmentCancel: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/cancel`,
+  appointmentReschedule: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/reschedule`,
+  appointmentCheckIn: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/check-in`,
+  appointmentComplete: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/complete`,
+  appointmentNoShow: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/no-show`,
+  clientReferrals: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/referrals`,
+  clientCarePlans: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/care-plans`,
   clientsCreate: '/client/v1/register',
   clientMatch: '/client/v1/match',
   assessmentTemplates: '/assessment-templates',

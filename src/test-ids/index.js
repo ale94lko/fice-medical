@@ -136,6 +136,18 @@ export const followUpTestIds = {
   rowCancel: id => toTestId('follow-up-row', id, 'btn-cancel'),
 }
 
+export const appointmentTestIds = {
+  btn: name => toTestId('appointment-btn', name),
+  field: name => toTestId('appointment-field', name),
+  rowView: id => toTestId('appointment-row', id, 'btn-view'),
+  rowEdit: id => toTestId('appointment-row', id, 'btn-edit'),
+  rowCancel: id => toTestId('appointment-row', id, 'btn-cancel'),
+  rowReschedule: id => toTestId('appointment-row', id, 'btn-reschedule'),
+  rowCheckIn: id => toTestId('appointment-row', id, 'btn-check-in'),
+  rowComplete: id => toTestId('appointment-row', id, 'btn-complete'),
+  rowNoShow: id => toTestId('appointment-row', id, 'btn-no-show'),
+}
+
 export const modalTestIds = {
   dialog: name => toTestId('modal', name),
   confirm: name => toTestId('modal', name, 'btn-confirm'),
