@@ -932,6 +932,12 @@ watch(activeTab, (tab, prev) => {
   }
 })
 
+watch(activeContactSubTab, () => {
+  if (isContactTabActive.value) {
+    scrollFormPanelToTop()
+  }
+})
+
 function onRemoveContactTab(contactId, event) {
   event?.preventDefault?.()
   addClientContactTabRef.value?.requestRemoveOtherContactById(contactId)

@@ -1,5 +1,6 @@
 import { computed } from 'vue'
-import { clientNameMaxLength } from 'components/constants.js'
+import { clientNameMaxLength, otherContactNotesMaxLength } from
+  'components/constants.js'
 import {
   isValidAddressLine,
   isValidEmailAddress,
@@ -52,6 +53,16 @@ export function useAddClientContactRules(t, lettersRule) {
         }
 
         return t('notesMax', { max: 500 })
+      },
+    ],
+    otherContactNotes: [
+      val => {
+        const s = String(val ?? '')
+        if (s.length <= otherContactNotesMaxLength) {
+          return true
+        }
+
+        return t('notesMax', { max: otherContactNotesMaxLength })
       },
     ],
   }))

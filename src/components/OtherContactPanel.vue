@@ -382,12 +382,12 @@
           :model-value="contact.notes"
           outlined
           type="textarea"
-          rows="4"
+          rows="2"
           class="full-width notes-field"
           :data-testid="ocField('notes')"
           :placeholder="t('additionalNotesPlaceholder')"
-          :rules="rules.additionalNotes"
-          maxlength="500"
+          :rules="rules.otherContactNotes"
+          :maxlength="otherContactNotesMaxLength"
           counter
           @update:model-value="setField('notes', $event)"
         />
@@ -411,6 +411,7 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { otherContactNotesMaxLength } from 'components/constants.js'
 import FormInput from './FormInput.vue'
 import FormToggle from 'components/FormToggle.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'

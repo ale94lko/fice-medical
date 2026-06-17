@@ -273,6 +273,7 @@ export const clientGenderValues = {
 export const clientMaxAge = 125
 
 export const clientNameMaxLength = 30
+export const otherContactNotesMaxLength = 250
 
 export const clientSuffixMaxLength = 5
 

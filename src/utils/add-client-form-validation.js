@@ -80,6 +80,7 @@ export function countContactTabFieldErrors(contact, rules) {
     for (const email of other.emails ?? []) {
       count += countFieldRuleErrors(email?.address, rules.emailAddress)
     }
+    count += countFieldRuleErrors(other.notes, rules.otherContactNotes)
   }
 
   count += countDuplicateContactMethodErrors(contact)

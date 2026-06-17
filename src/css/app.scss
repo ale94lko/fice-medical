@@ -1586,6 +1586,10 @@ input:-webkit-autofill {
 
 .other-contact-panel {
   padding: 0;
+
+  .notes-field textarea.q-field__native {
+    min-height: 60px;
+  }
 }
 
 .other-contact-add-tab {
