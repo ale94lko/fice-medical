@@ -8,8 +8,10 @@ import {
 import routes from './routes'
 import { useAuthStore } from 'stores/auth-store.js'
 import {
+  isStaleChunkLoadError,
   parseGithubPagesStoredRedirect,
   readGithubPagesStoredRedirect,
+  reloadRouteAfterStaleChunk,
 } from 'src/utils/gh-pages-router.js'
 
 function getRequiredModule(to) {
@@ -99,6 +101,14 @@ export default defineRouter(function(/* { store, ssrContext } */) {
       console.log(error)
       next('/login')
     }
+  })
+
+  Router.onError((error, to) => {
+    if (isStaleChunkLoadError(error) && reloadRouteAfterStaleChunk(to)) {
+      return
+    }
+
+    throw error
   })
 
   authStore.router = Router

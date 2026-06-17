@@ -27,3 +27,36 @@ export function readGithubPagesStoredRedirect() {
 
   return stored
 }
+
+const CHUNK_RELOAD_SESSION_PREFIX = 'fice-medical:chunk-reload:'
+
+/** True when a lazy route chunk failed to load (stale deploy / cache). */
+export function isStaleChunkLoadError(error) {
+  const message = String(error?.message ?? error ?? '')
+
+  return /Failed to fetch dynamically imported module/i.test(message)
+    || /error loading dynamically imported module/i.test(message)
+    || /Importing a module script failed/i.test(message)
+}
+
+/**
+ * After a deploy, hashed JS chunks change. Reload once so index.html
+ * picks up the new entry bundle.
+ */
+export function reloadRouteAfterStaleChunk(to) {
+  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') {
+    return false
+  }
+
+  const reloadKey = `${CHUNK_RELOAD_SESSION_PREFIX}${to.fullPath}`
+  if (sessionStorage.getItem(reloadKey)) {
+    sessionStorage.removeItem(reloadKey)
+
+    return false
+  }
+
+  sessionStorage.setItem(reloadKey, '1')
+  window.location.assign(to.fullPath)
+
+  return true
+}

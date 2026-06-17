@@ -109,8 +109,9 @@
             :day-has-availability="dayHasAvailability"
             :time-zone="timeZone"
             :empty-label="slotsEmptyLabel"
-            :can-go-prev-month="canGoPrevMonth"
-            :can-go-next-month="canGoNextMonth"
+            :readonly="schedulingLocked"
+            :can-go-prev-month="slotPickerCanGoPrev"
+            :can-go-next-month="slotPickerCanGoNext"
             @select-day="selectDay"
             @select-slot="selectSlot"
             @refresh="refreshSlots"
@@ -305,9 +306,22 @@ const {
   selectSlot,
   dayHasAvailability,
   clearSelectedSlot,
+  clearSlotsWindow,
   canGoPrevMonth,
   canGoNextMonth,
 } = scheduling
+
+const schedulingLocked = computed(() =>
+  props.mode === 'book' && !draft.value.appointmentTypeId,
+)
+
+const slotPickerCanGoPrev = computed(() =>
+  !schedulingLocked.value && canGoPrevMonth.value,
+)
+
+const slotPickerCanGoNext = computed(() =>
+  !schedulingLocked.value && canGoNextMonth.value,
+)
 
 const dialogTitle = computed(() =>
   props.mode === 'reschedule'
@@ -443,11 +457,9 @@ watch(
     }
     draft.value = createDraft()
     errors.value = {}
-    clearSelectedSlot()
+    clearSlotsWindow()
     await loadFormOptions()
-    if (schedulingFilters.value.appointmentTypeId) {
-      await loadSlotsWindow()
-    }
+    await loadSlotsWindow()
   },
 )
 
@@ -461,9 +473,7 @@ watch(
     if (!telemedicineAllowed.value) {
       draft.value.telemedicine = false
     }
-    if (next) {
-      await loadSlotsWindow()
-    }
+    await loadSlotsWindow()
   },
 )
 

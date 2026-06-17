@@ -13,7 +13,7 @@
               round
               dense
               icon="chevron_left"
-              :disable="!canGoPrevMonth"
+              :disable="readonly || !canGoPrevMonth"
               @click="prevMonth"
             />
             <span class="text-subtitle2">{{ monthLabel }}</span>
@@ -22,7 +22,7 @@
               round
               dense
               icon="chevron_right"
-              :disable="!canGoNextMonth"
+              :disable="readonly || !canGoNextMonth"
               @click="nextMonth"
             />
           </div>
@@ -172,7 +172,7 @@ const calendarCells = computed(() => {
       empty: false,
       dayKey,
       label: dayNum,
-      available: props.dayHasAvailability(dayKey),
+      available: !props.readonly && props.dayHasAvailability(dayKey),
     })
   })
 

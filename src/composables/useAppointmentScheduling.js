@@ -80,12 +80,19 @@ export function useAppointmentScheduling(getFilters) {
     selectedSlotId.value = null
   }
 
+  function clearSlotsWindow() {
+    slots.value = []
+    selectedDayKey.value = ''
+    clearSelectedSlot()
+    visibleMonthKey.value = monthKeyFromDayKey(
+      todayLocalDayKey(timeZone),
+    )
+  }
+
   async function loadSlotsWindow() {
     const filters = getFilters?.() ?? {}
     if (!filters.appointmentTypeId) {
-      slots.value = []
-      selectedDayKey.value = ''
-      clearSelectedSlot()
+      clearSlotsWindow()
 
       return
     }
@@ -190,5 +197,6 @@ export function useAppointmentScheduling(getFilters) {
     selectSlot,
     dayHasAvailability,
     clearSelectedSlot,
+    clearSlotsWindow,
   }
 }
