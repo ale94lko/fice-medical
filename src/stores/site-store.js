@@ -5,6 +5,7 @@ import {
   buildClientCreateBody,
   buildClientUpdateBody,
   extractClientMutationResponse,
+  extractClientWarnings,
   extractEnvelopeList,
   extractEnvelopeListPagination,
   formatClientDisplay,
@@ -170,6 +171,38 @@ export const useSiteStore = defineStore('site', {
       )
 
       return updated
+    },
+    async patchClientPartial(clientId, partialBody, t) {
+      const id = String(clientId ?? '').trim()
+      if (!id) {
+        throw new Error('Missing client id')
+      }
+      const response = await apiInstance.patch(
+        apiPaths.clientById(id),
+        partialBody,
+      )
+      const client = extractClientMutationResponse(response.data)
+      const warnings = extractClientWarnings(response.data)
+      if (client && typeof client === 'object') {
+        this.clientListSourceById[id] = client
+      }
+      await this.getClientList(
+        {
+          page: this.clientListQuery.page,
+          limit: this.clientListQuery.limit,
+        },
+        t,
+      )
+
+      return { client, warnings }
+    },
+    async patchClientFollowUps(clientId, followUpsPayload, t) {
+      return this.patchClientPartial(
+        clientId,
+        /* eslint-disable-next-line camelcase -- API field */
+        { follow_ups: followUpsPayload },
+        t,
+      )
     },
   },
 })

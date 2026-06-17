@@ -210,6 +210,18 @@ export function extractClientMutationResponse(data) {
   return root
 }
 
+export function extractClientWarnings(data) {
+  if (!data || typeof data !== typeNames.object) {
+    return []
+  }
+  const root = data.data != null && typeof data.data === typeNames.object
+    ? data.data
+    : data
+  const list = root?.warnings ?? data?.warnings
+
+  return Array.isArray(list) ? list : []
+}
+
 function clientPersonalInfo(client) {
   return client.personal_information ?? client.basic_info ?? client
 }

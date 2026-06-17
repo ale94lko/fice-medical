@@ -121,6 +121,21 @@ export const labTestIds = {
   rowDownload: id => toTestId('lab-row', id, 'btn-download'),
 }
 
+export const followUpTestIds = {
+  btn: name => toTestId('follow-up-btn', name),
+  field: name => toTestId('follow-up-field', name),
+  accordionToggle: section => toTestId(
+    'follow-up-accordion',
+    section,
+    'toggle',
+  ),
+  rowMenu: id => toTestId('follow-up-row', id, 'btn-menu'),
+  rowEdit: id => toTestId('follow-up-row', id, 'btn-edit'),
+  rowView: id => toTestId('follow-up-row', id, 'btn-view'),
+  rowComplete: id => toTestId('follow-up-row', id, 'btn-complete'),
+  rowCancel: id => toTestId('follow-up-row', id, 'btn-cancel'),
+}
+
 export const modalTestIds = {
   dialog: name => toTestId('modal', name),
   confirm: name => toTestId('modal', name, 'btn-confirm'),

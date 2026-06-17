@@ -39,6 +39,7 @@ import {
 import { nextInsuranceId } from 'src/utils/client-insurance.js'
 import { createEmptyVitalsSection } from 'src/utils/client-vitals.js'
 import { mapClientLabsListFromApi } from 'src/utils/lab-normalize.js'
+import { mapFollowUpsSectionFromApi } from 'src/utils/client-follow-ups.js'
 import {
   ageAndUnitFromUsDateString,
   isoDateToUsDateString,
@@ -899,5 +900,6 @@ export function mapClientApiToForm(client, options = {}) {
       ?? client.labOrders
       ?? [],
     ),
+    [clientFormSections.followUps]: mapFollowUpsSectionFromApi(client),
   }
 }

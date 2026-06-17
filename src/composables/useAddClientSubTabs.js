@@ -1,6 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import {
   addClientClinicalSubTabKeys,
+  addClientCareCoordinationSubTabKeys,
   addClientTabKeys,
 } from 'components/constants.js'
 
@@ -13,6 +14,9 @@ export const CLINICAL_ASSESSMENTS_SUB_TAB =
   addClientClinicalSubTabKeys.assessments
 
 export const CLINICAL_LABS_SUB_TAB = addClientClinicalSubTabKeys.labs
+
+export const CARE_COORDINATION_FOLLOW_UPS_SUB_TAB =
+  addClientCareCoordinationSubTabKeys.followUps
 
 export const ADD_CLIENT_MAIN_TABS = [
   {
@@ -96,32 +100,32 @@ export const ADD_CLIENT_SUB_TABS = {
   ],
   [addClientTabKeys.careCoordination]: [
     {
-      key: 'referrals',
+      key: addClientCareCoordinationSubTabKeys.referrals,
       icon: 'share',
       labelKey: 'subTabReferrals',
     },
     {
-      key: 'appointments',
+      key: addClientCareCoordinationSubTabKeys.appointments,
       icon: 'event',
       labelKey: 'subTabAppointments',
     },
     {
-      key: 'careTeam',
+      key: addClientCareCoordinationSubTabKeys.careTeam,
       icon: 'groups',
       labelKey: 'subTabCareTeam',
     },
     {
-      key: 'authorizations',
+      key: addClientCareCoordinationSubTabKeys.authorizations,
       icon: 'verified',
       labelKey: 'subTabAuthorizations',
     },
     {
-      key: 'tasks',
+      key: addClientCareCoordinationSubTabKeys.tasks,
       icon: 'task_alt',
       labelKey: 'subTabTasks',
     },
     {
-      key: 'followUps',
+      key: addClientCareCoordinationSubTabKeys.followUps,
       icon: 'update',
       labelKey: 'subTabFollowUps',
     },

@@ -62,6 +62,15 @@ export const addClientClinicalSubTabKeys = {
   labs: 'labs',
 }
 
+export const addClientCareCoordinationSubTabKeys = {
+  referrals: 'referrals',
+  appointments: 'appointments',
+  careTeam: 'careTeam',
+  authorizations: 'authorizations',
+  tasks: 'tasks',
+  followUps: 'followUps',
+}
+
 export const clientAgeUnitValues = {
   years: 'years',
   months: 'months',
@@ -144,6 +153,7 @@ export const clientFormSections = {
   insurance: 'insurance',
   vitals: 'vitals',
   labs: 'labs',
+  followUps: 'followUps',
 }
 
 export const clientInsurancePriorityValues = {
@@ -415,11 +425,76 @@ export const labMaxResultSummaryLength = 500
 
 export const labMaxComponentNotesLength = 255
 
+export const followUpStatuses = {
+  scheduled: 'SCHEDULED',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+  overdue: 'OVERDUE',
+}
+
+export const followUpStoredStatuses = {
+  scheduled: 'SCHEDULED',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+}
+
+export const followUpTypeValues = {
+  medicationReview: 'MEDICATION_REVIEW',
+  referralVerification: 'REFERRAL_VERIFICATION',
+  authorizationRenewal: 'AUTHORIZATION_RENEWAL',
+  carePlanReview: 'CARE_PLAN_REVIEW',
+  labResultsReview: 'LAB_RESULTS_REVIEW',
+  appointmentFollowUp: 'APPOINTMENT_FOLLOW_UP',
+  generalFollowUp: 'GENERAL_FOLLOW_UP',
+}
+
+export const followUpPriorityValues = {
+  low: 'LOW',
+  medium: 'MEDIUM',
+  high: 'HIGH',
+  urgent: 'URGENT',
+}
+
+export const followUpRelatedToValues = {
+  clinicalNote: 'CLINICAL_NOTE',
+  referral: 'REFERRAL',
+  authorization: 'AUTHORIZATION',
+  carePlan: 'CARE_PLAN',
+  appointment: 'APPOINTMENT',
+  labExam: 'LAB_EXAM',
+  medication: 'MEDICATION',
+  general: 'GENERAL',
+}
+
+export const followUpReminderUnitValues = {
+  daysBefore: 'DAYS_BEFORE',
+  weeksBefore: 'WEEKS_BEFORE',
+}
+
+export const followUpNotesMaxLength = 500
+
+export const followUpReminderValueOptions = [
+  1, 2, 3, 5, 7, 14, 21, 30,
+]
+
+export const clientPermissionNames = {
+  viewClient: 'VIEW_CLIENT',
+  viewFollowUps: 'VIEW_FOLLOW_UPS',
+  addFollowUps: 'ADD_FOLLOW_UPS',
+  editFollowUps: 'EDIT_FOLLOW_UPS',
+}
+
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   cliniciansList: '/clinicians/v1',
   clientsList: '/client/v1/all-clients',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
+  clientClinicalNotes: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/clinical-notes`,
+  clientAppointments: id => `/appointments/v1/clients/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
   clientsCreate: '/client/v1/register',
   clientMatch: '/client/v1/match',
   assessmentTemplates: '/assessment-templates',

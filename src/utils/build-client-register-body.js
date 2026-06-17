@@ -19,6 +19,7 @@ import {
   buildMedicalHistoryForRegister,
   buildVitalsForRegister,
 } from 'src/utils/build-client-register-clinical.js'
+import { buildFollowUpsForRegister } from 'src/utils/client-follow-ups.js'
 
 const ck = clientFieldKeys
 
@@ -301,6 +302,7 @@ export function buildClientRegisterBody(form) {
       insurance: [],
       medical_history: [],
       vitals: [],
+      follow_ups: [],
     }
   }
 
@@ -314,5 +316,8 @@ export function buildClientRegisterBody(form) {
     insurance: buildInsuranceForRegister(form),
     medical_history: buildMedicalHistoryForRegister(form),
     vitals: buildVitalsForRegister(form),
+    follow_ups: buildFollowUpsForRegister(
+      form?.[clientFormSections.followUps],
+    ),
   }
 }

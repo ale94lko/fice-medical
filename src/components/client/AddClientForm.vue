@@ -508,7 +508,19 @@
               :key="subTab.key"
               :name="subTab.key"
               class="q-pa-none">
-              <div class="text-body1 text-grey-7 q-py-xl text-center">
+              <AddClientFollowUpsTab
+                v-if="
+                  subTab.key === CARE_COORDINATION_FOLLOW_UPS_SUB_TAB
+                    && form[clientFormSections.followUps]?.visible
+                "
+                v-model="form[clientFormSections.followUps]"
+                :client-id="props.clientId"
+                :reference-context="followUpReferenceContext"
+                :clinician-options="assignedClinicianOptions"
+              />
+              <div
+                v-else
+                class="text-body1 text-grey-7 q-py-xl text-center">
                 {{ t('tabComingSoon') }}
               </div>
             </q-tab-panel>
@@ -660,6 +672,7 @@ import AddClientFamilyMedicalHistoryTab
 import AddClientVitalsTab from '../AddClientVitalsTab.vue'
 import AddClientAssessmentsTab from '../AddClientAssessmentsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
+import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
@@ -693,6 +706,7 @@ import {
   CLINICAL_VITALS_SUB_TAB,
   CLINICAL_ASSESSMENTS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
+  CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useClientProgressiveMatch }
@@ -809,6 +823,20 @@ const {
   discardMatch: duplicateDiscardMatch,
   markOpenedMatch: duplicateMarkOpenedMatch,
 } = useClientProgressiveMatch(form, progressiveMatchEnabled)
+
+const followUpReferenceContext = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  const rawClient = id ? siteStore.clientListSourceById[id] : null
+
+  return {
+    client: rawClient,
+    labs: form.value[clientFormSections.labs] ?? [],
+    insuranceProfiles:
+      form.value[clientFormSections.insurance]?.profiles ?? [],
+    referrals: rawClient?.referrals ?? [],
+    carePlans: rawClient?.care_plans ?? rawClient?.carePlans ?? [],
+  }
+})
 
 const duplicateSaveConfirmOpen = ref(false)
 const duplicateNavigateConfirmOpen = ref(false)
@@ -1198,6 +1226,20 @@ function onDuplicateSaveConfirm() {
   void executeSave()
 }
 
+function applyMappedClientSections(mapped) {
+  if (!mapped) {
+    return
+  }
+  const nextAllergies = mapped[clientFormSections.allergies]
+  if (nextAllergies) {
+    form.value[clientFormSections.allergies] = nextAllergies
+  }
+  const nextFollowUps = mapped[clientFormSections.followUps]
+  if (nextFollowUps) {
+    form.value[clientFormSections.followUps] = nextFollowUps
+  }
+}
+
 async function executeSave() {
   saving.value = true
   try {
@@ -1219,13 +1261,17 @@ async function executeSave() {
         )
         : null
 
-      const nextAllergies = mapped?.[clientFormSections.allergies]
-      if (nextAllergies) {
-        form.value[clientFormSections.allergies] = nextAllergies
-      }
+      applyMappedClientSections(mapped)
     } else {
       const created = await siteStore.createClient(form.value, t)
       savedClientId = created?.id ?? created?.client_id ?? savedClientId
+      if (created && typeof created === 'object') {
+        const mappedCreate = siteStore.buildEditFormFromClient(
+          created,
+          getClientMapOptions(),
+        )
+        applyMappedClientSections(mappedCreate)
+      }
     }
     $q.notify({
       type: quasarNotifyTypes.positive,
