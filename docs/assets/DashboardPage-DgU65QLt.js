@@ -1,1 +1,0 @@
-import{Sa as e,pi as t,ta as n}from"./index-CUaKH1r3.js";import{t as r}from"./QPage-CoiUn4_Z.js";var i={};function a(t,i){return e(),n(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
