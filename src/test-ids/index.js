@@ -156,6 +156,16 @@ export const appointmentTestIds = {
   rowNoShow: id => toTestId('appointment-row', id, 'btn-no-show'),
 }
 
+export const referralTestIds = {
+  btn: name => toTestId('referral-btn', name),
+  field: name => toTestId('referral-field', name),
+  rowView: id => toTestId('referral-row', id, 'btn-view'),
+  rowEdit: id => toTestId('referral-row', id, 'btn-edit'),
+  rowMore: id => toTestId('referral-row', id, 'btn-more'),
+  rowSchedule: id => toTestId('referral-row', id, 'btn-schedule'),
+  rowDelete: id => toTestId('referral-row', id, 'btn-delete'),
+}
+
 export const modalTestIds = {
   dialog: name => toTestId('modal', name),
   confirm: name => toTestId('modal', name, 'btn-confirm'),

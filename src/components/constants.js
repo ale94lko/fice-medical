@@ -517,6 +517,59 @@ export const carePlanGoalTitleMaxLength = 255
 export const carePlanInterventionNotesMaxLength = 300
 export const carePlanMeasureNotesMaxLength = 500
 
+export const referralTypes = {
+  incoming: 'INCOMING',
+  outgoing: 'OUTGOING',
+}
+
+export const referralStatuses = {
+  received: 'RECEIVED',
+  pendingReview: 'PENDING_REVIEW',
+  accepted: 'ACCEPTED',
+  scheduled: 'SCHEDULED',
+  completed: 'COMPLETED',
+  declined: 'DECLINED',
+  closed: 'CLOSED',
+}
+
+export const referralPriorities = {
+  routine: 'ROUTINE',
+  urgent: 'URGENT',
+  stat: 'STAT',
+}
+
+export const referralSchedulingLabels = {
+  appointmentScheduled: 'APPOINTMENT_SCHEDULED',
+  needsScheduling: 'NEEDS_SCHEDULING',
+  noAppointmentRequired: 'NO_APPOINTMENT_REQUIRED',
+}
+
+export const referralTerminalStatuses = new Set([
+  referralStatuses.closed,
+  referralStatuses.declined,
+])
+
+export const referralReasonMaxLength = 500
+export const referralNotesMaxLength = 1000
+export const referralProviderNameMaxLength = 120
+export const referralOrganizationMaxLength = 160
+export const referralSpecialtyMaxLength = 80
+export const referralDiagnosisMaxLength = 250
+
+export const referralMaxDocumentBytes = 10 * 1024 * 1024
+
+export const referralDocumentMimeTypes = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg',
+  'image/png',
+]
+
+export const referralDocumentExtensions = [
+  '.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png',
+]
+
 export const followUpReminderValueOptions = [
   1, 2, 3, 5, 7, 14, 21, 30,
 ]
@@ -535,6 +588,10 @@ export const clientPermissionNames = {
   cancelAppointment: 'CANCEL_APPOINTMENT',
   rescheduleAppointment: 'RESCHEDULE_APPOINTMENT',
   manageAppointmentSlots: 'MANAGE_APPOINTMENT_SLOTS',
+  viewReferrals: 'VIEW_REFERRALS',
+  addReferrals: 'ADD_REFERRALS',
+  editReferrals: 'EDIT_REFERRALS',
+  deleteReferrals: 'DELETE_REFERRALS',
 }
 
 export const appointmentStatuses = {
@@ -598,6 +655,29 @@ export const apiPaths = {
   clientReferrals: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/referrals`,
+  clientReferralById: (clientId, referralId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())}`,
+  clientReferralClose: (clientId, referralId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())}/close`,
+  clientReferralDocuments: (clientId, referralId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())}/documents`,
+  clientReferralDocumentDownload: (
+    clientId,
+    referralId,
+    documentId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())
+  }/documents/${encodeURIComponent(String(documentId ?? '').trim())}/download`,
+  clientReferralDocumentById: (
+    clientId,
+    referralId,
+    documentId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())
+  }/documents/${encodeURIComponent(String(documentId ?? '').trim())}`,
   clientCarePlans: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/care-plans`,

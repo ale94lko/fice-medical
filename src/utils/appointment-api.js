@@ -9,7 +9,6 @@ import {
   mockListAppointmentTypes,
   mockListClientAppointments,
   mockListClientCarePlans,
-  mockListClientReferrals,
   mockListSlots,
   mockPatchAppointment,
   mockRescheduleAppointment,
@@ -21,7 +20,6 @@ import {
   mapAvailableSlots,
   normalizeAppointment,
   normalizeCarePlanOption,
-  normalizeReferralOption,
 } from 'src/utils/appointment-normalize.js'
 
 function useMockFallback(error) {
@@ -181,18 +179,11 @@ export async function listAvailableSlotsInRange(params = {}) {
 }
 
 export async function listClientReferrals(clientId) {
-  try {
-    const response = await apiInstance.get(apiPaths.clientReferrals(clientId))
+  const { listClientReferralOptions } = await import(
+    'src/utils/referral-api.js'
+  )
 
-    return unwrapList(response.data).map(normalizeReferralOption)
-      .filter(row => row.value != null)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockListClientReferrals(clientId).map(normalizeReferralOption)
-  }
+  return listClientReferralOptions(clientId, { schedulableOnly: true })
 }
 
 export async function listClientCarePlans(clientId) {

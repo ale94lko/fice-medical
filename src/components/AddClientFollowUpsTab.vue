@@ -1,8 +1,14 @@
 <template>
   <div v-if="section.visible" class="add-client-follow-ups-tab">
     <div class="row items-center justify-between q-mb-md">
-      <h3 class="follow-ups-tab__list-title q-mb-none">
-        {{ t('followUpExistingTitle') }}
+      <h3 class="follow-ups-tab__list-title row items-center no-wrap q-mb-none">
+        <q-icon
+          name="update"
+          size="24px"
+          color="primary"
+          class="q-mr-sm"
+        />
+        <span>{{ t('followUpExistingTitle') }}</span>
       </h3>
       <q-btn
         v-if="canAddFollowUps"
@@ -424,7 +430,7 @@ function onCreateFollowUp(payload) {
   })
   formDialogOpen.value = false
   $q.notify({
-    type: quasarNotifyTypes.info,
+    type: quasarNotifyTypes.positive,
     message: t('followUpPendingAdded'),
   })
 }
@@ -456,7 +462,7 @@ function onSaveEdit(payload) {
   patchSection({ entries })
   formDialogOpen.value = false
   $q.notify({
-    type: quasarNotifyTypes.info,
+    type: quasarNotifyTypes.positive,
     message: t('followUpPendingAdded'),
   })
 }

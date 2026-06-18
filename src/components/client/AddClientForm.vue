@@ -595,8 +595,18 @@
               :key="subTab.key"
               :name="subTab.key"
               class="q-pa-none">
+              <AddClientReferralsTab
+                v-if="subTab.key === CARE_COORDINATION_REFERRALS_SUB_TAB"
+                :client-id="props.clientId"
+                :clinician-options="assignedClinicianOptions"
+                @schedule-appointment="onReferralSchedule"
+                @create-follow-up="onReferralCreateFollowUp"
+                @remove-follow-up="onReferralRemoveFollowUp"
+              />
               <AddClientAppointmentsTab
-                v-if="subTab.key === CARE_COORDINATION_APPOINTMENTS_SUB_TAB"
+                v-else-if="
+                  subTab.key === CARE_COORDINATION_APPOINTMENTS_SUB_TAB
+                "
                 :client-id="props.clientId"
               />
               <AddClientFollowUpsTab
@@ -766,6 +776,7 @@ import AddClientLabsTab from '../AddClientLabsTab.vue'
 import AddClientCarePlansTab from '../AddClientCarePlansTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
 import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
+import AddClientReferralsTab from '../AddClientReferralsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
@@ -796,6 +807,11 @@ import {
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { mapPendingFollowUpFromDraft } from 'src/utils/client-follow-ups.js'
+import {
+  followUpExistsForReferral,
+  removeFollowUpForReferral,
+} from 'src/utils/referral-follow-up.js'
 import {
   highestAllergySeverity,
   severityTabModifier,
@@ -809,6 +825,7 @@ import {
   CLINICAL_LABS_SUB_TAB,
   CLINICAL_CARE_PLANS_SUB_TAB,
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
+  CARE_COORDINATION_REFERRALS_SUB_TAB,
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
@@ -1388,6 +1405,54 @@ async function onNext() {
     return
   }
   goNextTab()
+}
+
+function onReferralSchedule() {
+  activeSubTab.value = CARE_COORDINATION_APPOINTMENTS_SUB_TAB
+  $q.notify({
+    type: quasarNotifyTypes.info,
+    message: t('referralScheduleRedirect'),
+    position: 'top',
+  })
+}
+
+function onReferralCreateFollowUp(draft) {
+  const section = form.value[clientFormSections.followUps]
+  if (!section?.visible || !draft?.reference) {
+    return
+  }
+  if (followUpExistsForReferral(section, draft.reference)) {
+    return
+  }
+  const pendingItem = mapPendingFollowUpFromDraft(draft)
+  form.value[clientFormSections.followUps] = {
+    ...section,
+    pending: [...(section.pending ?? []), pendingItem],
+  }
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t('referralFollowUpAdded'),
+    position: 'top',
+  })
+}
+
+function onReferralRemoveFollowUp(referralId) {
+  const section = form.value[clientFormSections.followUps]
+  if (!section?.visible || !referralId) {
+    return
+  }
+  if (!followUpExistsForReferral(section, referralId)) {
+    return
+  }
+  form.value[clientFormSections.followUps] = removeFollowUpForReferral(
+    section,
+    referralId,
+  )
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t('referralFollowUpRemoved'),
+    position: 'top',
+  })
 }
 
 function duplicateSaveGateActive() {
