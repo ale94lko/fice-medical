@@ -545,6 +545,11 @@
                 :patient-id="props.clientId"
                 :clinician-options="assignedClinicianOptions"
               />
+              <AddClientCarePlansTab
+                v-else-if="subTab.key === CLINICAL_CARE_PLANS_SUB_TAB"
+                :client-id="props.clientId"
+                :clinician-options="assignedClinicianOptions"
+              />
               <div
                 v-else
                 class="text-body1 text-grey-7 q-py-xl text-center">
@@ -734,6 +739,7 @@ import AddClientFamilyMedicalHistoryTab
 import AddClientVitalsTab from '../AddClientVitalsTab.vue'
 import AddClientAssessmentsTab from '../AddClientAssessmentsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
+import AddClientCarePlansTab from '../AddClientCarePlansTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
 import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
@@ -771,6 +777,7 @@ import {
   CLINICAL_VITALS_SUB_TAB,
   CLINICAL_ASSESSMENTS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
+  CLINICAL_CARE_PLANS_SUB_TAB,
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'

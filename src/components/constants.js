@@ -474,6 +474,48 @@ export const followUpReminderUnitValues = {
 
 export const followUpNotesMaxLength = 500
 
+export const carePlanStatuses = {
+  active: 'ACTIVE',
+  completed: 'COMPLETED',
+  archived: 'ARCHIVED',
+}
+
+export const carePlanGoalStatuses = {
+  inProgress: 'IN_PROGRESS',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+}
+
+export const carePlanProgressDirections = {
+  lowerIsBetter: 'LOWER_IS_BETTER',
+  higherIsBetter: 'HIGHER_IS_BETTER',
+}
+
+export const carePlanOutcomeSourceTypes = {
+  manual: 'MANUAL',
+  assessment: 'ASSESSMENT',
+  vital: 'VITAL',
+  lab: 'LAB',
+}
+
+export const carePlanProgressStatuses = {
+  measured: 'MEASURED',
+  notMeasured: 'NOT_MEASURED',
+}
+
+export const carePlanPriorities = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+}
+
+export const carePlanNameMaxLength = 255
+export const carePlanProblemMaxLength = 255
+export const carePlanDescriptionMaxLength = 500
+export const carePlanGoalTitleMaxLength = 255
+export const carePlanInterventionNotesMaxLength = 300
+export const carePlanMeasureNotesMaxLength = 500
+
 export const followUpReminderValueOptions = [
   1, 2, 3, 5, 7, 14, 21, 30,
 ]
@@ -483,6 +525,10 @@ export const clientPermissionNames = {
   viewFollowUps: 'VIEW_FOLLOW_UPS',
   addFollowUps: 'ADD_FOLLOW_UPS',
   editFollowUps: 'EDIT_FOLLOW_UPS',
+  viewCarePlans: 'VIEW_CARE_PLANS',
+  addCarePlans: 'ADD_CARE_PLANS',
+  editCarePlans: 'EDIT_CARE_PLANS',
+  signCarePlans: 'SIGN_CARE_PLANS',
   viewAppointmentSlot: 'VIEW_APPOINTMENT_SLOT',
   bookAppointment: 'BOOK_APPOINTMENT',
   cancelAppointment: 'CANCEL_APPOINTMENT',
@@ -554,6 +600,60 @@ export const apiPaths = {
   clientCarePlans: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/care-plans`,
+  clientCarePlanById: (clientId, planId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())}`,
+  clientCarePlanStatus: (clientId, planId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())}/status`,
+  clientCarePlanSign: (clientId, planId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())}/sign`,
+  clientCarePlanGoals: (clientId, planId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())}/goals`,
+  clientCarePlanGoalById: (clientId, planId, goalId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())
+  }/goals/${encodeURIComponent(String(goalId ?? '').trim())}`,
+  clientCarePlanOutcomeMeasures: (clientId, planId, goalId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())
+  }/goals/${encodeURIComponent(String(goalId ?? '').trim())
+  }/outcome-measures`,
+  clientCarePlanOutcomeMeasureById: (
+    clientId,
+    planId,
+    goalId,
+    measureId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())
+  }/goals/${encodeURIComponent(String(goalId ?? '').trim())
+  }/outcome-measures/${encodeURIComponent(String(measureId ?? '').trim())}`,
+  clientCarePlanMeasureCurrentValue: (
+    clientId,
+    planId,
+    goalId,
+    measureId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())
+  }/goals/${encodeURIComponent(String(goalId ?? '').trim())
+  }/outcome-measures/${encodeURIComponent(String(measureId ?? '').trim())
+  }/current-value`,
+  clientCarePlanInterventions: (clientId, planId, goalId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())
+  }/goals/${encodeURIComponent(String(goalId ?? '').trim())
+  }/interventions`,
+  clientCarePlanInterventionById: (
+    clientId,
+    planId,
+    goalId,
+    interventionId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/care-plans/${encodeURIComponent(String(planId ?? '').trim())
+  }/goals/${encodeURIComponent(String(goalId ?? '').trim())
+  }/interventions/${encodeURIComponent(String(interventionId ?? '').trim())}`,
   clientsCreate: '/client/v1/register',
   clientMatch: '/client/v1/match',
   assessmentTemplates: '/assessment-templates',

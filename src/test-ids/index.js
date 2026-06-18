@@ -121,6 +121,14 @@ export const labTestIds = {
   rowDownload: id => toTestId('lab-row', id, 'btn-download'),
 }
 
+export const carePlanTestIds = {
+  btn: name => toTestId('care-plan-btn', name),
+  field: name => toTestId('care-plan-field', name),
+  rowView: id => toTestId('care-plan-row', id, 'btn-view'),
+  rowEdit: id => toTestId('care-plan-row', id, 'btn-edit'),
+  rowMore: id => toTestId('care-plan-row', id, 'btn-more'),
+}
+
 export const followUpTestIds = {
   btn: name => toTestId('follow-up-btn', name),
   field: name => toTestId('follow-up-field', name),
