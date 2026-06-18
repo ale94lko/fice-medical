@@ -1,1 +1,0 @@
-import{Na as e,fa as t,wi as n}from"./index-FX4fdsTb.js";import{t as r}from"./QPage-Dt8TralO.js";var i={};function a(n,i){return e(),t(r,{class:`flex flex-center`})}var o=n(i,[[`render`,a]]);export{o as default};

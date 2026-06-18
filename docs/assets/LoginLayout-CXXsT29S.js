@@ -1,1 +1,0 @@
-import{Ha as e,La as t,Na as n,_a as r,fa as i,wi as a}from"./index-FX4fdsTb.js";import{r as o,t as s}from"./QLayout-BVdxxTjj.js";var c={};function l(a,c){let l=t(`router-view`);return n(),i(s,{view:`hHh Lpr lff`},{default:e(()=>[r(o,null,{default:e(()=>[r(l)]),_:1})]),_:1})}var u=a(c,[[`render`,l]]);export{u as default};

@@ -1,0 +1,1 @@
+import{Ha as e,Ni as t,xa as n}from"./index-CO5XpYcY.js";import{t as r}from"./QPage-Bd3TUEkN.js";var i={};function a(t,i){return e(),n(r,{class:`flex flex-center`})}var o=t(i,[[`render`,a]]);export{o as default};
