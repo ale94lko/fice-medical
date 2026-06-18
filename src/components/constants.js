@@ -31,6 +31,7 @@ export const clientFieldKeys = {
   ethnicity: 'ethnicity',
   age: 'age',
   socialSecurityNumber: 'socialSecurityNumber',
+  idNumberMasked: 'idNumberMasked',
   name: 'name',
   email: 'email',
   dob: 'dob',

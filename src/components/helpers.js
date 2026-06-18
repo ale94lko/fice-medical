@@ -8,6 +8,11 @@ import {
   buildClientRegisterBody,
 } from 'src/utils/build-client-register-body.js'
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
+import {
+  formatSsnMasked,
+  normalizeIdNumberMaskedDisplay,
+  normalizeSsnDigits,
+} from 'src/utils/client-form.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -372,7 +377,20 @@ export function mapClient(client, options = {}) {
     suffixRaw,
   ) || suffixRaw
   const dob = personal.dob ?? client.dob ?? ''
-  const ssn = client.ssn ?? client.social_security_number
+  const idNumberMasked = normalizeIdNumberMaskedDisplay(
+    personal.id_number_masked ?? client.id_number_masked ?? '',
+  )
+  const ssn = personal.id_number
+    ?? client.id_number
+    ?? client.ssn
+    ?? client.social_security_number
+  const ssnDigits = normalizeSsnDigits(ssn)
+  let taxIdDisplay = ''
+  if (idNumberMasked) {
+    taxIdDisplay = idNumberMasked
+  } else if (ssnDigits) {
+    taxIdDisplay = formatSsnMasked(ssnDigits)
+  }
 
   return {
     id: client.id,
@@ -386,8 +404,7 @@ export function mapClient(client, options = {}) {
       personal.gender ?? personal.sex ?? client.gender ?? client.sex,
     ),
     [ck.age]: personal.age ?? client.age ?? client[ck.age] ?? '',
-    [ck.socialSecurityNumber]:
-      ssn != null && ssn !== '' ? String(ssn) : '',
+    [ck.socialSecurityNumber]: taxIdDisplay,
     [ck.name]: formatClientListName(
       firstName,
       middleName,

@@ -238,20 +238,44 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField
-                    :label="t('socialSecurityNumber')"
+                    :label="t('ssnItin')"
                     :test-id="tid.field(ck.socialSecurityNumber)">
                     <q-input
+                      ref="ssnInputRef"
                       outlined
                       hide-bottom-space
                       class="full-width"
                       :data-testid="tid.field(ck.socialSecurityNumber)"
                       :model-value="ssnDisplayValue"
-                      :rules="rules.ssn"
+                      :rules="ssnFieldRules"
                       maxlength="11"
+                      :placeholder="t('taxIdPlaceholder')"
+                      inputmode="numeric"
+                      autocomplete="off"
                       @focus="onSsnFocus"
                       @blur="onSsnBlur"
+                      @keydown="onSsnKeydown"
                       @update:model-value="onSsnInput"
-                    />
+                    >
+                      <template
+                        v-if="taxIdTypeBadge"
+                        #append>
+                        <span
+                          class="add-client-form__tax-id-type-badge"
+                          :class="`add-client-form__tax-id-type-badge--${
+                            taxIdTypeBadge
+                          }`">
+                          {{ taxIdTypeBadgeLabel }}
+                        </span>
+                      </template>
+                    </q-input>
+                    <template
+                      v-if="ssnEditFullNumberHint"
+                      #hint>
+                      <span class="text-body2 text-grey-7">
+                        {{ t('taxIdEditFullNumberHint') }}
+                      </span>
+                    </template>
                   </AddClientLabeledField>
                 </div>
                 <div class="col-12 col-md-6">
@@ -761,8 +785,14 @@ import {
   quasarNotifyTypes,
 } from '../constants.js'
 import {
+  detectTaxIdType,
   formatSsnMasked,
+  formatTaxIdInput,
+  getSsnBlockValidationErrorKey,
+  hasStoredIdNumberMasked,
+  isValidTaxIdDigits,
   maxAgeForUnit,
+  normalizeIdNumberMaskedDisplay,
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -827,6 +857,7 @@ const saving = ref(false)
 const initialLoading = ref(false)
 const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
+const ssnInputRef = ref(null)
 const allergiesTabRef = ref(null)
 const addClientContactTabRef = ref(null)
 const fmhTabRef = ref(null)
@@ -1077,11 +1108,73 @@ function mainTabClass(tab) {
 const ssnDisplayValue = computed(() => {
   const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
   if (ssnEditing.value) {
-    return digits
+    return formatTaxIdInput(digits)
+  }
+  if (digits.length) {
+    return formatSsnMasked(digits)
+  }
+  const storedMask = normalizeIdNumberMaskedDisplay(
+    form.value[ck.idNumberMasked],
+  )
+  if (storedMask) {
+    return storedMask
   }
 
-  return digits.length ? formatSsnMasked(digits) : ''
+  return ''
 })
+
+const taxIdTypeBadge = computed(() => {
+  const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
+  if (!digits.length) {
+    return null
+  }
+
+  return detectTaxIdType(digits)
+})
+
+const taxIdTypeBadgeLabel = computed(() => {
+  if (taxIdTypeBadge.value === 'ITIN') {
+    return t('taxIdTypeItin')
+  }
+  if (taxIdTypeBadge.value === 'SSN') {
+    return t('taxIdTypeSsn')
+  }
+
+  return ''
+})
+
+const ssnEditFullNumberHint = computed(() => {
+  if (!isEditMode.value || !ssnEditing.value) {
+    return false
+  }
+  if (!hasStoredIdNumberMasked(form.value, ck)) {
+    return false
+  }
+  const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
+
+  return digits.length < 9
+})
+
+const ssnFieldRules = computed(() => [
+  () => {
+    const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
+    if (!digits.length && hasStoredIdNumberMasked(form.value, ck)) {
+      return true
+    }
+    if (!digits.length) {
+      return true
+    }
+    const blockKey = getSsnBlockValidationErrorKey(digits)
+    if (blockKey) {
+      return t(blockKey)
+    }
+    if (ssnEditing.value) {
+      return true
+    }
+
+    return isValidTaxIdDigits(digits) || t('taxIdInvalid')
+  },
+])
 
 const activeTabLabel = computed(() => tabLabelFor(activeTab.value))
 
@@ -1248,20 +1341,48 @@ function requiredLabel(text) {
 
 function onSsnFocus() {
   ssnEditing.value = true
+  ssnInputRef.value?.resetValidation?.()
+}
+
+function onSsnKeydown(evt) {
+  const controlKeys = [
+    'Backspace',
+    'Delete',
+    'Tab',
+    'ArrowLeft',
+    'ArrowRight',
+    'Home',
+    'End',
+  ]
+  if (controlKeys.includes(evt.key) || evt.ctrlKey || evt.metaKey) {
+    return
+  }
+  if (!/^\d$/.test(evt.key)) {
+    evt.preventDefault()
+  }
 }
 
 function onSsnInput(val) {
   form.value[ck.socialSecurityNumber] = normalizeSsnDigits(val)
+  nextTick(() => {
+    ssnInputRef.value?.validate?.()
+  })
 }
 
-function onSsnBlur() {
+async function onSsnBlur() {
   ssnEditing.value = false
   form.value[ck.socialSecurityNumber] = normalizeSsnDigits(
     form.value[ck.socialSecurityNumber],
   )
+  await nextTick()
+  await ssnInputRef.value?.validate?.()
 }
 
 async function onNext() {
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur()
+  }
+  await nextTick()
   const ok = await validateCurrentTabAndUnlock()
   if (!ok) {
     return

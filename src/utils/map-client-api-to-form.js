@@ -44,6 +44,7 @@ import { mapFollowUpsSectionFromApi } from 'src/utils/client-follow-ups.js'
 import {
   ageAndUnitFromUsDateString,
   isoDateToUsDateString,
+  normalizeIdNumberMaskedDisplay,
   parseUsDateString,
 } from 'src/utils/client-form.js'
 import { relationshipTokenForApi } from
@@ -840,10 +841,22 @@ export function mapClientApiToForm(client, options = {}) {
     applyPreferredPointOfContactFromApi(contact)
   }
 
-  const ssnRaw = personal.ssn ?? client.ssn ?? client.social_security_number
+  const idNumberMasked = normalizeIdNumberMaskedDisplay(
+    personal.id_number_masked
+      ?? client.id_number_masked
+      ?? '',
+  )
+  const ssnRaw = personal.id_number
+    ?? personal.ssn
+    ?? client.id_number
+    ?? client.ssn
+    ?? client.social_security_number
   let ssnDigits = ''
-  if (ssnRaw != null && ssnRaw !== '') {
-    ssnDigits = String(ssnRaw).replace(/\D/g, '').slice(0, 9)
+  if (ssnRaw != null && ssnRaw !== '' && !/[*#]/.test(String(ssnRaw))) {
+    const parsed = String(ssnRaw).replace(/\D/g, '').slice(0, 9)
+    if (parsed.length === 9) {
+      ssnDigits = parsed
+    }
   }
 
   return {
@@ -883,6 +896,7 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.age]: ageFields.age,
     [ck.ageUnit]: ageFields.ageUnit,
     [ck.socialSecurityNumber]: ssnDigits,
+    [ck.idNumberMasked]: idNumberMasked,
     [ck.admissionDate]: isoDateToUsDateString(
       client.admission_date ?? personal.admission_date,
     ),

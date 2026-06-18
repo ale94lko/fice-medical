@@ -651,7 +651,21 @@ export default {
   age: 'Age',
   ageIncrement: 'Increase age',
   ageDecrement: 'Decrease age',
-  socialSecurityNumber: 'Social Security Number',
+  ssnItin: 'SSN / ITIN',
+  socialSecurityNumber: 'SSN / ITIN',
+  taxIdPlaceholder: '###-##-####',
+  taxIdTypeSsn: 'SSN',
+  taxIdTypeItin: 'ITIN',
+  taxIdEditFullNumberHint:
+    'Enter the full 9-digit number to update this value.',
+  ssnAreaCannotBe000: 'The first block cannot be 000.',
+  ssnAreaCannotBe666: 'The first block cannot be 666.',
+  ssnAreaCannotBe900To999:
+    'The first block cannot be between 900 and 999.',
+  ssnGroupCannotBe00: 'The second block cannot be 00.',
+  ssnSerialCannotBe0000: 'The last block cannot be 0000.',
+  taxIdInvalid:
+    'Enter a valid 9-digit SSN or ITIN (e.g. 123-45-6789 or 912-34-5678).',
   next: 'Next',
   previous: 'Previous',
   close: 'Close',
@@ -663,7 +677,8 @@ export default {
   lettersOnlyMax: 'Letters only, maximum {max} characters',
   ageRange: 'Age must be a whole number from 0 to {max}',
   ageUnitRequired: 'Select an age unit when age is provided',
-  ssnInvalid: 'Enter a valid 9-digit Social Security Number',
+  ssnInvalid:
+    'Enter a valid 9-digit SSN or ITIN (e.g. 123-45-6789 or 912-34-5678).',
   clientNumber: 'Client No.',
   name: 'Name',
   dob: 'DOB',

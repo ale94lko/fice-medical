@@ -9,6 +9,9 @@ import { buildFollowUpsForSave } from 'src/utils/client-follow-ups.js'
  */
 export function buildClientUpdateBody(form) {
   const body = buildClientRegisterBody(form)
+  if (body.basic_info?.id_number == null) {
+    delete body.basic_info.id_number
+  }
   const followUps = buildFollowUpsForSave(form?.[clientFormSections.followUps])
 
   if (followUps.length > 0) {

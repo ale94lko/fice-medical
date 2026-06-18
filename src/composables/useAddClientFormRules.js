@@ -7,7 +7,9 @@ import {
 import {
   isAdmissionDateValid,
   isLettersOnly,
-  isValidSsnDigits,
+  isValidTaxIdDigits,
+  getSsnBlockValidationErrorKey,
+  hasStoredIdNumberMasked,
   maxAgeForUnit,
   normalizeSsnDigits,
   parseUsDateString,
@@ -134,8 +136,15 @@ export function useAddClientFormRules(t, form, ageFieldsLocked) {
   function ssnRule() {
     return () => {
       const digits = normalizeSsnDigits(form.value[ck.socialSecurityNumber])
+      if (!digits.length && hasStoredIdNumberMasked(form.value, ck)) {
+        return true
+      }
+      const blockKey = getSsnBlockValidationErrorKey(digits)
+      if (blockKey) {
+        return t(blockKey)
+      }
 
-      return isValidSsnDigits(digits) || t('ssnInvalid')
+      return isValidTaxIdDigits(digits) || t('taxIdInvalid')
     }
   }
 

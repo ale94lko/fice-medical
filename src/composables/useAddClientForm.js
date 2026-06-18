@@ -80,6 +80,7 @@ export function createEmptyAddClientForm() {
     [ck.age]: '',
     [ck.ageUnit]: clientAgeUnitValues.years,
     [ck.socialSecurityNumber]: '',
+    [ck.idNumberMasked]: '',
     [ck.admissionDate]: todayDateUs(),
     [ck.assignedClinician]: '',
     [ck.status]: 'active',

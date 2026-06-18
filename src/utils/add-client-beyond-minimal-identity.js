@@ -88,7 +88,10 @@ export function hasAddClientDataBeyondFirstLastName(form) {
   if (trim(form[ck.age])) {
     return true
   }
-  if (trim(form[ck.socialSecurityNumber])) {
+  if (
+    trim(form[ck.socialSecurityNumber])
+    || trim(form[ck.idNumberMasked])
+  ) {
     return true
   }
   if (trim(form[ck.admissionDate])) {

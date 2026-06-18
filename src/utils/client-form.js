@@ -1,6 +1,8 @@
 const US_DATE_RE = /^(\d{2})\/(\d{2})\/(\d{4})$/
 const LETTERS_RE = /^[A-Za-z\s]+$/
-const SSN_DIGITS_RE = /^\d{9}$/
+const SSN_PATTERN =
+  /^(?!000|666|9\d\d)\d{3}-?(?!00)\d{2}-?(?!0000)\d{4}$/
+const ITIN_PATTERN = /^9\d{2}-?\d{2}-?\d{4}$/
 
 export function generateClientNumber() {
   const n = Math.floor(Math.random() * 10_000_000)
@@ -329,23 +331,171 @@ export function normalizeSsnDigits(value) {
   return String(value ?? '').replace(/\D/g, '').slice(0, 9)
 }
 
-export function formatSsnMasked(digits) {
+/** @deprecated use normalizeSsnDigits — same behavior for SSN/ITIN field */
+export const normalizeTaxIdDigits = normalizeSsnDigits
+
+export function formatTaxIdWithDashes(digits) {
   const d = normalizeSsnDigits(digits)
-  if (d.length <= 4) {
+  if (d.length !== 9) {
     return d
   }
-  const last4 = d.slice(-4)
 
-  return `***-**-${last4}`
+  return `${d.slice(0, 3)}-${d.slice(3, 5)}-${d.slice(5)}`
 }
 
-export function isValidSsnDigits(digits) {
+export function formatTaxIdInput(digits) {
+  const d = normalizeSsnDigits(digits)
+  if (!d.length) {
+    return ''
+  }
+  if (d.length <= 3) {
+    return d
+  }
+  if (d.length <= 5) {
+    return `${d.slice(0, 3)}-${d.slice(3)}`
+  }
+
+  return `${d.slice(0, 3)}-${d.slice(3, 5)}-${d.slice(5)}`
+}
+
+export function formatSsnMasked(digits) {
+  const d = normalizeSsnDigits(digits)
+  if (!d.length) {
+    return ''
+  }
+  if (d.length !== 9) {
+    return formatTaxIdInput(d)
+  }
+  const last4 = d.slice(5)
+
+  return `###-##-${last4}`
+}
+
+/**
+ * Normalizes API masked tax id (e.g. ***-**-1455) to ###-##-1455 for display.
+ */
+export function normalizeIdNumberMaskedDisplay(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+  if (/[*#]/.test(raw)) {
+    const digits = raw.replace(/\D/g, '')
+    const last4 = digits.slice(-4)
+    if (last4.length === 4) {
+      return `###-##-${last4}`
+    }
+
+    return raw.replace(/\*/g, '#')
+  }
+  const digits = normalizeSsnDigits(raw)
+  if (digits.length === 9) {
+    return formatSsnMasked(digits)
+  }
+
+  return raw
+}
+
+export function hasStoredIdNumberMasked(form, fieldKeys = null) {
+  const ck = fieldKeys ?? {
+    idNumberMasked: 'idNumberMasked',
+  }
+  const masked = normalizeIdNumberMaskedDisplay(form?.[ck.idNumberMasked])
+
+  return masked.length > 0
+}
+
+export function isValidTaxIdDigits(digits) {
   const d = normalizeSsnDigits(digits)
   if (!d) {
     return true
   }
+  if (d.length !== 9) {
+    return false
+  }
+  const formatted = formatTaxIdWithDashes(d)
 
-  return SSN_DIGITS_RE.test(d)
+  return SSN_PATTERN.test(formatted) || ITIN_PATTERN.test(formatted)
+}
+
+export function isValidSsnDigits(digits) {
+  return isValidTaxIdDigits(digits)
+}
+
+/**
+ * SSN block rules validated while typing (not applied to ITIN / leading 9).
+ * Returns an i18n message key, or null if no block violation yet.
+ */
+export function getSsnBlockValidationErrorKey(digits) {
+  const d = normalizeSsnDigits(digits)
+  if (!d.length || d[0] === '9') {
+    return null
+  }
+  if (d.length >= 3) {
+    const area = d.slice(0, 3)
+    if (area === '000') {
+      return 'ssnAreaCannotBe000'
+    }
+    if (area === '666') {
+      return 'ssnAreaCannotBe666'
+    }
+    const areaNum = Number(area)
+    if (areaNum >= 900 && areaNum <= 999) {
+      return 'ssnAreaCannotBe900To999'
+    }
+  }
+  if (d.length >= 5) {
+    const group = d.slice(3, 5)
+    if (group === '00') {
+      return 'ssnGroupCannotBe00'
+    }
+  }
+  if (d.length >= 9) {
+    const serial = d.slice(5, 9)
+    if (serial === '0000') {
+      return 'ssnSerialCannotBe0000'
+    }
+  }
+
+  return null
+}
+
+/**
+ * Infers SSN vs ITIN while the user types (before 9 digits are complete).
+ * ITIN always starts with 9; SSN area cannot be 000, 666, or 9xx.
+ */
+export function detectTaxIdType(digits) {
+  const d = normalizeSsnDigits(digits)
+  if (!d.length) {
+    return null
+  }
+  if (d.length === 9) {
+    const formatted = formatTaxIdWithDashes(d)
+    if (ITIN_PATTERN.test(formatted)) {
+      return 'ITIN'
+    }
+    if (SSN_PATTERN.test(formatted)) {
+      return 'SSN'
+    }
+
+    return null
+  }
+  if (d[0] === '9') {
+    return 'ITIN'
+  }
+  if (d.length >= 3) {
+    const area = d.slice(0, 3)
+    if (area === '000' || area === '666') {
+      return null
+    }
+
+    return 'SSN'
+  }
+  if (d[0] >= '1' && d[0] <= '8') {
+    return 'SSN'
+  }
+
+  return null
 }
 
 export function usDateToIso(value) {

@@ -85,13 +85,13 @@ function allergyStartDateFromYear(year) {
   return `${y}-01-01`
 }
 
-function resolveSsn(form) {
-  const ssnDigits = trim(form[ck.socialSecurityNumber]).replace(/\D/g, '')
-  if (!ssnDigits) {
+function resolveIdNumber(form) {
+  const idDigits = trim(form[ck.socialSecurityNumber]).replace(/\D/g, '')
+  if (idDigits.length !== 9) {
     return null
   }
 
-  return Number(ssnDigits)
+  return Number(idDigits)
 }
 
 function resolveClinicianId(form) {
@@ -174,7 +174,7 @@ function buildBasicInfo(form) {
     dob: dobIso || null,
     age: resolveAgeForApi(form[ck.age]),
     age_unit: resolveAgeUnitForApi(form[ck.ageUnit]),
-    ssn: resolveSsn(form),
+    id_number: resolveIdNumber(form),
     admission_date: admissionDateToIso(form[ck.admissionDate]),
     clinician_id: resolveClinicianId(form),
     status: trim(form[ck.status]) || 'active',

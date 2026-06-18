@@ -672,7 +672,22 @@ export default {
   age: 'Edad',
   ageIncrement: 'Aumentar edad',
   ageDecrement: 'Disminuir edad',
-  socialSecurityNumber: 'Número de Seguro Social',
+  ssnItin: 'SSN / ITIN',
+  socialSecurityNumber: 'SSN / ITIN',
+  taxIdPlaceholder: '###-##-####',
+  taxIdTypeSsn: 'SSN',
+  taxIdTypeItin: 'ITIN',
+  taxIdEditFullNumberHint:
+    'Introduce el número completo de 9 dígitos para actualizarlo.',
+  ssnAreaCannotBe000: 'El primer bloque no puede ser 000.',
+  ssnAreaCannotBe666: 'El primer bloque no puede ser 666.',
+  ssnAreaCannotBe900To999:
+    'El primer bloque no puede estar entre 900 y 999.',
+  ssnGroupCannotBe00: 'El segundo bloque no puede ser 00.',
+  ssnSerialCannotBe0000: 'El último bloque no puede ser 0000.',
+  taxIdInvalid:
+    'Ingrese un SSN o ITIN válido de 9 dígitos '
+    + '(ej. 123-45-6789 o 912-34-5678).',
   next: 'Siguiente',
   previous: 'Anterior',
   close: 'Cerrar',
@@ -684,7 +699,9 @@ export default {
   lettersOnlyMax: 'Solo letras, máximo {max} caracteres',
   ageRange: 'La edad debe ser un número entero de 0 a {max}',
   ageUnitRequired: 'Seleccione la unidad de edad cuando indique la edad',
-  ssnInvalid: 'Ingrese un número de seguro social válido de 9 dígitos',
+  ssnInvalid:
+    'Ingrese un SSN o ITIN válido de 9 dígitos '
+    + '(ej. 123-45-6789 o 912-34-5678).',
   clientNumber: 'No. Cliente',
   name: 'Nombre',
   dob: 'Cumpleaños',

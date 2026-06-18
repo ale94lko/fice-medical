@@ -789,6 +789,27 @@ input:-webkit-autofill {
     font-size: 0.8125rem;
     line-height: 1.4;
   }
+
+  &__tax-id-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  &__tax-id-type-badge--SSN {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &__tax-id-type-badge--ITIN {
+    background: #ede9fe;
+    color: #5b21b6;
+  }
 }
 
 .app-dialog-card__body {
