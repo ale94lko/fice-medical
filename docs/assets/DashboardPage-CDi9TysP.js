@@ -1,0 +1,1 @@
+import{Oa as e,sa as t,yi as n}from"./index-CHsaUGQz.js";import{t as r}from"./QPage-C8J5-1fm.js";var i={};function a(n,i){return e(),t(r,{class:`flex flex-center`})}var o=n(i,[[`render`,a]]);export{o as default};
