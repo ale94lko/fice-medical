@@ -1,0 +1,1 @@
+import{Ma as e,Sa as t,la as n,yr as r}from"./index-Ccc7arSx.js";var i=n({name:`QCardSection`,props:{tag:{type:String,default:`div`},horizontal:Boolean},setup(n,{slots:i}){let a=t(()=>`q-card__section q-card__section--${n.horizontal===!0?`horiz row no-wrap`:`vert`}`);return()=>e(n.tag,{class:a.value},r(i.default))}});export{i as t};
