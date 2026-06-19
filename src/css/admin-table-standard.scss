@@ -1,0 +1,522 @@
+@import 'quasar.variables';
+
+// FiCE Medical — estándar único de tablas administrativas
+
+.admin-list-page {
+  &.admin-page {
+    padding: 12px 24px;
+  }
+
+  &__header {
+    margin-bottom: 0;
+  }
+
+  &__heading {
+    min-width: 0;
+  }
+
+  &__title-row {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  &__title {
+    font-family: Inter, 'Segoe UI', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 48px;
+    letter-spacing: -0.03em;
+    color: $text-strong;
+    margin: 0;
+  }
+
+  &__subtitle {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-family: Inter, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    color: $text-muted;
+  }
+
+  &__filters-btn {
+    flex-shrink: 0;
+  }
+
+  &__actions {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__center {
+    flex: 1 1 auto;
+    min-width: 160px;
+    max-width: 360px;
+    margin: 0 16px;
+  }
+
+  &__table-panel {
+    margin-top: 6px;
+  }
+
+  &__bottom-sticky {
+    z-index: 20;
+  }
+}
+
+.admin-table-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: $surface;
+  border: 1px solid $table-border;
+  border-radius: $table-radius;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+
+  &__toolbar {
+    padding: 12px 16px;
+    border-bottom: 1px solid $table-border;
+    background: $surface;
+  }
+
+  &__pagination {
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  &__table-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+
+    .admin-data-table:not(.admin-data-table--inline-column-settings)
+      thead tr th:last-child {
+      padding-right: 44px;
+    }
+  }
+
+  &__column-settings {
+    position: absolute;
+    top: 0;
+    right: 6px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: $table-header-height;
+    height: $table-header-height;
+    min-width: $table-header-height !important;
+    min-height: $table-header-height !important;
+    max-height: $table-header-height !important;
+    padding: 0 !important;
+    background: $table-header-bg;
+    color: $fice-teal-dark !important;
+    box-shadow: -8px 0 8px $table-header-bg;
+    border-radius: 0;
+  }
+}
+
+.admin-data-table {
+  background: $surface;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  max-height: calc(100dvh - 420px);
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: Inter, 'Segoe UI', sans-serif;
+
+  .q-table__middle {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &.q-table--grid {
+    max-height: none;
+    display: block;
+    overflow: visible;
+
+    .q-table__middle {
+      flex: none;
+      min-height: auto;
+      overflow: visible;
+      padding-bottom: 8px;
+    }
+
+    .q-table__grid-content {
+      padding-bottom: 4px;
+    }
+  }
+
+  .q-table__top {
+    display: none;
+  }
+
+  .q-table__bottom {
+    display: none !important;
+  }
+
+  thead tr {
+    height: $table-header-height;
+  }
+
+  thead tr th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: $table-header-height;
+    min-height: $table-header-height;
+    max-height: $table-header-height;
+    padding: 2px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+    vertical-align: middle;
+    color: $text-muted;
+    background: $table-header-bg !important;
+    border-bottom: 1px solid $table-border;
+    white-space: nowrap;
+  }
+
+  &.table {
+    thead tr th:last-child {
+      right: 0;
+      z-index: 4;
+      background-color: $table-header-bg !important;
+      box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
+    }
+
+    tbody tr td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background-color: $surface !important;
+      box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
+    }
+
+    tbody tr:hover td:last-child {
+      background: $table-hover-bg !important;
+    }
+
+    tbody tr.q-tr--selected td:last-child {
+      background: $table-selected-bg !important;
+    }
+  }
+
+  tbody tr td {
+    height: $table-row-height;
+    padding: 2px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: $table-text-primary;
+    border-bottom: 1px solid $table-border;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover td {
+    background: $table-hover-bg !important;
+  }
+
+  tbody tr.q-tr--selected td {
+    background: $table-selected-bg !important;
+  }
+
+  tbody tr.data-row--inactive td:not(:last-child) {
+    background: #fef2f2 !important;
+    box-shadow: inset 3px 0 0 $negative;
+  }
+
+  .q-table--grid .data-row--inactive {
+    background: #fef2f2;
+    box-shadow: inset 3px 0 0 $negative;
+  }
+
+  &__primary-cell {
+    font-weight: 500 !important;
+    color: $table-text-primary !important;
+  }
+
+  &__secondary-cell {
+    font-weight: 400 !important;
+    color: $table-text-secondary !important;
+  }
+
+  &__link {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: $primary;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    .admin-table-search-highlight__mark {
+      color: inherit;
+    }
+  }
+
+  .admin-table-grid-card {
+    border-radius: $radius-md;
+    background: $surface;
+  }
+
+  .admin-table-grid-actions {
+    flex-wrap: wrap;
+    gap: 4px;
+    border-top: 1px solid $table-border;
+  }
+}
+
+.admin-table-actions-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 18px;
+
+  &__label {
+    width: 100%;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: $text-muted;
+    text-align: center;
+  }
+
+  &__settings {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    flex-shrink: 0;
+    width: 18px;
+    min-width: 18px !important;
+    height: 18px;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    padding: 0 !important;
+    color: $fice-teal-dark !important;
+
+    .q-icon {
+      font-size: 14px;
+    }
+  }
+}
+
+.admin-table-search-highlight {
+  &__mark {
+    padding: 0 1px;
+    border-radius: 2px;
+    color: inherit;
+    background: rgba($primary, 0.22);
+  }
+}
+
+.admin-table-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &--open,
+  &--active {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &--pending {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  &--completed,
+  &--discharged {
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+
+  &--cancelled,
+  &--closed,
+  &--inactive {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+
+  &--other {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .admin-table-search-highlight__mark {
+    color: inherit;
+  }
+}
+
+.admin-table-row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+
+  .q-btn {
+    color: $fice-teal-dark !important;
+  }
+}
+
+.admin-table-pagination {
+  width: 100%;
+  gap: 6px;
+  min-height: 32px;
+  padding: 2px 12px;
+  border-bottom: 1px solid $table-border;
+  background: $table-header-bg;
+  color: $text-muted;
+  font-family: Inter, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  line-height: 1.1;
+  box-sizing: border-box;
+
+  &__end {
+    gap: 12px;
+    max-width: 100%;
+  }
+
+  &__summary {
+    flex-shrink: 0;
+    color: $text-muted;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  &__controls {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  &__per-page {
+    min-width: 100px;
+
+    .q-field__control {
+      min-height: 24px !important;
+      height: 24px !important;
+    }
+
+    .q-field__native {
+      min-height: 24px !important;
+      padding-top: 0;
+      padding-bottom: 0;
+      color: $text-muted;
+      font-size: 12px;
+    }
+
+    .q-field__marginal {
+      height: 24px !important;
+    }
+  }
+
+  .q-pagination .q-btn {
+    min-width: 24px !important;
+    width: 24px !important;
+    min-height: 24px !important;
+    height: 24px !important;
+    font-size: 0.6875rem;
+  }
+}
+
+.admin-table-column-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__row {
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid $border-subtle;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+}
+
+.admin-clinician-avatars {
+  flex-shrink: 0;
+  min-width: 0;
+
+  &__avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 2px solid $surface;
+    cursor: default;
+    flex-shrink: 0;
+    z-index: 1;
+
+    & + & {
+      margin-left: -8px;
+    }
+
+    &:hover {
+      z-index: 2;
+    }
+  }
+
+  &__tooltip {
+    padding: 8px 12px;
+    max-width: 240px;
+    text-align: center;
+  }
+
+  &__tooltip-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  &__tooltip-specialty {
+    margin-top: 2px;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.2;
+    opacity: 0.9;
+  }
+}
+
+@media (max-width: 1023px) {
+  .admin-list-page {
+    &.admin-page {
+      padding: 12px 12px 32px;
+    }
+
+    &__title {
+      font-size: 2rem;
+      line-height: 2.4rem;
+    }
+  }
+}

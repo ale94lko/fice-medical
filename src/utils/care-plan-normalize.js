@@ -8,6 +8,7 @@ import {
 } from 'components/constants.js'
 import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { refreshCarePlanProgress } from 'src/utils/care-plan-orders.js'
+import { formatClinicianDisplayLabel } from 'src/utils/clinician-display.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -38,14 +39,11 @@ function normalizeClinicianRef(raw) {
     return { id: null, name: '' }
   }
   const id = parseOptionalNumber(raw.id ?? raw.clinician_id)
-  const parts = [
-    raw.first_name ?? raw.firstName,
-    raw.last_name ?? raw.lastName,
-  ].map(part => trim(part)).filter(Boolean)
+  const name = formatClinicianDisplayLabel(raw)
 
   return {
     id,
-    name: trim(raw.name ?? raw.full_name) || parts.join(' '),
+    name,
   }
 }
 

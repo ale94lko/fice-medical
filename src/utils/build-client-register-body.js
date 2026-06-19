@@ -20,6 +20,9 @@ import {
   buildVitalsForRegister,
 } from 'src/utils/build-client-register-clinical.js'
 import { buildFollowUpsForRegister } from 'src/utils/client-follow-ups.js'
+import {
+  resolveClinicianIdsForApi,
+} from 'src/utils/client-clinicians-form.js'
 
 const ck = clientFieldKeys
 
@@ -94,16 +97,6 @@ function resolveIdNumber(form) {
   return Number(idDigits)
 }
 
-function resolveClinicianId(form) {
-  const clinicianRaw = trim(form[ck.assignedClinician])
-  if (!clinicianRaw) {
-    return null
-  }
-  const clinicianId = Number(clinicianRaw)
-
-  return Number.isFinite(clinicianId) ? clinicianId : null
-}
-
 function resolveAgeForApi(value) {
   const raw = String(value ?? '').trim()
   if (!raw) {
@@ -176,7 +169,6 @@ function buildBasicInfo(form) {
     age_unit: resolveAgeUnitForApi(form[ck.ageUnit]),
     id_number: resolveIdNumber(form),
     admission_date: admissionDateToIso(form[ck.admissionDate]),
-    clinician_id: resolveClinicianId(form),
     status: trim(form[ck.status]) || 'active',
     emails: mapEmailsAll(contact.emails),
     phones: mapPhonesAll(contact.phones),
@@ -296,6 +288,7 @@ export function buildClientRegisterBody(form) {
   if (!form || typeof form !== 'object') {
     return {
       basic_info: buildBasicInfo({}),
+      clinicians: [],
       contacts: [],
       allergies: [],
       no_allergies: false,
@@ -308,6 +301,7 @@ export function buildClientRegisterBody(form) {
 
   return {
     basic_info: buildBasicInfo(form),
+    clinicians: resolveClinicianIdsForApi(form),
     contacts: buildContacts(form),
     allergies: buildAllergies(form),
     no_allergies: Boolean(

@@ -7,12 +7,21 @@ import {
 import {
   buildClientRegisterBody,
 } from 'src/utils/build-client-register-body.js'
+import {
+  resolveClientListEmailEntries,
+  resolveClientListEmailSearchText,
+} from 'src/utils/client-list-email.js'
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
 import {
   formatSsnMasked,
   normalizeIdNumberMaskedDisplay,
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
+import {
+  clinicianInitialsFromPersonName,
+  formatClinicianDisplayLabel,
+  formatClinicianPersonName,
+} from 'src/utils/clinician-display.js'
 
 function isEmpty(value) {
   return value === null || value === undefined || value === ''
@@ -266,34 +275,12 @@ function mapGenderLabelForList(value) {
   return String(value ?? '').trim()
 }
 
-function firstEmailFromList(emails) {
-  if (!Array.isArray(emails) || !emails.length) {
-    return ''
-  }
-  const first = emails[0]
-  if (!first || typeof first !== typeNames.object) {
-    return ''
-  }
-
-  return String(first.email ?? first.address ?? '').trim()
-}
-
-function firstClientListEmail(client) {
-  const personal = clientPersonalInfo(client)
-  const fromPersonal = firstEmailFromList(personal.emails)
-  if (fromPersonal) {
-    return fromPersonal
-  }
-
-  return firstEmailFromList(client.emails)
-}
-
-function resolveClientListClinicians(client) {
+function resolveClientListClinicianNames(client) {
   const clinicians = client.clinicians
     ?? client.clinician_assignments
     ?? client.assigned_clinicians
   if (!Array.isArray(clinicians) || !clinicians.length) {
-    return ''
+    return []
   }
 
   return clinicians
@@ -302,15 +289,45 @@ function resolveClientListClinicians(client) {
         return ''
       }
 
-      return String(
-        item.name
-        ?? item.full_name
-        ?? item.clinician_name
-        ?? '',
-      ).trim()
+      return formatClinicianDisplayLabel(item)
     })
     .filter(Boolean)
-    .join(', ')
+}
+
+export function resolveClientListClinicianEntries(client) {
+  const clinicians = client.clinicians
+    ?? client.clinician_assignments
+    ?? client.assigned_clinicians
+  if (!Array.isArray(clinicians) || !clinicians.length) {
+    return []
+  }
+
+  return clinicians
+    .map(item => {
+      if (!item || typeof item !== typeNames.object) {
+        return null
+      }
+      const personName = formatClinicianPersonName(item)
+      const name = formatClinicianDisplayLabel(item)
+      if (!name) {
+        return null
+      }
+
+      return {
+        id: item.id ?? item.clinician_id ?? null,
+        name,
+        personName: personName || name.split(' - ')[0]?.trim() || name,
+        specialty: String(item.specialty ?? '').trim(),
+        initials: clinicianInitialsFromPersonName(
+          personName || name,
+        ),
+      }
+    })
+    .filter(Boolean)
+}
+
+function resolveClientListClinicians(client) {
+  return resolveClientListClinicianNames(client).join(', ')
 }
 
 function formatClientListDate(value) {
@@ -338,16 +355,29 @@ export function resolveClientListStatusVariant(status) {
   const lower = raw.toLowerCase()
   if (
     lower === 'closed'
+    || lower === 'inactive'
     || raw === String(clientStatus.CLOSED)
   ) {
-    return 'closed'
+    return lower === 'inactive' ? 'inactive' : 'closed'
   }
   if (
     lower === 'active'
     || lower === 'open'
     || raw === String(clientStatus.OPEN)
   ) {
-    return 'open'
+    return lower === 'active' ? 'active' : 'open'
+  }
+  if (lower === 'pending') {
+    return 'pending'
+  }
+  if (lower === 'completed') {
+    return 'completed'
+  }
+  if (lower === 'cancelled' || lower === 'canceled') {
+    return 'cancelled'
+  }
+  if (lower === 'discharged') {
+    return 'discharged'
   }
 
   return 'other'
@@ -362,9 +392,26 @@ function formatClientListStatus(status, t) {
   if (lower === 'closed' || raw === String(clientStatus.CLOSED)) {
     return t('closed')
   }
+  if (lower === 'inactive') {
+    return t('inactive')
+  }
+  if (lower === 'pending') {
+    return t('pending')
+  }
+  if (lower === 'completed') {
+    return t('completed')
+  }
+  if (lower === 'cancelled' || lower === 'canceled') {
+    return t('cancelled')
+  }
+  if (lower === 'discharged') {
+    return t('discharged')
+  }
+  if (lower === 'active') {
+    return t('active')
+  }
   if (
-    lower === 'active'
-    || lower === 'open'
+    lower === 'open'
     || raw === String(clientStatus.OPEN)
   ) {
     return t('open')
@@ -412,6 +459,8 @@ export function mapClient(client, options = {}) {
     taxIdDisplay = formatSsnMasked(ssnDigits)
   }
 
+  const emailEntries = resolveClientListEmailEntries(client)
+
   return {
     id: client.id,
     [ck.clientNumber]:
@@ -431,9 +480,12 @@ export function mapClient(client, options = {}) {
       lastName,
       suffix,
     ),
-    [ck.email]: firstClientListEmail(client),
+    [ck.email]: emailEntries[0]?.email ?? '',
+    emailEntries,
+    emailSearchText: resolveClientListEmailSearchText(emailEntries),
     [ck.dob]: dob,
     [ck.clinicians]: resolveClientListClinicians(client),
+    clinicianEntries: resolveClientListClinicianEntries(client),
     [ck.admissionDate]:
       client.admission_date ?? client[ck.admissionDate] ?? '',
     [ck.status]: client.status ?? '',

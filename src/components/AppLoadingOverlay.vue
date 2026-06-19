@@ -195,6 +195,17 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
+$app-loading-overlay-translucent-bg: rgba(248, 250, 251, 0.5);
+
+@mixin app-loading-overlay-translucent-surface {
+  background: $app-loading-overlay-translucent-bg !important;
+  backdrop-filter: blur(4px);
+
+  :deep(.app-brand-loading--with-waves) {
+    background: transparent;
+  }
+}
+
 .app-loading-overlay--content {
   position: fixed;
   z-index: 900;
@@ -206,15 +217,10 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   overflow: hidden;
   padding: 0;
-  background: transparent;
+  @include app-loading-overlay-translucent-surface;
 }
 
 .app-loading-overlay--local {
-  background: radial-gradient(
-    ellipse at 50% 40%,
-    rgba(248, 250, 251, 0.98) 0%,
-    rgba(228, 234, 236, 0.96) 100%
-  ) !important;
-  backdrop-filter: blur(6px);
+  @include app-loading-overlay-translucent-surface;
 }
 </style>

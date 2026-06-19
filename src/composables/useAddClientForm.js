@@ -82,7 +82,7 @@ export function createEmptyAddClientForm() {
     [ck.socialSecurityNumber]: '',
     [ck.idNumberMasked]: '',
     [ck.admissionDate]: todayDateUs(),
-    [ck.assignedClinician]: '',
+    [ck.clinicians]: [],
     [ck.status]: 'active',
     [clientFormSections.contact]: createEmptyContactSection(),
     [clientFormSections.familyMedicalHistory]:

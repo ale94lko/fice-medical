@@ -25,15 +25,27 @@ export const layoutTestIds = {
   navClientAssignment: 'layout-nav-client-assignment',
 }
 
+export const adminTableTestIds = {
+  columnSettings: 'admin-table-btn-column-settings',
+}
+
 export const clientListTestIds = {
   page: 'client-list-page',
+  search: 'client-list-input-search',
   addClient: 'client-list-btn-add',
   assignClinicians: 'client-list-btn-assign-clinicians',
   changeStatus: 'client-list-btn-change-status',
   filters: 'client-list-btn-filters',
+  columnSettings: 'client-list-btn-column-settings',
+  summaryUpcoming: 'client-list-summary-upcoming',
+  summaryMissing: 'client-list-summary-missing',
+  summaryBilling: 'client-list-summary-billing',
+  summaryAuthorizations: 'client-list-summary-authorizations',
+  rowView: id => toTestId('client-list-row', id, 'btn-view'),
   rowEdit: id => toTestId('client-list-row', id, 'btn-edit'),
   rowAssign: id => toTestId('client-list-row', id, 'btn-assign'),
   rowStatus: id => toTestId('client-list-row', id, 'btn-status'),
+  rowMore: id => toTestId('client-list-row', id, 'btn-more'),
 }
 
 export const clientPageTestIds = {

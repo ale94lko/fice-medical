@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 @import 'quasar.variables';
 @import 'form-field';
+@import 'admin-table-standard';
 
 
 .app-layout .q-page-container {
@@ -358,6 +359,11 @@
   overflow: hidden;
 }
 
+.app-layout .q-page-container:has(.client-list-page) {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .admin-page.add-client-page {
   display: flex;
   flex-direction: column;
@@ -397,9 +403,14 @@
   min-height: 0;
 }
 
-@media (max-width: 1023px) {
-  .admin-page:not(.add-client-page) {
+  @media (max-width: 1023px) {
+  .admin-page:not(.add-client-page):not(.admin-list-page) {
     padding: 12px 12px 72px;
+  }
+
+  .admin-page.admin-list-page,
+  .admin-page.client-list-page {
+    padding: 12px 12px 12px;
   }
 
   .admin-page.add-client-page {
@@ -407,110 +418,264 @@
   }
 }
 
-.admin-data-table {
-  background: $surface;
-  border-radius: $radius-lg;
-  border: 1px solid $border-subtle;
-  box-shadow: $shadow-sm;
-  max-height: calc(100vh - 140px);
+.client-list-page {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 56px);
+  box-sizing: border-box;
 
-  .q-table__middle {
+  .admin-list-page__header {
+    margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
+  }
+
+  .admin-list-page__title {
+    font-size: 1.375rem;
+    line-height: 1.65rem;
+  }
+
+  .admin-list-page__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .admin-list-page__actions {
+    margin-top: 0;
+  }
+
+  .admin-list-page__center {
+    max-width: 280px;
+    margin-left: 12px;
+    margin-right: 12px;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  &__search {
+    width: 100%;
+
+    .q-field__control {
+      min-height: 36px;
+      height: 36px;
+    }
+
+    .q-field__marginal {
+      height: 36px;
+    }
+  }
+
+  .admin-list-page__table-panel {
     flex: 1 1 auto;
     min-height: 0;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
   }
 
-  &.q-table--grid {
+  .admin-table-panel__table-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .admin-data-table {
+    flex: 1 1 auto;
+    min-height: 180px;
     max-height: none;
-    display: block;
-    overflow: visible;
-
-    .q-table__middle {
-      flex: none;
-      min-height: auto;
-      overflow: visible;
-      padding-bottom: 8px;
-    }
-
-    .q-table__grid-content {
-      padding-bottom: 4px;
-    }
-
-    .q-table__bottom {
-      flex: none;
-    }
+    height: 0;
   }
 
-  .q-table__top {
-    padding: 16px 20px;
-    gap: 12px;
-    border-bottom: 1px solid $border-subtle;
-    background: $surface;
+  &__not-assigned {
+    font-size: 14px;
+    font-weight: 400;
+    color: $table-text-secondary;
   }
 
-  .q-table__title {
-    font-size: 1.25rem;
+  &__email-cell {
+    vertical-align: middle;
+  }
+
+  &__emails {
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &__email-primary {
+    gap: 8px;
+    min-width: 0;
+    font-size: 14px;
+    line-height: 1.25;
+    color: $table-text-secondary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__email-type {
+    flex-shrink: 0;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: -0.02em;
-    color: $text-strong;
-  }
-
-  thead tr th {
-    font-weight: 600;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    line-height: 1.25;
     color: $text-muted;
-    background: $surface-muted !important;
-    border-bottom: 1px solid $border-subtle;
-    padding: 12px 16px;
   }
 
-  tbody tr td {
-    padding: 14px 16px;
-    font-size: 0.925rem;
-    color: $text-strong;
-    border-bottom: 1px solid $border-subtle;
+  &__email-more {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: $primary;
+    cursor: default;
   }
 
-  tbody tr:hover td:not(:last-child) {
-    background: $surface-muted !important;
+  &__email-tooltip {
+    padding: 8px 10px;
+    max-width: 320px;
   }
 
-  tbody tr.data-row--inactive td:not(:last-child) {
-    background: #fef2f2 !important;
-    box-shadow: inset 3px 0 0 $negative;
+  &__email-tooltip-line {
+    gap: 8px;
+
+    & + & {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+    }
   }
 
-  .q-table--grid .data-row--inactive {
-    background: #fef2f2;
-    box-shadow: inset 3px 0 0 $negative;
+  &__email-tooltip-address {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.25;
   }
 
-  .admin-table-grid-card {
-    border-radius: $radius-md;
-    background: $surface;
+  &__email-tooltip-type {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25;
+    opacity: 0.9;
   }
+}
 
-  .admin-table-grid-actions {
-    flex-wrap: wrap;
+.client-list-summary {
+  &__card {
+    display: flex;
+    flex-direction: column;
     gap: 4px;
-    border-top: 1px solid $border-subtle;
+    min-height: 0;
+    padding: 8px 12px;
+    border-radius: $radius-lg;
+    border: 1px solid $border-subtle;
+    background: $surface;
+    box-shadow: $shadow-sm;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      box-shadow: $shadow-md;
+    }
+
+    &--active {
+      border-color: $primary;
+      box-shadow: 0 0 0 1px rgba($primary, 0.2);
+    }
   }
 
-  .q-table__bottom {
-    padding: 10px 16px;
-    border-top: 1px solid $border-subtle;
-    background: $surface-muted;
-    color: $text-muted;
-    font-size: 0.85rem;
+  &__card-main {
+    gap: 10px;
+    min-width: 0;
   }
 
-  .q-table__control .q-btn {
+  &__card-copy {
+    min-width: 0;
+  }
+
+  &__card-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: $text-strong;
+  }
+
+  &__card-value {
+    flex-shrink: 0;
+    min-width: 2rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: $text-strong;
+  }
+
+  &__card-description {
+    margin-top: 2px;
+    font-size: 0.6875rem;
     color: $text-muted;
+    line-height: 1.2;
+  }
+
+  &__card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    flex-shrink: 0;
+
+    &--blue {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    &--orange {
+      background: #ffedd5;
+      color: #ea580c;
+    }
+
+    &--green {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    &--purple {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+  }
+
+  &__card-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    width: 100%;
+    margin-top: 0;
+    color: $text-muted;
+    font-size: 0.75rem;
+    font-weight: 500;
+    pointer-events: none;
+  }
+
+  &__card--blue {
+    border-top: 3px solid #2563eb;
+  }
+
+  &__card--orange {
+    border-top: 3px solid #ea580c;
+  }
+
+  &__card--green {
+    border-top: 3px solid #16a34a;
+  }
+
+  &__card--purple {
+    border-top: 3px solid #7c3aed;
   }
 }
 

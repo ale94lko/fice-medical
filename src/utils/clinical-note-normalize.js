@@ -3,6 +3,10 @@ import {
   formatClinicalNoteDateTimeDisplay,
   isoToClinicalNoteDateTime,
 } from 'src/utils/clinical-note-datetime.js'
+import {
+  formatClinicianDisplayLabel,
+  clinicianInitialsFromPersonName,
+} from 'src/utils/clinician-display.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -27,31 +31,17 @@ function resolveClinicianLabel(clinician, clinicianOptions = []) {
       return match.label
     }
   }
-  const first = trim(
-    clinician?.first_name ?? clinician?.firstName,
-  )
-  const last = trim(
-    clinician?.last_name ?? clinician?.lastName,
-  )
-  const full = `${first} ${last}`.trim()
-  if (full) {
-    return full.startsWith('Dr.') ? full : `Dr. ${full}`
+
+  const formatted = formatClinicianDisplayLabel(clinician)
+  if (formatted) {
+    return formatted
   }
 
   return clinicianId != null ? `Clinician #${clinicianId}` : '—'
 }
 
 export function clinicianInitialsFromLabel(label) {
-  const parts = String(label ?? '').trim().split(/\s+/).filter(Boolean)
-  if (parts.length >= 2) {
-    return `${parts[0][0] ?? ''}${parts[parts.length - 1][0] ?? ''}`
-      .toUpperCase()
-  }
-  if (parts.length === 1) {
-    return (parts[0].slice(0, 2) || '?').toUpperCase()
-  }
-
-  return '?'
+  return clinicianInitialsFromPersonName(label)
 }
 
 export function normalizeClinicalNoteSummary(

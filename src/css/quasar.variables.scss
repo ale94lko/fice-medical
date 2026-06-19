@@ -1,11 +1,13 @@
 // Quasar SCSS variables — FiCE Medical (aligned with admin)
 
-$primary   : #0f766e;
+$primary   : #0f7a74;
 $secondary : #e2e8f0;
 $accent    : #14b8a6;
 
 $dark      : #0f172a;
 $dark-page : #0f172a;
+
+$fice-teal-dark: #0b5e59;
 
 $positive  : #16a34a;
 $negative  : #dc2626;
@@ -16,7 +18,7 @@ $white     : #ffffff;
 $secondary-2: #f0fdfa;
 
 // App surfaces (available in .vue / .scss)
-$shell-bg        : #0f766e;
+$shell-bg        : #0f7a74;
 $shell-bg-hover  : rgba(255, 255, 255, 0.12);
 $shell-border    : rgba(255, 255, 255, 0.16);
 $shell-text      : #ffffff;
@@ -28,6 +30,15 @@ $border-subtle   : rgba(15, 23, 42, 0.08);
 $text-muted      : #64748b;
 $text-hint       : #94a3b8;
 $text-strong     : #0f172a;
+$table-text-primary: #1e293b;
+$table-text-secondary: #475569;
+$table-border    : #e2e8f0;
+$table-header-bg : #f8fafc;
+$table-hover-bg  : #f8fafc;
+$table-selected-bg: #f1f5f9;
+$table-radius    : 12px;
+$table-header-height: 24px;
+$table-row-height: 25px;
 $nav-active-bg   : rgba(255, 255, 255, 0.18);
 $radius-md       : 10px;
 $radius-lg       : 14px;

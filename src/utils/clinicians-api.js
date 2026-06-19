@@ -1,5 +1,8 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
+import {
+  formatClinicianDisplayLabel,
+} from 'src/utils/clinician-display.js'
 
 const DEFAULT_PAGE_SIZE = 100
 
@@ -12,18 +15,11 @@ export function mapClinicianRowToSelectOption(row) {
   if (id == null || id === '') {
     return null
   }
-  const specialty = String(row?.specialty ?? '').trim()
-  const npi = String(row?.npi ?? '').trim()
-  const parts = []
-  if (specialty) {
-    parts.push(specialty)
+
+  const label = formatClinicianDisplayLabel(row)
+  if (!label) {
+    return null
   }
-  if (npi) {
-    parts.push(`NPI ${npi}`)
-  }
-  const label = parts.length
-    ? parts.join(' · ')
-    : `Clinician ${id}`
 
   return {
     label,

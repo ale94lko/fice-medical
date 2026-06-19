@@ -1,6 +1,5 @@
 /* eslint-disable camelcase -- API request body uses snake_case */
 import {
-  clientFieldKeys,
   clientFormSections,
   clientInsurancePriorityValues,
   clientInsuranceRelationshipValues,
@@ -15,20 +14,12 @@ import {
 } from 'src/utils/client-insurance.js'
 import { combineRecordedDateTime } from 'src/utils/client-vitals.js'
 
-const ck = clientFieldKeys
+import {
+  resolvePrimaryClinicianIdForApi,
+} from 'src/utils/client-clinicians-form.js'
 
 function trim(value) {
   return String(value ?? '').trim()
-}
-
-function resolveClinicianIdForForm(form) {
-  const clinicianRaw = trim(form?.[ck.assignedClinician])
-  if (!clinicianRaw) {
-    return null
-  }
-  const clinicianId = Number(clinicianRaw)
-
-  return Number.isFinite(clinicianId) ? clinicianId : null
 }
 
 function catalogKeyFromLabel(mapObj, displayValue) {
@@ -210,7 +201,7 @@ function mapVitalsEntry(entry, clinicianId) {
 
 export function buildVitalsForRegister(form) {
   const section = form?.[clientFormSections.vitals] ?? {}
-  const clinicianId = resolveClinicianIdForForm(form)
+  const clinicianId = resolvePrimaryClinicianIdForApi(form)
 
   return (section.entries ?? [])
     .map(entry => {

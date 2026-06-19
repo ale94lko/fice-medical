@@ -1,5 +1,6 @@
 
 import { appointmentSlotStatuses } from 'components/constants.js'
+import { formatClinicianDisplayLabel } from 'src/utils/clinician-display.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -38,15 +39,17 @@ export function normalizeAppointmentType(raw) {
 export function normalizeAppointmentClinician(raw) {
   const row = raw ?? {}
   const id = parseOptionalNumber(row.id ?? row.clinician_id)
-
-  return {
-    value: id,
-    label: trim(
+  const label = formatClinicianDisplayLabel(row)
+    || trim(
       row.display_name
       ?? row.displayName
       ?? row.name
       ?? row.clinician_display_name,
-    ),
+    )
+
+  return {
+    value: id,
+    label,
   }
 }
 

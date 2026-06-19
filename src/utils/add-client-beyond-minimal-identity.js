@@ -3,6 +3,7 @@ import {
   clientFormSections,
 } from 'components/constants.js'
 import { visibleInsuranceProfiles } from 'src/utils/client-insurance.js'
+import { formHasAssignedClinicians } from 'src/utils/client-clinicians-form.js'
 
 const ck = clientFieldKeys
 
@@ -97,7 +98,7 @@ export function hasAddClientDataBeyondFirstLastName(form) {
   if (trim(form[ck.admissionDate])) {
     return true
   }
-  if (trim(form[ck.assignedClinician])) {
+  if (formHasAssignedClinicians(form)) {
     return true
   }
   const contact = form[clientFormSections.contact]

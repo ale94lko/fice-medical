@@ -51,6 +51,17 @@ const showClearable = computed(
 )
 
 function onUpdate(value) {
+  const isMultiple = Boolean(attrs.multiple)
+  if (isMultiple) {
+    if (value == null || (Array.isArray(value) && value.length === 0)) {
+      emit('update:modelValue', [])
+
+      return
+    }
+    emit('update:modelValue', value)
+
+    return
+  }
   if (isEmpty(value)) {
     emit('update:modelValue', null)
 

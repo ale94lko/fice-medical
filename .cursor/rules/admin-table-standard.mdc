@@ -1,0 +1,48 @@
+---
+description: Estándar único de tablas administrativas FiCE Medical
+globs: src/pages/**/*List*.vue, src/components/admin-table/**, src/css/admin-table-standard.scss
+alwaysApply: false
+---
+
+# Tablas administrativas — estándar FiCE
+
+Antes de crear o modificar un listado con tabla, usar los componentes y estilos compartidos.
+
+## Componentes (`src/components/admin-table/`)
+
+| Necesidad | Componente |
+|-----------|------------|
+| Título 40px + subtítulo 16px + slot acciones | `AdminListPageHeader` |
+| Card tabla + toolbar + ⚙ columnas en header | `AdminTablePanel` |
+| Tabla Quasar | `AdminQTable` + clase `admin-data-table` |
+| Paginación fija inferior | `AdminTablePaginationBar` |
+| Estado (● + texto) | `AdminTableStatusCell` |
+| Acciones View / Edit / More | `AdminTableRowActions` |
+| Diálogo columnas | `AdminTableColumnSettingsDialog` |
+
+## Composable columnas
+
+`useAdminTableColumnPreferences({ tableId, defaultOrder, requiredColumns, lockedColumns })`
+
+- `tableId`: usar `adminTableIds` en `src/constants/admin-table.js`
+- Persistencia: `localStorage` clave `fice-medical.admin-table.columns.{tableId}`
+
+## Clases CSS
+
+- Página: `admin-page admin-list-page`
+- Columna principal: `admin-data-table__primary-cell` o slot con `admin-data-table__link`
+- Texto secundario: `admin-data-table__secondary-cell`
+- Estados: `AdminTableStatusCell` (sin badges grandes)
+- Iconos acciones: `assignment_ind` (view), `edit_note` (edit), `more_vert` (more), color `#0B5E59`
+
+## Estilos globales
+
+`src/css/admin-table-standard.scss` — no duplicar en páginas salvo celdas específicas del módulo.
+
+## Paginación
+
+`AdminTablePaginationBar` con `summary-key` / `per-page-key` i18n del módulo o `adminTablePaginationSummary` genérico.
+
+## Referencia implementada
+
+`src/pages/client/ClientList.vue`

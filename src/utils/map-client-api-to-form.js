@@ -49,6 +49,9 @@ import {
 } from 'src/utils/client-form.js'
 import { relationshipTokenForApi } from
   'src/utils/build-client-register-clinical.js'
+import {
+  resolveCliniciansFormValue,
+} from 'src/utils/client-clinicians-form.js'
 
 /* eslint-disable camelcase -- API token keys */
 const PHONE_TYPE_FROM_API = {
@@ -229,6 +232,22 @@ function mapEmailTypeFromApi(value) {
   const token = toSnakeToken(value)
 
   return EMAIL_TYPE_FROM_API[token] ?? ''
+}
+
+export function resolveClientEmailTypeLabel(value) {
+  const mapped = mapEmailTypeFromApi(value)
+  if (mapped) {
+    return mapped
+  }
+
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+
+  return raw
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, char => char.toUpperCase())
 }
 
 function mapContactTypeFromApi(value) {
@@ -750,21 +769,6 @@ function resolveAgeFields(personal, dobUs, resolveAgeUnitCode) {
   return { age: '', ageUnit: resolveAgeUnitCode?.('years') ?? 'years' }
 }
 
-function resolveClinicianValue(client, personal) {
-  const id = personal?.clinician_id
-    ?? client?.clinician_id
-    ?? personal?.assigned_clinician_id
-  if (id != null && id !== '') {
-    return String(id)
-  }
-  const clinicians = client?.clinicians ?? client?.clinician_assignments
-  if (Array.isArray(clinicians) && clinicians[0]?.id != null) {
-    return String(clinicians[0].id)
-  }
-
-  return ''
-}
-
 /**
  * Maps a client list/detail API payload into the add/edit client form shape.
  */
@@ -900,7 +904,7 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.admissionDate]: isoDateToUsDateString(
       client.admission_date ?? personal.admission_date,
     ),
-    [ck.assignedClinician]: resolveClinicianValue(client, personal),
+    [ck.clinicians]: resolveCliniciansFormValue(client, personal),
     [ck.status]: String(client.status ?? personal.status ?? 'active').trim(),
     [clientFormSections.contact]: contact,
     [clientFormSections.familyMedicalHistory]: mapFamilyMedicalHistoryFromApi(

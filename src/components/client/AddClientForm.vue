@@ -476,10 +476,12 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField
-                    :label="t('assignedClinician')"
-                    :test-id="tid.field(ck.assignedClinician)">
+                    :label="t('clinicians')"
+                    :test-id="tid.field(ck.clinicians)">
                     <FormSelect
-                      v-model="form[ck.assignedClinician]"
+                      v-model="form[ck.clinicians]"
+                      multiple
+                      use-chips
                       outlined
                       hide-bottom-space
                       emit-value
@@ -488,7 +490,7 @@
                       class="full-width"
                       :loading="cliniciansLoading"
                       :options="assignedClinicianOptions"
-                      :test-id="tid.field(ck.assignedClinician)"
+                      :test-id="tid.field(ck.clinicians)"
                     />
                   </AddClientLabeledField>
                 </div>

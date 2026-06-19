@@ -35,7 +35,7 @@ export const useSiteStore = defineStore('site', {
     clientList: [],
     clientListSourceById: {},
     clientListPagination: null,
-    clientListQuery: { page: 1, limit: 20 },
+    clientListQuery: { page: 1, limit: 20, filter: null },
     suffixCatalogSelectOptions: null,
   }),
   actions: {
@@ -63,14 +63,23 @@ export const useSiteStore = defineStore('site', {
         const limit = Number(params.limit ?? this.clientListQuery.limit ?? 20)
         const safePage = Number.isFinite(page) && page >= 1 ? page : 1
         const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
-        this.clientListQuery = { page: safePage, limit: safeLimit }
+        const filter = params.filter ?? this.clientListQuery.filter ?? null
+        this.clientListQuery = {
+          page: safePage,
+          limit: safeLimit,
+          filter,
+        }
 
         const apiPage = Math.max(0, safePage - 1)
+        const queryParams = {
+          page: apiPage,
+          limit: safeLimit,
+        }
+        if (filter) {
+          queryParams.filter = filter
+        }
         const response = await apiInstance.get(apiPaths.clientsList, {
-          params: {
-            page: apiPage,
-            limit: safeLimit,
-          },
+          params: queryParams,
         })
 
         const root = response?.data?.data
