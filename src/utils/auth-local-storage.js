@@ -52,6 +52,26 @@ export function writeStoredModules(modules) {
   localStorage.setItem(keys.modules, JSON.stringify(list))
 }
 
+export function readStoredPermissions() {
+  const raw = localStorage.getItem(keys.permissions)
+  if (!raw) {
+    return []
+  }
+  try {
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed)
+      ? parsed.map(p => String(p).trim()).filter(Boolean)
+      : []
+  } catch {
+    return []
+  }
+}
+
+export function writeStoredPermissions(permissions) {
+  const list = Array.isArray(permissions) ? permissions : []
+  localStorage.setItem(keys.permissions, JSON.stringify(list))
+}
+
 export function readStoredSubtenants() {
   const raw = localStorage.getItem(keys.subtenants)
   if (!raw) {
@@ -114,6 +134,7 @@ export function clearAuthLocalStorage() {
     keys.refresh,
     keys.refreshLegacy,
     keys.modules,
+    keys.permissions,
     keys.subtenants,
     keys.activeSubtenantId,
   ].forEach(k => localStorage.removeItem(k))

@@ -1,5 +1,15 @@
 <template>
   <div class="add-client-insurance-tab">
+    <div
+      v-if="!canView"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('insuranceNoPermission') }}
+      </p>
+    </div>
+
+    <template v-else>
     <div class="insurance-header row items-start">
       <div class="col">
         <h2 class="insurance-title">
@@ -9,7 +19,7 @@
           {{ t('insuranceProfilesSubtitle') }}
         </p>
       </div>
-      <div class="col-auto">
+      <div v-if="!readonly" class="col-auto">
         <q-btn
           no-caps
           unelevated
@@ -26,6 +36,7 @@
     <div class="insurance-table-card q-pa-md q-mt-md">
       <InsuranceProfilesTable
         :profiles="visibleProfiles"
+        :can-edit="!readonly"
         :empty-label="t('insuranceProfilesEmpty')"
         @view="openView"
         @edit="openEdit"
@@ -53,6 +64,7 @@
       v-model="deactivateDialogOpen"
       @confirm="onDeactivateConfirm"
     />
+    </template>
   </div>
 </template>
 
@@ -84,6 +96,14 @@ defineProps({
   payerCatalogLoading: {
     type: Boolean,
     default: false,
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canView: {
+    type: Boolean,
+    default: true,
   },
 })
 

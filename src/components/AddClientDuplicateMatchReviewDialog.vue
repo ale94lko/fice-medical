@@ -14,9 +14,7 @@
         {{ t('duplicateMatchReviewTitle') }}
       </AppDialogHeader>
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <q-inner-loading :showing="loading" color="primary">
-          <q-spinner size="40px" />
-        </q-inner-loading>
+        <AppLoadingOverlay :showing="loading" compact />
 
         <div
           v-if="!loading && previewForm && newForm"
@@ -207,6 +205,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import {
   clientFieldKeys as ck,
   clientFormSections,

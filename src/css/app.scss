@@ -9,6 +9,20 @@
   background: $page-bg;
 }
 
+.app-layout .q-page-container.app-content-root {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-layout.q-layout:has(.add-client-page) {
+  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
 .app-header {
   background: $shell-bg !important;
   color: $shell-text;
@@ -149,14 +163,26 @@
   color: $shell-text;
   border-right: 1px solid $shell-border !important;
 
+  .q-list--padding {
+    padding: 6px 8px;
+  }
+
   .q-item {
     border-radius: $radius-md;
-    margin: 2px 0;
-    min-height: 44px;
+    margin: 1px 0;
+    min-height: 40px;
+    padding: 6px 8px;
+    font-size: 0.875rem;
     color: $shell-text;
     transition: background-color 0.15s ease;
 
+    .q-item__section--avatar {
+      min-width: 36px;
+      padding-right: 8px;
+    }
+
     .q-icon {
+      font-size: 20px;
       color: $shell-text-muted;
     }
 
@@ -166,7 +192,7 @@
   }
 
   .q-expansion-item {
-    margin: 2px 0;
+    margin: 1px 0;
     border-radius: $radius-md;
 
     > .q-expansion-item__container > .q-item {
@@ -174,11 +200,35 @@
     }
   }
 
-  .q-expansion-item__content .q-item {
-    margin-left: 4px;
+  .q-expansion-item__content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .app-drawer__subitem {
+    margin-left: 10px;
     margin-right: 4px;
-    padding-left: 12px;
-    font-size: 0.9rem;
+    padding-left: 2px;
+    padding-right: 8px;
+    min-height: 36px;
+    font-size: 0.8125rem;
+
+    .app-drawer__subitem-icon {
+      min-width: 28px;
+      padding-right: 6px;
+
+      .q-icon {
+        font-size: 18px;
+        color: $shell-text-muted;
+      }
+    }
+
+    &.q-router-link--active,
+    &.app-nav-item--active {
+      .app-drawer__subitem-icon .q-icon {
+        color: $shell-text !important;
+      }
+    }
   }
 
   .q-item.app-nav-item--active,
@@ -191,6 +241,18 @@
       color: $shell-text !important;
     }
   }
+
+  &.q-drawer--mini {
+    transition: width 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  &.q-drawer--standard.q-drawer--on-top {
+    box-shadow: 4px 0 20px rgba(15, 23, 42, 0.16);
+  }
+}
+
+.app-drawer__interactive {
+  min-height: 100%;
 }
 
 @mixin app-light-menu-shell {
@@ -253,8 +315,19 @@
   @include app-light-menu-item-active;
 }
 
-.app-drawer-submenu .q-item {
-  min-height: 40px;
+.app-drawer-submenu .app-drawer__subitem {
+  margin-left: 0;
+
+  .app-drawer__subitem-icon .q-icon {
+    color: $text-muted;
+  }
+
+  &.q-router-link--active,
+  &.app-nav-item--active {
+    .app-drawer__subitem-icon .q-icon {
+      color: $white !important;
+    }
+  }
 }
 
 .q-tooltip.app-drawer-tooltip {
@@ -280,8 +353,7 @@
 }
 
 .app-layout .q-page-container:has(.add-client-page) {
-  height: calc(100dvh - 56px);
-  max-height: calc(100dvh - 56px);
+  flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
 }
@@ -289,17 +361,11 @@
 .admin-page.add-client-page {
   display: flex;
   flex-direction: column;
-  padding: 12px 20px 16px;
-  height: 100%;
-  max-height: 100%;
+  flex: 1 1 auto;
+  padding: 12px 20px 12px;
   min-height: 0;
   overflow: hidden;
   box-sizing: border-box;
-}
-
-.q-page.add-client-page {
-  box-sizing: border-box;
-  overflow: hidden;
 }
 
 .admin-page.add-client-page .add-client-page__header {
@@ -338,11 +404,6 @@
 
   .admin-page.add-client-page {
     padding: 12px 12px 16px;
-  }
-
-  .app-layout .q-page-container:has(.add-client-page) {
-    height: calc(100dvh - 56px);
-    max-height: calc(100dvh - 56px);
   }
 }
 
@@ -695,8 +756,6 @@ input:-webkit-autofill {
           .q-field__label {
             background: transparent;
             padding: 0;
-            width: auto;
-            max-width: max-content;
           }
 
           .q-field__control {
@@ -772,6 +831,13 @@ input:-webkit-autofill {
   flex: 1;
   min-height: 0;
   overflow: hidden;
+
+  &__readonly-fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
 
   .q-tab-panels .q-panel.scroll {
     height: auto;

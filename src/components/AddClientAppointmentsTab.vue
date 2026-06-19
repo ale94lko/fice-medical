@@ -7,6 +7,15 @@
       </p>
     </div>
 
+    <div
+      v-else-if="!canViewAppointments"
+      class="appointments-panel q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('appointmentNoPermission') }}
+      </p>
+    </div>
+
     <template v-else>
       <div class="row items-center justify-between q-mb-md">
         <h3 class="appointments-panel__title q-mb-none">
@@ -27,7 +36,7 @@
       </div>
 
       <div v-if="loading" class="appointments-panel q-pa-xl flex flex-center">
-        <q-spinner color="primary" size="32px" />
+        <AppBrandLoading inline />
       </div>
 
       <div v-else class="appointments-panel q-pa-md">
@@ -119,6 +128,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AppointmentBookDialog from 'components/AppointmentBookDialog.vue'
+import AppBrandLoading from 'components/AppBrandLoading.vue'
 import AppointmentDetailDialog from 'components/AppointmentDetailDialog.vue'
 import AppointmentEditDialog from 'components/AppointmentEditDialog.vue'
 import AppointmentsTable from 'components/AppointmentsTable.vue'
@@ -200,7 +210,7 @@ const tablePermissions = computed(() => ({
 }))
 
 async function loadAppointments() {
-  if (!hasClientId.value) {
+  if (!hasClientId.value || !canViewAppointments.value) {
     return
   }
   loading.value = true

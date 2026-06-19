@@ -1,4 +1,4 @@
-import { appModuleNames } from 'components/constants.js'
+import { permissionNames } from 'components/constants.js'
 
 const routes = [
   {
@@ -12,18 +12,27 @@ const routes = [
       {
         path: 'clients',
         component: () => import('pages/client/ClientList.vue'),
-        meta: { requiresModule: appModuleNames.client },
+        meta: {
+          requiresPermission: permissionNames.viewClient,
+        },
       },
       {
         path: 'clients/add',
         component: () => import('pages/client/AddClientPage.vue'),
-        meta: { requiresModule: appModuleNames.client },
+        meta: {
+          requiresPermission: permissionNames.addClient,
+        },
       },
       {
         path: 'clients/:id/edit',
         name: 'EditClient',
         component: () => import('pages/client/EditClientPage.vue'),
-        meta: { requiresModule: appModuleNames.client },
+        meta: {
+          requiresAnyPermission: [
+            permissionNames.viewClient,
+            permissionNames.editBasicInfoClient,
+          ],
+        },
       },
     ],
     meta: { requiresAuth: true },

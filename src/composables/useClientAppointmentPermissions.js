@@ -1,49 +1,35 @@
 import { computed } from 'vue'
 import { clientPermissionNames } from 'components/constants.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
-
-function hasPermission(modules, permission) {
-  if (!Array.isArray(modules) || !modules.length) {
-    return true
-  }
-  const granular = modules.some(item => {
-    const key = String(item ?? '').trim()
-
-    return key.startsWith('VIEW_')
-      || key.startsWith('BOOK_')
-      || key.startsWith('CANCEL_')
-      || key.startsWith('RESCHEDULE_')
-      || key.startsWith('MANAGE_')
-  })
-  if (!granular) {
-    return true
-  }
-
-  return modules.includes(permission)
-}
+import { hasAnyPermission, hasPermission } from 'src/utils/auth-permissions.js'
 
 export function useClientAppointmentPermissions() {
   const authStore = useAuthStore()
-  const modules = computed(() => authStore.modules)
+  const permissions = computed(() => authStore.permissions)
 
   const canViewAppointments = computed(() =>
-    hasPermission(modules.value, clientPermissionNames.viewAppointmentSlot),
+    hasAnyPermission(permissions.value, [
+      clientPermissionNames.viewAppointmentSlot,
+      clientPermissionNames.bookAppointment,
+      clientPermissionNames.cancelAppointment,
+      clientPermissionNames.rescheduleAppointment,
+    ]),
   )
   const canBookAppointment = computed(() =>
-    hasPermission(modules.value, clientPermissionNames.bookAppointment),
+    hasPermission(permissions.value, clientPermissionNames.bookAppointment),
   )
   const canCancelAppointment = computed(() =>
-    hasPermission(modules.value, clientPermissionNames.cancelAppointment),
+    hasPermission(permissions.value, clientPermissionNames.cancelAppointment),
   )
   const canRescheduleAppointment = computed(() =>
     hasPermission(
-      modules.value,
+      permissions.value,
       clientPermissionNames.rescheduleAppointment,
     ),
   )
   const canManageAppointmentSlots = computed(() =>
     hasPermission(
-      modules.value,
+      permissions.value,
       clientPermissionNames.manageAppointmentSlots,
     ),
   )

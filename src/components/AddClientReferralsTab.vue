@@ -44,7 +44,7 @@
       </div>
 
       <div v-if="loading" class="referrals-panel q-pa-xl flex flex-center">
-        <q-spinner color="primary" size="32px" />
+        <AppBrandLoading inline />
       </div>
 
       <div v-else class="referrals-panel q-pa-md">
@@ -117,6 +117,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import ModalComponent from 'components/ModalComponent.vue'
+import AppBrandLoading from 'components/AppBrandLoading.vue'
 import ReferralDialog from 'components/ReferralDialog.vue'
 import ReferralsTable from 'components/ReferralsTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'

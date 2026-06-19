@@ -7,6 +7,8 @@ export default {
   showPassword: 'Mostrar contraseña',
   hidePassword: 'Ocultar contraseña',
   signIn: 'Iniciar sesión',
+  appLoading: 'Cargando…',
+  appSaving: 'Guardando…',
   subtenant: 'Sede',
   subtenantSwitcherAria: 'Cambiar subtenant activo',
   subtenantActiveAria: 'Sede activa: {name}',
@@ -44,6 +46,9 @@ export default {
   welcome: 'Bienvenido, {name}!',
   administration: 'Administración',
   dashboard: 'Panel',
+  noPermissionsTitle: 'Sin acceso asignado',
+  noPermissionsMessage:
+    'Su cuenta no tiene permisos. Contacte a un administrador.',
   expandMenu: 'Expandir menú',
   collapseMenu: 'Contraer menú',
   client: 'Cliente',
@@ -459,6 +464,16 @@ export default {
   referralSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar referencias.',
   referralNoPermission: 'No tiene permiso para ver referencias.',
+  allergiesNoPermission: 'No tiene permiso para ver alergias.',
+  contactNoPermission:
+    'No tiene permiso para ver información de contacto.',
+  insuranceNoPermission:
+    'No tiene permiso para ver perfiles de seguro.',
+  fmhNoPermission:
+    'No tiene permiso para ver antecedentes médicos familiares.',
+  vitalsNoPermission: 'No tiene permiso para ver signos vitales.',
+  labsNoPermission: 'No tiene permiso para ver órdenes de laboratorio.',
+  assessmentsNoPermission: 'No tiene permiso para ver evaluaciones.',
   referralListEmpty: 'Aún no hay referencias registradas.',
   referralLoadError: 'No se pudieron cargar las referencias.',
   referralSaveSuccess: 'Referencia guardada correctamente.',
@@ -609,6 +624,8 @@ export default {
   appointmentEditTitle: 'Editar cita',
   appointmentSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar citas.',
+  appointmentNoPermission:
+    'No tiene permiso para ver citas.',
   appointmentListEmpty: 'Aún no hay citas programadas.',
   appointmentFilterAllStatuses: 'Todos los estados',
   appointmentColDateTime: 'Fecha y hora',
@@ -683,6 +700,8 @@ export default {
   appointmentActionError: 'No se pudo completar la acción de la cita.',
   followUpSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar seguimientos.',
+  followUpNoPermission:
+    'No tiene permiso para ver seguimientos.',
   followUpAddTitle: 'Agregar seguimiento',
   followUpAddButton: 'Agregar seguimiento',
   followUpExistingTitle: 'Seguimientos',

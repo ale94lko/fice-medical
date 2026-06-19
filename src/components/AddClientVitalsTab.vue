@@ -1,5 +1,18 @@
 <template>
   <div class="add-client-vitals-tab">
+    <div
+      v-if="!canView"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('vitalsNoPermission') }}
+      </p>
+    </div>
+
+    <template v-else>
+    <fieldset
+      :disabled="readonly"
+      class="add-client-form__readonly-fieldset">
     <AccordionSection
       v-model="section.recordExpanded"
       icon="monitor_heart"
@@ -306,6 +319,7 @@
             @click="cancelEdit"
           />
           <q-btn
+            v-if="!readonly"
             no-caps
             unelevated
             color="primary"
@@ -330,6 +344,7 @@
       <div class="fmh-list-card q-pa-md">
         <VitalsHistoryTable
           :entries="sortedEntries"
+          :can-edit="!readonly"
           :empty-label="t('vitalsHistoryEmpty')"
           :clinician-options="clinicianOptions"
           @edit="startEdit"
@@ -337,6 +352,7 @@
         />
       </div>
     </AccordionSection>
+    </fieldset>
 
     <ModalComponent
       v-model="deleteDialogOpen"
@@ -348,6 +364,7 @@
       @confirm="confirmDelete"
       @cancel="deleteDialogOpen = false"
     />
+    </template>
   </div>
 </template>
 
@@ -393,6 +410,14 @@ const props = defineProps({
   clinicianOptions: {
     type: Array,
     default: () => [],
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canView: {
+    type: Boolean,
+    default: true,
   },
 })
 

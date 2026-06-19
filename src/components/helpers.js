@@ -41,6 +41,10 @@ function normalizeLoginModules(raw) {
   return raw.map(m => String(m).trim()).filter(Boolean)
 }
 
+function normalizeLoginPermissions(raw) {
+  return normalizeLoginModules(raw)
+}
+
 function extractFromFiCeEnvelope(body) {
   const envelope = body.data
   if (!envelope?.token_data?.token) {
@@ -56,6 +60,7 @@ function extractFromFiCeEnvelope(body) {
     expiration: pickExpiration(td, {}),
     refreshToken,
     modules: normalizeLoginModules(envelope.modules),
+    permissions: normalizeLoginPermissions(envelope.permissions),
     subtenants: normalizeLoginSubtenants(envelope.subtenants),
   }
 }
@@ -94,6 +99,7 @@ function extractFromRoots(body) {
       expiration: pickExpiration(td || {}, root),
       refreshToken,
       modules: normalizeLoginModules(root.modules),
+      permissions: normalizeLoginPermissions(root.permissions),
       subtenants: normalizeLoginSubtenants(root.subtenants),
     }
   }
@@ -173,6 +179,20 @@ export function extractLoginModules(body) {
   for (const root of candidates) {
     if (root && Array.isArray(root.modules)) {
       return normalizeLoginModules(root.modules)
+    }
+  }
+
+  return []
+}
+
+export function extractLoginPermissions(body) {
+  if (!body || typeof body !== 'object') {
+    return []
+  }
+  const candidates = [body, body.data, body.data?.data]
+  for (const root of candidates) {
+    if (root && Array.isArray(root.permissions)) {
+      return normalizeLoginPermissions(root.permissions)
     }
   }
 
@@ -490,6 +510,7 @@ export function extractOAuthTokenPayload(body) {
     return null
   }
   const fallbackModules = extractLoginModules(body)
+  const fallbackPermissions = extractLoginPermissions(body)
   const fallbackSubtenants = extractLoginSubtenants(body)
   const fromEnvelope = extractFromFiCeEnvelope(body)
   if (fromEnvelope) {
@@ -498,6 +519,9 @@ export function extractOAuthTokenPayload(body) {
       modules: fromEnvelope.modules?.length
         ? fromEnvelope.modules
         : fallbackModules,
+      permissions: fromEnvelope.permissions?.length
+        ? fromEnvelope.permissions
+        : fallbackPermissions,
       subtenants: fromEnvelope.subtenants?.length
         ? fromEnvelope.subtenants
         : fallbackSubtenants,
@@ -511,6 +535,9 @@ export function extractOAuthTokenPayload(body) {
       modules: fromRoots.modules?.length
         ? fromRoots.modules
         : fallbackModules,
+      permissions: fromRoots.permissions?.length
+        ? fromRoots.permissions
+        : fallbackPermissions,
       subtenants: fromRoots.subtenants?.length
         ? fromRoots.subtenants
         : fallbackSubtenants,

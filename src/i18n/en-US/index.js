@@ -7,6 +7,8 @@ export default {
   showPassword: 'Show password',
   hidePassword: 'Hide password',
   signIn: 'Sign in',
+  appLoading: 'Loading...',
+  appSaving: 'Saving...',
   subtenant: 'Site',
   subtenantSwitcherAria: 'Switch active subtenant',
   subtenantActiveAria: 'Active site: {name}',
@@ -43,6 +45,9 @@ export default {
   welcome: 'Welcome, {name}!',
   administration: 'Administration',
   dashboard: 'Dashboard',
+  noPermissionsTitle: 'No access assigned',
+  noPermissionsMessage:
+    'Your account has no permissions. Contact an administrator.',
   expandMenu: 'Expand menu',
   collapseMenu: 'Collapse menu',
   client: 'Client',
@@ -441,6 +446,16 @@ export default {
   referralSaveClientFirst:
     'Save the client first to create and manage referrals.',
   referralNoPermission: 'You do not have permission to view referrals.',
+  allergiesNoPermission: 'You do not have permission to view allergies.',
+  contactNoPermission:
+    'You do not have permission to view contact information.',
+  insuranceNoPermission:
+    'You do not have permission to view insurance profiles.',
+  fmhNoPermission:
+    'You do not have permission to view family medical history.',
+  vitalsNoPermission: 'You do not have permission to view vital signs.',
+  labsNoPermission: 'You do not have permission to view lab orders.',
+  assessmentsNoPermission: 'You do not have permission to view assessments.',
   referralListEmpty: 'No referrals have been recorded yet.',
   referralLoadError: 'Unable to load referrals.',
   referralSaveSuccess: 'Referral saved successfully.',
@@ -590,6 +605,8 @@ export default {
   appointmentEditTitle: 'Edit Appointment',
   appointmentSaveClientFirst:
     'Save the client first to create and manage appointments.',
+  appointmentNoPermission:
+    'You do not have permission to view appointments.',
   appointmentListEmpty: 'No appointments have been scheduled yet.',
   appointmentFilterAllStatuses: 'All statuses',
   appointmentColDateTime: 'Date & Time',
@@ -664,6 +681,8 @@ export default {
   appointmentActionError: 'Could not complete the appointment action.',
   followUpSaveClientFirst:
     'Save the client first to create and manage follow ups.',
+  followUpNoPermission:
+    'You do not have permission to view follow ups.',
   followUpAddTitle: 'Add Follow Up',
   followUpAddButton: 'Add Follow Up',
   followUpExistingTitle: 'Follow Ups',

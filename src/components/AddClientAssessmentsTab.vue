@@ -7,6 +7,15 @@
       </p>
     </div>
 
+    <div
+      v-else-if="!canView"
+      class="assessment-panel q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('assessmentsNoPermission') }}
+      </p>
+    </div>
+
     <template v-else>
       <AssessmentEditor
         v-if="view === 'editor' && editorState"
@@ -29,6 +38,7 @@
             </p>
           </div>
           <q-btn
+            v-if="!readonly"
             no-caps
             unelevated
             color="primary"
@@ -45,7 +55,7 @@
         <div
           v-if="loading"
           class="assessment-panel q-pa-xl flex flex-center">
-          <q-spinner color="primary" size="32px" />
+          <AppBrandLoading inline />
         </div>
 
         <div
@@ -87,6 +97,7 @@
                   </td>
                   <td class="fmh-table-actions">
                     <q-btn
+                      v-if="!readonly"
                       flat
                       round
                       size="sm"
@@ -97,6 +108,7 @@
                       :aria-label="t('edit')"
                       @click="openAssessment(row.id)"
                     />
+                    <span v-else class="text-grey-6">—</span>
                   </td>
                 </tr>
               </tbody>
@@ -171,6 +183,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AssessmentEditor from 'components/AssessmentEditor.vue'
+import AppBrandLoading from 'components/AppBrandLoading.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClientDateField from 'components/ClientDateField.vue'
@@ -190,6 +203,14 @@ const props = defineProps({
   patientId: {
     type: [String, Number],
     default: null,
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canView: {
+    type: Boolean,
+    default: true,
   },
 })
 

@@ -126,7 +126,7 @@
         </div>
       </template>
     </data-item-component>
-    <q-inner-loading :showing="loading" color="primary" />
+    <AppLoadingOverlay :showing="loading" inline />
   </div>
 </template>
 
@@ -137,6 +137,7 @@ import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { sortDuplicateMatches } from 'src/utils/client-duplicate-match-sort.js'
 import { addClientTestIds } from 'src/test-ids/index.js'
 import DataItemComponent from 'components/template/DataItemComponent.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 
 const props = defineProps({
   matches: {

@@ -1,5 +1,10 @@
 <template>
-  <q-page class="admin-page add-client-page">
+  <q-page class="admin-page add-client-page fit">
+    <AppLoadingOverlay
+      scope="content"
+      :showing="pageBusy"
+      :message="pageBusyMessage"
+    />
     <header class="add-client-page__header">
       <div class="add-client-page__intro">
         <h1 class="add-client-page__title">{{ t('editClient') }}</h1>
@@ -16,12 +21,13 @@
       </div>
       <div class="add-client-page__actions">
         <q-btn
+          v-if="canSaveForm"
           no-caps
           unelevated
           color="primary"
           class="app-btn-primary"
           :data-testid="clientPageTestIds.save"
-          :loading="saving"
+          :loading="false"
           :disable="saving || initialLoading"
           :label="t('save')"
           @click="onSave"
@@ -60,6 +66,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AddClientForm from '../../components/client/AddClientForm.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { clientPageTestIds } from 'src/test-ids/index.js'
 
 const route = useRoute()
@@ -76,6 +83,23 @@ const initialActiveTab = computed(() =>
 const saving = computed(() => clientFormRef.value?.saving ?? false)
 const initialLoading = computed(
   () => clientFormRef.value?.initialLoading ?? false,
+)
+const pageBusy = computed(() => {
+  if (!clientFormRef.value) {
+    return true
+  }
+
+  return clientFormRef.value.formBusy ?? false
+})
+const pageBusyMessage = computed(() => {
+  if (!clientFormRef.value) {
+    return t('appLoading')
+  }
+
+  return clientFormRef.value.formBusyMessage ?? t('appLoading')
+})
+const canSaveForm = computed(
+  () => clientFormRef.value?.canSaveForm ?? true,
 )
 
 function onSave() {

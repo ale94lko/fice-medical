@@ -1,5 +1,18 @@
 <template>
   <div class="add-client-contact-tab">
+    <div
+      v-if="!canView"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('contactNoPermission') }}
+      </p>
+    </div>
+
+    <fieldset
+      v-else
+      :disabled="readonly"
+      class="add-client-form__readonly-fieldset">
     <ContactSelfPanel
       v-if="activeSubTab === CONTACT_SUB_TAB_SELF"
       v-model="contact"
@@ -44,6 +57,7 @@
       @confirm="confirmRemoveOtherContact"
       @cancel="dismissRemoveConfirm"
     />
+    </fieldset>
   </div>
 </template>
 
@@ -80,6 +94,8 @@ const props = defineProps({
   contactTypeOptions: { type: Array, default: () => [] },
   relationshipTypeOptions: { type: Array, default: () => [] },
   catalogsLoading: { type: Boolean, default: false },
+  readonly: { type: Boolean, default: false },
+  canView: { type: Boolean, default: true },
 })
 
 const emit = defineEmits([

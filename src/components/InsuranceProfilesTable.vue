@@ -64,6 +64,7 @@
               @click="emit('view', profile)"
             />
             <q-btn
+              v-if="canEdit"
               flat
               round
               size="sm"
@@ -75,7 +76,7 @@
               @click="emit('edit', profile)"
             />
             <q-btn
-              v-if="canDeactivate(profile)"
+              v-if="canEdit && canDeactivate(profile)"
               flat
               round
               size="sm"
@@ -112,6 +113,10 @@ defineProps({
   emptyLabel: {
     type: String,
     default: '',
+  },
+  canEdit: {
+    type: Boolean,
+    default: true,
   },
 })
 

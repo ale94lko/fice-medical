@@ -1,5 +1,11 @@
 import { toTestId, withTestIdPrefix } from 'src/utils/base.js'
 
+export const appLoadingTestIds = {
+  root: 'app-brand-loading',
+  title: 'app-brand-loading-title',
+  message: 'app-brand-loading-message',
+}
+
 export const authTestIds = {
   emailInput: 'auth-input-email',
   passwordInput: 'auth-input-password',

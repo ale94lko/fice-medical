@@ -1,5 +1,9 @@
 <template>
   <q-page class="admin-page" :data-testid="clientListTestIds.page">
+    <AppLoadingOverlay
+      scope="content"
+      :showing="loading"
+    />
     <AdminQTable
       class="table admin-data-table"
       selection="multiple"
@@ -12,11 +16,12 @@
       :title="t('clients')"
       :rows="rows"
       :columns="columns"
-      :loading="loading"
+      :loading="false"
       :rows-per-page-label="t('rowsPerPage')"
       @request="onTableRequest">
       <template v-slot:top>
         <q-btn
+          v-if="canAddClient"
           no-caps
           unelevated
           color="primary"
@@ -28,17 +33,7 @@
           :label="t('addClient')"
           @click="addClient" />
         <q-btn
-          no-caps
-          unelevated
-          class="q-ml-sm app-btn-primary"
-          color="primary"
-          icon="assignment_ind"
-          :data-testid="clientListTestIds.assignClinicians"
-          :disable="selected.length === 0 || loading"
-          :title="t('assignClinicians')"
-          :label="t('assignClinicians')"
-          @click="assignClinicians(selected)" />
-        <q-btn
+          v-if="canChangeStatus"
           no-caps
           unelevated
           class="q-ml-sm app-btn-primary"
@@ -75,6 +70,7 @@
       </template>
       <template #row-actions="{ row }">
         <q-btn
+          v-if="canViewClient"
           flat
           round
           icon="edit"
@@ -87,18 +83,7 @@
           @click="editRow(row)"
         />
         <q-btn
-          flat
-          round
-          icon="assignment_ind"
-          color="primary"
-          class="app-btn-icon-action"
-          :data-testid="clientListTestIds.rowAssign(row.id)"
-          :size="siteBreakpoints.SM"
-          :title="t('assignClinicians')"
-          :aria-label="t('assignClinicians')"
-          @click="assignClinicians([row])"
-        />
-        <q-btn
+          v-if="canChangeStatus"
           flat
           round
           icon="note_alt"
@@ -136,7 +121,16 @@ import {
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminQTable from 'components/AdminQTable.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { clientListTestIds } from 'src/test-ids/index.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
+
+const {
+  canAddClient,
+  canViewClient,
+  canChangeStatus,
+} = useClientPermissions()
 
 const router = useRouter()
 const $q = useQuasar()
@@ -278,9 +272,6 @@ const addClient = () => {
   router.push('/clients/add')
 }
 
-const assignClinicians = (rows) => {
-  console.log('Assign Clinicians' + rows)
-}
 const changeStatus = () => {
   console.log('Change Status')
 }

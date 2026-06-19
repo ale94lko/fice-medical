@@ -1,5 +1,15 @@
 <template>
   <div v-if="section.visible" class="add-client-follow-ups-tab">
+    <div
+      v-if="!canViewFollowUps"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('followUpNoPermission') }}
+      </p>
+    </div>
+
+    <template v-else>
     <div class="row items-center justify-between q-mb-md">
       <h3 class="follow-ups-tab__list-title row items-center no-wrap q-mb-none">
         <q-icon
@@ -209,6 +219,7 @@
       test-id="follow-up-cancel"
       @confirm="onCancelConfirmed"
     />
+    </template>
   </div>
 </template>
 
@@ -264,6 +275,7 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const $q = useQuasar()
 const {
+  canViewFollowUps,
   canAddFollowUps,
   canEditFollowUps,
 } = useClientFollowUpPermissions()

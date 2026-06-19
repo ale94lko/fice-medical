@@ -1,5 +1,5 @@
 <template>
-  <q-page class="admin-page add-client-page">
+  <q-page class="admin-page add-client-page fit">
     <header class="add-client-page__header">
       <div class="add-client-page__intro">
         <h1 class="add-client-page__title">{{ t('addNewClient') }}</h1>
@@ -19,6 +19,7 @@
       />
       <div class="add-client-page__actions">
         <q-btn
+          v-if="canSaveForm"
           no-caps
           unelevated
           color="primary"
@@ -71,6 +72,9 @@ const activeTabLabel = ref('')
 provide('addClientDuplicateBannerInHeader', true)
 
 const saving = computed(() => addClientFormRef.value?.saving ?? false)
+const canSaveForm = computed(
+  () => addClientFormRef.value?.canSaveForm ?? true,
+)
 
 function onSave() {
   addClientFormRef.value?.onSave()

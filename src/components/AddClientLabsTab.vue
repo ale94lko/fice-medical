@@ -7,6 +7,15 @@
       </p>
     </div>
 
+    <template v-else-if="!canView">
+      <div class="labs-panel q-pa-lg text-center">
+        <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+        <p class="text-body1 text-grey-8 q-mb-none">
+          {{ t('labsNoPermission') }}
+        </p>
+      </div>
+    </template>
+
     <template v-else>
       <div class="row items-center justify-between q-mb-md">
         <div>
@@ -16,6 +25,7 @@
           </p>
         </div>
         <q-btn
+          v-if="!readonly"
           no-caps
           unelevated
           color="primary"
@@ -29,12 +39,14 @@
       </div>
 
       <div v-if="loading" class="labs-panel q-pa-xl flex flex-center">
-        <q-spinner color="primary" size="32px" />
+        <AppBrandLoading inline />
       </div>
 
       <div v-else class="labs-panel q-pa-md">
         <LabsTable
           :rows="paginatedLabs"
+          :can-edit="!readonly"
+          :can-delete="canDelete"
           :empty-label="t('labListEmpty')"
           @view="openView"
           @edit="openEdit"
@@ -86,6 +98,7 @@ import { computed, defineModel, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import LabOrderDialog from 'components/LabOrderDialog.vue'
+import AppBrandLoading from 'components/AppBrandLoading.vue'
 import LabsTable from 'components/LabsTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import {
@@ -111,6 +124,18 @@ const props = defineProps({
   clinicianOptions: {
     type: Array,
     default: () => [],
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canView: {
+    type: Boolean,
+    default: true,
+  },
+  canDelete: {
+    type: Boolean,
+    default: false,
   },
 })
 

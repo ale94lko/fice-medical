@@ -64,6 +64,7 @@
               @click="emit('view', row)"
             />
             <q-btn
+              v-if="canEdit"
               flat
               round
               size="sm"
@@ -108,6 +109,14 @@ defineProps({
   emptyLabel: {
     type: String,
     default: '',
+  },
+  canEdit: {
+    type: Boolean,
+    default: true,
+  },
+  canDelete: {
+    type: Boolean,
+    default: true,
   },
 })
 

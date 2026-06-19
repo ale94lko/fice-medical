@@ -1,5 +1,18 @@
 <template>
   <div class="add-client-family-medical-history-tab">
+    <div
+      v-if="!canView"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('fmhNoPermission') }}
+      </p>
+    </div>
+
+    <template v-else>
+    <fieldset
+      :disabled="readonly"
+      class="add-client-form__readonly-fieldset">
     <AccordionSection
       icon="add_circle_outline"
       :title="t('fmhAddSectionTitle')"
@@ -49,6 +62,7 @@
             </div>
             <div class="col-12 flex justify-end">
               <q-btn
+                v-if="!readonly"
                 no-caps
                 unelevated
                 color="primary"
@@ -72,6 +86,7 @@
       <div class="fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="personalEntries"
+          :can-edit="!readonly"
           :empty-label="t('fmhPersonalEmpty')"
           @edit="openEdit"
           @delete="openDelete"
@@ -89,12 +104,14 @@
       <div class="fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="familyEntries"
+          :can-edit="!readonly"
           :empty-label="t('fmhFamilyEmpty')"
           @edit="openEdit"
           @delete="openDelete"
         />
       </div>
     </AccordionSection>
+    </fieldset>
 
     <FamilyMedicalHistoryEditDialog
       v-model="editDialogOpen"
@@ -109,6 +126,7 @@
       v-model="deleteDialogOpen"
       @confirm="onDeleteConfirm"
     />
+    </template>
   </div>
 </template>
 
@@ -147,6 +165,14 @@ const props = defineProps({
   modelValue: {
     type: Object,
     required: true,
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canView: {
+    type: Boolean,
+    default: true,
   },
 })
 

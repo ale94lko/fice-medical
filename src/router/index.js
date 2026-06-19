@@ -14,13 +14,7 @@ import {
   reloadRouteAfterStaleChunk,
 } from 'src/utils/gh-pages-router.js'
 
-function getRequiredModule(to) {
-  return to.matched
-    .slice()
-    .reverse()
-    .find(record => record.meta.requiresModule)
-    ?.meta.requiresModule
-}
+import { canAccessRoute } from 'src/composables/useMainNavPermissions.js'
 
 function resolveSessionAccess(authStore) {
   let expireAt = new Date(authStore.expireAt)
@@ -41,13 +35,24 @@ function resolveSessionAccess(authStore) {
   return accessValid || canUseRefresh
 }
 
+function getRouteAccessMeta(to) {
+  return to.matched
+    .slice()
+    .reverse()
+    .find(record =>
+      record.meta.requiresPermission
+      || record.meta.requiresAnyPermission
+      || record.meta.requiresModule,
+    )?.meta
+}
+
 function resolveProtectedNavigation(to, authStore) {
   if (!resolveSessionAccess(authStore)) {
     return '/login'
   }
 
-  const requiredModule = getRequiredModule(to)
-  if (requiredModule && !authStore.hasModule(requiredModule)) {
+  const meta = getRouteAccessMeta(to)
+  if (meta && !canAccessRoute(authStore.permissions, meta)) {
     return '/dashboard'
   }
 

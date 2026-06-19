@@ -39,6 +39,7 @@
           </td>
           <td>{{ formatStartYear(entry.startYear) }}</td>
           <td class="fmh-table-actions">
+            <template v-if="canEdit">
             <q-btn
               flat
               round
@@ -61,6 +62,8 @@
               :aria-label="t('delete')"
               @click="emit('delete', entry)"
             />
+            </template>
+            <span v-else class="text-grey-6">—</span>
           </td>
         </tr>
       </tbody>
@@ -83,6 +86,10 @@ const props = defineProps({
   entries: {
     type: Array,
     default: () => [],
+  },
+  canEdit: {
+    type: Boolean,
+    default: true,
   },
   emptyLabel: {
     type: String,

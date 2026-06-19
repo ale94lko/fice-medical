@@ -1,5 +1,18 @@
 <template>
   <div class="add-client-allergies-tab">
+    <div
+      v-if="!canView"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('allergiesNoPermission') }}
+      </p>
+    </div>
+
+    <template v-else>
+    <fieldset
+      :disabled="readonly"
+      class="add-client-form__readonly-fieldset">
     <AccordionSection
       v-model="section.addExpanded"
       icon="medication"
@@ -117,6 +130,7 @@
         </div>
         <div class="col-12 flex justify-end">
           <q-btn
+            v-if="!readonly"
             no-caps
             unelevated
             color="primary"
@@ -142,6 +156,7 @@
           <AllergiesTable
             :entries="visibleEntries"
             :invalid-row-ids="invalidDobRowIds"
+            :can-edit="!readonly"
             :empty-label="t('allergiesExistingEmpty')"
             @edit="openEdit"
             @delete="openDelete"
@@ -172,6 +187,7 @@
         </div>
       </template>
     </AccordionSection>
+    </fieldset>
 
     <AllergyEditDialog
       v-if="!noKnownAllergiesChecked"
@@ -198,6 +214,7 @@
       :cancel-text="t('cancel')"
       @confirm="onConfirmNoKnownAllergiesRemove"
     />
+    </template>
   </div>
 </template>
 
@@ -253,6 +270,14 @@ const props = defineProps({
   patientDob: {
     type: String,
     default: '',
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canView: {
+    type: Boolean,
+    default: true,
   },
 })
 

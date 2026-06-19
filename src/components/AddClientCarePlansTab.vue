@@ -41,7 +41,7 @@
       </div>
 
       <div v-if="loading" class="care-plans-panel q-pa-xl flex flex-center">
-        <q-spinner color="primary" size="32px" />
+        <AppBrandLoading inline />
       </div>
 
       <div v-else class="care-plans-panel q-pa-md">
@@ -100,6 +100,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import CarePlanDialog from 'components/CarePlanDialog.vue'
+import AppBrandLoading from 'components/AppBrandLoading.vue'
 import CarePlansTable from 'components/CarePlansTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { useClientCarePlanPermissions } from

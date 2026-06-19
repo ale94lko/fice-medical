@@ -1,36 +1,29 @@
 import { computed } from 'vue'
 import { clientPermissionNames } from 'components/constants.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
+import {
+  hasAnyPermission,
+  hasPermission,
+} from 'src/utils/auth-permissions.js'
 
-function hasPermission(modules, permission) {
-  if (!Array.isArray(modules) || !modules.length) {
-    return true
-  }
-  const granular = modules.some(item => {
-    const key = String(item ?? '').trim()
-
-    return key.startsWith('VIEW_')
-      || key.startsWith('ADD_')
-      || key.startsWith('EDIT_')
-  })
-  if (!granular) {
-    return true
-  }
-
-  return modules.includes(permission)
-}
+const FOLLOW_UP_VIEW_PERMISSIONS = [
+  clientPermissionNames.viewFollowUps,
+  clientPermissionNames.addFollowUps,
+  clientPermissionNames.editFollowUps,
+]
 
 export function useClientFollowUpPermissions() {
   const authStore = useAuthStore()
+  const permissions = computed(() => authStore.permissions)
 
   const canViewFollowUps = computed(() =>
-    hasPermission(authStore.modules, clientPermissionNames.viewFollowUps),
+    hasAnyPermission(permissions.value, FOLLOW_UP_VIEW_PERMISSIONS),
   )
   const canAddFollowUps = computed(() =>
-    hasPermission(authStore.modules, clientPermissionNames.addFollowUps),
+    hasPermission(permissions.value, clientPermissionNames.addFollowUps),
   )
   const canEditFollowUps = computed(() =>
-    hasPermission(authStore.modules, clientPermissionNames.editFollowUps),
+    hasPermission(permissions.value, clientPermissionNames.editFollowUps),
   )
 
   return {

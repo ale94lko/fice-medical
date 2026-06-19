@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { apiPaths, appModuleNames, typeNames } from 'components/constants.js'
+import { apiPaths, permissionNames, typeNames } from 'components/constants.js'
+import {
+  hasAnyPermission,
+  hasAssignedPermissions,
+  hasPermission,
+} from 'src/utils/auth-permissions.js'
 import {
   extractLoginSubtenants,
   extractOAuthTokenPayload,
@@ -10,12 +15,14 @@ import {
   readStoredActiveSubtenantId,
   readStoredExpireAt,
   readStoredModules,
+  readStoredPermissions,
   readStoredRefreshToken,
   readStoredSubtenants,
   readStoredToken,
   writeStoredActiveSubtenantId,
   writeStoredExpireAt,
   writeStoredModules,
+  writeStoredPermissions,
   writeStoredRefreshToken,
   writeStoredSubtenants,
   writeStoredToken,
@@ -27,7 +34,10 @@ export const useAuthStore = defineStore('auth', {
     token: null,
     expireAt: null,
     refreshToken: null,
+    /** Feature module names from login (e.g. Client, Referrals). */
     modules: [],
+    /** Permission grants from login (e.g. VIEW_CLIENT, EDIT_ALLERGIES). */
+    permissions: [],
     subtenants: [],
     activeSubtenantId: null,
     _initialized: false,
@@ -53,10 +63,29 @@ export const useAuthStore = defineStore('auth', {
 
       return state.modules.some(m => String(m) === key)
     },
+    hasAssignedPermissions: state =>
+      hasAssignedPermissions(state.permissions),
+    hasPermission: state => permission =>
+      hasPermission(state.permissions, permission),
+    hasAnyPermission: state => permissionList =>
+      hasAnyPermission(state.permissions, permissionList),
     showClientMenu: state =>
-      state.modules.includes(appModuleNames.client),
+      hasAnyPermission(
+        state.permissions,
+        [permissionNames.viewClient, permissionNames.addClient],
+      ),
     showAdministrationMenu: state =>
-      state.modules.includes(appModuleNames.administration),
+      hasAnyPermission(state.permissions, [
+        permissionNames.viewConfig,
+        permissionNames.viewModules,
+        permissionNames.viewPermissions,
+        permissionNames.viewRoles,
+        permissionNames.viewCatalog,
+        permissionNames.viewPlans,
+        permissionNames.viewTenants,
+        permissionNames.viewAuditLog,
+        permissionNames.viewSubtenants,
+      ]),
   },
   actions: {
     applySubtenants(subtenants, preferredId = null) {
@@ -103,6 +132,10 @@ export const useAuthStore = defineStore('auth', {
       if (Array.isArray(td.modules)) {
         this.modules = td.modules
         writeStoredModules(td.modules)
+      }
+      if (Array.isArray(td.permissions)) {
+        this.permissions = td.permissions
+        writeStoredPermissions(td.permissions)
       }
       writeStoredToken(this.token)
       writeStoredExpireAt(this.expireAt)
@@ -156,6 +189,7 @@ export const useAuthStore = defineStore('auth', {
       const expireAt = readStoredExpireAt()
       const refreshToken = readStoredRefreshToken()
       const modules = readStoredModules()
+      const permissions = readStoredPermissions()
       const subtenants = readStoredSubtenants()
       const activeSubtenantId = readStoredActiveSubtenantId()
       if (token) {
@@ -163,6 +197,7 @@ export const useAuthStore = defineStore('auth', {
         this.expireAt = expireAt
         this.refreshToken = refreshToken
         this.modules = modules
+        this.permissions = permissions
         this.applySubtenants(subtenants, activeSubtenantId)
       }
     },
@@ -171,6 +206,7 @@ export const useAuthStore = defineStore('auth', {
       this.expireAt = null
       this.refreshToken = null
       this.modules = []
+      this.permissions = []
       this.subtenants = []
       this.activeSubtenantId = null
       clearAuthLocalStorage()
@@ -187,6 +223,7 @@ export const useAuthStore = defineStore('auth', {
             this.expireAt = null
             this.refreshToken = null
             this.modules = []
+            this.permissions = []
             this.subtenants = []
             this.activeSubtenantId = null
             if (this.router) {

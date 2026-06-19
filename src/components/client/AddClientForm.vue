@@ -15,9 +15,12 @@
         />
       </Teleport>
     </template>
-    <q-inner-loading :showing="initialLoading" color="primary">
-      <q-spinner size="42px" />
-    </q-inner-loading>
+    <AppLoadingOverlay
+      v-if="!isEditMode"
+      :showing="formBusy"
+      scope="content"
+      :message="formBusyMessage"
+    />
     <div class="chrome">
       <div class="tabs-row">
         <q-tabs
@@ -76,7 +79,7 @@
         indicator-color="primary"
         align="left">
         <q-tab
-          v-for="subTab in currentSubTabs"
+          v-for="subTab in filteredCurrentSubTabs"
           :key="subTab.key"
           :name="subTab.key"
           :data-testid="tid.subTab(subTab.key)"
@@ -159,6 +162,9 @@
           :name="addClientTabKeys.basic"
           class="q-pa-none"
           :data-add-client-tab="addClientTabKeys.basic">
+          <fieldset
+            :disabled="basicInfoReadonly"
+            class="add-client-form__readonly-fieldset">
           <AddClientAccordionSection
             icon="person"
             :title="t('personalInformation')"
@@ -488,6 +494,7 @@
                 </div>
               </div>
           </AddClientAccordionSection>
+          </fieldset>
         </q-tab-panel>
 
         <q-tab-panel
@@ -498,6 +505,8 @@
             ref="addClientContactTabRef"
             v-model="form[contactSectionKey]"
             :active-sub-tab="activeContactSubTab"
+            :readonly="contactReadonly"
+            :can-view="canViewContactTab"
             :rules="contactRules"
             :prefix-select-options="prefixSelectOptions"
             :suffix-select-options="suffixSelectOptions"
@@ -518,6 +527,8 @@
           <AddClientAllergiesTab
             ref="allergiesTabRef"
             v-model="form[clientFormSections.allergies]"
+            :readonly="allergiesReadonly"
+            :can-view="canViewAllergiesTab"
             :patient-dob="form[ck.dob]"
             :allergy-catalog-options="allergyNameSelectOptions"
             :allergy-catalog-loading="catalogsLoading"
@@ -530,6 +541,8 @@
           :data-add-client-tab="addClientTabKeys.insurance">
           <AddClientInsuranceTab
             v-model="form[clientFormSections.insurance]"
+            :readonly="insuranceReadonly"
+            :can-view="canViewInsuranceTab"
             :patient-name="patientFullName"
             :payer-catalog-items="payerCatalogItems"
             :payer-catalog-loading="catalogsLoading"
@@ -552,21 +565,30 @@
                 v-if="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
                 ref="fmhTabRef"
                 v-model="form[clientFormSections.familyMedicalHistory]"
+                :readonly="fmhReadonly"
+                :can-view="canViewFmhTab"
               />
               <AddClientVitalsTab
                 v-else-if="subTab.key === CLINICAL_VITALS_SUB_TAB"
                 ref="vitalsTabRef"
                 v-model="form[clientFormSections.vitals]"
+                :readonly="vitalsReadonly"
+                :can-view="canViewVitalsTab"
                 :clinician-options="assignedClinicianOptions"
               />
               <AddClientAssessmentsTab
                 v-else-if="subTab.key === CLINICAL_ASSESSMENTS_SUB_TAB"
                 :patient-id="props.clientId"
+                :readonly="assessmentsReadonly"
+                :can-view="canViewAssessmentsTab"
               />
               <AddClientLabsTab
                 v-else-if="subTab.key === CLINICAL_LABS_SUB_TAB"
                 v-model="form[clientFormSections.labs]"
                 :patient-id="props.clientId"
+                :readonly="labsReadonly"
+                :can-view="canViewLabsTab"
+                :can-delete="canDeleteLabsTab"
                 :clinician-options="assignedClinicianOptions"
               />
               <AddClientCarePlansTab
@@ -612,6 +634,7 @@
               <AddClientFollowUpsTab
                 v-else-if="
                   subTab.key === CARE_COORDINATION_FOLLOW_UPS_SUB_TAB
+                    && canViewFollowUpsTab
                     && form[clientFormSections.followUps]?.visible
                 "
                 v-model="form[clientFormSections.followUps]"
@@ -668,10 +691,10 @@
       </q-tab-panels>
 
         <footer
-          v-if="canGoPrevious() || canGoNext()"
+          v-if="canGoPreviousFiltered() || canGoNextFiltered()"
           class="nav-footer row items-center">
           <q-btn
-            v-if="canGoPrevious()"
+            v-if="canGoPreviousFiltered()"
             no-caps
             outline
             color="primary"
@@ -680,21 +703,23 @@
             :data-testid="tid.btn('previous')"
             :label="t('previous')"
             :disable="saving"
-            @click="goPreviousTab"
+            @click="goPreviousTabFiltered"
           />
-          <q-space v-if="canGoPrevious() && canGoNext()" />
+          <q-space
+            v-if="canGoPreviousFiltered() && canGoNextFiltered()"
+          />
           <q-btn
-            v-if="canGoNext()"
+            v-if="canGoNextFiltered()"
             no-caps
             outline
             color="primary"
             icon-right="arrow_forward"
             class="app-btn-outline nav-btn"
-            :class="{ 'q-ml-auto': !canGoPrevious() }"
+            :class="{ 'q-ml-auto': !canGoPreviousFiltered() }"
             :data-testid="tid.btn('next')"
             :label="t('next')"
             :disable="saving"
-            @click="onNext"
+            @click="onNextFiltered"
           />
         </footer>
       </q-form>
@@ -780,6 +805,7 @@ import AddClientReferralsTab from '../AddClientReferralsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
+import AppLoadingOverlay from '../AppLoadingOverlay.vue'
 import BannerComponent from '../BannerComponent.vue'
 import AddClientDuplicateMatchReviewDialog
   from '../AddClientDuplicateMatchReviewDialog.vue'
@@ -817,8 +843,6 @@ import {
   severityTabModifier,
 } from 'src/utils/client-allergies.js'
 import {
-  ADD_CLIENT_MAIN_TABS,
-  ADD_CLIENT_SUB_TABS,
   CLINICAL_FAMILY_HISTORY_SUB_TAB,
   CLINICAL_VITALS_SUB_TAB,
   CLINICAL_ASSESSMENTS_SUB_TAB,
@@ -829,6 +853,10 @@ import {
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useAddClientTabPermissions } from
+  'src/composables/useAddClientTabPermissions.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
 import { useClientProgressiveMatch }
   from 'src/composables/useClientProgressiveMatch.js'
 import { emitClientDuplicateAudit } from 'src/utils/client-duplicate-audit.js'
@@ -857,6 +885,45 @@ const emit = defineEmits(['saved', 'cancel', 'tab-label', 'navigate-existing'])
 
 const isEditMode = computed(() => props.mode === 'edit')
 
+const {
+  visibleMainTabs,
+  visibleTabOrder,
+  canEditBasicInfo,
+  canEditContact,
+  canEditAllergies,
+  canEditInsurance,
+  canEditSubTabFor,
+  canViewMainTabFor,
+  canViewSubTabFor,
+  canSaveForm,
+  filterSubTabsFor,
+} = useAddClientTabPermissions(isEditMode)
+
+const { canDeleteLabs } = useClientPermissions()
+
+const mainTabs = visibleMainTabs
+
+const basicInfoReadonly = computed(() => !canEditBasicInfo.value)
+const contactReadonly = computed(() => !canEditContact.value)
+const allergiesReadonly = computed(() => !canEditAllergies.value)
+const insuranceReadonly = computed(() => !canEditInsurance.value)
+const canViewContactTab = canViewMainTabFor(addClientTabKeys.contact)
+const canViewAllergiesTab = canViewMainTabFor(addClientTabKeys.allergies)
+const canViewInsuranceTab = canViewMainTabFor(addClientTabKeys.insurance)
+
+const fmhReadonly = canEditSubTabFor(CLINICAL_FAMILY_HISTORY_SUB_TAB)
+const canViewFmhTab = canViewSubTabFor(CLINICAL_FAMILY_HISTORY_SUB_TAB)
+const vitalsReadonly = canEditSubTabFor(CLINICAL_VITALS_SUB_TAB)
+const canViewVitalsTab = canViewSubTabFor(CLINICAL_VITALS_SUB_TAB)
+const assessmentsReadonly = canEditSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB)
+const canViewAssessmentsTab = canViewSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB)
+const labsReadonly = canEditSubTabFor(CLINICAL_LABS_SUB_TAB)
+const canViewLabsTab = canViewSubTabFor(CLINICAL_LABS_SUB_TAB)
+const canViewFollowUpsTab = canViewSubTabFor(
+  CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
+)
+const canDeleteLabsTab = canDeleteLabs
+
 const duplicateBannerInHeader = inject(
   'addClientDuplicateBannerInHeader',
   false,
@@ -872,6 +939,12 @@ const siteStore = useSiteStore()
 
 const saving = ref(false)
 const initialLoading = ref(false)
+const formBusy = computed(
+  () => initialLoading.value || saving.value,
+)
+const formBusyMessage = computed(() =>
+  saving.value ? t('appSaving') : t('appLoading'),
+)
 const cancelConfirmOpen = ref(false)
 const ssnEditing = ref(false)
 const ssnInputRef = ref(null)
@@ -914,16 +987,11 @@ const {
   applyForm,
   markPristine,
   isDirty,
-  goNextTab,
-  canGoNext,
-  goPreviousTab,
-  canGoPrevious,
   validateCurrentTabAndUnlock,
   validateAllTabs,
   tabErrorCount,
   tabLabelFor,
   hasSubTabs,
-  currentSubTabs,
   activeSubTab,
 } = useAddClientForm(t, catalogs, {
   allergiesTabRef,
@@ -932,6 +1000,75 @@ const {
   panelScrollRef,
   initialActiveTab: props.initialActiveTab,
 })
+
+const filteredCurrentSubTabs = computed(() => {
+  if (!hasSubTabs.value) {
+    return []
+  }
+
+  return filterSubTabsFor(activeTab.value)
+})
+
+const clinicalSubTabs = computed(
+  () => filterSubTabsFor(addClientTabKeys.clinical),
+)
+const careCoordinationSubTabs = computed(
+  () => filterSubTabsFor(addClientTabKeys.careCoordination),
+)
+const financialsSubTabs = computed(
+  () => filterSubTabsFor(addClientTabKeys.financials),
+)
+const documentsSubTabs = computed(
+  () => filterSubTabsFor(addClientTabKeys.documents),
+)
+
+function tabIndexInVisibleOrder(tab) {
+  return visibleTabOrder.value.indexOf(tab)
+}
+
+function canGoNextFiltered() {
+  const idx = tabIndexInVisibleOrder(activeTab.value)
+
+  return idx >= 0 && idx < visibleTabOrder.value.length - 1
+}
+
+function canGoPreviousFiltered() {
+  return tabIndexInVisibleOrder(activeTab.value) > 0
+}
+
+function goNextTabFiltered() {
+  const idx = tabIndexInVisibleOrder(activeTab.value)
+  if (idx >= 0 && idx < visibleTabOrder.value.length - 1) {
+    activeTab.value = visibleTabOrder.value[idx + 1]
+  }
+}
+
+function goPreviousTabFiltered() {
+  const idx = tabIndexInVisibleOrder(activeTab.value)
+  if (idx > 0) {
+    activeTab.value = visibleTabOrder.value[idx - 1]
+  }
+}
+
+function ensureActiveTabVisible() {
+  const order = visibleTabOrder.value
+  if (!order.length) {
+    return
+  }
+  if (!order.includes(activeTab.value)) {
+    activeTab.value = order[0]
+  }
+  if (!hasSubTabs.value) {
+    return
+  }
+  const subs = filterSubTabsFor(activeTab.value)
+  if (!subs.length) {
+    return
+  }
+  if (!subs.some(item => item.key === activeSubTab.value)) {
+    activeSubTab.value = subs[0].key
+  }
+}
 
 const progressiveMatchEnabled = computed(() => !isEditMode.value)
 const {
@@ -1092,14 +1229,6 @@ function bumpAge(delta) {
   const next = Math.min(max, Math.max(0, ageNumericValue.value + delta))
   form.value[ck.age] = String(next)
 }
-
-const mainTabs = ADD_CLIENT_MAIN_TABS
-
-const clinicalSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.clinical]
-const careCoordinationSubTabs =
-  ADD_CLIENT_SUB_TABS[addClientTabKeys.careCoordination]
-const financialsSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.financials]
-const documentsSubTabs = ADD_CLIENT_SUB_TABS[addClientTabKeys.documents]
 
 const allergiesTabClass = computed(() => {
   const classes = ['allergies']
@@ -1276,7 +1405,7 @@ onBeforeUnmount(() => {
   addClientFormMountAlive = false
 })
 
-onMounted(async() => {
+async function runCatalogLoadSafely() {
   try {
     await loadBasicInfoCatalogs()
   } catch (error) {
@@ -1291,11 +1420,9 @@ onMounted(async() => {
       })
     }
   }
+}
 
-  if (!addClientFormMountAlive) {
-    return
-  }
-
+async function runCliniciansLoadSafely() {
   try {
     await loadCliniciansForAddClient()
   } catch (error) {
@@ -1310,31 +1437,40 @@ onMounted(async() => {
       })
     }
   }
+}
 
+async function runEditClientLoad() {
+  try {
+    await loadClientForEdit()
+    markPristine()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      const msg = error?.response?.data?.message
+        || error?.message
+        || t('clientLoadError')
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: String(msg),
+        position: 'top',
+      })
+    }
+    emit('cancel')
+  }
+}
+
+async function initializeAddClientForm() {
+  await runCatalogLoadSafely()
+  if (!addClientFormMountAlive) {
+    return
+  }
+
+  await runCliniciansLoadSafely()
   if (!addClientFormMountAlive) {
     return
   }
 
   if (isEditMode.value) {
-    initialLoading.value = true
-    try {
-      await loadClientForEdit()
-      markPristine()
-    } catch (error) {
-      if (!isAuthSessionEndUIError(error)) {
-        const msg = error?.response?.data?.message
-          || error?.message
-          || t('clientLoadError')
-        $q.notify({
-          type: quasarNotifyTypes.negative,
-          message: String(msg),
-          position: 'top',
-        })
-      }
-      emit('cancel')
-    } finally {
-      initialLoading.value = false
-    }
+    await runEditClientLoad()
 
     return
   }
@@ -1350,6 +1486,20 @@ onMounted(async() => {
     return
   }
   duplicateBannerTeleportReady.value = true
+}
+
+onMounted(async() => {
+  if (isEditMode.value) {
+    initialLoading.value = true
+  }
+
+  try {
+    await initializeAddClientForm()
+  } finally {
+    if (isEditMode.value) {
+      initialLoading.value = false
+    }
+  }
 })
 
 function requiredLabel(text) {
@@ -1395,7 +1545,7 @@ async function onSsnBlur() {
   await ssnInputRef.value?.validate?.()
 }
 
-async function onNext() {
+async function onNextFiltered() {
   if (document.activeElement instanceof HTMLElement) {
     document.activeElement.blur()
   }
@@ -1404,7 +1554,11 @@ async function onNext() {
   if (!ok) {
     return
   }
-  goNextTab()
+  goNextTabFiltered()
+}
+
+async function onNext() {
+  return onNextFiltered()
 }
 
 function onReferralSchedule() {
@@ -1623,6 +1777,9 @@ async function executeSave() {
 }
 
 async function onSave() {
+  if (!canSaveForm.value) {
+    return
+  }
   const ok = await validateAllTabs()
   if (!ok) {
     return
@@ -1653,15 +1810,26 @@ function requestClose() {
   emit('cancel')
 }
 
+watch(visibleTabOrder, () => {
+  ensureActiveTabVisible()
+}, { immediate: true })
+
+watch([activeTab, visibleTabOrder], () => {
+  ensureActiveTabVisible()
+})
+
 defineExpose({
   requestClose,
   onSave,
   onNext,
-  goPreviousTab,
-  canGoNext,
-  canGoPrevious,
+  goPreviousTab: goPreviousTabFiltered,
+  canGoNext: canGoNextFiltered,
+  canGoPrevious: canGoPreviousFiltered,
+  canSaveForm,
   saving,
   initialLoading,
+  formBusy,
+  formBusyMessage,
 })
 </script>
 
