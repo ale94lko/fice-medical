@@ -299,6 +299,89 @@ export default {
   carePlanPriorityLow: 'Low',
   carePlanPriorityMedium: 'Medium',
   carePlanPriorityHigh: 'High',
+  clinicalNotesTitle: 'Clinical Notes',
+  clinicalNotesSubtitle:
+    'View and manage clinical notes for this patient.',
+  clinicalNoteAdd: 'Add Clinical Note',
+  clinicalNoteSaveClientFirst:
+    'Save the client first to create and manage clinical notes.',
+  clinicalNoteNoPermission:
+    'You do not have permission to view clinical notes.',
+  clinicalNoteListEmpty:
+    'No clinical notes yet. Add a clinical note to get started.',
+  clinicalNoteListError: 'Could not load clinical notes.',
+  clinicalNoteLoadError: 'Could not load the clinical note.',
+  clinicalNoteSaveError: 'Could not save the clinical note.',
+  clinicalNoteSignError: 'Could not sign the clinical note.',
+  clinicalNoteDeleteError: 'Could not delete the clinical note.',
+  clinicalNoteDownloadError: 'Could not download the clinical note.',
+  clinicalNoteSaved: 'Clinical note saved as draft.',
+  clinicalNoteSigned: 'Clinical note signed successfully.',
+  clinicalNoteDeleted: 'Clinical note deleted.',
+  clinicalNoteNoSignPermission:
+    'You do not have permission to sign clinical notes.',
+  clinicalNotePaginationSummary:
+    'Showing {from} to {to} of {total} results',
+  clinicalNoteAddTitle: 'Add Clinical Note',
+  clinicalNoteAddSubtitle:
+    'Create a new clinical note for this patient.',
+  clinicalNoteEditTitle: 'Edit Clinical Note',
+  clinicalNoteViewTitle: 'View Clinical Note',
+  clinicalNoteViewSubtitle: 'Clinical note details.',
+  clinicalNoteSectionGeneral: 'Note Information',
+  clinicalNoteSectionContent: 'Clinical Content',
+  clinicalNoteSectionSignature: 'Signature',
+  clinicalNoteDateTime: 'Date & Time',
+  clinicalNoteTimePlaceholder: '10:30 AM',
+  clinicalNoteDateRequired: 'Date is required.',
+  clinicalNoteTimeRequired: 'Time is required.',
+  clinicalNoteDateNotFuture:
+    'Date and time cannot be in the future.',
+  clinicalNoteDateBeforeAdmission:
+    'Date and time cannot be before the patient admission date.',
+  clinicalNoteClinician: 'Clinician',
+  clinicalNoteClinicianPlaceholder: 'Select clinician',
+  clinicalNoteClinicianRequired: 'Clinician is required.',
+  clinicalNoteSubjective: 'Subjective',
+  clinicalNoteSubjectivePlaceholder:
+    'Information reported by the patient.',
+  clinicalNoteSubjectiveRequired: 'Subjective is required to sign.',
+  clinicalNoteObjective: 'Objective',
+  clinicalNoteObjectivePlaceholder:
+    'Observations and measurable data obtained by the clinician.',
+  clinicalNoteObjectiveRequired: 'Objective is required to sign.',
+  clinicalNoteAssessment: 'Assessment',
+  clinicalNoteAssessmentPlaceholder:
+    'Clinical interpretation and professional conclusions.',
+  clinicalNoteAssessmentRequired: 'Assessment is required to sign.',
+  clinicalNotePlan: 'Plan',
+  clinicalNotePlanPlaceholder:
+    'Treatment plan, recommendations and next steps.',
+  clinicalNotePlanRequired: 'Plan is required to sign.',
+  clinicalNoteSignatureHint:
+    'Please sign below to authorize this note.',
+  clinicalNoteSignatureRequired:
+    'Signature is required to sign the note.',
+  clinicalNoteSaveDraft: 'Save as Draft',
+  clinicalNoteSign: 'Sign Note',
+  clinicalNoteSignConfirmTitle: 'Sign clinical note?',
+  clinicalNoteSignConfirmMessage:
+    'This action is irreversible. Signed notes cannot be edited.',
+  clinicalNoteDraftHint:
+    'Note: You can save as draft and sign later.',
+  clinicalNoteSignedRestrictionHint:
+    'Signed notes cannot be edited.',
+  clinicalNoteSignedAt: 'Signed on {date}',
+  clinicalNoteStatusDraft: 'Draft',
+  clinicalNoteStatusSigned: 'Signed',
+  clinicalNoteColDateTime: 'Date & Time',
+  clinicalNoteColClinician: 'Clinician',
+  clinicalNoteColSummary: 'Summary',
+  clinicalNoteActionView: 'View',
+  clinicalNoteActionDownload: 'Download',
+  clinicalNoteDeleteConfirmTitle: 'Delete clinical note?',
+  clinicalNoteDeleteConfirmMessage:
+    'This draft note will be permanently removed.',
   carePlanAddGoal: 'Add Goal',
   carePlanGoalsEmpty:
     'No goals added yet. Add goals to define what you want to achieve.',

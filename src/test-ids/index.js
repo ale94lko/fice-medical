@@ -135,6 +135,21 @@ export const carePlanTestIds = {
   rowMore: id => toTestId('care-plan-row', id, 'btn-more'),
 }
 
+export const clinicalNoteTestIds = {
+  btn: name => toTestId('clinical-note-btn', name),
+  field: name => toTestId('clinical-note-field', name),
+  accordion: section => toTestId('clinical-note-accordion', section),
+  accordionToggle: section => toTestId(
+    'clinical-note-accordion',
+    section,
+    'toggle',
+  ),
+  rowView: id => toTestId('clinical-note-row', id, 'btn-view'),
+  rowEdit: id => toTestId('clinical-note-row', id, 'btn-edit'),
+  rowDelete: id => toTestId('clinical-note-row', id, 'btn-delete'),
+  rowDownload: id => toTestId('clinical-note-row', id, 'btn-download'),
+}
+
 export const followUpTestIds = {
   btn: name => toTestId('follow-up-btn', name),
   field: name => toTestId('follow-up-field', name),

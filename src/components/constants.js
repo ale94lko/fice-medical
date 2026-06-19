@@ -483,6 +483,13 @@ export const carePlanStatuses = {
   archived: 'ARCHIVED',
 }
 
+export const clinicalNoteStatuses = {
+  draft: 'DRAFT',
+  signed: 'SIGNED',
+}
+
+export const clinicalNoteSoapMaxLength = 65535
+
 export const carePlanGoalStatuses = {
   inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
@@ -702,6 +709,15 @@ export const apiPaths = {
   clientClinicalNotes: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/clinical-notes`,
+  clientClinicalNoteById: (clientId, noteId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/clinical-notes/${encodeURIComponent(String(noteId ?? '').trim())}`,
+  clientClinicalNoteSign: (clientId, noteId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/clinical-notes/${encodeURIComponent(String(noteId ?? '').trim())}/sign`,
+  clientClinicalNoteDownload: (clientId, noteId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/clinical-notes/${encodeURIComponent(String(noteId ?? '').trim())}/download`,
   clientAppointments: id => `/appointments/v1/clients/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,

@@ -596,6 +596,12 @@
                 :client-id="props.clientId"
                 :clinician-options="assignedClinicianOptions"
               />
+              <AddClientClinicalNotesTab
+                v-else-if="subTab.key === CLINICAL_CLINICAL_NOTES_SUB_TAB"
+                :client-id="props.clientId"
+                :admission-date="form[ck.admissionDate]"
+                :clinician-options="assignedClinicianOptions"
+              />
               <div
                 v-else
                 class="text-body1 text-grey-7 q-py-xl text-center">
@@ -799,6 +805,7 @@ import AddClientVitalsTab from '../AddClientVitalsTab.vue'
 import AddClientAssessmentsTab from '../AddClientAssessmentsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
 import AddClientCarePlansTab from '../AddClientCarePlansTab.vue'
+import AddClientClinicalNotesTab from '../AddClientClinicalNotesTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
 import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
 import AddClientReferralsTab from '../AddClientReferralsTab.vue'
@@ -848,6 +855,7 @@ import {
   CLINICAL_ASSESSMENTS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
   CLINICAL_CARE_PLANS_SUB_TAB,
+  CLINICAL_CLINICAL_NOTES_SUB_TAB,
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
   CARE_COORDINATION_REFERRALS_SUB_TAB,
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,

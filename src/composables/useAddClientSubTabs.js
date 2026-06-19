@@ -18,6 +18,9 @@ export const CLINICAL_LABS_SUB_TAB = addClientClinicalSubTabKeys.labs
 export const CLINICAL_CARE_PLANS_SUB_TAB =
   addClientClinicalSubTabKeys.carePlans
 
+export const CLINICAL_CLINICAL_NOTES_SUB_TAB =
+  addClientClinicalSubTabKeys.clinicalNotes
+
 export const CARE_COORDINATION_REFERRALS_SUB_TAB =
   addClientCareCoordinationSubTabKeys.referrals
 

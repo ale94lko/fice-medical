@@ -314,6 +314,92 @@ export default {
   carePlanPriorityLow: 'Baja',
   carePlanPriorityMedium: 'Media',
   carePlanPriorityHigh: 'Alta',
+  clinicalNotesTitle: 'Notas clínicas',
+  clinicalNotesSubtitle:
+    'Ver y gestionar notas clínicas de este paciente.',
+  clinicalNoteAdd: 'Añadir nota clínica',
+  clinicalNoteSaveClientFirst:
+    'Guarde el cliente primero para crear y gestionar notas clínicas.',
+  clinicalNoteNoPermission:
+    'No tiene permiso para ver notas clínicas.',
+  clinicalNoteListEmpty:
+    'Aún no hay notas clínicas. Añada una para comenzar.',
+  clinicalNoteListError: 'No se pudieron cargar las notas clínicas.',
+  clinicalNoteLoadError: 'No se pudo cargar la nota clínica.',
+  clinicalNoteSaveError: 'No se pudo guardar la nota clínica.',
+  clinicalNoteSignError: 'No se pudo firmar la nota clínica.',
+  clinicalNoteDeleteError: 'No se pudo eliminar la nota clínica.',
+  clinicalNoteDownloadError: 'No se pudo descargar la nota clínica.',
+  clinicalNoteSaved: 'Nota clínica guardada como borrador.',
+  clinicalNoteSigned: 'Nota clínica firmada correctamente.',
+  clinicalNoteDeleted: 'Nota clínica eliminada.',
+  clinicalNoteNoSignPermission:
+    'No tiene permiso para firmar notas clínicas.',
+  clinicalNotePaginationSummary:
+    'Mostrando {from} a {to} de {total} resultados',
+  clinicalNoteAddTitle: 'Añadir nota clínica',
+  clinicalNoteAddSubtitle:
+    'Cree una nueva nota clínica para este paciente.',
+  clinicalNoteEditTitle: 'Editar nota clínica',
+  clinicalNoteViewTitle: 'Ver nota clínica',
+  clinicalNoteViewSubtitle: 'Detalle de la nota clínica.',
+  clinicalNoteSectionGeneral: 'Información de la nota',
+  clinicalNoteSectionContent: 'Contenido clínico',
+  clinicalNoteSectionSignature: 'Firma',
+  clinicalNoteDateTime: 'Fecha y hora',
+  clinicalNoteTimePlaceholder: '10:30 AM',
+  clinicalNoteDateRequired: 'La fecha es obligatoria.',
+  clinicalNoteTimeRequired: 'La hora es obligatoria.',
+  clinicalNoteDateNotFuture:
+    'La fecha y hora no pueden ser futuras.',
+  clinicalNoteDateBeforeAdmission:
+    'La fecha y hora no pueden ser anteriores a la admisión del paciente.',
+  clinicalNoteClinician: 'Clínico',
+  clinicalNoteClinicianPlaceholder: 'Seleccionar clínico',
+  clinicalNoteClinicianRequired: 'El clínico es obligatorio.',
+  clinicalNoteSubjective: 'Subjetivo',
+  clinicalNoteSubjectivePlaceholder:
+    'Información reportada por el paciente.',
+  clinicalNoteSubjectiveRequired:
+    'El subjetivo es obligatorio para firmar.',
+  clinicalNoteObjective: 'Objetivo',
+  clinicalNoteObjectivePlaceholder:
+    'Observaciones y datos medibles obtenidos por el clínico.',
+  clinicalNoteObjectiveRequired:
+    'El objetivo es obligatorio para firmar.',
+  clinicalNoteAssessment: 'Evaluación',
+  clinicalNoteAssessmentPlaceholder:
+    'Interpretación clínica y conclusiones profesionales.',
+  clinicalNoteAssessmentRequired:
+    'La evaluación es obligatoria para firmar.',
+  clinicalNotePlan: 'Plan',
+  clinicalNotePlanPlaceholder:
+    'Plan de tratamiento, recomendaciones y próximos pasos.',
+  clinicalNotePlanRequired: 'El plan es obligatorio para firmar.',
+  clinicalNoteSignatureHint:
+    'Firme abajo para autorizar esta nota.',
+  clinicalNoteSignatureRequired:
+    'La firma es obligatoria para firmar la nota.',
+  clinicalNoteSaveDraft: 'Guardar borrador',
+  clinicalNoteSign: 'Firmar nota',
+  clinicalNoteSignConfirmTitle: '¿Firmar nota clínica?',
+  clinicalNoteSignConfirmMessage:
+    'Esta acción es irreversible. Las notas firmadas no se pueden editar.',
+  clinicalNoteDraftHint:
+    'Nota: puede guardar como borrador y firmar más tarde.',
+  clinicalNoteSignedRestrictionHint:
+    'Las notas firmadas no se pueden editar.',
+  clinicalNoteSignedAt: 'Firmada el {date}',
+  clinicalNoteStatusDraft: 'Borrador',
+  clinicalNoteStatusSigned: 'Firmada',
+  clinicalNoteColDateTime: 'Fecha y hora',
+  clinicalNoteColClinician: 'Clínico',
+  clinicalNoteColSummary: 'Resumen',
+  clinicalNoteActionView: 'Ver',
+  clinicalNoteActionDownload: 'Descargar',
+  clinicalNoteDeleteConfirmTitle: '¿Eliminar nota clínica?',
+  clinicalNoteDeleteConfirmMessage:
+    'Este borrador se eliminará permanentemente.',
   carePlanAddGoal: 'Añadir objetivo',
   carePlanGoalsEmpty:
     'Aún no hay objetivos. Añada objetivos para definir metas.',
