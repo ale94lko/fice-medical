@@ -1,1 +1,0 @@
-import{Da as e,Ja as t,Ma as n,Qa as r,ro as i,zi as a}from"./index-rGCzWCjW.js";import{r as o,t as s}from"./QLayout-CX9D-BRY.js";var c={};function l(a,c){let l=r(`router-view`);return t(),e(s,{view:`hHh Lpr lff`},{default:i(()=>[n(o,null,{default:i(()=>[n(l)]),_:1})]),_:1})}var u=a(c,[[`render`,l]]);export{u as default};

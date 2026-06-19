@@ -1,0 +1,1 @@
+import{$a as e,La as t,Ma as n,Ui as r,co as i,ro as a}from"./index-DHIGlju3.js";import{r as o,t as s}from"./QLayout-D61P-tOF.js";var c={};function l(r,c){let l=a(`router-view`);return e(),n(s,{view:`hHh Lpr lff`},{default:i(()=>[t(o,null,{default:i(()=>[t(l)]),_:1})]),_:1})}var u=r(c,[[`render`,l]]);export{u as default};
