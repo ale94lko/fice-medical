@@ -35,7 +35,7 @@ export const useSiteStore = defineStore('site', {
     clientList: [],
     clientListSourceById: {},
     clientListPagination: null,
-    clientListQuery: { page: 1, limit: 20, filter: null },
+    clientListQuery: { page: 1, limit: 20, filter: null, q: null },
     suffixCatalogSelectOptions: null,
   }),
   actions: {
@@ -57,6 +57,35 @@ export const useSiteStore = defineStore('site', {
 
       return this.suffixCatalogSelectOptions
     },
+    async hydrateClientListFromEnvelope(root, t, queryPatch = {}) {
+      if (!root) {
+        this.clientList = []
+        this.clientListSourceById = {}
+        this.clientListPagination = null
+        this.clientListQuery = {
+          ...this.clientListQuery,
+          ...queryPatch,
+        }
+
+        return
+      }
+
+      const list = extractEnvelopeList(root)
+      const suffixSelectOptions =
+        await this.resolveSuffixCatalogSelectOptions()
+      this.clientListSourceById = indexClientListSource(list)
+      this.clientList = list
+        .map(client => formatClientDisplay(
+          mapClient(client, { suffixSelectOptions }),
+          t,
+        ))
+        .filter(Boolean)
+      this.clientListPagination = extractEnvelopeListPagination(root)
+      this.clientListQuery = {
+        ...this.clientListQuery,
+        ...queryPatch,
+      }
+    },
     async getClientList(params = {}, t) {
       try {
         const page = Number(params.page ?? this.clientListQuery.page ?? 1)
@@ -64,12 +93,6 @@ export const useSiteStore = defineStore('site', {
         const safePage = Number.isFinite(page) && page >= 1 ? page : 1
         const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
         const filter = params.filter ?? this.clientListQuery.filter ?? null
-        this.clientListQuery = {
-          page: safePage,
-          limit: safeLimit,
-          filter,
-        }
-
         const apiPage = Math.max(0, safePage - 1)
         const queryParams = {
           page: apiPage,
@@ -83,27 +106,45 @@ export const useSiteStore = defineStore('site', {
         })
 
         const root = response?.data?.data
-        if (!root) {
-          this.clientList = []
-          this.clientListSourceById = {}
-          this.clientListPagination = null
-
-          return
-        }
-
-        const list = extractEnvelopeList(root)
-        const suffixSelectOptions =
-          await this.resolveSuffixCatalogSelectOptions()
-        this.clientListSourceById = indexClientListSource(list)
-        this.clientList = list
-          .map(client => formatClientDisplay(
-            mapClient(client, { suffixSelectOptions }),
-            t,
-          ))
-          .filter(Boolean)
-        this.clientListPagination = extractEnvelopeListPagination(root)
+        await this.hydrateClientListFromEnvelope(root, t, {
+          page: safePage,
+          limit: safeLimit,
+          filter,
+          q: null,
+        })
       } catch (error) {
         console.error('Error fetching clients:', error)
+        throw error
+      }
+    },
+    async searchClientList(params = {}, t) {
+      try {
+        const q = String(params.q ?? '').trim()
+        if (!q) {
+          throw new Error('Search query is required')
+        }
+        const page = Number(params.page ?? this.clientListQuery.page ?? 1)
+        const limit = Number(params.limit ?? this.clientListQuery.limit ?? 20)
+        const safePage = Number.isFinite(page) && page >= 1 ? page : 1
+        const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
+        const apiPage = Math.max(0, safePage - 1)
+        const response = await apiInstance.get(apiPaths.clientsSearch, {
+          params: {
+            q,
+            page: apiPage,
+            limit: safeLimit,
+          },
+        })
+
+        const root = response?.data?.data
+        await this.hydrateClientListFromEnvelope(root, t, {
+          page: safePage,
+          limit: safeLimit,
+          filter: null,
+          q,
+        })
+      } catch (error) {
+        console.error('Error searching clients:', error)
         throw error
       }
     },

@@ -12,7 +12,7 @@
       :subtitle="t('clientListSubtitle')">
       <template #center>
         <q-input
-          v-model="searchQuery"
+          :model-value="searchQuery"
           dense
           outlined
           clearable
@@ -21,7 +21,9 @@
           :data-testid="clientListTestIds.search"
           :disable="loading"
           :placeholder="t('clientListSearchPlaceholder')"
-          :aria-label="t('clientListSearchPlaceholder')">
+          :aria-label="t('clientListSearchPlaceholder')"
+          @update:model-value="setSearchQuery"
+          @clear="resetSearchQuery">
           <template #prepend>
             <q-icon name="search" size="18px" />
           </template>
@@ -141,7 +143,7 @@
               @click="viewRow(scope.row)">
               <AdminTableSearchHighlight
                 :text="scope.row[ck.clientNumber] || '—'"
-                :query="trimmedQuery"
+                :query="highlightQuery"
               />
             </button>
           </q-td>
@@ -151,7 +153,7 @@
           <q-td :props="scope">
             <AdminTableSearchHighlight
               :text="scope.row[ck.name] || '—'"
-              :query="trimmedQuery"
+              :query="highlightQuery"
             />
           </q-td>
         </template>
@@ -169,7 +171,7 @@
                   items-center no-wrap">
                 <AdminTableSearchHighlight
                   :text="scope.row.emailEntries[0].email"
-                  :query="trimmedQuery"
+                  :query="highlightQuery"
                 />
                 <span
                   v-if="scope.row.emailEntries[0].typeLabel"
@@ -211,7 +213,7 @@
           <q-td :props="scope">
             <AdminTableSearchHighlight
               :text="scope.row[ck.dob] || '—'"
-              :query="trimmedQuery"
+              :query="highlightQuery"
             />
           </q-td>
         </template>
@@ -220,7 +222,7 @@
           <q-td :props="scope">
             <AdminTableSearchHighlight
               :text="scope.row[ck.admissionDate] || '—'"
-              :query="trimmedQuery"
+              :query="highlightQuery"
             />
           </q-td>
         </template>
@@ -244,7 +246,7 @@
             <AdminTableStatusCell
               :label="scope.row[ck.status]"
               :variant="scope.row.statusVariant"
-              :highlight-query="trimmedQuery"
+              :highlight-query="highlightQuery"
             />
           </q-td>
         </template>
@@ -334,6 +336,8 @@ import {
 } from 'src/composables/useClientListColumnPreferences.js'
 import { useClientListSearch } from
   'src/composables/useClientListSearch.js'
+import { isClientListServerSearchQuery } from
+  'src/utils/client-list-search.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
 
@@ -384,11 +388,51 @@ const sourceRows = computed(() => siteStore.clientList)
 
 const {
   searchQuery,
-  trimmedQuery,
+  setSearchQuery,
+  resetSearchQuery,
   isSearchActive,
+  highlightQuery,
   rows,
   paginationRowsNumber,
-} = useClientListSearch(sourceRows, tablePagination)
+  clearSearchQueryWithoutReload,
+} = useClientListSearch({
+  sourceRows,
+  tablePagination,
+  onQueryChange: () => loadClientsOrSearch(tablePagination.value),
+})
+
+async function loadClientsOrSearch(paginationPayload) {
+  loading.value = true
+  try {
+    const q = String(searchQuery.value ?? '').trim()
+    if (isClientListServerSearchQuery(q)) {
+      await siteStore.searchClientList({
+        q,
+        page: paginationPayload.page,
+        limit: paginationPayload.rowsPerPage,
+      }, t)
+    } else {
+      const filter = activeSummaryFilter.value
+        ? CLIENT_LIST_SUMMARY_FILTERS[activeSummaryFilter.value]
+        : null
+      await siteStore.getClientList({
+        page: paginationPayload.page,
+        limit: paginationPayload.rowsPerPage,
+        filter,
+      }, t)
+    }
+    tablePagination.value = clientTablePaginationFromStore(paginationPayload)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientListError'),
+      })
+    }
+  } finally {
+    loading.value = false
+  }
+}
 
 const allColumns = computed(() => [
   {
@@ -504,27 +548,7 @@ function clientTablePaginationFromStore(paginationPayload) {
 }
 
 async function loadClients(paginationPayload) {
-  loading.value = true
-  try {
-    const filter = activeSummaryFilter.value
-      ? CLIENT_LIST_SUMMARY_FILTERS[activeSummaryFilter.value]
-      : null
-    await siteStore.getClientList({
-      page: paginationPayload.page,
-      limit: paginationPayload.rowsPerPage,
-      filter,
-    }, t)
-    tablePagination.value = clientTablePaginationFromStore(paginationPayload)
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t('clientListError'),
-      })
-    }
-  } finally {
-    loading.value = false
-  }
+  return loadClientsOrSearch(paginationPayload)
 }
 
 function onTableRequest(props) {
@@ -551,9 +575,7 @@ function onPageChange(page) {
     ...tablePagination.value,
     page,
   }
-  if (!isSearchActive.value) {
-    loadClients(tablePagination.value)
-  }
+  loadClientsOrSearch(tablePagination.value)
 }
 
 function onRowsPerPageChange(rowsPerPage) {
@@ -565,12 +587,13 @@ function onRowsPerPageChange(rowsPerPage) {
     page: 1,
     rowsPerPage,
   }
-  if (!isSearchActive.value) {
-    loadClients(tablePagination.value)
-  }
+  loadClientsOrSearch(tablePagination.value)
 }
 
 function onSummaryFilter(cardId) {
+  if (isSearchActive.value) {
+    clearSearchQueryWithoutReload()
+  }
   activeSummaryFilter.value = activeSummaryFilter.value === cardId
     ? ''
     : cardId
@@ -578,7 +601,7 @@ function onSummaryFilter(cardId) {
     ...tablePagination.value,
     page: 1,
   }
-  loadClients(tablePagination.value)
+  loadClientsOrSearch(tablePagination.value)
 }
 
 onMounted(() => {

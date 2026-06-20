@@ -705,6 +705,7 @@ export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   cliniciansList: '/clinicians/v1',
   clientsList: '/client/v1/all-clients',
+  clientsSearch: '/client/v1/search',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientClinicalNotes: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),

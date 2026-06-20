@@ -38,6 +38,14 @@ export function clientRowMatchesSearch(row, query) {
   )
 }
 
+export const CLIENT_LIST_SEARCH_MIN_LENGTH = 3
+
+export const CLIENT_LIST_SEARCH_DEBOUNCE_MS = 350
+
+export function isClientListServerSearchQuery(query) {
+  return String(query ?? '').trim().length >= CLIENT_LIST_SEARCH_MIN_LENGTH
+}
+
 export function splitTextBySearchQuery(text, query) {
   const value = String(text ?? '')
   const normalizedQuery = String(query ?? '').trim()
