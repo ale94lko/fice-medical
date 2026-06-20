@@ -46,8 +46,14 @@
       </q-toolbar>
     </q-header>
     <q-footer class="app-footer">
-      <q-toolbar class="justify-center">
-        <label class="">&copy; 2025 FiCE Medical. Powered by LandA Apps</label>
+      <q-toolbar class="app-footer__toolbar">
+        <p class="app-footer__copyright q-mb-none">
+          &copy; 2026 FiCE Medical. Powered by LandA Apps
+        </p>
+        <q-space />
+        <div class="app-footer__pagination">
+          <AppFooterPaginationHost />
+        </div>
       </q-toolbar>
     </q-footer>
     <q-drawer
@@ -412,6 +418,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
 import AppDrawerSubNavItem from 'components/AppDrawerSubNavItem.vue'
+import AppFooterPaginationHost from
+  'components/admin-table/AppFooterPaginationHost.vue'
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
@@ -422,8 +430,16 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
+function readInitialSidebarOpen() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  return window.innerWidth > drawerMobileMaxPx
+}
+
 // State
-const sidebar = ref(false)
+const sidebar = ref(readInitialSidebarOpen())
 const sidebarExpanded = ref(false)
 const drawerHoverExpanded = ref(false)
 const showSignOutConfirm = ref(false)
@@ -436,7 +452,14 @@ const humanResourcesMenu = ref(false)
 const administrationMenu = ref(false)
 
 // Computed
-const windowWidth = computed(() => $q.screen.width)
+const windowWidth = computed(() => {
+  const quasarWidth = $q.screen.width
+  if (typeof window === 'undefined') {
+    return quasarWidth
+  }
+
+  return Math.max(quasarWidth, window.innerWidth)
+})
 
 const mobileView = computed(
   () => windowWidth.value <= drawerMobileMaxPx,
@@ -594,6 +617,14 @@ onMounted(() => {
   if (!mobileView.value) {
     sidebar.value = true
   }
+  syncNavMenusFromRoute()
+})
+
+watch(mobileView, (isMobile) => {
+  if (!isMobile) {
+    sidebar.value = true
+  }
+  syncDrawerWithViewport()
   syncNavMenusFromRoute()
 })
 

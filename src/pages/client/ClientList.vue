@@ -13,11 +13,10 @@
       <template #center>
         <q-input
           :model-value="searchQuery"
-          dense
           outlined
           clearable
           hide-bottom-space
-          class="client-list-page__search"
+          class="admin-list-page__search-input client-list-page__search"
           :data-testid="clientListTestIds.search"
           :disable="loading"
           :placeholder="t('clientListSearchPlaceholder')"
@@ -96,18 +95,6 @@
       :show-column-settings="false"
       :column-settings-test-id="adminTableTestIds.columnSettings"
       @open-column-settings="columnSettingsOpen = true">
-      <template #pagination>
-        <AdminTablePaginationBar
-          :page="tablePagination.page"
-          :rows-per-page="tablePagination.rowsPerPage"
-          :rows-number="paginationRowsNumber"
-          :disable="loading"
-          summary-key="clientListPaginationSummary"
-          per-page-key="adminTablePerPage"
-          @update:page="onPageChange"
-          @update:rows-per-page="onRowsPerPageChange"
-        />
-      </template>
       <AdminQTable
         class="table admin-data-table admin-data-table--inline-column-settings"
         flat
@@ -296,7 +283,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed, ref } from 'vue'
+import { onBeforeUnmount, onMounted, computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSiteStore } from 'stores/site-store.js'
 import { useI18n } from 'vue-i18n'
@@ -316,8 +303,6 @@ import AdminTableColumnSettingsDialog from
   'components/admin-table/AdminTableColumnSettingsDialog.vue'
 import AdminTableColumnSettingsHeader from
   'components/admin-table/AdminTableColumnSettingsHeader.vue'
-import AdminTablePaginationBar from
-  'components/admin-table/AdminTablePaginationBar.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AdminTableRowActions from
   'components/admin-table/AdminTableRowActions.vue'
@@ -336,6 +321,8 @@ import {
 } from 'src/composables/useClientListColumnPreferences.js'
 import { useClientListSearch } from
   'src/composables/useClientListSearch.js'
+import { useAppFooterPagination } from
+  'src/composables/useAppFooterPagination.js'
 import { isClientListServerSearchQuery } from
   'src/utils/client-list-search.js'
 import { useClientPermissions } from
@@ -604,9 +591,52 @@ function onSummaryFilter(cardId) {
   loadClientsOrSearch(tablePagination.value)
 }
 
+const {
+  setFooterPagination,
+  patchFooterPagination,
+  clearFooterPagination,
+} = useAppFooterPagination()
+
+function syncFooterPaginationBar() {
+  patchFooterPagination({
+    page: tablePagination.value.page,
+    rowsPerPage: tablePagination.value.rowsPerPage,
+    rowsNumber: paginationRowsNumber.value,
+    disable: loading.value,
+    onPageChange,
+    onRowsPerPageChange,
+  })
+}
+
 onMounted(() => {
+  setFooterPagination({
+    page: tablePagination.value.page,
+    rowsPerPage: tablePagination.value.rowsPerPage,
+    rowsNumber: paginationRowsNumber.value,
+    disable: loading.value,
+    summaryKey: 'clientListPaginationSummary',
+    perPageKey: 'adminTablePerPage',
+    onPageChange,
+    onRowsPerPageChange,
+  })
   loadClients(tablePagination.value)
 })
+
+onBeforeUnmount(() => {
+  clearFooterPagination()
+})
+
+watch(
+  () => [
+    tablePagination.value.page,
+    tablePagination.value.rowsPerPage,
+    paginationRowsNumber.value,
+    loading.value,
+  ],
+  () => {
+    syncFooterPaginationBar()
+  },
+)
 
 const showGrid = computed(() => $q.screen.width <= siteBreakpointsPx.XXS)
 

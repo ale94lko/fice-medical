@@ -54,6 +54,64 @@
     min-width: 160px;
     max-width: 360px;
     margin: 0 16px;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  &__search-input {
+    width: 100%;
+
+    &.q-field--outlined {
+      .q-field__control {
+        min-height: $app-button-height;
+        height: $app-button-height;
+        padding: 0 18px;
+        border-radius: $radius-md;
+        background: $white;
+
+        &::before {
+          border-color: $primary;
+        }
+
+        &:hover::before {
+          border-color: $primary;
+        }
+      }
+
+      &.q-field--focused .q-field__control::before {
+        border-color: $primary;
+        border-width: 1px;
+      }
+
+      .q-field__marginal {
+        height: $app-button-height;
+      }
+
+      .q-field__prepend {
+        padding-right: 8px;
+
+        .q-icon {
+          color: $primary;
+        }
+      }
+
+      .q-field__append .q-icon {
+        color: $primary;
+      }
+
+      .q-field__native,
+      .q-field__input {
+        min-height: $app-button-height;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $primary;
+
+        &::placeholder {
+          color: rgba($primary, 0.72);
+          opacity: 1;
+        }
+      }
+    }
   }
 
   &__table-panel {
@@ -440,6 +498,34 @@
     min-height: 24px !important;
     height: 24px !important;
     font-size: 0.6875rem;
+  }
+
+  &--footer {
+    width: auto;
+    min-height: 36px;
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+    color: $shell-text-muted;
+
+    .admin-table-pagination__summary {
+      color: $shell-text-muted;
+    }
+
+    .admin-table-pagination__per-page {
+      .q-field__native {
+        color: $shell-text-muted;
+      }
+
+      .q-field__append,
+      .q-field__marginal {
+        color: $shell-text-muted;
+      }
+    }
+
+    .q-pagination .q-btn {
+      color: $shell-text !important;
+    }
   }
 }
 
