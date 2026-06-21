@@ -1,6 +1,8 @@
 <template>
   <div class="add-client-care-plans-tab">
-    <div v-if="!hasClientId" class="care-plans-panel q-pa-lg text-center">
+    <div
+      v-if="!hasClientId"
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('carePlanSaveClientFirst') }}
@@ -9,7 +11,7 @@
 
     <div
       v-else-if="!canViewCarePlans"
-      class="care-plans-panel q-pa-lg text-center">
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('carePlanNoPermission') }}
@@ -17,36 +19,40 @@
     </div>
 
     <template v-else>
-      <div class="row items-center justify-between q-mb-md">
-        <div>
-          <h2 class="care-plans-panel__title q-mb-xs">
+      <div class="care-plans-header row items-start">
+        <div class="col">
+          <h2 class="care-plans-title">
             {{ t('carePlansTitle') }}
           </h2>
-          <p class="care-plans-panel__subtitle text-body2 text-grey-7">
+          <p class="care-plans-subtitle text-body2">
             {{ t('carePlansSubtitle') }}
           </p>
         </div>
-        <q-btn
-          v-if="canAddCarePlans"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="add"
-          :disable="loading"
-          :data-testid="tid.btn('add')"
-          :label="t('carePlanAdd')"
-          @click="openAdd"
+        <div class="col-auto">
+          <q-btn
+            v-if="canAddCarePlans"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :disable="loading"
+            :data-testid="tid.btn('add')"
+            :label="t('carePlanAdd')"
+            @click="openAdd"
+          />
+        </div>
+      </div>
+
+      <AdminTablePanel
+        class="care-plans-table-panel q-mt-md"
+        :show-column-settings="false">
+        <AppLoadingOverlay
+          scope="content"
+          :showing="loading"
         />
-      </div>
-
-      <div v-if="loading" class="care-plans-panel q-pa-xl flex flex-center">
-        <AppBrandLoading inline />
-      </div>
-
-      <div v-else class="care-plans-panel q-pa-md">
         <CarePlansTable
-          :rows="paginatedPlans"
+          :rows="plans"
           :empty-label="t('carePlanListEmpty')"
           :can-edit="canEditCarePlans"
           :can-sign="canSignCarePlans"
@@ -55,30 +61,7 @@
           @sign="openSign"
           @status="onChangeStatus"
         />
-
-        <div
-          v-if="plans.length"
-          class="row items-center justify-between q-mt-md">
-          <p class="text-body2 text-grey-7 q-mb-none">
-            {{
-              t('carePlanPaginationSummary', {
-                from: pageFrom,
-                to: pageTo,
-                total: plans.length,
-              })
-            }}
-          </p>
-          <q-pagination
-            v-model="page"
-            :max="pageCount"
-            max-pages="6"
-            direction-links
-            boundary-links
-            color="primary"
-            size="sm"
-          />
-        </div>
-      </div>
+      </AdminTablePanel>
     </template>
 
     <CarePlanDialog
@@ -99,8 +82,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import CarePlanDialog from 'components/CarePlanDialog.vue'
-import AppBrandLoading from 'components/AppBrandLoading.vue'
 import CarePlansTable from 'components/CarePlansTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { useClientCarePlanPermissions } from
@@ -147,8 +131,6 @@ const {
 const loading = ref(false)
 const saving = ref(false)
 const plans = ref([])
-const page = ref(1)
-const pageSize = 10
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -168,34 +150,6 @@ const resolvedClinicianOptions = computed(() => {
   }
 
   return [{ label: 'Dr. John Smith', value: 5 }]
-})
-
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(plans.value.length / pageSize)),
-)
-
-const paginatedPlans = computed(() => {
-  const start = (page.value - 1) * pageSize
-
-  return plans.value.slice(start, start + pageSize)
-})
-
-const pageFrom = computed(() => {
-  if (!plans.value.length) {
-    return 0
-  }
-
-  return (page.value - 1) * pageSize + 1
-})
-
-const pageTo = computed(() =>
-  Math.min(page.value * pageSize, plans.value.length),
-)
-
-watch(pageCount, maxPage => {
-  if (page.value > maxPage) {
-    page.value = 1
-  }
 })
 
 watch(clientId, () => {
@@ -393,30 +347,3 @@ async function onRecordProgress({ goalId, measureId, currentValue }) {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.add-client-care-plans-tab {
-  width: 100%;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.care-plans-panel {
-  background: #fff;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-lg;
-}
-
-.care-plans-panel__title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: $text-strong;
-}
-
-.care-plans-panel__subtitle {
-  margin: 0;
-}
-</style>

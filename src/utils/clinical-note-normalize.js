@@ -5,6 +5,7 @@ import {
 } from 'src/utils/clinical-note-datetime.js'
 import {
   formatClinicianDisplayLabel,
+  formatClinicianPersonName,
   clinicianInitialsFromPersonName,
 } from 'src/utils/clinician-display.js'
 
@@ -44,6 +45,39 @@ export function clinicianInitialsFromLabel(label) {
   return clinicianInitialsFromPersonName(label)
 }
 
+function resolveClinicalNoteClinicianEntries(
+  clinician,
+  clinicianId,
+  clinicianOptions = [],
+) {
+  const source = clinician
+    ?? (clinicianId != null ? { id: clinicianId } : null)
+  if (!source) {
+    return []
+  }
+
+  const label = resolveClinicianLabel(source, clinicianOptions)
+  if (!label || label === '—') {
+    return []
+  }
+
+  const personName = formatClinicianPersonName(clinician ?? {})
+  const specialty = trim(clinician?.specialty)
+  const labelParts = label.split(' - ')
+
+  return [{
+    id: clinicianId ?? clinician?.id ?? null,
+    name: label,
+    personName: personName || labelParts[0]?.trim() || label,
+    specialty: specialty || (labelParts.length > 1
+      ? labelParts.slice(1).join(' - ').trim()
+      : ''),
+    initials: clinicianInitialsFromPersonName(
+      personName || label,
+    ),
+  }]
+}
+
 export function normalizeClinicalNoteSummary(
   row,
   clinicianOptions = [],
@@ -53,20 +87,21 @@ export function normalizeClinicalNoteSummary(
   const clinician = row?.clinician ?? null
   const subjective = trim(row?.subjective)
   const status = normalizeStatus(row?.status)
+  const clinicianLabel = resolveClinicianLabel(
+    clinician ?? { id: clinicianId },
+    clinicianOptions,
+  )
 
   return {
     id: row?.id,
     clientId: row?.client_id ?? row?.clientId ?? null,
     clinicianId,
-    clinicianLabel: resolveClinicianLabel(
-      clinician ?? { id: clinicianId },
+    clinicianLabel,
+    clinicianInitials: clinicianInitialsFromLabel(clinicianLabel),
+    clinicianEntries: resolveClinicalNoteClinicianEntries(
+      clinician,
+      clinicianId,
       clinicianOptions,
-    ),
-    clinicianInitials: clinicianInitialsFromLabel(
-      resolveClinicianLabel(
-        clinician ?? { id: clinicianId },
-        clinicianOptions,
-      ),
     ),
     noteDateTime,
     noteDateTimeDisplay: formatClinicalNoteDateTimeDisplay(noteDateTime),

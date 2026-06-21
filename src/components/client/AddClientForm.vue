@@ -567,8 +567,6 @@
                 v-if="subTab.key === CLINICAL_FAMILY_HISTORY_SUB_TAB"
                 ref="fmhTabRef"
                 v-model="form[clientFormSections.familyMedicalHistory]"
-                :readonly="fmhReadonly"
-                :can-view="canViewFmhTab"
               />
               <AddClientVitalsTab
                 v-else-if="subTab.key === CLINICAL_VITALS_SUB_TAB"
@@ -921,13 +919,17 @@ const canViewContactTab = canViewMainTabFor(addClientTabKeys.contact)
 const canViewAllergiesTab = canViewMainTabFor(addClientTabKeys.allergies)
 const canViewInsuranceTab = canViewMainTabFor(addClientTabKeys.insurance)
 
-const fmhReadonly = canEditSubTabFor(CLINICAL_FAMILY_HISTORY_SUB_TAB)
-const canViewFmhTab = canViewSubTabFor(CLINICAL_FAMILY_HISTORY_SUB_TAB)
-const vitalsReadonly = canEditSubTabFor(CLINICAL_VITALS_SUB_TAB)
+const vitalsReadonly = computed(
+  () => !canEditSubTabFor(CLINICAL_VITALS_SUB_TAB).value,
+)
 const canViewVitalsTab = canViewSubTabFor(CLINICAL_VITALS_SUB_TAB)
-const assessmentsReadonly = canEditSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB)
+const assessmentsReadonly = computed(
+  () => !canEditSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB).value,
+)
 const canViewAssessmentsTab = canViewSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB)
-const labsReadonly = canEditSubTabFor(CLINICAL_LABS_SUB_TAB)
+const labsReadonly = computed(
+  () => !canEditSubTabFor(CLINICAL_LABS_SUB_TAB).value,
+)
 const canViewLabsTab = canViewSubTabFor(CLINICAL_LABS_SUB_TAB)
 const canViewFollowUpsTab = canViewSubTabFor(
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,

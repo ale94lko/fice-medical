@@ -6,12 +6,18 @@ import {
   buildClientUpdateBody,
   extractClientMutationResponse,
   extractClientWarnings,
-  extractEnvelopeList,
   extractEnvelopeListPagination,
-  formatClientDisplay,
-  mapClient,
   mapClientApiToForm,
 } from 'components/helpers.js'
+import {
+  applyClientListColumnPreferencesState,
+  columnConfigToApiPayload,
+  defaultClientListColumnPreferences,
+  normalizeColumnCatalogFromApi,
+  normalizeVisibleColumnsFromApi,
+  preferencesFromColumnConfig,
+} from 'src/utils/client-list-columns.js'
+import { mapClientListViewItem } from 'src/utils/client-list-normalize.js'
 import {
   catalogItemsFromCatalog,
   fetchCatalogsByNames,
@@ -30,12 +36,34 @@ function indexClientListSource(list) {
   return byId
 }
 
+function cloneClientListColumnState(store) {
+  return {
+    preferences: {
+      order: [...store.clientListColumnPreferences.order],
+      hidden: [...store.clientListColumnPreferences.hidden],
+    },
+    catalog: store.clientListColumnCatalog.map(entry => ({ ...entry })),
+    visibleColumns: store.clientListVisibleColumns.map(entry => ({
+      ...entry,
+    })),
+  }
+}
+
+function restoreClientListColumnState(store, snapshot) {
+  store.clientListColumnPreferences = snapshot.preferences
+  store.clientListColumnCatalog = snapshot.catalog
+  store.clientListVisibleColumns = snapshot.visibleColumns
+}
+
 export const useSiteStore = defineStore('site', {
   state: () => ({
     clientList: [],
     clientListSourceById: {},
     clientListPagination: null,
     clientListQuery: { page: 1, limit: 20, filter: null, q: null },
+    clientListVisibleColumns: [],
+    clientListColumnCatalog: [],
+    clientListColumnPreferences: defaultClientListColumnPreferences(),
     suffixCatalogSelectOptions: null,
   }),
   actions: {
@@ -62,6 +90,7 @@ export const useSiteStore = defineStore('site', {
         this.clientList = []
         this.clientListSourceById = {}
         this.clientListPagination = null
+        this.clientListVisibleColumns = []
         this.clientListQuery = {
           ...this.clientListQuery,
           ...queryPatch,
@@ -70,21 +99,59 @@ export const useSiteStore = defineStore('site', {
         return
       }
 
-      const list = extractEnvelopeList(root)
-      const suffixSelectOptions =
-        await this.resolveSuffixCatalogSelectOptions()
+      const list = Array.isArray(root.items) ? root.items : []
+      this.clientListVisibleColumns = normalizeVisibleColumnsFromApi(
+        root.columns,
+      )
       this.clientListSourceById = indexClientListSource(list)
       this.clientList = list
-        .map(client => formatClientDisplay(
-          mapClient(client, { suffixSelectOptions }),
-          t,
-        ))
+        .map(item => mapClientListViewItem(item, t))
         .filter(Boolean)
       this.clientListPagination = extractEnvelopeListPagination(root)
       this.clientListQuery = {
         ...this.clientListQuery,
         ...queryPatch,
       }
+    },
+    async fetchClientListColumnConfig() {
+      const response = await apiInstance.get(
+        apiPaths.clientsListColumnConfig,
+      )
+      const root = response?.data?.data
+      this.clientListColumnCatalog = normalizeColumnCatalogFromApi(root)
+      this.clientListColumnPreferences = preferencesFromColumnConfig(root)
+    },
+    applyClientListColumnPreferences(preferences) {
+      const next = applyClientListColumnPreferencesState(
+        preferences,
+        this.clientListColumnCatalog,
+      )
+      this.clientListColumnPreferences = next.preferences
+      this.clientListColumnCatalog = next.catalog
+      this.clientListVisibleColumns = next.visibleColumns
+    },
+    persistClientListColumnConfig(preferences) {
+      const payload = columnConfigToApiPayload(
+        preferences,
+        this.clientListColumnCatalog,
+      )
+      const snapshot = cloneClientListColumnState(this)
+      this.applyClientListColumnPreferences(preferences)
+
+      return apiInstance
+        .put(apiPaths.clientsListColumnConfig, payload)
+        .catch((error) => {
+          restoreClientListColumnState(this, snapshot)
+          throw error
+        })
+    },
+    saveClientListColumnConfig(preferences) {
+      return this.persistClientListColumnConfig(preferences)
+    },
+    resetClientListColumnConfig() {
+      const defaults = defaultClientListColumnPreferences()
+
+      return this.persistClientListColumnConfig(defaults)
     },
     async getClientList(params = {}, t) {
       try {

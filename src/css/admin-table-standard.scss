@@ -176,6 +176,14 @@
     box-shadow: -8px 0 8px $table-header-bg;
     border-radius: 0;
   }
+
+  &--wide {
+    overflow: visible;
+
+    .admin-table-panel__table-wrap {
+      overflow: visible;
+    }
+  }
 }
 
 .admin-data-table {
@@ -223,30 +231,53 @@
     display: none !important;
   }
 
-  thead tr {
-    height: $table-header-height;
+  .q-table {
+    thead tr {
+      height: $table-header-height !important;
+    }
+
+    thead tr th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      height: $table-header-height !important;
+      min-height: $table-header-height !important;
+      max-height: $table-header-height !important;
+      padding: 4px 12px !important;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: normal;
+      text-transform: none;
+      vertical-align: middle;
+      box-sizing: border-box;
+      color: $text-muted;
+      background: $table-header-bg !important;
+      border-bottom: 1px solid $table-border;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      height: $table-row-height !important;
+    }
+
+    tbody td {
+      height: $table-row-height !important;
+      min-height: $table-row-height !important;
+      max-height: $table-row-height !important;
+      padding: 2px 12px !important;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.25;
+      color: $table-text-primary;
+      border-bottom: 1px solid $table-border;
+      white-space: nowrap;
+      box-sizing: border-box;
+      vertical-align: middle;
+    }
   }
 
-  thead tr th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    height: $table-header-height;
-    min-height: $table-header-height;
-    max-height: $table-header-height;
-    padding: 2px 12px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: normal;
-    text-transform: none;
-    vertical-align: middle;
-    color: $text-muted;
-    background: $table-header-bg !important;
-    border-bottom: 1px solid $table-border;
-    white-space: nowrap;
-  }
-
-  &.table {
+  &.table .q-table {
     thead tr th:last-child {
       right: 0;
       z-index: 4;
@@ -271,26 +302,15 @@
     }
   }
 
-  tbody tr td {
-    height: $table-row-height;
-    padding: 2px 12px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.25;
-    color: $table-text-primary;
-    border-bottom: 1px solid $table-border;
-    white-space: nowrap;
-  }
-
-  tbody tr:hover td {
+  .q-table tbody tr:hover td {
     background: $table-hover-bg !important;
   }
 
-  tbody tr.q-tr--selected td {
+  .q-table tbody tr.q-tr--selected td {
     background: $table-selected-bg !important;
   }
 
-  tbody tr.data-row--inactive td:not(:last-child) {
+  .q-table tbody tr.data-row--inactive td:not(:last-child) {
     background: #fef2f2 !important;
     box-shadow: inset 3px 0 0 $negative;
   }
@@ -339,6 +359,152 @@
     gap: 4px;
     border-top: 1px solid $table-border;
   }
+
+  &--embedded {
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+
+    .q-table__middle {
+      overflow: visible;
+    }
+
+    &.table .q-table {
+      thead tr th:last-child,
+      tbody tr td:last-child {
+        position: static;
+        right: auto;
+        box-shadow: none;
+      }
+    }
+  }
+
+  &__scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 16px;
+    margin-bottom: 2px;
+
+    .admin-data-table {
+      overflow: visible;
+      max-height: none;
+      min-height: 0;
+
+      .q-table__middle {
+        overflow: visible;
+      }
+
+      &.table .q-table {
+        thead tr th:last-child {
+          position: sticky;
+          right: 0;
+          z-index: 4;
+          background-color: $table-header-bg !important;
+          box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
+        }
+
+        tbody tr td:last-child {
+          position: sticky;
+          right: 0;
+          z-index: 1;
+          background-color: $surface !important;
+          box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
+        }
+
+        tbody tr:hover td:last-child {
+          background: $table-hover-bg !important;
+        }
+      }
+    }
+  }
+
+  &__native {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    font-family: Inter, 'Segoe UI', sans-serif;
+
+    thead tr {
+      height: $table-header-height;
+    }
+
+    thead tr th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      height: $table-header-height;
+      min-height: $table-header-height;
+      max-height: $table-header-height;
+      padding: 4px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: normal;
+      text-transform: none;
+      vertical-align: middle;
+      box-sizing: border-box;
+      color: $text-muted;
+      background: $table-header-bg !important;
+      border-bottom: 1px solid $table-border;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    tbody tr td {
+      height: auto;
+      min-height: $table-row-height;
+      padding: 2px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.25;
+      color: $table-text-primary;
+      border-bottom: 1px solid $table-border;
+      white-space: nowrap;
+      vertical-align: middle;
+      box-sizing: border-box;
+    }
+
+    tbody tr:hover td {
+      background: $table-hover-bg !important;
+    }
+  }
+
+  &.table &__native {
+    thead tr th:last-child {
+      right: 0;
+      z-index: 4;
+      background-color: $table-header-bg !important;
+      box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
+    }
+
+    tbody tr td:last-child {
+      position: sticky;
+      right: 0;
+      z-index: 1;
+      background-color: $surface !important;
+      box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
+    }
+
+    tbody tr:hover td:last-child {
+      background: $table-hover-bg !important;
+    }
+  }
+
+  &__actions-header-cell {
+    text-align: center !important;
+    min-width: 132px;
+    width: 132px;
+  }
+
+  &__actions-cell {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  &__empty {
+    min-height: 120px;
+  }
 }
 
 .admin-table-actions-header {
@@ -347,13 +513,13 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 18px;
+  min-height: $table-header-height;
 
   &__label {
     width: 100%;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
-    line-height: 1;
+    line-height: 1.25;
     color: $text-muted;
     text-align: center;
   }

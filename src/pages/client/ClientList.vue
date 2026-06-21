@@ -196,6 +196,115 @@
           </q-td>
         </template>
 
+        <template #body-cell-phones="scope">
+          <q-td
+            :props="scope"
+            class="admin-data-table__secondary-cell
+              client-list-page__email-cell">
+            <div
+              v-if="scope.row.phoneEntries?.length"
+              class="client-list-page__emails row items-center no-wrap">
+              <span
+                class="client-list-page__email-primary row
+                  items-center no-wrap">
+                <AdminTableSearchHighlight
+                  :text="scope.row.phoneEntries[0].phone"
+                  :query="highlightQuery"
+                />
+                <span
+                  v-if="scope.row.phoneEntries[0].typeLabel"
+                  class="client-list-page__email-type">
+                  {{ scope.row.phoneEntries[0].typeLabel }}
+                </span>
+              </span>
+              <span
+                v-if="scope.row.phoneEntries.length > 1"
+                class="client-list-page__email-more">
+                +{{ scope.row.phoneEntries.length - 1 }}
+                <q-tooltip
+                  anchor="top middle"
+                  self="bottom middle"
+                  class="client-list-page__email-tooltip"
+                  :offset="[0, 6]">
+                  <div
+                    v-for="entry in scope.row.phoneEntries"
+                    :key="`phone-tip-${entry.key}`"
+                    class="client-list-page__email-tooltip-line row
+                      items-center no-wrap">
+                    <span class="client-list-page__email-tooltip-address">
+                      {{ entry.phone }}
+                    </span>
+                    <span
+                      v-if="entry.typeLabel"
+                      class="client-list-page__email-tooltip-type">
+                      {{ entry.typeLabel }}
+                    </span>
+                  </div>
+                </q-tooltip>
+              </span>
+            </div>
+            <span v-else>—</span>
+          </q-td>
+        </template>
+
+        <template #body-cell-allergies="scope">
+          <q-td
+            :props="scope"
+            class="admin-data-table__secondary-cell
+              client-list-page__email-cell">
+            <span
+              v-if="!scope.row.allergyEntries?.length"
+              :class="[
+                'allergy-severity-badge',
+                'client-list-page__allergy-badge',
+                allergySeverityBadgeClass('nka'),
+              ]">
+              {{ t('noKnownAllergiesLabel') }}
+            </span>
+            <div
+              v-else
+              class="client-list-page__emails row items-center no-wrap">
+              <span
+                :class="[
+                  'allergy-severity-badge',
+                  'client-list-page__allergy-badge',
+                  allergySeverityBadgeClass(
+                    scope.row.allergyEntries[0].severityModifier,
+                  ),
+                ]">
+                <AdminTableSearchHighlight
+                  :text="scope.row.allergyEntries[0].badgeLabel"
+                  :query="highlightQuery"
+                />
+              </span>
+              <span
+                v-if="scope.row.allergyEntries.length > 1"
+                class="client-list-page__email-more">
+                +{{ scope.row.allergyEntries.length - 1 }}
+                <q-tooltip
+                  anchor="top middle"
+                  self="bottom middle"
+                  class="client-list-page__email-tooltip"
+                  :offset="[0, 6]">
+                  <div
+                    v-for="entry in scope.row.allergyEntries"
+                    :key="`allergy-tip-${entry.key}`"
+                    class="client-list-page__email-tooltip-line">
+                    <span
+                      :class="[
+                        'allergy-severity-badge',
+                        'client-list-page__allergy-badge',
+                        allergySeverityBadgeClass(entry.severityModifier),
+                      ]">
+                      {{ entry.badgeLabel }}
+                    </span>
+                  </div>
+                </q-tooltip>
+              </span>
+            </div>
+          </q-td>
+        </template>
+
         <template #body-cell-dob="scope">
           <q-td :props="scope">
             <AdminTableSearchHighlight
@@ -276,8 +385,8 @@
       :default-order="defaultColumnOrder"
       :is-required-column="isRequiredColumn"
       :is-locked-column="isLockedColumn"
-      @save="saveColumnPreferences"
-      @reset="resetColumnPreferences"
+      @save="onSaveColumnPreferences"
+      @reset="onResetColumnPreferences"
     />
   </q-page>
 </template>
@@ -319,12 +428,16 @@ import {
   CLIENT_LIST_SUMMARY_FILTERS,
   useClientListColumnPreferences,
 } from 'src/composables/useClientListColumnPreferences.js'
+import { apiColumnKeyToFrontend } from 'src/utils/client-list-columns.js'
 import { useClientListSearch } from
   'src/composables/useClientListSearch.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { isClientListServerSearchQuery } from
   'src/utils/client-list-search.js'
+import {
+  clientListAllergySeverityBadgeClass as allergySeverityBadgeClass,
+} from 'src/utils/client-list-allergy-severity.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
 
@@ -348,12 +461,14 @@ const col = clientListColumnKeys
 
 const {
   preferences: columnPreferences,
+  loadPreferences: loadColumnPreferences,
   savePreferences: saveColumnPreferences,
   resetPreferences: resetColumnPreferences,
   buildVisibleColumns,
   isRequiredColumn,
   isLockedColumn,
   defaultOrder: defaultColumnOrder,
+  columnCatalog,
 } = useClientListColumnPreferences()
 
 const summaryMetrics = ref({
@@ -454,6 +569,17 @@ const allColumns = computed(() => [
     classes: 'admin-data-table__secondary-cell',
   },
   {
+    name: col.phones,
+    required: false,
+    label: t('phone'),
+    align: 'left',
+    field: row => row.phoneEntries,
+    sortable: false,
+    headerStyle: 'min-width: 180px',
+    style: 'min-width: 180px',
+    classes: 'admin-data-table__secondary-cell',
+  },
+  {
     name: col.dob,
     required: true,
     label: t('dob'),
@@ -462,6 +588,17 @@ const allColumns = computed(() => [
     sortable: true,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
+  },
+  {
+    name: col.allergies,
+    required: false,
+    label: t('clientListColAllergies'),
+    align: 'left',
+    field: row => row.allergyEntries,
+    sortable: false,
+    headerStyle: 'min-width: 180px',
+    style: 'min-width: 180px',
+    classes: 'admin-data-table__secondary-cell',
   },
   {
     name: col.clinicians,
@@ -505,11 +642,24 @@ const allColumns = computed(() => [
   },
 ])
 
-const columnLabels = computed(() =>
-  Object.fromEntries(
+const columnLabels = computed(() => {
+  const fromColumns = Object.fromEntries(
     allColumns.value.map(column => [column.name, column.label]),
-  ),
-)
+  )
+  const fromCatalog = Object.fromEntries(
+    columnCatalog.value
+      .map(entry => [
+        apiColumnKeyToFrontend(entry.key),
+        entry.label,
+      ])
+      .filter(([key]) => Boolean(key)),
+  )
+
+  return {
+    ...fromColumns,
+    ...fromCatalog,
+  }
+})
 
 const visibleColumns = computed(() =>
   buildVisibleColumns(allColumns.value),
@@ -521,7 +671,9 @@ function clientTablePaginationFromStore(paginationPayload) {
     ? Number(meta.total)
     : siteStore.clientList.length
   let resolvedPage = paginationPayload.page
-  if (meta && meta.limit > 0 && Number.isFinite(meta.offset)) {
+  if (meta && Number.isFinite(Number(meta.page))) {
+    resolvedPage = Number(meta.page) + 1
+  } else if (meta && meta.limit > 0 && Number.isFinite(meta.offset)) {
     resolvedPage = Math.floor(Number(meta.offset) / Number(meta.limit)) + 1
   }
 
@@ -532,6 +684,28 @@ function clientTablePaginationFromStore(paginationPayload) {
     rowsPerPage: paginationPayload.rowsPerPage,
     rowsNumber: total,
   }
+}
+
+function onSaveColumnPreferences(prefs) {
+  saveColumnPreferences(prefs).catch((error) => {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientListColumnConfigError'),
+      })
+    }
+  })
+}
+
+function onResetColumnPreferences() {
+  resetColumnPreferences().catch((error) => {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientListColumnConfigError'),
+      })
+    }
+  })
 }
 
 async function loadClients(paginationPayload) {
@@ -608,7 +782,7 @@ function syncFooterPaginationBar() {
   })
 }
 
-onMounted(() => {
+onMounted(async() => {
   setFooterPagination({
     page: tablePagination.value.page,
     rowsPerPage: tablePagination.value.rowsPerPage,
@@ -619,7 +793,20 @@ onMounted(() => {
     onPageChange,
     onRowsPerPageChange,
   })
-  loadClients(tablePagination.value)
+  loading.value = true
+  try {
+    await loadColumnPreferences()
+    await loadClients(tablePagination.value)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientListError'),
+      })
+    }
+  } finally {
+    loading.value = false
+  }
 })
 
 onBeforeUnmount(() => {

@@ -17,8 +17,7 @@ import {
 
 const SUB_TAB_VIEW = {
   [addClientClinicalSubTabKeys.familyHistory]: [
-    clientPermissionNames.viewTenantData,
-    clientPermissionNames.viewClient,
+    clientPermissionNames.viewMedicalHistory,
   ],
   [addClientClinicalSubTabKeys.assessments]: [
     clientPermissionNames.viewScreenings,
@@ -48,7 +47,8 @@ const SUB_TAB_VIEW = {
 
 const SUB_TAB_EDIT = {
   [addClientClinicalSubTabKeys.familyHistory]: [
-    clientPermissionNames.editTenantData,
+    clientPermissionNames.addMedicalHistory,
+    clientPermissionNames.editMedicalHistory,
   ],
   [addClientClinicalSubTabKeys.assessments]: [
     clientPermissionNames.editScreenings,

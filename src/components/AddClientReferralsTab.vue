@@ -1,6 +1,8 @@
 <template>
   <div class="add-client-referrals-tab">
-    <div v-if="!hasClientId" class="referrals-panel q-pa-lg text-center">
+    <div
+      v-if="!hasClientId"
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('referralSaveClientFirst') }}
@@ -9,7 +11,7 @@
 
     <div
       v-else-if="!canViewReferrals"
-      class="referrals-panel q-pa-lg text-center">
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('referralNoPermission') }}
@@ -17,39 +19,41 @@
     </div>
 
     <template v-else>
-      <div class="row items-center justify-between q-mb-md">
-        <div>
-          <h2 class="referrals-panel__title row items-center no-wrap q-mb-none">
-            <q-icon
-              name="groups"
-              size="28px"
-              color="primary"
-              class="q-mr-sm"
-            />
-            <span>{{ t('referralsTitle') }}</span>
+      <div class="referrals-header row items-start">
+        <div class="col">
+          <h2 class="referrals-title">
+            {{ t('referralsTitle') }}
           </h2>
+          <p class="referrals-subtitle text-body2">
+            {{ t('referralsSubtitle') }}
+          </p>
         </div>
-        <q-btn
-          v-if="canAddReferrals"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="add"
-          :disable="loading"
-          :data-testid="tid.btn('add')"
-          :label="t('referralAdd')"
-          @click="openAdd"
+        <div class="col-auto">
+          <q-btn
+            v-if="canAddReferrals"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :disable="loading"
+            :data-testid="tid.btn('add')"
+            :label="t('referralAdd')"
+            @click="openAdd"
+          />
+        </div>
+      </div>
+
+      <AdminTablePanel
+        class="referrals-table-panel admin-table-panel--wide q-mt-md"
+        :show-column-settings="false">
+        <AppLoadingOverlay
+          scope="content"
+          :showing="loading"
         />
-      </div>
-
-      <div v-if="loading" class="referrals-panel q-pa-xl flex flex-center">
-        <AppBrandLoading inline />
-      </div>
-
-      <div v-else class="referrals-panel q-pa-md">
         <ReferralsTable
-          :rows="paginatedReferrals"
+          :rows="referrals"
+          :clinician-options="resolvedClinicianOptions"
           :empty-label="t('referralListEmpty')"
           :can-edit="canEditReferrals"
           :can-schedule="canAddReferrals"
@@ -59,30 +63,7 @@
           @schedule="onSchedule"
           @delete="confirmDelete"
         />
-
-        <div
-          v-if="referrals.length"
-          class="row items-center justify-between q-mt-md">
-          <p class="text-body2 text-grey-7 q-mb-none">
-            {{
-              t('referralPaginationSummary', {
-                from: pageFrom,
-                to: pageTo,
-                total: referrals.length,
-              })
-            }}
-          </p>
-          <q-pagination
-            v-model="page"
-            :max="pageCount"
-            max-pages="6"
-            direction-links
-            boundary-links
-            color="primary"
-            size="sm"
-          />
-        </div>
-      </div>
+      </AdminTablePanel>
     </template>
 
     <ReferralDialog
@@ -116,8 +97,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
-import AppBrandLoading from 'components/AppBrandLoading.vue'
 import ReferralDialog from 'components/ReferralDialog.vue'
 import ReferralsTable from 'components/ReferralsTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
@@ -176,8 +158,6 @@ const loading = ref(false)
 const saving = ref(false)
 const documentUploading = ref(false)
 const referrals = ref([])
-const page = ref(1)
-const pageSize = 10
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -189,34 +169,6 @@ const hasClientId = computed(() => Boolean(String(props.clientId ?? '').trim()))
 const clientId = computed(() => String(props.clientId ?? '').trim())
 
 const resolvedClinicianOptions = computed(() => props.clinicianOptions ?? [])
-
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(referrals.value.length / pageSize)),
-)
-
-const paginatedReferrals = computed(() => {
-  const start = (page.value - 1) * pageSize
-
-  return referrals.value.slice(start, start + pageSize)
-})
-
-const pageFrom = computed(() => {
-  if (!referrals.value.length) {
-    return 0
-  }
-
-  return (page.value - 1) * pageSize + 1
-})
-
-const pageTo = computed(() =>
-  Math.min(page.value * pageSize, referrals.value.length),
-)
-
-watch(pageCount, maxPage => {
-  if (page.value > maxPage) {
-    page.value = 1
-  }
-})
 
 watch(clientId, () => {
   void loadReferrals()
@@ -437,32 +389,3 @@ function notifyError(error, fallback) {
   })
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.add-client-referrals-tab {
-  width: 100%;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.referrals-panel__title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.referrals-summary-card {
-  background: $surface;
-  border: 1px solid $border-subtle;
-  border-radius: 12px;
-}
-
-.referrals-summary-card__value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: $text-strong;
-}
-</style>

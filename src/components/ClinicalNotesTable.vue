@@ -1,103 +1,129 @@
 <template>
-  <div v-if="rows.length" class="fmh-table-wrap fmh-table-wrap--wide">
-    <table class="fmh-table fmh-table--wide clinical-notes-table">
-      <thead>
-        <tr>
-          <th>{{ t('clinicalNoteColDateTime') }}</th>
-          <th>{{ t('clinicalNoteColClinician') }}</th>
-          <th>{{ t('status') }}</th>
-          <th>{{ t('clinicalNoteColSummary') }}</th>
-          <th class="fmh-table-actions-col">{{ t('actions') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows" :key="row.id">
-          <td>{{ row.noteDateTimeDisplay || '—' }}</td>
-          <td>
-            <span
-              class="clinical-notes-table__clinician row items-center
-                no-wrap">
-              <span class="clinical-notes-table__avatar">
-                {{ row.clinicianInitials || '?' }}
-              </span>
-              <span>{{ row.clinicianLabel || '—' }}</span>
-            </span>
-          </td>
-          <td>
-            <span
-              class="clinical-note-status-badge"
-              :class="`clinical-note-status-badge--${row.status}`">
-              {{ statusLabel(row.status) }}
-            </span>
-          </td>
-          <td class="clinical-notes-table__summary">
-            {{ row.summaryPreview || '—' }}
-          </td>
-          <td class="fmh-table-actions clinical-notes-table__actions">
-            <q-btn
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action clinical-notes-table__action"
-              color="primary"
-              icon="visibility"
-              :data-testid="tid.rowView(row.id)"
-              :aria-label="t('clinicalNoteActionView')"
-              @click="emit('view', row)"
-            />
-            <q-btn
-              v-if="canDownloadRow(row)"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action clinical-notes-table__action"
-              color="primary"
-              icon="download"
-              :data-testid="tid.rowDownload(row.id)"
-              :aria-label="t('clinicalNoteActionDownload')"
-              @click="emit('download', row)"
-            />
-            <q-btn
-              v-if="canEditRow(row)"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action clinical-notes-table__action"
-              color="primary"
-              icon="edit"
-              :data-testid="tid.rowEdit(row.id)"
-              :aria-label="t('edit')"
-              @click="emit('edit', row)"
-            />
-            <q-btn
-              v-if="canDeleteRow(row)"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action clinical-notes-table__action"
-              icon="delete"
-              :data-testid="tid.rowDelete(row.id)"
-              :aria-label="t('delete')"
-              @click="emit('delete', row)"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <AdminQTable
+    v-if="rows.length"
+    class="table admin-data-table admin-data-table--embedded
+      admin-data-table--inline-column-settings"
+    flat
+    hide-bottom
+    row-key="id"
+    :rows="rows"
+    :columns="columns"
+    :pagination="tablePagination">
+    <template #body-cell-noteDateTime="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ scope.row.noteDateTimeDisplay || '—' }}
+      </q-td>
+    </template>
+
+    <template #body-cell-clinician="scope">
+      <q-td :props="scope">
+        <AdminTableClinicianAvatars
+          v-if="scope.row.clinicianEntries?.length"
+          :entries="scope.row.clinicianEntries"
+        />
+        <span v-else>—</span>
+      </q-td>
+    </template>
+
+    <template #body-cell-status="scope">
+      <q-td :props="scope">
+        <AdminTableStatusCell
+          :label="statusLabel(scope.row.status)"
+          :variant="statusVariant(scope.row.status)"
+        />
+      </q-td>
+    </template>
+
+    <template #body-cell-summary="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell
+          clinical-notes-table__summary">
+        {{ scope.row.summaryPreview || '—' }}
+      </q-td>
+    </template>
+
+    <template #row-actions="{ row }">
+      <div class="admin-table-row-actions">
+        <q-btn
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="adminTableActionIcons.view"
+          :data-testid="tid.rowView(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('clinicalNoteActionView')"
+          :aria-label="t('clinicalNoteActionView')"
+          @click="emit('view', row)"
+        />
+        <q-btn
+          v-if="canDownloadRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="download"
+          :data-testid="tid.rowDownload(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('clinicalNoteActionDownload')"
+          :aria-label="t('clinicalNoteActionDownload')"
+          @click="emit('download', row)"
+        />
+        <q-btn
+          v-if="canEditRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="adminTableActionIcons.edit"
+          :data-testid="tid.rowEdit(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('edit')"
+          :aria-label="t('edit')"
+          @click="emit('edit', row)"
+        />
+        <q-btn
+          v-if="canDeleteRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="delete"
+          :data-testid="tid.rowDelete(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('delete')"
+          :aria-label="t('delete')"
+          @click="emit('delete', row)"
+        />
+      </div>
+    </template>
+  </AdminQTable>
+
   <div
     v-else
-    class="clinical-notes-empty text-center q-pa-xl">
-    <q-icon name="description" size="48px" color="grey-5" />
-    <p class="text-body2 text-grey-7 q-mt-md q-mb-none">
-      {{ emptyLabel }}
-    </p>
+    class="admin-data-table__empty full-width row flex-center
+      text-grey-7 q-gutter-sm q-pa-lg">
+    <q-icon name="inbox" size="md" />
+    <span>{{ emptyLabel }}</span>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { clinicalNoteStatuses } from 'components/constants.js'
+import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
+import AdminTableStatusCell from
+  'components/admin-table/AdminTableStatusCell.vue'
+import {
+  clinicalNoteStatuses,
+  siteBreakpoints,
+} from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -127,6 +153,55 @@ const emit = defineEmits(['view', 'edit', 'delete', 'download'])
 
 const { t } = useI18n()
 
+const tablePagination = { rowsPerPage: 0 }
+
+const columns = computed(() => [
+  {
+    name: 'noteDateTime',
+    label: t('clinicalNoteColDateTime'),
+    align: 'left',
+    field: row => row.noteDateTimeDisplay,
+    sortable: false,
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
+  },
+  {
+    name: 'clinician',
+    label: t('clinicalNoteColClinician'),
+    align: 'left',
+    field: row => row.clinicianEntries,
+    sortable: false,
+    headerStyle: 'min-width: 100px',
+    style: 'min-width: 100px',
+  },
+  {
+    name: 'status',
+    label: t('status'),
+    align: 'left',
+    field: row => row.status,
+    sortable: false,
+    headerStyle: 'min-width: 100px',
+    style: 'min-width: 100px',
+  },
+  {
+    name: 'summary',
+    label: t('clinicalNoteColSummary'),
+    align: 'left',
+    field: row => row.summaryPreview,
+    sortable: false,
+  },
+  {
+    name: 'actions',
+    label: t('actions'),
+    align: 'center',
+    field: row => row.id,
+    sortable: false,
+    required: true,
+    headerStyle: 'min-width: 132px',
+    style: 'min-width: 132px',
+  },
+])
+
 function statusLabel(status) {
   if (status === clinicalNoteStatuses.signed) {
     return t('clinicalNoteStatusSigned')
@@ -136,6 +211,17 @@ function statusLabel(status) {
   }
 
   return status || '—'
+}
+
+function statusVariant(status) {
+  if (status === clinicalNoteStatuses.signed) {
+    return 'active'
+  }
+  if (status === clinicalNoteStatuses.draft) {
+    return 'inactive'
+  }
+
+  return 'other'
 }
 
 function canEditRow(row) {
@@ -150,60 +236,3 @@ function canDownloadRow(row) {
   return props.canDownload && row.status === clinicalNoteStatuses.signed
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.clinical-note-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.clinical-note-status-badge--SIGNED {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.clinical-note-status-badge--DRAFT {
-  background: #f1f5f9;
-  color: $text-muted;
-}
-
-.clinical-notes-table__clinician {
-  gap: 8px;
-}
-
-.clinical-notes-table__avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #e2e8f0;
-  color: $text-muted;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.clinical-notes-table__summary {
-  max-width: 280px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.clinical-notes-table__actions {
-  white-space: nowrap;
-}
-
-.clinical-notes-table__action {
-  color: $text-muted !important;
-}
-</style>
