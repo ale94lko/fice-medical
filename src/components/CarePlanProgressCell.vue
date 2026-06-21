@@ -1,6 +1,31 @@
 <template>
   <div class="care-plan-progress-cell">
-    <template v-if="isMeasured">
+    <template v-if="compact">
+      <template v-if="isMeasured">
+        <div
+          class="care-plan-progress-cell__percent"
+          :class="`care-plan-progress-cell__percent--${colorToken}`">
+          {{ Math.round(percent) }}%
+        </div>
+        <q-linear-progress
+          :value="percent / 100"
+          :color="barColor"
+          track-color="grey-3"
+          rounded
+          size="6px"
+          class="care-plan-progress-cell__bar q-mt-xs"
+        />
+      </template>
+      <span
+        v-else-if="isAchieved"
+        class="text-positive text-weight-medium">
+        {{ t('carePlanProgressAchieved') }}
+      </span>
+      <span v-else class="text-grey-6">
+        {{ t('carePlanProgressNotMeasured') }}
+      </span>
+    </template>
+    <template v-else-if="isMeasured">
       <div
         class="care-plan-progress-cell__percent"
         :class="`care-plan-progress-cell__percent--${colorToken}`">
@@ -70,6 +95,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const { t } = useI18n()
@@ -101,6 +130,12 @@ const colorToken = computed(() => {
 .care-plan-progress-cell__percent {
   font-weight: 700;
   font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+.care-plan-progress-cell__bar {
+  min-width: 72px;
+  max-width: 120px;
 }
 
 .care-plan-progress-cell__percent--low {

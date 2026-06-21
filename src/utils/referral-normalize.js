@@ -94,6 +94,7 @@ export function normalizeReferralSummary(raw) {
     assignedClinicianId: parseOptionalNumber(
       row.assigned_clinician_id ?? row.assignedClinicianId,
     ),
+    assignedClinician: row.assigned_clinician ?? row.assignedClinician ?? null,
     followUpRequired: parseBool(
       row.follow_up_required ?? row.followUpRequired,
       false,

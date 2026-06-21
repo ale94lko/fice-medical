@@ -10,10 +10,8 @@
     </div>
 
     <template v-else>
-    <fieldset
-      :disabled="readonly"
-      class="add-client-form__readonly-fieldset">
     <AccordionSection
+      v-if="canAddMedicalHistory"
       icon="add_circle_outline"
       :title="t('fmhAddSectionTitle')"
       section-test-id="add-client-accordion-fmh-add"
@@ -62,7 +60,6 @@
             </div>
             <div class="col-12 flex justify-end">
               <q-btn
-                v-if="!readonly"
                 no-caps
                 unelevated
                 color="primary"
@@ -76,7 +73,9 @@
       </div>
     </AccordionSection>
 
-    <q-separator class="section-separator" />
+    <q-separator
+      v-if="canAddMedicalHistory"
+      class="section-separator" />
 
     <AccordionSection
       icon="person"
@@ -86,7 +85,8 @@
       <div class="fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="personalEntries"
-          :can-edit="!readonly"
+          :can-edit="canEditMedicalHistory"
+          :can-delete="canDeleteMedicalHistory"
           :empty-label="t('fmhPersonalEmpty')"
           @edit="openEdit"
           @delete="openDelete"
@@ -104,14 +104,14 @@
       <div class="fmh-list-card q-pa-md">
         <FamilyMedicalHistoryTable
           :entries="familyEntries"
-          :can-edit="!readonly"
+          :can-edit="canEditMedicalHistory"
+          :can-delete="canDeleteMedicalHistory"
           :empty-label="t('fmhFamilyEmpty')"
           @edit="openEdit"
           @delete="openDelete"
         />
       </div>
     </AccordionSection>
-    </fieldset>
 
     <FamilyMedicalHistoryEditDialog
       v-model="editDialogOpen"
@@ -158,6 +158,8 @@ import {
   validateFamilyMedicalHistoryForAdd,
 } from 'src/utils/client-family-medical-history.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useClientMedicalHistoryPermissions } from
+  'src/composables/useClientMedicalHistoryPermissions.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
 
@@ -166,14 +168,6 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  readonly: {
-    type: Boolean,
-    default: false,
-  },
-  canView: {
-    type: Boolean,
-    default: true,
-  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -181,6 +175,14 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const $q = useQuasar()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
+const {
+  canViewMedicalHistory,
+  canAddMedicalHistory,
+  canEditMedicalHistory,
+  canDeleteMedicalHistory,
+} = useClientMedicalHistoryPermissions()
+
+const canView = canViewMedicalHistory
 
 const draftRelationshipError = ref('')
 const draftConditionsError = ref('')
@@ -270,6 +272,9 @@ function applyDraftValidationErrors(result) {
 }
 
 async function onAddEntry() {
+  if (!canAddMedicalHistory.value) {
+    return
+  }
   draftRelationshipError.value = ''
   draftConditionsError.value = ''
 
@@ -311,6 +316,9 @@ async function onAddEntry() {
 }
 
 function openEdit(entry) {
+  if (!canEditMedicalHistory.value) {
+    return
+  }
   editingEntry.value = { ...entry }
   editDialogOpen.value = true
 }
@@ -330,6 +338,9 @@ function onEditSave(payload) {
 }
 
 function openDelete(entry) {
+  if (!canDeleteMedicalHistory.value) {
+    return
+  }
   deletingEntry.value = entry
   deleteDialogOpen.value = true
 }

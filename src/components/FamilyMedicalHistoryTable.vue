@@ -7,7 +7,9 @@
         <tr>
           <th>{{ t('fmhColRelationship') }}</th>
           <th>{{ t('fmhColConditions') }}</th>
-          <th class="fmh-table-actions-col">
+          <th
+            v-if="showActions"
+            class="fmh-table-actions-col">
             {{ t('actions') }}
           </th>
         </tr>
@@ -16,9 +18,9 @@
         <tr v-for="entry in entries" :key="entry.id">
           <td>{{ entry.familyRelationship }}</td>
           <td>{{ entry.medicalConditions }}</td>
-          <td class="fmh-table-actions">
-            <template v-if="canEdit">
+          <td v-if="showActions" class="fmh-table-actions">
             <q-btn
+              v-if="canEdit"
               flat
               round
               size="sm"
@@ -30,6 +32,7 @@
               @click="emit('edit', entry)"
             />
             <q-btn
+              v-if="canDelete"
               flat
               round
               size="sm"
@@ -40,8 +43,11 @@
               :aria-label="t('delete')"
               @click="emit('delete', entry)"
             />
-            </template>
-            <span v-else class="text-grey-6">—</span>
+            <span
+              v-if="!canEdit && !canDelete"
+              class="text-grey-6">
+              —
+            </span>
           </td>
         </tr>
       </tbody>
@@ -53,10 +59,11 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
-defineProps({
+const props = defineProps({
   entries: {
     type: Array,
     default: () => [],
@@ -67,11 +74,19 @@ defineProps({
   },
   canEdit: {
     type: Boolean,
-    default: true,
+    default: false,
+  },
+  canDelete: {
+    type: Boolean,
+    default: false,
   },
 })
 
 const emit = defineEmits(['edit', 'delete'])
 
 const { t } = useI18n()
+
+const showActions = computed(
+  () => props.canEdit || props.canDelete,
+)
 </script>

@@ -65,7 +65,10 @@ export default {
   adminTableColumnSettingsTitle: 'Configurar columnas',
   adminTableColumnSettingsHint:
     'Muestra, oculta y reordena columnas. Las preferencias se guardan '
-    + 'en este dispositivo.',
+    + 'para su cuenta en este subtenant.',
+  clientListColAllergies: 'Alergias',
+  clientListColumnConfigError:
+    'No se pudieron guardar las preferencias de columnas.',
   clientListPerPage: '{count} por página',
   clientListNotAssigned: 'Sin asignar',
   clientListSummaryViewClients: 'Ver clientes',
@@ -581,6 +584,8 @@ export default {
   subTabCareTeam: 'Equipo de cuidado',
   subTabFollowUps: 'Seguimientos',
   referralsTitle: 'Referencias',
+  referralsSubtitle:
+    'Consulte y gestione las referencias de este paciente.',
   referralAdd: 'Agregar referencia',
   referralAddTitle: 'Agregar referencia',
   referralAddSubtitle: 'Cree una nueva referencia para este paciente.',

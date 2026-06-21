@@ -1,106 +1,128 @@
 <template>
   <div
     v-if="rows.length"
-    class="fmh-table-wrap fmh-table-wrap--wide">
-    <table class="fmh-table fmh-table--wide">
-      <thead>
-        <tr>
-          <th>{{ t('appointmentColDateTime') }}</th>
-          <th>{{ t('appointmentColNumber') }}</th>
-          <th>{{ t('appointmentColType') }}</th>
-          <th>{{ t('appointmentColClinician') }}</th>
-          <th>{{ t('status') }}</th>
-          <th>{{ t('appointmentColTelemedicine') }}</th>
-          <th class="fmh-table-actions-col appointment-table-actions-col">
-            {{ t('actions') }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="row in rows"
-          :key="row.appointmentId">
-          <td class="appointment-col-datetime">
-            <div class="appointment-datetime__date">
-              {{ formatDate(row.startAtUtc) }}
-            </div>
-            <div class="appointment-datetime__time text-grey-7">
-              {{ formatTimeRange(row.startAtUtc, row.endAtUtc) }}
-            </div>
-          </td>
-          <td>{{ row.appointmentNumber || '—' }}</td>
-          <td>{{ row.appointmentTypeName || '—' }}</td>
-          <td>{{ row.clinicianDisplayName || '—' }}</td>
-          <td>
-            <span
-              class="appointment-status-badge"
-              :class="statusBadgeClass(row.status)">
-              {{ statusLabel(row.status) }}
-            </span>
-          </td>
-          <td>
-            <span class="row items-center no-wrap">
-              {{ row.telemedicine ? t('yes') : t('no') }}
-              <q-icon
-                v-if="row.telemedicine"
-                name="videocam"
-                size="16px"
-                class="q-ml-xs"
-                color="primary"
-              />
-            </span>
-          </td>
-          <td class="fmh-table-actions appointment-table-actions">
-            <div
-              v-if="primaryActionButtons(row).length"
-              class="appointment-table-actions__row">
-              <q-btn
-                v-for="action in primaryActionButtons(row)"
-                :key="action.key"
-                flat
-                round
-                size="sm"
-                class="app-btn-icon-action"
-                :color="action.color"
-                :icon="action.icon"
-                :aria-label="t(action.labelKey)"
-                :data-testid="action.testId"
-                @click="emit(action.event, row)"
-              >
-                <q-tooltip>{{ t(action.labelKey) }}</q-tooltip>
-              </q-btn>
-            </div>
-            <div
-              v-if="lifecycleActionButtons(row).length"
-              class="appointment-table-actions__row">
-              <q-btn
-                v-for="action in lifecycleActionButtons(row)"
-                :key="action.key"
-                flat
-                round
-                size="sm"
-                class="app-btn-icon-action"
-                :color="action.color"
-                :icon="action.icon"
-                :aria-label="t(action.labelKey)"
-                :data-testid="action.testId"
-                @click="emit(action.event, row)"
-              >
-                <q-tooltip>{{ t(action.labelKey) }}</q-tooltip>
-              </q-btn>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    class="admin-data-table__scroll">
+    <AdminQTable
+      class="table admin-data-table admin-data-table--embedded
+        admin-data-table--inline-column-settings"
+      flat
+      hide-bottom
+      row-key="appointmentId"
+      :rows="rows"
+      :columns="columns"
+      :pagination="tablePagination">
+    <template #body-cell-dateTime="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__primary-cell">
+        <div class="appointments-table__datetime">
+          <span class="appointments-table__datetime-date">
+            {{ formatDate(scope.row.startAtUtc) }}
+          </span>
+          <span class="appointments-table__datetime-time">
+            {{ formatTimeRange(
+              scope.row.startAtUtc,
+              scope.row.endAtUtc,
+            ) }}
+          </span>
+        </div>
+      </q-td>
+    </template>
+
+    <template #body-cell-appointmentNumber="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ scope.row.appointmentNumber || '—' }}
+      </q-td>
+    </template>
+
+    <template #body-cell-appointmentType="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <span class="appointments-table__ellipsis">
+          {{ scope.row.appointmentTypeName || '—' }}
+        </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-clinician="scope">
+      <q-td :props="scope">
+        <AdminTableClinicianAvatars
+          v-if="clinicianEntries(scope.row).length"
+          :entries="clinicianEntries(scope.row)"
+        />
+        <span v-else>—</span>
+      </q-td>
+    </template>
+
+    <template #body-cell-status="scope">
+      <q-td :props="scope">
+        <AdminTableStatusCell
+          :label="statusLabel(scope.row.status)"
+          :variant="statusVariant(scope.row.status)"
+        />
+      </q-td>
+    </template>
+
+    <template #body-cell-telemedicine="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <span class="row items-center no-wrap">
+          {{ scope.row.telemedicine ? t('yes') : t('no') }}
+          <q-icon
+            v-if="scope.row.telemedicine"
+            name="videocam"
+            size="16px"
+            class="q-ml-xs"
+            color="primary"
+          />
+        </span>
+      </q-td>
+    </template>
+
+    <template #row-actions="{ row }">
+      <div class="admin-table-row-actions">
+        <q-btn
+          v-for="action in actionButtons(row)"
+          :key="action.key"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="action.icon"
+          :data-testid="action.testId"
+          :size="siteBreakpoints.SM"
+          :title="t(action.labelKey)"
+          :aria-label="t(action.labelKey)"
+          @click="emit(action.event, row)"
+        />
+      </div>
+    </template>
+  </AdminQTable>
   </div>
-  <p v-else class="fmh-empty text-body2 text-grey-7">
-    {{ emptyLabel }}
-  </p>
+
+  <div
+    v-else
+    class="admin-data-table__empty full-width row flex-center
+      text-grey-7 q-gutter-sm q-pa-lg">
+    <q-icon name="inbox" size="md" />
+    <span>{{ emptyLabel }}</span>
+  </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
+import AdminTableStatusCell from
+  'components/admin-table/AdminTableStatusCell.vue'
+import { appointmentStatuses, siteBreakpoints } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import {
   appointmentCanCancel,
   appointmentCanCheckIn,
@@ -108,12 +130,13 @@ import {
   appointmentCanEdit,
   appointmentCanNoShow,
   appointmentCanReschedule,
-  appointmentStatusBadgeClass,
 } from 'src/utils/appointment-actions.js'
 import {
   formatUtcDateLong,
   formatUtcTimeRange,
 } from 'src/utils/appointment-datetime.js'
+import { clinicianInitialsFromPersonName } from
+  'src/utils/clinician-display.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -143,6 +166,75 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 
+const tablePagination = { rowsPerPage: 0 }
+
+const columns = computed(() => [
+  {
+    name: 'dateTime',
+    label: t('appointmentColDateTime'),
+    align: 'left',
+    field: row => row.startAtUtc,
+    sortable: false,
+    headerStyle: 'min-width: 130px',
+    style: 'min-width: 130px',
+  },
+  {
+    name: 'appointmentNumber',
+    label: t('appointmentColNumber'),
+    align: 'left',
+    field: row => row.appointmentNumber,
+    sortable: false,
+    headerStyle: 'min-width: 100px',
+    style: 'min-width: 100px',
+  },
+  {
+    name: 'appointmentType',
+    label: t('appointmentColType'),
+    align: 'left',
+    field: row => row.appointmentTypeName,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'clinician',
+    label: t('appointmentColClinician'),
+    align: 'left',
+    field: row => row.clinicianDisplayName,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'status',
+    label: t('status'),
+    align: 'left',
+    field: row => row.status,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'telemedicine',
+    label: t('appointmentColTelemedicine'),
+    align: 'left',
+    field: row => row.telemedicine,
+    sortable: false,
+    headerStyle: 'min-width: 90px',
+    style: 'min-width: 90px',
+  },
+  {
+    name: 'actions',
+    label: t('actions'),
+    align: 'center',
+    field: row => row.appointmentId,
+    sortable: false,
+    required: true,
+    headerStyle: 'min-width: 200px; width: 200px',
+    style: 'min-width: 200px; width: 200px',
+  },
+])
+
 function formatDate(iso) {
   return formatUtcDateLong(iso)
 }
@@ -160,8 +252,50 @@ function statusLabel(status) {
   return t(key)
 }
 
-function statusBadgeClass(status) {
-  return appointmentStatusBadgeClass(status)
+function statusVariant(status) {
+  const token = String(status ?? '').toUpperCase()
+  if (token === appointmentStatuses.pending) {
+    return 'pending'
+  }
+  if (token === appointmentStatuses.confirmed) {
+    return 'active'
+  }
+  if (token === appointmentStatuses.checkedIn) {
+    return 'completed'
+  }
+  if (token === appointmentStatuses.completed) {
+    return 'completed'
+  }
+  if (token === appointmentStatuses.cancelled) {
+    return 'cancelled'
+  }
+  if (token === appointmentStatuses.noShow) {
+    return 'inactive'
+  }
+  if (token === appointmentStatuses.rescheduled) {
+    return 'other'
+  }
+
+  return 'other'
+}
+
+function clinicianEntries(row) {
+  const name = String(row?.clinicianDisplayName ?? '').trim()
+  if (!name) {
+    return []
+  }
+
+  const parts = name.split(' - ')
+
+  return [{
+    id: row.clinicianId ?? null,
+    name,
+    personName: parts[0]?.trim() || name,
+    specialty: parts.length > 1
+      ? parts.slice(1).join(' - ').trim()
+      : '',
+    initials: clinicianInitialsFromPersonName(name),
+  }]
 }
 
 function actionsFor(row) {
@@ -179,145 +313,61 @@ function actionsFor(row) {
   }
 }
 
-function buildActionButtons(row, keys) {
+function actionButtons(row) {
   const available = actionsFor(row)
   const id = row.appointmentId
-
-  const catalog = {
-    view: {
+  const catalog = [
+    {
       key: 'view',
-      icon: 'visibility',
-      color: 'primary',
+      icon: adminTableActionIcons.view,
       labelKey: 'appointmentActionView',
       event: 'view',
       testId: tid.rowView(id),
     },
-    edit: {
+    {
       key: 'edit',
-      icon: 'edit',
-      color: 'primary',
+      icon: adminTableActionIcons.edit,
       labelKey: 'edit',
       event: 'edit',
       testId: tid.rowEdit(id),
     },
-    reschedule: {
+    {
       key: 'reschedule',
       icon: 'event',
-      color: 'primary',
       labelKey: 'appointmentActionReschedule',
       event: 'reschedule',
       testId: tid.rowReschedule(id),
     },
-    cancel: {
+    {
       key: 'cancel',
       icon: 'close',
-      color: 'negative',
       labelKey: 'appointmentActionCancel',
       event: 'cancel',
       testId: tid.rowCancel(id),
     },
-    checkIn: {
+    {
       key: 'checkIn',
       icon: 'how_to_reg',
-      color: 'primary',
       labelKey: 'appointmentActionCheckIn',
       event: 'check-in',
       testId: tid.rowCheckIn(id),
     },
-    complete: {
+    {
       key: 'complete',
       icon: 'task_alt',
-      color: 'positive',
       labelKey: 'appointmentActionComplete',
       event: 'complete',
       testId: tid.rowComplete(id),
     },
-    noShow: {
+    {
       key: 'noShow',
       icon: 'schedule',
-      color: 'grey-8',
       labelKey: 'appointmentActionNoShow',
       event: 'no-show',
       testId: tid.rowNoShow(id),
     },
-  }
+  ]
 
-  return keys
-    .filter(key => available[key])
-    .map(key => catalog[key])
-}
-
-function primaryActionButtons(row) {
-  return buildActionButtons(row, [
-    'view',
-    'edit',
-    'reschedule',
-    'cancel',
-  ])
-}
-
-function lifecycleActionButtons(row) {
-  return buildActionButtons(row, [
-    'checkIn',
-    'complete',
-    'noShow',
-  ])
+  return catalog.filter(action => available[action.key])
 }
 </script>
-
-<style lang="scss" scoped>
-.appointment-col-datetime {
-  white-space: nowrap;
-}
-
-.appointment-datetime__date {
-  font-weight: 600;
-}
-
-.appointment-datetime__time {
-  font-size: 0.8125rem;
-}
-
-.appointment-table-actions-col,
-.appointment-table-actions {
-  min-width: 152px;
-  width: 152px;
-  white-space: normal;
-}
-
-.appointment-table-actions__row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: nowrap;
-  gap: 4px;
-
-  & + & {
-    margin-top: 4px;
-  }
-
-  .q-btn + .q-btn {
-    margin-left: 0;
-  }
-}
-</style>
-
-<style lang="scss">
-.appointment-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-
-  &--pending { background: #fef9c3; color: #a16207; }
-  &--confirmed { background: #dcfce7; color: #15803d; }
-  &--checked-in { background: #dbeafe; color: #1d4ed8; }
-  &--completed { background: #dbeafe; color: #1e40af; }
-  &--cancelled { background: #fee2e2; color: #b91c1c; }
-  &--no-show { background: #f3f4f6; color: #4b5563; }
-  &--rescheduled { background: #f3e8ff; color: #7e22ce; }
-}
-</style>

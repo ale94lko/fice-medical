@@ -1,122 +1,192 @@
 <template>
-  <div v-if="rows.length" class="fmh-table-wrap fmh-table-wrap--wide">
-    <table class="fmh-table fmh-table--wide referrals-table">
-      <thead>
-        <tr>
-          <th>{{ t('referralColDate') }}</th>
-          <th>{{ t('referralColNumberShort') }}</th>
-          <th>{{ t('referralColType') }}</th>
-          <th>{{ t('referralColPriority') }}</th>
-          <th>{{ t('referralColReferredByTo') }}</th>
-          <th>{{ t('referralColReason') }}</th>
-          <th>{{ t('status') }}</th>
-          <th class="fmh-table-actions-col">{{ t('actions') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows" :key="row.id">
-          <td>{{ formatReferralListDate(row.referralDate) }}</td>
-          <td>{{ row.referralNumber || '—' }}</td>
-          <td>
-            <span
-              class="referral-type-badge"
-              :class="`referral-type-badge--${row.type}`">
-              {{ typeLabel(row.type) }}
-            </span>
-          </td>
-          <td>
-            <span class="referral-priority-label row items-center no-wrap">
-              <span
-                class="referral-priority-dot"
-                :class="priorityDotClass(row.priority)"
-              />
-              {{ priorityLabel(row.priority) }}
-            </span>
-          </td>
-          <td>{{ partyLabel(row) }}</td>
-          <td>{{ row.reason || '—' }}</td>
-          <td>
-            <span
-              class="referral-status-badge"
-              :class="`referral-status-badge--${row.status}`">
-              {{ statusLabel(row.status) }}
-            </span>
-          </td>
-          <td class="fmh-table-actions referrals-table__actions">
-            <q-btn
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action referrals-table__action"
-              icon="visibility"
-              :data-testid="tid.rowView(row.id)"
-              :aria-label="t('referralActionView')"
-              @click="emit('view', row)"
-            />
-            <q-btn
-              v-if="canEditRow(row)"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action referrals-table__action"
-              icon="edit"
-              :data-testid="tid.rowEdit(row.id)"
-              :aria-label="t('edit')"
-              @click="emit('edit', row)"
-            />
-            <q-btn
-              v-if="canScheduleRow(row)"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action referrals-table__action"
-              icon="event"
-              :data-testid="tid.rowSchedule(row.id)"
-              :aria-label="t('referralActionSchedule')"
-              @click="emit('schedule', row)"
-            />
-            <q-btn
-              v-if="canDeleteRow()"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action referrals-table__action"
-              icon="delete"
-              :data-testid="tid.rowDelete(row.id)"
-              :aria-label="t('delete')"
-              @click="emit('delete', row)"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div
+    v-if="rows.length"
+    class="admin-data-table__scroll">
+    <AdminQTable
+      class="table admin-data-table admin-data-table--embedded
+        admin-data-table--inline-column-settings"
+      flat
+      hide-bottom
+      row-key="id"
+      :rows="rows"
+      :columns="columns"
+      :pagination="tablePagination">
+    <template #body-cell-referralDate="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ formatReferralListDate(scope.row.referralDate) }}
+      </q-td>
+    </template>
+
+    <template #body-cell-referralNumber="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ scope.row.referralNumber || '—' }}
+      </q-td>
+    </template>
+
+    <template #body-cell-type="scope">
+      <q-td :props="scope">
+        <AdminTableStatusCell
+          :label="typeLabel(scope.row.type)"
+          :variant="typeVariant(scope.row.type)"
+        />
+      </q-td>
+    </template>
+
+    <template #body-cell-priority="scope">
+      <q-td :props="scope">
+        <AdminTableStatusCell
+          :label="priorityLabel(scope.row.priority)"
+          :variant="priorityVariant(scope.row.priority)"
+        />
+      </q-td>
+    </template>
+
+    <template #body-cell-referredByTo="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <div
+          v-if="partyClinicianEntries(scope.row).length"
+          class="referrals-table__party row items-center no-wrap">
+          <AdminTableClinicianAvatars
+            :entries="partyClinicianEntries(scope.row)"
+          />
+          <span
+            v-if="partyOrganization(scope.row)"
+            class="referrals-table__party-org">
+            {{ partyOrganization(scope.row) }}
+          </span>
+        </div>
+        <span
+          v-else
+          class="referrals-table__ellipsis">
+          {{ partyLabel(scope.row) }}
+        </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-reason="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <span class="referrals-table__ellipsis">
+          {{ scope.row.reason || '—' }}
+        </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-status="scope">
+      <q-td :props="scope">
+        <AdminTableStatusCell
+          :label="statusLabel(scope.row.status)"
+          :variant="statusVariant(scope.row.status)"
+        />
+      </q-td>
+    </template>
+
+    <template #row-actions="{ row }">
+      <div class="admin-table-row-actions">
+        <q-btn
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="adminTableActionIcons.view"
+          :data-testid="tid.rowView(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('referralActionView')"
+          :aria-label="t('referralActionView')"
+          @click="emit('view', row)"
+        />
+        <q-btn
+          v-if="canEditRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="adminTableActionIcons.edit"
+          :data-testid="tid.rowEdit(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('edit')"
+          :aria-label="t('edit')"
+          @click="emit('edit', row)"
+        />
+        <q-btn
+          v-if="canScheduleRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="event"
+          :data-testid="tid.rowSchedule(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('referralActionSchedule')"
+          :aria-label="t('referralActionSchedule')"
+          @click="emit('schedule', row)"
+        />
+        <q-btn
+          v-if="canDeleteRow()"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="delete"
+          :data-testid="tid.rowDelete(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('delete')"
+          :aria-label="t('delete')"
+          @click="emit('delete', row)"
+        />
+      </div>
+    </template>
+  </AdminQTable>
   </div>
+
   <div
     v-else
-    class="referrals-empty text-center q-pa-xl">
-    <q-icon name="groups" size="48px" color="grey-5" />
-    <p class="text-body2 text-grey-7 q-mt-md q-mb-none">
-      {{ emptyLabel }}
-    </p>
+    class="admin-data-table__empty full-width row flex-center
+      text-grey-7 q-gutter-sm q-pa-lg">
+    <q-icon name="inbox" size="md" />
+    <span>{{ emptyLabel }}</span>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
+import AdminTableStatusCell from
+  'components/admin-table/AdminTableStatusCell.vue'
 import {
   referralPriorities,
+  referralStatuses,
   referralTypes,
+  siteBreakpoints,
 } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import {
   formatReferralListDate,
   isReferralSchedulable,
 } from 'src/utils/referral-normalize.js'
 import { referralI18nKey } from 'src/utils/referral-i18n.js'
 import { isReferralEditable } from 'src/utils/referral-orders.js'
+import {
+  resolveReferralClinicianEntriesFromPartyLabel,
+} from 'src/utils/referral-clinician-display.js'
 import { referralTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   rows: {
+    type: Array,
+    default: () => [],
+  },
+  clinicianOptions: {
     type: Array,
     default: () => [],
   },
@@ -142,6 +212,84 @@ const emit = defineEmits(['view', 'edit', 'schedule', 'delete'])
 
 const { t } = useI18n()
 
+const tablePagination = { rowsPerPage: 0 }
+
+const columns = computed(() => [
+  {
+    name: 'referralDate',
+    label: t('referralColDate'),
+    align: 'left',
+    field: row => row.referralDate,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'referralNumber',
+    label: t('referralColNumberShort'),
+    align: 'left',
+    field: row => row.referralNumber,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'type',
+    label: t('referralColType'),
+    align: 'left',
+    field: row => row.type,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'priority',
+    label: t('referralColPriority'),
+    align: 'left',
+    field: row => row.priority,
+    sortable: false,
+    headerStyle: 'min-width: 100px',
+    style: 'min-width: 100px',
+  },
+  {
+    name: 'referredByTo',
+    label: t('referralColReferredByTo'),
+    align: 'left',
+    field: row => partyLabel(row),
+    sortable: false,
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
+  },
+  {
+    name: 'reason',
+    label: t('referralColReason'),
+    align: 'left',
+    field: row => row.reason,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'status',
+    label: t('status'),
+    align: 'left',
+    field: row => row.status,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'actions',
+    label: t('actions'),
+    align: 'center',
+    field: row => row.id,
+    sortable: false,
+    required: true,
+    headerStyle: 'min-width: 140px; width: 140px',
+    style: 'min-width: 140px; width: 140px',
+  },
+])
+
 function enumLabel(prefix, token) {
   const key = referralI18nKey(prefix, token)
   const translated = t(key)
@@ -164,16 +312,54 @@ function priorityLabel(priority) {
   return enumLabel('referralPriority', priority)
 }
 
-function priorityDotClass(priority) {
-  const token = String(priority ?? '').toUpperCase()
-  if (token === referralPriorities.stat) {
-    return 'referral-priority-dot--urgent'
+function typeVariant(type) {
+  if (type === referralTypes.incoming) {
+    return 'active'
   }
-  if (token === referralPriorities.urgent) {
-    return 'referral-priority-dot--high'
+  if (type === referralTypes.outgoing) {
+    return 'completed'
   }
 
-  return 'referral-priority-dot--medium'
+  return 'other'
+}
+
+function priorityVariant(priority) {
+  const token = String(priority ?? '').toUpperCase()
+  if (token === referralPriorities.stat) {
+    return 'cancelled'
+  }
+  if (token === referralPriorities.urgent) {
+    return 'pending'
+  }
+
+  return 'other'
+}
+
+function statusVariant(status) {
+  const token = String(status ?? '').toUpperCase()
+  if (
+    token === referralStatuses.received
+    || token === referralStatuses.accepted
+  ) {
+    return 'active'
+  }
+  if (token === referralStatuses.scheduled) {
+    return 'completed'
+  }
+  if (token === referralStatuses.pendingReview) {
+    return 'pending'
+  }
+  if (token === referralStatuses.completed) {
+    return 'active'
+  }
+  if (token === referralStatuses.declined) {
+    return 'cancelled'
+  }
+  if (token === referralStatuses.closed) {
+    return 'inactive'
+  }
+
+  return 'other'
 }
 
 function partyLabel(row) {
@@ -182,6 +368,29 @@ function partyLabel(row) {
   }
 
   return row.referredByLabel || '—'
+}
+
+function partyProviderLabel(row) {
+  if (row.type === referralTypes.outgoing) {
+    return row.referredToProvider || ''
+  }
+
+  return row.referringProvider || ''
+}
+
+function partyOrganization(row) {
+  if (row.type === referralTypes.outgoing) {
+    return row.referredToOrganization || ''
+  }
+
+  return row.referringOrganization || ''
+}
+
+function partyClinicianEntries(row) {
+  return resolveReferralClinicianEntriesFromPartyLabel(
+    partyProviderLabel(row),
+    props.clinicianOptions,
+  )
 }
 
 function canEditRow(row) {
@@ -196,91 +405,3 @@ function canDeleteRow() {
   return props.canDelete
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.referral-type-badge,
-.referral-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.referral-type-badge--INCOMING {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.referral-type-badge--OUTGOING {
-  background: #ede9fe;
-  color: #5b21b6;
-}
-
-.referral-priority-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.referral-priority-dot--medium {
-  background: #eab308;
-}
-
-.referral-priority-dot--high {
-  background: #f97316;
-}
-
-.referral-priority-dot--urgent {
-  background: #ef4444;
-}
-
-.referral-priority-label {
-  font-size: 0.875rem;
-  color: $text-strong;
-}
-
-.referral-status-badge--RECEIVED,
-.referral-status-badge--ACCEPTED,
-.referral-status-badge--SCHEDULED {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.referral-status-badge--PENDING_REVIEW {
-  background: #ffedd5;
-  color: #c2410c;
-}
-
-.referral-status-badge--COMPLETED {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.referral-status-badge--DECLINED {
-  background: #fee2e2;
-  color: #b91c1c;
-}
-
-.referral-status-badge--CLOSED {
-  background: #f1f5f9;
-  color: $text-muted;
-}
-
-.referrals-table__actions {
-  white-space: nowrap;
-}
-
-.referrals-table__action {
-  color: $text-muted !important;
-}
-</style>

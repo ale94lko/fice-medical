@@ -64,7 +64,10 @@ export default {
   adminTableColumnSettingsTitle: 'Configure columns',
   adminTableColumnSettingsHint:
     'Show, hide and reorder table columns. Preferences are saved '
-    + 'for your account on this device.',
+    + 'for your account in this subtenant.',
+  clientListColAllergies: 'Allergies',
+  clientListColumnConfigError:
+    'Could not save column preferences. Please try again.',
   clientListNotAssigned: 'Not Assigned',
   clientListSummaryViewClients: 'View clients',
   clientListSummaryUpcomingAppointments: 'Upcoming Appointments',
@@ -559,6 +562,8 @@ export default {
   subTabCareTeam: 'Care Team',
   subTabFollowUps: 'Follow Ups',
   referralsTitle: 'Referrals',
+  referralsSubtitle:
+    'View and manage referrals for this patient.',
   referralAdd: 'Add Referral',
   referralAddTitle: 'Add Referral',
   referralAddSubtitle: 'Create a new referral for this patient.',

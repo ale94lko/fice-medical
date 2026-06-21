@@ -1,6 +1,8 @@
 <template>
   <div class="add-client-appointments-tab">
-    <div v-if="!hasClientId" class="appointments-panel q-pa-lg text-center">
+    <div
+      v-if="!hasClientId"
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('appointmentSaveClientFirst') }}
@@ -9,7 +11,7 @@
 
     <div
       v-else-if="!canViewAppointments"
-      class="appointments-panel q-pa-lg text-center">
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('appointmentNoPermission') }}
@@ -17,31 +19,40 @@
     </div>
 
     <template v-else>
-      <div class="row items-center justify-between q-mb-md">
-        <h3 class="appointments-panel__title q-mb-none">
-          {{ t('appointmentsTitle') }}
-        </h3>
-        <q-btn
-          v-if="canBookAppointment"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="add"
-          :disable="loading"
-          :label="t('appointmentAddButton')"
-          :data-testid="tid.btn('add')"
-          @click="openBookDrawer"
+      <div class="appointments-header row items-start">
+        <div class="col">
+          <h2 class="appointments-title">
+            {{ t('appointmentsTitle') }}
+          </h2>
+          <p class="appointments-subtitle text-body2">
+            {{ t('appointmentsSubtitle') }}
+          </p>
+        </div>
+        <div class="col-auto">
+          <q-btn
+            v-if="canBookAppointment"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :disable="loading"
+            :label="t('appointmentAddButton')"
+            :data-testid="tid.btn('add')"
+            @click="openBookDrawer"
+          />
+        </div>
+      </div>
+
+      <AdminTablePanel
+        class="appointments-table-panel admin-table-panel--wide q-mt-md"
+        :show-column-settings="false">
+        <AppLoadingOverlay
+          scope="content"
+          :showing="loading"
         />
-      </div>
-
-      <div v-if="loading" class="appointments-panel q-pa-xl flex flex-center">
-        <AppBrandLoading inline />
-      </div>
-
-      <div v-else class="appointments-panel q-pa-md">
         <AppointmentsTable
-          :rows="paginatedAppointments"
+          :rows="appointments"
           :empty-label="t('appointmentListEmpty')"
           :permissions="tablePermissions"
           @view="openView"
@@ -52,30 +63,7 @@
           @complete="onComplete"
           @no-show="onNoShow"
         />
-
-        <div
-          v-if="appointments.length"
-          class="row items-center justify-between q-mt-md">
-          <p class="text-body2 text-grey-7 q-mb-none">
-            {{
-              t('appointmentPaginationSummary', {
-                from: pageFrom,
-                to: pageTo,
-                total: appointments.length,
-              })
-            }}
-          </p>
-          <q-pagination
-            v-model="page"
-            :max="pageCount"
-            max-pages="6"
-            direction-links
-            boundary-links
-            color="primary"
-            size="sm"
-          />
-        </div>
-      </div>
+      </AdminTablePanel>
     </template>
 
     <AppointmentBookDialog
@@ -127,8 +115,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import AppointmentBookDialog from 'components/AppointmentBookDialog.vue'
-import AppBrandLoading from 'components/AppBrandLoading.vue'
 import AppointmentDetailDialog from 'components/AppointmentDetailDialog.vue'
 import AppointmentEditDialog from 'components/AppointmentEditDialog.vue'
 import AppointmentsTable from 'components/AppointmentsTable.vue'
@@ -169,8 +158,6 @@ const {
 const appointments = ref([])
 const loading = ref(false)
 const actionSaving = ref(false)
-const page = ref(1)
-const pageSize = 10
 
 const bookDrawerOpen = ref(false)
 const rescheduleDrawerOpen = ref(false)
@@ -183,23 +170,7 @@ const hasClientId = computed(() =>
   String(props.clientId ?? '').trim().length > 0,
 )
 
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(appointments.value.length / pageSize)),
-)
-
-const paginatedAppointments = computed(() => {
-  const start = (page.value - 1) * pageSize
-
-  return appointments.value.slice(start, start + pageSize)
-})
-
-const pageFrom = computed(() =>
-  appointments.value.length ? (page.value - 1) * pageSize + 1 : 0,
-)
-
-const pageTo = computed(() =>
-  Math.min(page.value * pageSize, appointments.value.length),
-)
+const clientId = computed(() => String(props.clientId ?? '').trim())
 
 const tablePermissions = computed(() => ({
   canView: canViewAppointments.value,
@@ -211,11 +182,13 @@ const tablePermissions = computed(() => ({
 
 async function loadAppointments() {
   if (!hasClientId.value || !canViewAppointments.value) {
+    appointments.value = []
+
     return
   }
   loading.value = true
   try {
-    appointments.value = await listClientAppointments(props.clientId)
+    appointments.value = await listClientAppointments(clientId.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -389,34 +362,11 @@ async function onNoShow(row) {
   }
 }
 
-watch(hasClientId, id => {
-  if (id) {
-    void loadAppointments()
-  }
+watch(clientId, () => {
+  void loadAppointments()
 })
 
 onMounted(() => {
-  if (hasClientId.value) {
-    void loadAppointments()
-  }
+  void loadAppointments()
 })
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.add-client-appointments-tab {
-  width: 100%;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.appointments-panel {
-  &__title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: $primary;
-  }
-}
-</style>

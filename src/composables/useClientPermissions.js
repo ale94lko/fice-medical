@@ -47,6 +47,22 @@ export function useClientPermissions() {
     permissions,
     clientPermissionNames.editAllergies,
   )
+  const canViewMedicalHistory = usePermission(
+    permissions,
+    clientPermissionNames.viewMedicalHistory,
+  )
+  const canAddMedicalHistory = usePermission(
+    permissions,
+    clientPermissionNames.addMedicalHistory,
+  )
+  const canEditMedicalHistory = usePermission(
+    permissions,
+    clientPermissionNames.editMedicalHistory,
+  )
+  const canDeleteMedicalHistory = usePermission(
+    permissions,
+    clientPermissionNames.deleteMedicalHistory,
+  )
   const canViewVitals = usePermission(
     permissions,
     clientPermissionNames.viewVitalsClient,
@@ -186,6 +202,8 @@ export function useClientPermissions() {
       clientPermissionNames.editBasicInfoClient,
       clientPermissionNames.editContact,
       clientPermissionNames.editAllergies,
+      clientPermissionNames.addMedicalHistory,
+      clientPermissionNames.editMedicalHistory,
       clientPermissionNames.editTenantData,
       clientPermissionNames.editVitalsClient,
       clientPermissionNames.addVitalsClient,
@@ -214,6 +232,10 @@ export function useClientPermissions() {
     canEditContact,
     canViewAllergies,
     canEditAllergies,
+    canViewMedicalHistory,
+    canAddMedicalHistory,
+    canEditMedicalHistory,
+    canDeleteMedicalHistory,
     canViewVitals,
     canAddVitals,
     canEditVitals,

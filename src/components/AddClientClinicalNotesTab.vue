@@ -1,6 +1,8 @@
 <template>
   <div class="add-client-clinical-notes-tab">
-    <div v-if="!hasClientId" class="clinical-notes-panel q-pa-lg text-center">
+    <div
+      v-if="!hasClientId"
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('clinicalNoteSaveClientFirst') }}
@@ -9,7 +11,7 @@
 
     <div
       v-else-if="!canViewClinicalNotes"
-      class="clinical-notes-panel q-pa-lg text-center">
+      class="fmh-list-card q-pa-lg text-center">
       <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('clinicalNoteNoPermission') }}
@@ -17,36 +19,40 @@
     </div>
 
     <template v-else>
-      <div class="row items-center justify-between q-mb-md">
-        <div>
-          <h2 class="clinical-notes-panel__title q-mb-xs">
+      <div class="clinical-notes-header row items-start">
+        <div class="col">
+          <h2 class="clinical-notes-title">
             {{ t('clinicalNotesTitle') }}
           </h2>
-          <p class="clinical-notes-panel__subtitle text-body2 text-grey-7">
+          <p class="clinical-notes-subtitle text-body2">
             {{ t('clinicalNotesSubtitle') }}
           </p>
         </div>
-        <q-btn
-          v-if="canAddClinicalNotes"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="add"
-          :disable="loading"
-          :data-testid="tid.btn('add')"
-          :label="t('clinicalNoteAdd')"
-          @click="openAdd"
+        <div class="col-auto">
+          <q-btn
+            v-if="canAddClinicalNotes"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :disable="loading"
+            :data-testid="tid.btn('add')"
+            :label="t('clinicalNoteAdd')"
+            @click="openAdd"
+          />
+        </div>
+      </div>
+
+      <AdminTablePanel
+        class="clinical-notes-table-panel q-mt-md"
+        :show-column-settings="false">
+        <AppLoadingOverlay
+          scope="content"
+          :showing="loading"
         />
-      </div>
-
-      <div v-if="loading" class="clinical-notes-panel q-pa-xl flex flex-center">
-        <AppBrandLoading inline />
-      </div>
-
-      <div v-else class="clinical-notes-panel q-pa-md">
         <ClinicalNotesTable
-          :rows="paginatedNotes"
+          :rows="notes"
           :empty-label="t('clinicalNoteListEmpty')"
           :can-edit="canEditClinicalNotes"
           :can-delete="canDeleteClinicalNotes"
@@ -56,30 +62,7 @@
           @delete="confirmDelete"
           @download="onDownload"
         />
-
-        <div
-          v-if="notes.length"
-          class="row items-center justify-between q-mt-md">
-          <p class="text-body2 text-grey-7 q-mb-none">
-            {{
-              t('clinicalNotePaginationSummary', {
-                from: pageFrom,
-                to: pageTo,
-                total: notes.length,
-              })
-            }}
-          </p>
-          <q-pagination
-            v-model="page"
-            :max="pageCount"
-            max-pages="6"
-            direction-links
-            boundary-links
-            color="primary"
-            size="sm"
-          />
-        </div>
-      </div>
+      </AdminTablePanel>
     </template>
 
     <ClinicalNoteDialog
@@ -111,7 +94,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import AppBrandLoading from 'components/AppBrandLoading.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ClinicalNoteDialog from 'components/ClinicalNoteDialog.vue'
 import ClinicalNotesTable from 'components/ClinicalNotesTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
@@ -164,8 +148,6 @@ const {
 const loading = ref(false)
 const saving = ref(false)
 const notes = ref([])
-const page = ref(1)
-const pageSize = 10
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -180,34 +162,6 @@ const clientId = computed(() => String(props.clientId ?? '').trim())
 const resolvedClinicianOptions = computed(
   () => props.clinicianOptions ?? [],
 )
-
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(notes.value.length / pageSize)),
-)
-
-const paginatedNotes = computed(() => {
-  const start = (page.value - 1) * pageSize
-
-  return notes.value.slice(start, start + pageSize)
-})
-
-const pageFrom = computed(() => {
-  if (!notes.value.length) {
-    return 0
-  }
-
-  return (page.value - 1) * pageSize + 1
-})
-
-const pageTo = computed(() =>
-  Math.min(page.value * pageSize, notes.value.length),
-)
-
-watch(pageCount, maxPage => {
-  if (page.value > maxPage) {
-    page.value = 1
-  }
-})
 
 watch(clientId, () => {
   if (hasClientId.value && canViewClinicalNotes.value) {
@@ -425,30 +379,3 @@ async function onSign(note) {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.add-client-clinical-notes-tab {
-  width: 100%;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.clinical-notes-panel {
-  background: #fff;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-lg;
-}
-
-.clinical-notes-panel__title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: $text-strong;
-}
-
-.clinical-notes-panel__subtitle {
-  margin: 0;
-}
-</style>

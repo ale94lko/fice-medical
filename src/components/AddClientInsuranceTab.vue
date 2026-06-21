@@ -33,7 +33,9 @@
       </div>
     </div>
 
-    <div class="insurance-table-card q-pa-md q-mt-md">
+    <AdminTablePanel
+      class="insurance-table-panel q-mt-md"
+      :show-column-settings="false">
       <InsuranceProfilesTable
         :profiles="visibleProfiles"
         :can-edit="!readonly"
@@ -42,7 +44,7 @@
         @edit="openEdit"
         @deactivate="openDeactivate"
       />
-    </div>
+    </AdminTablePanel>
 
     <div class="insurance-info-banner q-mt-md">
       <q-icon name="info" size="20px" class="q-mr-sm" />
@@ -75,6 +77,7 @@ import { useI18n } from 'vue-i18n'
 import InsuranceDeactivateDialog from
   'components/InsuranceDeactivateDialog.vue'
 import InsuranceProfileDialog from 'components/InsuranceProfileDialog.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import InsuranceProfilesTable from 'components/InsuranceProfilesTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'

@@ -8,7 +8,9 @@
     </template>
 
     <template v-if="hasRowActions" #body-cell-actions="scope">
-      <q-td :props="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__actions-cell">
         <slot name="row-actions" :row="scope.row" />
       </q-td>
     </template>

@@ -144,7 +144,9 @@ export const carePlanTestIds = {
   field: name => toTestId('care-plan-field', name),
   rowView: id => toTestId('care-plan-row', id, 'btn-view'),
   rowEdit: id => toTestId('care-plan-row', id, 'btn-edit'),
-  rowMore: id => toTestId('care-plan-row', id, 'btn-more'),
+  rowSign: id => toTestId('care-plan-row', id, 'btn-sign'),
+  rowComplete: id => toTestId('care-plan-row', id, 'btn-complete'),
+  rowArchive: id => toTestId('care-plan-row', id, 'btn-archive'),
 }
 
 export const clinicalNoteTestIds = {

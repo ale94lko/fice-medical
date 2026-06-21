@@ -1,131 +1,151 @@
 <template>
-  <div v-if="rows.length" class="fmh-table-wrap">
-    <table class="fmh-table">
-      <thead>
-        <tr>
-          <th>{{ t('carePlanColName') }}</th>
-          <th>{{ t('carePlanColProblem') }}</th>
-          <th>{{ t('status') }}</th>
-          <th>{{ t('carePlanColProgress') }}</th>
-          <th>{{ t('carePlanColTargetDate') }}</th>
-          <th class="fmh-table-actions-col">{{ t('actions') }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows" :key="row.id">
-          <td>{{ row.name || '—' }}</td>
-          <td>{{ row.problem || '—' }}</td>
-          <td>
-            <span
-              class="care-plan-status-badge"
-              :class="`care-plan-status-badge--${row.status}`">
-              {{ statusLabel(row.status) }}
-            </span>
-          </td>
-          <td>
-            <CarePlanProgressCell :progress="row.progress" :goals-count="0" />
-          </td>
-          <td>
-            <span v-if="row.targetDate" class="row items-center no-wrap">
-              <q-icon name="event" size="16px" class="q-mr-xs text-grey-6" />
-              {{ row.targetDate }}
-            </span>
-            <span v-else>—</span>
-          </td>
-          <td class="fmh-table-actions">
-            <q-btn
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action"
-              color="primary"
-              icon="visibility"
-              :data-testid="tid.rowView(row.id)"
-              :aria-label="t('carePlanActionView')"
-              @click="emit('view', row)"
-            />
-            <q-btn
-              v-if="canEditRow(row)"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action"
-              color="primary"
-              icon="edit"
-              :data-testid="tid.rowEdit(row.id)"
-              :aria-label="t('edit')"
-              @click="emit('edit', row)"
-            />
-            <q-btn
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action"
-              color="primary"
-              icon="more_vert"
-              :data-testid="tid.rowMore(row.id)"
-              :aria-label="t('carePlanActionMore')"
-            >
-              <q-menu anchor="bottom right" self="top right">
-                <q-list dense style="min-width: 180px">
-                  <q-item
-                    v-if="canSignRow(row)"
-                    v-close-popup
-                    clickable
-                    @click="emit('sign', row)">
-                    <q-item-section avatar>
-                      <q-icon name="draw" size="18px" />
-                    </q-item-section>
-                    <q-item-section>
-                      {{ t('carePlanActionSign') }}
-                    </q-item-section>
-                  </q-item>
-                  <q-item
-                    v-if="canChangeStatus(row)"
-                    v-close-popup
-                    clickable
-                    @click="emit('status', row, 'COMPLETED')">
-                    <q-item-section avatar>
-                      <q-icon name="check_circle" size="18px" />
-                    </q-item-section>
-                    <q-item-section>
-                      {{ t('carePlanActionMarkCompleted') }}
-                    </q-item-section>
-                  </q-item>
-                  <q-item
-                    v-if="canChangeStatus(row)"
-                    v-close-popup
-                    clickable
-                    @click="emit('status', row, 'ARCHIVED')">
-                    <q-item-section avatar>
-                      <q-icon name="archive" size="18px" />
-                    </q-item-section>
-                    <q-item-section>
-                      {{ t('carePlanActionArchive') }}
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <AdminQTable
+    v-if="rows.length"
+    class="table admin-data-table admin-data-table--embedded
+      admin-data-table--inline-column-settings"
+    flat
+    hide-bottom
+    row-key="id"
+    :rows="rows"
+    :columns="columns"
+    :pagination="tablePagination">
+    <template #body-cell-planName="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__primary-cell">
+        <span class="care-plans-table__ellipsis">
+          {{ scope.row.name || '—' }}
+        </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-problem="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <span class="care-plans-table__ellipsis">
+          {{ scope.row.problem || '—' }}
+        </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-status="scope">
+      <q-td :props="scope">
+        <AdminTableStatusCell
+          :label="statusLabel(scope.row.status)"
+          :variant="statusVariant(scope.row.status)"
+        />
+      </q-td>
+    </template>
+
+    <template #body-cell-progress="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell
+          care-plans-table__progress-cell">
+        <CarePlanProgressCell
+          compact
+          :progress="scope.row.progress"
+        />
+      </q-td>
+    </template>
+
+    <template #body-cell-targetDate="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ scope.row.targetDate || '—' }}
+      </q-td>
+    </template>
+
+    <template #row-actions="{ row }">
+      <div class="admin-table-row-actions">
+        <q-btn
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="adminTableActionIcons.view"
+          :data-testid="tid.rowView(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('carePlanActionView')"
+          :aria-label="t('carePlanActionView')"
+          @click="emit('view', row)"
+        />
+        <q-btn
+          v-if="canEditRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          :icon="adminTableActionIcons.edit"
+          :data-testid="tid.rowEdit(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('edit')"
+          :aria-label="t('edit')"
+          @click="emit('edit', row)"
+        />
+        <q-btn
+          v-if="canSignRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="draw"
+          :data-testid="tid.rowSign(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('carePlanActionSign')"
+          :aria-label="t('carePlanActionSign')"
+          @click="emit('sign', row)"
+        />
+        <q-btn
+          v-if="canChangeStatus(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="check_circle"
+          :data-testid="tid.rowComplete(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('carePlanActionMarkCompleted')"
+          :aria-label="t('carePlanActionMarkCompleted')"
+          @click="emit('status', row, 'COMPLETED')"
+        />
+        <q-btn
+          v-if="canChangeStatus(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="archive"
+          :data-testid="tid.rowArchive(row.id)"
+          :size="siteBreakpoints.SM"
+          :title="t('carePlanActionArchive')"
+          :aria-label="t('carePlanActionArchive')"
+          @click="emit('status', row, 'ARCHIVED')"
+        />
+      </div>
+    </template>
+  </AdminQTable>
+
   <div
     v-else
-    class="care-plans-empty text-center q-pa-xl">
-    <q-icon name="track_changes" size="48px" color="grey-5" />
-    <p class="text-body2 text-grey-7 q-mt-md q-mb-none">
-      {{ emptyLabel }}
-    </p>
+    class="admin-data-table__empty full-width row flex-center
+      text-grey-7 q-gutter-sm q-pa-lg">
+    <q-icon name="inbox" size="md" />
+    <span>{{ emptyLabel }}</span>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableStatusCell from
+  'components/admin-table/AdminTableStatusCell.vue'
 import CarePlanProgressCell from 'components/CarePlanProgressCell.vue'
-import { carePlanStatuses } from 'components/constants.js'
+import { carePlanStatuses, siteBreakpoints } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
@@ -152,6 +172,66 @@ const emit = defineEmits(['view', 'edit', 'sign', 'status'])
 
 const { t } = useI18n()
 
+const tablePagination = { rowsPerPage: 0 }
+
+const columns = computed(() => [
+  {
+    name: 'planName',
+    label: t('carePlanColName'),
+    align: 'left',
+    field: row => row.name,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'problem',
+    label: t('carePlanColProblem'),
+    align: 'left',
+    field: row => row.problem,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'status',
+    label: t('status'),
+    align: 'left',
+    field: row => row.status,
+    sortable: false,
+    headerStyle: 'min-width: 100px',
+    style: 'min-width: 100px',
+  },
+  {
+    name: 'progress',
+    label: t('carePlanColProgress'),
+    align: 'left',
+    field: row => row.progress,
+    sortable: false,
+    headerStyle: 'min-width: 90px',
+    style: 'min-width: 90px',
+  },
+  {
+    name: 'targetDate',
+    label: t('carePlanColTargetDate'),
+    align: 'left',
+    field: row => row.targetDate,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'actions',
+    label: t('actions'),
+    align: 'center',
+    field: row => row.id,
+    sortable: false,
+    required: true,
+    headerStyle: 'min-width: 180px',
+    style: 'min-width: 180px',
+  },
+])
+
 function statusLabel(status) {
   const key = carePlanI18nKey('carePlanStatus', status)
   const translated = t(key)
@@ -160,6 +240,20 @@ function statusLabel(status) {
   }
 
   return status || '—'
+}
+
+function statusVariant(status) {
+  if (status === carePlanStatuses.active) {
+    return 'active'
+  }
+  if (status === carePlanStatuses.completed) {
+    return 'completed'
+  }
+  if (status === carePlanStatuses.archived) {
+    return 'inactive'
+  }
+
+  return 'other'
 }
 
 function canEditRow(row) {
@@ -179,31 +273,3 @@ function canChangeStatus(row) {
   return props.canEdit && row.status === carePlanStatuses.active
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.care-plan-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-}
-
-.care-plan-status-badge--ACTIVE {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.care-plan-status-badge--COMPLETED {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.care-plan-status-badge--ARCHIVED {
-  background: #f1f5f9;
-  color: $text-muted;
-}
-</style>

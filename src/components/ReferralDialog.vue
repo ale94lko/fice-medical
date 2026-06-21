@@ -207,16 +207,24 @@
               <AddClientLabeledField
                 :label="t('referralReferredToProvider')"
                 :test-id="tid.field('referred-to-provider')">
-                <q-input
+                <q-select
                   v-model="local.referredToProvider"
                   outlined
                   hide-bottom-space
+                  use-input
+                  fill-input
+                  hide-selected
+                  input-debounce="0"
+                  emit-value
+                  map-options
+                  new-value-mode="add-unique"
                   :readonly="readonly"
-                  :maxlength="referralProviderNameMaxLength"
+                  :options="providerOptions"
                   :placeholder="t('referralReferredToProviderPlaceholder')"
                   :error="Boolean(errors.referredToProvider)"
                   :error-message="errors.referredToProvider"
                   :data-testid="tid.field('referred-to-provider')"
+                  @new-value="onNewProvider"
                 />
               </AddClientLabeledField>
             </div>
@@ -406,7 +414,6 @@ import ReferralPrioritySelect from 'components/ReferralPrioritySelect.vue'
 import {
   referralOrganizationMaxLength,
   referralPriorities,
-  referralProviderNameMaxLength,
   referralReasonMaxLength,
   referralSpecialtyMaxLength,
   referralStatuses,

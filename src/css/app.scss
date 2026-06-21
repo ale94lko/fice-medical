@@ -529,6 +529,16 @@
     text-overflow: ellipsis;
   }
 
+  &__allergy-badge {
+    flex-shrink: 0;
+    max-width: 100%;
+    font-size: 0.75rem;
+    padding: 2px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   &__email-type {
     flex-shrink: 0;
     font-size: 12px;
@@ -2058,6 +2068,10 @@ input:-webkit-autofill {
   &--severe {
     background: #dc2626;
   }
+
+  &--nka {
+    background: #16a34a;
+  }
 }
 
 .allergy-severity-label {
@@ -2086,6 +2100,11 @@ input:-webkit-autofill {
   &--severe {
     background: #fef2f2;
     color: #dc2626;
+  }
+
+  &--nka {
+    background: #f0fdf4;
+    color: #16a34a;
   }
 }
 
@@ -2387,11 +2406,79 @@ input:-webkit-autofill {
   padding: 8px 0 16px;
 }
 
+.add-client-clinical-notes-tab {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 0 16px;
+}
+
+.add-client-care-plans-tab {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 0 16px;
+}
+
+.add-client-referrals-tab {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 0 16px;
+}
+
+.add-client-appointments-tab {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 0 16px;
+}
+
 .insurance-header {
   gap: 16px;
 }
 
+.clinical-notes-header {
+  gap: 16px;
+}
+
+.care-plans-header {
+  gap: 16px;
+}
+
+.referrals-header {
+  gap: 16px;
+}
+
+.appointments-header {
+  gap: 16px;
+}
+
 .insurance-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.clinical-notes-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.care-plans-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.referrals-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.appointments-title {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 700;
@@ -2403,71 +2490,177 @@ input:-webkit-autofill {
   color: $text-muted;
 }
 
-.insurance-table-card {
-  border: 1px solid $border-subtle;
-  border-radius: $radius-md;
-  background: $surface;
+.clinical-notes-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.care-plans-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.referrals-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.appointments-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.insurance-table-panel {
+  margin-top: 12px;
+}
+
+.clinical-notes-table-panel {
+  margin-top: 12px;
+}
+
+.care-plans-table-panel {
+  margin-top: 12px;
+}
+
+.referrals-table-panel {
+  margin-top: 12px;
+}
+
+.appointments-table-panel {
+  margin-top: 12px;
+}
+
+.add-client-clinical-notes-tab,
+.add-client-care-plans-tab,
+.add-client-insurance-tab {
+  .admin-data-table--embedded {
+    overflow: visible;
+
+    .q-table__middle {
+      overflow: visible;
+    }
+  }
+}
+
+.add-client-referrals-tab {
+  .admin-data-table__actions-cell {
+    min-width: 140px;
+    width: 140px;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+}
+
+.add-client-appointments-tab {
+  .admin-data-table__actions-cell {
+    min-width: 200px;
+    width: 200px;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .admin-data-table__scroll .admin-data-table tbody td {
+    height: auto !important;
+    min-height: $table-row-height !important;
+    max-height: none !important;
+  }
+}
+
+.appointments-table__datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appointments-table__datetime-date {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.appointments-table__datetime-time {
+  font-size: 0.8125rem;
+  color: $text-muted;
+}
+
+.appointments-table__ellipsis {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referrals-table__ellipsis {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.referrals-table__party {
+  gap: 8px;
+  min-width: 0;
+}
+
+.referrals-table__party-org {
+  font-size: 0.8125rem;
+  color: $text-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clinical-notes-table__summary {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.care-plans-table__ellipsis {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-client-care-plans-tab {
+  .care-plans-table__progress-cell {
+    height: auto !important;
+    max-height: none !important;
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    vertical-align: middle;
+  }
+
+  .admin-data-table .q-table tbody tr:has(.care-plans-table__progress-cell) {
+    height: auto !important;
+  }
 }
 
 .insurance-payer-cell {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .insurance-payer-name {
-  font-weight: 600;
-  color: $text-strong;
+  font-weight: 500;
+  color: $table-text-primary;
 }
 
 .insurance-plan-name {
-  font-size: 0.875rem;
-  color: $text-muted;
-}
-
-.insurance-priority-badge,
-.insurance-status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8125rem;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.2;
-}
-
-.insurance-priority-badge--primary {
-  background: rgba($positive, 0.12);
-  color: color.adjust($positive, $lightness: -8%);
-}
-
-.insurance-priority-badge--secondary {
-  background: rgba($info, 0.12);
-  color: color.adjust($info, $lightness: -10%);
-}
-
-.insurance-priority-badge--tertiary {
-  background: rgba(#7e57c2, 0.12);
-  color: #5e35b1;
-}
-
-.insurance-status-badge--active {
-  background: rgba($positive, 0.12);
-  color: color.adjust($positive, $lightness: -8%);
-}
-
-.insurance-status-badge--pending {
-  background: rgba($warning, 0.18);
-  color: color.adjust($warning, $lightness: -22%);
-}
-
-.insurance-status-badge--expired {
-  background: rgba($negative, 0.1);
-  color: color.adjust($negative, $lightness: -6%);
-}
-
-.insurance-status-badge--inactive {
-  background: $surface-muted;
+  line-height: 1.25;
   color: $text-muted;
 }
 
