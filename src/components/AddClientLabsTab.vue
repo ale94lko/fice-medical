@@ -1,13 +1,6 @@
 <template>
   <div class="add-client-labs-tab">
-    <div v-if="!hasPatientId" class="labs-panel q-pa-lg text-center">
-      <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
-      <p class="text-body1 text-grey-8 q-mb-none">
-        {{ t('labSaveClientFirst') }}
-      </p>
-    </div>
-
-    <template v-else-if="!canView">
+    <template v-if="!canView">
       <div class="labs-panel q-pa-lg text-center">
         <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
         <p class="text-body1 text-grey-8 q-mb-none">
@@ -280,6 +273,16 @@ function onSave(lab) {
 }
 
 async function onRowDownload(row) {
+  if (!hasPatientId.value) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('labSaveClientFirst'),
+      position: 'top',
+    })
+
+    return
+  }
+
   try {
     const detail = await fetchPatientLab(patientId.value, row.id)
     const attachment = detail.attachments?.[0]
@@ -310,6 +313,16 @@ async function onRowDownload(row) {
 }
 
 async function onUploadAttachment(file) {
+  if (!hasPatientId.value) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('labSaveClientFirst'),
+      position: 'top',
+    })
+
+    return
+  }
+
   if (!activeLab.value?.id) {
     $q.notify({
       type: quasarNotifyTypes.warning,
@@ -341,6 +354,16 @@ async function onUploadAttachment(file) {
 }
 
 async function onDownloadAttachment(attachmentId) {
+  if (!hasPatientId.value) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('labSaveClientFirst'),
+      position: 'top',
+    })
+
+    return
+  }
+
   if (!activeLab.value?.id) {
     return
   }
@@ -363,6 +386,16 @@ async function onDownloadAttachment(attachmentId) {
 }
 
 async function onRemoveAttachment(attachmentId) {
+  if (!hasPatientId.value) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('labSaveClientFirst'),
+      position: 'top',
+    })
+
+    return
+  }
+
   if (!activeLab.value?.id) {
     return
   }

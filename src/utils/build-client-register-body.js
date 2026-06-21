@@ -19,6 +19,7 @@ import {
   buildMedicalHistoryForRegister,
   buildVitalsForRegister,
 } from 'src/utils/build-client-register-clinical.js'
+import { labToApiPayload } from 'src/utils/lab-normalize.js'
 import { buildFollowUpsForRegister } from 'src/utils/client-follow-ups.js'
 import {
   resolveClinicianIdsForApi,
@@ -238,6 +239,18 @@ function buildRegisterContact(other, clientContact) {
   return payload
 }
 
+function buildLabsForRegister(form) {
+  const labs = form?.[clientFormSections.labs] ?? []
+  if (!Array.isArray(labs) || !labs.length) {
+    return []
+  }
+
+  return labs
+    .filter(lab => !lab?.deletedAt)
+    .map(lab => labToApiPayload(lab))
+    .filter(payload => trim(payload?.test_name).length > 0)
+}
+
 function buildContacts(form) {
   const contact = form[clientFormSections.contact] ?? {}
   syncPreferredPointOfContactFlags(contact)
@@ -296,6 +309,7 @@ export function buildClientRegisterBody(form) {
       medical_history: [],
       vitals: [],
       follow_ups: [],
+      labs: [],
     }
   }
 
@@ -313,5 +327,6 @@ export function buildClientRegisterBody(form) {
     follow_ups: buildFollowUpsForRegister(
       form?.[clientFormSections.followUps],
     ),
+    labs: buildLabsForRegister(form),
   }
 }
