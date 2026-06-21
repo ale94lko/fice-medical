@@ -19,75 +19,76 @@
         <div
           v-if="!loading && previewForm && newForm"
           class="duplicate-match-review__sections">
-          <div class="duplicate-match-review__summary-row row q-col-gutter-md">
-            <div class="col-12 col-md-6 col-lg-3">
-              <div
-                class="duplicate-match-review__summary-card
-                  duplicate-match-review__summary-card--score">
-                <q-icon
-                  name="check_circle"
-                  class="duplicate-match-review__summary-icon
-                    duplicate-match-review__summary-icon--match"
-                  size="20px" />
-                <div class="duplicate-match-review__summary-text">
-                  {{ matchScorePercent }}% Match
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-3">
-              <div
-                class="duplicate-match-review__summary-card
-                  duplicate-match-review__summary-card--confidence">
-                <q-icon
-                  :name="confidenceIconName"
-                  class="duplicate-match-review__summary-icon
-                    duplicate-match-review__summary-icon--missing"
-                  size="20px" />
-                <div class="duplicate-match-review__summary-text">
-                  {{ confidenceBadgeTerm }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-3">
-              <div
-                class="duplicate-match-review__summary-card
-                  duplicate-match-review__summary-card--matched">
-                <q-icon
-                  name="check_circle"
-                  class="duplicate-match-review__summary-icon
-                    duplicate-match-review__summary-icon--match"
-                  size="20px" />
-                <div class="duplicate-match-review__summary-text">
-                  {{ t('duplicateMatchMatchedCardTitle', {
-                    count: matchedFields.length,
-                  }) }}
-                </div>
-                <div class="duplicate-match-review__summary-list">
-                  {{ matchedFields.join(', ') }}
-                </div>
-              </div>
-            </div>
-
-            <div class="col-12 col-md-6 col-lg-3">
-              <div
-                class="duplicate-match-review__summary-card
-                  duplicate-match-review__summary-card--missing">
-                <q-icon
-                  name="warning"
-                  class="duplicate-match-review__summary-icon
-                    duplicate-match-review__summary-icon--missing"
-                  size="20px" />
-                <div class="duplicate-match-review__summary-text">
-                  {{ t('duplicateMatchMissingCardTitle', {
-                    count: missingFields.length,
-                  }) }}
-                </div>
-                <div class="duplicate-match-review__summary-list">
-                  {{ missingFields.join(', ') }}
-                </div>
-              </div>
+          <div class="duplicate-match-review__summary-bar">
+            <div class="duplicate-match-review__summary-left">
+              <data-item-component
+                icon="person"
+                icon-size="80px"
+                title-size="large"
+                :title="existingClientDisplayName">
+                <template #subTitle>
+                  <div class="duplicate-match-review__badges-row">
+                    <div class="duplicate-match-review__score-pill">
+                      {{ matchScorePercent }}% Match
+                    </div>
+                    <div
+                      class="duplicate-match-review__confidence-pill"
+                      :class="confidencePillClass">
+                      <q-icon
+                        :name="confidenceIconName"
+                        class="duplicate-match-review__confidence-pill-icon"
+                        :style="{ color: confidenceIconColor }"
+                        size="16px" />
+                      <span
+                        class="duplicate-match-review__confidence-pill-text">
+                        {{ confidenceBadgeTerm }}
+                      </span>
+                    </div>
+                  </div>
+                </template>
+                <template #actions>
+                  <div class="duplicate-match-review__summary-cards">
+                    <div
+                      class="duplicate-match-review__stat-card
+                        duplicate-match-review__stat-card--matched">
+                      <div class="duplicate-match-review__stat-card-header">
+                        <q-icon
+                          name="check_circle"
+                          class="duplicate-match-review__stat-card-icon
+                            duplicate-match-review__stat-card-icon--match"
+                          size="18px" />
+                        <span class="duplicate-match-review__stat-card-title">
+                          {{ t('duplicateMatchMatchedCardTitle', {
+                            count: matchedFields.length,
+                          }) }}
+                        </span>
+                      </div>
+                      <div class="duplicate-match-review__stat-card-detail">
+                        {{ matchedFields.join(', ') }}
+                      </div>
+                    </div>
+                    <div
+                      class="duplicate-match-review__stat-card
+                  duplicate-match-review__stat-card--missing">
+                      <div class="duplicate-match-review__stat-card-header">
+                        <q-icon
+                          name="warning"
+                          class="duplicate-match-review__stat-card-icon
+                      duplicate-match-review__stat-card-icon--missing"
+                          size="18px" />
+                        <span class="duplicate-match-review__stat-card-title">
+                    {{ t('duplicateMatchMissingCardTitle', {
+                          count: missingFields.length,
+                        }) }}
+                  </span>
+                      </div>
+                      <div class="duplicate-match-review__stat-card-detail">
+                        {{ missingFields.join(', ') }}
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </data-item-component>
             </div>
           </div>
 
@@ -124,6 +125,7 @@
                     <q-icon
                       :name="row.statusIconName"
                       :color="row.statusIconColor"
+                      :style="{ color: row.statusIconColor }"
                       size="18px" />
                   </div>
                 </div>
@@ -158,6 +160,7 @@
                     <q-icon
                       :name="row.statusIconName"
                       :color="row.statusIconColor"
+                      :style="{ color: row.statusIconColor }"
                       size="18px" />
                   </div>
                 </div>
@@ -216,6 +219,7 @@ import {
   formatPhoneUs,
   normalizePhoneDigits,
 } from 'src/utils/client-contact-form.js'
+import DataItemComponent from 'components/template/DataItemComponent.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -305,21 +309,16 @@ function valuesMatch(a, b) {
   return normalizeText(a) === normalizeText(b)
 }
 
-function fieldStatus(existingValue, newValue, fieldKey) {
+function fieldStatus(existingValue, newValue) {
   const existingEmpty = isEmpty(existingValue)
   const newEmpty = isEmpty(newValue)
 
-  // Middle name is optional: show neutral when both are empty.
-  if (fieldKey === ck.middleName) {
-    if (existingEmpty && newEmpty) {
-      return 'neutral'
-    }
-    if (!existingEmpty && !newEmpty && valuesMatch(existingValue, newValue)) {
-      return 'match'
-    }
-    return 'missing'
+  // Empty on both sides: show neutral (gray) instead of warning.
+  if (existingEmpty && newEmpty) {
+    return 'neutral'
   }
 
+  // Middle name is optional, so empty handling is already covered above.
   if (!existingEmpty && !newEmpty && valuesMatch(existingValue, newValue)) {
     return 'match'
   }
@@ -343,6 +342,41 @@ const confidenceTier = computed(() => {
     return 'low'
   }
   return 'unknown'
+})
+
+const confidenceIconColor = computed(() => {
+  if (confidenceTier.value === 'high') {
+    return '#16A34A'
+  }
+  if (confidenceTier.value === 'medium') {
+    return '#0EA5E9'
+  }
+  if (confidenceTier.value === 'low') {
+    return '#F59E0B'
+  }
+  return '#9CA3AF'
+})
+
+const confidencePillClass = computed(() => {
+  if (confidenceTier.value === 'high') {
+    return 'duplicate-match-review__confidence-pill--high'
+  }
+  if (confidenceTier.value === 'medium') {
+    return 'duplicate-match-review__confidence-pill--medium'
+  }
+  if (confidenceTier.value === 'low') {
+    return 'duplicate-match-review__confidence-pill--low'
+  }
+  return 'duplicate-match-review__confidence-pill--unknown'
+})
+
+const existingClientDisplayName = computed(() => {
+  const first = trim(props.previewForm?.[ck.firstName])
+  const middle = trim(props.previewForm?.[ck.middleName])
+  const last = trim(props.previewForm?.[ck.lastName])
+
+  const parts = [first, middle, last].filter(Boolean)
+  return parts.length ? parts.join(' ') : '—'
 })
 
 const matchScorePercent = computed(
@@ -449,17 +483,15 @@ const compareRows = computed(() => {
 
   return rows.map(r => {
     const status = r.isPhoneEmail
-      ? (r.existingValue === t('duplicateMatchNoPhones')
+      ? ((r.existingValue === t('duplicateMatchNoPhones')
         && r.newValue === t('duplicateMatchNoPhones'))
         || (r.existingValue === t('duplicateMatchNoEmails')
           && r.newValue === t('duplicateMatchNoEmails'))
-        ? 'missing'
+        ? 'neutral'
         : (valuesMatch(r.existingValue, r.newValue)
           ? 'match'
-          : 'missing')
-      : fieldStatus(r.existingValue, r.newValue, r.key === 'middleName'
-        ? ck.middleName
-        : r.key)
+          : 'missing'))
+      : fieldStatus(r.existingValue, r.newValue)
 
     const statusIconName = status === 'match'
       ? 'check_circle'
@@ -470,7 +502,7 @@ const compareRows = computed(() => {
     const statusIconColor = status === 'match'
       ? '#16A34A'
       : status === 'neutral'
-        ? '#6B7280'
+        ? '#9CA3AF'
         : '#F59E0B'
 
     return {
@@ -482,45 +514,20 @@ const compareRows = computed(() => {
       newValueText: r.isPhoneEmail
         ? r.newValue
         : display(r.newValue),
+      status,
       statusIconName,
       statusIconColor,
     }
   })
 })
 
-const matchedFields = computed(() => {
-  const first = compareRows.value.find(r => r.key === 'firstName')
-  const last = compareRows.value.find(r => r.key === 'lastName')
-  const out = []
-  if (first?.statusIconName === 'check_circle') {
-    out.push(t('firstName'))
-  }
-  if (last?.statusIconName === 'check_circle') {
-    out.push(t('lastName'))
-  }
-  return out
-})
+const matchedFields = computed(() => compareRows.value
+  .filter(r => r.status === 'match')
+  .map(r => r.label))
 
-const missingFields = computed(() => {
-  const dobRow = compareRows.value.find(r => r.key === 'dob')
-  const addrRow = compareRows.value.find(r => r.key === 'addressLine1')
-  const phoneRow = compareRows.value.find(r => r.key === 'phone')
-  const emailRow = compareRows.value.find(r => r.key === 'email')
-  const out = []
-  if (dobRow && dobRow.statusIconName !== 'check_circle') {
-    out.push(t('dob'))
-  }
-  if (phoneRow && phoneRow.statusIconName !== 'check_circle') {
-    out.push(t('duplicateMatchPhoneShort'))
-  }
-  if (emailRow && emailRow.statusIconName !== 'check_circle') {
-    out.push(t('duplicateMatchEmailShort'))
-  }
-  if (addrRow && addrRow.statusIconName !== 'check_circle') {
-    out.push(t('duplicateMatchAddressShort'))
-  }
-  return out
-})
+const missingFields = computed(() => compareRows.value
+  .filter(r => r.status === 'neutral')
+  .map(r => r.label))
 
 function onCancel() {
   emit('update:modelValue', false)
@@ -539,58 +546,160 @@ function onNotMatch() {
   max-width: 980px;
 }
 
-.duplicate-match-review__summary-row {
-  margin-top: 8px;
+.duplicate-match-review__summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 4px;
 }
 
-.duplicate-match-review__summary-card {
-  background: #fff;
-  border-radius: $radius-md;
-  border: 1px solid #E5E7EB;
-  padding: 14px 14px;
+.duplicate-match-review__summary-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.duplicate-match-review__summary-text {
+.duplicate-match-review__identity-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.duplicate-match-review__identity-person {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #E6FFFA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.duplicate-match-review__identity-person-icon {
+  color: #0D9488;
+}
+
+.duplicate-match-review__identity-name {
   font-weight: 700;
   color: #111827;
-  font-size: 0.875rem;
+  font-size: 1.125rem;
   line-height: 1.2;
-  margin-top: 6px;
+  white-space: nowrap;
 }
 
-.duplicate-match-review__summary-list {
-  margin-top: 8px;
-  font-weight: 600;
-  color: #6B7280;
-  font-size: 0.75rem;
-  line-height: 1.2;
+.duplicate-match-review__badges-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.duplicate-match-review__summary-icon {
-  vertical-align: middle;
+.duplicate-match-review__score-pill {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.8125rem;
+  line-height: 1;
+  padding: 7px 12px;
+  border-radius: $radius-md;
+  background: #E0F7FA;
+  border: 1px solid #99F6E4;
+  white-space: nowrap;
 }
 
-.duplicate-match-review__summary-icon--match {
+.duplicate-match-review__confidence-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: $radius-md;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.duplicate-match-review__confidence-pill--high {
+  background: #EAF8F0;
+  border-color: #B8E2C8;
+}
+
+.duplicate-match-review__confidence-pill--medium {
+  background: #EFF6FF;
+  border-color: #93C5FD;
+}
+
+.duplicate-match-review__confidence-pill--low {
+  background: #FFF5E6;
+  border-color: #F6D89B;
+}
+
+.duplicate-match-review__confidence-pill--unknown {
+  background: #F3F4F6;
+  border-color: #E5E7EB;
+}
+
+.duplicate-match-review__confidence-pill-text {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+.duplicate-match-review__summary-cards {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  flex-shrink: 0;
+  width: calc(100% - 25px);
+}
+
+.duplicate-match-review__stat-card {
+  border-radius: $radius-md;
+  border: 1px solid #E5E7EB;
+  padding: 12px 14px;
+  min-width: 160px;
+}
+
+.duplicate-match-review__stat-card--matched {
+  background: #EAF8F0;
+  border-color: #B8E2C8;
+}
+
+.duplicate-match-review__stat-card--missing {
+  background: #FFF5E6;
+  border-color: #F6D89B;
+}
+
+.duplicate-match-review__stat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.duplicate-match-review__stat-card-icon--match {
   color: #16A34A;
 }
 
-.duplicate-match-review__summary-icon--missing {
+.duplicate-match-review__stat-card-icon--missing {
   color: #F59E0B;
 }
 
-.duplicate-match-review__summary-card--confidence {
-  background: #FFF5E6;
-  border-color: #F6D89B;
+.duplicate-match-review__stat-card-title {
+  font-weight: 700;
+  color: #111827;
+  font-size: 0.8125rem;
+  line-height: 1.2;
 }
 
-.duplicate-match-review__summary-card--matched {
-  border-color: #B8E2C8;
-  background: #EAF8F0;
-}
-
-.duplicate-match-review__summary-card--missing {
-  border-color: #F6D89B;
-  background: #FFF5E6;
+.duplicate-match-review__stat-card-detail {
+  margin-top: 6px;
+  font-weight: 500;
+  color: #6B7280;
+  font-size: 0.75rem;
+  line-height: 1.3;
 }
 
 .duplicate-match-review__compare-subtitle {
@@ -599,7 +708,8 @@ function onNotMatch() {
 
 .duplicate-match-review__panel-header {
   background: #F3F4F6;
-  border-radius: $radius-md;
+  border-top-left-radius: $radius-md;
+  border-top-right-radius: $radius-md;
   padding: 14px 16px;
   border: 1px solid #E5E7EB;
 }
@@ -618,7 +728,12 @@ function onNotMatch() {
 }
 
 .duplicate-match-review__panel-body {
-  margin-top: 12px;
+  border-left: 1px solid $border-subtle;
+  border-right: 1px solid $border-subtle;
+  border-bottom: 1px solid $border-subtle;
+  border-bottom-left-radius: $radius-md;
+  border-bottom-right-radius: $radius-md;
+  padding: 6px 16px;
 }
 
 .duplicate-match-review__field-row {
@@ -652,5 +767,25 @@ function onNotMatch() {
 .duplicate-match-review__actions {
   flex-wrap: wrap;
   gap: 8px;
+}
+
+@media (max-width: 767px) {
+  .duplicate-match-review__summary-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .duplicate-match-review__summary-cards {
+    width: 100%;
+  }
+
+  .duplicate-match-review__stat-card {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .duplicate-match-review__badges-row {
+    padding-left: 0;
+  }
 }
 </style>

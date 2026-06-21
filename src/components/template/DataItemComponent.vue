@@ -10,16 +10,19 @@
       @click="emit('click', $event)">
       <q-item-section avatar>
         <q-avatar
-          size="40px"
+          :size="iconSize"
           :icon="icon"
           :color="iconColor"
           :text-color="iconTextColor" />
       </q-item-section>
       <q-item-section>
-        <q-item-label>
+        <q-item-label :class="labelClass">
           {{ title }}
         </q-item-label>
-        <q-item-label caption class="banner__meta">
+        <span class="data-item-sub-title">
+          <slot name="subTitle" />
+        </span>
+        <q-item-label v-if="subTitle" caption class="banner__meta">
           <q-icon
             v-if="subTitleIcon"
             size="14px"
@@ -48,8 +51,18 @@ const props = defineProps({
     default: 'primary',
     required: false,
   },
+  iconSize: {
+    type: String,
+    default: '40px',
+    required: false,
+  },
   title: {
     type: String,
+    required: true,
+  },
+  titleSize: {
+    type: String,
+    default: 'small',
     required: true,
   },
   subTitle: {
@@ -101,5 +114,24 @@ const iconTextColor = computed(() => {
   }
 
   return color
+})
+
+const labelClass = computed(() => {
+  let labelClass
+  switch (props.titleSize) {
+    case 'medium':
+      labelClass = 'data-item-title-medium'
+      break
+
+    case 'large':
+      labelClass = 'data-item-title-large'
+      break
+
+    default:
+      labelClass = 'data-item-title-small'
+      break
+  }
+
+  return labelClass
 })
 </script>

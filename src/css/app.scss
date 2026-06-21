@@ -1259,6 +1259,22 @@ input:-webkit-autofill {
   color: $primary;
 }
 
+.data-item-title-small {
+  font-size: 0.875rem;
+}
+
+.data-item-title-medium {
+  font-size: 1rem;
+}
+
+.data-item-title-large {
+  font-size: 1.5rem;
+}
+
+.data-item-sub-title {
+  margin-top: 10px;
+}
+
 .data-item-actions {
   display: flex;
   align-items: end;
