@@ -376,20 +376,22 @@ export const assessmentMeasurementDirections = {
 }
 
 export const labStatuses = {
-  draft: 'draft',
-  ordered: 'ordered',
-  collected: 'collected',
-  resulted: 'resulted',
-  reviewed: 'reviewed',
-  cancelled: 'cancelled',
+  draft: 'DRAFT',
+  ordered: 'ORDERED',
+  collected: 'COLLECTED',
+  resulted: 'RESULTED',
+  reviewed: 'REVIEWED',
+  cancelled: 'CANCELLED',
 }
 
 export const labCategories = {
-  bloodTest: 'blood_test',
-  urineTest: 'urine_test',
-  imaging: 'imaging',
-  microbiology: 'microbiology',
-  pathology: 'pathology',
+  bloodTest: 'BLOOD_TEST',
+  urineTest: 'URINE_TEST',
+  imaging: 'IMAGING',
+  microbiology: 'MICROBIOLOGY',
+  pathology: 'PATHOLOGY',
+  genetic: 'GENETIC',
+  other: 'OTHER',
 }
 
 export const labPriorities = {

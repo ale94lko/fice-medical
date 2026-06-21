@@ -77,7 +77,8 @@ function admissionDateToIso(value) {
     return null
   }
 
-  return `${isoDate}T00:00:00`
+  // Backend expects YYYY-MM-DD for date fields.
+  return isoDate
 }
 
 function allergyStartDateFromYear(year) {
@@ -86,6 +87,7 @@ function allergyStartDateFromYear(year) {
     return null
   }
 
+  // Backend expects YYYY-MM-DD for date fields.
   return `${y}-01-01`
 }
 

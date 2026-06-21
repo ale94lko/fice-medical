@@ -508,10 +508,11 @@ export function usDateToIso(value) {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
 
+  // Backend format required: YYYY-MM-DD (date-only)
   return `${y}-${m}-${day}`
 }
 
-/** ISO date or datetime → mm/dd/yyyy for form fields. */
+/** Date (YYYY-MM-DD / YYYY/MM/DD) or datetime → mm/dd/yyyy for form fields. */
 export function isoDateToUsDateString(value) {
   const raw = String(value ?? '').trim()
   if (!raw) {
@@ -521,12 +522,12 @@ export function isoDateToUsDateString(value) {
     return raw
   }
   const datePart = raw.includes('T') ? raw.split('T')[0] : raw.slice(0, 10)
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datePart)
+  const m = /^(\d{4})([-/])(\d{2})\2(\d{2})$/.exec(datePart)
   if (!m) {
     return ''
   }
 
-  return `${m[2]}/${m[3]}/${m[1]}`
+  return `${m[3]}/${m[4]}/${m[1]}`
 }
 
 export function snapshotAddClientForm(form) {

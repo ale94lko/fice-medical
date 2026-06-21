@@ -3,6 +3,7 @@ import {
   labStatuses,
 } from 'components/constants.js'
 import { cloneLab, computeLabAbnormalResult } from 'src/utils/lab-orders.js'
+import { isoDateToUsDateString, usDateToIso } from 'src/utils/client-form.js'
 
 function parseOptionalNumber(value) {
   if (value == null || value === '') {
@@ -65,7 +66,9 @@ export function normalizeLabComponent(raw) {
       c.reference_range_unit ?? c.referenceRangeUnit ?? '',
     ).trim() || null,
     flag: String(c.flag ?? '').trim().toLowerCase() || null,
-    resultDate: String(c.result_date ?? c.resultDate ?? '').trim(),
+    resultDate: isoDateToUsDateString(
+      c.result_date ?? c.resultDate ?? '',
+    ),
     resultTime: String(c.result_time ?? c.resultTime ?? '').trim() || null,
     notes: String(c.notes ?? '').trim() || null,
     abnormalIndicator: String(
@@ -81,13 +84,19 @@ export function normalizeLabSummary(raw) {
   return {
     id: String(l.id ?? l.lab_id ?? '').trim(),
     patientId: String(l.patient_id ?? l.patientId ?? '').trim(),
-    testName: String(l.test_name ?? l.testName ?? '').trim(),
+    testName: String(
+      l.lab_name ?? l.labName ?? l.test_name ?? l.testName ?? '',
+    ).trim(),
     category: String(l.category ?? '').trim().toLowerCase() || null,
-    orderedDate: String(l.ordered_date ?? l.orderedDate ?? '').trim(),
+    orderedDate: isoDateToUsDateString(
+      l.ordered_date ?? l.orderedDate ?? '',
+    ),
     collectedDate: String(
-      l.collected_date ?? l.collectedDate ?? '',
+      isoDateToUsDateString(l.collected_date ?? l.collectedDate ?? ''),
     ).trim() || null,
-    resultDate: String(l.result_date ?? l.resultDate ?? '').trim() || null,
+    resultDate: String(
+      isoDateToUsDateString(l.result_date ?? l.resultDate ?? ''),
+    ).trim() || null,
     status: String(l.status ?? labStatuses.draft).trim().toLowerCase(),
     abnormalResult: parseOptionalBool(
       l.abnormal_result ?? l.abnormalResult,
@@ -124,9 +133,9 @@ export function normalizeLabDetail(raw) {
       l.abnormal_result_manual ?? l.abnormalResultManual ?? '',
     ).trim().toLowerCase() || null,
     reviewedBy: String(l.reviewed_by ?? l.reviewedBy ?? '').trim() || null,
-    reviewedDate: String(
+    reviewedDate: isoDateToUsDateString(
       l.reviewed_date ?? l.reviewedDate ?? '',
-    ).trim() || null,
+    ) || null,
     resultSummary: String(
       l.result_summary ?? l.resultSummary ?? '',
     ).trim() || null,
@@ -138,19 +147,19 @@ export function normalizeLabDetail(raw) {
 export function labToApiPayload(lab, { draft = false } = {}) {
   /* eslint-disable camelcase -- API snake_case */
   const body = {
-    test_name: lab.testName,
+    lab_name: lab.testName,
     category: lab.category,
     ordering_clinician_id: lab.orderingClinicianId,
     status: draft ? labStatuses.draft : lab.status,
-    ordered_date: lab.orderedDate,
+    ordered_date: usDateToIso(lab.orderedDate) || null,
     priority: lab.priority,
     specimen_type: lab.specimenType,
-    collected_date: lab.collectedDate,
+    collected_date: usDateToIso(lab.collectedDate) || null,
     collection_location: lab.collectionLocation,
-    result_date: lab.resultDate,
+    result_date: usDateToIso(lab.resultDate) || null,
     abnormal_result_manual: lab.abnormalResultManual,
     reviewed_by: lab.reviewedBy,
-    reviewed_date: lab.reviewedDate,
+    reviewed_date: usDateToIso(lab.reviewedDate) || null,
     result_summary: lab.resultSummary,
     components: (lab.components ?? [])
       .filter(c => !c.deletedAt)
@@ -164,7 +173,7 @@ export function labToApiPayload(lab, { draft = false } = {}) {
         reference_range_high: c.referenceRangeHigh,
         reference_range_unit: c.referenceRangeUnit,
         flag: c.flag,
-        result_date: c.resultDate,
+        result_date: usDateToIso(c.resultDate) || null,
         result_time: c.resultTime,
         notes: c.notes,
         abnormal_indicator: c.abnormalIndicator,
