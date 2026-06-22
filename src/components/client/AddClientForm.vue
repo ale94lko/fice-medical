@@ -887,6 +887,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  initialActiveSubTab: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['saved', 'cancel', 'tab-label', 'navigate-existing'])
@@ -1011,6 +1015,7 @@ const {
   vitalsTabRef,
   panelScrollRef,
   initialActiveTab: props.initialActiveTab,
+  initialActiveSubTab: props.initialActiveSubTab,
 })
 
 const filteredCurrentSubTabs = computed(() => {

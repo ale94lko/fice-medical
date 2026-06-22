@@ -48,6 +48,19 @@ export const clientListTestIds = {
   rowMore: id => toTestId('client-list-row', id, 'btn-more'),
 }
 
+export const clientOverviewTestIds = {
+  page: 'client-overview-page',
+  header: 'client-overview-header',
+  sidebar: 'client-overview-sidebar',
+  modules: 'client-overview-modules',
+  alertBar: 'client-overview-alert-bar',
+  edit: 'client-overview-btn-edit',
+  close: 'client-overview-btn-close',
+  reviewMissing: 'client-overview-btn-review-missing',
+  moduleCard: id => toTestId('client-overview-module', id),
+  moduleDialog: 'client-overview-module-dialog',
+}
+
 export const clientPageTestIds = {
   save: 'client-page-btn-save',
   close: 'client-page-btn-close',

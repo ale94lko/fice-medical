@@ -119,7 +119,10 @@ export function useAddClientForm(t, catalogs, options = {}) {
     currentSubTabs,
     activeSubTab,
     resetSubTabs,
-  } = useAddClientSubTabs(activeTab)
+  } = useAddClientSubTabs(activeTab, {
+    initialActiveTab: options?.initialActiveTab,
+    initialActiveSubTab: options?.initialActiveSubTab,
+  })
 
   const {
     resetTabAccess,

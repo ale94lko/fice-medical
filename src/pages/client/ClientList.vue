@@ -108,7 +108,8 @@
         :rows="rows"
         :columns="visibleColumns"
         :loading="false"
-        @request="onTableRequest">
+        @request="onTableRequest"
+        @row-click="onRowClick">
         <template #header-cell-actions="scope">
           <q-th
             :props="scope"
@@ -150,48 +151,20 @@
             :props="scope"
             class="admin-data-table__secondary-cell
               client-list-page__email-cell">
-            <div
+            <AdminTableContactOverflow
               v-if="scope.row.emailEntries?.length"
-              class="client-list-page__emails row items-center no-wrap">
-              <span
-                class="client-list-page__email-primary row
-                  items-center no-wrap">
+              :entries="scope.row.emailEntries"
+              value-key="email"
+              type-key="typeLabel"
+              icon="mail_outline"
+            >
+              <template #value="{ entry }">
                 <AdminTableSearchHighlight
-                  :text="scope.row.emailEntries[0].email"
+                  :text="entry.email"
                   :query="highlightQuery"
                 />
-                <span
-                  v-if="scope.row.emailEntries[0].typeLabel"
-                  class="client-list-page__email-type">
-                  {{ scope.row.emailEntries[0].typeLabel }}
-                </span>
-              </span>
-              <span
-                v-if="scope.row.emailEntries.length > 1"
-                class="client-list-page__email-more">
-                +{{ scope.row.emailEntries.length - 1 }}
-                <q-tooltip
-                  anchor="top middle"
-                  self="bottom middle"
-                  class="client-list-page__email-tooltip"
-                  :offset="[0, 6]">
-                  <div
-                    v-for="entry in scope.row.emailEntries"
-                    :key="`tip-${entry.key}`"
-                    class="client-list-page__email-tooltip-line row
-                      items-center no-wrap">
-                    <span class="client-list-page__email-tooltip-address">
-                      {{ entry.email }}
-                    </span>
-                    <span
-                      v-if="entry.typeLabel"
-                      class="client-list-page__email-tooltip-type">
-                      {{ entry.typeLabel }}
-                    </span>
-                  </div>
-                </q-tooltip>
-              </span>
-            </div>
+              </template>
+            </AdminTableContactOverflow>
             <span v-else>—</span>
           </q-td>
         </template>
@@ -201,48 +174,20 @@
             :props="scope"
             class="admin-data-table__secondary-cell
               client-list-page__email-cell">
-            <div
+            <AdminTableContactOverflow
               v-if="scope.row.phoneEntries?.length"
-              class="client-list-page__emails row items-center no-wrap">
-              <span
-                class="client-list-page__email-primary row
-                  items-center no-wrap">
+              :entries="scope.row.phoneEntries"
+              value-key="phone"
+              type-key="typeLabel"
+              icon="phone"
+            >
+              <template #value="{ entry }">
                 <AdminTableSearchHighlight
-                  :text="scope.row.phoneEntries[0].phone"
+                  :text="entry.phone"
                   :query="highlightQuery"
                 />
-                <span
-                  v-if="scope.row.phoneEntries[0].typeLabel"
-                  class="client-list-page__email-type">
-                  {{ scope.row.phoneEntries[0].typeLabel }}
-                </span>
-              </span>
-              <span
-                v-if="scope.row.phoneEntries.length > 1"
-                class="client-list-page__email-more">
-                +{{ scope.row.phoneEntries.length - 1 }}
-                <q-tooltip
-                  anchor="top middle"
-                  self="bottom middle"
-                  class="client-list-page__email-tooltip"
-                  :offset="[0, 6]">
-                  <div
-                    v-for="entry in scope.row.phoneEntries"
-                    :key="`phone-tip-${entry.key}`"
-                    class="client-list-page__email-tooltip-line row
-                      items-center no-wrap">
-                    <span class="client-list-page__email-tooltip-address">
-                      {{ entry.phone }}
-                    </span>
-                    <span
-                      v-if="entry.typeLabel"
-                      class="client-list-page__email-tooltip-type">
-                      {{ entry.typeLabel }}
-                    </span>
-                  </div>
-                </q-tooltip>
-              </span>
-            </div>
+              </template>
+            </AdminTableContactOverflow>
             <span v-else>—</span>
           </q-td>
         </template>
@@ -261,47 +206,16 @@
               ]">
               {{ t('noKnownAllergiesLabel') }}
             </span>
-            <div
+            <AdminTableAllergyOverflow
               v-else
-              class="client-list-page__emails row items-center no-wrap">
-              <span
-                :class="[
-                  'allergy-severity-badge',
-                  'client-list-page__allergy-badge',
-                  allergySeverityBadgeClass(
-                    scope.row.allergyEntries[0].severityModifier,
-                  ),
-                ]">
+              :entries="scope.row.allergyEntries">
+              <template #value="{ entry }">
                 <AdminTableSearchHighlight
-                  :text="scope.row.allergyEntries[0].badgeLabel"
+                  :text="entry.badgeLabel"
                   :query="highlightQuery"
                 />
-              </span>
-              <span
-                v-if="scope.row.allergyEntries.length > 1"
-                class="client-list-page__email-more">
-                +{{ scope.row.allergyEntries.length - 1 }}
-                <q-tooltip
-                  anchor="top middle"
-                  self="bottom middle"
-                  class="client-list-page__email-tooltip"
-                  :offset="[0, 6]">
-                  <div
-                    v-for="entry in scope.row.allergyEntries"
-                    :key="`allergy-tip-${entry.key}`"
-                    class="client-list-page__email-tooltip-line">
-                    <span
-                      :class="[
-                        'allergy-severity-badge',
-                        'client-list-page__allergy-badge',
-                        allergySeverityBadgeClass(entry.severityModifier),
-                      ]">
-                      {{ entry.badgeLabel }}
-                    </span>
-                  </div>
-                </q-tooltip>
-              </span>
-            </div>
+              </template>
+            </AdminTableAllergyOverflow>
           </q-td>
         </template>
 
@@ -408,6 +322,10 @@ import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTableClinicianAvatars from
   'components/admin-table/AdminTableClinicianAvatars.vue'
+import AdminTableAllergyOverflow from
+  'components/admin-table/AdminTableAllergyOverflow.vue'
+import AdminTableContactOverflow from
+  'components/admin-table/AdminTableContactOverflow.vue'
 import AdminTableColumnSettingsDialog from
   'components/admin-table/AdminTableColumnSettingsDialog.vue'
 import AdminTableColumnSettingsHeader from
@@ -831,8 +749,27 @@ const addClient = () => {
   router.push('/clients/add')
 }
 
+function onRowClick(evt, row) {
+  const target = evt?.target
+  if (target?.closest?.(
+    '.admin-data-table__actions-cell, .q-checkbox, button, a',
+  )) {
+    return
+  }
+
+  openClientOverview(row)
+}
+
 function viewRow(row) {
-  editRow(row)
+  openClientOverview(row)
+}
+
+function openClientOverview(row) {
+  const id = row?.id
+  if (id == null || id === '') {
+    return
+  }
+  router.push({ name: 'ClientOverview', params: { id: String(id) } })
 }
 
 function assignClinicians() {

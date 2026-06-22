@@ -187,8 +187,24 @@ export const ADD_CLIENT_TABS_WITH_SUBTABS = new Set(
   Object.keys(ADD_CLIENT_SUB_TABS),
 )
 
-export function useAddClientSubTabs(activeTab) {
-  const activeSubTabByParent = ref({})
+export function useAddClientSubTabs(activeTab, options = {}) {
+  const initialParentTab = String(options.initialActiveTab ?? '').trim()
+  const initialSubTab = String(options.initialActiveSubTab ?? '').trim()
+
+  function seedSubTabState() {
+    const state = {}
+    if (!initialParentTab || !initialSubTab) {
+      return state
+    }
+    const tabs = ADD_CLIENT_SUB_TABS[initialParentTab] ?? []
+    if (tabs.some(tab => tab.key === initialSubTab)) {
+      state[initialParentTab] = initialSubTab
+    }
+
+    return state
+  }
+
+  const activeSubTabByParent = ref(seedSubTabState())
 
   const hasSubTabs = computed(
     () => ADD_CLIENT_TABS_WITH_SUBTABS.has(activeTab.value),

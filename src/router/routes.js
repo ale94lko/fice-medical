@@ -24,6 +24,14 @@ const routes = [
         },
       },
       {
+        path: 'clients/:id',
+        name: 'ClientOverview',
+        component: () => import('pages/client/ClientOverviewPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewClient,
+        },
+      },
+      {
         path: 'clients/:id/edit',
         name: 'EditClient',
         component: () => import('pages/client/EditClientPage.vue'),

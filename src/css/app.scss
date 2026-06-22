@@ -4,6 +4,7 @@
 @import 'quasar.variables';
 @import 'form-field';
 @import 'admin-table-standard';
+@import 'client-overview';
 
 
 .app-layout .q-page-container {
@@ -386,6 +387,14 @@
   min-height: 0;
 }
 
+.app-layout .q-page-container:has(.client-overview-page) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .admin-page.add-client-page {
   display: flex;
   flex-direction: column;
@@ -431,8 +440,9 @@
   }
 
   .admin-page.admin-list-page,
-  .admin-page.client-list-page {
-    padding: 12px 12px 12px;
+  .admin-page.client-list-page,
+  .admin-page.client-overview-page {
+    padding: 8px 10px 12px;
   }
 
   .admin-page.add-client-page {
@@ -446,9 +456,12 @@
   flex: 1 1 auto;
   min-height: calc(100dvh - 56px);
   box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
+  }
+
+  .admin-data-table tbody tr {
+    cursor: pointer;
   }
 
   .admin-list-page__title-row {
@@ -2743,7 +2756,7 @@ input:-webkit-autofill {
   border-radius: $radius-md;
   background-color: $banner-bg;
   border: 1px solid $banner-border;
-  font-family: Inter, sans-serif;
+  font-family: $typography-font-family;
 }
 
 .banner__title {
