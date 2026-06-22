@@ -1,1 +1,0 @@
-import{Ba as e,Fa as t,Ki as n,do as r,no as i,oo as a}from"./index-motSL-N6.js";import{r as o,t as s}from"./QLayout-D-mSGLHq.js";var c={};function l(n,c){let l=a(`router-view`);return i(),t(s,{view:`hHh Lpr lff`},{default:r(()=>[e(o,null,{default:r(()=>[e(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};
