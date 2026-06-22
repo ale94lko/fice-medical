@@ -21,7 +21,7 @@
   }
 
   &__title {
-    font-family: Inter, 'Segoe UI', sans-serif;
+    font-family: $typography-font-family;
     font-size: 40px;
     font-weight: 700;
     line-height: 48px;
@@ -33,7 +33,7 @@
   &__subtitle {
     margin-top: 0;
     margin-bottom: 5px;
-    font-family: Inter, 'Segoe UI', sans-serif;
+    font-family: $typography-font-family;
     font-size: 16px;
     font-weight: 400;
     line-height: 24px;
@@ -196,7 +196,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: Inter, 'Segoe UI', sans-serif;
+  font-family: $typography-font-family;
 
   .q-table__middle {
     flex: 1 1 auto;
@@ -423,7 +423,7 @@
     width: 100%;
     min-width: 720px;
     border-collapse: collapse;
-    font-family: Inter, 'Segoe UI', sans-serif;
+    font-family: $typography-font-family;
 
     thead tr {
       height: $table-header-height;
@@ -615,7 +615,7 @@
   border-bottom: 1px solid $table-border;
   background: $table-header-bg;
   color: $text-muted;
-  font-family: Inter, 'Segoe UI', sans-serif;
+  font-family: $typography-font-family;
   font-size: 12px;
   line-height: 1.1;
   box-sizing: border-box;
@@ -711,9 +711,41 @@
   }
 }
 
+.admin-hover-card {
+  display: inline-flex;
+  vertical-align: middle;
+  outline: none;
+
+  &__menu {
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible;
+  }
+
+  &__panel {
+    outline: none;
+  }
+}
+
 .admin-clinician-avatars {
   flex-shrink: 0;
   min-width: 0;
+
+  &__avatar-host {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    z-index: 1;
+
+    & + & {
+      margin-left: -8px;
+    }
+
+    &:hover,
+    &:focus-within {
+      z-index: 2;
+    }
+  }
 
   &__avatar {
     position: relative;
@@ -728,35 +760,212 @@
     border: 2px solid $surface;
     cursor: default;
     flex-shrink: 0;
-    z-index: 1;
-
-    & + & {
-      margin-left: -8px;
-    }
-
-    &:hover {
-      z-index: 2;
-    }
+    outline: none;
   }
 
-  &__tooltip {
-    padding: 8px 12px;
-    max-width: 240px;
-    text-align: center;
+  &--md &__avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+    border-width: 2px;
+  }
+
+  &--md &__avatar-host + &__avatar-host {
+    margin-left: -6px;
+  }
+
+  &__tooltip-card {
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+    max-width: 280px;
+    padding: 8px 10px;
+    border-radius: $radius-md;
+    background: $surface;
+    color: $text-strong;
+    border: 1px solid $border-subtle;
+    box-shadow: $shadow-md;
+  }
+
+  &__tooltip-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid rgba($primary, 0.12);
+  }
+
+  &__tooltip-body {
+    min-width: 0;
+    text-align: left;
   }
 
   &__tooltip-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
+    font-size: 0.8125rem;
+    font-weight: 700;
     line-height: 1.25;
+    color: $text-strong;
+    word-break: break-word;
   }
 
   &__tooltip-specialty {
-    margin-top: 2px;
-    font-size: 0.75rem;
+    margin-top: 1px;
+    font-size: 0.6875rem;
     font-weight: 400;
     line-height: 1.2;
-    opacity: 0.9;
+    color: $text-muted;
+    word-break: break-word;
+  }
+
+  &__tooltip-star {
+    flex-shrink: 0;
+    align-self: center;
+    color: #f59e0b;
+  }
+}
+
+.admin-contact-overflow {
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+
+  &__primary {
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__type {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: $text-muted;
+
+    &--before {
+      font-weight: 500;
+      margin-right: 4px;
+    }
+  }
+
+  &--header {
+    .admin-contact-overflow__value {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: $text-strong;
+      line-height: 1.35;
+      word-break: break-word;
+      overflow: visible;
+      text-overflow: unset;
+    }
+  }
+
+  &:not(.admin-contact-overflow--header) {
+    .admin-contact-overflow__primary {
+      font-size: 14px;
+      line-height: 1.25;
+      color: $table-text-secondary;
+    }
+  }
+
+  &__more {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    color: $primary;
+    background: $secondary-2;
+    border: 1px solid rgba($primary, 0.24);
+    cursor: default;
+    outline: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba($primary, 0.12);
+      border-color: rgba($primary, 0.36);
+    }
+  }
+
+  &__tip-card {
+    min-width: 200px;
+    max-width: 300px;
+    padding: 6px;
+    border-radius: $radius-md;
+    background: $surface;
+    color: $text-strong;
+    border: 1px solid $border-subtle;
+    box-shadow: $shadow-md;
+  }
+
+  &__tip-item {
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: $radius-md;
+
+    & + & {
+      margin-top: 2px;
+      padding-top: 6px;
+      border-top: 1px solid $border-subtle;
+    }
+  }
+
+  &__tip-icon {
+    flex-shrink: 0;
+    color: $primary;
+  }
+
+  &__tip-body {
+    min-width: 0;
+    text-align: left;
+  }
+
+  &__tip-value {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: $text-strong;
+    word-break: break-word;
+  }
+
+  &__tip-type {
+    margin-top: 1px;
+    font-size: 0.6875rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: $text-muted;
+    word-break: break-word;
+  }
+}
+
+.admin-allergy-overflow {
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+
+  &__tip-severity {
+    flex-shrink: 0;
+    font-size: 0.625rem;
+    padding: 1px 6px;
+    white-space: nowrap;
   }
 }
 

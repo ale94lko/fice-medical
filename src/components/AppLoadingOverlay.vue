@@ -3,6 +3,7 @@
     <div
       v-show="showing"
       class="app-loading-overlay app-loading-overlay--content"
+      :class="{ 'app-loading-overlay--translucent': isTranslucent }"
       :style="contentOverlayStyle"
       role="alertdialog"
       aria-modal="true"
@@ -20,7 +21,9 @@
   <q-inner-loading
     v-else
     :showing="showing"
-    class="app-loading-overlay app-loading-overlay--local">
+    class="app-loading-overlay app-loading-overlay--local"
+    :class="{ 'app-loading-overlay--translucent': isTranslucent }"
+    :style="localOverlayStyle">
     <AppBrandLoading
       :compact="compact"
       :inline="inline"
@@ -80,6 +83,11 @@ const props = defineProps({
     type: Boolean,
     default: undefined,
   },
+  surfaceOpacity: {
+    type: Number,
+    default: 0.5,
+    validator: value => value >= 0 && value <= 1,
+  },
 })
 
 const { t } = useI18n()
@@ -97,11 +105,22 @@ const resolvedAriaLabel = computed(
   () => props.message || t('appLoading'),
 )
 
+const isTranslucent = computed(() => props.surfaceOpacity < 1)
+
+const overlaySurfaceBackground = computed(
+  () => `rgba(244, 246, 248, ${props.surfaceOpacity})`,
+)
+
+const localOverlayStyle = computed(() => ({
+  background: overlaySurfaceBackground.value,
+}))
+
 const contentOverlayStyle = computed(() => ({
   top: `${contentBounds.value.top}px`,
   left: `${contentBounds.value.left}px`,
   width: `${contentBounds.value.width}px`,
   height: `${contentBounds.value.height}px`,
+  background: overlaySurfaceBackground.value,
 }))
 
 function readContentBounds() {
@@ -195,14 +214,15 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-$app-loading-overlay-translucent-bg: rgba(248, 250, 251, 0.5);
+@import 'src/css/quasar.variables';
 
 @mixin app-loading-overlay-translucent-surface {
-  background: $app-loading-overlay-translucent-bg !important;
   backdrop-filter: blur(4px);
 
-  :deep(.app-brand-loading--with-waves) {
-    background: transparent;
+  &.app-loading-overlay--translucent {
+    :deep(.app-brand-loading--with-waves) {
+      background: transparent !important;
+    }
   }
 }
 
