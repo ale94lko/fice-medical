@@ -56,11 +56,7 @@
       </q-card>
     </q-page>
 
-    <q-page class="promo-container" v-if="showPromo">
-      <div class="promo">
-        <!-- contenido de promo aquí -->
-      </div>
-    </q-page>
+    <LoginPromoPanel v-if="showPromo" />
   </div>
 </template>
 
@@ -72,6 +68,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth-store.js'
 import { siteBreakpointsPx } from 'components/constants.js'
 import FormInput from '../../components/FormInput.vue'
+import LoginPromoPanel from '../../components/LoginPromoPanel.vue'
 import { authTestIds } from 'src/test-ids/index.js'
 
 // Quasar + Router + Auth Store

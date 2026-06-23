@@ -34,6 +34,24 @@ export default {
   emailMaxLength: 'Email must be at most 32 characters',
   emailInvalid: 'Please enter a valid email address',
   backToLogin: 'Back to login',
+  loginPromoAriaLabel: 'About FICE Medical',
+  loginPromoHeadline: 'Smart tools for',
+  loginPromoHeadlineAccent: 'better care',
+  loginPromoDescription:
+    'FICE Medical helps healthcare professionals manage patients, '
+    + 'appointments and medical records in one secure, intuitive platform.',
+  loginPromoFeaturePatientTitle: 'Patient-Centered',
+  loginPromoFeaturePatientDesc:
+    'All patient information in one place, accessible when you need it.',
+  loginPromoFeatureSecureTitle: 'Secure & Compliant',
+  loginPromoFeatureSecureDesc:
+    'Your data is protected with industry-leading security and privacy.',
+  loginPromoFeatureInsightsTitle: 'Insights that matter',
+  loginPromoFeatureInsightsDesc:
+    'Powerful reports and analytics to improve outcomes and efficiency.',
+  loginPromoFooter:
+    'Built for healthcare. Designed for you. More time for what matters '
+    + 'most: your patients.',
   invalidCredentials: 'Invalid credentials, please try again.',
   sessionExpiredRelogin:
     'Your session has expired, please sign in again',
@@ -75,6 +93,7 @@ export default {
   adminTableColumnSettingsHint:
     'Show, hide and reorder table columns. Preferences are saved '
     + 'for your account in this subtenant.',
+  adminTableColumnDragToReorder: 'Drag to reorder',
   clientListColAllergies: 'Allergies',
   clientListColumnConfigError:
     'Could not save column preferences. Please try again.',

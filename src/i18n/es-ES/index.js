@@ -35,6 +35,26 @@ export default {
   emailMaxLength: 'El correo debe tener como máximo 32 caracteres',
   emailInvalid: 'Introduce un correo electrónico válido',
   backToLogin: 'Volver a Iniciar sesión',
+  loginPromoAriaLabel: 'Acerca de FICE Medical',
+  loginPromoHeadline: 'Herramientas inteligentes para una',
+  loginPromoHeadlineAccent: 'mejor atención',
+  loginPromoDescription:
+    'FICE Medical ayuda a los profesionales de la salud a gestionar '
+    + 'pacientes, citas y registros médicos en una plataforma segura e '
+    + 'intuitiva.',
+  loginPromoFeaturePatientTitle: 'Centrado en el paciente',
+  loginPromoFeaturePatientDesc:
+    'Toda la información del paciente en un solo lugar, accesible cuando '
+    + 'la necesites.',
+  loginPromoFeatureSecureTitle: 'Seguro y conforme',
+  loginPromoFeatureSecureDesc:
+    'Tus datos están protegidos con seguridad y privacidad de primer nivel.',
+  loginPromoFeatureInsightsTitle: 'Información que importa',
+  loginPromoFeatureInsightsDesc:
+    'Informes y analíticas potentes para mejorar resultados y eficiencia.',
+  loginPromoFooter:
+    'Creado para la salud. Diseñado para ti. Más tiempo para lo que más '
+    + 'importa: tus pacientes.',
   invalidCredentials: 'Credenciales inválidas, intente de nuevo.',
   sessionExpiredRelogin:
     'La session expiró, por favor inicia session de nuevo',
@@ -76,6 +96,7 @@ export default {
   adminTableColumnSettingsHint:
     'Muestra, oculta y reordena columnas. Las preferencias se guardan '
     + 'para su cuenta en este subtenant.',
+  adminTableColumnDragToReorder: 'Arrastrar para reordenar',
   clientListColAllergies: 'Alergias',
   clientListColumnConfigError:
     'No se pudieron guardar las preferencias de columnas.',

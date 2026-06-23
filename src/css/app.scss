@@ -6,6 +6,7 @@
 @import 'admin-table-standard';
 @import 'client-overview';
 @import 'session-expiry-dialog';
+@import 'login-promo-panel';
 
 
 .app-layout .q-page-container {
@@ -944,14 +945,22 @@ input:-webkit-autofill {
 }
 
 .login-container {
+  min-height: 100vh;
+  flex-wrap: nowrap;
   background: linear-gradient(160deg, $secondary-2 0%, $page-bg 55%, $surface 100%);
 
   .login-card {
-    min-width: 100%;
+    min-width: 0;
+    flex: 1 1 0;
     flex-direction: column;
 
     &:not(.mobile) {
-      min-width: 70%;
+      flex: 1 1 auto;
+      max-width: none;
+    }
+
+    &.mobile {
+      max-width: 100%;
     }
 
     .logo {
@@ -1025,17 +1034,6 @@ input:-webkit-autofill {
 
 .user-menu {
   min-width: 200px;
-}
-
-.promo-container {
-  min-width: 30%;
-  border-left: 1px solid $primary;
-
-  .promo {
-    width: 100%;
-    height: calc(100% - 20px);
-    margin: 10px 0;
-  }
 }
 
 .q-notifications .q-notifications__list--top {
