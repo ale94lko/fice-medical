@@ -867,6 +867,12 @@
   min-width: 320px;
 }
 
+.client-overview-allergies-dialog.app-dialog-card {
+  width: 100%;
+  max-width: 600px;
+  min-width: 280px;
+}
+
 .modal-card {
   border-radius: $radius-lg !important;
   overflow: hidden;

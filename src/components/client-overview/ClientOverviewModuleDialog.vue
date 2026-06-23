@@ -6,26 +6,56 @@
     transition-hide="scale"
     @update:model-value="emit('update:modelValue', $event)">
     <q-card
-      class="insurance-dialog app-dialog-card
-        client-overview-module-dialog"
+      class="app-dialog-card client-overview-module-dialog"
+      :class="dialogCardClass"
+      :style="dialogCardStyle"
       :data-testid="clientOverviewTestIds.moduleDialog">
       <AppDialogHeader
         :close-label="t('close')"
         @close="onClose">
-        {{ dialogTitle }}
+        <div
+          v-if="isAllergiesModule"
+          class="client-overview-module-dialog__title-wrap">
+          <div
+            class="client-overview-module-dialog__title-icon"
+            :class="titleIconToneClass">
+            <q-icon :name="moduleIcon" size="20px" />
+          </div>
+          <div class="client-overview-module-dialog__title-copy">
+            <span class="client-overview-module-dialog__title-text">
+              {{ dialogTitle }}
+            </span>
+            <span
+              v-if="summaryLabel"
+              class="client-overview-module-dialog__title-sub">
+              {{ summaryLabel }}
+            </span>
+          </div>
+        </div>
+        <template v-else>
+          {{ dialogTitle }}
+        </template>
       </AppDialogHeader>
 
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md
           client-overview-module-dialog__body">
         <p
-          v-if="summaryLabel"
+          v-if="summaryLabel && !isAllergiesModule"
           class="text-body2 text-grey-7 q-mt-none q-mb-md">
           {{ summaryLabel }}
         </p>
 
         <div
-          v-if="hasTableContent"
+          v-if="hasAllergyListContent"
+          class="client-overview-module-dialog__allergy-list-wrap">
+          <ClientOverviewAllergiesDialogList
+            :items="tableRows"
+          />
+        </div>
+
+        <div
+          v-else-if="hasTableContent"
           class="add-client-form__fmh-list-card">
           <div class="add-client-form__fmh-table-wrap">
             <table class="add-client-form__fmh-table">
@@ -168,11 +198,14 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { addClientTabKeys } from 'components/constants.js'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import DialogFieldGrid from
   'components/client-overview/ClientOverviewModuleDialogFieldGrid.vue'
 import DialogSectionTable from
   'components/client-overview/ClientOverviewModuleDialogSectionTable.vue'
+import ClientOverviewAllergiesDialogList from
+  'components/client-overview/ClientOverviewAllergiesDialogList.vue'
 import {
   clientListAllergySeverityBadgeClass as allergySeverityBadgeClass,
 } from 'src/utils/client-list-allergy-severity.js'
@@ -221,6 +254,50 @@ const hasTableContent = computed(
   () => dialogDetail.value?.layout === 'table'
     && tableRows.value.length > 0,
 )
+
+const isAllergiesModule = computed(
+  () => props.module?.tabKey === addClientTabKeys.allergies,
+)
+
+const dialogCardClass = computed(() => {
+  if (isAllergiesModule.value) {
+    return [
+      'client-overview-module-dialog--allergies',
+      'client-overview-allergies-dialog',
+    ].join(' ')
+  }
+
+  return 'insurance-dialog'
+})
+
+const ALLERGY_DIALOG_MAX_WIDTH = '600px'
+
+const dialogCardStyle = computed(() => {
+  if (!isAllergiesModule.value) {
+    return undefined
+  }
+
+  return {
+    width: '100%',
+    maxWidth: ALLERGY_DIALOG_MAX_WIDTH,
+  }
+})
+
+const isAllergyListLayout = computed(
+  () => dialogDetail.value?.layout === 'allergy-list',
+)
+
+const hasAllergyListContent = computed(
+  () => isAllergyListLayout.value && tableRows.value.length > 0,
+)
+
+const moduleIcon = computed(() => props.module?.icon ?? 'medication')
+
+const titleIconToneClass = computed(() => {
+  const tone = String(props.module?.tone ?? 'red').trim()
+
+  return `client-overview-module-dialog__title-icon--${tone}`
+})
 
 const hasRecordContent = computed(
   () => dialogDetail.value?.layout === 'records'

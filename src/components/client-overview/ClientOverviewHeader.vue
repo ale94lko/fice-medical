@@ -6,16 +6,37 @@
       <div class="client-overview-header__main">
         <div class="client-overview-header__profile-head">
           <div class="client-overview-header__avatar-wrap">
-            <div
-              class="client-overview-header__avatar"
-              :style="clientAvatarStyle">
-              {{ header.clientInitials }}
+            <div class="client-overview-header__avatar-block">
+              <div
+                class="client-overview-header__avatar"
+                role="img"
+                :aria-label="t('clientOverviewProfilePhotoPlaceholder')">
+                <ClientOverviewProfileAvatarPlaceholder />
+              </div>
+              <span
+                v-if="header.statusLabel"
+                class="client-overview-header__status-badge">
+                {{ header.statusLabel }}
+              </span>
             </div>
-            <span
-              v-if="header.statusLabel"
-              class="client-overview-header__status-badge">
-              {{ header.statusLabel }}
-            </span>
+
+            <button
+              v-if="missingItems.length"
+              type="button"
+              class="client-overview-header__missing-alert-btn"
+              :data-testid="clientOverviewTestIds.reviewMissing"
+              :aria-label="t('clientOverviewReviewMissing')"
+              @click="emit('review-missing')">
+              <q-icon
+                name="warning_amber"
+                size="36px"
+              />
+              <q-tooltip anchor="bottom middle" self="top middle">
+                {{ t('clientOverviewMissingInformation', {
+                  count: missingItems.length,
+                }) }}
+              </q-tooltip>
+            </button>
           </div>
 
           <div class="client-overview-header__profile-body">
@@ -23,50 +44,59 @@
               {{ header.fullName }}
             </h2>
 
-            <div class="client-overview-header__meta-row">
-              <div class="client-overview-header__meta-cell">
+            <div
+              class="client-overview-header__meta-row
+                client-overview-header__meta-row--client-actions">
+              <div
+                class="client-overview-header__meta-cell
+                  client-overview-header__meta-cell--client-number">
                 <span class="client-overview-header__meta-label">
                   {{ t('clientNumber') }}
                 </span>
                 <div class="client-overview-header__meta-value-row">
-                  <strong
+                  <span
                     v-if="header.clientNumber"
-                    class="client-overview-header__meta-value
-                      client-overview-header__client-number-badge">
-                    {{ header.clientNumber }}
-                  </strong>
+                    class="client-overview-header__client-number-badge">
+                    <span class="client-overview-header__client-number-text">
+                      {{ header.clientNumber }}
+                    </span>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="xs"
+                      icon="content_copy"
+                      class="client-overview-header__copy-btn"
+                      :aria-label="t('clientOverviewCopyClientNumber')"
+                      @click="copyClientNumber"
+                    />
+                  </span>
                   <strong
                     v-else
                     class="client-overview-header__meta-value">
                     —
                   </strong>
-                  <q-btn
-                    v-if="header.clientNumber"
-                    flat
-                    dense
-                    round
-                    size="xs"
-                    icon="content_copy"
-                    class="client-overview-header__copy-btn"
-                    :aria-label="t('clientOverviewCopyClientNumber')"
-                    @click="copyClientNumber"
-                  />
-                  <q-btn
-                    no-caps
-                    unelevated
-                    dense
-                    outline
-                    color="primary"
-                    class="app-btn-outline
-                      client-overview-header__edit-btn"
-                    icon="edit"
-                    size="sm"
-                    :data-testid="clientOverviewTestIds.edit"
-                    :disable="loading"
-                    :label="t('editClient')"
-                    @click="emit('edit')"
-                  />
                 </div>
+              </div>
+
+              <div
+                class="client-overview-header__meta-cell
+                  client-overview-header__meta-cell--edit">
+                <q-btn
+                  no-caps
+                  unelevated
+                  dense
+                  outline
+                  color="primary"
+                  class="app-btn-outline
+                    client-overview-header__edit-btn"
+                  icon="edit"
+                  size="sm"
+                  :data-testid="clientOverviewTestIds.edit"
+                  :disable="loading"
+                  :label="t('editClient')"
+                  @click="emit('edit')"
+                />
               </div>
 
               <div
@@ -74,7 +104,9 @@
                 aria-hidden="true"
               />
 
-              <div class="client-overview-header__meta-cell">
+              <div
+                class="client-overview-header__meta-cell
+                  client-overview-header__meta-cell--dob">
                 <span class="client-overview-header__meta-label">
                   {{ t('clientOverviewDobAge') }}
                 </span>
@@ -84,11 +116,14 @@
               </div>
 
               <div
-                class="client-overview-header__meta-divider"
+                class="client-overview-header__meta-divider
+                  client-overview-header__meta-divider--compact"
                 aria-hidden="true"
               />
 
-              <div class="client-overview-header__meta-cell">
+              <div
+                class="client-overview-header__meta-cell
+                  client-overview-header__meta-cell--sex">
                 <span class="client-overview-header__meta-label">
                   {{ t('clientOverviewSex') }}
                 </span>
@@ -98,32 +133,40 @@
               </div>
             </div>
 
-            <div
-              v-if="header.phones.length || header.emails.length"
-              class="client-overview-header__contact-row">
-              <div
-                v-if="header.phones.length"
-                class="client-overview-header__contact-group">
-                <q-icon name="phone" size="18px" />
-                <AdminTableContactOverflow
-                  :entries="header.phones"
-                  icon="phone"
-                  variant="header"
-                  type-before-value
-                />
+            <div class="client-overview-header__contact-row">
+                <div
+                  class="client-overview-header__contact-group
+                    client-overview-header__contact-group--phone">
+                  <q-icon name="phone" size="18px" />
+                  <AdminTableContactOverflow
+                    v-if="header.phones.length"
+                    :entries="header.phones"
+                    icon="phone"
+                    variant="header"
+                  />
+                  <strong
+                    v-else
+                    class="client-overview-header__contact-placeholder">
+                    —
+                  </strong>
+                </div>
+                <div
+                  class="client-overview-header__contact-group
+                    client-overview-header__contact-group--email">
+                  <q-icon name="mail_outline" size="18px" />
+                  <AdminTableContactOverflow
+                    v-if="header.emails.length"
+                    :entries="header.emails"
+                    icon="mail_outline"
+                    variant="header"
+                  />
+                  <strong
+                    v-else
+                    class="client-overview-header__contact-placeholder">
+                    —
+                  </strong>
+                </div>
               </div>
-              <div
-                v-if="header.emails.length"
-                class="client-overview-header__contact-group">
-                <q-icon name="mail_outline" size="18px" />
-                <AdminTableContactOverflow
-                  :entries="header.emails"
-                  icon="mail_outline"
-                  variant="header"
-                  type-before-value
-                />
-              </div>
-            </div>
 
             <div class="client-overview-header__demographics-row">
               <div class="client-overview-header__meta-cell">
@@ -176,24 +219,6 @@
                   {{ header.idNumberMasked }}
                 </strong>
               </div>
-
-              <q-btn
-                v-if="missingItems.length"
-                flat
-                round
-                dense
-                color="warning"
-                class="client-overview-header__missing-alert-btn"
-                icon="warning_amber"
-                :data-testid="clientOverviewTestIds.reviewMissing"
-                :aria-label="t('clientOverviewReviewMissing')"
-                @click="emit('review-missing')">
-                <q-tooltip anchor="bottom middle" self="top middle">
-                  {{ t('clientOverviewMissingInformation', {
-                    count: missingItems.length,
-                  }) }}
-                </q-tooltip>
-              </q-btn>
             </div>
           </div>
         </div>
@@ -341,7 +366,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
@@ -349,7 +373,8 @@ import AdminTableClinicianAvatars from
   'components/admin-table/AdminTableClinicianAvatars.vue'
 import AdminTableContactOverflow from
   'components/admin-table/AdminTableContactOverflow.vue'
-import { clinicianAvatarStyle } from 'src/utils/clinician-display.js'
+import ClientOverviewProfileAvatarPlaceholder from
+  'components/client-overview/ClientOverviewProfileAvatarPlaceholder.vue'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -379,10 +404,6 @@ const emit = defineEmits(['review-missing', 'edit'])
 
 const { t } = useI18n()
 const $q = useQuasar()
-
-const clientAvatarStyle = computed(() =>
-  clinicianAvatarStyle(props.header.fullName),
-)
 
 function copyClientNumber() {
   copyToClipboard(props.header.clientNumber)

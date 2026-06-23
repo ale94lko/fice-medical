@@ -109,6 +109,7 @@ export default {
   clientOverviewModulesLoadWarning:
     'No se pudieron cargar algunos resúmenes de módulos.',
   clientOverviewCopyClientNumber: 'Copiar número de cliente',
+  clientOverviewProfilePhotoPlaceholder: 'Marcador de foto de perfil',
   clientOverviewCopiedClientNumber: 'Número de cliente copiado',
   clientOverviewDobAge: 'F. nac. / Edad',
   clientOverviewSex: 'Sexo',
@@ -151,6 +152,7 @@ export default {
   clientOverviewContactsDocumented: '{count} método(s) de contacto',
   clientOverviewNoContacts: 'Sin métodos de contacto documentados',
   clientOverviewAllergiesDocumented: '{count} documentada(s)',
+  clientOverviewAllergyRecordedYear: 'Año registrado',
   clientOverviewNoAllergies: 'Sin alergias documentadas',
   clientOverviewNoKnownAllergies: 'Sin alergias conocidas confirmadas',
   clientOverviewFamilyHistoryDocumented: '{count} documentado(s)',

@@ -1,0 +1,22 @@
+<template>
+  <svg
+    class="client-overview-profile-avatar"
+    viewBox="0 0 88 88"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true">
+    <ellipse
+      class="client-overview-profile-avatar__head"
+      cx="44"
+      cy="31"
+      rx="14"
+      ry="16"
+    />
+    <ellipse
+      class="client-overview-profile-avatar__shoulders"
+      cx="44"
+      cy="84"
+      rx="34"
+      ry="28"
+    />
+  </svg>
+</template>

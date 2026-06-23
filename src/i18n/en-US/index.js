@@ -107,6 +107,7 @@ export default {
   clientOverviewModulesLoadWarning:
     'Some module summaries could not be loaded.',
   clientOverviewCopyClientNumber: 'Copy client number',
+  clientOverviewProfilePhotoPlaceholder: 'Profile photo placeholder',
   clientOverviewCopiedClientNumber: 'Client number copied',
   clientOverviewDobAge: 'DOB / Age',
   clientOverviewSex: 'Sex',
@@ -149,6 +150,7 @@ export default {
   clientOverviewContactsDocumented: '{count} contact method(s)',
   clientOverviewNoContacts: 'No contact methods documented',
   clientOverviewAllergiesDocumented: '{count} documented',
+  clientOverviewAllergyRecordedYear: 'Recorded Year',
   clientOverviewNoAllergies: 'No allergies documented',
   clientOverviewNoKnownAllergies: 'No known allergies confirmed',
   clientOverviewFamilyHistoryDocumented: '{count} documented',

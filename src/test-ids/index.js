@@ -59,6 +59,7 @@ export const clientOverviewTestIds = {
   reviewMissing: 'client-overview-btn-review-missing',
   moduleCard: id => toTestId('client-overview-module', id),
   moduleDialog: 'client-overview-module-dialog',
+  allergiesDialogList: 'client-overview-allergies-dialog-list',
 }
 
 export const clientPageTestIds = {

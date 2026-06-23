@@ -184,16 +184,23 @@ function resolveVitalsEntries(form, rawClient) {
   }))
 }
 
-function buildAllergiesDialogDetail({ form, rawClient, t }) {
+function buildAllergyListDetail(rows, extras = {}) {
+  return {
+    layout: 'allergy-list',
+    columns: [],
+    rows,
+    records: [],
+    ...extras,
+  }
+}
+
+function buildAllergiesDialogDetail({ form, rawClient }) {
   const noKnown = Boolean(
     form?.[clientFormSections.allergies]?.noKnownAllergies
     ?? rawClient?.no_allergies,
   )
   if (noKnown) {
-    return buildTableDetail(
-      [{ key: 'label', labelKey: 'clientOverviewModuleDialogColAllergy' }],
-      [{ label: t('noKnownAllergiesLabel') }],
-    )
+    return buildAllergyListDetail([], { noKnownAllergies: true })
   }
 
   const apiRows = asArray(rawClient?.allergies)
@@ -220,18 +227,7 @@ function buildAllergiesDialogDetail({ form, rawClient, t }) {
     }),
   )
 
-  return buildTableDetail(
-    [
-      { key: 'label', labelKey: 'clientOverviewModuleDialogColAllergy' },
-      { key: 'year', labelKey: 'clientOverviewModuleDialogColYear' },
-      {
-        key: 'severityLabel',
-        labelKey: 'clientOverviewModuleDialogColSeverity',
-        cellType: 'severity',
-      },
-    ],
-    rows,
-  )
+  return buildAllergyListDetail(rows)
 }
 
 function buildFamilyHistoryDialogDetail({ form, rawClient }) {
