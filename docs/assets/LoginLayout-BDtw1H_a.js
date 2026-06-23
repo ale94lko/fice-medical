@@ -1,0 +1,1 @@
+import{Po as e,To as t,ha as n,io as r,ko as i,lo as a}from"./index-SCOifbjs.js";import{r as o,t as s}from"./QLayout-DjJ3EJoZ.js";var c={};function l(n,c){let l=i(`router-view`);return t(),r(s,{view:`hHh Lpr lff`},{default:e(()=>[a(o,null,{default:e(()=>[a(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};
