@@ -37,6 +37,16 @@ export default {
   invalidCredentials: 'Invalid credentials, please try again.',
   sessionExpiredRelogin:
     'Your session has expired, please sign in again',
+  sessionExpiryTitle: 'Session Expiring Soon',
+  sessionExpiryInactiveMessage:
+    'You have been inactive for more than 30 minutes.',
+  sessionExpiryAutoCloseMessage:
+    'This section will automatically close due to inactivity.',
+  sessionExpiryCountdownLabel: 'This section will close in:',
+  sessionExpiryCloseSection: 'Close Section',
+  sessionExpiryKeepOpen: 'Keep Section Open',
+  sessionExpirySecureFooter:
+    'Your session will remain secure until it expires.',
   save: 'Save',
   confirm: 'Confirm',
   cancel: 'Cancel',

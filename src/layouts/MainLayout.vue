@@ -402,6 +402,14 @@
     @confirm="handleSignOutConfirm"
     @cancel="handleSignOutCancel"
   />
+  <SessionExpiryDialog
+    v-model="warningVisible"
+    :countdown="formattedCountdown"
+    :keep-open-loading="keepOpenLoading"
+    :closing-section="closingSection"
+    @close-section="closeSection"
+    @keep-open="keepSectionOpen"
+  />
 </template>
 
 <script setup>
@@ -417,11 +425,13 @@ import {
 } from 'components/constants.js'
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
+import SessionExpiryDialog from 'components/SessionExpiryDialog.vue'
 import AppDrawerSubNavItem from 'components/AppDrawerSubNavItem.vue'
 import AppFooterPaginationHost from
   'components/admin-table/AppFooterPaginationHost.vue'
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
+import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
 
 // Composables
@@ -429,6 +439,14 @@ const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const {
+  warningVisible,
+  formattedCountdown,
+  keepOpenLoading,
+  closingSection,
+  closeSection,
+  keepSectionOpen,
+} = useSessionInactivity()
 
 function readInitialSidebarOpen() {
   if (typeof window === 'undefined') {

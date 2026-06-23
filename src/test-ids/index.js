@@ -25,6 +25,13 @@ export const layoutTestIds = {
   navClientAssignment: 'layout-nav-client-assignment',
 }
 
+export const sessionInactivityTestIds = {
+  dialog: 'session-inactivity-dialog',
+  countdown: 'session-inactivity-countdown',
+  closeSection: 'session-inactivity-btn-close-section',
+  keepOpen: 'session-inactivity-btn-keep-open',
+}
+
 export const adminTableTestIds = {
   columnSettings: 'admin-table-btn-column-settings',
 }

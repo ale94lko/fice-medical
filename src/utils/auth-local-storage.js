@@ -1,4 +1,6 @@
 import { authStorageKeys as keys } from 'components/constants.js'
+import { clearSharedSessionInactivityState } from
+  'src/utils/session-inactivity-sync.js'
 
 export function readStoredToken() {
   return localStorage.getItem(keys.token)
@@ -138,4 +140,5 @@ export function clearAuthLocalStorage() {
     keys.subtenants,
     keys.activeSubtenantId,
   ].forEach(k => localStorage.removeItem(k))
+  clearSharedSessionInactivityState()
 }

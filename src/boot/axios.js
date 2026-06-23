@@ -309,3 +309,9 @@ export default defineBoot(({ app }) => {
 })
 
 export const apiInstance = api
+
+export function refreshAccessToken() {
+  return getRefreshInFlight()
+}
+
+export { clearSessionAndRedirectToLogin }
