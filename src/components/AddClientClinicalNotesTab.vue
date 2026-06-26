@@ -36,7 +36,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
-            :disable="loading"
+            :disable="saving"
             :data-testid="tid.btn('add')"
             :label="t('clinicalNoteAdd')"
             @click="openAdd"
@@ -47,12 +47,8 @@
       <AdminTablePanel
         class="clinical-notes-table-panel q-mt-md"
         :show-column-settings="false">
-        <AppLoadingOverlay
-          scope="content"
-          :showing="loading"
-        />
         <ClinicalNotesTable
-          :rows="notes"
+          :rows="noteRows"
           :empty-label="t('clinicalNoteListEmpty')"
           :can-edit="canEditClinicalNotes"
           :can-delete="canDeleteClinicalNotes"
@@ -91,11 +87,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ClinicalNoteDialog from 'components/ClinicalNoteDialog.vue'
 import ClinicalNotesTable from 'components/ClinicalNotesTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
@@ -107,23 +102,30 @@ import {
   createClinicalNote,
   deleteClinicalNote,
   downloadClinicalNote,
-  fetchClinicalNote,
-  listClinicalNotes,
   signClinicalNote,
   updateClinicalNote,
 } from 'src/utils/clinical-note-api.js'
+import {
+  mapClinicalNotesListFromApi,
+  normalizeClinicalNoteDetail,
+} from 'src/utils/clinical-note-normalize.js'
 import {
   cloneClinicalNote,
   createEmptyClinicalNote,
   isServerClinicalNoteId,
 } from 'src/utils/clinical-note-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   clientId: {
     type: [String, Number],
     default: null,
+  },
+  clinicalNotes: {
+    type: Array,
+    default: () => [],
   },
   admissionDate: {
     type: String,
@@ -137,6 +139,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const siteStore = useSiteStore()
 const {
   canViewClinicalNotes,
   canAddClinicalNotes,
@@ -145,9 +148,7 @@ const {
   canSignClinicalNotes,
 } = useClientClinicalNotePermissions()
 
-const loading = ref(false)
 const saving = ref(false)
-const notes = ref([])
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -163,58 +164,49 @@ const resolvedClinicianOptions = computed(
   () => props.clinicianOptions ?? [],
 )
 
-watch(clientId, () => {
-  if (hasClientId.value && canViewClinicalNotes.value) {
-    loadNotes()
-  }
-})
+const clinicalNotesRaw = computed(() =>
+  Array.isArray(props.clinicalNotes) ? props.clinicalNotes : [],
+)
 
-onMounted(() => {
-  if (hasClientId.value && canViewClinicalNotes.value) {
-    loadNotes()
-  }
-})
+const noteRows = computed(() =>
+  mapClinicalNotesListFromApi(
+    clinicalNotesRaw.value,
+    resolvedClinicianOptions.value,
+  ),
+)
 
-async function loadNotes() {
-  loading.value = true
-  try {
-    const result = await listClinicalNotes(
-      clientId.value,
-      { limit: 100, page: 0 },
-      resolvedClinicianOptions.value,
-    )
-    notes.value = result.items ?? []
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: apiErrorMessage(error) || t('clinicalNoteListError'),
-      })
-    }
-  } finally {
-    loading.value = false
-  }
+function findRawClinicalNote(noteId) {
+  return clinicalNotesRaw.value.find(
+    row => String(row?.id) === String(noteId),
+  )
 }
 
-async function loadNoteDetail(noteId, mode) {
-  loading.value = true
+function noteDetailFromRecord(noteId) {
+  const raw = findRawClinicalNote(noteId)
+  if (!raw) {
+    return null
+  }
+
+  return normalizeClinicalNoteDetail(
+    raw,
+    resolvedClinicianOptions.value,
+  )
+}
+
+async function refreshClientClinicalNotes() {
+  if (!hasClientId.value) {
+    return
+  }
   try {
-    activeNote.value = await fetchClinicalNote(
-      clientId.value,
-      noteId,
-      resolvedClinicianOptions.value,
-    )
-    dialogMode.value = mode
-    dialogOpen.value = true
+    await siteStore.fetchClientById(clientId.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
         type: quasarNotifyTypes.negative,
-        message: apiErrorMessage(error) || t('clinicalNoteLoadError'),
+        message: t('clinicalNoteListError'),
+        position: 'top',
       })
     }
-  } finally {
-    loading.value = false
   }
 }
 
@@ -224,25 +216,35 @@ function openAdd() {
   dialogOpen.value = true
 }
 
-async function openView(row) {
+function openView(row) {
   if (isServerClinicalNoteId(row.id)) {
-    await loadNoteDetail(row.id, 'view')
+    const detail = noteDetailFromRecord(row.id)
+    if (detail) {
+      activeNote.value = detail
+      dialogMode.value = 'view'
+      dialogOpen.value = true
 
-    return
+      return
+    }
   }
   activeNote.value = cloneClinicalNote(row)
   dialogMode.value = 'view'
   dialogOpen.value = true
 }
 
-async function openEdit(row) {
+function openEdit(row) {
   if (!canEditClinicalNotes.value) {
     return
   }
   if (isServerClinicalNoteId(row.id)) {
-    await loadNoteDetail(row.id, 'edit')
+    const detail = noteDetailFromRecord(row.id)
+    if (detail) {
+      activeNote.value = detail
+      dialogMode.value = 'edit'
+      dialogOpen.value = true
 
-    return
+      return
+    }
   }
   activeNote.value = cloneClinicalNote(row)
   dialogMode.value = 'edit'
@@ -267,7 +269,7 @@ async function onDeleteConfirmed() {
       message: t('clinicalNoteDeleted'),
       position: 'top',
     })
-    await loadNotes()
+    await refreshClientClinicalNotes()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -328,7 +330,7 @@ async function onSaveDraft(note) {
       position: 'top',
     })
     dialogOpen.value = false
-    await loadNotes()
+    await refreshClientClinicalNotes()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -366,7 +368,7 @@ async function onSign(note) {
       position: 'top',
     })
     dialogOpen.value = false
-    await loadNotes()
+    await refreshClientClinicalNotes()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({

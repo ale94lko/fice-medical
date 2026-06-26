@@ -11,7 +11,10 @@
                 class="client-overview-header__avatar"
                 role="img"
                 :aria-label="t('clientOverviewProfilePhotoPlaceholder')">
-                <ClientOverviewProfileAvatarPlaceholder />
+                <StoredFileAvatar
+                  :file-id="header.photoFileId"
+                  spinner-size="32px"
+                />
               </div>
               <span
                 v-if="header.statusLabel"
@@ -373,8 +376,7 @@ import AdminTableClinicianAvatars from
   'components/admin-table/AdminTableClinicianAvatars.vue'
 import AdminTableContactOverflow from
   'components/admin-table/AdminTableContactOverflow.vue'
-import ClientOverviewProfileAvatarPlaceholder from
-  'components/client-overview/ClientOverviewProfileAvatarPlaceholder.vue'
+import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({

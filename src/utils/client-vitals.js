@@ -106,9 +106,6 @@ export function createEmptyVitalsSection() {
     entries: [],
     draft: createEmptyVitalsDraft(),
     editingId: null,
-    recordExpanded: true,
-    additionalInfoExpanded: true,
-    historyExpanded: true,
   }
 }
 

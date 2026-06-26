@@ -73,6 +73,12 @@ export const clientPageTestIds = {
   save: 'client-page-btn-save',
   close: 'client-page-btn-close',
   breadcrumbClients: 'client-page-breadcrumb-clients',
+  profilePhotoCamera: 'client-page-profile-photo-camera',
+  profilePhotoCropDialog: 'client-page-profile-photo-crop-dialog',
+  profilePhotoCropViewport: 'client-page-profile-photo-crop-viewport',
+  profilePhotoCropZoom: 'client-page-profile-photo-crop-zoom',
+  profilePhotoCropSave: 'client-page-profile-photo-crop-save',
+  profilePhotoCropCancel: 'client-page-profile-photo-crop-cancel',
 }
 
 export const addClientTestIds = {
@@ -82,6 +88,10 @@ export const addClientTestIds = {
   subTab: key => toTestId('add-client-subtab', key),
   field: name => toTestId('add-client-field', name),
   genderOption: token => toTestId('add-client-field-gender', token),
+  preferredLanguageOption: token => toTestId(
+    'add-client-field-preferred-language',
+    token,
+  ),
   accordionToggle: section => toTestId(
     'add-client-accordion',
     section,
@@ -112,6 +122,7 @@ export const addClientTestIds = {
   vitalsField: name => toTestId('add-client-vitals-field', name),
   vitalsPainLevel: token => toTestId('add-client-vitals-pain', token),
   vitalsBtnSave: 'add-client-vitals-btn-save',
+  vitalsBtnAdd: 'add-client-vitals-btn-add',
   vitalsBtnCancelEdit: 'add-client-vitals-btn-cancel-edit',
   vitalsRowEdit: id => toTestId('add-client-vitals-row', id, 'btn-edit'),
   vitalsRowDelete: id => toTestId('add-client-vitals-row', id, 'btn-delete'),
@@ -145,11 +156,12 @@ export const addClientTestIds = {
   },
 }
 
-export const assessmentTestIds = {
-  btn: name => toTestId('assessment-btn', name),
-  field: name => toTestId('assessment-field', name),
-  section: id => toTestId('assessment-section', id),
-  rowEdit: id => toTestId('assessment-row', id, 'btn-edit'),
+export const screeningTestIds = {
+  btn: name => toTestId('screening-btn', name),
+  field: name => toTestId('screening-field', name),
+  section: id => toTestId('screening-section', id),
+  rowView: id => toTestId('screening-row', id, 'btn-view'),
+  rowEdit: id => toTestId('screening-row', id, 'btn-edit'),
 }
 
 export const labTestIds = {

@@ -44,6 +44,8 @@ function resolveApiBaseUrl() {
   return ''
 }
 
+export { resolveApiBaseUrl }
+
 const api = axios.create({
   baseURL: resolveApiBaseUrl(),
 })

@@ -12,6 +12,7 @@
       v-if="question.fieldType === fieldTypes.text"
       :model-value="stringValue"
       :external-label="false"
+      :disable="readonly"
       :test-id="fieldTestId"
       :error="hasError"
       :error-message="errorMessage"
@@ -23,6 +24,7 @@
       :model-value="stringValue"
       type="textarea"
       :external-label="false"
+      :disable="readonly"
       :test-id="fieldTestId"
       :error="hasError"
       :error-message="errorMessage"
@@ -32,6 +34,7 @@
     <ClientDateField
       v-else-if="question.fieldType === fieldTypes.date"
       :model-value="stringValue"
+      :readonly="readonly"
       :test-id="fieldTestId"
       :error="hasError"
       :error-message="errorMessage"
@@ -45,6 +48,7 @@
       hide-bottom-space
       type="text"
       inputmode="decimal"
+      :readonly="readonly"
       :data-testid="fieldTestId"
       :error="hasError"
       :error-message="errorMessage"
@@ -60,6 +64,7 @@
       map-options
       clearable
       class="full-width"
+      :disable="readonly"
       :options="selectOptions"
       :test-id="fieldTestId"
       :error="hasError"
@@ -69,22 +74,23 @@
 
     <div
       v-else-if="question.fieldType === fieldTypes.radio"
-      class="assessment-field__radio-group"
-      :class="{ 'assessment-field--error': hasError }">
+      class="screening-field__radio-group"
+      :class="{ 'screening-field--error': hasError }">
       <label
         v-for="(opt, optIndex) in question.options"
         :key="optionKey(opt, optIndex)"
-        class="assessment-field__radio-option">
+        class="screening-field__radio-option">
         <input
           type="radio"
-          class="assessment-field__radio-input"
+          class="screening-field__radio-input"
           :name="radioGroupName"
           :value="optionValue(opt)"
           :checked="stringValue === optionValue(opt)"
+          :disabled="readonly"
           @change="emitString(optionValue(opt))"
         />
-        <span class="assessment-field__radio-indicator" aria-hidden="true" />
-        <span class="assessment-field__radio-label">
+        <span class="screening-field__radio-indicator" aria-hidden="true" />
+        <span class="screening-field__radio-label">
           {{ optionLabel(opt) }}
         </span>
       </label>
@@ -95,8 +101,8 @@
 
     <div
       v-else-if="question.fieldType === fieldTypes.chips"
-      class="assessment-field__chips"
-      :class="{ 'assessment-field--error': hasError }">
+      class="screening-field__chips"
+      :class="{ 'screening-field--error': hasError }">
       <q-btn
         v-for="(opt, optIndex) in question.options"
         :key="optionKey(opt, optIndex)"
@@ -111,6 +117,7 @@
             'preferred-chip--selected': isChipSelected(opt),
           },
         ]"
+        :disable="readonly"
         @click="onChipToggle(opt)">
         <span class="preferred-chip-label">
           {{ optionLabel(opt) }}
@@ -123,8 +130,8 @@
 
     <div
       v-else-if="question.fieldType === fieldTypes.yesNo"
-      class="assessment-field__yes-no"
-      :class="{ 'assessment-field--error': hasError }">
+      class="screening-field__yes-no"
+      :class="{ 'screening-field--error': hasError }">
       <q-btn
         v-for="opt in yesNoOptions"
         :key="opt.value"
@@ -140,6 +147,7 @@
               stringValue === opt.value,
           },
         ]"
+        :disable="readonly"
         @click="emitString(opt.value)">
         <span class="preferred-chip-label">
           {{ opt.label }}
@@ -159,18 +167,18 @@ import FormInput from './FormInput.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import { assessmentFieldTypes } from 'components/constants.js'
+import { screeningFieldTypes } from 'components/constants.js'
 import {
   isChipSelected as checkChipSelected,
   toggleChipAnswer,
-} from 'src/utils/assessment-answers.js'
+} from 'src/utils/screening-answers.js'
 import {
   optionKey,
   optionLabel,
   optionValue,
   optionsForSelectField,
-} from 'src/utils/assessment-template-metadata.js'
-import { assessmentTestIds as tid } from 'src/test-ids/index.js'
+} from 'src/utils/screening-template-metadata.js'
+import { screeningTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   question: {
@@ -193,19 +201,23 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
-const fieldTypes = assessmentFieldTypes
+const fieldTypes = screeningFieldTypes
 
 const fieldTestId = computed(
   () => tid.field(props.question?.id),
 )
 
 const radioGroupName = computed(
-  () => `assessment-radio-${props.question?.id}`,
+  () => `screening-radio-${props.question?.id}`,
 )
 
 const stringValue = computed(() => {
@@ -245,6 +257,9 @@ function isChipSelected(opt) {
 }
 
 function onChipToggle(opt) {
+  if (props.readonly) {
+    return
+  }
   emit(
     'update:modelValue',
     toggleChipAnswer(
@@ -259,13 +274,13 @@ function onChipToggle(opt) {
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
 
-.assessment-field__radio-group {
+.screening-field__radio-group {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.assessment-field__radio-option {
+.screening-field__radio-option {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -273,13 +288,13 @@ function onChipToggle(opt) {
   margin: 0;
 }
 
-.assessment-field__radio-input {
+.screening-field__radio-input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
 
-.assessment-field__radio-indicator {
+.screening-field__radio-indicator {
   width: 18px;
   height: 18px;
   border: 1.5px solid $text-hint;
@@ -288,7 +303,7 @@ function onChipToggle(opt) {
   position: relative;
 }
 
-.assessment-field__radio-input:checked + .assessment-field__radio-indicator {
+.screening-field__radio-input:checked + .screening-field__radio-indicator {
   border-color: $primary;
   background: $primary;
 
@@ -305,19 +320,19 @@ function onChipToggle(opt) {
   }
 }
 
-.assessment-field__radio-label {
+.screening-field__radio-label {
   font-size: 0.875rem;
   color: $text-strong;
 }
 
-.assessment-field__chips,
-.assessment-field__yes-no {
+.screening-field__chips,
+.screening-field__yes-no {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.assessment-field--error {
+.screening-field--error {
   padding: 8px 10px;
   border-radius: $radius-md;
   border: 1px solid $negative;

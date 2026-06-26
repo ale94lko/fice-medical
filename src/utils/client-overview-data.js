@@ -14,7 +14,7 @@ import { formatPhoneUs } from 'src/utils/client-contact-form.js'
 import { visibleInsuranceProfiles } from 'src/utils/client-insurance.js'
 import { sortVitalsEntriesDesc } from 'src/utils/client-vitals.js'
 import { normalizeAppointment } from 'src/utils/appointment-normalize.js'
-import { normalizeAssessmentRecord } from 'src/utils/assessment-normalize.js'
+import { normalizeScreeningRecord } from 'src/utils/screening-normalize.js'
 import { mapCarePlansListFromApi } from 'src/utils/care-plan-normalize.js'
 import { mapClinicalNotesListFromApi } from
   'src/utils/clinical-note-normalize.js'
@@ -339,9 +339,8 @@ function summariesFromRawClient(rawClient, t) {
   const clinicalNotes = mapClinicalNotesListFromApi(
     asArray(rawClient?.clinical_notes ?? rawClient?.clinicalNotes),
   )
-  const assessments = asArray(
-    rawClient?.screenings ?? rawClient?.assessments,
-  ).map(normalizeAssessmentRecord)
+  const screenings = asArray(rawClient?.screenings)
+    .map(normalizeScreeningRecord)
 
   const carePlanItems = carePlans.map(plan => ({
     label: trim(plan.name) || trim(plan.problem) || '—',
@@ -362,7 +361,7 @@ function summariesFromRawClient(rawClient, t) {
     label: trim(note.summaryPreview) || trim(note.clinicianLabel) || '—',
     meta: trim(note.noteDateTimeDisplay) || trim(note.status),
   }))
-  const assessmentItems = assessments.map(item => ({
+  const screeningItems = screenings.map(item => ({
     label: trim(item.templateName) || trim(item.name) || '—',
     meta: trim(item.status) || trim(item.completedAt),
   }))
@@ -396,13 +395,13 @@ function summariesFromRawClient(rawClient, t) {
       }),
       t('clientOverviewNoClinicalNotes'),
     ),
-    assessments: moduleSummary(
-      assessmentItems.length,
-      assessmentItems,
-      t('clientOverviewAssessmentsDocumented', {
-        count: assessmentItems.length,
+    screenings: moduleSummary(
+      screeningItems.length,
+      screeningItems,
+      t('clientOverviewScreeningsDocumented', {
+        count: screeningItems.length,
       }),
-      t('clientOverviewNoAssessments'),
+      t('clientOverviewNoScreenings'),
     ),
     appointmentsRaw: appointments,
   }
@@ -434,11 +433,11 @@ function emptyRawClientSummaries(t) {
       t('clientOverviewClinicalNotesDocumented', { count: 0 }),
       t('clientOverviewNoClinicalNotes'),
     ),
-    assessments: moduleSummary(
+    screenings: moduleSummary(
       0,
       [],
-      t('clientOverviewAssessmentsDocumented', { count: 0 }),
-      t('clientOverviewNoAssessments'),
+      t('clientOverviewScreeningsDocumented', { count: 0 }),
+      t('clientOverviewNoScreenings'),
     ),
     appointmentsRaw: [],
   }
@@ -464,7 +463,7 @@ export function buildClientOverviewModuleSummaries(
     referrals: rawSummaries.referrals,
     appointments: rawSummaries.appointments,
     clinicalNotes: rawSummaries.clinicalNotes,
-    assessments: rawSummaries.assessments,
+    screenings: rawSummaries.screenings,
     careTeam: comingSoonSummary(t),
     authorizations: comingSoonSummary(t),
     tasks: comingSoonSummary(t),

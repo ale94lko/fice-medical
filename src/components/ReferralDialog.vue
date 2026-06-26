@@ -542,9 +542,9 @@ const providerOptions = computed(() =>
 )
 
 const documentRows = computed(() =>
-  (local.value.documents ?? []).map(doc => ({
+  (local.value.files ?? local.value.documents ?? []).map(doc => ({
     id: doc.id,
-    name: doc.fileName,
+    name: doc.originalFilename ?? doc.fileName ?? doc.name,
     size: doc.fileSize,
   })),
 )

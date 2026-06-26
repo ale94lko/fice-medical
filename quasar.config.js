@@ -23,7 +23,7 @@ function devApiProxy(target) {
     '/catalogs': { ...o },
     '/oauth': { ...o },
     '/patients': { ...o },
-    '/assessment-templates': { ...o },
+    '/screenings': { ...o },
     '/logout': { ...o },
   }
 }

@@ -82,7 +82,9 @@
       :title="t('fmhPersonalSectionTitle')"
       section-test-id="add-client-accordion-fmh-personal"
       :toggle-test-id="tid.accordionToggle('fmh-personal')">
-      <div class="fmh-list-card q-pa-md">
+      <AdminTablePanel
+        class="family-medical-history-table-panel"
+        :show-column-settings="false">
         <FamilyMedicalHistoryTable
           :entries="personalEntries"
           :can-edit="canEditMedicalHistory"
@@ -91,7 +93,7 @@
           @edit="openEdit"
           @delete="openDelete"
         />
-      </div>
+      </AdminTablePanel>
     </AccordionSection>
 
     <q-separator class="section-separator" />
@@ -101,7 +103,9 @@
       :title="t('fmhFamilySectionTitle')"
       section-test-id="add-client-accordion-fmh-family"
       :toggle-test-id="tid.accordionToggle('fmh-family')">
-      <div class="fmh-list-card q-pa-md">
+      <AdminTablePanel
+        class="family-medical-history-table-panel"
+        :show-column-settings="false">
         <FamilyMedicalHistoryTable
           :entries="familyEntries"
           :can-edit="canEditMedicalHistory"
@@ -110,7 +114,7 @@
           @edit="openEdit"
           @delete="openDelete"
         />
-      </div>
+      </AdminTablePanel>
     </AccordionSection>
 
     <FamilyMedicalHistoryEditDialog
@@ -135,6 +139,7 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FormSelect from 'components/FormSelect.vue'
 import AccordionSection from './AccordionSection.vue'
 import FamilyMedicalHistoryTable from 'components/FamilyMedicalHistoryTable.vue'

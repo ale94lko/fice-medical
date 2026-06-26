@@ -152,7 +152,9 @@
       section-test-id="add-client-accordion-allergies-existing"
       :toggle-test-id="tid.accordionToggle('allergies-existing')">
       <template v-if="!noKnownAllergiesChecked">
-        <div class="fmh-list-card q-pa-md">
+        <AdminTablePanel
+          class="allergies-table-panel"
+          :show-column-settings="false">
           <AllergiesTable
             :entries="visibleEntries"
             :invalid-row-ids="invalidDobRowIds"
@@ -161,7 +163,7 @@
             @edit="openEdit"
             @delete="openDelete"
           />
-        </div>
+        </AdminTablePanel>
         <p class="allergy-footer-hint">
           <q-icon name="info_outline" size="18px" class="q-mr-xs" />
           {{ t('allergiesFooterHint') }}
@@ -226,6 +228,7 @@ import ClientYearField from 'components/ClientYearField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormFieldHint from 'components/FormFieldHint.vue'
 import AccordionSection from './AccordionSection.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'
 import AllergyDeleteDialog from 'components/AllergyDeleteDialog.vue'

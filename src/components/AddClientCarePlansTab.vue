@@ -36,7 +36,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
-            :disable="loading"
+            :disable="saving"
             :data-testid="tid.btn('add')"
             :label="t('carePlanAdd')"
             @click="openAdd"
@@ -47,12 +47,8 @@
       <AdminTablePanel
         class="care-plans-table-panel q-mt-md"
         :show-column-settings="false">
-        <AppLoadingOverlay
-          scope="content"
-          :showing="loading"
-        />
         <CarePlansTable
-          :rows="plans"
+          :rows="planRows"
           :empty-label="t('carePlanListEmpty')"
           :can-edit="canEditCarePlans"
           :can-sign="canSignCarePlans"
@@ -79,11 +75,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import CarePlanDialog from 'components/CarePlanDialog.vue'
 import CarePlansTable from 'components/CarePlansTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
@@ -93,25 +88,32 @@ import {
   apiErrorMessage,
   changeCarePlanStatus,
   createClientCarePlan,
-  fetchClientCarePlan,
-  listClientCarePlans,
   prepareCarePlanForSave,
   signClientCarePlan,
   updateClientCarePlan,
   updateOutcomeMeasureCurrentValue,
 } from 'src/utils/care-plan-api.js'
 import {
+  mapCarePlansListFromApi,
+  normalizeCarePlanDetail,
+} from 'src/utils/care-plan-normalize.js'
+import {
   cloneCarePlan,
   createEmptyCarePlan,
   isServerNumericId,
 } from 'src/utils/care-plan-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   clientId: {
     type: [String, Number],
     default: null,
+  },
+  carePlans: {
+    type: Array,
+    default: () => [],
   },
   clinicianOptions: {
     type: Array,
@@ -121,6 +123,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const siteStore = useSiteStore()
 const {
   canViewCarePlans,
   canAddCarePlans,
@@ -128,9 +131,7 @@ const {
   canSignCarePlans,
 } = useClientCarePlanPermissions()
 
-const loading = ref(false)
 const saving = ref(false)
-const plans = ref([])
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -152,50 +153,43 @@ const resolvedClinicianOptions = computed(() => {
   return [{ label: 'Dr. John Smith', value: 5 }]
 })
 
-watch(clientId, () => {
-  if (hasClientId.value && canViewCarePlans.value) {
-    loadPlans()
-  }
-})
+const carePlansRaw = computed(() =>
+  Array.isArray(props.carePlans) ? props.carePlans : [],
+)
 
-onMounted(() => {
-  if (hasClientId.value && canViewCarePlans.value) {
-    loadPlans()
-  }
-})
+const planRows = computed(() =>
+  mapCarePlansListFromApi(carePlansRaw.value),
+)
 
-async function loadPlans() {
-  loading.value = true
-  try {
-    const result = await listClientCarePlans(clientId.value, { limit: 100 })
-    plans.value = result.items ?? []
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: apiErrorMessage(error) || t('carePlanListError'),
-      })
-    }
-  } finally {
-    loading.value = false
-  }
+function findRawCarePlan(planId) {
+  return carePlansRaw.value.find(
+    row => String(row?.id) === String(planId),
+  )
 }
 
-async function loadPlanDetail(planId, mode) {
-  loading.value = true
+function planDetailFromRecord(planId) {
+  const raw = findRawCarePlan(planId)
+  if (!raw) {
+    return null
+  }
+
+  return normalizeCarePlanDetail(raw)
+}
+
+async function refreshClientCarePlans() {
+  if (!hasClientId.value) {
+    return
+  }
   try {
-    activePlan.value = await fetchClientCarePlan(clientId.value, planId)
-    dialogMode.value = mode
-    dialogOpen.value = true
+    await siteStore.fetchClientById(clientId.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
         type: quasarNotifyTypes.negative,
-        message: apiErrorMessage(error) || t('carePlanLoadError'),
+        message: t('carePlanListError'),
+        position: 'top',
       })
     }
-  } finally {
-    loading.value = false
   }
 }
 
@@ -205,36 +199,56 @@ function openAdd() {
   dialogOpen.value = true
 }
 
-async function openView(row) {
+function openView(row) {
   if (isServerNumericId(row.id)) {
-    await loadPlanDetail(row.id, 'view')
+    const detail = planDetailFromRecord(row.id)
+    if (detail) {
+      activePlan.value = detail
+      dialogMode.value = 'view'
+      dialogOpen.value = true
 
-    return
+      return
+    }
   }
   activePlan.value = cloneCarePlan(row)
   dialogMode.value = 'view'
   dialogOpen.value = true
 }
 
-async function openEdit(row) {
+function openEdit(row) {
   if (!canEditCarePlans.value) {
     return
   }
   if (isServerNumericId(row.id)) {
-    await loadPlanDetail(row.id, 'edit')
+    const detail = planDetailFromRecord(row.id)
+    if (detail) {
+      activePlan.value = detail
+      dialogMode.value = 'edit'
+      dialogOpen.value = true
 
-    return
+      return
+    }
   }
   activePlan.value = cloneCarePlan(row)
   dialogMode.value = 'edit'
   dialogOpen.value = true
 }
 
-async function openSign(row) {
+function openSign(row) {
   if (!canSignCarePlans.value) {
     return
   }
-  await loadPlanDetail(row.id, 'edit')
+  const detail = planDetailFromRecord(row.id)
+  if (detail) {
+    activePlan.value = detail
+    dialogMode.value = 'edit'
+    dialogOpen.value = true
+
+    return
+  }
+  activePlan.value = cloneCarePlan(row)
+  dialogMode.value = 'edit'
+  dialogOpen.value = true
 }
 
 async function onSave({ plan, activate }) {
@@ -282,7 +296,7 @@ async function onSave({ plan, activate }) {
       position: 'top',
     })
     dialogOpen.value = false
-    await loadPlans()
+    await refreshClientCarePlans()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -305,7 +319,7 @@ async function onChangeStatus(row, status) {
       type: quasarNotifyTypes.positive,
       message: t('carePlanStatusUpdated'),
     })
-    await loadPlans()
+    await refreshClientCarePlans()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -334,7 +348,7 @@ async function onRecordProgress({ goalId, measureId, currentValue }) {
       type: quasarNotifyTypes.positive,
       message: t('carePlanMeasurementSaved'),
     })
-    await loadPlans()
+    await refreshClientCarePlans()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({

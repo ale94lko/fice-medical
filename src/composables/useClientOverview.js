@@ -45,6 +45,8 @@ export function useClientOverview(clientId) {
       clinicianOptions: catalogs.assignedClinicianSelectOptions.value,
       raceSelectOptions: catalogs.raceSelectOptions.value,
       ethnicitySelectOptions: catalogs.ethnicitySelectOptions.value,
+      preferredLanguageSelectOptions:
+        catalogs.preferredLanguageOptions.value,
       resolveCatalogSelectValue: catalogs.resolveCatalogSelectValue,
       appointments: summaries.value.appointmentsRaw ?? [],
       t,
@@ -93,6 +95,8 @@ export function useClientOverview(clientId) {
       raceSelectOptions: catalogs.raceSelectOptions.value,
       ethnicitySelectOptions: catalogs.ethnicitySelectOptions.value,
       genderSelectOptions: catalogs.genderOptions.value,
+      preferredLanguageSelectOptions:
+        catalogs.preferredLanguageOptions.value,
       contactTypeSelectOptions: catalogs.contactTypeSelectOptions.value,
       relationshipTypeSelectOptions:
         catalogs.relationshipTypeSelectOptions.value,

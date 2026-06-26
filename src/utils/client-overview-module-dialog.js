@@ -4,7 +4,7 @@ import {
   resolveClientListAllergySeverityModifier,
   sortClientListAllergyItemsBySeverity,
 } from 'src/utils/client-list-allergy-severity.js'
-import { normalizeAssessmentRecord } from 'src/utils/assessment-normalize.js'
+import { normalizeScreeningRecord } from 'src/utils/screening-normalize.js'
 import { normalizeAppointment } from 'src/utils/appointment-normalize.js'
 import {
   normalizeCarePlanDetail,
@@ -393,8 +393,12 @@ function buildReferralsDialogDetail({ rawClient, t }) {
     const clinicianName = formatClinicianDisplayLabel(
       raw.assigned_clinician ?? raw.assignedClinician,
     )
-    const documentRows = (referral.documents ?? []).map(doc => ({
-      fileName: display(doc.fileName),
+    const documentRows = (
+      referral.files ?? referral.documents ?? []
+    ).map(doc => ({
+      fileName: display(
+        doc.originalFilename ?? doc.fileName ?? doc.name,
+      ),
       uploadedAt: display(doc.uploadedAt),
     }))
 
@@ -492,13 +496,13 @@ function buildCarePlansDialogDetail({ rawClient, t }) {
   return buildRecordsDetail(records)
 }
 
-function buildAssessmentsDialogDetail({ rawClient }) {
-  const rows = asArray(rawClient?.screenings ?? rawClient?.assessments)
-    .map(normalizeAssessmentRecord)
+function buildScreeningsDialogDetail({ rawClient }) {
+  const rows = asArray(rawClient?.screenings)
+    .map(normalizeScreeningRecord)
     .map(item => ({
       templateName: display(item.templateName),
       status: display(item.status),
-      assessmentDate: display(item.assessmentDate),
+      screeningDate: display(item.screeningDate),
       completedAt: display(item.completedAt),
       weight: display(item.weight),
       height: display(item.height),
@@ -507,16 +511,16 @@ function buildAssessmentsDialogDetail({ rawClient }) {
 
   return buildTableDetail(
     [
-      { key: 'templateName', labelKey: 'assessmentTemplateColumn' },
+      { key: 'templateName', labelKey: 'screeningTemplateColumn' },
       { key: 'status', labelKey: 'status' },
-      { key: 'assessmentDate', labelKey: 'assessmentDate' },
+      { key: 'screeningDate', labelKey: 'screeningDate' },
       {
         key: 'completedAt',
         labelKey: 'clientOverviewModuleDialogCompletedAt',
       },
-      { key: 'weight', labelKey: 'assessmentWeight' },
-      { key: 'height', labelKey: 'assessmentHeight' },
-      { key: 'bmi', labelKey: 'assessmentBmi' },
+      { key: 'weight', labelKey: 'screeningWeight' },
+      { key: 'height', labelKey: 'screeningHeight' },
+      { key: 'bmi', labelKey: 'screeningBmi' },
     ],
     rows,
   )
@@ -583,7 +587,7 @@ const MODULE_DIALOG_BUILDERS = {
   followUps: buildFollowUpsDialogDetail,
   referrals: buildReferralsDialogDetail,
   carePlans: buildCarePlansDialogDetail,
-  assessments: buildAssessmentsDialogDetail,
+  screenings: buildScreeningsDialogDetail,
   clinicalNotes: buildClinicalNotesDialogDetail,
   appointments: buildAppointmentsDialogDetail,
 }

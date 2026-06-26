@@ -1,23 +1,22 @@
 <template>
   <q-page class="admin-page add-client-page fit">
-    <header class="add-client-page__header">
-      <div class="add-client-page__intro">
-        <h1 class="add-client-page__title">{{ t('addNewClient') }}</h1>
-        <p class="add-client-page__subtitle">
-          {{ t('addNewClientSubtitle') }}
-        </p>
-        <q-breadcrumbs class="add-client-page__breadcrumbs" gutter="xs">
-          <q-breadcrumbs-el :label="t('clients')" to="/clients" />
-          <q-breadcrumbs-el :label="t('addClient')" />
-          <q-breadcrumbs-el
-            :label="activeTabLabel || t('tabBasicInformation')"
-          />
-        </q-breadcrumbs>
-      </div>
-      <div id="banner-anchor"
-        class="add-client-page__duplicate-banner-anchor"
-      />
-      <div class="add-client-page__actions">
+    <AddClientPageHeader
+      :title="t('addNewClient')"
+      :subtitle="t('addNewClientSubtitle')"
+      :breadcrumb-current="t('addClient')"
+      :active-tab-label="activeTabLabel || t('tabBasicInformation')"
+      :photo-file-id="profilePhotoFileId"
+      :client-id="clientId"
+      :photo-disabled="profilePhotoDisabled"
+      @update:photo-file-id="onProfilePhotoUpdate"
+    >
+      <template #banner>
+        <div
+          id="banner-anchor"
+          class="add-client-page__duplicate-banner-anchor"
+        />
+      </template>
+      <template #actions>
         <q-btn
           v-if="canSaveForm"
           no-caps
@@ -40,8 +39,8 @@
           :label="t('close')"
           @click="onClose"
         />
-      </div>
-    </header>
+      </template>
+    </AddClientPageHeader>
 
     <q-card flat bordered class="add-client-page__card">
       <q-card-section class="add-client-page__card-body q-pa-md">
@@ -50,6 +49,7 @@
           @saved="onSaved"
           @cancel="goToClientList"
           @tab-label="activeTabLabel = $event"
+          @profile-photo-change="profilePhotoFileId = $event"
           @navigate-existing="onNavigateExistingClient"
         />
       </q-card-section>
@@ -62,12 +62,16 @@ import { computed, provide, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AddClientForm from '../../components/client/AddClientForm.vue'
+import AddClientPageHeader from
+  '../../components/client/AddClientPageHeader.vue'
 import { clientPageTestIds } from 'src/test-ids/index.js'
 
 const router = useRouter()
 const { t } = useI18n()
 const addClientFormRef = ref(null)
 const activeTabLabel = ref('')
+const profilePhotoFileId = ref(null)
+const clientId = computed(() => null)
 
 provide('addClientDuplicateBannerInHeader', true)
 
@@ -75,6 +79,14 @@ const saving = computed(() => addClientFormRef.value?.saving ?? false)
 const canSaveForm = computed(
   () => addClientFormRef.value?.canSaveForm ?? true,
 )
+const profilePhotoDisabled = computed(() =>
+  saving.value
+  || Boolean(addClientFormRef.value?.profilePhotoReadonly),
+)
+
+function onProfilePhotoUpdate(fileId) {
+  addClientFormRef.value?.setProfilePhotoFileId(fileId)
+}
 
 function onSave() {
   addClientFormRef.value?.onSave()
@@ -115,55 +127,10 @@ function onSaved({ clientId, activeTab } = {}) {
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
 
-.add-client-page__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 16px;
-  margin-bottom: 12px;
-  flex-shrink: 0;
-}
-
 .add-client-page__duplicate-banner-anchor {
   flex: 1 1 220px;
   min-width: 0;
   max-width: 100%;
-}
-
-.add-client-page__intro {
-  flex: 0 1 auto;
-  min-width: 0;
-}
-
-.add-client-page__title {
-  margin: 0;
-  font-size: 1.375rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: $text-strong;
-}
-
-.add-client-page__subtitle {
-  margin: 2px 0 4px;
-  font-size: 0.875rem;
-  line-height: 1.35;
-  color: $text-muted;
-}
-
-.add-client-page__breadcrumbs {
-  margin: 0;
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  color: $text-muted;
-}
-
-.add-client-page__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-left: auto;
-  flex-shrink: 0;
 }
 
 .add-client-page__card {

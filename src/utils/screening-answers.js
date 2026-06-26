@@ -1,8 +1,8 @@
-import { assessmentFieldTypes } from 'components/constants.js'
+import { screeningFieldTypes } from 'components/constants.js'
 import {
   findOptionByStoredValue,
   optionValue,
-} from 'src/utils/assessment-template-metadata.js'
+} from 'src/utils/screening-template-metadata.js'
 
 export function createEmptyAnswersMap() {
   return {}
@@ -36,7 +36,7 @@ export function isAnswerEmpty(value, fieldType) {
   if (value === null || value === undefined) {
     return true
   }
-  if (fieldType === assessmentFieldTypes.chips && Array.isArray(value)) {
+  if (fieldType === screeningFieldTypes.chips && Array.isArray(value)) {
     return value.length === 0
   }
   if (typeof value === 'boolean') {

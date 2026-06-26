@@ -1,25 +1,25 @@
 /* eslint-disable camelcase -- mock persistence mirrors API snake_case */
-import { ASSESSMENT_TEMPLATE_SEED } from 'src/data/assessment-templates-seed.js'
-import { assessmentStatuses } from 'components/constants.js'
+import { SCREENING_TEMPLATE_SEED } from 'src/data/screening-templates-seed.js'
+import { screeningStatuses } from 'components/constants.js'
 import {
   answersMapFromArray,
   answersArrayFromMap,
   validateRequiredAnswers,
-} from 'src/utils/assessment-answers.js'
+} from 'src/utils/screening-answers.js'
 import {
-  normalizeAssessmentMeasurements,
-} from 'src/utils/assessment-measurements.js'
+  normalizeScreeningMeasurements,
+} from 'src/utils/screening-measurements.js'
 import {
-  normalizeAssessmentRecord,
-  normalizeAssessmentTemplate,
-  normalizeAssessmentTemplateSummary,
-} from 'src/utils/assessment-normalize.js'
+  normalizeScreeningRecord,
+  normalizeScreeningTemplate,
+  normalizeScreeningTemplateSummary,
+} from 'src/utils/screening-normalize.js'
 
 function applyRecordMeasurements(record, payload = {}) {
   if (payload?.weight === undefined && payload?.height === undefined) {
     return
   }
-  const normalized = normalizeAssessmentMeasurements({
+  const normalized = normalizeScreeningMeasurements({
     weight: payload.weight ?? '',
     height: payload.height ?? '',
   })
@@ -28,21 +28,21 @@ function applyRecordMeasurements(record, payload = {}) {
   record.bmi = normalized.bmi
 }
 
-const STORAGE_KEY = 'fice-assessment-mock-v1'
+const STORAGE_KEY = 'fice-screening-mock-v1'
 
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) {
-      return { assessmentsByPatient: {} }
+      return { screeningsByPatient: {} }
     }
     const parsed = JSON.parse(raw)
 
     return {
-      assessmentsByPatient: parsed?.assessmentsByPatient ?? {},
+      screeningsByPatient: parsed?.screeningsByPatient ?? {},
     }
   } catch {
-    return { assessmentsByPatient: {} }
+    return { screeningsByPatient: {} }
   }
 }
 
@@ -55,76 +55,76 @@ function nextId(prefix) {
 }
 
 function getTemplate(templateId) {
-  const found = ASSESSMENT_TEMPLATE_SEED.find(
+  const found = SCREENING_TEMPLATE_SEED.find(
     item => item.id === templateId,
   )
 
-  return found ? normalizeAssessmentTemplate(found) : null
+  return found ? normalizeScreeningTemplate(found) : null
 }
 
 export function mockListTemplates() {
-  return ASSESSMENT_TEMPLATE_SEED
+  return SCREENING_TEMPLATE_SEED
     .filter(t => String(t.status ?? 'active').toLowerCase() === 'active')
-    .map(normalizeAssessmentTemplateSummary)
+    .map(normalizeScreeningTemplateSummary)
 }
 
 export function mockGetTemplate(templateId) {
   return getTemplate(templateId)
 }
 
-export function mockListPatientAssessments(patientId) {
+export function mockListClientScreenings(patientId) {
   const state = loadState()
-  const list = state.assessmentsByPatient[String(patientId)] ?? []
+  const list = state.screeningsByPatient[String(patientId)] ?? []
 
-  return list.map(item => normalizeAssessmentRecord(item))
+  return list.map(item => normalizeScreeningRecord(item))
 }
 
-export function mockCreateAssessment(patientId, payload) {
+export function mockCreateClientScreening(patientId, payload) {
   const template = getTemplate(payload?.templateId)
   if (!template) {
     throw new Error('Template not found')
   }
   const state = loadState()
   const pid = String(patientId).trim()
-  const assessment = {
-    id: nextId('asm'),
+  const screening = {
+    id: nextId('scr'),
     patient_id: pid,
     template_id: template.id,
     template_name: template.name,
-    status: assessmentStatuses.draft,
+    status: screeningStatuses.draft,
     assigned_clinician_id: payload?.assignedClinicianId ?? null,
-    assessment_date: payload?.assessmentDate ?? '',
+    screening_date: payload?.screeningDate ?? '',
     completed_at: null,
     weight: null,
     height: null,
     bmi: null,
     answers: [],
   }
-  applyRecordMeasurements(assessment, payload)
-  if (!state.assessmentsByPatient[pid]) {
-    state.assessmentsByPatient[pid] = []
+  applyRecordMeasurements(screening, payload)
+  if (!state.screeningsByPatient[pid]) {
+    state.screeningsByPatient[pid] = []
   }
-  state.assessmentsByPatient[pid].unshift(assessment)
+  state.screeningsByPatient[pid].unshift(screening)
   saveState(state)
 
   return {
-    assessmentId: assessment.id,
-    status: assessment.status,
-    bmi: assessment.bmi,
+    screeningId: screening.id,
+    status: screening.status,
+    bmi: screening.bmi,
   }
 }
 
-function findAssessment(state, patientId, assessmentId) {
-  const list = state.assessmentsByPatient[String(patientId)] ?? []
+function findScreening(state, patientId, screeningId) {
+  const list = state.screeningsByPatient[String(patientId)] ?? []
 
-  return list.find(item => String(item.id) === String(assessmentId)) ?? null
+  return list.find(item => String(item.id) === String(screeningId)) ?? null
 }
 
-export function mockGetPatientAssessment(patientId, assessmentId) {
+export function mockGetClientScreening(patientId, screeningId) {
   const state = loadState()
-  const record = findAssessment(state, patientId, assessmentId)
+  const record = findScreening(state, patientId, screeningId)
   if (!record) {
-    throw new Error('Assessment not found')
+    throw new Error('Screening not found')
   }
   const template = getTemplate(record.template_id)
   if (!template) {
@@ -132,7 +132,7 @@ export function mockGetPatientAssessment(patientId, assessmentId) {
   }
 
   return {
-    assessment: normalizeAssessmentRecord(record),
+    screening: normalizeScreeningRecord(record),
     template,
     answers: (record.answers ?? []).map(a => ({
       questionId: a.question_id ?? a.questionId,
@@ -141,14 +141,14 @@ export function mockGetPatientAssessment(patientId, assessmentId) {
   }
 }
 
-export function mockSaveDraft(patientId, assessmentId, payload) {
+export function mockSaveDraft(patientId, screeningId, payload) {
   const state = loadState()
-  const record = findAssessment(state, patientId, assessmentId)
+  const record = findScreening(state, patientId, screeningId)
   if (!record) {
-    throw new Error('Assessment not found')
+    throw new Error('Screening not found')
   }
-  if (record.status === assessmentStatuses.completed) {
-    throw new Error('Assessment already completed')
+  if (record.status === screeningStatuses.completed) {
+    throw new Error('Screening already completed')
   }
   const answersMap = Array.isArray(payload?.answers)
     ? answersMapFromArray(payload.answers)
@@ -158,25 +158,25 @@ export function mockSaveDraft(patientId, assessmentId, payload) {
     value: item.value,
   }))
   applyRecordMeasurements(record, payload)
-  record.status = assessmentStatuses.draft
+  record.status = screeningStatuses.draft
   saveState(state)
 
   return {
-    assessmentId: record.id,
+    screeningId: record.id,
     status: record.status,
     bmi: record.bmi,
-    message: 'Assessment draft saved successfully.',
+    message: 'Screening draft saved successfully.',
   }
 }
 
-export function mockCompleteAssessment(patientId, assessmentId, payload) {
+export function mockCompleteScreening(patientId, screeningId, payload) {
   const state = loadState()
-  const record = findAssessment(state, patientId, assessmentId)
+  const record = findScreening(state, patientId, screeningId)
   if (!record) {
-    throw new Error('Assessment not found')
+    throw new Error('Screening not found')
   }
-  if (record.status === assessmentStatuses.completed) {
-    throw new Error('Assessment already completed')
+  if (record.status === screeningStatuses.completed) {
+    throw new Error('Screening already completed')
   }
   const template = getTemplate(record.template_id)
   applyRecordMeasurements(record, payload)
@@ -184,7 +184,7 @@ export function mockCompleteAssessment(patientId, assessmentId, payload) {
   const errors = validateRequiredAnswers(template, answersMap)
   if (Object.keys(errors).length) {
     const err = new Error('Required fields missing')
-    err.code = 'ASSESSMENT_VALIDATION'
+    err.code = 'SCREENING_VALIDATION'
     err.validationErrors = errors
     throw err
   }
@@ -192,14 +192,14 @@ export function mockCompleteAssessment(patientId, assessmentId, payload) {
     question_id: item.questionId,
     value: item.value,
   }))
-  record.status = assessmentStatuses.completed
+  record.status = screeningStatuses.completed
   record.completed_at = new Date().toISOString()
   saveState(state)
 
   return {
-    assessmentId: record.id,
+    screeningId: record.id,
     status: record.status,
     bmi: record.bmi,
-    message: 'Assessment completed successfully.',
+    message: 'Screening completed successfully.',
   }
 }

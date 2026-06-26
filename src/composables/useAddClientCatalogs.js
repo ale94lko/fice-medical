@@ -102,6 +102,17 @@ export function useAddClientCatalogs(t) {
     return fallbackGenderOptions(t)
   })
 
+  const preferredLanguageOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.language]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+      )
+    }
+
+    return []
+  })
+
   const prefixSelectOptions = computed(() => {
     const catalog = catalogsByName.value[catalogNames.prefix]
     if (catalog) {
@@ -272,6 +283,7 @@ export function useAddClientCatalogs(t) {
     loadBasicInfoCatalogs,
     loadCliniciansForAddClient,
     genderOptions,
+    preferredLanguageOptions,
     prefixSelectOptions,
     suffixSelectOptions,
     raceSelectOptions,

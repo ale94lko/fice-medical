@@ -1,0 +1,156 @@
+@import 'quasar.variables';
+
+.screening-dialog.app-dialog-card {
+  width: 100%;
+  max-width: 1180px;
+  min-width: 320px;
+}
+
+.screening-dialog__loading {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screening-dialog__summary {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  background: $surface;
+  padding: 16px;
+}
+
+.screening-dialog__progress-label {
+  color: $text-muted;
+}
+
+.screening-dialog__metric {
+  min-width: 120px;
+  border-radius: $radius-md;
+  padding: 8px 12px;
+  border: 1px solid $border-subtle;
+  background: #f8fafc;
+}
+
+.screening-dialog__metric-label {
+  font-size: 0.75rem;
+  color: $text-muted;
+  margin-bottom: 2px;
+}
+
+.screening-dialog__metric-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.screening-dialog__metric--score {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+.screening-dialog__metric--risk-low {
+  background: #f8fafc;
+}
+
+.screening-dialog__metric--risk-moderate {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+.screening-dialog__metric--risk-high,
+.screening-dialog__metric--risk-critical {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.screening-dialog__risk-alert {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  border-radius: $radius-md;
+  padding: 10px 14px;
+  color: #9a3412;
+}
+
+.screening-dialog__sidebar-card {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  background: $surface;
+  padding: 14px 16px;
+}
+
+.screening-dialog__sidebar-title {
+  margin: 0 0 10px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.screening-dialog__contents-list {
+  margin: 0;
+}
+
+.screening-dialog__info-list {
+  margin: 0;
+
+  div + div {
+    margin-top: 10px;
+  }
+
+  dt {
+    font-size: 0.75rem;
+    color: $text-muted;
+    margin-bottom: 2px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 0.875rem;
+    color: $text-strong;
+  }
+}
+
+.screening-dialog__placeholder {
+  border: 1px dashed $border-subtle;
+  border-radius: $radius-lg;
+}
+
+.screening-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+
+  &--draft {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &--completed {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &--cancelled {
+    background: #f1f5f9;
+    color: $text-muted;
+  }
+}
+
+.screening-dialog-section__status--complete {
+  color: $positive;
+}
+
+.screening-dialog-section__status--warning,
+.screening-dialog-section__status--in_progress {
+  color: #ea580c;
+}
+
+.screening-dialog-section__status--pending {
+  color: #cbd5e1;
+}

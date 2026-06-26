@@ -19,7 +19,7 @@ const SUB_TAB_VIEW = {
   [addClientClinicalSubTabKeys.familyHistory]: [
     clientPermissionNames.viewMedicalHistory,
   ],
-  [addClientClinicalSubTabKeys.assessments]: [
+  [addClientClinicalSubTabKeys.screenings]: [
     clientPermissionNames.viewScreenings,
   ],
   [addClientClinicalSubTabKeys.vitals]: [
@@ -50,7 +50,7 @@ const SUB_TAB_EDIT = {
     clientPermissionNames.addMedicalHistory,
     clientPermissionNames.editMedicalHistory,
   ],
-  [addClientClinicalSubTabKeys.assessments]: [
+  [addClientClinicalSubTabKeys.screenings]: [
     clientPermissionNames.editScreenings,
     clientPermissionNames.addScreenings,
   ],

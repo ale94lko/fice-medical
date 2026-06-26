@@ -1,5 +1,5 @@
 /** Preconfigured assessment templates for MVP (Mental Health focus). */
-export const ASSESSMENT_TEMPLATE_SEED = [
+export const SCREENING_TEMPLATE_SEED = [
   {
     id: 'tpl-initial-psychiatric',
     name: 'Initial Psychiatric Evaluation',

@@ -465,6 +465,30 @@
   }
 }
 
+.stored-file-avatar {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &__image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  &--loading .q-spinner {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 .client-overview-clinicians {
   width: 100%;
   min-width: 0;

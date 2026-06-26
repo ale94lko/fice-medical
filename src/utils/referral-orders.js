@@ -32,6 +32,7 @@ export function createEmptyReferral(overrides = {}) {
     closedAt: null,
     closedBy: null,
     documents: [],
+    files: [],
     createdAt: null,
     updatedAt: null,
     referredByLabel: '—',
@@ -48,7 +49,12 @@ export function cloneReferral(referral) {
   return {
     ...createEmptyReferral(),
     ...referral,
-    documents: (referral.documents ?? []).map(doc => ({ ...doc })),
+    files: (referral.files ?? referral.documents ?? []).map(file => ({
+      ...file,
+    })),
+    documents: (referral.files ?? referral.documents ?? []).map(file => ({
+      ...file,
+    })),
   }
 }
 

@@ -427,7 +427,7 @@
                         type="button"
                         role="radio"
                         class="gender-option"
-                        :aria-checked="genderValuesMatch(
+                        :aria-checked="catalogRadioValuesMatch(
                           form[ck.gender],
                           opt.value,
                         )"
@@ -435,9 +435,48 @@
                         :data-testid="tid.genderOption(opt.value)"
                         :class="{
                           'gender-option--selected':
-                            genderValuesMatch(form[ck.gender], opt.value),
+                            catalogRadioValuesMatch(form[ck.gender], opt.value),
                         }"
                         @click="form[ck.gender] = opt.value">
+                        <span
+                          class="gender-option-radio"
+                          aria-hidden="true"
+                        />
+                        <span class="gender-option-label">
+                          {{ opt.label }}
+                        </span>
+                      </button>
+                    </div>
+                  </AddClientLabeledField>
+                </div>
+                <div class="col-12">
+                  <AddClientLabeledField
+                    :label="t('preferredLanguage')"
+                    :test-id="tid.field(ck.preferredLanguage)">
+                    <div
+                      class="gender-options"
+                      role="radiogroup"
+                      :aria-label="t('preferredLanguage')">
+                      <button
+                        v-for="opt in preferredLanguageOptions"
+                        :key="opt.value"
+                        type="button"
+                        role="radio"
+                        class="gender-option"
+                        :aria-checked="catalogRadioValuesMatch(
+                          form[ck.preferredLanguage],
+                          opt.value,
+                        )"
+                        :disabled="catalogsLoading"
+                        :data-testid="tid.preferredLanguageOption(opt.value)"
+                        :class="{
+                          'gender-option--selected':
+                            catalogRadioValuesMatch(
+                              form[ck.preferredLanguage],
+                              opt.value,
+                            ),
+                        }"
+                        @click="form[ck.preferredLanguage] = opt.value">
                         <span
                           class="gender-option-radio"
                           aria-hidden="true"
@@ -576,11 +615,13 @@
                 :can-view="canViewVitalsTab"
                 :clinician-options="assignedClinicianOptions"
               />
-              <AddClientAssessmentsTab
-                v-else-if="subTab.key === CLINICAL_ASSESSMENTS_SUB_TAB"
+              <AddClientScreeningsTab
+                v-else-if="subTab.key === CLINICAL_SCREENINGS_SUB_TAB"
                 :patient-id="props.clientId"
-                :readonly="assessmentsReadonly"
-                :can-view="canViewAssessmentsTab"
+                :screenings="clientScreenings"
+                :readonly="screeningsReadonly"
+                :can-view="canViewScreeningsTab"
+                :clinician-options="assignedClinicianOptions"
               />
               <AddClientLabsTab
                 v-else-if="subTab.key === CLINICAL_LABS_SUB_TAB"
@@ -594,11 +635,13 @@
               <AddClientCarePlansTab
                 v-else-if="subTab.key === CLINICAL_CARE_PLANS_SUB_TAB"
                 :client-id="props.clientId"
+                :care-plans="clientCarePlans"
                 :clinician-options="assignedClinicianOptions"
               />
               <AddClientClinicalNotesTab
                 v-else-if="subTab.key === CLINICAL_CLINICAL_NOTES_SUB_TAB"
                 :client-id="props.clientId"
+                :clinical-notes="clientClinicalNotes"
                 :admission-date="form[ck.admissionDate]"
                 :clinician-options="assignedClinicianOptions"
               />
@@ -626,6 +669,7 @@
               <AddClientReferralsTab
                 v-if="subTab.key === CARE_COORDINATION_REFERRALS_SUB_TAB"
                 :client-id="props.clientId"
+                :referrals="clientReferrals"
                 :clinician-options="assignedClinicianOptions"
                 @schedule-appointment="onReferralSchedule"
                 @create-follow-up="onReferralCreateFollowUp"
@@ -636,6 +680,7 @@
                   subTab.key === CARE_COORDINATION_APPOINTMENTS_SUB_TAB
                 "
                 :client-id="props.clientId"
+                :appointments="clientAppointments"
               />
               <AddClientFollowUpsTab
                 v-else-if="
@@ -802,7 +847,7 @@ import AddClientContactTab from '../AddClientContactTab.vue'
 import AddClientFamilyMedicalHistoryTab
   from '../AddClientFamilyMedicalHistoryTab.vue'
 import AddClientVitalsTab from '../AddClientVitalsTab.vue'
-import AddClientAssessmentsTab from '../AddClientAssessmentsTab.vue'
+import AddClientScreeningsTab from '../AddClientScreeningsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
 import AddClientCarePlansTab from '../AddClientCarePlansTab.vue'
 import AddClientClinicalNotesTab from '../AddClientClinicalNotesTab.vue'
@@ -852,7 +897,7 @@ import {
 import {
   CLINICAL_FAMILY_HISTORY_SUB_TAB,
   CLINICAL_VITALS_SUB_TAB,
-  CLINICAL_ASSESSMENTS_SUB_TAB,
+  CLINICAL_SCREENINGS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
   CLINICAL_CARE_PLANS_SUB_TAB,
   CLINICAL_CLINICAL_NOTES_SUB_TAB,
@@ -893,7 +938,13 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['saved', 'cancel', 'tab-label', 'navigate-existing'])
+const emit = defineEmits([
+  'saved',
+  'cancel',
+  'tab-label',
+  'navigate-existing',
+  'profile-photo-change',
+])
 
 const isEditMode = computed(() => props.mode === 'edit')
 
@@ -927,10 +978,10 @@ const vitalsReadonly = computed(
   () => !canEditSubTabFor(CLINICAL_VITALS_SUB_TAB).value,
 )
 const canViewVitalsTab = canViewSubTabFor(CLINICAL_VITALS_SUB_TAB)
-const assessmentsReadonly = computed(
-  () => !canEditSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB).value,
+const screeningsReadonly = computed(
+  () => !canEditSubTabFor(CLINICAL_SCREENINGS_SUB_TAB).value,
 )
-const canViewAssessmentsTab = canViewSubTabFor(CLINICAL_ASSESSMENTS_SUB_TAB)
+const canViewScreeningsTab = canViewSubTabFor(CLINICAL_SCREENINGS_SUB_TAB)
 const labsReadonly = computed(
   () => !canEditSubTabFor(CLINICAL_LABS_SUB_TAB).value,
 )
@@ -952,6 +1003,61 @@ const duplicateBannerTeleportReady = ref(false)
 const $q = useQuasar()
 const { t } = useI18n()
 const siteStore = useSiteStore()
+
+const clientScreenings = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.screenings
+
+  return Array.isArray(list) ? list : []
+})
+
+const clientClinicalNotes = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.clinical_notes ?? raw?.clinicalNotes
+
+  return Array.isArray(list) ? list : []
+})
+
+const clientCarePlans = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.care_plans ?? raw?.carePlans
+
+  return Array.isArray(list) ? list : []
+})
+
+const clientReferrals = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.referrals
+
+  return Array.isArray(list) ? list : []
+})
+
+const clientAppointments = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.appointments
+
+  return Array.isArray(list) ? list : []
+})
 
 const saving = ref(false)
 const initialLoading = ref(false)
@@ -991,6 +1097,7 @@ const {
   ageUnitSelectOptions,
   assignedClinicianOptions,
   genderOptions,
+  preferredLanguageOptions,
   prefixSelectOptions,
   suffixSelectOptions,
   raceSelectOptions,
@@ -1197,7 +1304,7 @@ function normalizeGenderToken(value) {
     .replace(/^_|_$/g, '')
 }
 
-function genderValuesMatch(stored, optionValue) {
+function catalogRadioValuesMatch(stored, optionValue) {
   const a = normalizeGenderToken(stored)
   const b = normalizeGenderToken(optionValue)
   if (!a || !b) {
@@ -1390,6 +1497,21 @@ watch([activeTab, activeSubTab], () => {
   scrollFormPanelToTop()
 }, { immediate: true })
 
+watch(
+  () => form.value[ck.photoFileId],
+  value => {
+    emit('profile-photo-change', value ?? null)
+  },
+  { immediate: true },
+)
+
+function setProfilePhotoFileId(fileId) {
+  const parsed = Number(fileId)
+  form.value[ck.photoFileId] = Number.isFinite(parsed) && parsed > 0
+    ? parsed
+    : null
+}
+
 function getClientMapOptions() {
   return {
     resolveAgeUnitCode: catalogs.resolveAgeUnitCode,
@@ -1400,6 +1522,7 @@ function getClientMapOptions() {
     raceSelectOptions: raceSelectOptions.value,
     ethnicitySelectOptions: ethnicitySelectOptions.value,
     genderSelectOptions: genderOptions.value,
+    preferredLanguageSelectOptions: preferredLanguageOptions.value,
     contactTypeSelectOptions: contactTypeSelectOptions.value,
     relationshipTypeSelectOptions: relationshipTypeSelectOptions.value,
   }
@@ -1847,6 +1970,8 @@ defineExpose({
   initialLoading,
   formBusy,
   formBusyMessage,
+  setProfilePhotoFileId,
+  profilePhotoReadonly: basicInfoReadonly,
 })
 </script>
 

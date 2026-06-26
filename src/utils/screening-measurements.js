@@ -3,8 +3,8 @@ import {
   formatBmiDisplay,
 } from 'src/utils/client-vitals.js'
 
-export const ASSESSMENT_WEIGHT_MAX_LBS = 1500
-export const ASSESSMENT_HEIGHT_MAX_IN = 120
+export const SCREENING_WEIGHT_MAX_LBS = 1500
+export const SCREENING_HEIGHT_MAX_IN = 120
 
 function parseOptionalDecimal(value) {
   const s = String(value ?? '').trim()
@@ -19,35 +19,35 @@ function parseOptionalDecimal(value) {
   return n
 }
 
-export function calculateAssessmentBmi(weight, height) {
+export function calculateScreeningBmi(weight, height) {
   return calculateBmiFromUs(weight, height)
 }
 
-export function formatAssessmentBmiDisplay(bmi) {
+export function formatScreeningBmiDisplay(bmi) {
   return formatBmiDisplay(bmi)
 }
 
-export function validateAssessmentMeasurements({ weight, height }, t) {
+export function validateScreeningMeasurements({ weight, height }, t) {
   const errors = {}
   const weightNum = parseOptionalDecimal(weight)
   const heightNum = parseOptionalDecimal(height)
 
   if (weight != null && String(weight).trim() !== '') {
     if (!Number.isFinite(weightNum) || weightNum <= 0) {
-      errors.weight = t('assessmentWeightInvalid')
-    } else if (weightNum > ASSESSMENT_WEIGHT_MAX_LBS) {
-      errors.weight = t('assessmentWeightMax', {
-        max: ASSESSMENT_WEIGHT_MAX_LBS,
+      errors.weight = t('screeningWeightInvalid')
+    } else if (weightNum > SCREENING_WEIGHT_MAX_LBS) {
+      errors.weight = t('screeningWeightMax', {
+        max: SCREENING_WEIGHT_MAX_LBS,
       })
     }
   }
 
   if (height != null && String(height).trim() !== '') {
     if (!Number.isFinite(heightNum) || heightNum <= 0) {
-      errors.height = t('assessmentHeightInvalid')
-    } else if (heightNum > ASSESSMENT_HEIGHT_MAX_IN) {
-      errors.height = t('assessmentHeightMax', {
-        max: ASSESSMENT_HEIGHT_MAX_IN,
+      errors.height = t('screeningHeightInvalid')
+    } else if (heightNum > SCREENING_HEIGHT_MAX_IN) {
+      errors.height = t('screeningHeightMax', {
+        max: SCREENING_HEIGHT_MAX_IN,
       })
     }
   }
@@ -59,7 +59,7 @@ export function validateAssessmentMeasurements({ weight, height }, t) {
  * Normalizes measurement inputs for API/mock persistence.
  * Recalculates BMI server-side style (ignores client bmi).
  */
-export function normalizeAssessmentMeasurements({ weight, height }) {
+export function normalizeScreeningMeasurements({ weight, height }) {
   const weightRaw = String(weight ?? '').trim()
   const heightRaw = String(height ?? '').trim()
   const weightNum = weightRaw ? parseOptionalDecimal(weightRaw) : null
@@ -71,7 +71,7 @@ export function normalizeAssessmentMeasurements({ weight, height }) {
     err.field = 'weight'
     throw err
   }
-  if (weightNum != null && weightNum > ASSESSMENT_WEIGHT_MAX_LBS) {
+  if (weightNum != null && weightNum > SCREENING_WEIGHT_MAX_LBS) {
     const err = new Error('Weight exceeds maximum')
     err.code = 'MEASUREMENT_VALIDATION'
     err.field = 'weight'
@@ -84,7 +84,7 @@ export function normalizeAssessmentMeasurements({ weight, height }) {
     err.field = 'height'
     throw err
   }
-  if (heightNum != null && heightNum > ASSESSMENT_HEIGHT_MAX_IN) {
+  if (heightNum != null && heightNum > SCREENING_HEIGHT_MAX_IN) {
     const err = new Error('Height exceeds maximum')
     err.code = 'MEASUREMENT_VALIDATION'
     err.field = 'height'
@@ -97,7 +97,7 @@ export function normalizeAssessmentMeasurements({ weight, height }) {
   const storedHeight = heightNum != null
     ? Math.round(heightNum * 100) / 100
     : null
-  const bmi = calculateAssessmentBmi(storedWeight, storedHeight)
+  const bmi = calculateScreeningBmi(storedWeight, storedHeight)
 
   return {
     weight: storedWeight,
@@ -106,9 +106,9 @@ export function normalizeAssessmentMeasurements({ weight, height }) {
   }
 }
 
-export function measurementsToFormValues(assessment) {
-  const weight = assessment?.weight
-  const height = assessment?.height
+export function measurementsToFormValues(screening) {
+  const weight = screening?.weight
+  const height = screening?.height
 
   return {
     weight: weight != null && Number.isFinite(Number(weight))
@@ -121,7 +121,7 @@ export function measurementsToFormValues(assessment) {
 }
 
 export function buildMeasurementsApiPayload({ weight, height }) {
-  const normalized = normalizeAssessmentMeasurements({ weight, height })
+  const normalized = normalizeScreeningMeasurements({ weight, height })
 
   return {
     weight: normalized.weight,

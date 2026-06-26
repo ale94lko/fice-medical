@@ -9,7 +9,7 @@
     <slot name="anchor" />
     <q-menu
       v-model="isOpen"
-      :target="anchorRef"
+      :target="true"
       :anchor="anchor"
       :self="self"
       :offset="offset"

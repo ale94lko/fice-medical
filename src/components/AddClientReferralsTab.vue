@@ -36,7 +36,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
-            :disable="loading"
+            :disable="saving"
             :data-testid="tid.btn('add')"
             :label="t('referralAdd')"
             @click="openAdd"
@@ -47,12 +47,8 @@
       <AdminTablePanel
         class="referrals-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
-        <AppLoadingOverlay
-          scope="content"
-          :showing="loading"
-        />
         <ReferralsTable
-          :rows="referrals"
+          :rows="referralRows"
           :clinician-options="resolvedClinicianOptions"
           :empty-label="t('referralListEmpty')"
           :can-edit="canEditReferrals"
@@ -94,11 +90,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import ReferralDialog from 'components/ReferralDialog.vue'
 import ReferralsTable from 'components/ReferralsTable.vue'
@@ -109,13 +104,15 @@ import {
   apiErrorMessage,
   createClientReferral,
   deleteClientReferral,
-  deleteReferralDocument,
-  downloadReferralDocument,
-  fetchClientReferral,
-  listClientReferrals,
+  deleteReferralFile,
+  downloadReferralFile,
   updateClientReferral,
-  uploadReferralDocument,
+  uploadReferralFile,
 } from 'src/utils/referral-api.js'
+import {
+  mapReferralsListFromApi,
+  normalizeReferralDetail,
+} from 'src/utils/referral-normalize.js'
 import {
   cloneReferral,
   createEmptyReferral,
@@ -126,12 +123,17 @@ import {
   shouldRemoveFollowUpFromReferral,
 } from 'src/utils/referral-follow-up.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import { referralTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   clientId: {
     type: [String, Number],
     default: null,
+  },
+  referrals: {
+    type: Array,
+    default: () => [],
   },
   clinicianOptions: {
     type: Array,
@@ -147,6 +149,7 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
+const siteStore = useSiteStore()
 const {
   canViewReferrals,
   canAddReferrals,
@@ -154,10 +157,8 @@ const {
   canDeleteReferrals,
 } = useClientReferralPermissions()
 
-const loading = ref(false)
 const saving = ref(false)
 const documentUploading = ref(false)
-const referrals = ref([])
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -170,29 +171,39 @@ const clientId = computed(() => String(props.clientId ?? '').trim())
 
 const resolvedClinicianOptions = computed(() => props.clinicianOptions ?? [])
 
-watch(clientId, () => {
-  void loadReferrals()
-})
+const referralsRaw = computed(() =>
+  Array.isArray(props.referrals) ? props.referrals : [],
+)
 
-onMounted(async() => {
-  await loadReferrals()
-})
+const referralRows = computed(() =>
+  mapReferralsListFromApi(referralsRaw.value),
+)
 
-async function loadReferrals() {
-  if (!hasClientId.value || !canViewReferrals.value) {
-    referrals.value = []
+function findRawReferral(referralId) {
+  return referralsRaw.value.find(
+    row => String(row?.id) === String(referralId),
+  )
+}
 
+function referralDetailFromRecord(referralId) {
+  const raw = findRawReferral(referralId)
+  if (!raw) {
+    return null
+  }
+
+  return normalizeReferralDetail(raw)
+}
+
+async function refreshClientReferrals() {
+  if (!hasClientId.value) {
     return
   }
-  loading.value = true
   try {
-    referrals.value = await listClientReferrals(clientId.value)
+    await siteStore.fetchClientById(clientId.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error, t('referralLoadError'))
     }
-  } finally {
-    loading.value = false
   }
 }
 
@@ -202,26 +213,18 @@ function openAdd() {
   dialogOpen.value = true
 }
 
-async function openView(row) {
+function openView(row) {
   dialogMode.value = 'view'
-  activeReferral.value = await loadReferralDetail(row)
+  activeReferral.value = referralDetailFromRecord(row.id)
+    ?? cloneReferral(row)
   dialogOpen.value = true
 }
 
-async function openEdit(row) {
+function openEdit(row) {
   dialogMode.value = 'edit'
-  activeReferral.value = await loadReferralDetail(row)
+  activeReferral.value = referralDetailFromRecord(row.id)
+    ?? cloneReferral(row)
   dialogOpen.value = true
-}
-
-async function loadReferralDetail(row) {
-  try {
-    return await fetchClientReferral(clientId.value, row.id)
-  } catch (error) {
-    notifyError(error, t('referralLoadError'))
-
-    return cloneReferral(row)
-  }
 }
 
 async function onSave(referral) {
@@ -231,8 +234,8 @@ async function onSave(referral) {
     const saved = referral.id
       ? await updateClientReferral(clientId.value, referral)
       : await createClientReferral(clientId.value, referral)
-    upsertReferral(saved)
-    activeReferral.value = saved
+    await refreshClientReferrals()
+    activeReferral.value = referralDetailFromRecord(saved.id) ?? saved
     dialogMode.value = 'edit'
     if (shouldCreateFollowUpFromReferral(saved, previous)) {
       emit('create-follow-up', buildFollowUpDraftFromReferral(saved))
@@ -257,15 +260,6 @@ function onSchedule(row) {
   emit('schedule-appointment', row)
 }
 
-function upsertReferral(saved) {
-  const index = referrals.value.findIndex(row => row.id === saved.id)
-  if (index >= 0) {
-    referrals.value[index] = saved
-  } else {
-    referrals.value.unshift(saved)
-  }
-}
-
 function confirmDelete(row) {
   pendingActionReferral.value = row
   deleteDialogOpen.value = true
@@ -280,7 +274,7 @@ async function onDeleteConfirmed() {
   saving.value = true
   try {
     await deleteClientReferral(clientId.value, row.id)
-    referrals.value = referrals.value.filter(item => item.id !== row.id)
+    await refreshClientReferrals()
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('referralDeleteSuccess'),
@@ -303,13 +297,10 @@ async function onUploadDocument(file) {
   }
   documentUploading.value = true
   try {
-    const doc = await uploadReferralDocument(clientId.value, referralId, file)
-    const current = activeReferral.value.documents ?? []
-    activeReferral.value = {
-      ...activeReferral.value,
-      documents: [...current, doc],
-    }
-    upsertReferral(activeReferral.value)
+    await uploadReferralFile(clientId.value, referralId, file)
+    await refreshClientReferrals()
+    activeReferral.value = referralDetailFromRecord(referralId)
+      ?? activeReferral.value
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('referralDocumentUploadSuccess'),
@@ -324,20 +315,26 @@ async function onUploadDocument(file) {
   }
 }
 
-async function onDownloadDocument(documentId) {
+async function onDownloadDocument(fileId) {
   const referralId = activeReferral.value?.id
-  if (!referralId || !documentId) {
+  if (!referralId || !fileId) {
     return
   }
   try {
-    const response = await downloadReferralDocument(
+    const response = await downloadReferralFile(
       clientId.value,
       referralId,
-      documentId,
+      fileId,
     )
-    const doc = (activeReferral.value.documents ?? [])
-      .find(item => item.id === documentId)
-    const fileName = doc?.fileName || 'referral-document'
+    const doc = (
+      activeReferral.value.files
+      ?? activeReferral.value.documents
+      ?? []
+    ).find(item => String(item.id) === String(fileId))
+    const fileName = doc?.originalFilename
+      ?? doc?.fileName
+      ?? doc?.name
+      ?? 'referral-document'
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
     link.href = url
@@ -353,20 +350,17 @@ async function onDownloadDocument(documentId) {
   }
 }
 
-async function onDeleteDocument(documentId) {
+async function onDeleteDocument(fileId) {
   const referralId = activeReferral.value?.id
-  if (!referralId || !documentId) {
+  if (!referralId || !fileId) {
     return
   }
   documentUploading.value = true
   try {
-    await deleteReferralDocument(clientId.value, referralId, documentId)
-    activeReferral.value = {
-      ...activeReferral.value,
-      documents: (activeReferral.value.documents ?? [])
-        .filter(doc => doc.id !== documentId),
-    }
-    upsertReferral(activeReferral.value)
+    await deleteReferralFile(clientId.value, referralId, fileId)
+    await refreshClientReferrals()
+    activeReferral.value = referralDetailFromRecord(referralId)
+      ?? activeReferral.value
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('referralDocumentDeleteSuccess'),

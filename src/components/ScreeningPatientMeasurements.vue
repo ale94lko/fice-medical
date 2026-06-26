@@ -2,13 +2,13 @@
   <AccordionSection
     v-model="expanded"
     icon="straighten"
-    :title="t('assessmentPatientMeasurements')"
-    section-test-id="assessment-section-patient-measurements"
+    :title="t('screeningPatientMeasurements')"
+    section-test-id="screening-section-patient-measurements"
     :toggle-test-id="tid.section('patient-measurements')">
     <div class="row q-col-gutter-md">
       <div class="col-12 col-md-4">
         <AddClientLabeledField
-          :label="t('assessmentWeight')"
+          :label="t('screeningWeight')"
           :test-id="tid.field('weight')">
           <q-input
             :model-value="weight"
@@ -18,7 +18,7 @@
             inputmode="decimal"
             :disable="readonly"
             :data-testid="tid.field('weight')"
-            :placeholder="t('assessmentWeightUnit')"
+            :placeholder="t('screeningWeightUnit')"
             :error="Boolean(errors.weight)"
             :error-message="errors.weight"
             @update:model-value="val => emit('update:weight', val)"
@@ -27,7 +27,7 @@
       </div>
       <div class="col-12 col-md-4">
         <AddClientLabeledField
-          :label="t('assessmentHeight')"
+          :label="t('screeningHeight')"
           :test-id="tid.field('height')">
           <q-input
             :model-value="height"
@@ -37,7 +37,7 @@
             inputmode="decimal"
             :disable="readonly"
             :data-testid="tid.field('height')"
-            :placeholder="t('assessmentHeightUnit')"
+            :placeholder="t('screeningHeightUnit')"
             :error="Boolean(errors.height)"
             :error-message="errors.height"
             @update:model-value="val => emit('update:height', val)"
@@ -46,10 +46,10 @@
       </div>
       <div class="col-12 col-md-4">
         <AddClientLabeledField
-          :label="t('assessmentBmi')"
+          :label="t('screeningBmi')"
           :test-id="tid.field('bmi')">
           <template #hint>
-            {{ t('assessmentBmiHint') }}
+            {{ t('screeningBmiHint') }}
           </template>
           <q-input
             :model-value="bmiDisplay"
@@ -57,7 +57,7 @@
             hide-bottom-space
             readonly
             disable
-            class="assessment-measurements__bmi-field"
+            class="screening-measurements__bmi-field"
             :data-testid="tid.field('bmi')"
           />
         </AddClientLabeledField>
@@ -71,7 +71,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccordionSection from './AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import { assessmentTestIds as tid } from 'src/test-ids/index.js'
+import { screeningTestIds as tid } from 'src/test-ids/index.js'
 
 defineProps({
   weight: {
@@ -103,7 +103,7 @@ const expanded = ref(true)
 </script>
 
 <style lang="scss" scoped>
-.assessment-measurements__bmi-field {
+.screening-measurements__bmi-field {
   :deep(.q-field__control) {
     background: #f8fafc;
   }

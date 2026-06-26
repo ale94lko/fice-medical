@@ -95,11 +95,11 @@ import AppBrandLoading from 'components/AppBrandLoading.vue'
 import LabsTable from 'components/LabsTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import {
-  deleteLabAttachment,
-  downloadLabAttachment,
+  deleteLabFile,
+  downloadLabFile,
   fetchPatientLab,
   triggerBlobDownload,
-  uploadLabAttachment,
+  uploadLabFile,
 } from 'src/utils/lab-api.js'
 import {
   cloneLab,
@@ -285,7 +285,7 @@ async function onRowDownload(row) {
 
   try {
     const detail = await fetchPatientLab(patientId.value, row.id)
-    const attachment = detail.attachments?.[0]
+    const attachment = detail.files?.[0] ?? detail.attachments?.[0]
     if (!attachment?.id) {
       $q.notify({
         type: quasarNotifyTypes.warning,
@@ -295,7 +295,7 @@ async function onRowDownload(row) {
 
       return
     }
-    const { blob, fileName } = await downloadLabAttachment(
+    const { blob, fileName } = await downloadLabFile(
       patientId.value,
       row.id,
       attachment.id,
@@ -333,14 +333,19 @@ async function onUploadAttachment(file) {
     return
   }
   try {
-    const attachments = await uploadLabAttachment(
+    const uploaded = await uploadLabFile(
       patientId.value,
       activeLab.value.id,
       file,
     )
+    const currentFiles = activeLab.value.files
+      ?? activeLab.value.attachments
+      ?? []
+    const nextFiles = [...currentFiles, uploaded]
     activeLab.value = {
       ...activeLab.value,
-      attachments,
+      files: nextFiles,
+      attachments: nextFiles,
     }
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
@@ -368,7 +373,7 @@ async function onDownloadAttachment(attachmentId) {
     return
   }
   try {
-    const { blob, fileName } = await downloadLabAttachment(
+    const { blob, fileName } = await downloadLabFile(
       patientId.value,
       activeLab.value.id,
       attachmentId,
@@ -385,7 +390,7 @@ async function onDownloadAttachment(attachmentId) {
   }
 }
 
-async function onRemoveAttachment(attachmentId) {
+async function onRemoveAttachment(fileId) {
   if (!hasPatientId.value) {
     $q.notify({
       type: quasarNotifyTypes.warning,
@@ -400,16 +405,21 @@ async function onRemoveAttachment(attachmentId) {
     return
   }
   try {
-    await deleteLabAttachment(
+    await deleteLabFile(
       patientId.value,
       activeLab.value.id,
-      attachmentId,
+      fileId,
+    )
+    const currentFiles = activeLab.value.files
+      ?? activeLab.value.attachments
+      ?? []
+    const nextFiles = currentFiles.filter(
+      item => String(item.id) !== String(fileId),
     )
     activeLab.value = cloneLab({
       ...activeLab.value,
-      attachments: activeLab.value.attachments.filter(
-        item => item.id !== attachmentId,
-      ),
+      files: nextFiles,
+      attachments: nextFiles,
     })
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {

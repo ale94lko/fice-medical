@@ -87,6 +87,7 @@ export function createEmptyLabOrder() {
     reviewedDate: null,
     resultSummary: '',
     components: [],
+    files: [],
     attachments: [],
     deletedAt: null,
   }

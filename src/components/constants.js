@@ -29,6 +29,7 @@ export const clientFieldKeys = {
   prefix: 'prefix',
   suffix: 'suffix',
   gender: 'gender',
+  preferredLanguage: 'preferredLanguage',
   race: 'race',
   ethnicity: 'ethnicity',
   age: 'age',
@@ -42,6 +43,7 @@ export const clientFieldKeys = {
   ageUnit: 'ageUnit',
   assignedClinician: 'assignedClinician',
   status: 'status',
+  photoFileId: 'photoFileId',
 }
 
 export const addClientTabKeys = {
@@ -58,7 +60,7 @@ export const addClientTabKeys = {
 
 export const addClientClinicalSubTabKeys = {
   familyHistory: 'familyHistory',
-  assessments: 'assessments',
+  screenings: 'screenings',
   vitals: 'vitals',
   clinicalNotes: 'clinicalNotes',
   carePlans: 'carePlans',
@@ -205,6 +207,74 @@ export const clientInsuranceMaxSubscriberNameLength = 150
 
 export const clientInsuranceMaxCardFileBytes = 5 * 1024 * 1024
 
+export const storedFileMaxBytes = 25 * 1024 * 1024
+
+export const storedFileExtensions = [
+  'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'txt', 'csv',
+  'doc', 'docx', 'xls', 'xlsx', 'dcm',
+]
+
+export const storedFileMimeTypes = [
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'text/plain',
+  'text/csv',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/dicom',
+]
+
+export const storedFileCategories = {
+  clientProfile: 'CLIENT_PROFILE',
+  clinicianProfile: 'CLINICIAN_PROFILE',
+  labResult: 'LAB_RESULT',
+  clinicalDocument: 'CLINICAL_DOCUMENT',
+  prescription: 'PRESCRIPTION',
+  xray: 'XRAY',
+  consentForm: 'CONSENT_FORM',
+  insuranceDocument: 'INSURANCE_DOCUMENT',
+  companyLogo: 'COMPANY_LOGO',
+}
+
+export const storedFileStatuses = {
+  active: 'ACTIVE',
+  deleted: 'DELETED',
+}
+
+export const clientProfilePhotoMimeTypes = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+]
+
+export const clientProfilePhotoMaxBytes = storedFileMaxBytes
+
+export const clientProfilePhotoOutputSize = 512
+
+export const clientProfilePhotoCropViewportSize = 280
+
+export const clientProfilePhotoCropMinZoom = 1
+
+export const clientProfilePhotoCropMaxZoom = 3
+
+export const clientProfilePhotoOutputMime = 'image/jpeg'
+
+export const clientProfilePhotoOutputQuality = 0.92
+
+export const labMaxAttachmentBytes = storedFileMaxBytes
+
+export const labAttachmentMimeTypes = storedFileMimeTypes.filter(type =>
+  type.startsWith('application/pdf')
+  || type.startsWith('image/')
+  || type.startsWith('text/'),
+)
+
 export const clientInsuranceCardMimeTypes = [
   'image/png',
   'image/jpeg',
@@ -323,6 +393,7 @@ export const catalogNames = {
   suffix: 'suffix',
   ageUnit: 'age_unit',
   gender: 'gender',
+  language: 'language',
   race: 'race',
   ethnicity: 'ethnicity',
   relationshipType: 'relationship_type',
@@ -336,6 +407,7 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.suffix,
   catalogNames.ageUnit,
   catalogNames.gender,
+  catalogNames.language,
   catalogNames.race,
   catalogNames.ethnicity,
   catalogNames.relationshipType,
@@ -344,7 +416,7 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.allergyName,
 ]
 
-export const assessmentFieldTypes = {
+export const screeningFieldTypes = {
   text: 'text',
   textarea: 'textarea',
   date: 'date',
@@ -355,13 +427,13 @@ export const assessmentFieldTypes = {
   yesNo: 'yes_no',
 }
 
-export const assessmentStatuses = {
+export const screeningStatuses = {
   draft: 'draft',
   completed: 'completed',
   cancelled: 'cancelled',
 }
 
-export const assessmentClinicalKeys = {
+export const screeningClinicalKeys = {
   mood: 'mood',
   sleepQuality: 'sleep_quality',
   anxietyLevel: 'anxiety_level',
@@ -369,7 +441,7 @@ export const assessmentClinicalKeys = {
   phq9: 'phq9',
 }
 
-export const assessmentMeasurementDirections = {
+export const screeningMeasurementDirections = {
   higherIsBetter: 'higher_is_better',
   higherIsWorse: 'higher_is_worse',
   neutral: 'neutral',
@@ -420,14 +492,6 @@ export const labClinicalKeys = {
   platelets: 'platelets',
   a1c: 'a1c',
 }
-
-export const labMaxAttachmentBytes = 10 * 1024 * 1024
-
-export const labAttachmentMimeTypes = [
-  'application/pdf',
-  'image/jpeg',
-  'image/png',
-]
 
 export const labMaxResultSummaryLength = 500
 
@@ -569,7 +633,7 @@ export const referralOrganizationMaxLength = 160
 export const referralSpecialtyMaxLength = 80
 export const referralDiagnosisMaxLength = 250
 
-export const referralMaxDocumentBytes = 10 * 1024 * 1024
+export const referralMaxDocumentBytes = storedFileMaxBytes
 
 export const referralDocumentMimeTypes = [
   'application/pdf',
@@ -577,6 +641,10 @@ export const referralDocumentMimeTypes = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'image/jpeg',
   'image/png',
+  'image/webp',
+  'image/gif',
+  'text/plain',
+  'text/csv',
 ]
 
 export const referralDocumentExtensions = [
@@ -763,23 +831,23 @@ export const apiPaths = {
   clientReferralClose: (clientId, referralId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/referrals/${encodeURIComponent(String(referralId ?? '').trim())}/close`,
-  clientReferralDocuments: (clientId, referralId) => `/client/v1/${
+  clientReferralFiles: (clientId, referralId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
-  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())}/documents`,
-  clientReferralDocumentDownload: (
+  }/referrals/${encodeURIComponent(String(referralId ?? '').trim())}/files`,
+  clientReferralFileDownload: (
     clientId,
     referralId,
-    documentId,
+    fileId,
   ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
   }/referrals/${encodeURIComponent(String(referralId ?? '').trim())
-  }/documents/${encodeURIComponent(String(documentId ?? '').trim())}/download`,
-  clientReferralDocumentById: (
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}/download`,
+  clientReferralFileById: (
     clientId,
     referralId,
-    documentId,
+    fileId,
   ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
   }/referrals/${encodeURIComponent(String(referralId ?? '').trim())
-  }/documents/${encodeURIComponent(String(documentId ?? '').trim())}`,
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
   clientCarePlans: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/care-plans`,
@@ -839,43 +907,74 @@ export const apiPaths = {
   }/interventions/${encodeURIComponent(String(interventionId ?? '').trim())}`,
   clientsCreate: '/client/v1/register',
   clientMatch: '/client/v1/match',
-  assessmentTemplates: '/assessment-templates',
-  assessmentTemplateById: id => `/assessment-templates/${encodeURIComponent(
+  screeningTemplates: '/screenings/v1/templates',
+  screeningTemplateById: id => `/screenings/v1/templates/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
-  patientAssessments: patientId => `/patients/${encodeURIComponent(
-    String(patientId ?? '').trim(),
-  )}/assessments`,
-  patientAssessmentById: (patientId, assessmentId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
-  }/assessments/${encodeURIComponent(String(assessmentId ?? '').trim())}`,
-  patientAssessmentDraft: (patientId, assessmentId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
-  }/assessments/${encodeURIComponent(
-    String(assessmentId ?? '').trim(),
-  )}/draft`,
-  patientAssessmentComplete: (patientId, assessmentId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
-  }/assessments/${encodeURIComponent(
-    String(assessmentId ?? '').trim(),
-  )}/complete`,
-  patientLabs: patientId => `/patients/${encodeURIComponent(
-    String(patientId ?? '').trim(),
+  clientScreenings: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/screenings`,
+  clientScreeningById: (clientId, screeningId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/screenings/${encodeURIComponent(String(screeningId ?? '').trim())}`,
+  clientScreeningAnswers: (clientId, screeningId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/screenings/${encodeURIComponent(String(screeningId ?? '').trim())}/answers`,
+  clientScreeningComplete: (clientId, screeningId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/screenings/${
+    encodeURIComponent(String(screeningId ?? '').trim())
+  }/complete`,
+  clientScreeningCancel: (clientId, screeningId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/screenings/${encodeURIComponent(String(screeningId ?? '').trim())}/cancel`,
+  clientLabs: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
   )}/labs`,
-  patientLabById: (patientId, labId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
+  clientLabById: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
-  patientLabDraft: (patientId, labId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
+  clientLabDraft: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}/draft`,
-  patientLabAttachment: (patientId, labId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
-  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/attachments`,
-  patientLabAttachmentById: (patientId, labId, attachmentId) => `/patients/${
-    encodeURIComponent(String(patientId ?? '').trim())
-  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/attachments/${
-    encodeURIComponent(String(attachmentId ?? '').trim())
-  }`,
+  clientLabFiles: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/files`,
+  clientLabFileDownload: (clientId, labId, fileId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}/download`,
+  clientLabFileById: (clientId, labId, fileId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
+  storedFilesUpload: '/files/v1/upload',
+  storedFilesList: '/files/v1',
+  storedFileById: id => `/files/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  storedFileDownload: id => `/files/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/download`,
+  storedFilePreview: id => `/files/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/preview`,
+  patientLabs: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/labs`,
+  patientLabById: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
+  patientLabDraft: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/draft`,
+  patientLabAttachment: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/files`,
+  patientLabAttachmentById: (clientId, labId, fileId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
   oauthLogin: '/oauth/v1/login',
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',

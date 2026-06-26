@@ -53,6 +53,15 @@ import {
   resolveCliniciansFormValue,
 } from 'src/utils/client-clinicians-form.js'
 
+function parseOptionalNumber(value) {
+  if (value == null || value === '') {
+    return null
+  }
+  const num = Number(value)
+
+  return Number.isFinite(num) && num > 0 ? num : null
+}
+
 /* eslint-disable camelcase -- API token keys */
 const PHONE_TYPE_FROM_API = {
   home: clientPhoneTypeValues.home,
@@ -784,6 +793,7 @@ export function mapClientApiToForm(client, options = {}) {
     raceSelectOptions = [],
     ethnicitySelectOptions = [],
     genderSelectOptions = [],
+    preferredLanguageSelectOptions = [],
   } = options
   if (!client || typeof client !== 'object') {
     return null
@@ -886,6 +896,14 @@ export function mapClientApiToForm(client, options = {}) {
       genderSelectOptions,
       resolveCatalogSelectValue,
     ),
+    [ck.preferredLanguage]: resolveCatalogSelectField(
+      personal.preferred_language
+      ?? personal.language
+      ?? client.preferred_language
+      ?? client.language,
+      preferredLanguageSelectOptions,
+      resolveCatalogSelectValue,
+    ),
     [ck.race]: resolveCatalogSelectField(
       personal.race,
       raceSelectOptions,
@@ -906,6 +924,9 @@ export function mapClientApiToForm(client, options = {}) {
     ),
     [ck.clinicians]: resolveCliniciansFormValue(client, personal),
     [ck.status]: String(client.status ?? personal.status ?? 'active').trim(),
+    [ck.photoFileId]: parseOptionalNumber(
+      personal.photo_file_id ?? personal.photoFileId,
+    ),
     [clientFormSections.contact]: contact,
     [clientFormSections.familyMedicalHistory]: mapFamilyMedicalHistoryFromApi(
       client.medical_history

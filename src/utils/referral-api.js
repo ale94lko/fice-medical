@@ -14,7 +14,7 @@ import {
   mapReferralsListFromApi,
   isReferralSchedulable,
   normalizeReferralDetail,
-  normalizeReferralDocument,
+  normalizeReferralFile,
   normalizeReferralOption,
   referralToApiPayload,
 } from 'src/utils/referral-normalize.js'
@@ -188,66 +188,67 @@ export async function deleteClientReferral(clientId, referralId) {
   }
 }
 
-export async function uploadReferralDocument(clientId, referralId, file) {
+export async function uploadReferralFile(clientId, referralId, file) {
   const formData = new FormData()
   formData.append('file', file)
   try {
     const response = await apiInstance.post(
-      apiPaths.clientReferralDocuments(clientId, referralId),
+      apiPaths.clientReferralFiles(clientId, referralId),
       formData,
       { headers: { 'Content-Type': 'multipart/form-data' } },
     )
 
-    return normalizeReferralDocument(unwrapData(response.data))
+    return normalizeReferralFile(unwrapData(response.data))
   } catch (error) {
     if (!useMockFallback(error)) {
       throw error
     }
 
-    return normalizeReferralDocument(
+    return normalizeReferralFile(
       mockUploadReferralDocument(clientId, referralId, file),
     )
   }
 }
 
-export async function downloadReferralDocument(
+/** @deprecated use uploadReferralFile */
+export const uploadReferralDocument = uploadReferralFile
+
+export async function downloadReferralFile(
   clientId,
   referralId,
-  documentId,
+  fileId,
 ) {
   const response = await apiInstance.get(
-    apiPaths.clientReferralDocumentDownload(
-      clientId,
-      referralId,
-      documentId,
-    ),
+    apiPaths.clientReferralFileDownload(clientId, referralId, fileId),
     { responseType: 'blob' },
   )
 
   return response
 }
 
-export async function deleteReferralDocument(
+/** @deprecated use downloadReferralFile */
+export const downloadReferralDocument = downloadReferralFile
+
+export async function deleteReferralFile(
   clientId,
   referralId,
-  documentId,
+  fileId,
 ) {
   try {
     await apiInstance.delete(
-      apiPaths.clientReferralDocumentById(
-        clientId,
-        referralId,
-        documentId,
-      ),
+      apiPaths.clientReferralFileById(clientId, referralId, fileId),
     )
   } catch (error) {
     if (!useMockFallback(error)) {
       throw error
     }
 
-    mockDeleteReferralDocument(clientId, referralId, documentId)
+    mockDeleteReferralDocument(clientId, referralId, fileId)
   }
 }
+
+/** @deprecated use deleteReferralFile */
+export const deleteReferralDocument = deleteReferralFile
 
 export function prepareReferralForSave(referral) {
   return referralToApiPayload(referral)

@@ -157,14 +157,14 @@ function buildBasicInfo(form) {
   const contact = form[clientFormSections.contact] ?? {}
   const address = buildAddressFields(contact)
   const dobIso = usDateToIso(form[ck.dob])
-
-  return {
+  const basicInfo = {
     prefix: trim(form[ck.prefix]),
     first_name: trim(form[ck.firstName]),
     middle_name: trim(form[ck.middleName]),
     last_name: trim(form[ck.lastName]),
     suffix: trim(form[ck.suffix]),
     sex: trim(form[ck.gender]),
+    preferred_language: trim(form[ck.preferredLanguage]),
     race: trim(form[ck.race]),
     ethnicity: trim(form[ck.ethnicity]),
     dob: dobIso || null,
@@ -191,6 +191,12 @@ function buildBasicInfo(form) {
     county: address.county,
     notes: address.notes,
   }
+  const photoFileId = Number(form[ck.photoFileId])
+  if (Number.isFinite(photoFileId) && photoFileId > 0) {
+    basicInfo.photo_file_id = photoFileId
+  }
+
+  return basicInfo
 }
 
 function resolveOtherContactAddress(other, clientContact) {

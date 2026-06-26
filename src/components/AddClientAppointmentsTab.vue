@@ -36,7 +36,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
-            :disable="loading"
+            :disable="actionSaving"
             :label="t('appointmentAddButton')"
             :data-testid="tid.btn('add')"
             @click="openBookDrawer"
@@ -47,12 +47,8 @@
       <AdminTablePanel
         class="appointments-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
-        <AppLoadingOverlay
-          scope="content"
-          :showing="loading"
-        />
         <AppointmentsTable
-          :rows="appointments"
+          :rows="appointmentRows"
           :empty-label="t('appointmentListEmpty')"
           :permissions="tablePermissions"
           @view="openView"
@@ -112,11 +108,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import AppointmentBookDialog from 'components/AppointmentBookDialog.vue'
 import AppointmentDetailDialog from 'components/AppointmentDetailDialog.vue'
 import AppointmentEditDialog from 'components/AppointmentEditDialog.vue'
@@ -130,12 +125,13 @@ import {
   cancelAppointment,
   checkInAppointment,
   completeAppointment,
-  listClientAppointments,
   noShowAppointment,
   patchAppointment,
   rescheduleAppointment,
 } from 'src/utils/appointment-api.js'
+import { mapAppointmentsList } from 'src/utils/appointment-normalize.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -143,10 +139,15 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  appointments: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const { t } = useI18n()
 const $q = useQuasar()
+const siteStore = useSiteStore()
 const {
   canViewAppointments,
   canBookAppointment,
@@ -155,8 +156,6 @@ const {
   canManageAppointmentSlots,
 } = useClientAppointmentPermissions()
 
-const appointments = ref([])
-const loading = ref(false)
 const actionSaving = ref(false)
 
 const bookDrawerOpen = ref(false)
@@ -172,6 +171,14 @@ const hasClientId = computed(() =>
 
 const clientId = computed(() => String(props.clientId ?? '').trim())
 
+const appointmentsRaw = computed(() =>
+  Array.isArray(props.appointments) ? props.appointments : [],
+)
+
+const appointmentRows = computed(() =>
+  mapAppointmentsList(appointmentsRaw.value),
+)
+
 const tablePermissions = computed(() => ({
   canView: canViewAppointments.value,
   canBook: canBookAppointment.value,
@@ -180,21 +187,16 @@ const tablePermissions = computed(() => ({
   canManage: canManageAppointmentSlots.value,
 }))
 
-async function loadAppointments() {
-  if (!hasClientId.value || !canViewAppointments.value) {
-    appointments.value = []
-
+async function refreshClientAppointments() {
+  if (!hasClientId.value) {
     return
   }
-  loading.value = true
   try {
-    appointments.value = await listClientAppointments(clientId.value)
+    await siteStore.fetchClientById(clientId.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
     }
-  } finally {
-    loading.value = false
   }
 }
 
@@ -246,7 +248,7 @@ async function onBook(body) {
     await bookAppointment(body)
     bookDrawerOpen.value = false
     notifySuccess(t('appointmentBookSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -269,7 +271,7 @@ async function onReschedule(payload) {
     )
     rescheduleDrawerOpen.value = false
     notifySuccess(t('appointmentRescheduleSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -288,7 +290,7 @@ async function onEditSave(body) {
     await patchAppointment(activeAppointment.value.appointmentId, body)
     editOpen.value = false
     notifySuccess(t('appointmentEditSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -307,7 +309,7 @@ async function onCancelConfirmed() {
   try {
     await cancelAppointment(activeAppointment.value.appointmentId)
     notifySuccess(t('appointmentCancelSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -322,7 +324,7 @@ async function onCheckIn(row) {
   try {
     await checkInAppointment(row.appointmentId)
     notifySuccess(t('appointmentCheckInSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -337,7 +339,7 @@ async function onComplete(row) {
   try {
     await completeAppointment(row.appointmentId)
     notifySuccess(t('appointmentCompleteSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -352,7 +354,7 @@ async function onNoShow(row) {
   try {
     await noShowAppointment(row.appointmentId)
     notifySuccess(t('appointmentNoShowSuccess'))
-    await loadAppointments()
+    await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)
@@ -361,12 +363,4 @@ async function onNoShow(row) {
     actionSaving.value = false
   }
 }
-
-watch(clientId, () => {
-  void loadAppointments()
-})
-
-onMounted(() => {
-  void loadAppointments()
-})
 </script>

@@ -57,14 +57,7 @@ function sectionHasRows(section, key) {
   return Array.isArray(entries) && entries.length > 0
 }
 
-/**
- * True when the add-client form has meaningful data beyond first + last name.
- * Used before navigating away from a draft to an existing client record.
- */
-export function hasAddClientDataBeyondFirstLastName(form) {
-  if (!form || typeof form !== 'object') {
-    return false
-  }
+function basicIdentityFieldsHaveData(form) {
   if (trim(form[ck.middleName])) {
     return true
   }
@@ -75,6 +68,9 @@ export function hasAddClientDataBeyondFirstLastName(form) {
     return true
   }
   if (trim(form[ck.gender])) {
+    return true
+  }
+  if (trim(form[ck.preferredLanguage])) {
     return true
   }
   if (form[ck.race] != null && String(form[ck.race]).trim() !== '') {
@@ -99,6 +95,21 @@ export function hasAddClientDataBeyondFirstLastName(form) {
     return true
   }
   if (formHasAssignedClinicians(form)) {
+    return true
+  }
+
+  return false
+}
+
+/**
+ * True when the add-client form has meaningful data beyond first + last name.
+ * Used before navigating away from a draft to an existing client record.
+ */
+export function hasAddClientDataBeyondFirstLastName(form) {
+  if (!form || typeof form !== 'object') {
+    return false
+  }
+  if (basicIdentityFieldsHaveData(form)) {
     return true
   }
   const contact = form[clientFormSections.contact]

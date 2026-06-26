@@ -12,7 +12,7 @@ const MODULE_TONES = {
   contact: 'blue',
   allergies: 'red',
   familyHistory: 'purple',
-  assessments: 'blue',
+  screenings: 'blue',
   vitals: 'teal',
   clinicalNotes: 'slate',
   carePlans: 'green',

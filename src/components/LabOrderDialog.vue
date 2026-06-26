@@ -375,7 +375,7 @@
             {{ t('labAttachmentsHint') }}
           </p>
           <LabAttachmentUploadField
-            :attachments="local.attachments"
+            :attachments="local.files ?? local.attachments"
             :readonly="readonly"
             :test-id="tid.field('attachments')"
             @upload="onAttachmentUpload"
@@ -606,7 +606,7 @@ function flagLabel(flag) {
 }
 
 function errorText(field) {
-  return errors.value[field] ? t('assessmentFieldRequired') : ''
+  return errors.value[field] ? t('fieldRequired') : ''
 }
 
 function onCancel() {

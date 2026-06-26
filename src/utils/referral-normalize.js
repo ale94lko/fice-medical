@@ -38,19 +38,18 @@ function parseBool(value, fallback = false) {
   return String(value).toLowerCase() === 'true'
 }
 
-export function normalizeReferralDocument(raw) {
-  const row = raw ?? {}
+import {
+  mapStoredFilesList,
+  normalizeStoredFile,
+} from 'src/utils/stored-file-normalize.js'
 
-  return {
-    id: parseOptionalNumber(row.id),
-    referralId: parseOptionalNumber(row.referral_id ?? row.referralId),
-    fileName: trim(row.file_name ?? row.fileName),
-    fileType: trim(row.file_type ?? row.fileType) || null,
-    fileSize: parseOptionalNumber(row.file_size ?? row.fileSize),
-    uploadedBy: parseOptionalNumber(row.uploaded_by ?? row.uploadedBy),
-    uploadedAt: trim(row.uploaded_at ?? row.uploadedAt) || null,
-    createdAt: trim(row.created_at ?? row.createdAt) || null,
-  }
+export function normalizeReferralFile(raw) {
+  return normalizeStoredFile(raw)
+}
+
+/** @deprecated use normalizeReferralFile */
+export function normalizeReferralDocument(raw) {
+  return normalizeReferralFile(raw)
 }
 
 export function normalizeReferralSummary(raw) {
@@ -108,7 +107,8 @@ export function normalizeReferralSummary(raw) {
     notes: trim(row.notes) || null,
     closedAt: trim(row.closed_at ?? row.closedAt) || null,
     closedBy: parseOptionalNumber(row.closed_by ?? row.closedBy),
-    documents: (row.documents ?? []).map(normalizeReferralDocument),
+    files: mapStoredFilesList(row.files ?? row.documents ?? []),
+    documents: mapStoredFilesList(row.files ?? row.documents ?? []),
     createdAt: trim(row.created_at ?? row.createdAt) || null,
     updatedAt: trim(row.updated_at ?? row.updatedAt) || null,
     referredByLabel: buildReferredPartyLabel(type, referredBy, referredByOrg),

@@ -1,7 +1,6 @@
 import {
   clientFieldKeys as ck,
   clientFormSections,
-  clientPreferredCommunicationValues as pref,
 } from 'components/constants.js'
 import { resolveClientListClinicianEntries } from 'components/helpers.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
@@ -80,32 +79,6 @@ function resolvePrimaryPhone(contact) {
 
 function resolvePrimaryEmail(contact) {
   return resolveContactEmails(contact)[0]?.value ?? ''
-}
-
-const PREF_COMM_I18N = {
-  [pref.email]: 'prefCommEmail',
-  [pref.mobilePhone]: 'prefCommMobilePhone',
-  [pref.homePhone]: 'prefCommHomePhone',
-  [pref.workPhone]: 'prefCommWorkPhone',
-  [pref.mail]: 'prefCommMail',
-  [pref.pointOfContact]: 'prefCommPointOfContact',
-}
-
-function resolvePreferredLanguageLabel(contact, t) {
-  const list = contact?.preferredCommunication ?? []
-  const meaningful = list.find(item => {
-    const value = trim(item)
-
-    return value
-      && value !== pref.providerDidNotAsk
-      && value !== pref.patientDeclined
-  })
-  if (!meaningful) {
-    return ''
-  }
-  const key = PREF_COMM_I18N[meaningful]
-
-  return key ? t(key) : meaningful
 }
 
 function resolveClinicianCards(form, rawClient, clinicianOptions = []) {
@@ -390,6 +363,7 @@ export function buildClientOverviewHeaderData(
     clinicianOptions = [],
     raceSelectOptions = [],
     ethnicitySelectOptions = [],
+    preferredLanguageSelectOptions = [],
     resolveCatalogSelectValue = null,
     appointments = [],
     t,
@@ -402,6 +376,7 @@ export function buildClientOverviewHeaderData(
   return {
     fullName: formatClientName(form),
     clientNumber: trim(form?.[ck.clientNumber]),
+    photoFileId: form?.[ck.photoFileId] ?? null,
     clientInitials: clientInitialsFromForm(form),
     status: trim(form?.[ck.status]) || 'active',
     statusLabel: resolveStatusLabel(form?.[ck.status], t),
@@ -422,7 +397,11 @@ export function buildClientOverviewHeaderData(
     emails: resolveContactEmails(contact),
     phone: resolvePrimaryPhone(contact),
     email: resolvePrimaryEmail(contact),
-    preferredLanguage: resolvePreferredLanguageLabel(contact, t),
+    preferredLanguage: resolveCatalogFieldLabel(
+      form?.[ck.preferredLanguage],
+      preferredLanguageSelectOptions,
+      resolveCatalogSelectValue,
+    ),
     clinicians: resolveClinicianCards(form, rawClient, clinicianOptions),
     nextAppointment: appointmentSummary.nextAppointment,
     lastVisit: appointmentSummary.lastVisit,

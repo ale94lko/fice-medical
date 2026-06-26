@@ -74,6 +74,7 @@ export function createEmptyAddClientForm() {
     [ck.prefix]: null,
     [ck.suffix]: null,
     [ck.gender]: '',
+    [ck.preferredLanguage]: '',
     [ck.race]: null,
     [ck.ethnicity]: null,
     [ck.dob]: '',
@@ -84,6 +85,7 @@ export function createEmptyAddClientForm() {
     [ck.admissionDate]: todayDateUs(),
     [ck.clinicians]: [],
     [ck.status]: 'active',
+    [ck.photoFileId]: null,
     [clientFormSections.contact]: createEmptyContactSection(),
     [clientFormSections.familyMedicalHistory]:
       createEmptyFamilyMedicalHistorySection(),
@@ -147,6 +149,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
   )
 
   const genderOptions = catalogs?.genderOptions
+  const preferredLanguageOptions = catalogs?.preferredLanguageOptions
   const prefixSelectOptions = catalogs?.prefixSelectOptions
   const suffixSelectOptions = catalogs?.suffixSelectOptions
   const raceSelectOptions = catalogs?.raceSelectOptions
@@ -262,6 +265,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     ageUnitSelectOptions,
     assignedClinicianOptions,
     genderOptions,
+    preferredLanguageOptions,
     prefixSelectOptions,
     suffixSelectOptions,
     raceSelectOptions,

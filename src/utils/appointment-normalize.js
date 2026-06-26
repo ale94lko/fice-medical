@@ -89,7 +89,7 @@ export function normalizeAppointment(raw) {
     clinicianId: parseOptionalNumber(row.clinician_id ?? row.clinicianId),
     clinicianDisplayName: trim(
       row.clinician_display_name ?? row.clinicianDisplayName,
-    ),
+    ) || formatClinicianDisplayLabel(row.clinician),
     appointmentTypeId: parseOptionalNumber(
       row.appointment_type_id ?? row.appointmentTypeId,
     ),

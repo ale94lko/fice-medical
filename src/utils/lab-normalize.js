@@ -4,6 +4,10 @@ import {
 } from 'components/constants.js'
 import { cloneLab, computeLabAbnormalResult } from 'src/utils/lab-orders.js'
 import { isoDateToUsDateString, usDateToIso } from 'src/utils/client-form.js'
+import {
+  mapStoredFilesList,
+  normalizeStoredFile,
+} from 'src/utils/stored-file-normalize.js'
 
 function parseOptionalNumber(value) {
   if (value == null || value === '') {
@@ -31,17 +35,13 @@ function parseOptionalBool(value) {
   return null
 }
 
-export function normalizeLabAttachment(raw) {
-  const a = raw ?? {}
+export function normalizeLabFile(raw) {
+  return normalizeStoredFile(raw)
+}
 
-  return {
-    id: String(a.id ?? a.attachment_id ?? '').trim(),
-    name: String(a.name ?? a.file_name ?? '').trim(),
-    mimeType: String(a.mime_type ?? a.mimeType ?? '').trim() || null,
-    size: Number(a.size ?? 0) || 0,
-    uploadedAt: a.uploaded_at ?? a.uploadedAt ?? null,
-    deletedAt: a.deleted_at ?? a.deletedAt ?? null,
-  }
+/** @deprecated use normalizeLabFile */
+export function normalizeLabAttachment(raw) {
+  return normalizeLabFile(raw)
 }
 
 export function normalizeLabComponent(raw) {
@@ -110,9 +110,7 @@ export function normalizeLabDetail(raw) {
   const components = (l.components ?? [])
     .map(normalizeLabComponent)
     .filter(c => c.id && !c.deletedAt)
-  const attachments = (l.attachments ?? [])
-    .map(normalizeLabAttachment)
-    .filter(a => a.id && !a.deletedAt)
+  const files = mapStoredFilesList(l.files ?? l.attachments ?? [])
 
   return {
     ...normalizeLabSummary(l),
@@ -140,7 +138,8 @@ export function normalizeLabDetail(raw) {
       l.result_summary ?? l.resultSummary ?? '',
     ).trim() || null,
     components,
-    attachments,
+    files,
+    attachments: files,
   }
 }
 

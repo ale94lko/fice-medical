@@ -381,7 +381,7 @@ function applySuggestedFlag() {
 }
 
 function errorText(field) {
-  return errors.value[field] ? t('assessmentFieldRequired') : ''
+  return errors.value[field] ? t('fieldRequired') : ''
 }
 
 function onCancel() {
