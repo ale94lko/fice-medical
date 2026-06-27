@@ -44,6 +44,11 @@ export const clientFieldKeys = {
   assignedClinician: 'assignedClinician',
   status: 'status',
   photoFileId: 'photoFileId',
+  referralSource: 'referralSource',
+  referralIntakeDate: 'referralIntakeDate',
+  referringProvider: 'referringProvider',
+  referringOrganization: 'referringOrganization',
+  referralSourceDetails: 'referralSourceDetails',
 }
 
 export const addClientTabKeys = {
@@ -400,6 +405,7 @@ export const catalogNames = {
   contactType: 'contact_type',
   payer: 'payer',
   allergyName: 'allergy_name',
+  referralSource: 'referral_source',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -414,6 +420,7 @@ export const addClientBasicInfoCatalogNames = [
   catalogNames.contactType,
   catalogNames.payer,
   catalogNames.allergyName,
+  catalogNames.referralSource,
 ]
 
 export const screeningFieldTypes = {
@@ -614,6 +621,10 @@ export const referralPriorities = {
   urgent: 'URGENT',
   stat: 'STAT',
 }
+
+export const referralSourceSelfReferredCode = 'SELF_REFERRED'
+
+export const referralIntakeSourceDetailsMaxLength = 500
 
 export const referralSchedulingLabels = {
   appointmentScheduled: 'APPOINTMENT_SCHEDULED',

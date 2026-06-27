@@ -911,6 +911,27 @@ export default {
   referralSourceTransferFromAnotherClinic: 'Transferencia de otra clínica',
   referralSourceFamilyGuardianReferral: 'Familia / tutor',
   referralSourceOther: 'Otro',
+  referralSourceSelfReferred: 'Autorreferido',
+  referralInformation: 'Información de referencia',
+  referralInformationSubtitle:
+    'Indíquenos cómo llegó este paciente a la clínica.',
+  referralSource: 'Origen de la referencia',
+  referralSourcePlaceholder: 'Seleccionar origen',
+  referralSourceRequired: 'El origen de la referencia es obligatorio.',
+  referralSourceDetails: 'Detalles del origen',
+  referralSourceDetailsOptional: 'Detalles del origen (opcional)',
+  referralSourceDetailsPlaceholder:
+    'Ingrese información adicional de la referencia',
+  referralIntakeSelfReferredTitle: 'Autorreferido',
+  referralIntakeSelfReferredMessage:
+    'Este paciente contactó la clínica directamente.',
+  referralIntakeSelfReferredNoRecord:
+    'No se creará un registro de referencia.',
+  referralIntakeDefaultReason:
+    'Referencia entrante al registrar al paciente',
+  referralIntakeCreateError:
+    'Paciente guardado, pero no se pudo crear la referencia entrante.',
+  referralDateInvalid: 'Ingrese una fecha de referencia válida.',
   appointmentsTitle: 'Citas',
   appointmentsSubtitle: 'Ver y gestionar citas del cliente.',
   appointmentAddButton: 'Agregar cita',

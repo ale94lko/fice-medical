@@ -491,6 +491,129 @@
               </div>
           </AddClientAccordionSection>
 
+          <template v-if="!isEditMode">
+            <q-separator class="section-separator" />
+
+            <AddClientAccordionSection
+              icon="groups"
+              :title="t('referralInformation')"
+              section-test-id="add-client-accordion-referral-information"
+              :toggle-test-id="tid.accordionToggle('referral-information')">
+              <template #hint>
+                {{ t('referralInformationSubtitle') }}
+              </template>
+              <div class="row q-col-gutter-sm q-col-gutter-md">
+                <div class="col-12 col-md-6">
+                  <AddClientLabeledField
+                    :label="requiredLabel(t('referralSource'))"
+                    :test-id="tid.field(ck.referralSource)">
+                    <FormSelect
+                      v-model="form[ck.referralSource]"
+                      outlined
+                      hide-bottom-space
+                      emit-value
+                      map-options
+                      clearable
+                      class="full-width"
+                      :loading="catalogsLoading"
+                      :options="referralSourceSelectOptions"
+                      :placeholder="t('referralSourcePlaceholder')"
+                      :rules="rules.referralSource"
+                      :test-id="tid.field(ck.referralSource)"
+                    />
+                  </AddClientLabeledField>
+                </div>
+                <template v-if="!isIntakeSelfReferred">
+                  <div class="col-12 col-md-6">
+                    <AddClientLabeledField
+                      :label="requiredLabel(t('referralDate'))"
+                      :test-id="tid.field(ck.referralIntakeDate)">
+                      <ClientDateField
+                        v-model="form[ck.referralIntakeDate]"
+                        :rules="rules.referralIntakeDate"
+                        :close-label="t('close')"
+                        :test-id="tid.field(ck.referralIntakeDate)"
+                      />
+                    </AddClientLabeledField>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <AddClientLabeledField
+                      :label="t('referralReferringProvider')"
+                      :test-id="tid.field(ck.referringProvider)">
+                      <q-input
+                        v-model="form[ck.referringProvider]"
+                        outlined
+                        hide-bottom-space
+                        :maxlength="referralProviderNameMaxLength"
+                        :placeholder="
+                          t('referralReferringProviderPlaceholder')
+                        "
+                        :data-testid="tid.field(ck.referringProvider)">
+                        <template #append>
+                          <q-icon name="search" />
+                        </template>
+                      </q-input>
+                    </AddClientLabeledField>
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <AddClientLabeledField
+                      :label="t('referralReferringOrganization')"
+                      :test-id="tid.field(ck.referringOrganization)">
+                      <q-input
+                        v-model="form[ck.referringOrganization]"
+                        outlined
+                        hide-bottom-space
+                        :maxlength="referralOrganizationMaxLength"
+                        :placeholder="
+                          t('referralReferringOrganizationPlaceholder')
+                        "
+                        :data-testid="tid.field(ck.referringOrganization)">
+                        <template #append>
+                          <q-icon name="search" />
+                        </template>
+                      </q-input>
+                    </AddClientLabeledField>
+                  </div>
+                  <div class="col-12">
+                    <AddClientLabeledField
+                      :label="t('referralSourceDetailsOptional')"
+                      :test-id="tid.field(ck.referralSourceDetails)">
+                      <q-input
+                        v-model="form[ck.referralSourceDetails]"
+                        outlined
+                        hide-bottom-space
+                        type="textarea"
+                        autogrow
+                        counter
+                        :maxlength="referralIntakeSourceDetailsMaxLength"
+                        :placeholder="t('referralSourceDetailsPlaceholder')"
+                        :data-testid="tid.field(ck.referralSourceDetails)"
+                      />
+                    </AddClientLabeledField>
+                  </div>
+                </template>
+                <div
+                  v-else-if="form[ck.referralSource]"
+                  class="col-12">
+                  <div class="insurance-info-banner">
+                    <q-icon name="info" size="20px" class="q-mr-sm" />
+                    <div>
+                      <div class="text-weight-medium">
+                        <strong>
+                          {{ t('referralIntakeSelfReferredTitle') }}
+                        </strong>
+                      </div>
+                      <div>
+                      {{ t('referralIntakeSelfReferredMessage') }}
+                      {{ t('referralIntakeSelfReferredNoRecord') }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AddClientAccordionSection>
+          </template>
+
           <q-separator class="section-separator" />
 
           <AddClientAccordionSection
@@ -872,6 +995,9 @@ import {
   clientMaxAge,
   clientNameMaxLength,
   quasarNotifyTypes,
+  referralIntakeSourceDetailsMaxLength,
+  referralOrganizationMaxLength,
+  referralProviderNameMaxLength,
 } from '../constants.js'
 import {
   detectTaxIdType,
@@ -917,6 +1043,14 @@ import { summarizeNewClientDataForAudit }
   from 'src/utils/client-duplicate-audit-summary.js'
 import { hasAddClientDataBeyondFirstLastName }
   from 'src/utils/add-client-beyond-minimal-identity.js'
+import { createClientReferral } from 'src/utils/referral-api.js'
+import {
+  buildIntakeReferralFromForm,
+  clearNonSelfReferralIntakeFields,
+  isSelfReferredSource,
+  shouldCreateIntakeReferral,
+} from 'src/utils/referral-intake.js'
+import { todayDateUs } from 'src/utils/client-form.js'
 
 const props = defineProps({
   mode: {
@@ -1102,6 +1236,7 @@ const {
   suffixSelectOptions,
   raceSelectOptions,
   ethnicitySelectOptions,
+  referralSourceSelectOptions,
   contactTypeSelectOptions,
   relationshipTypeSelectOptions,
   rules,
@@ -1123,6 +1258,7 @@ const {
   panelScrollRef,
   initialActiveTab: props.initialActiveTab,
   initialActiveSubTab: props.initialActiveSubTab,
+  validateReferralIntake: () => !isEditMode.value,
 })
 
 const filteredCurrentSubTabs = computed(() => {
@@ -1132,6 +1268,26 @@ const filteredCurrentSubTabs = computed(() => {
 
   return filterSubTabsFor(activeTab.value)
 })
+
+const isIntakeSelfReferred = computed(() =>
+  isSelfReferredSource(form.value[ck.referralSource]),
+)
+
+watch(
+  () => form.value[ck.referralSource],
+  (source, previous) => {
+    if (isSelfReferredSource(source)) {
+      clearNonSelfReferralIntakeFields(form.value)
+
+      return
+    }
+    const switchedFromSelf = source && isSelfReferredSource(previous)
+    const needsDefaultDate = !form.value[ck.referralIntakeDate]
+    if (switchedFromSelf && needsDefaultDate) {
+      form.value[ck.referralIntakeDate] = todayDateUs()
+    }
+  },
+)
 
 const clinicalSubTabs = computed(
   () => filterSubTabsFor(addClientTabKeys.clinical),
@@ -1857,6 +2013,31 @@ function applyMappedClientSections(mapped) {
   }
 }
 
+async function createIntakeReferralAfterClientSave(clientId) {
+  if (!clientId || !shouldCreateIntakeReferral(form.value)) {
+    return
+  }
+
+  try {
+    await createClientReferral(
+      clientId,
+      buildIntakeReferralFromForm(form.value, t),
+    )
+  } catch (referralError) {
+    if (isAuthSessionEndUIError(referralError)) {
+      return
+    }
+    const referralMsg = referralError?.response?.data?.message
+      || referralError?.message
+      || t('referralIntakeCreateError')
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: String(referralMsg),
+      position: 'top',
+    })
+  }
+}
+
 async function executeSave() {
   saving.value = true
   try {
@@ -1889,6 +2070,7 @@ async function executeSave() {
         )
         applyMappedClientSections(mappedCreate)
       }
+      await createIntakeReferralAfterClientSave(savedClientId)
     }
     $q.notify({
       type: quasarNotifyTypes.positive,

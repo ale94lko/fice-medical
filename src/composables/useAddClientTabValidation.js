@@ -37,6 +37,7 @@ export function useAddClientTabValidation({
   panelScrollRef,
   getBasicRules,
   getContactRules,
+  validateReferralIntake,
 }) {
   const { t } = useI18n()
   const $q = useQuasar()
@@ -115,6 +116,9 @@ export function useAddClientTabValidation({
       return countBasicTabFieldErrors(
         form.value,
         getBasicRules?.(),
+        {
+          validateReferralIntake: validateReferralIntake?.() ?? false,
+        },
       )
     }
     if (tab === addClientTabKeys.contact) {

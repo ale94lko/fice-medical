@@ -2,6 +2,7 @@ import { clientFieldKeys } from 'components/constants.js'
 import {
   countDuplicateContactMethodErrors,
 } from 'src/utils/client-contact-method-validation.js'
+import { isSelfReferredSource } from 'src/utils/referral-intake.js'
 
 export function countFieldRuleErrors(value, rules) {
   if (!rules?.length) {
@@ -17,10 +18,11 @@ export function countFieldRuleErrors(value, rules) {
   return 0
 }
 
-export function countBasicTabFieldErrors(form, rules) {
+export function countBasicTabFieldErrors(form, rules, options = {}) {
   if (!form || !rules) {
     return 0
   }
+  const validateReferralIntake = options.validateReferralIntake !== false
   const ck = clientFieldKeys
   const fields = [
     { value: form[ck.firstName], rules: rules.firstName },
@@ -35,6 +37,18 @@ export function countBasicTabFieldErrors(form, rules) {
       rules: rules.ssn,
     },
   ]
+  if (validateReferralIntake) {
+    fields.push({
+      value: form[ck.referralSource],
+      rules: rules.referralSource,
+    })
+    if (!isSelfReferredSource(form[ck.referralSource])) {
+      fields.push({
+        value: form[ck.referralIntakeDate],
+        rules: rules.referralIntakeDate,
+      })
+    }
+  }
   let count = 0
 
   for (const field of fields) {

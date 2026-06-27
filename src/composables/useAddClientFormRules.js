@@ -17,6 +17,7 @@ import {
 import {
   useAddClientContactRules,
 } from 'src/composables/useAddClientContactRules.js'
+import { isSelfReferredSource } from 'src/utils/referral-intake.js'
 
 export function useAddClientFormRules(t, form, ageFieldsLocked) {
   const ck = clientFieldKeys
@@ -148,6 +149,31 @@ export function useAddClientFormRules(t, form, ageFieldsLocked) {
     }
   }
 
+  function referralSourceRule() {
+    return val => {
+      const s = String(val ?? '').trim()
+
+      return s.length > 0 || t('referralSourceRequired')
+    }
+  }
+
+  function referralIntakeDateRule() {
+    return val => {
+      if (isSelfReferredSource(form.value[ck.referralSource])) {
+        return true
+      }
+      const s = String(val ?? '').trim()
+      if (!s) {
+        return t('referralDateRequired')
+      }
+      if (!parseUsDateString(s)) {
+        return t('referralDateInvalid')
+      }
+
+      return true
+    }
+  }
+
   const { contactRules } = useAddClientContactRules(t, lettersRule)
 
   const rules = computed(() => ({
@@ -167,6 +193,8 @@ export function useAddClientFormRules(t, form, ageFieldsLocked) {
     age: [ageRule()],
     ageUnit: [ageUnitRule()],
     ssn: [ssnRule()],
+    referralSource: [referralSourceRule()],
+    referralIntakeDate: [referralIntakeDateRule()],
   }))
 
   return { rules, contactRules }

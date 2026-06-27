@@ -157,6 +157,17 @@ export function useAddClientCatalogs(t) {
     return []
   })
 
+  const referralSourceSelectOptions = computed(() => {
+    const catalog = catalogsByName.value[catalogNames.referralSource]
+    if (catalog) {
+      return mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalog),
+      )
+    }
+
+    return []
+  })
+
   const ageUnitSelectOptions = computed(() => {
     const catalog = catalogsByName.value[catalogNames.ageUnit]
     if (catalog) {
@@ -288,6 +299,7 @@ export function useAddClientCatalogs(t) {
     suffixSelectOptions,
     raceSelectOptions,
     ethnicitySelectOptions,
+    referralSourceSelectOptions,
     ageUnitSelectOptions,
     contactTypeSelectOptions,
     relationshipTypeSelectOptions,

@@ -83,6 +83,11 @@ export function createEmptyAddClientForm() {
     [ck.socialSecurityNumber]: '',
     [ck.idNumberMasked]: '',
     [ck.admissionDate]: todayDateUs(),
+    [ck.referralSource]: null,
+    [ck.referralIntakeDate]: '',
+    [ck.referringProvider]: '',
+    [ck.referringOrganization]: '',
+    [ck.referralSourceDetails]: '',
     [ck.clinicians]: [],
     [ck.status]: 'active',
     [ck.photoFileId]: null,
@@ -154,6 +159,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
   const suffixSelectOptions = catalogs?.suffixSelectOptions
   const raceSelectOptions = catalogs?.raceSelectOptions
   const ethnicitySelectOptions = catalogs?.ethnicitySelectOptions
+  const referralSourceSelectOptions = catalogs?.referralSourceSelectOptions
   const ageUnitSelectOptions = catalogs?.ageUnitSelectOptions
   const contactTypeSelectOptions = catalogs?.contactTypeSelectOptions
   const relationshipTypeSelectOptions = catalogs?.relationshipTypeSelectOptions
@@ -217,6 +223,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     panelScrollRef: options.panelScrollRef,
     getBasicRules: () => rules.value,
     getContactRules: () => contactRules.value,
+    validateReferralIntake: options.validateReferralIntake,
   })
 
   function tabLabelFor(tab) {
@@ -270,6 +277,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     suffixSelectOptions,
     raceSelectOptions,
     ethnicitySelectOptions,
+    referralSourceSelectOptions,
     contactTypeSelectOptions,
     relationshipTypeSelectOptions,
     rules,

@@ -885,6 +885,26 @@ export default {
   referralSourceTransferFromAnotherClinic: 'Transfer From Another Clinic',
   referralSourceFamilyGuardianReferral: 'Family / Guardian Referral',
   referralSourceOther: 'Other',
+  referralSourceSelfReferred: 'Self-Referred',
+  referralInformation: 'Referral Information',
+  referralInformationSubtitle:
+    'Tell us how this patient came to our clinic.',
+  referralSource: 'Referral Source',
+  referralSourcePlaceholder: 'Select referral source',
+  referralSourceRequired: 'Referral source is required.',
+  referralSourceDetails: 'Referral Source Details',
+  referralSourceDetailsOptional: 'Referral Source Details (Optional)',
+  referralSourceDetailsPlaceholder:
+    'Enter additional referral information',
+  referralIntakeSelfReferredTitle: 'Self-Referred',
+  referralIntakeSelfReferredMessage:
+    'This patient contacted the clinic directly.',
+  referralIntakeSelfReferredNoRecord:
+    'No referral record will be created.',
+  referralIntakeDefaultReason: 'Incoming referral at patient registration',
+  referralIntakeCreateError:
+    'Patient saved, but the incoming referral could not be created.',
+  referralDateInvalid: 'Enter a valid referral date.',
   appointmentsTitle: 'Appointments',
   appointmentsSubtitle: 'View and manage client appointments.',
   appointmentAddButton: 'Add Appointment',
