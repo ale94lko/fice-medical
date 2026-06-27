@@ -43,6 +43,8 @@ jobs:
 
       - name: Update docs
         run: |
+          git add -A
+          git reset --hard
           rm -rf docs/assets
           cp -r dist/spa/* docs/
           git config user.name "github-actions[bot]"
