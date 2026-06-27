@@ -1,108 +1,48 @@
 ---
-description: Estándar único de tablas FiCE Medical (listados y datos tabulares)
-globs: src/pages/**/*List*.vue, src/components/admin-table/**, src/components/*Table*.vue, src/css/admin-table-standard.scss
+description: Estándar único de tablas administrativas FiCE Medical
+globs: src/pages/**/*List*.vue, src/components/admin-table/**, src/css/admin-table-standard.scss
 alwaysApply: false
 ---
 
-# Tablas — estándar FiCE Medical
+# Tablas administrativas — estándar FiCE
 
-Aplica a Clients, Providers, Appointments, Referrals, Authorizations, Follow Ups, Billing, Claims, Payments, Documents, Reports y cualquier tabla nueva.
+Antes de crear o modificar un listado con tabla, usar los componentes y estilos compartidos.
 
-## Tipografía
-
-- Fuente: `Inter, "Segoe UI", sans-serif` (`$typography-font-family`)
-- Título de pantalla: 40px / 700 / 48px line-height / `#0F172A`
-- Descripción: 16px / 400 / 24px / `#64748B`
-- Encabezados de columna: 12px / 600 / uppercase / letter-spacing 0.04em / `#64748B`
-- Texto principal fila: 14px / 500 / `#1E293B`
-- Texto secundario: 14px / 400 / `#475569`
-- Columna principal (entidad): 14px / **600** / `#1E293B`
-
-## Paleta
-
-| Token | Valor | Uso |
-|-------|-------|-----|
-| `$primary` | `#0F7A74` | Botones, links, activos |
-| `$fice-teal-dark` | `#0B5E59` | Hover, iconos de acción |
-| `$surface` | `#FFFFFF` | Fondo tabla |
-| `$table-header-bg` | `#F8FAFC` | Header |
-| `$table-border` | `#E2E8F0` | Bordes |
-| `$table-text-primary` | `#1E293B` | Texto fila |
-| `$table-text-secondary` | `#475569` | Texto secundario |
-| `$table-hover-bg` | `#F8FAFC` | Hover fila |
-| `$table-selected-bg` | `#F1F5F9` | Selección |
-
-## Contenedor y filas
-
-- Panel: fondo blanco, borde 1px `#E2E8F0`, border-radius 12px
-- Header fila: altura **30px** (`$table-header-height`)
-- Filas: altura **25px** (`$table-row-height`)
-- Scroll horizontal obligatorio cuando hay columnas extra (no ocultar columnas)
-
-## Componentes obligatorios (`src/components/admin-table/`)
+## Componentes (`src/components/admin-table/`)
 
 | Necesidad | Componente |
 |-----------|------------|
-| Título + subtítulo + acciones | `AdminListPageHeader` |
-| Card contenedor + ⚙ columnas | `AdminTablePanel` |
-| Tabla Quasar | `AdminQTable` + `admin-data-table` |
-| Paginación inferior derecha | `AdminTablePaginationBar` + footer host |
-| Estado (● + texto, sin badge grande) | `AdminTableStatusCell` |
-| View / Edit / More | `AdminTableRowActions` |
-| Configuración columnas | `AdminTableColumnSettingsDialog` + `useAdminTableColumnPreferences` |
+| Título 40px + subtítulo 16px + slot acciones | `AdminListPageHeader` |
+| Card tabla + toolbar + ⚙ columnas en header | `AdminTablePanel` |
+| Tabla Quasar | `AdminQTable` + clase `admin-data-table` |
+| Paginación fija inferior | `AdminTablePaginationBar` |
+| Estado (● + texto) | `AdminTableStatusCell` |
+| Acciones View / Edit / More | `AdminTableRowActions` |
+| Diálogo columnas | `AdminTableColumnSettingsDialog` |
 
-## Iconografía de acciones
+## Composable columnas
 
-| Acción | Icono Material | Color |
-|--------|----------------|-------|
-| View | `assignment_ind` | `#0B5E59` |
-| Edit | `edit_note` | `#0B5E59` |
-| More | `more_vert` | `#0B5E59` |
+`useAdminTableColumnPreferences({ tableId, defaultOrder, requiredColumns, lockedColumns })`
 
-Constantes: `adminTableActionIcons` en `src/constants/admin-table.js`.
-
-## Estados
-
-Formato: **indicador de color (6px) + texto**. Variantes: `open`, `active`, `pending`, `completed`, `cancelled` (+ `closed`, `inactive`, `discharged`, `other`).
-
-No usar pills ni badges grandes. Usar `AdminTableStatusCell`.
-
-## Columnas
-
-Toda tabla de listado debe soportar:
-
-- Mostrar / ocultar columnas
-- Reordenar columnas
-- Persistencia (`useAdminTableColumnPreferences` + `adminTableIds`)
-
-Acceso: icono ⚙ en header de columna Actions.
-
-## Paginación
-
-Ubicación: **parte inferior derecha** (`AdminTablePaginationBar`, `justify-end`).
-
-Elementos: selector de tamaño de página, navegación, página actual, total de registros.
+- `tableId`: usar `adminTableIds` en `src/constants/admin-table.js`
+- Persistencia: `localStorage` clave `fice-medical.admin-table.columns.{tableId}`
 
 ## Clases CSS
 
-- Página listado: `admin-page admin-list-page`
-- Panel: `admin-table-panel`
-- Tabla: `admin-data-table` (+ `--embedded` en tabs Add Client)
-- Columna principal: `admin-data-table__primary-cell` o `admin-data-table__link`
-- Secundario: `admin-data-table__secondary-cell`
-- Tablas HTML en formularios: `fmh-table` / `add-client-form__fmh-table` (mismos tokens)
+- Página: `admin-page admin-list-page`
+- Columna principal: `admin-data-table__primary-cell` o slot con `admin-data-table__link`
+- Texto secundario: `admin-data-table__secondary-cell`
+- Estados: `AdminTableStatusCell` (sin badges grandes)
+- Iconos acciones: `assignment_ind` (view), `edit_note` (edit), `more_vert` (more), color `#0B5E59`
 
-Estilos globales: `src/css/admin-table-standard.scss` — **no duplicar** en páginas.
+## Estilos globales
 
-## Referencia
+`src/css/admin-table-standard.scss` — no duplicar en páginas salvo celdas específicas del módulo.
 
-`src/pages/client/ClientList.vue` — implementación completa (header, columnas, paginación, acciones).
+## Paginación
 
-## Evitar
+`AdminTablePaginationBar` con `summary-key` / `per-page-key` i18n del módulo o `adminTablePaginationSummary` genérico.
 
-- Títulos de listado distintos a 40px (no sobrescribir `.admin-list-page__title`)
-- Headers sin uppercase / 12px
-- Badges de estado grandes
-- `q-table` crudo sin clases estándar en listados admin
-- Eliminar columnas por falta de espacio (usar scroll horizontal)
-- Iconos de acción con colores distintos a `#0B5E59`
+## Referencia implementada
+
+`src/pages/client/ClientList.vue`
