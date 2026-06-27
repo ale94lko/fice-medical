@@ -3,6 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [master]
+    paths-ignore:
+      - 'docs/**'
   pull_request:
     branches: [master]
     types: [closed]
@@ -21,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: master
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -32,9 +36,6 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Sync with remote before build
-        run: git pull --rebase origin master
-
       - name: Build
         env:
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
@@ -44,8 +45,13 @@ jobs:
         run: |
           rm -rf docs/assets
           cp -r dist/spa/* docs/
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs
-          git diff --staged --quiet docs || git commit -m "chore: update docs"
-          git push origin HEAD:master
+          if git diff --staged --quiet; then
+            echo "No docs changes to publish"
+            exit 0
+          fi
+          git commit -m "chore: update docs"
+          git pull --rebase origin master
+          git push origin master
