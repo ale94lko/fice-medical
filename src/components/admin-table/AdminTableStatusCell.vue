@@ -1,12 +1,18 @@
 <template>
   <span
     v-if="label"
-    class="admin-table-status-badge"
-    :class="`admin-table-status-badge--${variant}`">
-    <AdminTableSearchHighlight
-      :text="label"
-      :query="highlightQuery"
+    class="admin-table-status"
+    :class="`admin-table-status--${variant}`">
+    <span
+      class="admin-table-status__dot"
+      aria-hidden="true"
     />
+    <span class="admin-table-status__label">
+      <AdminTableSearchHighlight
+        :text="label"
+        :query="highlightQuery"
+      />
+    </span>
   </span>
   <span v-else class="text-grey-7">—</span>
 </template>

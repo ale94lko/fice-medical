@@ -658,14 +658,7 @@
     align-items: flex-end;
   }
 
-  .admin-list-page__title {
-    font-size: 1.375rem;
-    line-height: 1.65rem;
-  }
-
   .admin-list-page__subtitle {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
     margin-bottom: 0;
   }
 
@@ -2386,7 +2379,8 @@ input:-webkit-autofill {
   box-shadow: $shadow-sm;
 }
 
-.fmh-table-wrap {
+.fmh-table-wrap,
+.add-client-form__fmh-table-wrap {
   overflow-x: auto;
 }
 
@@ -2394,11 +2388,13 @@ input:-webkit-autofill {
   min-width: 0;
 }
 
-.fmh-table {
+.fmh-table,
+.add-client-form__fmh-table {
   width: 100%;
   min-width: 560px;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-family: $typography-font-family;
+  font-size: 14px;
 
   &--wide {
     min-width: 720px;
@@ -2406,28 +2402,53 @@ input:-webkit-autofill {
 
   th,
   td {
-    padding: 12px 14px;
-    border: 1px solid $border-subtle;
+    padding: 3px 12px;
+    border: 1px solid $table-border;
     text-align: left;
     vertical-align: middle;
+    box-sizing: border-box;
   }
 
   thead th {
-    background: rgba($primary, 0.08);
-    color: $text-strong;
+    height: $table-header-height;
+    min-height: $table-header-height;
+    max-height: $table-header-height;
+    background: $table-header-bg;
+    color: $text-muted;
+    font-size: 12px;
     font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    height: $table-row-height;
+    min-height: $table-row-height;
+    max-height: $table-row-height;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: $table-text-primary;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover td {
+    background: $table-hover-bg !important;
   }
 
   tbody tr:nth-child(even) {
-    background: $surface-muted;
+    background: transparent;
   }
 
-  tbody tr:nth-child(even) .fmh-table-actions {
-    background-color: $surface-muted !important;
+  tbody tr:nth-child(even) .fmh-table-actions,
+  tbody tr:nth-child(even) .add-client-form__fmh-table-actions {
+    background-color: $surface !important;
   }
 
-  tbody tr:hover .fmh-table-actions {
-    background-color: $surface-muted !important;
+  tbody tr:hover .fmh-table-actions,
+  tbody tr:hover .add-client-form__fmh-table-actions {
+    background-color: $table-hover-bg !important;
   }
 
   tbody tr.fmh-table-row--error,
@@ -2455,7 +2476,9 @@ input:-webkit-autofill {
 }
 
 .fmh-table-actions-col,
-.fmh-table-actions {
+.fmh-table-actions,
+.add-client-form__fmh-table-actions-col,
+.add-client-form__fmh-table-actions {
   position: sticky;
   right: 0;
   z-index: 2;
@@ -2465,17 +2488,20 @@ input:-webkit-autofill {
   box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
 }
 
-.fmh-table-actions-col {
+.fmh-table-actions-col,
+.add-client-form__fmh-table-actions-col {
   z-index: 3;
   text-align: center !important;
 }
 
-.fmh-table-actions {
+.fmh-table-actions,
+.add-client-form__fmh-table-actions {
   text-align: center;
   white-space: nowrap;
 
   .q-btn.app-btn-icon-action {
     font-size: 18px;
+    color: $fice-teal-dark !important;
   }
 
   .q-btn + .q-btn {

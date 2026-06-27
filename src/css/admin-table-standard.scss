@@ -130,7 +130,6 @@
   background: $surface;
   border: 1px solid $table-border;
   border-radius: $table-radius;
-  box-shadow: $shadow-sm;
   overflow: hidden;
 
   &__toolbar {
@@ -243,12 +242,12 @@
       height: $table-header-height !important;
       min-height: $table-header-height !important;
       max-height: $table-header-height !important;
-      padding: 4px 12px !important;
-      font-size: 13px;
+      padding: 7px 12px !important;
+      font-size: 12px;
       font-weight: 600;
       line-height: 1.25;
-      letter-spacing: normal;
-      text-transform: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       vertical-align: middle;
       box-sizing: border-box;
       color: $text-muted;
@@ -265,7 +264,7 @@
       height: $table-row-height !important;
       min-height: $table-row-height !important;
       max-height: $table-row-height !important;
-      padding: 2px 12px !important;
+      padding: 3px 12px !important;
       font-size: 14px;
       font-weight: 500;
       line-height: 1.25;
@@ -321,7 +320,7 @@
   }
 
   &__primary-cell {
-    font-weight: 500 !important;
+    font-weight: 600 !important;
     color: $table-text-primary !important;
   }
 
@@ -335,7 +334,7 @@
     background: transparent;
     padding: 0;
     color: $primary;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     cursor: pointer;
     text-align: left;
@@ -436,12 +435,12 @@
       height: $table-header-height;
       min-height: $table-header-height;
       max-height: $table-header-height;
-      padding: 4px 12px;
-      font-size: 13px;
+      padding: 7px 12px;
+      font-size: 12px;
       font-weight: 600;
       line-height: 1.25;
-      letter-spacing: normal;
-      text-transform: none;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       vertical-align: middle;
       box-sizing: border-box;
       color: $text-muted;
@@ -454,7 +453,7 @@
     tbody tr td {
       height: auto;
       min-height: $table-row-height;
-      padding: 2px 12px;
+      padding: 3px 12px;
       font-size: 14px;
       font-weight: 500;
       line-height: 1.25;
@@ -517,9 +516,11 @@
 
   &__label {
     width: 100%;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     color: $text-muted;
     text-align: center;
   }
@@ -553,43 +554,47 @@
   }
 }
 
-.admin-table-status-badge {
+.admin-table-status {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.2;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: $table-text-primary;
   white-space: nowrap;
 
-  &--open,
-  &--active {
-    background: #dcfce7;
-    color: #166534;
+  &__dot {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $text-hint;
   }
 
-  &--pending {
-    background: #fef3c7;
-    color: #b45309;
+  &--open &__dot,
+  &--active &__dot {
+    background: $positive;
   }
 
-  &--completed,
-  &--discharged {
-    background: #e0e7ff;
-    color: #4338ca;
+  &--pending &__dot,
+  &--other &__dot {
+    background: $warning;
   }
 
-  &--cancelled,
-  &--closed,
-  &--inactive {
-    background: #f1f5f9;
-    color: #64748b;
+  &--completed &__dot,
+  &--discharged &__dot {
+    background: #6366f1;
   }
 
-  &--other {
-    background: #fef3c7;
-    color: #b45309;
+  &--cancelled &__dot,
+  &--closed &__dot,
+  &--inactive &__dot {
+    background: $text-hint;
+  }
+
+  &__label {
+    min-width: 0;
   }
 
   .admin-table-search-highlight__mark {
