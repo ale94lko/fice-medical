@@ -94,7 +94,7 @@ export function cloneUser(user) {
 
   return createEmptyUser({
     id: user.id ?? null,
-    email: user.email ?? user[userFieldKeys.email] ?? '',
+    email: user.email ?? user[userFieldKeys.email] ?? user.username ?? '',
     password: String(user?.password ?? '').trim(),
     roles,
     permissions,
@@ -107,14 +107,10 @@ export function cloneUser(user) {
   })
 }
 
-export function userToFormPayload(user) {
-  const row = cloneUser(user)
+export function userToUpdatePayload(user) {
   const payload = {
-    email: row.email,
-    status: row.statusCode ?? row.status,
-    roles: row.roles,
-    permissions: row.permissions,
-    description: row.description,
+    username: String(user?.email ?? user?.username ?? '').trim(),
+    description: String(user?.description ?? '').trim(),
   }
   const password = String(user?.password ?? '').trim()
   if (password) {

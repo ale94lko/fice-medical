@@ -3,6 +3,7 @@ import {
   userStatusValues,
 } from 'components/constants.js'
 import { adminTableStatusVariants } from 'src/constants/admin-table.js'
+import { mapUserStatusFromApi } from 'src/utils/user-register-payload.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -102,14 +103,14 @@ export function mapUserListViewItem(item, t) {
     return null
   }
 
-  const statusRaw = trim(item.status).toUpperCase() || userStatusValues.active
-  const statusLabelKey = `userStatus${statusRaw.charAt(0)}${
-    statusRaw.slice(1).toLowerCase()
+  const statusCode = mapUserStatusFromApi(item.status)
+  const statusLabelKey = `userStatus${statusCode.charAt(0)}${
+    statusCode.slice(1).toLowerCase()
   }`
   const translatedStatus = t(statusLabelKey)
   const status = translatedStatus !== statusLabelKey
     ? translatedStatus
-    : statusRaw
+    : statusCode
 
   const normalizedRoles = normalizeRolesFromItem(item)
   const roleLabels = resolveRoleLabels(normalizedRoles)
@@ -119,7 +120,7 @@ export function mapUserListViewItem(item, t) {
   return {
     id: item.id,
     [uk.name]: resolveUserDisplayName(item),
-    [uk.email]: trim(item.email),
+    [uk.email]: trim(item.email ?? item.username),
     [uk.roles]: roleLabels,
     rolesCodes: roleIds.length ? roleIds : normalizedRoles.map(r => r.name),
     roleCode: roleIds[0] ?? normalizedRoles[0]?.name ?? '',
@@ -127,9 +128,8 @@ export function mapUserListViewItem(item, t) {
     [uk.permissions]: permissions,
     [uk.description]: trim(item.description),
     [uk.status]: status,
-    statusCode: statusRaw,
-    statusVariant: resolveUserStatusVariant(statusRaw),
-    [uk.lastLogin]: trim(item.last_login ?? item.lastLogin) || '—',
+    statusCode,
+    statusVariant: resolveUserStatusVariant(statusCode),
   }
 }
 

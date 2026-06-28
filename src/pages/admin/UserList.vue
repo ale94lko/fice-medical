@@ -78,7 +78,7 @@
           </q-th>
         </template>
 
-        <template #body-cell-name="scope">
+        <template #body-cell-email="scope">
           <q-td :props="scope" class="admin-data-table__primary-cell">
             <button
               type="button"
@@ -86,21 +86,10 @@
               :data-testid="userListTestIds.rowView(scope.row.id)"
               @click="viewRow(scope.row)">
               <AdminTableSearchHighlight
-                :text="scope.row[uk.name] || '—'"
+                :text="scope.row[uk.email] || '—'"
                 :query="highlightQuery"
               />
             </button>
-          </q-td>
-        </template>
-
-        <template #body-cell-email="scope">
-          <q-td
-            :props="scope"
-            class="admin-data-table__secondary-cell">
-            <AdminTableSearchHighlight
-              :text="scope.row[uk.email] || '—'"
-              :query="highlightQuery"
-            />
           </q-td>
         </template>
 
@@ -121,17 +110,6 @@
               :label="scope.row[uk.status]"
               :variant="scope.row.statusVariant"
               :highlight-query="highlightQuery"
-            />
-          </q-td>
-        </template>
-
-        <template #body-cell-lastLogin="scope">
-          <q-td
-            :props="scope"
-            class="admin-data-table__secondary-cell">
-            <AdminTableSearchHighlight
-              :text="scope.row[uk.lastLogin] || '—'"
-              :query="highlightQuery"
             />
           </q-td>
         </template>
@@ -255,7 +233,7 @@ import {
   isUserListServerSearchQuery,
 } from 'src/utils/user-list-search.js'
 import { useAuthStore } from 'stores/auth-store.js'
-import { cloneUser, userToFormPayload } from 'src/utils/user-orders.js'
+import { cloneUser, userToUpdatePayload } from 'src/utils/user-orders.js'
 import {
   adminTableTestIds,
   userListTestIds,
@@ -288,7 +266,7 @@ const searchQuery = ref('')
 let debounceTimer = null
 
 const tablePagination = ref({
-  sortBy: col.name,
+  sortBy: col.email,
   descending: false,
   page: 1,
   rowsPerPage: 20,
@@ -296,11 +274,9 @@ const tablePagination = ref({
 })
 
 const defaultColumnOrder = [
-  col.name,
   col.email,
   col.role,
   col.status,
-  col.lastLogin,
   col.actions,
 ]
 
@@ -314,8 +290,8 @@ const {
 } = useAdminTableColumnPreferences({
   tableId: adminTableIds.users,
   defaultOrder: defaultColumnOrder,
-  requiredColumns: [col.name, col.actions],
-  lockedColumns: [col.name, col.actions],
+  requiredColumns: [col.email, col.actions],
+  lockedColumns: [col.email, col.actions],
 })
 
 const sourceRows = computed(() => adminStore.userList)
@@ -331,16 +307,6 @@ const rows = computed(() => sourceRows.value)
 
 const allColumns = computed(() => [
   {
-    name: col.name,
-    required: true,
-    label: t('userListColName'),
-    align: 'left',
-    field: row => row[uk.name],
-    sortable: true,
-    headerStyle: 'min-width: 180px',
-    style: 'min-width: 180px',
-  },
-  {
     name: col.email,
     required: true,
     label: t('email'),
@@ -349,7 +315,6 @@ const allColumns = computed(() => [
     sortable: true,
     headerStyle: 'min-width: 220px',
     style: 'min-width: 220px',
-    classes: 'admin-data-table__secondary-cell',
   },
   {
     name: col.role,
@@ -371,17 +336,6 @@ const allColumns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
-  },
-  {
-    name: col.lastLogin,
-    required: false,
-    label: t('userListColLastLogin'),
-    align: 'left',
-    field: row => row[uk.lastLogin],
-    sortable: false,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
-    classes: 'admin-data-table__secondary-cell',
   },
   {
     name: col.actions,
@@ -406,12 +360,12 @@ const visibleColumns = computed(() =>
 )
 
 const deleteConfirmMessage = computed(() => {
-  const name = pendingDeleteUser.value?.[uk.name]
-  if (!name) {
+  const email = pendingDeleteUser.value?.[uk.email]
+  if (!email) {
     return t('userDeleteMessageGeneric')
   }
 
-  return t('userDeleteMessage', { name })
+  return t('userDeleteMessage', { name: email })
 })
 
 function tablePaginationFromStore(paginationPayload) {
@@ -607,7 +561,7 @@ async function onDialogSave({ user, permissionTreeNodes }) {
         message: t('userCreateSuccess'),
       })
     } else {
-      const payload = userToFormPayload(user)
+      const payload = userToUpdatePayload(user)
       await adminStore.updateUser(user.id, payload, t)
       $q.notify({
         type: quasarNotifyTypes.positive,

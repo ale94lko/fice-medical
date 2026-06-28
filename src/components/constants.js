@@ -69,11 +69,9 @@ export const userFieldKeys = {
 export const userDescriptionMaxLength = 500
 
 export const userListColumnKeys = {
-  name: 'name',
   email: 'email',
   role: 'role',
   status: 'status',
-  lastLogin: 'lastLogin',
   actions: 'actions',
 }
 
@@ -870,7 +868,7 @@ export const apiPaths = {
   clientsListColumnConfig: '/client/v1/list-view/column-config',
   tenantsUsersList: '/user/v1',
   tenantsUsersCreate: '/user/v1/register',
-  tenantUserById: id => `/tenants/v1/users/${encodeURIComponent(
+  tenantUserById: id => `/user/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
   tenantRolesByTenantId: tenantId => `/roles/v1/tenant/${

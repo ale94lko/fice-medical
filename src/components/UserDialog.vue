@@ -56,7 +56,9 @@
               />
             </AddClientLabeledField>
           </div>
-          <div class="col-12 col-md-6">
+          <div
+            v-if="showFullUserFields"
+            class="col-12 col-md-6">
             <AddClientLabeledField
               :label="requiredLabel(t('status'))"
               :test-id="tid.field('status')">
@@ -75,7 +77,9 @@
               />
             </AddClientLabeledField>
           </div>
-          <div class="col-12 col-md-6">
+          <div
+            v-if="showFullUserFields"
+            class="col-12 col-md-6">
             <AddClientLabeledField
               :label="requiredLabel(t('userRoles'))"
               :test-id="tid.field('roles')">
@@ -97,7 +101,9 @@
               />
             </AddClientLabeledField>
           </div>
-          <div class="col-12">
+          <div
+            v-if="showFullUserFields"
+            class="col-12">
             <AddClientLabeledField
               :label="t('permissions')"
               :test-id="tid.field('permissions')">
@@ -226,6 +232,8 @@ const open = computed({
 
 const readonly = computed(() => props.mode === 'view')
 const isAddMode = computed(() => props.mode === 'add')
+const isEditMode = computed(() => props.mode === 'edit')
+const showFullUserFields = computed(() => isAddMode.value || readonly.value)
 
 const dialogTitle = computed(() => {
   if (props.mode === 'view') {
@@ -277,11 +285,13 @@ const passwordRules = computed(() => {
 })
 
 const statusRules = computed(() =>
-  readonly.value ? [] : [requiredRule(t('fieldRequired'))],
+  readonly.value || isEditMode.value
+    ? []
+    : [requiredRule(t('fieldRequired'))],
 )
 
 const rolesRules = computed(() => (
-  readonly.value
+  readonly.value || isEditMode.value
     ? []
     : [
       val => (Array.isArray(val) && val.length > 0) || t('fieldRequired'),
@@ -345,8 +355,13 @@ watch(
       local.value.permissions = []
     }
     local.value.password = ''
-    loadRoleOptions()
-    loadPermissionTree()
+    if (props.mode === 'add' || props.mode === 'view') {
+      loadRoleOptions()
+      loadPermissionTree()
+    } else {
+      roleOptions.value = []
+      permissionTreeNodes.value = []
+    }
     nextTick(() => {
       formRef.value?.resetValidation()
     })
@@ -371,7 +386,7 @@ async function onSave() {
       ...local.value,
       password: local.value.password,
     }),
-    permissionTreeNodes: permissionTreeNodes.value,
+    permissionTreeNodes: isAddMode.value ? permissionTreeNodes.value : [],
   })
 }
 </script>

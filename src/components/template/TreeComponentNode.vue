@@ -7,8 +7,7 @@
       :class="{
         'tree-component__row--parent': hasChildren,
         'tree-component__row--leaf': !hasChildren,
-      }"
-      :style="rowIndentStyle">
+      }">
       <button
         v-if="hasChildren"
         type="button"
@@ -170,10 +169,6 @@ const selectedLeafCount = computed(
     value => selectedSet.value.has(String(value)),
   ).length,
 )
-
-const rowIndentStyle = computed(() => ({
-  paddingLeft: `${Math.max(0, props.depth) * 12}px`,
-}))
 
 const nodeTestId = computed(() => {
   const suffix = hasChildren.value

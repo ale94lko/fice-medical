@@ -5,6 +5,29 @@ const USER_STATUS_API_BY_CODE = {
   [userStatusValues.inactive]: 0,
 }
 
+const USER_STATUS_CODE_BY_API = {
+  1: userStatusValues.active,
+  0: userStatusValues.inactive,
+  2: userStatusValues.inactive,
+}
+
+export function mapUserStatusFromApi(status) {
+  const numeric = Number(status)
+  if (Number.isFinite(numeric) && USER_STATUS_CODE_BY_API[numeric]) {
+    return USER_STATUS_CODE_BY_API[numeric]
+  }
+
+  const token = String(status ?? '').trim().toUpperCase()
+  if (
+    token === userStatusValues.active
+    || token === userStatusValues.inactive
+  ) {
+    return token
+  }
+
+  return userStatusValues.active
+}
+
 function normalizeNumericIds(values = []) {
   return (values ?? [])
     .map(value => Number(value))

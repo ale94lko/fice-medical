@@ -128,7 +128,6 @@ const emit = defineEmits(['update:modelValue'])
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 38px;
   padding: 4px 8px 4px 4px;
   border-radius: 8px;
   transition: background-color 0.15s ease;

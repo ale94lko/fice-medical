@@ -84,10 +84,7 @@ export async function createTenantUser(payload, options = {}) {
 
 export async function updateTenantUser(userId, payload) {
   const body = {
-    email: String(payload?.email ?? '').trim(),
-    status: String(payload?.status ?? '').trim(),
-    roles: Array.isArray(payload?.roles) ? payload.roles : [],
-    permissions: Array.isArray(payload?.permissions) ? payload.permissions : [],
+    username: String(payload?.username ?? payload?.email ?? '').trim(),
     description: String(payload?.description ?? '').trim(),
   }
   const password = String(payload?.password ?? '').trim()
