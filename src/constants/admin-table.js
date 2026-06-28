@@ -21,6 +21,7 @@ export const adminTableStatusVariants = {
 
 export const adminTableIds = {
   clients: 'clients',
+  staff: 'staff',
   providers: 'providers',
   appointments: 'appointments',
   referrals: 'referrals',

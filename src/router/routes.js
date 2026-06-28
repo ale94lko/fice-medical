@@ -42,6 +42,50 @@ const routes = [
           ],
         },
       },
+      {
+        path: 'staff',
+        component: () => import('pages/staff/StaffList.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewStaffMembers,
+        },
+      },
+      {
+        path: 'staff/add',
+        name: 'AddStaff',
+        component: () => import('pages/staff/StaffFormPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.editStaffMembers,
+          staffEntryPoint: 'ADD_STAFF',
+        },
+      },
+      {
+        path: 'staff/add-clinician',
+        name: 'AddClinician',
+        component: () => import('pages/staff/StaffFormPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.editStaffMembers,
+          staffEntryPoint: 'ADD_CLINICIAN',
+        },
+      },
+      {
+        path: 'staff/:id',
+        name: 'StaffProfile',
+        component: () => import('pages/staff/StaffProfilePage.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewStaffMembers,
+        },
+      },
+      {
+        path: 'staff/:id/edit',
+        name: 'EditStaff',
+        component: () => import('pages/staff/StaffFormPage.vue'),
+        meta: {
+          requiresAnyPermission: [
+            permissionNames.viewStaffMembers,
+            permissionNames.editStaffMembers,
+          ],
+        },
+      },
     ],
     meta: { requiresAuth: true },
   },

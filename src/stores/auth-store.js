@@ -76,6 +76,7 @@ export const useAuthStore = defineStore('auth', {
       ),
     showAdministrationMenu: state =>
       hasAnyPermission(state.permissions, [
+        permissionNames.viewStaffMembers,
         permissionNames.viewConfig,
         permissionNames.viewModules,
         permissionNames.viewPermissions,

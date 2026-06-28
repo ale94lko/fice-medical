@@ -8,6 +8,7 @@ import {
 } from 'src/utils/auth-permissions.js'
 
 const administrationPermissions = [
+  permissionNames.viewStaffMembers,
   permissionNames.viewConfig,
   permissionNames.editConfig,
   permissionNames.viewModules,
@@ -27,7 +28,6 @@ const administrationPermissions = [
 ]
 
 const humanResourcesPermissions = [
-  permissionNames.viewStaffMembers,
   permissionNames.viewCredentials,
 ]
 
@@ -70,6 +70,10 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.viewCredentials),
   )
 
+  const showAdminStaffList = computed(() =>
+    hasPermission(permissions.value, permissionNames.viewStaffMembers),
+  )
+
   const showBilling = computed(() =>
     hasPermission(permissions.value, permissionNames.viewTenantsBilling),
   )
@@ -87,6 +91,7 @@ export function useMainNavPermissions() {
     showHrGeneral,
     showHrEmployees,
     showHrCredentials,
+    showAdminStaffList,
     showBilling,
     showAdministrationMenu,
   }

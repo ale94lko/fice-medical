@@ -83,6 +83,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  fileCategory: {
+    type: String,
+    default: () => storedFileCategories.clientProfile,
+  },
 })
 
 const emit = defineEmits(['update:fileId'])
@@ -145,7 +149,7 @@ async function onCropConfirm(file) {
     const clientId = String(props.clientId ?? '').trim()
     const uploaded = await uploadStoredFile(
       file,
-      storedFileCategories.clientProfile,
+      props.fileCategory,
       clientId ? { clientId } : {},
     )
     emit('update:fileId', uploaded.id)
