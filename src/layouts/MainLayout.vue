@@ -331,13 +331,28 @@
             v-model="administrationMenu"
             expand-separator
             icon="manage_accounts"
-            :label="t('administration')">
-            <AppDrawerSubNavItem icon="tune">General</AppDrawerSubNavItem>
+            :label="t('administration')"
+            :header-class="isAdministrationActive ? activeClass : ''">
+            <AppDrawerSubNavItem
+              v-if="showAdminGeneral"
+              icon="tune">
+              {{ t('administrationGeneral') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
+              v-if="showAdminUsers"
+              icon="group"
+              to="/administration/users"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminUsers">
+              {{ t('users') }}
+            </AppDrawerSubNavItem>
           </q-expansion-item>
           <q-item
             v-else-if="showAdministrationMenu"
             clickable
-            v-ripple>
+            v-ripple
+            :active="isAdministrationActive"
+            :active-class="activeClass">
             <q-item-section avatar>
               <q-icon name="manage_accounts" />
             </q-item-section>
@@ -352,7 +367,19 @@
               self="top left"
               class="app-drawer-submenu app-light-menu"
               v-model="administrationMenu">
-              <AppDrawerSubNavItem icon="tune">General</AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showAdminGeneral"
+                icon="tune">
+                {{ t('administrationGeneral') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showAdminUsers"
+                icon="group"
+                to="/administration/users"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminUsers">
+                {{ t('users') }}
+              </AppDrawerSubNavItem>
             </q-menu>
             <q-tooltip
               v-if="drawerShowsMiniTooltips && !administrationMenu"
@@ -517,12 +544,18 @@ const {
   showHrCredentials,
   showBilling,
   showAdministrationMenu,
+  showAdminGeneral,
+  showAdminUsers,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')
 
 const isClientActive = computed(() => {
   return route.path.startsWith('/clients')
 })
+
+const isAdministrationActive = computed(() =>
+  route.path.startsWith('/administration'),
+)
 
 const isActiveClass = (condition) => {
   return condition ? 'app-nav-item--active' : ''
@@ -582,10 +615,15 @@ function syncNavMenusFromRoute() {
   } else if (!isClientActive.value) {
     clientMenuExpanded.value = false
   }
+  if (accordionMenu.value && isAdministrationActive.value) {
+    administrationMenu.value = true
+  }
   clientMenuPopup.value = false
   if (!isClientActive.value) {
     providerMenu.value = false
     humanResourcesMenu.value = false
+  }
+  if (!isAdministrationActive.value) {
     administrationMenu.value = false
   }
 }

@@ -19,6 +19,7 @@ import {
   readStoredRefreshToken,
   readStoredSubtenants,
   readStoredToken,
+  readStoredTenantId,
   writeStoredActiveSubtenantId,
   writeStoredExpireAt,
   writeStoredModules,
@@ -26,6 +27,7 @@ import {
   writeStoredRefreshToken,
   writeStoredSubtenants,
   writeStoredToken,
+  writeStoredTenantId,
 } from '../utils/auth-local-storage.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
 
@@ -40,6 +42,7 @@ export const useAuthStore = defineStore('auth', {
     permissions: [],
     subtenants: [],
     activeSubtenantId: null,
+    tenantId: null,
     _initialized: false,
   }),
   getters: {
@@ -77,6 +80,7 @@ export const useAuthStore = defineStore('auth', {
     showAdministrationMenu: state =>
       hasAnyPermission(state.permissions, [
         permissionNames.viewConfig,
+        permissionNames.editConfig,
         permissionNames.viewModules,
         permissionNames.viewPermissions,
         permissionNames.viewRoles,
@@ -85,6 +89,10 @@ export const useAuthStore = defineStore('auth', {
         permissionNames.viewTenants,
         permissionNames.viewAuditLog,
         permissionNames.viewSubtenants,
+        permissionNames.viewTenantsUser,
+        permissionNames.addTenantsUser,
+        permissionNames.editTenantsUser,
+        permissionNames.deleteTenantsUser,
       ]),
   },
   actions: {
@@ -136,6 +144,10 @@ export const useAuthStore = defineStore('auth', {
       if (Array.isArray(td.permissions)) {
         this.permissions = td.permissions
         writeStoredPermissions(td.permissions)
+      }
+      if (td.tenantId != null) {
+        this.tenantId = td.tenantId
+        writeStoredTenantId(td.tenantId)
       }
       writeStoredToken(this.token)
       writeStoredExpireAt(this.expireAt)
@@ -192,12 +204,14 @@ export const useAuthStore = defineStore('auth', {
       const permissions = readStoredPermissions()
       const subtenants = readStoredSubtenants()
       const activeSubtenantId = readStoredActiveSubtenantId()
+      const tenantId = readStoredTenantId()
       if (token) {
         this.token = token
         this.expireAt = expireAt
         this.refreshToken = refreshToken
         this.modules = modules
         this.permissions = permissions
+        this.tenantId = tenantId
         this.applySubtenants(subtenants, activeSubtenantId)
       }
     },
@@ -209,6 +223,7 @@ export const useAuthStore = defineStore('auth', {
       this.permissions = []
       this.subtenants = []
       this.activeSubtenantId = null
+      this.tenantId = null
       clearAuthLocalStorage()
     },
     init() {
@@ -226,6 +241,7 @@ export const useAuthStore = defineStore('auth', {
             this.permissions = []
             this.subtenants = []
             this.activeSubtenantId = null
+            this.tenantId = null
             if (this.router) {
               this.router.push('/login')
             }

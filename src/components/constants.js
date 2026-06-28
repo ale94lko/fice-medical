@@ -51,6 +51,45 @@ export const clientFieldKeys = {
   referralSourceDetails: 'referralSourceDetails',
 }
 
+export const userFieldKeys = {
+  id: 'id',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  roles: 'roles',
+  permissions: 'permissions',
+  description: 'description',
+  role: 'role',
+  status: 'status',
+  lastLogin: 'lastLogin',
+}
+
+export const userDescriptionMaxLength = 500
+
+export const userListColumnKeys = {
+  name: 'name',
+  email: 'email',
+  role: 'role',
+  status: 'status',
+  lastLogin: 'lastLogin',
+  actions: 'actions',
+}
+
+export const userRoleValues = {
+  administrator: 'ADMINISTRATOR',
+  clinician: 'CLINICIAN',
+  staff: 'STAFF',
+  billing: 'BILLING',
+}
+
+export const userStatusValues = {
+  active: 'ACTIVE',
+  pending: 'PENDING',
+  inactive: 'INACTIVE',
+}
+
 export const addClientTabKeys = {
   basic: 'basic',
   contact: 'contact',
@@ -794,6 +833,16 @@ export const apiPaths = {
   clientsList: '/client/v1/list-view',
   clientsSearch: '/client/v1/list-view/search',
   clientsListColumnConfig: '/client/v1/list-view/column-config',
+  tenantsUsersList: '/tenants/v1/users/list-view',
+  tenantsUsersSearch: '/tenants/v1/users/list-view/search',
+  tenantsUsersCreate: '/user/v1/register',
+  tenantUserById: id => `/tenants/v1/users/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  tenantRolesByTenantId: tenantId => `/roles/v1/tenant/${
+    encodeURIComponent(String(tenantId ?? '').trim())
+  }`,
+  permissionsForCurrentUser: '/permissions/v1/user/me',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   clientClinicalNotes: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
@@ -1003,6 +1052,7 @@ export const authStorageKeys = {
   permissions: 'permissions',
   subtenants: 'subtenants',
   activeSubtenantId: 'activeSubtenantId',
+  tenantId: 'tenantId',
 }
 
 export const appModuleNames = {

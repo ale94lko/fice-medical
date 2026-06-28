@@ -23,6 +23,7 @@ export const layoutTestIds = {
   navClientList: 'layout-nav-client-list',
   navPriorAuth: 'layout-nav-prior-authorization',
   navClientAssignment: 'layout-nav-client-assignment',
+  navAdminUsers: 'layout-nav-admin-users',
 }
 
 export const sessionInactivityTestIds = {
@@ -34,6 +35,21 @@ export const sessionInactivityTestIds = {
 
 export const adminTableTestIds = {
   columnSettings: 'admin-table-btn-column-settings',
+}
+
+export const userListTestIds = {
+  page: 'user-list-page',
+  search: 'user-list-input-search',
+  addUser: 'user-list-btn-add',
+  rowView: id => toTestId('user-list-row', id, 'btn-view'),
+  rowEdit: id => toTestId('user-list-row', id, 'btn-edit'),
+  rowMore: id => toTestId('user-list-row', id, 'btn-more'),
+  rowDelete: id => toTestId('user-list-row', id, 'btn-delete'),
+}
+
+export const userDialogTestIds = {
+  field: name => toTestId('user-dialog-field', name),
+  btn: name => toTestId('user-dialog-btn', name),
 }
 
 export const clientListTestIds = {

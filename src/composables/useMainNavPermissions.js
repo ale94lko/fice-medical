@@ -24,6 +24,10 @@ const administrationPermissions = [
   permissionNames.viewTenants,
   permissionNames.viewAuditLog,
   permissionNames.viewSubtenants,
+  permissionNames.viewTenantsUser,
+  permissionNames.addTenantsUser,
+  permissionNames.editTenantsUser,
+  permissionNames.deleteTenantsUser,
 ]
 
 const humanResourcesPermissions = [
@@ -78,6 +82,18 @@ export function useMainNavPermissions() {
     hasAnyPermission(permissions.value, administrationPermissions),
   )
 
+  const showAdminGeneral = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.viewTenantsUser,
+      permissionNames.viewConfig,
+      permissionNames.editConfig,
+    ]),
+  )
+
+  const showAdminUsers = computed(() =>
+    hasPermission(permissions.value, permissionNames.viewTenantsUser),
+  )
+
   return {
     showDashboard,
     showClientMenu,
@@ -89,6 +105,8 @@ export function useMainNavPermissions() {
     showHrCredentials,
     showBilling,
     showAdministrationMenu,
+    showAdminGeneral,
+    showAdminUsers,
   }
 }
 

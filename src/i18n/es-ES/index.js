@@ -75,6 +75,65 @@ export default {
   notes: 'Notas',
   welcome: 'Bienvenido, {name}!',
   administration: 'Administración',
+  administrationGeneral: 'General',
+  users: 'Usuarios',
+  userListSubtitle:
+    'Gestione usuarios, roles y accesos del tenant.',
+  userListSearchPlaceholder:
+    'Buscar usuarios por nombre, correo o rol…',
+  userListEmpty: 'No se encontraron usuarios.',
+  userListSearchEmpty: 'Ningún usuario coincide con la búsqueda.',
+  userListError:
+    'No se pudieron cargar los usuarios. Inténtelo de nuevo.',
+  userListPaginationSummary: '{from}–{to} de {total} usuarios',
+  userListColName: 'Nombre',
+  userListColLastLogin: 'Último acceso',
+  addUser: 'Añadir usuario',
+  userRole: 'Rol',
+  userRoles: 'Roles',
+  userRolePlaceholder: 'Seleccionar rol',
+  userRolesPlaceholder: 'Seleccionar roles',
+  userRolesLoadError:
+    'No se pudieron cargar los roles. Inténtelo de nuevo.',
+  permissions: 'Permisos',
+  userPermissionsPlaceholder: 'Seleccionar permisos',
+  userPermissionsEmpty: 'No hay permisos disponibles.',
+  userPermissionsLoading: 'Cargando permisos…',
+  userPermissionsLoadError:
+    'No se pudieron cargar los permisos. Inténtelo de nuevo.',
+  treeExpand: 'Expandir',
+  treeCollapse: 'Contraer',
+  userDescriptionPlaceholder: 'Introduzca descripción',
+  userPasswordPlaceholder: 'Introduzca contraseña',
+  userPasswordEditPlaceholder:
+    'Deje en blanco para mantener la contraseña actual',
+  userRoleAdministrator: 'Administrador',
+  userRoleClinician: 'Clínico',
+  userRoleStaff: 'Personal',
+  userRoleBilling: 'Facturación',
+  userStatusActive: 'Activo',
+  userStatusPending: 'Pendiente',
+  userStatusInactive: 'Inactivo',
+  userStatusPlaceholder: 'Seleccionar estado',
+  userStatusRequired: 'El estado es obligatorio.',
+  userRolesRequired: 'Seleccione al menos un rol.',
+  userDialogAddTitle: 'Añadir usuario',
+  userDialogEditTitle: 'Editar usuario',
+  userDialogViewTitle: 'Ver usuario',
+  userDialogAddSubtitle:
+    'Cree una nueva cuenta de usuario para este tenant.',
+  userCreateSuccess: 'Usuario creado correctamente.',
+  userUpdateSuccess: 'Usuario actualizado correctamente.',
+  userSaveError:
+    'No se pudo guardar el usuario. Inténtelo de nuevo.',
+  userDeleteTitle: 'Eliminar usuario',
+  userDeleteMessage:
+    '¿Eliminar a {name}? Esta acción no se puede deshacer.',
+  userDeleteMessageGeneric:
+    '¿Eliminar este usuario? Esta acción no se puede deshacer.',
+  userDeleteSuccess: 'Usuario eliminado correctamente.',
+  userDeleteError:
+    'No se pudo eliminar el usuario. Inténtelo de nuevo.',
   dashboard: 'Panel',
   noPermissionsTitle: 'Sin acceso asignado',
   noPermissionsMessage:

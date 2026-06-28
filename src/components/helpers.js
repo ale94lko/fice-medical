@@ -54,6 +54,41 @@ function normalizeLoginPermissions(raw) {
   return normalizeLoginModules(raw)
 }
 
+function tenantIdFromConfig(config) {
+  if (!config || typeof config !== typeNames.object) {
+    return null
+  }
+  const raw = config.tenant_id ?? config.tenantId
+  const id = Number(raw)
+
+  return Number.isFinite(id) ? id : null
+}
+
+function findLoginConfigData(node, depth = 0) {
+  if (!node || typeof node !== typeNames.object || depth > 5) {
+    return null
+  }
+  if (node.config_data && typeof node.config_data === typeNames.object) {
+    return node.config_data
+  }
+  if (node.configData && typeof node.configData === typeNames.object) {
+    return node.configData
+  }
+  if (node.data && typeof node.data === typeNames.object) {
+    return findLoginConfigData(node.data, depth + 1)
+  }
+
+  return null
+}
+
+export function extractLoginTenantId(body) {
+  if (!body || typeof body !== typeNames.object) {
+    return null
+  }
+
+  return tenantIdFromConfig(findLoginConfigData(body))
+}
+
 function extractFromFiCeEnvelope(body) {
   const envelope = body.data
   if (!envelope?.token_data?.token) {
@@ -71,6 +106,7 @@ function extractFromFiCeEnvelope(body) {
     modules: normalizeLoginModules(envelope.modules),
     permissions: normalizeLoginPermissions(envelope.permissions),
     subtenants: normalizeLoginSubtenants(envelope.subtenants),
+    tenantId: tenantIdFromConfig(envelope.config_data ?? envelope.configData),
   }
 }
 
@@ -110,6 +146,7 @@ function extractFromRoots(body) {
       modules: normalizeLoginModules(root.modules),
       permissions: normalizeLoginPermissions(root.permissions),
       subtenants: normalizeLoginSubtenants(root.subtenants),
+      tenantId: tenantIdFromConfig(root.config_data ?? root.configData),
     }
   }
 
@@ -564,6 +601,7 @@ export function extractOAuthTokenPayload(body) {
   const fallbackModules = extractLoginModules(body)
   const fallbackPermissions = extractLoginPermissions(body)
   const fallbackSubtenants = extractLoginSubtenants(body)
+  const fallbackTenantId = extractLoginTenantId(body)
   const fromEnvelope = extractFromFiCeEnvelope(body)
   if (fromEnvelope) {
     return {
@@ -577,6 +615,7 @@ export function extractOAuthTokenPayload(body) {
       subtenants: fromEnvelope.subtenants?.length
         ? fromEnvelope.subtenants
         : fallbackSubtenants,
+      tenantId: fromEnvelope.tenantId ?? fallbackTenantId,
     }
   }
 
@@ -593,6 +632,7 @@ export function extractOAuthTokenPayload(body) {
       subtenants: fromRoots.subtenants?.length
         ? fromRoots.subtenants
         : fallbackSubtenants,
+      tenantId: fromRoots.tenantId ?? fallbackTenantId,
     }
   }
 

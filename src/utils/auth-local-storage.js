@@ -128,6 +128,25 @@ export function writeStoredActiveSubtenantId(id) {
   localStorage.setItem(keys.activeSubtenantId, String(id))
 }
 
+export function readStoredTenantId() {
+  const raw = localStorage.getItem(keys.tenantId)
+  if (raw == null || raw === '') {
+    return null
+  }
+  const id = Number(raw)
+
+  return Number.isFinite(id) ? id : null
+}
+
+export function writeStoredTenantId(id) {
+  if (id == null || id === '') {
+    localStorage.removeItem(keys.tenantId)
+
+    return
+  }
+  localStorage.setItem(keys.tenantId, String(id))
+}
+
 export function clearAuthLocalStorage() {
   [
     keys.token,
@@ -139,6 +158,7 @@ export function clearAuthLocalStorage() {
     keys.permissions,
     keys.subtenants,
     keys.activeSubtenantId,
+    keys.tenantId,
   ].forEach(k => localStorage.removeItem(k))
   clearSharedSessionInactivityState()
 }

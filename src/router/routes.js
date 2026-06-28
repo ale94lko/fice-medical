@@ -42,6 +42,14 @@ const routes = [
           ],
         },
       },
+      {
+        path: 'administration/users',
+        name: 'AdminUsersList',
+        component: () => import('pages/admin/UserList.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewTenantsUser,
+        },
+      },
     ],
     meta: { requiresAuth: true },
   },

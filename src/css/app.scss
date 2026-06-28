@@ -1057,6 +1057,12 @@
   min-width: 320px;
 }
 
+.user-dialog.app-dialog-card:not(.app-dialog-card--sm)  {
+  width: 100%;
+  max-width: 720px;
+  min-width: 320px;
+}
+
 .client-overview-allergies-dialog.app-dialog-card {
   width: 100%;
   max-width: 600px;
