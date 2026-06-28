@@ -40,14 +40,16 @@ export function apiErrorMessage(error, fallback = 'Request failed') {
 }
 
 export async function listTenantUsers(params = {}, t) {
-  const page = Math.max(0, Number(params.page ?? 1) - 1)
+  const page = Math.max(1, Number(params.page ?? 1))
   const limit = Number(params.limit ?? 20)
+  const offset = (page - 1) * limit
   const q = String(params.q ?? '').trim()
-  const endpoint = q ? apiPaths.tenantsUsersSearch : apiPaths.tenantsUsersList
-  const response = await apiInstance.get(endpoint, {
-    params: q
-      ? { q, page, limit }
-      : { page, limit },
+  const queryParams = { limit, offset }
+  if (q) {
+    queryParams.q = q
+  }
+  const response = await apiInstance.get(apiPaths.tenantsUsersList, {
+    params: queryParams,
   })
   const root = unwrapListRoot(response.data)
   const pagination = extractEnvelopeListPagination(root)

@@ -868,8 +868,7 @@ export const apiPaths = {
   clientsList: '/client/v1/list-view',
   clientsSearch: '/client/v1/list-view/search',
   clientsListColumnConfig: '/client/v1/list-view/column-config',
-  tenantsUsersList: '/tenants/v1/users/list-view',
-  tenantsUsersSearch: '/tenants/v1/users/list-view/search',
+  tenantsUsersList: '/user/v1',
   tenantsUsersCreate: '/user/v1/register',
   tenantUserById: id => `/tenants/v1/users/${encodeURIComponent(
     String(id ?? '').trim(),
