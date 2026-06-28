@@ -44,11 +44,9 @@
           :can-create-system-user="canCreateSystemUser"
           :prefix-options="prefixOptions"
           :suffix-options="suffixOptions"
+          :gender-options="genderOptions"
           :state-options="stateOptions"
-          :phone-type-options="phoneTypeOptions"
-          :email-type-options="emailTypeOptions"
           :position-options="positionOptions"
-          :role-options="roleOptions"
           :credential-options="credentialOptions"
           :specialty-options="specialtyOptions"
           :supervisor-options="supervisorOptions"
@@ -74,7 +72,6 @@ import {
 import { useStaffPermissions } from 'src/composables/useStaffPermissions.js'
 import {
   createStaff,
-  fetchRolesList,
   fetchStaffById,
   patchStaff,
 } from 'src/utils/staff-api.js'
@@ -104,13 +101,11 @@ const activeTabLabel = ref('')
 const saving = ref(false)
 const photoFileId = ref(null)
 const fieldErrors = ref({})
-const roleOptions = ref([])
 const positionOptions = ref([])
 const prefixOptions = ref([])
 const suffixOptions = ref([])
+const genderOptions = ref([])
 const stateOptions = ref([])
-const phoneTypeOptions = ref([])
-const emailTypeOptions = ref([])
 const credentialOptions = ref([])
 const specialtyOptions = ref([])
 const supervisorOptions = ref([])
@@ -199,8 +194,7 @@ async function loadCatalogOptions() {
       'staff_position',
       'prefix',
       'suffix',
-      'phone_type',
-      'email_type',
+      'gender',
       'credential_type',
       'specialty',
       'state',
@@ -214,11 +208,8 @@ async function loadCatalogOptions() {
     suffixOptions.value = mapCatalogItemsToSelectOptions(
       catalogItemsFromCatalog(catalogs.suffix),
     )
-    phoneTypeOptions.value = mapCatalogItemsToSelectOptions(
-      catalogItemsFromCatalog(catalogs.phone_type),
-    )
-    emailTypeOptions.value = mapCatalogItemsToSelectOptions(
-      catalogItemsFromCatalog(catalogs.email_type),
+    genderOptions.value = mapCatalogItemsToSelectOptions(
+      catalogItemsFromCatalog(catalogs.gender),
     )
     credentialOptions.value = mapCatalogItemsToSelectOptions(
       catalogItemsFromCatalog(catalogs.credential_type),
@@ -306,13 +297,6 @@ onMounted(async() => {
   form.value = createEmptyStaffForm(entryPoint.value)
   await Promise.all([
     loadCatalogOptions(),
-    fetchRolesList()
-      .then(rows => {
-        roleOptions.value = rows
-      })
-      .catch(() => {
-        roleOptions.value = []
-      }),
     loadStaffRecord(),
   ])
 })

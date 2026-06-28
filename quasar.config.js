@@ -15,17 +15,6 @@ function devApiProxyOptions(target) {
   }
 }
 
-function devNpiRegistryProxy() {
-  return {
-    '/npi-registry': {
-      target: 'https://npiregistry.cms.hhs.gov',
-      changeOrigin: true,
-      secure: true,
-      rewrite: path => path.replace(/^\/npi-registry/, ''),
-    },
-  }
-}
-
 function devApiProxy(target) {
   const o = devApiProxyOptions(target)
 
@@ -35,6 +24,7 @@ function devApiProxy(target) {
     '/oauth': { ...o },
     '/patients': { ...o },
     '/screenings': { ...o },
+    '/staff': { ...o },
     '/logout': { ...o },
   }
 }
@@ -133,7 +123,6 @@ export default defineConfig((ctx) => {
       port: 8090,
       open: true, // opens browser window automatically
       proxy: {
-        ...devNpiRegistryProxy(),
         ...(ctx.dev && apiProxyTarget
           ? devApiProxy(apiProxyTarget)
           : {}),

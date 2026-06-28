@@ -1,23 +1,12 @@
 import { staffFieldKeys as fk } from 'src/utils/staff-list-columns.js'
+import { apiDateToDisplay } from 'src/utils/app-datetime.js'
 import {
   staffStatusLabel,
   staffStatusVariant,
 } from 'src/utils/staff-status.js'
 
 function formatHireDate(value) {
-  const raw = String(value ?? '').trim()
-  if (!raw) {
-    return ''
-  }
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
-    return raw
-  }
-  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw)
-  if (isoMatch) {
-    return `${isoMatch[2]}/${isoMatch[3]}/${isoMatch[1]}`
-  }
-
-  return raw
+  return apiDateToDisplay(value) || String(value ?? '').trim()
 }
 
 export function mapStaffListItem(item, t) {

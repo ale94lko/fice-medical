@@ -13,6 +13,7 @@ import {
 import {
   clearAuthLocalStorage,
   readStoredActiveSubtenantId,
+  readStoredConfigData,
   readStoredExpireAt,
   readStoredModules,
   readStoredPermissions,
@@ -21,6 +22,7 @@ import {
   readStoredToken,
   readStoredTenantId,
   writeStoredActiveSubtenantId,
+  writeStoredConfigData,
   writeStoredExpireAt,
   writeStoredModules,
   writeStoredPermissions,
@@ -30,6 +32,8 @@ import {
   writeStoredTenantId,
 } from '../utils/auth-local-storage.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
+import { syncAppDateTimeConfigFromAuth } from
+  '../utils/sync-app-datetime-config.js'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -43,6 +47,7 @@ export const useAuthStore = defineStore('auth', {
     subtenants: [],
     activeSubtenantId: null,
     tenantId: null,
+    configData: null,
     _initialized: false,
   }),
   getters: {
@@ -150,6 +155,11 @@ export const useAuthStore = defineStore('auth', {
         this.tenantId = td.tenantId
         writeStoredTenantId(td.tenantId)
       }
+      if (td.configData) {
+        this.configData = td.configData
+        writeStoredConfigData(td.configData)
+        syncAppDateTimeConfigFromAuth(td.configData)
+      }
       writeStoredToken(this.token)
       writeStoredExpireAt(this.expireAt)
     },
@@ -206,6 +216,7 @@ export const useAuthStore = defineStore('auth', {
       const subtenants = readStoredSubtenants()
       const activeSubtenantId = readStoredActiveSubtenantId()
       const tenantId = readStoredTenantId()
+      const configData = readStoredConfigData()
       if (token) {
         this.token = token
         this.expireAt = expireAt
@@ -213,6 +224,8 @@ export const useAuthStore = defineStore('auth', {
         this.modules = modules
         this.permissions = permissions
         this.tenantId = tenantId
+        this.configData = configData
+        syncAppDateTimeConfigFromAuth(configData)
         this.applySubtenants(subtenants, activeSubtenantId)
       }
     },
@@ -225,6 +238,8 @@ export const useAuthStore = defineStore('auth', {
       this.subtenants = []
       this.activeSubtenantId = null
       this.tenantId = null
+      this.configData = null
+      syncAppDateTimeConfigFromAuth(null)
       clearAuthLocalStorage()
     },
     init() {
@@ -243,6 +258,8 @@ export const useAuthStore = defineStore('auth', {
             this.subtenants = []
             this.activeSubtenantId = null
             this.tenantId = null
+            this.configData = null
+            syncAppDateTimeConfigFromAuth(null)
             if (this.router) {
               this.router.push('/login')
             }

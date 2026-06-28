@@ -21,10 +21,17 @@ export const layoutTestIds = {
   navDashboard: 'layout-nav-dashboard',
   navClientMenu: 'layout-nav-client-menu',
   navClientList: 'layout-nav-client-list',
+  navClientAdd: 'layout-nav-client-add',
   navPriorAuth: 'layout-nav-prior-authorization',
   navClientAssignment: 'layout-nav-client-assignment',
-  navAdminUsers: 'layout-nav-admin-users',
+  navStaffClinicianMenu: 'layout-nav-staff-clinician-menu',
   navStaffList: 'layout-nav-staff-list',
+  navStaffAddClinician: 'layout-nav-staff-add-clinician',
+  navStaffAddStaff: 'layout-nav-staff-add-staff',
+  navUsersMenu: 'layout-nav-users-menu',
+  navUsersList: 'layout-nav-users-list',
+  navUsersAdd: 'layout-nav-users-add',
+  navAdminUsers: 'layout-nav-admin-users',
 }
 
 export const sessionInactivityTestIds = {

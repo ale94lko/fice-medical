@@ -1,5 +1,10 @@
 <template>
   <div class="staff-basic-info-tab">
+    <AppLoadingOverlay
+      :showing="npiLoading"
+      scope="content"
+      :message="t('appLoading')"
+    />
     <div
       v-if="showNpiLookup"
       class="staff-basic-info-tab__npi-section">
@@ -24,6 +29,7 @@
                   inputmode="numeric"
                   pattern="[0-9]*"
                   :readonly="readonly"
+                  :disable="npiLoading"
                   :placeholder="t('staffNpiLookupPlaceholder')"
                   @update:model-value="onNpiInput"
                   @keypress="onNpiKeypress"
@@ -38,8 +44,7 @@
                   color="primary"
                   class="app-btn-primary staff-basic-info-tab__npi-search-btn"
                   icon="search"
-                  :loading="npiLoading"
-                  :disable="readonly || !canSearchNpi"
+                  :disable="readonly || !canSearchNpi || npiLoading"
                   :label="t('search')"
                   @click="onNpiSearch"
                 />
@@ -147,35 +152,50 @@
         </div>
         <div class="col-12">
           <AddClientLabeledField :label="t('gender')" required>
-            <div class="row q-col-gutter-sm">
-              <div
+            <div
+              class="gender-options"
+              role="radiogroup"
+              :aria-label="t('gender')">
+              <button
                 v-for="opt in genderOptions"
                 :key="opt.value"
-                class="col-12 col-md-4">
-                <q-btn
-                  flat
-                  no-caps
-                  class="full-width staff-gender-card"
-                  :disable="readonly"
-                  :class="{
-                    'staff-gender-card--selected': basic.sex === opt.value,
-                  }"
-                  @click="basic.sex = opt.value">
-                  <q-radio
-                    :model-value="basic.sex"
-                    :val="opt.value"
-                    :disable="readonly"
-                    color="primary"
-                    @update:model-value="basic.sex = $event"
-                  />
-                  <span class="q-ml-sm">{{ opt.label }}</span>
-                </q-btn>
-              </div>
+                type="button"
+                role="radio"
+                class="gender-option"
+                :aria-checked="catalogRadioValuesMatch(basic.sex, opt.value)"
+                :disabled="readonly"
+                :class="{
+                  'gender-option--selected':
+                    catalogRadioValuesMatch(basic.sex, opt.value),
+                }"
+                @click="basic.sex = opt.value">
+                <span
+                  class="gender-option-radio"
+                  aria-hidden="true"
+                />
+                <span class="gender-option-label">
+                  {{ opt.label }}
+                </span>
+              </button>
             </div>
           </AddClientLabeledField>
         </div>
       </div>
     </AccordionSection>
+
+    <q-separator class="section-separator q-my-md" />
+
+    <SectionHeading
+      icon="admin_panel_settings"
+      :title="t('staffSystemAccessTitle')"
+    />
+    <div class="fields">
+      <FormToggle
+        v-model="systemAccessEnabled"
+        :disable="readonly || !canCreateSystemUser"
+        :label="t('staffSystemAccessEnabledLabel')"
+      />
+    </div>
   </div>
 </template>
 
@@ -185,16 +205,20 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import FormToggle from 'components/FormToggle.vue'
 import SectionHeading from 'components/SectionHeading.vue'
 import TextInput from 'components/TextInput.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
+import { catalogRadioValuesMatch } from 'src/utils/catalogs.js'
+import { lookupStaffNpi } from 'src/utils/staff-api.js'
 import {
   isValidNpiDigits,
-  lookupNpiRegistry,
+  resolveNpiLookupErrorMessage,
   sanitizeNpiDigits,
-} from 'src/utils/npi-registry-api.js'
+} from 'src/utils/staff-npi-lookup.js'
 
 const props = defineProps({
   modelValue: {
@@ -217,10 +241,23 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  genderOptions: {
+    type: Array,
+    default: () => [],
+  },
   fieldErrors: {
     type: Object,
     default: () => ({}),
   },
+  canCreateSystemUser: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+const systemAccessEnabled = defineModel('systemAccessEnabled', {
+  type: Boolean,
+  default: false,
 })
 
 const emit = defineEmits(['update:modelValue', 'npi-result'])
@@ -239,16 +276,13 @@ const basic = computed({
   set: val => emit('update:modelValue', val),
 })
 
-const genderOptions = computed(() => [
-  { value: 'Male', label: t('genderMale') },
-  { value: 'Female', label: t('genderFemale') },
-  { value: 'Other', label: t('genderOther') },
-])
-
 const fieldErrors = computed(() => props.fieldErrors ?? {})
 
 function onNpiInput(value) {
   localNpi.value = sanitizeNpiDigits(value)
+  if (!isValidNpiDigits(localNpi.value)) {
+    npiFoundBanner.value = false
+  }
 }
 
 function onNpiKeypress(event) {
@@ -273,47 +307,31 @@ function onNpiPaste(event) {
   localNpi.value = sanitizeNpiDigits(pasted)
 }
 
-function applyNpiLookup(result) {
-  if (!result?.found) {
-    npiFoundBanner.value = false
-    return
-  }
-  npiFoundBanner.value = true
-  basic.value = {
-    ...basic.value,
-    prefix: result.prefix ?? result.name_prefix ?? basic.value.prefix,
-    firstName: result.first_name ?? basic.value.firstName,
-    middleName: result.middle_name ?? basic.value.middleName,
-    lastName: result.last_name ?? basic.value.lastName,
-    suffix: result.suffix ?? basic.value.suffix,
-    sex: result.sex ?? basic.value.sex,
-    npiLookup: result.npi ?? localNpi.value,
-    npiLookupFound: true,
-  }
-}
-
 async function onNpiSearch() {
-  if (!canSearchNpi.value) {
+  if (!canSearchNpi.value || npiLoading.value) {
     return
   }
+  const digits = sanitizeNpiDigits(localNpi.value)
+
   npiLoading.value = true
   try {
-    const result = await lookupNpiRegistry(localNpi.value)
-    if (!result.found) {
+    const result = await lookupStaffNpi(digits)
+    if (!result?.found) {
       npiFoundBanner.value = false
       $q.notify({
         type: quasarNotifyTypes.warning,
         message: t('staffNpiLookupNotFound'),
       })
+      emit('npi-result', result)
       return
     }
-    applyNpiLookup(result)
+    npiFoundBanner.value = true
     emit('npi-result', result)
-  } catch {
+  } catch (error) {
     npiFoundBanner.value = false
     $q.notify({
       type: quasarNotifyTypes.negative,
-      message: t('staffNpiLookupFailed'),
+      message: resolveNpiLookupErrorMessage(error, t),
     })
   } finally {
     npiLoading.value = false

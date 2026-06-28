@@ -100,72 +100,18 @@
       </div>
 
       <div class="add-client-form__fmh-list-card">
-        <div
-          v-if="clinical.licenses.length"
-          class="add-client-form__fmh-table-wrap">
-          <table class="add-client-form__fmh-table">
-            <thead>
-              <tr>
-                <th>{{ t('staffLicenseTypeLabel') }}</th>
-                <th>{{ t('staffLicenseIdentifierLabel') }}</th>
-                <th>{{ t('staffLicenseExpirationLabel') }}</th>
-                <th>{{ t('staffLicenseStatusLabel') }}</th>
-                <th>{{ t('staffLicensePrimaryLabel') }}</th>
-                <th
-                  v-if="!readonly"
-                  class="add-client-form__fmh-table-actions-col">
-                  {{ t('actions') }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="row in clinical.licenses"
-                :key="row.id">
-                <td>{{ row.type || '—' }}</td>
-                <td>{{ row.identifier || '—' }}</td>
-                <td>{{ row.expirationDate || '—' }}</td>
-                <td>{{ row.status || '—' }}</td>
-                <td>
-                  <q-icon
-                    v-if="row.isPrimary"
-                    name="check_circle"
-                    color="positive"
-                    size="20px"
-                  />
-                  <span v-else>—</span>
-                </td>
-                <td
-                  v-if="!readonly"
-                  class="add-client-form__fmh-table-actions">
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="edit"
-                    :title="t('edit')"
-                    @click="openEditLicense(row)"
-                  />
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="delete"
-                    :title="t('delete')"
-                    @click="removeLicense(row.id)"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div
-          v-else
-          class="admin-data-table__empty full-width row flex-center
-            text-grey-7 q-gutter-sm q-pa-lg">
-          <q-icon name="inbox" size="md" />
-          <span>{{ t('staffLicensesEmpty') }}</span>
-        </div>
+        <AdminTablePanel
+          class="staff-licenses-table-panel"
+          :show-column-settings="false">
+          <StaffLicensesTable
+            :licenses="clinical.licenses"
+            :can-edit="!readonly"
+            :can-delete="!readonly"
+            :empty-label="t('staffLicensesEmpty')"
+            @edit="openEditLicense"
+            @delete="openDeleteLicense"
+          />
+        </AdminTablePanel>
       </div>
     </AccordionSection>
 
@@ -198,6 +144,17 @@
       :readonly="readonly"
       @save="onLicenseSave"
     />
+
+    <ModalComponent
+      v-model="licenseDeleteOpen"
+      test-id="staff-license-delete"
+      :title="t('staffLicenseDeleteTitle')"
+      :message="t('staffLicenseDeleteMessage')"
+      :confirm-text="t('delete')"
+      :cancel-text="t('cancel')"
+      @confirm="confirmDeleteLicense"
+      @cancel="dismissDeleteLicense"
+    />
   </div>
 </template>
 
@@ -206,8 +163,11 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ModalComponent from 'components/ModalComponent.vue'
 import StaffLicenseDialog from 'components/staff/StaffLicenseDialog.vue'
+import StaffLicensesTable from 'components/staff/StaffLicensesTable.vue'
 import TextInput from 'components/TextInput.vue'
 import {
   createEmptyStaffLicense,
@@ -246,7 +206,9 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 
 const licenseDialogOpen = ref(false)
+const licenseDeleteOpen = ref(false)
 const activeLicense = ref(null)
+const pendingDeleteLicenseId = ref(null)
 
 const clinical = computed({
   get: () => props.modelValue,
@@ -294,6 +256,23 @@ function onLicenseSave(license) {
     ...clinical.value,
     licenses,
   }
+}
+
+function openDeleteLicense(row) {
+  pendingDeleteLicenseId.value = row?.id ?? null
+  licenseDeleteOpen.value = true
+}
+
+function dismissDeleteLicense() {
+  licenseDeleteOpen.value = false
+  pendingDeleteLicenseId.value = null
+}
+
+function confirmDeleteLicense() {
+  if (pendingDeleteLicenseId.value != null) {
+    removeLicense(pendingDeleteLicenseId.value)
+  }
+  dismissDeleteLicense()
 }
 
 function removeLicense(id) {

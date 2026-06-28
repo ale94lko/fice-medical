@@ -21,7 +21,8 @@ export default defineBoot(({ app }) => {
   const locale = savedLocale || browserLocale
 
   const i18n = createI18n({
-    locale: locale,
+    locale,
+    fallbackLocale: 'en-US',
     globalInjection: true,
     messages
   })

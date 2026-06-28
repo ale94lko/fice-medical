@@ -14,7 +14,7 @@
           </AddClientLabeledField>
         </div>
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('addressLine2')">
+          <AddClientLabeledField :label="t('addressLine2Optional')">
             <TextInput
               v-model="contact.address.address2"
               :external-label="true"
@@ -79,16 +79,23 @@
           class="row q-col-gutter-md q-mb-md contact-method-row">
           <div class="col-12 col-md-6">
             <AddClientLabeledField :label="t('phoneNumber')">
-              <TextInput
-                v-model="phone.phoneNumber"
-                :external-label="true"
+              <q-input
+                outlined
+                hide-bottom-space
+                lazy-rules="ondemand"
+                class="full-width"
+                :model-value="phone.phoneNumber"
                 :readonly="readonly"
+                :disable="readonly"
                 :placeholder="t('phoneNumberPlaceholder')"
+                :rules="readonly ? [] : phoneNumberRules(index)"
+                maxlength="14"
+                @update:model-value="val => onPhoneInput(index, val)"
               />
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('type')">
+            <AddClientLabeledField :label="t('phoneType')">
               <div
                 class="row q-col-gutter-sm items-center
                   contact-method-type-row">
@@ -137,7 +144,7 @@
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('type')">
+            <AddClientLabeledField :label="t('emailType')">
               <div
                 class="row q-col-gutter-sm items-center
                   contact-method-type-row">
@@ -185,6 +192,16 @@ import {
   createEmptyStaffEmail,
   createEmptyStaffPhone,
 } from 'src/utils/staff-form.js'
+import {
+  emailTypeSelectOptions,
+  phoneTypeSelectOptions,
+} from 'src/utils/client-contact-select-options.js'
+import {
+  formatPhoneUs,
+  isValidPhoneChars,
+} from 'src/utils/client-contact-form.js'
+import { useContactMethodDuplicateRules } from
+  'src/composables/useContactMethodDuplicateRules.js'
 
 const props = defineProps({
   modelValue: {
@@ -199,24 +216,45 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  phoneTypeOptions: {
-    type: Array,
-    default: () => [],
-  },
-  emailTypeOptions: {
-    type: Array,
-    default: () => [],
-  },
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
+const { phoneNumberRules: buildPhoneNumberRules } =
+  useContactMethodDuplicateRules(t)
 
 const contact = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
 })
+
+const phoneTypeOptions = computed(() => phoneTypeSelectOptions())
+
+const emailTypeOptions = computed(() => emailTypeSelectOptions())
+
+function staffPhonesForRules() {
+  return (contact.value.phones ?? []).map(row => ({
+    number: row.phoneNumber,
+  }))
+}
+
+function phoneNumberRules(index) {
+  return buildPhoneNumberRules(
+    staffPhonesForRules(),
+    index,
+    [val => isValidPhoneChars(val) || t('phoneInvalid')],
+  )
+}
+
+function onPhoneInput(index, val) {
+  const phones = [...contact.value.phones]
+  phones[index] = {
+    ...phones[index],
+    phoneNumber: formatPhoneUs(val),
+  }
+  contact.value = { ...contact.value, phones }
+}
 
 function canAddPhone(index) {
   const row = contact.value.phones[index]

@@ -190,76 +190,6 @@
         </div>
       </div>
     </AccordionSection>
-
-    <q-separator class="section-separator q-my-md" />
-
-    <AccordionSection
-      icon="admin_panel_settings"
-      :title="t('staffSystemAccessTitle')">
-      <FormToggle
-        v-model="employment.systemUser.enabled"
-        :disable="readonly || !canCreateSystemUser"
-        :label="t('staffSystemAccessEnabledLabel')"
-      />
-      <div
-        v-if="employment.systemUser.enabled"
-        class="fmh-list-card q-pa-md q-mt-md">
-        <div class="row q-col-gutter-md">
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="t('username')"
-              required>
-              <TextInput
-                v-model="employment.systemUser.username"
-                :external-label="true"
-                :disable="readonly"
-                :error="Boolean(fieldErrors.username)"
-                :error-message="fieldErrors.username"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="t('staffListColRole')"
-              required>
-              <FormSelect
-                v-model="employment.systemUser.roleId"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :readonly="readonly"
-                :options="roleOptions"
-                :error="Boolean(fieldErrors.roleId)"
-                :error-message="fieldErrors.roleId"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div
-            v-if="!readonly && !isEdit"
-            class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="t('password')"
-              required>
-              <TextInput
-                v-model="employment.systemUser.password"
-                type="password"
-                :external-label="true"
-                :error="Boolean(fieldErrors.password)"
-                :error-message="fieldErrors.password"
-              />
-            </AddClientLabeledField>
-          </div>
-        </div>
-        <div class="staff-system-access-hint row items-start q-mt-md">
-          <q-icon name="info_outline" color="primary" size="18px" />
-          <span class="text-body2 q-ml-sm">
-            {{ t('staffSystemAccessRoleHint') }}
-          </span>
-        </div>
-      </div>
-    </AccordionSection>
   </div>
 </template>
 
@@ -271,8 +201,6 @@ import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
-import FormToggle from 'components/FormToggle.vue'
-import TextInput from 'components/TextInput.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import {
   createEmptyStaffCompensation,
@@ -289,21 +217,9 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  roleOptions: {
-    type: Array,
-    default: () => [],
-  },
   positionOptions: {
     type: Array,
     default: () => [],
-  },
-  canCreateSystemUser: {
-    type: Boolean,
-    default: false,
-  },
-  isEdit: {
-    type: Boolean,
-    default: false,
   },
   fieldErrors: {
     type: Object,

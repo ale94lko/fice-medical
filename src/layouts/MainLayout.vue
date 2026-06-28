@@ -110,6 +110,14 @@
               :test-id="layoutTestIds.navClientList">
               {{ t('clientList') }}
             </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
+              v-if="showClientAdd"
+              icon="person_add"
+              to="/clients/add"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navClientAdd">
+              {{ t('addClient') }}
+            </AppDrawerSubNavItem>
           </q-expansion-item>
           <q-item
             v-else-if="showClientMenu"
@@ -147,6 +155,14 @@
                 :test-id="layoutTestIds.navClientList">
                 {{ t('clientList') }}
               </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showClientAdd"
+                icon="person_add"
+                to="/clients/add"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navClientAdd">
+                {{ t('addClient') }}
+              </AppDrawerSubNavItem>
             </q-menu>
             <q-tooltip
               v-if="drawerShowsMiniTooltips && !clientMenuPopup"
@@ -155,6 +171,180 @@
               :offset="[8, 0]"
               class="app-drawer-tooltip">
               {{ t('client') }}
+            </q-tooltip>
+          </q-item>
+          <q-expansion-item
+            v-if="accordionMenu && showStaffMenu"
+            v-model="staffMenuExpanded"
+            expand-separator
+            icon="badge"
+            :label="t('navStaffClinician')"
+            :data-testid="layoutTestIds.navStaffClinicianMenu"
+            :header-class="isStaffActive ? activeClass : ''">
+            <AppDrawerSubNavItem
+              v-if="showAdminStaffList"
+              icon="format_list_bulleted"
+              :to="'/staff'"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navStaffList">
+              {{ t('navStaffClinicianList') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
+              v-if="showStaffAddClinician"
+              icon="medical_services"
+              :to="{ name: 'AddClinician' }"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navStaffAddClinician">
+              {{ t('staffListAddClinician') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
+              v-if="showStaffAddStaff"
+              icon="person_add"
+              :to="{ name: 'AddStaff' }"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navStaffAddStaff">
+              {{ t('staffListAddStaff') }}
+            </AppDrawerSubNavItem>
+          </q-expansion-item>
+          <q-item
+            v-else-if="showStaffMenu"
+            v-ripple
+            clickable
+            :active="isStaffActive"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="badge" />
+            </q-item-section>
+            <q-item-section>{{ t('navStaffClinician') }}</q-item-section>
+            <q-item-section side>
+              <q-icon
+                v-if="staffMenuPopup"
+                name="chevron_left"
+                :class="isActiveClass(isStaffActive)"
+              />
+              <q-icon
+                v-else
+                name="chevron_right"
+                :class="isActiveClass(isStaffActive)"
+              />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="app-drawer-submenu app-light-menu"
+              v-model="staffMenuPopup">
+              <AppDrawerSubNavItem
+                v-if="showAdminStaffList"
+                icon="format_list_bulleted"
+                :to="'/staff'"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navStaffList">
+                {{ t('navStaffClinicianList') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showStaffAddClinician"
+                icon="medical_services"
+                :to="{ name: 'AddClinician' }"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navStaffAddClinician">
+                {{ t('staffListAddClinician') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showStaffAddStaff"
+                icon="person_add"
+                :to="{ name: 'AddStaff' }"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navStaffAddStaff">
+                {{ t('staffListAddStaff') }}
+              </AppDrawerSubNavItem>
+            </q-menu>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips && !staffMenuPopup"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navStaffClinician') }}
+            </q-tooltip>
+          </q-item>
+          <q-expansion-item
+            v-if="accordionMenu && showUsersMenu"
+            v-model="usersMenuExpanded"
+            expand-separator
+            icon="group"
+            :label="t('users')"
+            :data-testid="layoutTestIds.navUsersMenu"
+            :header-class="isUsersActive ? activeClass : ''">
+            <AppDrawerSubNavItem
+              v-if="showAdminUsers"
+              icon="format_list_bulleted"
+              to="/administration/users"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navUsersList">
+              {{ t('navUsersList') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
+              v-if="showUsersAdd"
+              icon="person_add"
+              :to="{ name: 'AdminUsersAdd' }"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navUsersAdd">
+              {{ t('addUser') }}
+            </AppDrawerSubNavItem>
+          </q-expansion-item>
+          <q-item
+            v-else-if="showUsersMenu"
+            v-ripple
+            clickable
+            :active="isUsersActive"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="group" />
+            </q-item-section>
+            <q-item-section>{{ t('users') }}</q-item-section>
+            <q-item-section side>
+              <q-icon
+                v-if="usersMenuPopup"
+                name="chevron_left"
+                :class="isActiveClass(isUsersActive)"
+              />
+              <q-icon
+                v-else
+                name="chevron_right"
+                :class="isActiveClass(isUsersActive)"
+              />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="app-drawer-submenu app-light-menu"
+              v-model="usersMenuPopup">
+              <AppDrawerSubNavItem
+                v-if="showAdminUsers"
+                icon="format_list_bulleted"
+                to="/administration/users"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navUsersList">
+                {{ t('navUsersList') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showUsersAdd"
+                icon="person_add"
+                :to="{ name: 'AdminUsersAdd' }"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navUsersAdd">
+                {{ t('addUser') }}
+              </AppDrawerSubNavItem>
+            </q-menu>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips && !usersMenuPopup"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('users') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -318,21 +508,6 @@
               icon="tune">
               {{ t('administrationGeneral') }}
             </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
-              v-if="showAdminUsers"
-              icon="group"
-              to="/administration/users"
-              :active-class="activeClass"
-              :test-id="layoutTestIds.navAdminUsers">
-              {{ t('users') }}
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
-              v-if="showAdminStaffList"
-              icon="badge"
-              :to="'/staff'"
-              :test-id="layoutTestIds.navStaffList">
-              {{ t('staffList') }}
-            </AppDrawerSubNavItem>
           </q-expansion-item>
           <q-item
             v-else-if="showAdministrationMenu"
@@ -358,21 +533,6 @@
                 v-if="showAdminGeneral"
                 icon="tune">
                 {{ t('administrationGeneral') }}
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showAdminUsers"
-                icon="group"
-                to="/administration/users"
-                :active-class="activeClass"
-                :test-id="layoutTestIds.navAdminUsers">
-                {{ t('users') }}
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showAdminStaffList"
-                icon="badge"
-                :to="'/staff'"
-                :test-id="layoutTestIds.navStaffList">
-                {{ t('staffList') }}
               </AppDrawerSubNavItem>
             </q-menu>
             <q-tooltip
@@ -486,6 +646,10 @@ const drawerOverlayBreakpoint = drawerMobileMaxPx + 1
 
 const clientMenuExpanded = ref(false)
 const clientMenuPopup = ref(false)
+const staffMenuExpanded = ref(false)
+const staffMenuPopup = ref(false)
+const usersMenuExpanded = ref(false)
+const usersMenuPopup = ref(false)
 const providerMenu = ref(false)
 const humanResourcesMenu = ref(false)
 const administrationMenu = ref(false)
@@ -531,6 +695,12 @@ const {
   showDashboard,
   showClientMenu,
   showClientList,
+  showClientAdd,
+  showStaffMenu,
+  showStaffAddClinician,
+  showStaffAddStaff,
+  showUsersMenu,
+  showUsersAdd,
   showProvidersMenu,
   showHumanResourcesMenu,
   showHrGeneral,
@@ -547,8 +717,15 @@ const isClientActive = computed(() => {
   return route.path.startsWith('/clients')
 })
 
+const isStaffActive = computed(() => route.path.startsWith('/staff'))
+
+const isUsersActive = computed(() =>
+  route.path.startsWith('/administration/users'),
+)
+
 const isAdministrationActive = computed(() =>
-  route.path.startsWith('/administration'),
+  route.path.startsWith('/administration')
+    && !route.path.startsWith('/administration/users'),
 )
 
 const isActiveClass = (condition) => {
@@ -598,6 +775,8 @@ function onDrawerMouseEnter() {
 function onDrawerMouseLeave() {
   drawerHoverExpanded.value = false
   clientMenuPopup.value = false
+  staffMenuPopup.value = false
+  usersMenuPopup.value = false
   if (!sidebarExpanded.value) {
     closeMiniPopups()
   }
@@ -609,21 +788,34 @@ function syncNavMenusFromRoute() {
   } else if (!isClientActive.value) {
     clientMenuExpanded.value = false
   }
+  if (accordionMenu.value && isStaffActive.value) {
+    staffMenuExpanded.value = true
+  } else if (!isStaffActive.value) {
+    staffMenuExpanded.value = false
+  }
+  if (accordionMenu.value && isUsersActive.value) {
+    usersMenuExpanded.value = true
+  } else if (!isUsersActive.value) {
+    usersMenuExpanded.value = false
+  }
   if (accordionMenu.value && isAdministrationActive.value) {
     administrationMenu.value = true
+  } else if (!isAdministrationActive.value) {
+    administrationMenu.value = false
   }
   clientMenuPopup.value = false
+  staffMenuPopup.value = false
+  usersMenuPopup.value = false
   if (!isClientActive.value) {
     providerMenu.value = false
     humanResourcesMenu.value = false
-  }
-  if (!isAdministrationActive.value) {
-    administrationMenu.value = false
   }
 }
 
 function closeMiniPopups() {
   clientMenuPopup.value = false
+  staffMenuPopup.value = false
+  usersMenuPopup.value = false
   providerMenu.value = false
   humanResourcesMenu.value = false
   administrationMenu.value = false
@@ -633,6 +825,12 @@ function hideAllMenu() {
   closeMiniPopups()
   if (!isClientActive.value) {
     clientMenuExpanded.value = false
+  }
+  if (!isStaffActive.value) {
+    staffMenuExpanded.value = false
+  }
+  if (!isUsersActive.value) {
+    usersMenuExpanded.value = false
   }
 }
 
@@ -679,6 +877,14 @@ watch(mobileView, (isMobile) => {
 })
 
 watch(isClientActive, () => {
+  syncNavMenusFromRoute()
+})
+
+watch(isStaffActive, () => {
+  syncNavMenusFromRoute()
+})
+
+watch(isUsersActive, () => {
   syncNavMenusFromRoute()
 })
 

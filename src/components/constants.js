@@ -1085,6 +1085,7 @@ export const authStorageKeys = {
   subtenants: 'subtenants',
   activeSubtenantId: 'activeSubtenantId',
   tenantId: 'tenantId',
+  configData: 'configData',
 }
 
 export const appModuleNames = {

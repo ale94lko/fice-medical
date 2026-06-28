@@ -12,8 +12,8 @@
     :error-message="errorMessage"
     :rules="rules"
     :lazy-rules="'ondemand'"
-    mask="##/##/####"
-    placeholder="mm/dd/yyyy"
+    :mask="dateMask"
+    :placeholder="datePlaceholder"
     @update:model-value="onInput"
     @blur="onBlur">
     <template v-if="!readonly" #append>
@@ -25,7 +25,7 @@
           transition-hide="scale">
           <q-date
             :model-value="datePickerValue"
-            mask="MM/DD/YYYY"
+            :mask="datePickerMask"
             :options="dateOptions"
             @update:model-value="onPickerChange">
             <div class="row items-center justify-end">
@@ -52,6 +52,7 @@ import {
   sanitizeUsDateInput,
   startOfDay,
 } from 'src/utils/client-form.js'
+import { useAppDateTime } from 'src/composables/useAppDateTime.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -68,6 +69,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
+const { dateMask, datePlaceholder, datePickerMask } = useAppDateTime()
 const datePopupRef = ref(null)
 
 const resolvedMinYear = computed(() => {
@@ -86,28 +88,20 @@ const datePickerValue = computed(() => {
   if (!d) {
     return null
   }
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  const yyyy = String(d.getFullYear())
 
-  return `${mm}/${dd}/${yyyy}`
+  return props.modelValue
 })
 
 function dateOptions(dateStr) {
   if (!props.maxToday) {
     return true
   }
-  const parts = String(dateStr).split('/')
-  if (parts.length !== 3) {
+  const parsed = parseUsDateString(dateStr)
+  if (!parsed) {
     return true
   }
-  const d = new Date(
-    Number(parts[0]),
-    Number(parts[1]) - 1,
-    Number(parts[2]),
-  )
 
-  return d.getTime() <= startOfDay(new Date()).getTime()
+  return parsed.getTime() <= startOfDay(new Date()).getTime()
 }
 
 function sanitizeOptions() {

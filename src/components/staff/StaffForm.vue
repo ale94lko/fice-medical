@@ -44,10 +44,13 @@
             <q-tab-panel name="basic" class="q-pa-none">
               <StaffBasicInfoTab
                 v-model="form.basic"
+                v-model:system-access-enabled="systemAccessEnabled"
                 :show-npi-lookup="isClinicianEntry"
                 :readonly="readonly"
+                :can-create-system-user="canCreateSystemUser"
                 :prefix-options="prefixOptions"
                 :suffix-options="suffixOptions"
+                :gender-options="genderOptions"
                 :field-errors="fieldErrors"
                 @npi-result="onNpiLookupResult"
               />
@@ -58,20 +61,6 @@
                 v-model="form.contact"
                 :readonly="readonly"
                 :state-options="stateOptions"
-                :phone-type-options="phoneTypeOptions"
-                :email-type-options="emailTypeOptions"
-              />
-            </q-tab-panel>
-
-            <q-tab-panel name="employment" class="q-pa-none">
-              <StaffEmploymentTab
-                v-model="form.employment"
-                :readonly="readonly"
-                :role-options="roleOptions"
-                :position-options="positionOptions"
-                :can-create-system-user="canCreateSystemUser"
-                :is-edit="isEditMode"
-                :field-errors="fieldErrors"
               />
             </q-tab-panel>
 
@@ -85,6 +74,27 @@
                 :credential-options="credentialOptions"
                 :specialty-options="specialtyOptions"
                 :supervisor-options="supervisorOptions"
+                :field-errors="fieldErrors"
+              />
+            </q-tab-panel>
+
+            <q-tab-panel name="employment" class="q-pa-none">
+              <StaffEmploymentTab
+                v-model="form.employment"
+                :readonly="readonly"
+                :position-options="positionOptions"
+                :field-errors="fieldErrors"
+              />
+            </q-tab-panel>
+
+            <q-tab-panel
+              v-if="showSystemAccessTab"
+              name="systemAccess"
+              class="q-pa-none">
+              <StaffSystemAccessTab
+                v-model="form.employment.systemUser"
+                :readonly="readonly"
+                :is-edit="isEditMode"
                 :field-errors="fieldErrors"
               />
             </q-tab-panel>
@@ -147,19 +157,19 @@ import ModalComponent from 'components/ModalComponent.vue'
 import StaffBasicInfoTab from 'components/staff/StaffBasicInfoTab.vue'
 import StaffContactTab from 'components/staff/StaffContactTab.vue'
 import StaffEmploymentTab from 'components/staff/StaffEmploymentTab.vue'
+import StaffSystemAccessTab from 'components/staff/StaffSystemAccessTab.vue'
 import StaffClinicalProfileTab from
   'components/staff/StaffClinicalProfileTab.vue'
 import { staffEntryPoints } from 'components/constants.js'
 import { fetchStaffPositionIsClinical } from 'src/utils/staff-api.js'
 import {
   createEmptyStaffClinical,
-  nextStaffLicenseId,
 } from 'src/utils/staff-form.js'
+import { prefillStaffFormFromNpiLookup } from 'src/utils/staff-npi-lookup.js'
 import {
-  mapNpiEmailsToStaffContact,
-  mapNpiPhonesToStaffContact,
-  resolveNpiAddressState,
-} from 'src/utils/npi-registry-contact-map.js'
+  emailTypeSelectOptions,
+  phoneTypeSelectOptions,
+} from 'src/utils/client-contact-select-options.js'
 
 const props = defineProps({
   modelValue: {
@@ -190,23 +200,15 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  genderOptions: {
+    type: Array,
+    default: () => [],
+  },
   stateOptions: {
     type: Array,
     default: () => [],
   },
-  phoneTypeOptions: {
-    type: Array,
-    default: () => [],
-  },
-  emailTypeOptions: {
-    type: Array,
-    default: () => [],
-  },
   positionOptions: {
-    type: Array,
-    default: () => [],
-  },
-  roleOptions: {
     type: Array,
     default: () => [],
   },
@@ -252,6 +254,24 @@ const showClinicalProfileTab = computed(() =>
   isClinicianEntry.value || positionIsClinical.value,
 )
 
+const systemAccessEnabled = computed({
+  get: () => Boolean(form.value.employment?.systemUser?.enabled),
+  set: enabled => {
+    form.value = {
+      ...form.value,
+      employment: {
+        ...form.value.employment,
+        systemUser: {
+          ...form.value.employment.systemUser,
+          enabled,
+        },
+      },
+    }
+  },
+})
+
+const showSystemAccessTab = computed(() => systemAccessEnabled.value)
+
 const tabDefs = computed(() => [
   {
     key: 'basic',
@@ -264,15 +284,21 @@ const tabDefs = computed(() => [
     label: t('tabStaffContactInformation'),
   },
   {
+    key: 'clinical',
+    icon: 'medical_services',
+    label: t('tabStaffClinicalProfile'),
+    visible: showClinicalProfileTab.value,
+  },
+  {
     key: 'employment',
     icon: 'work',
     label: t('tabStaffEmployment'),
   },
   {
-    key: 'clinical',
-    icon: 'medical_services',
-    label: t('tabStaffClinicalProfile'),
-    visible: showClinicalProfileTab.value,
+    key: 'systemAccess',
+    icon: 'admin_panel_settings',
+    label: t('tabStaffSystemAccess'),
+    visible: showSystemAccessTab.value,
   },
 ])
 
@@ -387,6 +413,12 @@ watch(
 
 watch(showClinicalProfileTab, visible => {
   if (!visible && activeTab.value === 'clinical') {
+    activeTab.value = 'contact'
+  }
+})
+
+watch(showSystemAccessTab, visible => {
+  if (!visible && activeTab.value === 'systemAccess') {
     activeTab.value = 'employment'
   }
 })
@@ -424,103 +456,37 @@ function cancelPositionChange() {
   pendingPositionChange.value = null
 }
 
-function mapNpiLicenses(rows) {
-  return (rows ?? []).map(row => ({
-    id: nextStaffLicenseId(),
-    type: row.type ?? '',
-    identifier: row.identifier ?? '',
-    expirationDate: row.expirationDate ?? row.expiration_date ?? '',
-    status: row.status ?? 'Active',
-    attachmentFileId: row.attachmentFileId ?? null,
-    isPrimary: Boolean(row.isPrimary ?? row.is_primary),
-  }))
-}
-
 function onNpiLookupResult(result) {
   if (!result?.found) {
     return
   }
-  const npiLicenses = mapNpiLicenses(result.licenses)
-  const npiPhones = result.phones?.length
-    ? result.phones
-    : result.phone
-      ? [{ number: result.phone, kind: 'telephone' }]
-      : []
-  const mappedPhones = mapNpiPhonesToStaffContact(
-    npiPhones,
-    props.phoneTypeOptions,
-  )
-  const mappedEmails = result.emails?.length
-    ? mapNpiEmailsToStaffContact(
-      result.emails,
-      props.emailTypeOptions,
-    )
-    : form.value.contact.emails
-  const resolvedState = resolveNpiAddressState(
-    result.practice_address?.state,
-    props.stateOptions,
-  )
-  form.value = {
-    ...form.value,
-    basic: {
-      ...form.value.basic,
-      prefix: result.prefix ?? result.name_prefix ?? form.value.basic.prefix,
-      npiLookup: result.npi ?? form.value.basic.npiLookup,
-      npiLookupFound: true,
-    },
-    clinical: {
-      ...form.value.clinical,
-      npi: result.npi ?? form.value.clinical.npi,
-      credential: result.credential ?? form.value.clinical.credential,
-      primarySpecialty:
-        result.primary_specialty ?? form.value.clinical.primarySpecialty,
-      taxonomies: (result.taxonomies ?? []).map(row => ({
-        code: row.code ?? '',
-        displayName: row.display_name ?? row.displayName ?? '',
-        isPrimary: Boolean(row.is_primary ?? row.isPrimary),
-      })),
-      licenses: npiLicenses.length
-        ? npiLicenses
-        : form.value.clinical.licenses,
-    },
-    contact: {
-      ...form.value.contact,
-      address: {
-        ...form.value.contact.address,
-        address:
-          result.practice_address?.address
-          ?? form.value.contact.address.address,
-        address2:
-          result.practice_address?.address2
-          ?? form.value.contact.address.address2,
-        city:
-          result.practice_address?.city
-          ?? form.value.contact.address.city,
-        state: resolvedState || form.value.contact.address.state,
-        zipCode:
-          result.practice_address?.zip_code
-          ?? form.value.contact.address.zipCode,
-        country:
-          result.practice_address?.country
-          ?? form.value.contact.address.country,
-      },
-      phones: mappedPhones,
-      emails: mappedEmails,
-    },
-  }
+  form.value = prefillStaffFormFromNpiLookup(form.value, result, {
+    phoneTypeOptions: phoneTypeSelectOptions(),
+    emailTypeOptions: emailTypeSelectOptions(),
+    stateOptions: props.stateOptions,
+    prefixOptions: props.prefixOptions,
+    suffixOptions: props.suffixOptions,
+    genderOptions: props.genderOptions,
+    credentialOptions: props.credentialOptions,
+    specialtyOptions: props.specialtyOptions,
+  })
 }
 
 function focusTabForField(field) {
   const basicFields = ['firstName', 'lastName', 'dob', 'sex']
-  const employmentFields = [
-    'position',
-    'hireDate',
+  const employmentFields = ['position', 'hireDate']
+  const systemAccessFields = [
+    'email',
+    'password',
+    'status',
+    'roles',
     'username',
     'roleId',
-    'password',
   ]
   if (basicFields.includes(field)) {
     activeTab.value = 'basic'
+  } else if (systemAccessFields.includes(field)) {
+    activeTab.value = 'systemAccess'
   } else if (employmentFields.includes(field)) {
     activeTab.value = 'employment'
   } else if (field === 'npi') {

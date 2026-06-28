@@ -143,6 +143,9 @@ export default {
   client: 'Cliente',
   clients: 'Clientes',
   clientList: 'Listado de clientes',
+  navStaffClinician: 'Personal / Clínico',
+  navStaffClinicianList: 'Listado de personal / clínicos',
+  navUsersList: 'Listado de usuarios',
   clientListSubtitle: 'Gestiona y consulta todos los registros de clientes.',
   clientListSearchPlaceholder: 'Buscar clientes…',
   clientListSearchEmpty: 'Ningún cliente coincide con la búsqueda.',
@@ -232,6 +235,7 @@ export default {
   tabStaffBasicInformation: 'Información básica',
   tabStaffContactInformation: 'Información de contacto',
   tabStaffEmployment: 'Empleo',
+  tabStaffSystemAccess: 'Acceso al sistema',
   tabStaffClinicalProfile: 'Perfil clínico',
   staffFormSaveComingSoon:
     'El guardado del formulario de personal aún no está configurado.',
@@ -240,7 +244,8 @@ export default {
   staffNpiLookupFoundTitle: 'Clínico encontrado en el registro NPI',
   staffNpiLookupFoundHint:
     'Revise y edite la información a continuación según sea necesario.',
-  staffNpiLookupNotFound: 'No se encontró un clínico con este NPI.',
+  staffNpiLookupNotFound:
+    'NPI no encontrado en el registro nacional.',
   staffNpiLookupFailed:
     'No se pudo buscar en el registro NPI. Inténtelo de nuevo.',
   staffPersonalInformationTitle: 'Información personal',
@@ -317,7 +322,11 @@ export default {
   staffLicenseStatusLabel: 'Estado',
   staffLicenseStatusExpired: 'Vencida',
   staffLicensePrimaryLabel: 'Licencia principal',
+  staffLicensePrimaryShort: 'Principal',
   staffLicenseAttachmentLabel: 'Adjunto',
+  staffLicenseDeleteTitle: 'Eliminar licencia',
+  staffLicenseDeleteMessage:
+    '¿Seguro que desea eliminar esta licencia?',
   staffLicenseTypeRequired: 'El tipo de licencia es obligatorio.',
   staffLicenseIdentifierRequired: 'El número de licencia es obligatorio.',
   staffLicenseExpirationRequired:
@@ -1497,6 +1506,7 @@ export default {
   closed: 'Cerrado',
   clientAddress: 'Dirección del cliente',
   addressLine1: 'Línea de dirección 1',
+  addressLine2: 'Línea de dirección 2',
   addressLine2Optional: 'Línea de dirección 2',
   city: 'Ciudad',
   state: 'Estado',
@@ -1506,6 +1516,7 @@ export default {
   contactMethods: 'Métodos de contacto',
   phone: 'Teléfono',
   phoneNumber: 'Número de teléfono',
+  type: 'Tipo',
   phoneType: 'Tipo',
   contactEmailLabel: 'Correo',
   emailAddress: 'Correo electrónico',

@@ -132,6 +132,9 @@ export default {
   client: 'Client',
   clients: 'Clients',
   clientList: 'Client list',
+  navStaffClinician: 'Staff / Clinician',
+  navStaffClinicianList: 'Staff / Clinician List',
+  navUsersList: 'Users List',
   clientListSubtitle: 'Manage and view all client records.',
   clientListSearchPlaceholder: 'Search clients…',
   clientListSearchEmpty: 'No clients match your search.',
@@ -220,6 +223,7 @@ export default {
   tabStaffBasicInformation: 'Basic Information',
   tabStaffContactInformation: 'Contact Information',
   tabStaffEmployment: 'Employment',
+  tabStaffSystemAccess: 'System Access',
   tabStaffClinicalProfile: 'Clinical Profile',
   staffFormSaveComingSoon:
     'Staff form save is not fully configured yet.',
@@ -228,7 +232,8 @@ export default {
   staffNpiLookupFoundTitle: 'Clinician found in NPI Registry',
   staffNpiLookupFoundHint:
     'Review and edit the information below as needed.',
-  staffNpiLookupNotFound: 'No clinician found for this NPI.',
+  staffNpiLookupNotFound:
+    'NPI not found in the national registry.',
   staffNpiLookupFailed:
     'Unable to search the NPI registry. Please try again.',
   staffPersonalInformationTitle: 'Personal Information',
@@ -303,7 +308,11 @@ export default {
   staffLicenseStatusLabel: 'Status',
   staffLicenseStatusExpired: 'Expired',
   staffLicensePrimaryLabel: 'Primary license',
+  staffLicensePrimaryShort: 'Primary',
   staffLicenseAttachmentLabel: 'Attachment',
+  staffLicenseDeleteTitle: 'Delete license',
+  staffLicenseDeleteMessage:
+    'Are you sure you want to delete this license?',
   staffLicenseTypeRequired: 'License type is required.',
   staffLicenseIdentifierRequired: 'License number is required.',
   staffLicenseExpirationRequired: 'Expiration date is required.',
@@ -1452,6 +1461,7 @@ export default {
   closed: 'Closed',
   clientAddress: 'Client Address',
   addressLine1: 'Address Line 1',
+  addressLine2: 'Address Line 2',
   addressLine2Optional: 'Address Line 2',
   city: 'City',
   state: 'State',
@@ -1461,6 +1471,7 @@ export default {
   contactMethods: 'Contact Methods',
   phone: 'Phone',
   phoneNumber: 'Phone Number',
+  type: 'Type',
   phoneType: 'Type',
   contactEmailLabel: 'Email',
   emailAddress: 'Email Address',

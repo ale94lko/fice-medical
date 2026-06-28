@@ -1,4 +1,7 @@
 /* eslint-disable camelcase -- API payload field names */
+import { normalizePhoneDigits } from 'src/utils/client-contact-form.js'
+import { displayDateToApi } from 'src/utils/app-datetime.js'
+
 function trim(value) {
   return String(value ?? '').trim()
 }
@@ -6,7 +9,7 @@ function trim(value) {
 function mapPhones(phones = []) {
   return phones
     .map(row => ({
-      phone_number: trim(row.phoneNumber),
+      phone_number: normalizePhoneDigits(row.phoneNumber),
       phone_type: trim(row.phoneType),
     }))
     .filter(row => row.phone_number)
@@ -38,6 +41,11 @@ function mapAddress(address = {}) {
   }]
 }
 
+function mapDateForApi(value) {
+  const apiDate = displayDateToApi(value)
+  return apiDate || null
+}
+
 function mapBasicInformation(basic, photoFileId) {
   return {
     first_name: trim(basic.firstName),
@@ -45,34 +53,60 @@ function mapBasicInformation(basic, photoFileId) {
     last_name: trim(basic.lastName),
     suffix: trim(basic.suffix),
     prefix: trim(basic.prefix),
-    dob: trim(basic.dob),
+    dob: mapDateForApi(basic.dob),
     sex: trim(basic.sex),
     photo_file_id: photoFileId ?? basic.photoFileId ?? null,
   }
+}
+
+function mapSystemUser(systemUser = {}, { isEdit }) {
+  const email = trim(systemUser.email) || trim(systemUser.username)
+  const roles = Array.isArray(systemUser.roles) ? systemUser.roles : []
+  const roleId = systemUser.roleId ?? roles[0] ?? null
+
+  const payload = {
+    enabled: Boolean(systemUser.enabled),
+    username: email,
+    email,
+    role_id: roleId,
+    roles: roles.length ? roles : roleId != null ? [roleId] : [],
+    status: trim(systemUser.status) || 'active',
+    permissions: Array.isArray(systemUser.permissions)
+      ? systemUser.permissions
+      : [],
+    description: trim(systemUser.description),
+  }
+
+  if (!isEdit && systemUser.enabled) {
+    payload.password = trim(systemUser.password)
+  } else if (isEdit && systemUser.enabled) {
+    const password = trim(systemUser.password)
+    if (password) {
+      payload.password = password
+    }
+  }
+
+  return payload
 }
 
 function mapEmployment(employment, { isEdit }) {
   const payload = {
     status: trim(employment.status) || 'active',
     position: trim(employment.position),
-    hire: trim(employment.hireDate),
-    termination: trim(employment.terminationDate) || null,
-    system_user: {
-      enabled: Boolean(employment.systemUser?.enabled),
-      username: trim(employment.systemUser?.username),
-      role_id: employment.systemUser?.roleId ?? null,
-    },
+    hire: mapDateForApi(employment.hireDate),
+    termination: mapDateForApi(employment.terminationDate),
+    system_user: mapSystemUser(employment.systemUser, { isEdit }),
     compensation: (employment.compensation ?? []).map(row => ({
       rate_type: trim(row.rate_type ?? row.rateType),
       rate: row.rate != null ? Number(row.rate) : null,
-      effective_from: row.effective_from ?? row.effectiveFrom ?? null,
-      effective_to: row.effective_to ?? row.effectiveTo ?? null,
+      effective_from: mapDateForApi(
+        row.effective_from ?? row.effectiveFrom,
+      ),
+      effective_to: mapDateForApi(
+        row.effective_to ?? row.effectiveTo,
+      ),
       is_current: Boolean(row.is_current ?? row.isCurrent),
     })),
-  }
-
-  if (!isEdit && employment.systemUser?.enabled) {
-    payload.system_user.password = trim(employment.systemUser.password)
   }
 
   return payload
@@ -91,7 +125,9 @@ function mapClinicalProfile(clinical) {
     licenses: (clinical.licenses ?? []).map(row => ({
       type: trim(row.type),
       identifier: trim(row.identifier),
-      expiration_date: trim(row.expiration_date ?? row.expirationDate),
+      expiration_date: mapDateForApi(
+        row.expiration_date ?? row.expirationDate,
+      ),
       status: trim(row.status),
       attachment_file_id:
         row.attachment_file_id ?? row.attachmentFileId ?? null,

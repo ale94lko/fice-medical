@@ -1,4 +1,14 @@
-const US_DATE_RE = /^(\d{2})\/(\d{2})\/(\d{4})$/
+import {
+  apiDateToDisplay,
+  displayDateToApi,
+  formatDisplayDate,
+  getAppDateTimeConfig,
+  isCompleteDisplayDateString,
+  parseDisplayDate,
+  sanitizeDisplayDateInput,
+  startOfDay as appStartOfDay,
+} from 'src/utils/app-datetime.js'
+
 const LETTERS_RE = /^[A-Za-z\s]+$/
 const SSN_PATTERN =
   /^(?!000|666|9\d\d)\d{3}-?(?!00)\d{2}-?(?!0000)\d{4}$/
@@ -11,14 +21,7 @@ export function generateClientNumber() {
 }
 
 export function formatDateUs(date) {
-  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
-    return ''
-  }
-  const mm = String(date.getMonth() + 1).padStart(2, '0')
-  const dd = String(date.getDate()).padStart(2, '0')
-  const yyyy = String(date.getFullYear())
-
-  return `${mm}/${dd}/${yyyy}`
+  return formatDisplayDate(date, getAppDateTimeConfig())
 }
 
 export function todayDateUs() {
@@ -26,27 +29,11 @@ export function todayDateUs() {
 }
 
 export function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  return appStartOfDay(date)
 }
 
 export function parseUsDateString(value) {
-  const m = US_DATE_RE.exec(String(value ?? '').trim())
-  if (!m) {
-    return null
-  }
-  const month = Number(m[1]) - 1
-  const day = Number(m[2])
-  const year = Number(m[3])
-  const d = new Date(year, month, day)
-  if (
-    d.getFullYear() !== year
-    || d.getMonth() !== month
-    || d.getDate() !== day
-  ) {
-    return null
-  }
-
-  return d
+  return parseDisplayDate(value, getAppDateTimeConfig())
 }
 
 /** Calendar year from patient DOB (mm/dd/yyyy), or null if missing/invalid. */
@@ -183,129 +170,15 @@ export function isAdmissionDateValid(value) {
   return d.getTime() <= startOfDay(new Date()).getTime()
 }
 
-export function daysInMonth(month, year) {
-  const m = Number(month)
-  const y = Number(year)
-  if (!Number.isFinite(m) || m < 1 || m > 12) {
-    return 31
-  }
-  if (!Number.isFinite(y) || y < 1) {
-    return 31
-  }
+export { daysInMonth } from 'src/utils/app-datetime.js'
 
-  return new Date(y, m, 0).getDate()
-}
-
-function clampMonthDigits(digits) {
-  if (!digits.length) {
-    return ''
-  }
-  if (digits.length === 1) {
-    const n = Number(digits)
-
-    return n > 1 ? `0${n}` : digits
-  }
-  let m = Number(digits.slice(0, 2))
-  if (m < 1) {
-    m = 1
-  }
-  if (m > 12) {
-    m = 12
-  }
-
-  return String(m).padStart(2, '0')
-}
-
-function clampDayDigits(digits, month, year) {
-  if (!digits.length) {
-    return ''
-  }
-  const maxDay = daysInMonth(month, year)
-  if (digits.length === 1) {
-    const n = Number(digits)
-
-    return n > 3 ? `0${n}` : digits
-  }
-  let d = Number(digits.slice(0, 2))
-  if (d < 1) {
-    d = 1
-  }
-  if (d > maxDay) {
-    d = maxDay
-  }
-
-  return String(d).padStart(2, '0')
-}
-
-function clampYearDigits(digits, minYear, maxYear) {
-  if (!digits.length) {
-    return ''
-  }
-  if (digits.length < 4) {
-    return digits
-  }
-  let y = Number(digits.slice(0, 4))
-  if (!Number.isFinite(y)) {
-    return digits.slice(0, 4)
-  }
-  if (y < minYear) {
-    y = minYear
-  }
-  if (y > maxYear) {
-    y = maxYear
-  }
-
-  return String(y)
-}
-
-/** Constrains mm/dd/yyyy while typing; blocks invalid calendar dates. */
+/** Constrains tenant display date while typing. */
 export function sanitizeUsDateInput(value, options = {}) {
-  const { maxToday = false, minYear: minYearOpt } = options
-  const digits = String(value ?? '').replace(/\D/g, '').slice(0, 8)
-  if (!digits.length) {
-    return ''
-  }
-
-  const currentYear = new Date().getFullYear()
-  const minYear = minYearOpt ?? (maxToday ? currentYear - 125 : 1900)
-  const maxYear = maxToday ? currentYear : currentYear + 50
-
-  const mm = clampMonthDigits(digits.slice(0, 2))
-  const monthNum = Number(mm) || 1
-
-  if (digits.length <= 2) {
-    return digits.length === 2 ? `${mm}/` : mm
-  }
-
-  const yearForDay = digits.length >= 8
-    ? Number(clampYearDigits(digits.slice(4, 8), minYear, maxYear))
-    : currentYear
-  const dd = clampDayDigits(digits.slice(2, 4), monthNum, yearForDay)
-
-  if (digits.length <= 4) {
-    return digits.length === 4 ? `${mm}/${dd}/` : `${mm}/${dd}`
-  }
-
-  const yyyy = clampYearDigits(digits.slice(4, 8), minYear, maxYear)
-  const result = `${mm}/${dd}/${yyyy}`
-
-  if (result.length !== 10) {
-    return result
-  }
-
-  const parsed = parseUsDateString(result)
-  if (!parsed) {
-    return `${mm}/${dd}/`
-  }
-  if (maxToday && parsed.getTime() > startOfDay(new Date()).getTime()) {
-    return todayDateUs()
-  }
-
-  return result
+  return sanitizeDisplayDateInput(value, options, getAppDateTimeConfig())
 }
 
 export function isCompleteUsDateString(value) {
-  return US_DATE_RE.test(String(value ?? '').trim())
+  return isCompleteDisplayDateString(value, getAppDateTimeConfig())
 }
 
 export function isLettersOnly(value, maxLen) {
@@ -499,35 +372,12 @@ export function detectTaxIdType(digits) {
 }
 
 export function usDateToIso(value) {
-  const d = parseUsDateString(value)
-
-  if (!d) {
-    return ''
-  }
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-
-  // Backend format required: YYYY-MM-DD (date-only)
-  return `${y}-${m}-${day}`
+  return displayDateToApi(value, getAppDateTimeConfig())
 }
 
-/** Date (YYYY-MM-DD / YYYY/MM/DD) or datetime → mm/dd/yyyy for form fields. */
+/** Date (YYYY-MM-DD / ISO datetime) → tenant display format for form fields. */
 export function isoDateToUsDateString(value) {
-  const raw = String(value ?? '').trim()
-  if (!raw) {
-    return ''
-  }
-  if (US_DATE_RE.test(raw)) {
-    return raw
-  }
-  const datePart = raw.includes('T') ? raw.split('T')[0] : raw.slice(0, 10)
-  const m = /^(\d{4})([-/])(\d{2})\2(\d{2})$/.exec(datePart)
-  if (!m) {
-    return ''
-  }
-
-  return `${m[3]}/${m[4]}/${m[1]}`
+  return apiDateToDisplay(value, getAppDateTimeConfig())
 }
 
 export function snapshotAddClientForm(form) {

@@ -8,7 +8,6 @@ import {
 } from 'src/utils/auth-permissions.js'
 
 const administrationPermissions = [
-  permissionNames.viewStaffMembers,
   permissionNames.viewConfig,
   permissionNames.editConfig,
   permissionNames.viewModules,
@@ -25,10 +24,6 @@ const administrationPermissions = [
   permissionNames.viewTenants,
   permissionNames.viewAuditLog,
   permissionNames.viewSubtenants,
-  permissionNames.viewTenantsUser,
-  permissionNames.addTenantsUser,
-  permissionNames.editTenantsUser,
-  permissionNames.deleteTenantsUser,
 ]
 
 const humanResourcesPermissions = [
@@ -52,6 +47,42 @@ export function useMainNavPermissions() {
 
   const showClientList = computed(() =>
     hasPermission(permissions.value, permissionNames.viewClient),
+  )
+
+  const showClientAdd = computed(() =>
+    hasPermission(permissions.value, permissionNames.addClient),
+  )
+
+  const showStaffMenu = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.viewStaffMembers,
+      permissionNames.editStaffMembers,
+    ]),
+  )
+
+  const showStaffAddClinician = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.editStaffMembers,
+      permissionNames.addTenantsUser,
+    ]),
+  )
+
+  const showStaffAddStaff = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.editStaffMembers,
+      permissionNames.addTenantsUser,
+    ]),
+  )
+
+  const showUsersMenu = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.viewTenantsUser,
+      permissionNames.addTenantsUser,
+    ]),
+  )
+
+  const showUsersAdd = computed(() =>
+    hasPermission(permissions.value, permissionNames.addTenantsUser),
   )
 
   const showProvidersMenu = computed(() =>
@@ -88,7 +119,6 @@ export function useMainNavPermissions() {
 
   const showAdminGeneral = computed(() =>
     hasAnyPermission(permissions.value, [
-      permissionNames.viewTenantsUser,
       permissionNames.viewConfig,
       permissionNames.editConfig,
     ]),
@@ -102,6 +132,12 @@ export function useMainNavPermissions() {
     showDashboard,
     showClientMenu,
     showClientList,
+    showClientAdd,
+    showStaffMenu,
+    showStaffAddClinician,
+    showStaffAddStaff,
+    showUsersMenu,
+    showUsersAdd,
     showProvidersMenu,
     showHumanResourcesMenu,
     showHrGeneral,

@@ -2931,6 +2931,18 @@ input:-webkit-autofill {
   margin-top: 0;
 }
 
+.staff-licenses-table-panel {
+  margin-top: 0;
+
+  .staff-licenses-table__scroll {
+    width: 100%;
+  }
+
+  .staff-licenses-table.table .q-table {
+    min-width: 860px;
+  }
+}
+
 .allergies-table-panel {
   margin-top: 0;
 }

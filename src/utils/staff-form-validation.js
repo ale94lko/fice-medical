@@ -1,3 +1,5 @@
+import { parseDisplayDate } from 'src/utils/app-datetime.js'
+
 export function resolveStaffApiErrorMessage(error, t) {
   const data = error?.response?.data
   const code = data?.error_code ?? data?.code
@@ -13,6 +15,8 @@ export function resolveStaffApiErrorMessage(error, t) {
 
   return String(data?.message ?? error?.message ?? t('staffFormSaveError'))
 }
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export function validateStaffForm(form, {
   includeClinicalProfile,
@@ -31,8 +35,11 @@ export function validateStaffForm(form, {
   if (!String(basic.lastName ?? '').trim()) {
     errors.lastName = t('staffLastNameRequired')
   }
-  if (!String(basic.dob ?? '').trim()) {
+  const dob = String(basic.dob ?? '').trim()
+  if (!dob) {
     errors.dob = t('staffDobRequired')
+  } else if (!parseDisplayDate(dob)) {
+    errors.dob = t('dobInvalid')
   }
   if (!String(basic.sex ?? '').trim()) {
     errors.sex = t('staffGenderRequired')
@@ -44,14 +51,27 @@ export function validateStaffForm(form, {
     errors.hireDate = t('staffHireDateRequired')
   }
   if (systemUser.enabled) {
-    if (!String(systemUser.username ?? '').trim()) {
-      errors.username = t('staffUsernameRequired')
+    const email = String(
+      systemUser.email ?? systemUser.username ?? '',
+    ).trim()
+    if (!email) {
+      errors.email = t('emailRequired')
+    } else if (!EMAIL_RE.test(email)) {
+      errors.email = t('emailInvalid')
     }
-    if (systemUser.roleId == null || systemUser.roleId === '') {
-      errors.roleId = t('staffRoleRequired')
-    }
-    if (!isEdit && !String(systemUser.password ?? '').trim()) {
-      errors.password = t('staffPasswordRequired')
+    if (!isEdit) {
+      if (!String(systemUser.status ?? '').trim()) {
+        errors.status = t('fieldRequired')
+      }
+      const roles = Array.isArray(systemUser.roles) ? systemUser.roles : []
+      const hasRole = roles.length > 0
+        || (systemUser.roleId != null && systemUser.roleId !== '')
+      if (!hasRole) {
+        errors.roles = t('fieldRequired')
+      }
+      if (!String(systemUser.password ?? '').trim()) {
+        errors.password = t('passwordRequired')
+      }
     }
   }
   if (includeClinicalProfile && !String(clinical.npi ?? '').trim()) {

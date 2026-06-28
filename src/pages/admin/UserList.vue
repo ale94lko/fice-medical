@@ -195,6 +195,7 @@ import {
   watch,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
@@ -241,6 +242,8 @@ import {
 
 const { t } = useI18n()
 const $q = useQuasar()
+const route = useRoute()
+const router = useRouter()
 const adminStore = useAdminStore()
 const authStore = useAuthStore()
 const uk = userFieldKeys
@@ -500,6 +503,12 @@ function openAddDialog() {
   dialogOpen.value = true
 }
 
+function maybeOpenAddFromRoute() {
+  if (route.meta.userListAutoOpen === 'add' && canAddUser.value) {
+    openAddDialog()
+  }
+}
+
 function viewRow(row) {
   dialogMode.value = 'view'
   activeUser.value = cloneUser(row)
@@ -515,6 +524,9 @@ function editRow(row) {
 function closeDialog() {
   dialogOpen.value = false
   activeUser.value = null
+  if (route.name === 'AdminUsersAdd') {
+    router.replace({ name: 'AdminUsersList' })
+  }
 }
 
 function confirmDelete(row) {
@@ -601,6 +613,11 @@ onMounted(async() => {
     onRowsPerPageChange,
   })
   await loadUsers(tablePagination.value)
+  maybeOpenAddFromRoute()
+})
+
+watch(() => route.name, () => {
+  maybeOpenAddFromRoute()
 })
 
 onBeforeUnmount(() => {

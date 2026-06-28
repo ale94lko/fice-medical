@@ -17,6 +17,7 @@ import {
   normalizeIdNumberMaskedDisplay,
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
+import { apiDateToDisplay } from 'src/utils/app-datetime.js'
 import {
   clinicianInitialsFromPersonName,
   formatClinicianDisplayLabel,
@@ -89,6 +90,27 @@ export function extractLoginTenantId(body) {
   return tenantIdFromConfig(findLoginConfigData(body))
 }
 
+export function extractLoginConfigData(body) {
+  if (!body || typeof body !== typeNames.object) {
+    return null
+  }
+
+  return findLoginConfigData(body)
+}
+
+function normalizeLoginConfigData(raw) {
+  if (!raw || typeof raw !== typeNames.object) {
+    return null
+  }
+
+  return {
+    timezone: String(raw.timezone ?? '').trim(),
+    locale: String(raw.locale ?? '').trim(),
+    // eslint-disable-next-line camelcase -- API field name
+    date_format: String(raw.date_format ?? raw.dateFormat ?? '').trim(),
+  }
+}
+
 function extractFromFiCeEnvelope(body) {
   const envelope = body.data
   if (!envelope?.token_data?.token) {
@@ -107,6 +129,9 @@ function extractFromFiCeEnvelope(body) {
     permissions: normalizeLoginPermissions(envelope.permissions),
     subtenants: normalizeLoginSubtenants(envelope.subtenants),
     tenantId: tenantIdFromConfig(envelope.config_data ?? envelope.configData),
+    configData: normalizeLoginConfigData(
+      envelope.config_data ?? envelope.configData,
+    ),
   }
 }
 
@@ -147,6 +172,9 @@ function extractFromRoots(body) {
       permissions: normalizeLoginPermissions(root.permissions),
       subtenants: normalizeLoginSubtenants(root.subtenants),
       tenantId: tenantIdFromConfig(root.config_data ?? root.configData),
+      configData: normalizeLoginConfigData(
+        root.config_data ?? root.configData,
+      ),
     }
   }
 
@@ -368,20 +396,7 @@ function resolveClientListClinicians(client) {
 }
 
 function formatClientListDate(value) {
-  const raw = String(value ?? '').trim()
-  if (!raw) {
-    return ''
-  }
-  const d = new Date(raw)
-  if (Number.isNaN(d.getTime())) {
-    return raw
-  }
-
-  return d.toLocaleDateString('en-US', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })
+  return apiDateToDisplay(value) || String(value ?? '').trim()
 }
 
 export function resolveClientListStatusVariant(status) {
@@ -602,6 +617,7 @@ export function extractOAuthTokenPayload(body) {
   const fallbackPermissions = extractLoginPermissions(body)
   const fallbackSubtenants = extractLoginSubtenants(body)
   const fallbackTenantId = extractLoginTenantId(body)
+  const fallbackConfigData = extractLoginConfigData(body)
   const fromEnvelope = extractFromFiCeEnvelope(body)
   if (fromEnvelope) {
     return {
@@ -616,6 +632,7 @@ export function extractOAuthTokenPayload(body) {
         ? fromEnvelope.subtenants
         : fallbackSubtenants,
       tenantId: fromEnvelope.tenantId ?? fallbackTenantId,
+      configData: fromEnvelope.configData ?? fallbackConfigData,
     }
   }
 
@@ -633,6 +650,7 @@ export function extractOAuthTokenPayload(body) {
         ? fromRoots.subtenants
         : fallbackSubtenants,
       tenantId: fromRoots.tenantId ?? fallbackTenantId,
+      configData: fromRoots.configData ?? fallbackConfigData,
     }
   }
 

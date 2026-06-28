@@ -1,8 +1,16 @@
 /**
  * UTC ↔ tenant-local display helpers for appointments.
- * Uses browser timezone until subtenant timezone is available from API.
  */
+import {
+  getAppDateTimeConfig,
+  resolveIntlTimeZone,
+} from 'src/utils/app-datetime.js'
+
 export function resolveTenantTimeZone() {
+  const configured = resolveIntlTimeZone(getAppDateTimeConfig().timezone)
+  if (configured) {
+    return configured
+  }
   try {
     // eslint-disable-next-line new-cap
     return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'

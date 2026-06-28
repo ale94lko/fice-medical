@@ -94,6 +94,24 @@ export function resolveCatalogSelectValue(options, raw) {
   return match?.value ?? null
 }
 
+function normalizeCatalogRadioToken(value) {
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+}
+
+export function catalogRadioValuesMatch(stored, optionValue) {
+  const a = normalizeCatalogRadioToken(stored)
+  const b = normalizeCatalogRadioToken(optionValue)
+  if (!a || !b) {
+    return false
+  }
+
+  return a === b
+}
+
 export function mapCatalogItemsToSelectOptions(items, { emptyOption } = {}) {
   const sorted = [...(items ?? [])].sort(
     (a, b) => Number(a?.id ?? 0) - Number(b?.id ?? 0),

@@ -33,18 +33,6 @@
           class="admin-list-page__actions row items-center
             q-gutter-sm no-wrap">
           <q-btn
-            v-if="canAddStaff"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="staffListTestIds.addStaff"
-            :disable="loading"
-            :label="t('staffListAddStaff')"
-            @click="goAddStaff"
-          />
-          <q-btn
             v-if="canAddClinician"
             no-caps
             unelevated
@@ -55,6 +43,18 @@
             :disable="loading"
             :label="t('staffListAddClinician')"
             @click="goAddClinician"
+          />
+          <q-btn
+            v-if="canAddStaff"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :data-testid="staffListTestIds.addStaff"
+            :disable="loading"
+            :label="t('staffListAddStaff')"
+            @click="goAddStaff"
           />
           <q-btn
             v-if="canChangeStatus"
@@ -257,16 +257,6 @@
               v-if="showEmptyActions"
               class="row q-gutter-sm q-mt-sm">
               <q-btn
-                v-if="canAddStaff"
-                no-caps
-                unelevated
-                color="primary"
-                class="app-btn-primary"
-                icon="add"
-                :label="t('staffListAddStaff')"
-                @click="goAddStaff"
-              />
-              <q-btn
                 v-if="canAddClinician"
                 no-caps
                 unelevated
@@ -275,6 +265,16 @@
                 icon="add"
                 :label="t('staffListAddClinician')"
                 @click="goAddClinician"
+              />
+              <q-btn
+                v-if="canAddStaff"
+                no-caps
+                unelevated
+                color="primary"
+                class="app-btn-primary"
+                icon="add"
+                :label="t('staffListAddStaff')"
+                @click="goAddStaff"
               />
             </div>
           </div>

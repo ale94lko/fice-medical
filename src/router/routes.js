@@ -43,6 +43,15 @@ const routes = [
         },
       },
       {
+        path: 'administration/users/add',
+        name: 'AdminUsersAdd',
+        component: () => import('pages/admin/UserList.vue'),
+        meta: {
+          requiresPermission: permissionNames.addTenantsUser,
+          userListAutoOpen: 'add',
+        },
+      },
+      {
         path: 'administration/users',
         name: 'AdminUsersList',
         component: () => import('pages/admin/UserList.vue'),

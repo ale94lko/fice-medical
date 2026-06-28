@@ -1,4 +1,6 @@
-import { staffEntryPoints } from 'components/constants.js'
+import { staffEntryPoints, userStatusValues } from 'components/constants.js'
+import { apiDateToDisplay } from 'src/utils/app-datetime.js'
+import { formatPhoneUs } from 'src/utils/client-contact-form.js'
 
 export function createEmptyStaffAddress() {
   return {
@@ -52,9 +54,38 @@ export function createEmptyStaffContact() {
 export function createEmptyStaffSystemUser() {
   return {
     enabled: false,
+    email: '',
+    password: '',
+    status: userStatusValues.active,
+    roles: [],
+    permissions: [],
+    description: '',
     username: '',
     roleId: null,
+  }
+}
+
+function normalizeStaffSystemUserFromApi(systemUser = {}) {
+  const username = String(systemUser.username ?? '').trim()
+  const roleId = systemUser.role_id ?? systemUser.roleId ?? null
+  const roles = Array.isArray(systemUser.roles)
+    ? systemUser.roles
+    : roleId != null && roleId !== ''
+      ? [roleId]
+      : []
+
+  return {
+    enabled: Boolean(systemUser.enabled),
+    email: String(systemUser.email ?? username).trim(),
     password: '',
+    status: systemUser.status ?? userStatusValues.active,
+    roles,
+    permissions: Array.isArray(systemUser.permissions)
+      ? systemUser.permissions
+      : [],
+    description: String(systemUser.description ?? '').trim(),
+    username,
+    roleId,
   }
 }
 
@@ -108,13 +139,17 @@ export function nextStaffCompensationId() {
   return `staff-comp-${staffCompensationIdCounter}`
 }
 
+function mapApiDate(value) {
+  return apiDateToDisplay(value) || String(value ?? '').trim()
+}
+
 export function normalizeStaffCompensationRow(row) {
   return {
     id: row.id ?? nextStaffCompensationId(),
     rateType: row.rate_type ?? row.rateType ?? '',
     rate: row.rate ?? '',
-    effectiveFrom: row.effective_from ?? row.effectiveFrom ?? '',
-    effectiveTo: row.effective_to ?? row.effectiveTo ?? '',
+    effectiveFrom: mapApiDate(row.effective_from ?? row.effectiveFrom),
+    effectiveTo: mapApiDate(row.effective_to ?? row.effectiveTo),
     isCurrent: Boolean(row.is_current ?? row.isCurrent),
   }
 }
@@ -124,7 +159,7 @@ export function normalizeStaffLicenseRow(row) {
     id: row.id ?? nextStaffLicenseId(),
     type: row.type ?? '',
     identifier: row.identifier ?? '',
-    expirationDate: row.expiration_date ?? row.expirationDate ?? '',
+    expirationDate: mapApiDate(row.expiration_date ?? row.expirationDate),
     status: row.status ?? 'Active',
     attachmentFileId: row.attachment_file_id ?? row.attachmentFileId ?? null,
     isPrimary: Boolean(row.is_primary ?? row.isPrimary),
@@ -171,7 +206,7 @@ export function createEmptyStaffForm(
       middleName: personal.middle_name ?? '',
       lastName: personal.last_name ?? '',
       suffix: personal.suffix ?? '',
-      dob: personal.dob ?? '',
+      dob: mapApiDate(personal.dob),
       sex: personal.sex ?? '',
       photoFileId: personal.photo_file_id ?? null,
       npiLookup: clinical.npi ?? '',
@@ -189,7 +224,7 @@ export function createEmptyStaffForm(
       },
       phones: (contact.phones ?? []).length
         ? (contact.phones ?? []).map(row => ({
-          phoneNumber: row.phone_number ?? '',
+          phoneNumber: formatPhoneUs(row.phone_number ?? ''),
           phoneType: row.phone_type ?? '',
         }))
         : [createEmptyStaffPhone()],
@@ -203,14 +238,11 @@ export function createEmptyStaffForm(
     employment: {
       status: employment.status ?? 'active',
       position: employment.position ?? '',
-      hireDate: employment.hire ?? '',
-      terminationDate: employment.termination ?? '',
-      systemUser: {
-        enabled: Boolean(employment.system_user?.enabled),
-        username: employment.system_user?.username ?? '',
-        roleId: employment.system_user?.role_id ?? null,
-        password: '',
-      },
+      hireDate: mapApiDate(employment.hire ?? employment.hire_date),
+      terminationDate: mapApiDate(
+        employment.termination ?? employment.termination_date,
+      ),
+      systemUser: normalizeStaffSystemUserFromApi(employment.system_user),
       compensationDraft: createEmptyStaffCompensation(),
       compensation: (employment.compensation ?? []).map(
         normalizeStaffCompensationRow,
