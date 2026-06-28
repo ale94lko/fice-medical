@@ -24,6 +24,7 @@ export const layoutTestIds = {
   navPriorAuth: 'layout-nav-prior-authorization',
   navClientAssignment: 'layout-nav-client-assignment',
   navAdminUsers: 'layout-nav-admin-users',
+  navStaffList: 'layout-nav-staff-list',
 }
 
 export const sessionInactivityTestIds = {
@@ -69,6 +70,28 @@ export const clientListTestIds = {
   rowAssign: id => toTestId('client-list-row', id, 'btn-assign'),
   rowStatus: id => toTestId('client-list-row', id, 'btn-status'),
   rowMore: id => toTestId('client-list-row', id, 'btn-more'),
+}
+
+export const staffListTestIds = {
+  page: 'staff-list-page',
+  search: 'staff-list-input-search',
+  addStaff: 'staff-list-btn-add-staff',
+  addClinician: 'staff-list-btn-add-clinician',
+  changeStatus: 'staff-list-btn-change-status',
+  filters: 'staff-list-btn-filters',
+  filtersDialog: 'staff-list-filters-dialog',
+  filtersApply: 'staff-list-filters-btn-apply',
+  changeStatusDialog: 'staff-list-change-status-dialog',
+  changeStatusConfirm: 'staff-list-change-status-btn-confirm',
+  summaryTotal: 'staff-list-summary-total',
+  summaryClinicians: 'staff-list-summary-clinicians',
+  summaryActive: 'staff-list-summary-active',
+  summaryOnLeave: 'staff-list-summary-on-leave',
+  summaryExpiring: 'staff-list-summary-expiring',
+  rowView: id => toTestId('staff-list-row', id, 'btn-view'),
+  rowEdit: id => toTestId('staff-list-row', id, 'btn-edit'),
+  rowMore: id => toTestId('staff-list-row', id, 'btn-more'),
+  rowDeactivate: id => toTestId('staff-list-row', id, 'btn-deactivate'),
 }
 
 export const clientOverviewTestIds = {

@@ -78,6 +78,9 @@ const pagesNumber = computed(() => {
   if (!props.rowsNumber) {
     return 1
   }
+  if (!props.rowsPerPage) {
+    return 1
+  }
 
   return Math.max(1, Math.ceil(props.rowsNumber / props.rowsPerPage))
 })
@@ -87,6 +90,9 @@ const summaryText = computed(() => {
   if (!total) {
     return t(props.summaryKey, { from: 0, to: 0, total: 0 })
   }
+  if (!props.rowsPerPage) {
+    return t(props.summaryKey, { from: 1, to: total, total })
+  }
   const from = (props.page - 1) * props.rowsPerPage + 1
   const to = Math.min(props.page * props.rowsPerPage, total)
 
@@ -95,7 +101,9 @@ const summaryText = computed(() => {
 
 const rowsPerPageOptions = computed(() =>
   props.rowsPerPageChoices.map(count => ({
-    label: t(props.perPageKey, { count }),
+    label: count === 0
+      ? t('adminTablePerPageAll')
+      : t(props.perPageKey, { count }),
     value: count,
   })),
 )

@@ -1,0 +1,1 @@
+import{Bo as e,Wo as t,Yo as n,ka as r,wo as i,yo as a}from"./index-BVnPzKty.js";import{r as o,t as s}from"./QLayout-yFDGrc2R.js";var c={};function l(r,c){let l=t(`router-view`);return e(),a(s,{view:`hHh Lpr lff`},{default:n(()=>[i(o,null,{default:n(()=>[i(l)]),_:1})]),_:1})}var u=r(c,[[`render`,l]]);export{u as default};

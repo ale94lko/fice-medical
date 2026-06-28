@@ -15,6 +15,17 @@ function devApiProxyOptions(target) {
   }
 }
 
+function devNpiRegistryProxy() {
+  return {
+    '/npi-registry': {
+      target: 'https://npiregistry.cms.hhs.gov',
+      changeOrigin: true,
+      secure: true,
+      rewrite: path => path.replace(/^\/npi-registry/, ''),
+    },
+  }
+}
+
 function devApiProxy(target) {
   const o = devApiProxyOptions(target)
 
@@ -121,9 +132,12 @@ export default defineConfig((ctx) => {
       // https: true,
       port: 8090,
       open: true, // opens browser window automatically
-      ...(ctx.dev && apiProxyTarget
-        ? { proxy: devApiProxy(apiProxyTarget) }
-        : {}),
+      proxy: {
+        ...devNpiRegistryProxy(),
+        ...(ctx.dev && apiProxyTarget
+          ? devApiProxy(apiProxyTarget)
+          : {}),
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework

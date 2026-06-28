@@ -827,9 +827,44 @@ export const appointmentTerminalStatuses = new Set([
   appointmentStatuses.noShow,
 ])
 
+export const staffStatuses = {
+  active: 'active',
+  inactive: 'inactive',
+  onLeave: 'on_leave',
+  terminated: 'terminated',
+}
+
+export const staffStaffTypes = {
+  all: 'all',
+  clinicians: 'clinicians',
+  nonClinical: 'non_clinical',
+}
+
+export const staffCredentialStatuses = {
+  valid: 'valid',
+  expiringSoon: 'expiring_soon',
+  expired: 'expired',
+  missing: 'missing',
+}
+
+export const staffEntryPoints = {
+  addStaff: 'ADD_STAFF',
+  addClinician: 'ADD_CLINICIAN',
+}
+
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
-  cliniciansList: '/clinicians/v1',
+  staffList: '/staff/v1',
+  staffById: id => `/staff/v1/${encodeURIComponent(String(id ?? '').trim())}`,
+  staffStatus: id => `/staff/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/status`,
+  staffNpiLookup: '/staff/v1/npi-lookup',
+  staffPositionIsClinical: code => `/staff/v1/positions/${encodeURIComponent(
+    String(code ?? '').trim(),
+  )}/is-clinical`,
+  rolesList: '/roles/v1',
+  cliniciansList: '/staff/v1',
   clientsList: '/client/v1/list-view',
   clientsSearch: '/client/v1/list-view/search',
   clientsListColumnConfig: '/client/v1/list-view/column-config',

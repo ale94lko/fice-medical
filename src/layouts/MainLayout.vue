@@ -236,16 +236,6 @@
               General
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
-              v-if="showHrEmployees"
-              icon="badge">
-              Employees
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
-              v-if="showHrEmployees"
-              icon="groups">
-              Human Resources
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
               v-if="showHrCredentials"
               icon="admin_panel_settings">
               Credentials and Roles
@@ -278,16 +268,6 @@
                 v-if="showHrGeneral"
                 icon="tune">
                 General
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showHrEmployees"
-                icon="badge">
-                Employees
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showHrEmployees"
-                icon="groups">
-                Human Resources
               </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showHrCredentials"
@@ -346,6 +326,13 @@
               :test-id="layoutTestIds.navAdminUsers">
               {{ t('users') }}
             </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
+              v-if="showAdminStaffList"
+              icon="badge"
+              :to="'/staff'"
+              :test-id="layoutTestIds.navStaffList">
+              {{ t('staffList') }}
+            </AppDrawerSubNavItem>
           </q-expansion-item>
           <q-item
             v-else-if="showAdministrationMenu"
@@ -379,6 +366,13 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminUsers">
                 {{ t('users') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showAdminStaffList"
+                icon="badge"
+                :to="'/staff'"
+                :test-id="layoutTestIds.navStaffList">
+                {{ t('staffList') }}
               </AppDrawerSubNavItem>
             </q-menu>
             <q-tooltip
@@ -540,8 +534,8 @@ const {
   showProvidersMenu,
   showHumanResourcesMenu,
   showHrGeneral,
-  showHrEmployees,
   showHrCredentials,
+  showAdminStaffList,
   showBilling,
   showAdministrationMenu,
   showAdminGeneral,

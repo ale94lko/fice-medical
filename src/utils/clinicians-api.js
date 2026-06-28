@@ -36,7 +36,12 @@ export async function fetchCliniciansListPage({
   page = 0,
 } = {}) {
   const response = await apiInstance.get(apiPaths.cliniciansList, {
-    params: { limit, page },
+    params: {
+      limit,
+      page,
+      // eslint-disable-next-line camelcase -- staff API filter
+      staff_type: 'clinicians',
+    },
   })
   const envelope = response?.data?.data ?? response?.data ?? {}
   const items = Array.isArray(envelope.items) ? envelope.items : []
