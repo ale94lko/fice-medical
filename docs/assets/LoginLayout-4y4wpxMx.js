@@ -1,0 +1,1 @@
+import{Io as e,Ka as t,Vo as n,fs as r,rs as i,ss as a}from"./index-CiSCK7gx.js";import{r as o,t as s}from"./QLayout-DV_kJXSD.js";var c={};function l(t,c){let l=a(`router-view`);return i(),e(s,{view:`hHh Lpr lff`},{default:r(()=>[n(o,null,{default:r(()=>[n(l)]),_:1})]),_:1})}var u=t(c,[[`render`,l]]);export{u as default};
