@@ -504,6 +504,14 @@
             :label="t('administration')"
             :header-class="isAdministrationActive ? activeClass : ''">
             <AppDrawerSubNavItem
+              v-if="showAdminSubtenants"
+              icon="apartment"
+              to="/administration/subtenants"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminSubtenants">
+              {{ t('subtenantListTitle') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
               v-if="showAdminGeneral"
               icon="tune">
               {{ t('administrationGeneral') }}
@@ -529,6 +537,14 @@
               self="top left"
               class="app-drawer-submenu app-light-menu"
               v-model="administrationMenu">
+              <AppDrawerSubNavItem
+                v-if="showAdminSubtenants"
+                icon="apartment"
+                to="/administration/subtenants"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminSubtenants">
+                {{ t('subtenantListTitle') }}
+              </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showAdminGeneral"
                 icon="tune">
@@ -571,7 +587,7 @@
       </div>
     </q-drawer>
     <q-page-container id="app-content-root" class="app-content-root">
-      <router-view />
+      <router-view :key="activeContentKey" />
     </q-page-container>
   </q-layout>
   <ModalComponent
@@ -620,6 +636,10 @@ const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+
+const activeContentKey = computed(() =>
+  `${route.fullPath}::${authStore.activeSubtenantId ?? 0}`,
+)
 const {
   warningVisible,
   formattedCountdown,
@@ -709,6 +729,7 @@ const {
   showBilling,
   showAdministrationMenu,
   showAdminGeneral,
+  showAdminSubtenants,
   showAdminUsers,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')

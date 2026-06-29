@@ -32,6 +32,7 @@ export const layoutTestIds = {
   navUsersList: 'layout-nav-users-list',
   navUsersAdd: 'layout-nav-users-add',
   navAdminUsers: 'layout-nav-admin-users',
+  navAdminSubtenants: 'layout-nav-admin-subtenants',
 }
 
 export const sessionInactivityTestIds = {
@@ -58,6 +59,21 @@ export const userListTestIds = {
 export const userDialogTestIds = {
   field: name => toTestId('user-dialog-field', name),
   btn: name => toTestId('user-dialog-btn', name),
+}
+
+export const subtenantListTestIds = {
+  page: 'subtenant-list-page',
+  add: 'subtenant-list-btn-add',
+  rowView: id => toTestId('subtenant-list-row', id, 'btn-view'),
+  rowEdit: id => toTestId('subtenant-list-row', id, 'btn-edit'),
+  rowMore: id => toTestId('subtenant-list-row', id, 'btn-more'),
+  rowDelete: id => toTestId('subtenant-list-row', id, 'btn-delete'),
+}
+
+export const subtenantDialogTestIds = {
+  dialog: 'subtenant-dialog',
+  field: name => toTestId('subtenant-dialog-field', name),
+  btn: name => toTestId('subtenant-dialog-btn', name),
 }
 
 export const clientListTestIds = {

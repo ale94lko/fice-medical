@@ -986,6 +986,8 @@ import AddClientDuplicateMatchReviewDialog
   from '../AddClientDuplicateMatchReviewDialog.vue'
 import { useSiteStore } from '../../stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
+import { useRegisterUnsavedChanges } from
+  'src/composables/useUnsavedChangesRegistry.js'
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
 import { useContactSubTabs } from 'src/composables/useContactSubTabs.js'
 import { resolveOtherContactTabLabel } from 'src/utils/client-contact-form.js'
@@ -1260,6 +1262,8 @@ const {
   initialActiveSubTab: props.initialActiveSubTab,
   validateReferralIntake: () => !isEditMode.value,
 })
+
+useRegisterUnsavedChanges(() => isDirty())
 
 const filteredCurrentSubTabs = computed(() => {
   if (!hasSubTabs.value) {

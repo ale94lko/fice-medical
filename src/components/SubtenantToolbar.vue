@@ -55,18 +55,38 @@
       :aria-label="t('subtenantActiveAria', { name: activeSubtenant.name })">
       <SubtenantPillContent :name="activeSubtenant.name" />
     </div>
+    <ModalComponent
+      v-model="switchConfirmOpen"
+      test-id="subtenant-switch-unsaved"
+      :title="t('subtenantSwitchUnsavedTitle')"
+      :message="t('subtenantSwitchUnsavedMessage')"
+      :confirm-text="t('keepEditing')"
+      :cancel-text="t('discardChanges')"
+      @confirm="dismissSwitchConfirm"
+      @cancel="confirmSwitchDiscard"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth-store.js'
 import SubtenantPillContent from 'components/SubtenantPillContent.vue'
+import ModalComponent from 'components/ModalComponent.vue'
+import { hasUnsavedChanges } from
+  'src/composables/useUnsavedChangesRegistry.js'
+import { resolveSubtenantSwitchRoute } from
+  'src/utils/subtenant-switch-navigation.js'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
+const switchConfirmOpen = ref(false)
+const pendingSubtenantId = ref(null)
 
 const {
   subtenants,
@@ -76,7 +96,38 @@ const {
 
 const activeSubtenant = computed(() => authStore.activeSubtenant)
 
-function selectSubtenant(id) {
+function applySubtenantSwitch(id) {
+  const fallbackRoute = resolveSubtenantSwitchRoute(route.path)
   authStore.setActiveSubtenant(id)
+  if (fallbackRoute && route.path !== fallbackRoute) {
+    router.push(fallbackRoute)
+  }
+}
+
+function selectSubtenant(id) {
+  if (id === authStore.activeSubtenantId) {
+    return
+  }
+  if (hasUnsavedChanges()) {
+    pendingSubtenantId.value = id
+    switchConfirmOpen.value = true
+
+    return
+  }
+  applySubtenantSwitch(id)
+}
+
+function dismissSwitchConfirm() {
+  switchConfirmOpen.value = false
+  pendingSubtenantId.value = null
+}
+
+function confirmSwitchDiscard() {
+  switchConfirmOpen.value = false
+  const id = pendingSubtenantId.value
+  pendingSubtenantId.value = null
+  if (id != null) {
+    applySubtenantSwitch(id)
+  }
 }
 </script>

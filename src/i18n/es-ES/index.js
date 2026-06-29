@@ -12,6 +12,10 @@ export default {
   subtenant: 'Sede',
   subtenantSwitcherAria: 'Cambiar subtenant activo',
   subtenantActiveAria: 'Sede activa: {name}',
+  subtenantSwitchUnsavedTitle: '¿Cambiar de sede?',
+  subtenantSwitchUnsavedMessage:
+    'Tiene cambios sin guardar. Si cambia de sede ahora, saldrá de este '
+    + 'registro y se perderán los cambios.',
   signOut: 'Cerrar sesión',
   confirmSignOut: '¿Seguro que deseas cerrar sesión?',
   confirmSignOutTitle: 'Confirmar cerrar sesión',
@@ -76,6 +80,38 @@ export default {
   welcome: 'Bienvenido, {name}!',
   administration: 'Administración',
   administrationGeneral: 'General',
+  subtenantListTitle: 'Subtenants',
+  subtenantListSubtitle:
+    'Gestione sucursales y sedes del tenant.',
+  subtenantListAdd: 'Añadir subtenant',
+  subtenantListEmpty: 'No se encontraron subtenants.',
+  subtenantListError:
+    'No se pudieron cargar los subtenants. Inténtelo de nuevo.',
+  subtenantListPaginationSummary: '{from}–{to} de {total} subtenants',
+  subtenantNameLabel: 'Nombre',
+  subtenantCodeLabel: 'Código',
+  subtenantMainLabel: 'Sucursal principal',
+  subtenantStatusActiveLabel: 'Activo',
+  subtenantNameRequired: 'El nombre es obligatorio.',
+  subtenantDialogAddTitle: 'Añadir subtenant',
+  subtenantDialogEditTitle: 'Editar subtenant',
+  subtenantDialogViewTitle: 'Detalle del subtenant',
+  subtenantDialogAddSubtitle:
+    'El código de sucursal se genera automáticamente al guardar.',
+  subtenantDialogEditSubtitle: 'El código de sucursal no se puede cambiar.',
+  subtenantCreateSuccess:
+    'Subtenant creado. Código de sucursal: {code}',
+  subtenantUpdateSuccess: 'Subtenant actualizado correctamente.',
+  subtenantSaveError:
+    'No se pudo guardar el subtenant. Inténtelo de nuevo.',
+  subtenantLoadError:
+    'No se pudo cargar el subtenant. Inténtelo de nuevo.',
+  subtenantDeleteTitle: 'Eliminar subtenant',
+  subtenantDeleteMessage: '¿Eliminar el subtenant "{name}"?',
+  subtenantDeleteMessageGeneric: '¿Eliminar este subtenant?',
+  subtenantDeleteSuccess: 'Subtenant eliminado correctamente.',
+  subtenantDeleteError:
+    'No se pudo eliminar el subtenant. Inténtelo de nuevo.',
   users: 'Usuarios',
   userListSubtitle:
     'Gestione usuarios, roles y accesos del tenant.',

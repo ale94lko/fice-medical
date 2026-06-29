@@ -185,6 +185,15 @@
 }
 
 .app-drawer {
+  --app-drawer-item-padding-x: 8px;
+  --app-drawer-main-icon-size: 20px;
+  --app-drawer-sub-icon-size: 18px;
+  --app-drawer-icon-text-gap: 10px;
+  --app-drawer-subitem-icon-text-gap: 10px;
+  --app-drawer-subitem-icon-offset: calc(
+    var(--app-drawer-item-padding-x) + var(--app-drawer-main-icon-size)
+  );
+
   background: $shell-bg !important;
   color: $shell-text;
   border-right: 1px solid $shell-border !important;
@@ -197,14 +206,22 @@
     border-radius: $radius-md;
     margin: 1px 0;
     min-height: 40px;
-    padding: 6px 8px;
+    padding: 6px var(--app-drawer-item-padding-x);
+    gap: var(--app-drawer-icon-text-gap);
     font-size: 0.875rem;
     color: $shell-text;
     transition: background-color 0.15s ease;
 
     .q-item__section--avatar {
-      min-width: 36px;
-      padding-right: 8px;
+      min-width: 0 !important;
+      width: auto;
+      padding-right: 0 !important;
+      flex: 0 0 auto;
+    }
+
+    .q-item__section--avatar .q-icon {
+      width: var(--app-drawer-main-icon-size);
+      font-size: var(--app-drawer-main-icon-size);
     }
 
     .q-icon {
@@ -232,19 +249,23 @@
   }
 
   .app-drawer__subitem {
-    margin-left: 10px;
+    margin-left: 0;
     margin-right: 4px;
-    padding-left: 2px;
-    padding-right: 8px;
+    padding-left: var(--app-drawer-subitem-icon-offset);
+    padding-right: var(--app-drawer-item-padding-x);
     min-height: 36px;
+    gap: var(--app-drawer-subitem-icon-text-gap);
     font-size: 0.8125rem;
 
     .app-drawer__subitem-icon {
-      min-width: 28px;
-      padding-right: 6px;
+      min-width: 0 !important;
+      width: auto;
+      padding-right: 0 !important;
+      flex: 0 0 auto;
 
       .q-icon {
-        font-size: 18px;
+        width: var(--app-drawer-sub-icon-size);
+        font-size: var(--app-drawer-sub-icon-size);
         color: $shell-text-muted;
       }
     }
@@ -313,6 +334,17 @@
   }
 }
 
+.app-drawer-submenu {
+  --app-drawer-item-padding-x: 8px;
+  --app-drawer-main-icon-size: 20px;
+  --app-drawer-sub-icon-size: 18px;
+  --app-drawer-icon-text-gap: 10px;
+  --app-drawer-subitem-icon-text-gap: 10px;
+  --app-drawer-subitem-icon-offset: calc(
+    var(--app-drawer-item-padding-x) + var(--app-drawer-main-icon-size)
+  );
+}
+
 .app-light-menu,
 .app-drawer-submenu,
 .user-menu,
@@ -320,9 +352,28 @@
   @include app-light-menu-shell;
 
   .q-item {
+    gap: var(--app-drawer-icon-text-gap, 10px);
     color: $text-strong;
     border-radius: $radius-md;
     margin: 2px 6px;
+  }
+
+  .q-item__section--avatar {
+    min-width: 0 !important;
+    width: auto;
+    padding-right: 0 !important;
+    flex: 0 0 auto;
+  }
+
+  .app-drawer__subitem {
+    gap: var(--app-drawer-subitem-icon-text-gap, 10px);
+  }
+
+  .app-drawer__subitem-icon {
+    min-width: 0 !important;
+    width: auto;
+    padding-right: 0 !important;
+    flex: 0 0 auto;
   }
 
   .q-item:not(.app-nav-item--active):not(.q-router-link--active):not(
@@ -343,6 +394,7 @@
 
 .app-drawer-submenu .app-drawer__subitem {
   margin-left: 0;
+  padding-left: var(--app-drawer-subitem-icon-offset);
 
   .app-drawer__subitem-icon .q-icon {
     color: $text-muted;
@@ -385,7 +437,8 @@
 }
 
 .app-layout .q-page-container:has(.client-list-page),
-.app-layout .q-page-container:has(.staff-list-page) {
+.app-layout .q-page-container:has(.staff-list-page),
+.app-layout .q-page-container:has(.subtenant-list-page) {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -1201,6 +1254,11 @@
   width: 100%;
   max-width: 920px;
   min-width: 320px;
+}
+
+.subtenant-dialog.insurance-dialog.app-dialog-card {
+  max-width: calc(920px * 2 / 3);
+  min-width: 280px;
 }
 
 .user-dialog.app-dialog-card:not(.app-dialog-card--sm)  {

@@ -75,6 +75,27 @@ export const userListColumnKeys = {
   actions: 'actions',
 }
 
+export const subtenantStatusValues = {
+  active: 1,
+  inactive: 0,
+}
+
+export const subtenantFieldKeys = {
+  id: 'id',
+  name: 'name',
+  code: 'code',
+  main: 'main',
+  status: 'status',
+}
+
+export const subtenantListColumnKeys = {
+  name: 'name',
+  code: 'code',
+  main: 'main',
+  status: 'status',
+  actions: 'actions',
+}
+
 export const userRoleValues = {
   administrator: 'ADMINISTRATOR',
   clinician: 'CLINICIAN',
@@ -869,6 +890,10 @@ export const apiPaths = {
   tenantsUsersList: '/user/v1',
   tenantsUsersCreate: '/user/v1/register',
   tenantUserById: id => `/user/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  subtenantsList: '/subtenants/v1',
+  subtenantById: id => `/subtenants/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
   tenantRolesByTenantId: tenantId => `/roles/v1/tenant/${

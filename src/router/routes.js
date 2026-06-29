@@ -43,6 +43,23 @@ const routes = [
         },
       },
       {
+        path: 'administration/subtenants/add',
+        name: 'AdminSubtenantsAdd',
+        component: () => import('pages/admin/SubtenantList.vue'),
+        meta: {
+          requiresPermission: permissionNames.editSubtenants,
+          subtenantListAutoOpen: 'add',
+        },
+      },
+      {
+        path: 'administration/subtenants',
+        name: 'AdminSubtenantsList',
+        component: () => import('pages/admin/SubtenantList.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewSubtenants,
+        },
+      },
+      {
         path: 'administration/users/add',
         name: 'AdminUsersAdd',
         component: () => import('pages/admin/UserList.vue'),

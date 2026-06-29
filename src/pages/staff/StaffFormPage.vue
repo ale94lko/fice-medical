@@ -88,6 +88,8 @@ import {
   mapCatalogItemsToSelectOptions,
 } from 'src/utils/catalogs.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
+import { useRegisterUnsavedChanges } from
+  'src/composables/useUnsavedChangesRegistry.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -109,6 +111,28 @@ const stateOptions = ref([])
 const credentialOptions = ref([])
 const specialtyOptions = ref([])
 const supervisorOptions = ref([])
+const initialFormSnapshot = ref('')
+
+function buildStaffPageSnapshot() {
+  return JSON.stringify({
+    form: form.value,
+    photoFileId: photoFileId.value,
+  })
+}
+
+function isStaffFormDirty() {
+  if (!initialFormSnapshot.value) {
+    return false
+  }
+
+  return buildStaffPageSnapshot() !== initialFormSnapshot.value
+}
+
+function markStaffFormPristine() {
+  initialFormSnapshot.value = buildStaffPageSnapshot()
+}
+
+useRegisterUnsavedChanges(isStaffFormDirty)
 
 const staffId = computed(() => {
   const raw = route.params.id
@@ -299,6 +323,7 @@ onMounted(async() => {
     loadCatalogOptions(),
     loadStaffRecord(),
   ])
+  markStaffFormPristine()
 })
 </script>
 

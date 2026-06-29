@@ -128,6 +128,10 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.viewTenantsUser),
   )
 
+  const showAdminSubtenants = computed(() =>
+    hasPermission(permissions.value, permissionNames.viewSubtenants),
+  )
+
   return {
     showDashboard,
     showClientMenu,
@@ -147,6 +151,7 @@ export function useMainNavPermissions() {
     showBilling,
     showAdministrationMenu,
     showAdminGeneral,
+    showAdminSubtenants,
     showAdminUsers,
   }
 }
