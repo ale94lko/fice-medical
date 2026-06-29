@@ -1588,6 +1588,9 @@ export default {
   prefCommPointOfContactSaveRequiresSelection:
     'Seleccione un punto de contacto preferido cuando Punto de contacto '
     + 'esté seleccionado como método de comunicación preferido.',
+  minorClientGuardianContactRequired:
+    'Los clientes menores de 18 años deben tener al menos un contacto '
+    + 'completo de tipo Guardian antes de guardar.',
   additionalNotes: 'Notas adicionales',
   additionalNotesPlaceholder: 'Ingrese notas adicionales aquí...',
   optional: 'Opcional',

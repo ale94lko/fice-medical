@@ -180,6 +180,7 @@ export const clientContactTypeValues = {
   billing: 'Billing Contact',
   legal: 'Legal Representative',
   caregiver: 'Caregiver',
+  guardian: 'Guardian',
   nextOfKin: 'Next of Kin',
   other: 'Other',
 }

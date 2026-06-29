@@ -21,6 +21,9 @@ import { useValidationSaveFeedback } from
 import {
   resolvePointOfContactSaveErrorKey,
 } from 'src/utils/client-preferred-communication.js'
+import {
+  resolveMinorGuardianContactSaveErrorKey,
+} from 'src/utils/client-minor-guardian-validation.js'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
@@ -232,8 +235,10 @@ export function useAddClientTabValidation({
     resetTabErrorCounts()
 
     const contactSection = form.value[clientFormSections.contact]
-    const pocSaveErrorKey = resolvePointOfContactSaveErrorKey(contactSection)
-    if (pocSaveErrorKey) {
+    const businessRuleErrorKey = resolvePointOfContactSaveErrorKey(
+      contactSection,
+    ) || resolveMinorGuardianContactSaveErrorKey(form.value)
+    if (businessRuleErrorKey) {
       tabErrorCounts.value = {
         [addClientTabKeys.contact]: 1,
       }
@@ -241,7 +246,7 @@ export function useAddClientTabValidation({
       await nextTick()
       $q.notify({
         type: quasarNotifyTypes.negative,
-        message: t(pocSaveErrorKey),
+        message: t(businessRuleErrorKey),
         position: 'top',
       })
       await notifyAndScrollToValidationErrors(panelScrollRef)
