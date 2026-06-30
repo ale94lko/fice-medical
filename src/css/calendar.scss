@@ -1,0 +1,654 @@
+@import 'src/css/quasar.variables';
+
+$calendar-time-gutter-width: 44px;
+$calendar-hour-row-height: 48px;
+$calendar-hour-count: 24;
+$calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
+
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  padding: 8px 20px 0;
+
+  &__shell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  &__header {
+    flex-shrink: 0;
+    gap: 16px;
+  }
+
+  &__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 0 0 280px;
+    min-width: 260px;
+    max-width: 300px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    font-weight: 700;
+    color: $text-strong;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: $text-muted;
+    font-size: 0.8125rem;
+    line-height: 1.3;
+  }
+
+  &__toolbar-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-top: 1px;
+    padding-left: 10px;
+  }
+
+  &__body {
+    flex: 1 1 0;
+    min-height: 0;
+    gap: 16px;
+    align-items: stretch;
+    overflow: hidden;
+    display: flex;
+  }
+
+  &__sidebar {
+    flex: 0 0 280px;
+    min-width: 260px;
+    max-width: 300px;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: $surface;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    padding: 8px 10px;
+  }
+}
+
+.calendar-toolbar {
+  width: 100%;
+  flex-wrap: wrap;
+
+  &__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: $text-strong;
+    min-width: 140px;
+  }
+
+  &__view-toggle {
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    overflow: hidden;
+  }
+}
+
+.calendar-sidebar {
+  background: $surface;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  padding: 16px;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.calendar-source-panel {
+  &__title {
+    font-weight: 600;
+    color: $text-strong;
+  }
+}
+
+.calendar-clinician-list {
+  position: relative;
+  min-height: 24px;
+
+  &__title {
+    font-weight: 600;
+    color: $text-strong;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    cursor: pointer;
+    margin-bottom: 4px;
+  }
+
+  &__label {
+    font-size: 0.8125rem;
+    color: $text-strong;
+    line-height: 1.3;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__checkbox {
+    flex-shrink: 0;
+  }
+
+  &__checkbox.q-checkbox .q-checkbox__inner--truthy {
+    color: var(--calendar-clinician-color) !important;
+  }
+
+  &__checkbox.q-checkbox .q-checkbox__inner--truthy .q-checkbox__bg {
+    background: var(--calendar-clinician-color) !important;
+    border-color: var(--calendar-clinician-color) !important;
+  }
+}
+
+.calendar-mini-month {
+  &__weekday {
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: $text-muted;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  &__day {
+    border: none;
+    background: transparent;
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto;
+    font-size: 0.78rem;
+    color: $text-strong;
+    cursor: pointer;
+
+    &--outside {
+      color: $text-muted;
+    }
+
+    &--today {
+      border: 1px solid $primary;
+    }
+
+    &--selected {
+      background: rgba($primary, 0.12);
+      color: $primary;
+      font-weight: 600;
+    }
+
+    &--has-events {
+      font-weight: 700;
+    }
+  }
+}
+
+.calendar-month-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
+
+  &__weekday {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $text-muted;
+    padding-bottom: 8px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-rows: minmax(110px, 1fr);
+    flex: 1 1 auto;
+    border-top: 1px solid $border-subtle;
+    border-left: 1px solid $border-subtle;
+  }
+
+  &__cell {
+    border-right: 1px solid $border-subtle;
+    border-bottom: 1px solid $border-subtle;
+    padding: 6px;
+    min-height: 110px;
+    cursor: pointer;
+    background: $surface;
+
+    &--outside {
+      background: rgba($border-subtle, 0.25);
+    }
+
+    &--today {
+      background: rgba($primary, 0.04);
+    }
+  }
+
+  &__day-number {
+    border: none;
+    background: transparent;
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    font-family: $typography-font-family;
+    font-weight: 600;
+
+    &--today {
+      background: $primary;
+      color: #fff;
+    }
+  }
+
+  &__events {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  &__event {
+    border: 1px solid rgba($text-strong, 0.14);
+    border-radius: 4px;
+    padding: 2px 6px;
+    text-align: left;
+    font-family: $typography-font-family;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__event-time {
+    margin-right: 4px;
+    font-weight: 600;
+  }
+
+  &__more {
+    border: none;
+    background: transparent;
+    color: $primary;
+    font-family: $typography-font-family;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+}
+
+.calendar-week-view,
+.calendar-day-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+
+  &__gutter,
+  &__hours {
+    flex: 0 0 $calendar-time-gutter-width;
+    width: $calendar-time-gutter-width;
+  }
+
+  &__header {
+    flex-shrink: 0;
+    margin-left: $calendar-time-gutter-width;
+  }
+
+  &__day-header {
+    text-align: center;
+    padding-bottom: 6px;
+  }
+
+  &__day-button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    font-family: $typography-font-family;
+  }
+
+  &__weekday {
+    font-size: 0.72rem;
+    color: $text-muted;
+    text-transform: uppercase;
+  }
+
+  &__day-number {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 999px;
+    font-weight: 600;
+
+    &--today {
+      background: $primary;
+      color: #fff;
+    }
+  }
+
+  &__body {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    align-items: flex-start;
+  }
+
+  &__hours {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: $calendar-time-grid-height;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: $surface;
+  }
+
+  &__hour-label {
+    flex: 0 0 $calendar-hour-row-height;
+    height: $calendar-hour-row-height;
+    font-size: 0.68rem;
+    line-height: 1.1;
+    color: $text-muted;
+    text-align: right;
+    padding: 0 4px 0 0;
+    box-sizing: border-box;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    border-top: 1px solid transparent;
+  }
+
+  &__day-column,
+  &__grid-wrap {
+    position: relative;
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  &__day-grid,
+  &__grid {
+    position: relative;
+    height: $calendar-time-grid-height;
+    min-height: $calendar-time-grid-height;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid $border-subtle;
+  }
+
+  &__hour-line {
+    flex: 0 0 $calendar-hour-row-height;
+    height: $calendar-hour-row-height;
+    border-top: 1px solid rgba($border-subtle, 0.9);
+    border-bottom: none;
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+}
+
+.calendar-week-view {
+  &__day-grid--bookable {
+    cursor: pointer;
+  }
+}
+
+.calendar-day-view {
+  &__grid--bookable {
+    cursor: pointer;
+  }
+}
+
+.calendar-time-now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 0;
+  border-top: 2px solid $negative;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: $negative;
+  }
+}
+
+.calendar-day-view {
+  &__header {
+    margin-left: $calendar-time-gutter-width;
+    margin-bottom: 6px;
+  }
+
+  &__day-button {
+    align-items: flex-start;
+  }
+
+  &__weekday {
+    font-size: 0.95rem;
+    text-transform: none;
+    color: $text-strong;
+    font-weight: 600;
+  }
+}
+
+.calendar-event {
+  position: absolute;
+  border: 1px solid rgba($text-strong, 0.14);
+  border-radius: 6px;
+  padding: 4px 6px;
+  text-align: left;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+  container-type: size;
+  font-family: $typography-font-family;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+
+  &--overlap-layer {
+    box-shadow: 0 1px 2px rgba($text-strong, 0.08);
+  }
+
+  &--overlap-front {
+    box-shadow: 0 2px 6px rgba($text-strong, 0.12);
+  }
+
+  &__time {
+    display: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__label {
+    display: block;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@container (min-height: 38px) {
+  .calendar-event__time {
+    display: block;
+  }
+}
+
+.calendar-event--cancelled,
+.calendar-month-view__event.calendar-event--cancelled {
+  text-decoration: line-through;
+  opacity: 0.78;
+}
+
+.calendar-event--completed,
+.calendar-month-view__event.calendar-event--completed {
+  opacity: 0.88;
+}
+
+.calendar-event--no-show,
+.calendar-month-view__event.calendar-event--no-show {
+  opacity: 0.85;
+}
+
+.calendar-agenda-view {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  gap: 20px;
+
+  &__empty {
+    padding: 48px 16px;
+    text-align: center;
+  }
+
+  &__day-title {
+    border: none;
+    background: transparent;
+    font-family: $typography-font-family;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: $text-strong;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  &__events {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  &__event {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    background: $surface;
+    padding: 12px;
+    text-align: left;
+    cursor: pointer;
+    font-family: $typography-font-family;
+  }
+
+  &__event-time {
+    flex: 0 0 120px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $text-strong;
+  }
+
+  &__event-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__event-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $text-strong;
+  }
+
+  &__event-meta {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 1023px) {
+  .calendar-page__header {
+    flex-direction: column;
+  }
+
+  .calendar-page__intro {
+    flex: 0 0 auto;
+    max-width: none;
+    width: 100%;
+  }
+
+  .calendar-page__toolbar-wrap {
+    width: 100%;
+    padding-top: 0;
+    padding-left: 0;
+  }
+
+  .calendar-page__body {
+    flex-direction: column;
+  }
+
+  .calendar-page__sidebar {
+    flex: 0 0 auto;
+    max-width: none;
+    width: 100%;
+  }
+}

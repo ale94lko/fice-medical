@@ -19,6 +19,7 @@ export const layoutTestIds = {
   userMenu: 'layout-btn-user-menu',
   signOut: 'layout-menu-sign-out',
   navDashboard: 'layout-nav-dashboard',
+  navCalendar: 'layout-nav-calendar',
   navClientMenu: 'layout-nav-client-menu',
   navClientList: 'layout-nav-client-list',
   navClientAdd: 'layout-nav-client-add',
@@ -294,6 +295,21 @@ export const referralTestIds = {
   rowMore: id => toTestId('referral-row', id, 'btn-more'),
   rowSchedule: id => toTestId('referral-row', id, 'btn-schedule'),
   rowDelete: id => toTestId('referral-row', id, 'btn-delete'),
+}
+
+export const calendarTestIds = {
+  page: 'calendar-page',
+  btnToday: 'calendar-btn-today',
+  btnAddAppointment: 'calendar-btn-add-appointment',
+  btnPrev: 'calendar-btn-prev',
+  btnNext: 'calendar-btn-next',
+  viewToggle: 'calendar-view-toggle',
+  miniMonthPrev: 'calendar-mini-month-btn-prev',
+  miniMonthNext: 'calendar-mini-month-btn-next',
+  clinicianSelect: 'calendar-clinician-select',
+  clinicianToggle: id => toTestId('calendar-clinician', id, 'toggle'),
+  sourceToggle: id => toTestId('calendar-source', id, 'toggle'),
+  event: id => toTestId('calendar-event', id),
 }
 
 export const modalTestIds = {

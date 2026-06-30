@@ -106,6 +106,23 @@ export function localDayKeyFromUtc(iso, timeZone = resolveTenantTimeZone()) {
   return `${y}-${m}-${d}`
 }
 
+export function localDateTimeToUtcIso(
+  dayKey,
+  hour,
+  minute = 0,
+  timeZone = resolveTenantTimeZone(),
+) {
+  const { fromUtc } = utcRangeForLocalDay(dayKey, timeZone)
+  const startMs = Date.parse(fromUtc)
+  if (!Number.isFinite(startMs)) {
+    return ''
+  }
+
+  const offsetMinutes = Number(hour) * 60 + Number(minute)
+
+  return new Date(startMs + offsetMinutes * 60 * 1000).toISOString()
+}
+
 export function utcRangeForLocalDay(
   dayKey,
   timeZone = resolveTenantTimeZone(),

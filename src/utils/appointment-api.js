@@ -7,6 +7,7 @@ import {
   mockLifecycleAppointment,
   mockListAppointmentClinicians,
   mockListAppointmentTypes,
+  mockListCalendarAppointments,
   mockListClientAppointments,
   mockListClientCarePlans,
   mockListSlots,
@@ -71,6 +72,31 @@ export async function listClientAppointments(clientId, params = {}) {
     }
 
     return mapAppointmentsList(mockListClientAppointments(clientId))
+  }
+}
+
+export async function listCalendarAppointments(params = {}) {
+  const query = {
+    from_utc: params.from_utc,
+    to_utc: params.to_utc,
+    clinician_ids: params.clinician_ids ?? undefined,
+    clinician_id: params.clinician_id ?? undefined,
+    page: params.page ?? 0,
+    limit: params.limit ?? 200,
+  }
+
+  try {
+    const response = await apiInstance.get(apiPaths.appointmentsList, {
+      params: query,
+    })
+
+    return mapAppointmentsList(unwrapList(response.data))
+  } catch (error) {
+    if (!useMockFallback(error)) {
+      throw error
+    }
+
+    return mapAppointmentsList(mockListCalendarAppointments(query))
   }
 }
 

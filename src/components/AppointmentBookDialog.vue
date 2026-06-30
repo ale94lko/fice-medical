@@ -25,6 +25,27 @@
             :step="1"
           />
           <div class="row q-col-gutter-md q-mt-md q-mb-sm items-center">
+            <div
+              v-if="showClientPicker"
+              class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('client')"
+                required
+                :test-id="tid.field('client')">
+                <FormSelect
+                  v-model="draft.clientId"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  :options="clientOptions"
+                  :placeholder="t('appointmentClientPlaceholder')"
+                  :error="Boolean(errors.clientId)"
+                  :error-message="errors.clientId"
+                  :test-id="tid.field('client')"
+                />
+              </AddClientLabeledField>
+            </div>
             <div class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('appointmentType')"
@@ -216,9 +237,13 @@ import AppointmentSlotPicker from 'components/AppointmentSlotPicker.vue'
 import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
-import { appointmentNotesMaxLength } from 'components/constants.js'
+import {
+  appointmentNotesMaxLength,
+  clientFieldKeys as ck,
+} from 'components/constants.js'
 import { useAppointmentScheduling } from
   'src/composables/useAppointmentScheduling.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import {
   listAppointmentClinicians,
   listAppointmentTypes,
@@ -235,6 +260,7 @@ const props = defineProps({
   mode: { type: String, default: 'book' },
   appointment: { type: Object, default: null },
   saving: { type: Boolean, default: false },
+  bookingHint: { type: Object, default: null },
 })
 
 const emit = defineEmits([
@@ -245,6 +271,7 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const siteStore = useSiteStore()
 
 const open = computed({
   get: () => props.modelValue,
@@ -255,6 +282,19 @@ const draft = ref(createDraft())
 const errors = ref({})
 const typeOptions = ref([])
 const clinicianOptions = ref([])
+const clientOptions = ref([])
+
+const showClientPicker = computed(() =>
+  props.mode === 'book' && !String(props.clientId ?? '').trim(),
+)
+
+const resolvedClientId = computed(() => {
+  if (!showClientPicker.value) {
+    return props.clientId
+  }
+
+  return draft.value.clientId
+})
 
 const selectedType = computed(() =>
   typeOptions.value.find(
@@ -309,6 +349,7 @@ const {
   clearSlotsWindow,
   canGoPrevMonth,
   canGoNextMonth,
+  applyBookingHint,
 } = scheduling
 
 const schedulingLocked = computed(() =>
@@ -376,11 +417,38 @@ const summaryTelemedicine = computed(() =>
 
 function createDraft() {
   return {
+    clientId: null,
     appointmentTypeId: null,
     clinicianId: null,
     telemedicine: false,
     notes: '',
   }
+}
+
+function buildClientOptionLabel(row) {
+  const name = String(row?.[ck.name] ?? '').trim()
+  const clientNumber = String(row?.[ck.clientNumber] ?? '').trim()
+  if (name && clientNumber) {
+    return `${name} (${clientNumber})`
+  }
+
+  return name || clientNumber || String(row?.id ?? '')
+}
+
+async function loadClientOptions() {
+  if (!showClientPicker.value) {
+    clientOptions.value = []
+
+    return
+  }
+
+  await siteStore.getClientList({ page: 1, limit: 200 }, t)
+  clientOptions.value = siteStore.clientList
+    .map(row => ({
+      label: buildClientOptionLabel(row),
+      value: row.id,
+    }))
+    .filter(option => option.value != null)
 }
 
 async function loadFormOptions() {
@@ -398,6 +466,9 @@ async function loadFormOptions() {
 
 function validateDraft() {
   const next = {}
+  if (showClientPicker.value && !draft.value.clientId) {
+    next.clientId = t('appointmentClientRequired')
+  }
   if (props.mode === 'book' && !draft.value.appointmentTypeId) {
     next.appointmentTypeId = t('appointmentTypeRequired')
   }
@@ -419,11 +490,22 @@ function onCancel() {
   emit('cancel')
 }
 
+function tryApplyBookingHint() {
+  if (props.mode !== 'book' || !props.bookingHint || slotsLoading.value) {
+    return
+  }
+  if (!draft.value.appointmentTypeId) {
+    return
+  }
+
+  applyBookingHint(props.bookingHint)
+}
+
 function buildBookPayload() {
   /* eslint-disable camelcase -- API book payload */
   const payload = {
     slot_id: selectedSlotId.value,
-    client_id: Number(props.clientId),
+    client_id: Number(resolvedClientId.value),
     notes: draft.value.notes || null,
     telemedicine: Boolean(draft.value.telemedicine),
     clinician_id: draft.value.clinicianId ?? null,
@@ -458,8 +540,12 @@ watch(
     draft.value = createDraft()
     errors.value = {}
     clearSlotsWindow()
-    await loadFormOptions()
+    await Promise.all([
+      loadFormOptions(),
+      loadClientOptions(),
+    ])
     await loadSlotsWindow()
+    tryApplyBookingHint()
   },
 )
 
@@ -474,6 +560,7 @@ watch(
       draft.value.telemedicine = false
     }
     await loadSlotsWindow()
+    tryApplyBookingHint()
   },
 )
 
@@ -489,6 +576,7 @@ watch(
     clearSelectedSlot()
     if (draft.value.appointmentTypeId) {
       await refreshSlots()
+      tryApplyBookingHint()
     }
   },
 )

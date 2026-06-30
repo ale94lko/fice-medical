@@ -94,6 +94,26 @@
               {{ t('dashboard') }}
             </q-tooltip>
           </q-item>
+          <q-item
+            v-if="showCalendarMenu"
+            clickable
+            v-ripple
+            to="/calendar"
+            :data-testid="layoutTestIds.navCalendar"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="calendar_month" />
+            </q-item-section>
+            <q-item-section>{{ t('calendar') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('calendar') }}
+            </q-tooltip>
+          </q-item>
           <q-expansion-item
             v-if="accordionMenu && showClientMenu"
             v-model="clientMenuExpanded"
@@ -713,6 +733,7 @@ const accordionMenu = computed(
 )
 const {
   showDashboard,
+  showCalendarMenu,
   showClientMenu,
   showClientList,
   showClientAdd,

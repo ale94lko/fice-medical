@@ -4,7 +4,7 @@
     :label="label"
     :disable="disable"
     :data-testid="testId || undefined"
-    color="positive"
+    :color="color"
     keep-color
     class="app-form-toggle"
     @update:model-value="emit('update:modelValue', $event)"
@@ -24,6 +24,10 @@ defineProps({
   disable: {
     type: Boolean,
     default: false,
+  },
+  color: {
+    type: String,
+    default: 'positive',
   },
   testId: {
     type: String,

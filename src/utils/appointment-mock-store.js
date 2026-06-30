@@ -1,5 +1,11 @@
 /* eslint-disable camelcase -- mock API uses snake_case */
 import { appointmentStatuses } from 'components/constants.js'
+import {
+  addDaysToDayKey,
+  localDateTimeToUtcIso,
+  resolveTenantTimeZone,
+  todayLocalDayKey,
+} from 'src/utils/appointment-datetime.js'
 
 const mockAppointmentsByClient = {}
 const mockSlots = buildMockSlots()
@@ -78,19 +84,6 @@ export function mockListClientAppointments(clientId) {
   return seedClientAppointments(clientId)
 }
 
-export function mockGetAppointment(appointmentId) {
-  for (const list of Object.values(mockAppointmentsByClient)) {
-    const match = list.find(
-      row => String(row.appointment_id) === String(appointmentId),
-    )
-    if (match) {
-      return match
-    }
-  }
-
-  return null
-}
-
 export function mockListAppointmentTypes() {
   return [
     {
@@ -128,7 +121,130 @@ export function mockListAppointmentClinicians() {
   return [
     { id: 12, display_name: 'Dr. Sarah Mitchell' },
     { id: 18, display_name: 'Dr. James Wilson' },
+    { id: 24, display_name: 'Dr. Ana Rivera' },
   ]
+}
+
+const mockCalendarAppointments = buildMockCalendarAppointments()
+
+function buildMockCalendarAppointments() {
+  const timeZone = resolveTenantTimeZone()
+  const baseDayKey = todayLocalDayKey(timeZone)
+  const clinicians = mockListAppointmentClinicians()
+  const clients = [
+    'Jane Cooper',
+    'Michael Brown',
+    'Emily Davis',
+    'Robert Miller',
+    'Sofia Martinez',
+  ]
+  const types = mockListAppointmentTypes()
+  const rows = []
+  let appointmentId = 600
+
+  for (let dayOffset = -14; dayOffset <= 45; dayOffset += 1) {
+    const dayKey = addDaysToDayKey(baseDayKey, dayOffset)
+    clinicians.forEach((clinician, clinicianIndex) => {
+      const slotsPerDay = clinicianIndex === 0 ? 3 : 2
+      for (let slot = 0; slot < slotsPerDay; slot += 1) {
+        const localHour = 9 + slot * 2 + clinicianIndex
+        const localMinute = (slot * 15 + clinicianIndex * 5) % 60
+        const startIso = localDateTimeToUtcIso(
+          dayKey,
+          localHour,
+          localMinute,
+          timeZone,
+        )
+        const duration = types[slot % types.length].default_duration_min
+        const startMs = Date.parse(startIso)
+        const endIso = Number.isFinite(startMs)
+          ? new Date(startMs + duration * 60 * 1000).toISOString()
+          : ''
+        const clientName = clients[
+          (dayOffset + clinicianIndex + slot) % clients.length
+        ]
+        rows.push({
+          appointment_id: appointmentId,
+          appointment_number: `APT-${appointmentId}`,
+          status: appointmentStatuses.confirmed,
+          client_id: 100 + appointmentId,
+          client_display_name: clientName,
+          clinician_id: clinician.id,
+          clinician_display_name: clinician.display_name,
+          appointment_type_id: types[slot % types.length].id,
+          appointment_type_code: types[slot % types.length].code,
+          appointment_type_name: types[slot % types.length].name,
+          start_at_utc: startIso,
+          end_at_utc: endIso,
+          duration_min: duration,
+          telemedicine: slot % 2 === 0,
+          telemedicine_allowed: true,
+          notes: null,
+        })
+        appointmentId += 1
+      }
+    })
+  }
+
+  return rows
+}
+
+function parseClinicianIdsParam(value) {
+  if (Array.isArray(value)) {
+    return value.map(id => Number(id)).filter(Number.isFinite)
+  }
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return []
+  }
+
+  return raw.split(',').map(id => Number(id.trim())).filter(Number.isFinite)
+}
+
+export function mockListCalendarAppointments(params = {}) {
+  let rows = [...mockCalendarAppointments]
+  const fromMs = Date.parse(String(params.from_utc ?? ''))
+  const toMs = Date.parse(String(params.to_utc ?? ''))
+
+  if (Number.isFinite(fromMs)) {
+    rows = rows.filter(row =>
+      Date.parse(String(row.start_at_utc)) >= fromMs,
+    )
+  }
+  if (Number.isFinite(toMs)) {
+    rows = rows.filter(row =>
+      Date.parse(String(row.start_at_utc)) <= toMs,
+    )
+  }
+
+  const clinicianIds = parseClinicianIdsParam(
+    params.clinician_ids ?? params.clinicianIds,
+  )
+  if (clinicianIds.length) {
+    rows = rows.filter(row => clinicianIds.includes(Number(row.clinician_id)))
+  }
+
+  return rows
+}
+
+export function mockGetAppointment(appointmentId) {
+  for (const list of Object.values(mockAppointmentsByClient)) {
+    const match = list.find(
+      row => String(row.appointment_id) === String(appointmentId),
+    )
+    if (match) {
+      return match
+    }
+  }
+
+  const calendarMatch = mockCalendarAppointments.find(
+    row => String(row.appointment_id) === String(appointmentId),
+  )
+  if (calendarMatch) {
+    return calendarMatch
+  }
+
+  return null
 }
 
 export function mockListSlots(params = {}) {

@@ -20,6 +20,7 @@ function devApiProxy(target) {
 
   return {
     '/client': { ...o },
+    '/appointments': { ...o },
     '/catalogs': { ...o },
     '/oauth': { ...o },
     '/patients': { ...o },

@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { permissionNames } from 'components/constants.js'
+import { permissionNames, clientPermissionNames } from 'components/constants.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import {
   hasAnyPermission,
@@ -30,12 +30,24 @@ const humanResourcesPermissions = [
   permissionNames.viewCredentials,
 ]
 
+const calendarPermissions = [
+  clientPermissionNames.viewAppointmentSlot,
+  clientPermissionNames.bookAppointment,
+  clientPermissionNames.cancelAppointment,
+  clientPermissionNames.rescheduleAppointment,
+  clientPermissionNames.manageAppointmentSlots,
+]
+
 export function useMainNavPermissions() {
   const authStore = useAuthStore()
   const permissions = computed(() => authStore.permissions)
 
   const showDashboard = computed(() =>
     hasAssignedPermissions(permissions.value),
+  )
+
+  const showCalendarMenu = computed(() =>
+    hasAnyPermission(permissions.value, calendarPermissions),
   )
 
   const showClientMenu = computed(() =>
@@ -134,6 +146,7 @@ export function useMainNavPermissions() {
 
   return {
     showDashboard,
+    showCalendarMenu,
     showClientMenu,
     showClientList,
     showClientAdd,

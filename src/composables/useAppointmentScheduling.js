@@ -15,6 +15,7 @@ import {
   resolveTenantTimeZone,
   todayLocalDayKey,
 } from 'src/utils/appointment-datetime.js'
+import { localMinutesFromUtc } from 'src/utils/calendar-events.js'
 
 export function useAppointmentScheduling(getFilters) {
   const timeZone = resolveTenantTimeZone()
@@ -173,6 +174,55 @@ export function useAppointmentScheduling(getFilters) {
     return slotsByDay.value.has(dayKey)
   }
 
+  function prefillDay(dayKey) {
+    const { startDayKey, endDayKey } = queryRange.value
+    if (!isDayKeyInRange(dayKey, startDayKey, endDayKey)) {
+      return false
+    }
+    selectedDayKey.value = dayKey
+    visibleMonthKey.value = monthKeyFromDayKey(dayKey)
+    clearSelectedSlot()
+
+    return true
+  }
+
+  function selectNearestSlotForMinutes(minutesLocal) {
+    const daySlots = selectedDaySlots.value
+    if (!daySlots.length) {
+      return false
+    }
+
+    let bestSlot = null
+    let bestDiff = Infinity
+    for (const slot of daySlots) {
+      const start = localMinutesFromUtc(slot.startAtUtc, timeZone)
+      const diff = Math.abs(start - minutesLocal)
+      if (diff < bestDiff) {
+        bestDiff = diff
+        bestSlot = slot
+      }
+    }
+    if (!bestSlot) {
+      return false
+    }
+    selectedSlotId.value = bestSlot.slotId
+
+    return true
+  }
+
+  function applyBookingHint(hint) {
+    const dayKey = String(hint?.dayKey ?? '').trim()
+    const minutesLocal = Number(hint?.minutesLocal)
+    if (!dayKey || !Number.isFinite(minutesLocal)) {
+      return false
+    }
+    if (!prefillDay(dayKey)) {
+      return false
+    }
+
+    return selectNearestSlotForMinutes(minutesLocal)
+  }
+
   return {
     timeZone,
     slots,
@@ -198,5 +248,8 @@ export function useAppointmentScheduling(getFilters) {
     dayHasAvailability,
     clearSelectedSlot,
     clearSlotsWindow,
+    prefillDay,
+    selectNearestSlotForMinutes,
+    applyBookingHint,
   }
 }

@@ -1,4 +1,4 @@
-import { permissionNames } from 'components/constants.js'
+import { permissionNames, clientPermissionNames } from 'components/constants.js'
 
 const routes = [
   {
@@ -8,6 +8,20 @@ const routes = [
       {
         path: 'dashboard',
         component: () => import('pages/dashboard/DashboardPage.vue'),
+      },
+      {
+        path: 'calendar',
+        name: 'Calendar',
+        component: () => import('pages/calendar/CalendarPage.vue'),
+        meta: {
+          requiresAnyPermission: [
+            clientPermissionNames.viewAppointmentSlot,
+            clientPermissionNames.bookAppointment,
+            clientPermissionNames.cancelAppointment,
+            clientPermissionNames.rescheduleAppointment,
+            clientPermissionNames.manageAppointmentSlots,
+          ],
+        },
       },
       {
         path: 'clients',
