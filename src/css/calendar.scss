@@ -169,6 +169,10 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     color: var(--calendar-clinician-color) !important;
   }
 
+  &__checkbox.q-checkbox .q-checkbox__inner--falsy .q-checkbox__bg {
+    border-color: var(--calendar-clinician-color) !important;
+  }
+
   &__checkbox.q-checkbox .q-checkbox__inner--truthy .q-checkbox__bg {
     background: var(--calendar-clinician-color) !important;
     border-color: var(--calendar-clinician-color) !important;
@@ -435,6 +439,26 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 }
 
 .calendar-week-view {
+  &__header {
+    margin-left: 0;
+  }
+
+  &__day-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__day-button {
+    justify-content: center;
+  }
+
+  &__weekday,
+  &__day-number {
+    text-align: center;
+  }
+
   &__day-grid--bookable {
     cursor: pointer;
   }
@@ -549,6 +573,86 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 .calendar-event--no-show,
 .calendar-month-view__event.calendar-event--no-show {
   opacity: 0.85;
+}
+
+.appointment-availability-day-grid {
+  height: auto;
+  flex: none;
+
+  &__body {
+    flex: none;
+    height: 480px;
+    min-height: 480px;
+    max-height: 480px;
+    overflow-y: auto;
+    border: 1px solid $border-subtle;
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  &__grid--interactive {
+    cursor: pointer;
+  }
+
+  &__block {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+
+    &--outside {
+      background: rgba($grey-5, 0.72);
+      border-color: rgba($grey-6, 0.35);
+    }
+
+    &--break {
+      background: rgba($warning, 0.42);
+      border-color: rgba(darken($warning, 8%), 0.35);
+    }
+
+    &--appointment {
+      left: 4px;
+      right: 4px;
+      z-index: 2;
+      pointer-events: auto;
+      cursor: pointer;
+      border-radius: 6px;
+      background: rgba($positive, 0.22);
+      border: 1px solid rgba($positive, 0.55);
+      padding: 4px 6px;
+      overflow: hidden;
+    }
+  }
+
+  &__block-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: darken($positive, 12%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__selection {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    z-index: 3;
+    border-radius: 6px;
+    background: rgba($primary, 0.18);
+    border: 2px solid $primary;
+    pointer-events: none;
+  }
+
+  &__selected {
+    color: $text-strong;
+    margin-bottom: 0;
+  }
 }
 
 .calendar-agenda-view {

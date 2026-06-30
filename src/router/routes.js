@@ -74,6 +74,23 @@ const routes = [
         },
       },
       {
+        path: 'administration/services/add',
+        name: 'AdminServiceProceduresAdd',
+        component: () => import('pages/admin/ServiceProcedureList.vue'),
+        meta: {
+          requiresPermission: permissionNames.editCatalog,
+          serviceProcedureListAutoOpen: 'add',
+        },
+      },
+      {
+        path: 'administration/services',
+        name: 'AdminServiceProceduresList',
+        component: () => import('pages/admin/ServiceProcedureList.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewCatalog,
+        },
+      },
+      {
         path: 'administration/users/add',
         name: 'AdminUsersAdd',
         component: () => import('pages/admin/UserList.vue'),

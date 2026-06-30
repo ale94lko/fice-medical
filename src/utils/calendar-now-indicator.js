@@ -1,6 +1,12 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { calendarTimeRowHeightPx } from 'src/constants/calendar.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 import { resolveTenantTimeZone } from 'src/utils/appointment-datetime.js'
+import {
+  getAppDateTimeConfig,
+  localWallClockMinutesNow,
+} from 'src/utils/app-datetime.js'
 
 function resolveTimeZone(timeZone) {
   const raw = typeof timeZone === 'function' ? timeZone() : timeZone
@@ -9,6 +15,13 @@ function resolveTimeZone(timeZone) {
 }
 
 export function localMinutesNow(timeZone = resolveTenantTimeZone()) {
+  const fromLoginOffset = localWallClockMinutesNow(
+    getAppDateTimeConfig().timezone,
+  )
+  if (fromLoginOffset != null) {
+    return Math.floor(fromLoginOffset)
+  }
+
   const tz = resolveTimeZone(timeZone)
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: tz,
@@ -36,6 +49,8 @@ export function scrollContainerToNow(containerEl, nowTopPx) {
 }
 
 export function useCalendarNowIndicator(timeZone) {
+  const authStore = useAuthStore()
+  const { configData } = storeToRefs(authStore)
   const nowTick = ref(Date.now())
   let timer = null
 
@@ -53,6 +68,7 @@ export function useCalendarNowIndicator(timeZone) {
 
   const nowLineStyle = computed(() => {
     void nowTick.value
+    void configData.value?.timezone
 
     return {
       top: `${nowIndicatorTopPx(resolveTimeZone(timeZone))}px`,
@@ -61,6 +77,7 @@ export function useCalendarNowIndicator(timeZone) {
 
   const nowScrollTopPx = computed(() => {
     void nowTick.value
+    void configData.value?.timezone
 
     return nowIndicatorTopPx(resolveTimeZone(timeZone))
   })

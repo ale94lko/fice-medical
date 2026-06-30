@@ -96,6 +96,73 @@ export const subtenantListColumnKeys = {
   actions: 'actions',
 }
 
+export const serviceProcedureStatusValues = {
+  active: 'ACTIVE',
+  inactive: 'INACTIVE',
+}
+
+export const serviceProcedureCategoryValues = {
+  clinicalService: 'CLINICAL_SERVICE',
+  therapy: 'THERAPY',
+  evaluation: 'EVALUATION',
+  medicationManagement: 'MEDICATION_MANAGEMENT',
+  labExam: 'LAB_EXAM',
+  procedure: 'PROCEDURE',
+  other: 'OTHER',
+}
+
+export const authorizationRequirementValues = {
+  unknown: 'UNKNOWN',
+  mayBeRequired: 'MAY_BE_REQUIRED',
+  typicallyRequired: 'TYPICALLY_REQUIRED',
+  notUsuallyRequired: 'NOT_USUALLY_REQUIRED',
+}
+
+export const serviceProcedureFieldKeys = {
+  id: 'id',
+  name: 'name',
+  category: 'category',
+  description: 'description',
+  status: 'status',
+  minDurationMin: 'minDurationMin',
+  maxDurationMin: 'maxDurationMin',
+  requiresAppointment: 'requiresAppointment',
+  cptCode: 'cptCode',
+  hcpcsCode: 'hcpcsCode',
+  defaultFee: 'defaultFee',
+  authorizationRequirement: 'authorizationRequirement',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+}
+
+export const serviceProcedureListColumnKeys = {
+  name: 'name',
+  category: 'category',
+  duration: 'duration',
+  requiresAppointment: 'requiresAppointment',
+  codes: 'codes',
+  status: 'status',
+  actions: 'actions',
+}
+
+export const appointmentBookingMaxServices = 3
+
+export const placeOfServiceStatusValues = {
+  active: 'ACTIVE',
+  inactive: 'INACTIVE',
+}
+
+export const appointmentRecurrenceFrequencyValues = {
+  daily: 'DAILY',
+  weekly: 'WEEKLY',
+  monthly: 'MONTHLY',
+}
+
+export const appointmentRecurrenceEndTypeValues = {
+  afterCount: 'AFTER_COUNT',
+  onDate: 'ON_DATE',
+}
+
 export const userRoleValues = {
   administrator: 'ADMINISTRATOR',
   clinician: 'CLINICIAN',
@@ -833,13 +900,26 @@ export const appointmentStatuses = {
   rescheduled: 'RESCHEDULED',
 }
 
-export const appointmentSlotStatuses = {
-  available: 'AVAILABLE',
-}
-
 export const appointmentNotesMaxLength = 250
 
 export const appointmentSlotLookaheadDays = 60
+
+export const appointmentAvailabilityPickerModes = {
+  ranges: 'ranges',
+  slots: 'slots',
+}
+
+export const appointmentAvailabilityPickerDefaultMode =
+  appointmentAvailabilityPickerModes.ranges
+
+export const appointmentAvailabilityRangesLimit = 500
+
+export const appointmentAvailabilityBlockTypes = {
+  outside: 'outside',
+  break: 'break',
+  appointment: 'appointment',
+  available: 'available',
+}
 
 export const appointmentTerminalStatuses = new Set([
   appointmentStatuses.cancelled,
@@ -884,7 +964,7 @@ export const apiPaths = {
     String(code ?? '').trim(),
   )}/is-clinical`,
   rolesList: '/roles/v1',
-  cliniciansList: '/staff/v1',
+  cliniciansList: '/staff/v1/clinicians',
   clientsList: '/client/v1/list-view',
   clientsSearch: '/client/v1/list-view/search',
   clientsListColumnConfig: '/client/v1/list-view/column-config',
@@ -897,6 +977,14 @@ export const apiPaths = {
   subtenantById: id => `/subtenants/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
+  serviceProceduresList: '/services-procedures/v1',
+  serviceProcedureById: id => `/services-procedures/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  serviceProcedureStatus: id => `/services-procedures/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/status`,
+  tenantServiceProceduresList: '/tenant/services-procedures/v1',
   tenantRolesByTenantId: tenantId => `/roles/v1/tenant/${
     encodeURIComponent(String(tenantId ?? '').trim())
   }`,
@@ -921,9 +1009,13 @@ export const apiPaths = {
   appointmentById: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
-  appointmentTypes: '/appointments/v1/types',
-  appointmentClinicians: '/appointments/v1/clinicians',
-  appointmentSlots: '/appointments/v1/slots',
+  appointmentServiceProcedures: '/appointments/v1/service-procedures',
+  appointmentDurationPreview:
+    '/appointments/v1/service-procedures/duration-preview',
+  appointmentAvailability: '/appointments/v1/availability',
+  appointmentAvailabilityRanges: '/appointments/v1/availability/ranges',
+  appointmentPlacesOfService: '/appointments/v1/places-of-service',
+  placesOfServiceList: '/places-of-service/v1',
   appointmentBook: '/appointments/v1/book',
   appointmentCancel: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
@@ -940,6 +1032,9 @@ export const apiPaths = {
   appointmentNoShow: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/no-show`,
+  clinicianWeeklySchedule: id => `/appointments/v1/admin/clinicians/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/weekly-schedule`,
   clientReferrals: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/referrals`,

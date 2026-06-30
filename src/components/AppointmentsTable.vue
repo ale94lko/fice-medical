@@ -42,7 +42,7 @@
         :props="scope"
         class="admin-data-table__secondary-cell">
         <span class="appointments-table__ellipsis">
-          {{ scope.row.appointmentTypeName || '—' }}
+          {{ scope.row.servicesLabel || scope.row.appointmentTypeName || '—' }}
         </span>
       </q-td>
     </template>
@@ -66,20 +66,11 @@
       </q-td>
     </template>
 
-    <template #body-cell-telemedicine="scope">
+    <template #body-cell-placeOfService="scope">
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        <span class="row items-center no-wrap">
-          {{ scope.row.telemedicine ? t('yes') : t('no') }}
-          <q-icon
-            v-if="scope.row.telemedicine"
-            name="videocam"
-            size="16px"
-            class="q-ml-xs"
-            color="primary"
-          />
-        </span>
+        {{ scope.row.placeOfServiceName || '—' }}
       </q-td>
     </template>
 
@@ -189,9 +180,9 @@ const columns = computed(() => [
   },
   {
     name: 'appointmentType',
-    label: t('appointmentColType'),
+    label: t('appointmentColServices'),
     align: 'left',
-    field: row => row.appointmentTypeName,
+    field: row => row.servicesLabel || row.appointmentTypeName,
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
@@ -215,13 +206,13 @@ const columns = computed(() => [
     style: 'min-width: 110px',
   },
   {
-    name: 'telemedicine',
-    label: t('appointmentColTelemedicine'),
+    name: 'placeOfService',
+    label: t('appointmentColPlaceOfService'),
     align: 'left',
-    field: row => row.telemedicine,
+    field: row => row.placeOfServiceName,
     sortable: false,
-    headerStyle: 'min-width: 90px',
-    style: 'min-width: 90px',
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
   },
   {
     name: 'actions',

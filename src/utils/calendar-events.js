@@ -154,7 +154,9 @@ export function appointmentToCalendarEvent(appointment, options = {}) {
     ?? appointment?.clientName
     ?? appointment?.patientName,
   )
-  const typeName = trim(appointment?.appointmentTypeName) || 'Appointment'
+  const typeName = trim(appointment?.servicesLabel)
+    || trim(appointment?.appointmentTypeName)
+    || 'Appointment'
   const title = clientName
     ? `${clientName} – ${typeName}`
     : typeName

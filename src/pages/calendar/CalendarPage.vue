@@ -135,7 +135,10 @@ import { useAppointmentCalendar } from
   'src/composables/useAppointmentCalendar.js'
 import { useCalendarPermissions } from
   'src/composables/useCalendarPermissions.js'
-import { bookAppointment } from 'src/utils/appointment-api.js'
+import {
+  bookAppointment,
+  extractBookingConflicts,
+} from 'src/utils/appointment-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { calendarTestIds } from 'src/test-ids/index.js'
 
@@ -235,19 +238,24 @@ function onBookDialogCancel() {
 async function onBookAppointment(body) {
   bookSaving.value = true
   try {
-    await bookAppointment(body)
+    const result = await bookAppointment(body)
     bookDialogOpen.value = false
     bookHint.value = null
-    $q.notify({
-      type: 'positive',
-      message: t('appointmentBookSuccess'),
-    })
+    const message = result.appointments?.length
+      ? t('appointmentBookSeriesSuccess', {
+        count: result.appointments.length,
+      })
+      : t('appointmentBookSuccess')
+    $q.notify({ type: 'positive', message })
     await reloadEvents()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
+      const conflicts = extractBookingConflicts(error)
       $q.notify({
         type: 'negative',
-        message: t('appointmentBookError'),
+        message: conflicts.length
+          ? t('appointmentBookingConflict')
+          : t('appointmentBookError'),
       })
     }
   } finally {

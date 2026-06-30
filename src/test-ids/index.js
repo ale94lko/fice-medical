@@ -34,6 +34,7 @@ export const layoutTestIds = {
   navUsersAdd: 'layout-nav-users-add',
   navAdminUsers: 'layout-nav-admin-users',
   navAdminSubtenants: 'layout-nav-admin-subtenants',
+  navAdminServices: 'layout-nav-admin-services',
 }
 
 export const sessionInactivityTestIds = {
@@ -75,6 +76,23 @@ export const subtenantDialogTestIds = {
   dialog: 'subtenant-dialog',
   field: name => toTestId('subtenant-dialog-field', name),
   btn: name => toTestId('subtenant-dialog-btn', name),
+}
+
+export const serviceProcedureListTestIds = {
+  page: 'service-procedure-list-page',
+  search: 'service-procedure-list-input-search',
+  categoryFilter: 'service-procedure-list-select-category',
+  add: 'service-procedure-list-btn-add',
+  rowView: id => toTestId('service-procedure-list-row', id, 'btn-view'),
+  rowEdit: id => toTestId('service-procedure-list-row', id, 'btn-edit'),
+  rowMore: id => toTestId('service-procedure-list-row', id, 'btn-more'),
+  rowToggle: id => toTestId('service-procedure-list-row', id, 'btn-toggle'),
+}
+
+export const serviceProcedureDialogTestIds = {
+  dialog: 'service-procedure-dialog',
+  field: name => toTestId('service-procedure-dialog-field', name),
+  btn: name => toTestId('service-procedure-dialog-btn', name),
 }
 
 export const clientListTestIds = {

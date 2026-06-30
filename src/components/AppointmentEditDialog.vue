@@ -32,20 +32,6 @@
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField
-              :label="t('appointmentTelemedicine')"
-              :test-id="tid.field('telemedicine')">
-              <q-btn-toggle
-                v-model="local.telemedicine"
-                no-caps
-                unelevated
-                toggle-color="primary"
-                :options="telemedicineOptions"
-                :disable="!record?.telemedicineAllowed"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
               :label="t('appointmentReferralOptional')"
               :test-id="tid.field('referral')">
               <FormSelect
@@ -109,14 +95,9 @@ const open = computed({
   set: value => emit('update:modelValue', value),
 })
 
-const local = ref({ notes: '', telemedicine: false, referralId: null })
+const local = ref({ notes: '', referralId: null })
 const errors = ref({})
 const referralOptions = ref([])
-
-const telemedicineOptions = computed(() => [
-  { label: t('yes'), value: true },
-  { label: t('no'), value: false },
-])
 
 watch(
   () => [props.modelValue, props.record],
@@ -126,7 +107,6 @@ watch(
     }
     local.value = {
       notes: props.record.notes ?? '',
-      telemedicine: Boolean(props.record.telemedicine),
       referralId: props.record.referralId ?? null,
     }
     errors.value = {}
@@ -158,7 +138,6 @@ function buildEditPayload() {
   /* eslint-disable camelcase -- API PATCH payload */
   return {
     notes: local.value.notes || null,
-    telemedicine: Boolean(local.value.telemedicine),
     referral_id: local.value.referralId ?? null,
   }
   /* eslint-enable camelcase */

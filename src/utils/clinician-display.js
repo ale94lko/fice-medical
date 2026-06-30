@@ -2,19 +2,36 @@ function trim(value) {
   return String(value ?? '').trim()
 }
 
+function staffMemberFromRow(row) {
+  if (!row || typeof row !== 'object') {
+    return null
+  }
+
+  return row.staff_member ?? row.staffMember ?? null
+}
+
 function personalFromClinicianRow(row) {
   if (!row || typeof row !== 'object') {
     return null
   }
 
-  return row.staff_member?.personal_information
-    ?? row.staffMember?.personalInformation
+  const staffMember = staffMemberFromRow(row)
+
+  return staffMember?.personal_information
+    ?? staffMember?.personalInformation
     ?? row.personal_information
     ?? row.personalInformation
     ?? null
 }
 
 function fallbackClinicianName(row) {
+  const staffMember = staffMemberFromRow(row)
+  const code = trim(staffMember?.code)
+
+  if (code) {
+    return code
+  }
+
   return trim(
     row?.name
     ?? row?.full_name

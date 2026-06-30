@@ -19,3 +19,4 @@ export const calendarHourCount = calendarHourEnd - calendarHourStart + 1
 export const calendarTimeRowHeightPx = 48
 export const calendarTimeGridHeightPx =
   calendarHourCount * calendarTimeRowHeightPx
+export const appointmentAvailabilityScrollFocusHour = 8

@@ -112,6 +112,84 @@ export default {
   subtenantDeleteSuccess: 'Subtenant eliminado correctamente.',
   subtenantDeleteError:
     'No se pudo eliminar el subtenant. Inténtelo de nuevo.',
+  serviceProcedureListTitle: 'Servicios / Procedimientos',
+  serviceProcedureListSubtitle:
+    'Configure los servicios de la organización para citas, '
+    + 'referrals, laboratorios, autorizaciones, facturación y claims.',
+  serviceProcedureListAdd: 'Añadir servicio',
+  serviceProcedureListEmpty:
+    'No se encontraron servicios ni procedimientos.',
+  serviceProcedureListError:
+    'No se pudieron cargar los servicios. Inténtelo de nuevo.',
+  serviceProcedureListPaginationSummary:
+    '{from}–{to} de {total} servicios',
+  serviceProcedureListSearchPlaceholder:
+    'Buscar por nombre, categoría o código…',
+  serviceProcedureCategoryFilterPlaceholder: 'Todas las categorías',
+  serviceProcedureNameLabel: 'Nombre',
+  serviceProcedureCategoryLabel: 'Categoría',
+  serviceProcedureDescriptionLabel: 'Descripción',
+  serviceProcedureStatusActiveLabel: 'Activo',
+  serviceProcedureMinDurationLabel: 'Duración mín. (minutos)',
+  serviceProcedureMaxDurationLabel: 'Duración máx. (minutos)',
+  serviceProcedureRequiresAppointmentLabel: 'Requiere cita',
+  serviceProcedureRequiresAppointmentShortLabel: 'Cita',
+  serviceProcedureDurationColumnLabel: 'Duración',
+  serviceProcedureCodesColumnLabel: 'Códigos',
+  serviceProcedureCptCodeLabel: 'Código CPT',
+  serviceProcedureHcpcsCodeLabel: 'Código HCPCS',
+  serviceProcedureDefaultFeeLabel: 'Tarifa predeterminada',
+  serviceProcedureAuthorizationRequirementLabel:
+    'Requisito de autorización',
+  serviceProcedureAuthorizationHint:
+    'Solo informativo. No sustituye la verificación con el seguro.',
+  serviceProcedureSectionGeneral: 'Información general',
+  serviceProcedureSectionOperational: 'Configuración operativa',
+  serviceProcedureSectionBilling: 'Facturación (opcional)',
+  serviceProcedureSectionAuthorization: 'Referencia de autorización',
+  serviceProcedureCategoryClinicalService: 'Servicio clínico',
+  serviceProcedureCategoryTherapy: 'Terapia',
+  serviceProcedureCategoryEvaluation: 'Evaluación',
+  serviceProcedureCategoryMedicationManagement:
+    'Gestión de medicación',
+  serviceProcedureCategoryLabExam: 'Laboratorio / Examen',
+  serviceProcedureCategoryProcedure: 'Procedimiento',
+  serviceProcedureCategoryOther: 'Otro',
+  serviceProcedureAuthReqUnknown: 'Desconocido',
+  serviceProcedureAuthReqMayBeRequired: 'Puede requerirse',
+  serviceProcedureAuthReqTypicallyRequired: 'Suele requerirse',
+  serviceProcedureAuthReqNotUsuallyRequired: 'Normalmente no requerido',
+  serviceProcedureDurationMinutes: '{count} min',
+  serviceProcedureDurationRangeMinutes: '{min}–{max} min',
+  serviceProcedureDialogAddTitle: 'Añadir servicio / procedimiento',
+  serviceProcedureDialogEditTitle: 'Editar servicio / procedimiento',
+  serviceProcedureDialogViewTitle: 'Detalle del servicio / procedimiento',
+  serviceProcedureDialogAddSubtitle:
+    'Defina un servicio reutilizable para esta sede.',
+  serviceProcedureDialogEditSubtitle:
+    'Actualice la configuración. Desactive en lugar de eliminar.',
+  serviceProcedureNameRequired: 'El nombre es obligatorio.',
+  serviceProcedureCategoryRequired: 'La categoría es obligatoria.',
+  serviceProcedureDurationInvalid:
+    'La duración debe ser mayor que 0 minutos.',
+  serviceProcedureDurationRangeInvalid:
+    'La duración máx. debe ser mayor o igual que la mín.',
+  serviceProcedureDefaultFeeInvalid:
+    'La tarifa debe ser cero o mayor.',
+  serviceProcedureNameDuplicate:
+    'Ya existe un servicio con este nombre.',
+  serviceProcedureCreateSuccess: 'Servicio creado correctamente.',
+  serviceProcedureUpdateSuccess: 'Servicio actualizado correctamente.',
+  serviceProcedureSaveError:
+    'No se pudo guardar el servicio. Inténtelo de nuevo.',
+  serviceProcedureLoadError:
+    'No se pudo cargar el servicio. Inténtelo de nuevo.',
+  serviceProcedureActivate: 'Activar',
+  serviceProcedureDeactivate: 'Desactivar',
+  serviceProcedureActivateSuccess: 'Servicio activado correctamente.',
+  serviceProcedureDeactivateSuccess: 'Servicio desactivado correctamente.',
+  serviceProcedureStatusError:
+    'No se pudo actualizar el estado. Inténtelo de nuevo.',
   users: 'Usuarios',
   userListSubtitle:
     'Gestione usuarios, roles y accesos del tenant.',
@@ -1246,6 +1324,7 @@ export default {
     'Consulte la información completa de esta cita.',
   appointmentDetailNumberLabel: 'Número de cita',
   appointmentDetailTypeLabel: 'Tipo de cita',
+  appointmentDetailServicesLabel: 'Servicios / Procedimientos',
   appointmentDetailClinicianLabel: 'Clínico',
   appointmentDetailClinicianHint: 'Clínico asignado para esta visita.',
   appointmentDetailClinicianEmpty: 'Sin clínico asignado.',
@@ -1286,8 +1365,9 @@ export default {
   appointmentColDateTime: 'Fecha y hora',
   appointmentColNumber: 'N.º de cita',
   appointmentColType: 'Tipo',
+  appointmentColServices: 'Servicios',
+  appointmentColPlaceOfService: 'Lugar',
   appointmentColClinician: 'Clínico',
-  appointmentColTelemedicine: 'Telemed.',
   appointmentColCarePlan: 'Plan de cuidado',
   appointmentColReferral: 'Referencia',
   appointmentActionView: 'Ver detalle',
@@ -1304,14 +1384,116 @@ export default {
   appointmentTypePlaceholder: 'Seleccionar tipo de cita',
   appointmentTypeRequired: 'El tipo de cita es obligatorio.',
   appointmentClientPlaceholder: 'Seleccionar cliente',
+  appointmentClientSearchPlaceholder: 'Buscar por nombre o código…',
+  appointmentClientSearchHint:
+    'Escriba al menos 3 caracteres para buscar por nombre o código.',
+  appointmentClientSearchEmpty:
+    'Ningún cliente coincide con la búsqueda.',
+  appointmentClientSearchMinLength:
+    'Escriba al menos {min} caracteres para buscar.',
   appointmentClientRequired: 'El cliente es obligatorio.',
-  appointmentDuration: 'Duración (del tipo)',
+  appointmentServicesLabel: 'Servicios / Procedimientos',
+  appointmentServicesSearchPlaceholder: 'Buscar y añadir servicio...',
+  appointmentServicesSearchAdd: 'Buscar y añadir otro servicio...',
+  appointmentServicesSearchEmpty: 'No hay servicios coincidentes.',
+  appointmentServicesAddButton: 'Añadir',
+  appointmentServiceCatalogDurationFixed: '{count} min (fija)',
+  appointmentServiceCatalogDurationRange: '{min}–{max} min',
+  appointmentServicesSelectedCount: '{count} seleccionados',
+  appointmentServicesAddAnother: 'Añadir otro servicio',
+  appointmentServicesCatalogEmpty:
+    'No hay servicios de cita disponibles. '
+    + 'Configure servicios activos que requieran cita en '
+    + 'Servicios / Procedimientos.',
+  appointmentServiceRequired:
+    'Seleccione al menos un servicio / procedimiento.',
+  appointmentPlaceOfService: 'Lugar de atención',
+  appointmentPlaceOfServicePlaceholder: 'Seleccionar lugar de atención',
+  appointmentPlaceOfServiceRequired: 'El lugar de atención es obligatorio.',
+  appointmentPlacesEmpty:
+    'No hay lugares de atención disponibles. '
+    + 'Configure lugares activos antes de crear citas.',
+  appointmentTotalDurationTitle:
+    'Duración de la cita (servicios seleccionados)',
+  appointmentSuggestedFeeTotal: 'Tarifa sugerida (total)',
+  appointmentSuggestedFeeValue: '${amount}',
+  appointmentCptCodes: 'Códigos CPT',
+  appointmentServiceLineSummary:
+    'Servicio {index}: {name} — {count} min ({fixed})',
+  appointmentDurationFixedTag: 'fija',
+  appointmentDurationSelectedTag: 'seleccionada',
+  appointmentDurationFixedHint: 'Duración fija',
+  appointmentDurationRangeHint: 'Rango permitido: {min}–{max} min',
+  appointmentSelectServicesFirst:
+    'Seleccione servicios para ver disponibilidad.',
+  appointmentSelectPlaceFirst:
+    'Seleccione un lugar de atención para ver disponibilidad.',
+  appointmentSelectDurationFirst:
+    'Indique una duración válida para ver disponibilidad.',
+  appointmentAvailabilityEmpty:
+    'No hay horarios disponibles para los criterios seleccionados.',
+  appointmentAvailabilityRequired: 'Seleccione un horario disponible.',
+  appointmentAvailabilityDurationHint:
+    'Mostrando horarios para duración total de {count} min.',
+  appointmentAvailabilityRangesHint:
+    'Blanco = libre. Verde = reservado (clic para detalle). '
+    + 'Amarillo = descanso. Gris = fuera de horario.',
+  appointmentAvailabilityOutsideHoursBlock: 'Fuera de horario · {time}',
+  appointmentAvailabilityBreakBlock: 'Descanso · {time}',
+  appointmentAvailabilityBookedBlock: 'Reservado · {time}',
+  appointmentAvailabilityBookedBlockClient: '{client} · {time}',
+  appointmentAvailabilityBookedBlockDetail: '{client} · {services} · {time}',
+  appointmentAvailabilitySelectedTime: 'Seleccionado: {time}',
+  appointmentAvailabilitySelectedWithClinician:
+    'Seleccionado: {time} · {clinician}',
+  appointmentSchedulingStartTime: 'Hora de inicio',
+  appointmentSchedulingEndTime: 'Hora de fin',
+  appointmentTimeSpinnerIncreaseHour: 'Aumentar hora',
+  appointmentTimeSpinnerDecreaseHour: 'Disminuir hora',
+  appointmentTimeSpinnerIncreaseMinute: 'Aumentar minuto',
+  appointmentTimeSpinnerDecreaseMinute: 'Disminuir minuto',
+  appointmentTimeSpinnerIncreasePeriod: 'Cambiar a PM',
+  appointmentTimeSpinnerDecreasePeriod: 'Cambiar a AM',
+  appointmentBookingConflict:
+    'El horario seleccionado no tiene disponibilidad suficiente '
+    + 'para la duración total. Elija otro horario.',
+  appointmentBookSeriesSuccess: '{count} citas reservadas correctamente.',
+  appointmentRepeatLabel: 'Repetir cita',
+  appointmentRecurrenceFrequency: 'Frecuencia',
+  appointmentRecurrenceInterval: 'Repetir cada',
+  appointmentRecurrenceDays: 'Días de la semana',
+  appointmentRecurrenceEnds: 'Finaliza',
+  appointmentRecurrenceCount: 'Número de citas',
+  appointmentRecurrenceEndDate: 'Fecha de fin',
+  appointmentRecurrenceDaily: 'Diaria',
+  appointmentRecurrenceWeekly: 'Semanal',
+  appointmentRecurrenceMonthly: 'Mensual',
+  appointmentRecurrenceAfterCount: 'Tras número de citas',
+  appointmentRecurrenceOnDate: 'En fecha específica',
+  placeOfServiceOffice: 'Consultorio',
+  placeOfServiceTelehealth: 'Telemedicina',
+  placeOfServiceHome: 'Domicilio',
+  placeOfServiceSchool: 'Escuela',
+  placeOfServiceCommunity: 'Comunidad',
+  weekdayMon: 'Lun',
+  weekdayTue: 'Mar',
+  weekdayWed: 'Mié',
+  weekdayThu: 'Jue',
+  weekdayFri: 'Vie',
+  weekdaySat: 'Sáb',
+  weekdaySun: 'Dom',
+  appointmentDuration: 'Duración',
+  appointmentDurationUnitMin: 'min',
   appointmentDurationMinutes: '{count} min',
   appointmentClinicianOptional: 'Clínico (opcional)',
   appointmentClinicianPlaceholder: 'Seleccionar clínico',
   appointmentClinicianHint:
     'Deje vacío para asignar un clínico disponible automáticamente.',
   appointmentClinicianAutoAssign: 'Clínico asignado automáticamente',
+  appointmentSupervisorOptional: 'Supervisor (opcional)',
+  appointmentSupervisorPlaceholder: 'Seleccionar supervisor',
+  appointmentSupervisorHint:
+    'Seleccione el clínico supervisor cuando sea necesario.',
   appointmentTelemedicine: 'Telemedicina',
   appointmentReferralOptional: 'Referencia (opcional)',
   appointmentReferralPlaceholder: 'Seleccionar referencia',
@@ -1331,9 +1513,9 @@ export default {
   appointmentLegendSelected: 'Seleccionado',
   appointmentSlotsEmpty:
     'No hay horarios disponibles para los criterios seleccionados. '
-    + 'Pruebe otra fecha, tipo de cita o clínico.',
+    + 'Pruebe otra fecha, servicios, lugar de atención o clínico.',
   appointmentSelectTypeFirst:
-    'Seleccione un tipo de cita para ver horarios disponibles.',
+    'Seleccione servicios para ver horarios disponibles.',
   appointmentSlotRequired: 'Seleccione un horario disponible.',
   appointmentPaginationSummary:
     'Mostrando {from} a {to} de {total} citas',

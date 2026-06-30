@@ -90,10 +90,10 @@
             </div>
             <div>
               <p class="appointment-detail-dialog__cell-label">
-                {{ t('appointmentDetailTypeLabel') }}
+                {{ t('appointmentDetailServicesLabel') }}
               </p>
               <p class="appointment-detail-dialog__cell-value">
-                {{ record?.appointmentTypeName || '—' }}
+                {{ servicesSummary }}
               </p>
             </div>
           </div>
@@ -145,17 +145,14 @@
             <div
               class="appointment-detail-dialog__cell-icon
                 appointment-detail-dialog__cell-icon--blue">
-              <q-icon name="videocam" />
+              <q-icon name="place" />
             </div>
             <div>
               <p class="appointment-detail-dialog__cell-label">
-                {{ t('appointmentTelemedicine') }}
+                {{ t('appointmentPlaceOfService') }}
               </p>
               <p class="appointment-detail-dialog__cell-value">
-                {{ record?.telemedicine ? t('yes') : t('no') }}
-              </p>
-              <p class="appointment-detail-dialog__cell-hint">
-                {{ telemedicineHint }}
+                {{ record?.placeOfServiceName || '—' }}
               </p>
             </div>
           </div>
@@ -349,6 +346,21 @@ const durationLabel = computed(() => {
   return t('appointmentDurationMinutes', { count: minutes })
 })
 
+const servicesSummary = computed(() => {
+  const lines = props.record?.serviceProcedures ?? []
+  if (lines.length) {
+    return lines
+      .map(line => {
+        const cpt = line.cptCode ? ` — CPT ${line.cptCode}` : ''
+
+        return `${line.name}${cpt}`
+      })
+      .join(', ')
+  }
+
+  return props.record?.appointmentTypeName || '—'
+})
+
 const referralValue = computed(() =>
   props.record?.referralLabel
   ?? props.record?.referralNumber
@@ -359,12 +371,6 @@ const referralHint = computed(() =>
   referralValue.value === '—'
     ? t('appointmentDetailReferralEmpty')
     : t('appointmentDetailReferralLinked'),
-)
-
-const telemedicineHint = computed(() =>
-  props.record?.telemedicine
-    ? t('appointmentDetailTelemedicineYes')
-    : t('appointmentDetailTelemedicineNo'),
 )
 
 const clinicianHint = computed(() =>

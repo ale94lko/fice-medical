@@ -9,7 +9,6 @@ import {
   calendarHourEnd,
   calendarHourStart,
   calendarSlotMinutes,
-  calendarTimeGridHeightPx,
   calendarTimeRowHeightPx,
 } from 'src/constants/calendar.js'
 import { localMinutesNow } from 'src/utils/calendar-now-indicator.js'
@@ -21,29 +20,45 @@ function resolveTimeZone(timeZone) {
 export function snapLocalMinutesToSlot(
   minutes,
   slotMinutes = calendarSlotMinutes,
+  gridHourStart = calendarHourStart,
+  gridHourEnd = calendarHourEnd,
 ) {
   const snapped = Math.floor(minutes / slotMinutes) * slotMinutes
-  const gridStart = calendarHourStart * 60
-  const gridEnd = (calendarHourEnd + 1) * 60
+  const gridStart = gridHourStart * 60
+  const gridEnd = (gridHourEnd + 1) * 60
 
   return Math.max(gridStart, Math.min(snapped, gridEnd - slotMinutes))
 }
 
-export function localMinutesFromGridOffsetY(offsetY) {
+export function localMinutesFromGridOffsetY(
+  offsetY,
+  rowHeightPx = calendarTimeRowHeightPx,
+  gridHourStart = calendarHourStart,
+  gridHourEnd = calendarHourEnd,
+) {
+  const hourCount = gridHourEnd - gridHourStart + 1
+  const gridHeight = hourCount * rowHeightPx
   const clampedY = Math.max(
     0,
-    Math.min(Number(offsetY) || 0, calendarTimeGridHeightPx),
+    Math.min(Number(offsetY) || 0, gridHeight),
   )
-  const raw = calendarHourStart * 60
-    + (clampedY / calendarTimeRowHeightPx) * 60
+  const raw = gridHourStart * 60
+    + (clampedY / rowHeightPx) * 60
 
-  return snapLocalMinutesToSlot(raw)
+  return snapLocalMinutesToSlot(
+    raw,
+    calendarSlotMinutes,
+    gridHourStart,
+    gridHourEnd,
+  )
 }
 
 export function isValidGridBookingTarget(
   dayKey,
   minutesLocal,
   timeZone = resolveTenantTimeZone(),
+  gridHourStart = calendarHourStart,
+  gridHourEnd = calendarHourEnd,
 ) {
   const tz = resolveTimeZone(timeZone)
   const { startDayKey, endDayKey } = appointmentSlotQueryRange(
@@ -54,8 +69,8 @@ export function isValidGridBookingTarget(
     return false
   }
 
-  const gridStart = calendarHourStart * 60
-  const gridEnd = (calendarHourEnd + 1) * 60
+  const gridStart = gridHourStart * 60
+  const gridEnd = (gridHourEnd + 1) * 60
   if (minutesLocal < gridStart || minutesLocal >= gridEnd) {
     return false
   }

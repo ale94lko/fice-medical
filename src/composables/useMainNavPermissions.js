@@ -144,6 +144,10 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.viewSubtenants),
   )
 
+  const showServicesProcedures = computed(() =>
+    hasPermission(permissions.value, permissionNames.viewCatalog),
+  )
+
   return {
     showDashboard,
     showCalendarMenu,
@@ -166,6 +170,7 @@ export function useMainNavPermissions() {
     showAdminGeneral,
     showAdminSubtenants,
     showAdminUsers,
+    showServicesProcedures,
   }
 }
 

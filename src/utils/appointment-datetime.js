@@ -3,8 +3,10 @@
  */
 import {
   getAppDateTimeConfig,
+  localDayKeyFromLoginOffset,
   resolveIntlTimeZone,
 } from 'src/utils/app-datetime.js'
+import { parseUsDateString } from 'src/utils/client-form.js'
 
 export function resolveTenantTimeZone() {
   const configured = resolveIntlTimeZone(getAppDateTimeConfig().timezone)
@@ -89,6 +91,14 @@ export function formatUtcDateTimeDisplay(
 }
 
 export function localDayKeyFromUtc(iso, timeZone = resolveTenantTimeZone()) {
+  const configuredDayKey = localDayKeyFromLoginOffset(
+    iso,
+    getAppDateTimeConfig().timezone,
+  )
+  if (configuredDayKey) {
+    return configuredDayKey
+  }
+
   const date = parseUtcDate(iso)
   if (!date) {
     return ''
@@ -169,6 +179,51 @@ export function formatTimeZoneLabel(timeZone = resolveTenantTimeZone()) {
   } catch {
     return timeZone
   }
+}
+
+export function localDayKeyToUtcStartIso(
+  dayKey,
+  timeZone = resolveTenantTimeZone(),
+) {
+  return utcRangeForLocalDay(dayKey, timeZone).fromUtc
+}
+
+export function usDateStringToLocalDayKey(dateUs) {
+  const date = parseUsDateString(dateUs)
+  if (!date) {
+    return ''
+  }
+
+  return localDayKeyFromParts(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+  )
+}
+
+export function usDateStringToUtcStartIso(
+  dateUs,
+  timeZone = resolveTenantTimeZone(),
+) {
+  const dayKey = usDateStringToLocalDayKey(dateUs)
+  if (!dayKey) {
+    return ''
+  }
+
+  return localDayKeyToUtcStartIso(dayKey, timeZone)
+}
+
+export function ensureUtcIsoString(iso) {
+  const raw = String(iso ?? '').trim()
+  if (!raw) {
+    return ''
+  }
+  const date = new Date(raw)
+  if (Number.isNaN(date.getTime())) {
+    return raw
+  }
+
+  return date.toISOString()
 }
 
 export function addDaysToDayKey(dayKey, delta) {

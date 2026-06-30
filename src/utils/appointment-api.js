@@ -1,44 +1,24 @@
 /* eslint-disable camelcase -- API payloads use snake_case */
 import { apiInstance } from 'boot/axios'
-import { apiPaths, appointmentSlotStatuses } from 'components/constants.js'
+import { apiPaths } from 'components/constants.js'
+import { extractEnvelopeList } from 'components/helpers.js'
 import {
-  mockBookAppointment,
-  mockGetAppointment,
-  mockLifecycleAppointment,
-  mockListAppointmentClinicians,
-  mockListAppointmentTypes,
-  mockListCalendarAppointments,
-  mockListClientAppointments,
-  mockListClientCarePlans,
-  mockListSlots,
-  mockPatchAppointment,
-  mockRescheduleAppointment,
-} from 'src/utils/appointment-mock-store.js'
-import {
-  mapAppointmentClinicians,
-  mapAppointmentTypes,
   mapAppointmentsList,
-  mapAvailableSlots,
+  mapAvailabilityRangesResponse,
+  mapAvailabilityWindows,
+  mapBookableServiceProcedures,
   normalizeAppointment,
   normalizeCarePlanOption,
+  normalizeRecurringSeries,
 } from 'src/utils/appointment-normalize.js'
-
-function useMockFallback(error) {
-  const status = error?.response?.status
-  if (status === 404 || status === 501 || status === 502 || status === 503) {
-    return true
-  }
-  if (!error?.response) {
-    return true
-  }
-
-  return false
-}
 
 function unwrapList(body) {
   const root = body?.data ?? body
   if (Array.isArray(root)) {
     return root
+  }
+  if (root && typeof root === 'object' && Array.isArray(root.data)) {
+    return root.data
   }
   if (Array.isArray(root?.content)) {
     return root.content
@@ -46,8 +26,14 @@ function unwrapList(body) {
   if (Array.isArray(root?.items)) {
     return root.items
   }
+  if (Array.isArray(root?.service_procedures)) {
+    return root.service_procedures
+  }
+  if (Array.isArray(root?.serviceProcedures)) {
+    return root.serviceProcedures
+  }
 
-  return []
+  return extractEnvelopeList(root)
 }
 
 function unwrapData(body) {
@@ -59,20 +45,12 @@ function unwrapData(body) {
 }
 
 export async function listClientAppointments(clientId, params = {}) {
-  try {
-    const response = await apiInstance.get(
-      apiPaths.clientAppointments(clientId),
-      { params },
-    )
+  const response = await apiInstance.get(
+    apiPaths.clientAppointments(clientId),
+    { params },
+  )
 
-    return mapAppointmentsList(unwrapList(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mapAppointmentsList(mockListClientAppointments(clientId))
-  }
+  return mapAppointmentsList(unwrapList(response.data))
 }
 
 export async function listCalendarAppointments(params = {}) {
@@ -85,123 +63,82 @@ export async function listCalendarAppointments(params = {}) {
     limit: params.limit ?? 200,
   }
 
-  try {
-    const response = await apiInstance.get(apiPaths.appointmentsList, {
-      params: query,
-    })
+  const response = await apiInstance.get(apiPaths.appointmentsList, {
+    params: query,
+  })
 
-    return mapAppointmentsList(unwrapList(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mapAppointmentsList(mockListCalendarAppointments(query))
-  }
+  return mapAppointmentsList(unwrapList(response.data))
 }
 
 export async function fetchAppointment(appointmentId) {
-  try {
-    const response = await apiInstance.get(
-      apiPaths.appointmentById(appointmentId),
-    )
+  const response = await apiInstance.get(
+    apiPaths.appointmentById(appointmentId),
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-    const row = mockGetAppointment(appointmentId)
-    if (!row) {
-      throw error
-    }
-
-    return normalizeAppointment(row)
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
-export async function listAppointmentTypes() {
-  try {
-    const response = await apiInstance.get(apiPaths.appointmentTypes)
+export async function listBookableServiceProcedures() {
+  const response = await apiInstance.get(
+    apiPaths.appointmentServiceProcedures,
+  )
 
-    return mapAppointmentTypes(unwrapList(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mapAppointmentTypes(mockListAppointmentTypes())
-  }
+  return mapBookableServiceProcedures(unwrapList(response.data))
 }
 
-export async function listAppointmentClinicians() {
-  try {
-    const response = await apiInstance.get(apiPaths.appointmentClinicians)
-
-    return mapAppointmentClinicians(unwrapList(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mapAppointmentClinicians(mockListAppointmentClinicians())
+export async function fetchAppointmentDurationPreview(
+  serviceProcedureIds = [],
+  durationMinutes = null,
+) {
+  const ids = (serviceProcedureIds ?? []).filter(id => id != null)
+  const query = {
+    service_procedure_ids: ids.join(','),
+    duration_minutes: durationMinutes ?? undefined,
   }
+
+  const response = await apiInstance.get(
+    apiPaths.appointmentDurationPreview,
+    { params: query },
+  )
+
+  return unwrapData(response.data)
 }
 
-export async function listAvailableSlots(params = {}) {
+export async function listAppointmentAvailability(params = {}) {
   const query = {
     from_utc: params.from_utc,
     to_utc: params.to_utc,
-    appointment_type_id: params.appointment_type_id,
+    duration_minutes: params.duration_minutes,
+    service_procedure_ids: (params.service_procedure_ids ?? [])
+      .join(','),
     clinician_id: params.clinician_id ?? undefined,
-    telemedicine: params.telemedicine ?? undefined,
     limit: params.limit ?? 50,
-    page: params.page ?? 0,
   }
-  try {
-    const response = await apiInstance.get(apiPaths.appointmentSlots, {
-      params: query,
-    })
 
-    return mapAvailableSlots(unwrapList(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
+  const response = await apiInstance.get(apiPaths.appointmentAvailability, {
+    params: query,
+  })
 
-    return mapAvailableSlots(mockListSlots(query))
-  }
+  return mapAvailabilityWindows(unwrapList(response.data))
 }
 
-export async function listAvailableSlotsInRange(params = {}) {
-  const pageSize = Number(params.limit ?? 50)
-  const maxPages = Number(params.max_pages ?? 20)
-  const merged = []
-  const seen = new Set()
-
-  for (let page = 0; page < maxPages; page += 1) {
-    const batch = await listAvailableSlots({
-      ...params,
-      limit: pageSize,
-      page,
-    })
-    if (!batch.length) {
-      break
-    }
-    for (const slot of batch) {
-      const key = String(slot.slotId)
-      if (seen.has(key)) {
-        continue
-      }
-      seen.add(key)
-      merged.push(slot)
-    }
-    if (batch.length < pageSize) {
-      break
-    }
+export async function listAppointmentAvailabilityRanges(params = {}) {
+  const query = {
+    from_utc: params.from_utc,
+    to_utc: params.to_utc,
+    duration_minutes: params.duration_minutes,
+    service_procedure_ids: (params.service_procedure_ids ?? [])
+      .join(','),
+    clinician_id: params.clinician_id ?? undefined,
+    limit: params.limit ?? 100,
   }
 
-  return merged
+  const response = await apiInstance.get(
+    apiPaths.appointmentAvailabilityRanges,
+    { params: query },
+  )
+
+  return mapAvailabilityRangesResponse(unwrapData(response.data))
 }
 
 export async function listClientReferrals(clientId) {
@@ -213,18 +150,10 @@ export async function listClientReferrals(clientId) {
 }
 
 export async function listClientCarePlans(clientId) {
-  try {
-    const response = await apiInstance.get(apiPaths.clientCarePlans(clientId))
+  const response = await apiInstance.get(apiPaths.clientCarePlans(clientId))
 
-    return unwrapList(response.data).map(normalizeCarePlanOption)
-      .filter(row => row.value != null)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockListClientCarePlans(clientId).map(normalizeCarePlanOption)
-  }
+  return unwrapList(response.data).map(normalizeCarePlanOption)
+    .filter(row => row.value != null)
 }
 
 export async function bookAppointment(body, idempotencyKey = null) {
@@ -232,139 +161,92 @@ export async function bookAppointment(body, idempotencyKey = null) {
   if (idempotencyKey) {
     headers['Idempotency-Key'] = idempotencyKey
   }
-  try {
-    const response = await apiInstance.post(
-      apiPaths.appointmentBook,
-      body,
-      { headers },
-    )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
+  const response = await apiInstance.post(
+    apiPaths.appointmentBook,
+    body,
+    { headers },
+  )
+
+  const data = unwrapData(response.data)
+  if (Array.isArray(data?.appointments)) {
+    return {
+      appointments: mapAppointmentsList(data.appointments),
+      recurringSeries: normalizeRecurringSeries(data.recurring_series) ?? null,
+      conflicts: data.conflicts ?? [],
     }
+  }
 
-    return normalizeAppointment(mockBookAppointment(body))
+  return {
+    appointment: normalizeAppointment(data?.appointment ?? data),
+    appointments: [],
+    recurringSeries: normalizeRecurringSeries(data?.recurring_series) ?? null,
+    conflicts: [],
   }
 }
 
 export async function patchAppointment(appointmentId, body) {
-  try {
-    const response = await apiInstance.patch(
-      apiPaths.appointmentById(appointmentId),
-      body,
-    )
+  const response = await apiInstance.patch(
+    apiPaths.appointmentById(appointmentId),
+    body,
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeAppointment(mockPatchAppointment(appointmentId, body))
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
 export async function cancelAppointment(appointmentId, reason = null) {
   const body = reason ? { reason } : {}
-  try {
-    const response = await apiInstance.post(
-      apiPaths.appointmentCancel(appointmentId),
-      body,
-    )
+  const response = await apiInstance.post(
+    apiPaths.appointmentCancel(appointmentId),
+    body,
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeAppointment(
-      mockLifecycleAppointment(appointmentId, 'CANCELLED'),
-    )
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
 export async function rescheduleAppointment(
   appointmentId,
-  newSlotId,
-  notes = null,
+  payload = {},
 ) {
   const body = {
-    new_slot_id: newSlotId,
-    notes,
+    new_start_at_utc: payload.newStartAtUtc ?? payload.new_start_at_utc,
+    clinician_id: payload.clinicianId ?? payload.clinician_id ?? undefined,
+    notes: payload.notes ?? undefined,
   }
-  try {
-    const response = await apiInstance.post(
-      apiPaths.appointmentReschedule(appointmentId),
-      body,
-    )
+  const response = await apiInstance.post(
+    apiPaths.appointmentReschedule(appointmentId),
+    body,
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeAppointment(
-      mockRescheduleAppointment(appointmentId, newSlotId),
-    )
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
 export async function checkInAppointment(appointmentId) {
-  try {
-    const response = await apiInstance.post(
-      apiPaths.appointmentCheckIn(appointmentId),
-    )
+  const response = await apiInstance.post(
+    apiPaths.appointmentCheckIn(appointmentId),
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeAppointment(
-      mockLifecycleAppointment(appointmentId, 'CHECKED_IN'),
-    )
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
 export async function completeAppointment(appointmentId) {
-  try {
-    const response = await apiInstance.post(
-      apiPaths.appointmentComplete(appointmentId),
-    )
+  const response = await apiInstance.post(
+    apiPaths.appointmentComplete(appointmentId),
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeAppointment(
-      mockLifecycleAppointment(appointmentId, 'COMPLETED'),
-    )
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
 export async function noShowAppointment(appointmentId) {
-  try {
-    const response = await apiInstance.post(
-      apiPaths.appointmentNoShow(appointmentId),
-    )
+  const response = await apiInstance.post(
+    apiPaths.appointmentNoShow(appointmentId),
+  )
 
-    return normalizeAppointment(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeAppointment(
-      mockLifecycleAppointment(appointmentId, 'NO_SHOW'),
-    )
-  }
+  return normalizeAppointment(unwrapData(response.data))
 }
 
-export { appointmentSlotStatuses }
+export function extractBookingConflicts(error) {
+  const data = error?.response?.data?.data ?? error?.response?.data
+
+  return Array.isArray(data?.conflicts) ? data.conflicts : []
+}

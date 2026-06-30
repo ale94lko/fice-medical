@@ -550,29 +550,29 @@ function buildClinicalNotesDialogDetail({ rawClient }) {
   )
 }
 
-function buildAppointmentsDialogDetail({ rawClient, t }) {
+function buildAppointmentsDialogDetail({ rawClient }) {
   const rows = asArray(
     rawClient?.appointments ?? rawClient?.client_appointments,
   )
     .map(normalizeAppointment)
     .map(item => ({
       dateTime: display(item.startAtUtc),
-      type: display(item.appointmentTypeName),
+      type: display(item.servicesLabel || item.appointmentTypeName),
       status: display(item.status),
       clinician: display(item.clinicianDisplayName),
       duration: item.durationMin ? `${item.durationMin} min` : '—',
-      telemedicine: yesNo(t, item.telemedicine),
+      placeOfService: display(item.placeOfServiceName),
       notes: display(item.notes),
     }))
 
   return buildTableDetail(
     [
       { key: 'dateTime', labelKey: 'clientOverviewModuleDialogDateTime' },
-      { key: 'type', labelKey: 'appointmentType' },
+      { key: 'type', labelKey: 'appointmentColServices' },
       { key: 'status', labelKey: 'status' },
       { key: 'clinician', labelKey: 'assignedClinician' },
       { key: 'duration', labelKey: 'appointmentDuration' },
-      { key: 'telemedicine', labelKey: 'appointmentTelemedicine' },
+      { key: 'placeOfService', labelKey: 'appointmentPlaceOfService' },
       { key: 'notes', labelKey: 'notes' },
     ],
     rows,

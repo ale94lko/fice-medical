@@ -355,7 +355,9 @@ function summariesFromRawClient(rawClient, t) {
   }))
   const appointmentItems = appointments.map(item => ({
     label: formatAppointmentLabel(item),
-    meta: trim(item.appointmentTypeName) || trim(item.status),
+    meta: trim(item.servicesLabel)
+      || trim(item.appointmentTypeName)
+      || trim(item.status),
   }))
   const clinicalNoteItems = clinicalNotes.map(note => ({
     label: trim(note.summaryPreview) || trim(note.clinicianLabel) || '—',

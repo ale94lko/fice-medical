@@ -103,6 +103,82 @@ export default {
   subtenantDeleteMessageGeneric: 'Delete this subtenant?',
   subtenantDeleteSuccess: 'Subtenant deleted successfully.',
   subtenantDeleteError: 'Could not delete subtenant. Please try again.',
+  serviceProcedureListTitle: 'Services / Procedures',
+  serviceProcedureListSubtitle:
+    'Configure organization services for appointments, referrals, '
+    + 'labs, authorizations, billing, and claims.',
+  serviceProcedureListAdd: 'Add Service',
+  serviceProcedureListEmpty: 'No services or procedures found.',
+  serviceProcedureListError:
+    'Could not load services. Please try again.',
+  serviceProcedureListPaginationSummary:
+    '{from}–{to} of {total} services',
+  serviceProcedureListSearchPlaceholder:
+    'Search by name, category, or code…',
+  serviceProcedureCategoryFilterPlaceholder: 'All categories',
+  serviceProcedureNameLabel: 'Name',
+  serviceProcedureCategoryLabel: 'Category',
+  serviceProcedureDescriptionLabel: 'Description',
+  serviceProcedureStatusActiveLabel: 'Active',
+  serviceProcedureMinDurationLabel: 'Min duration (minutes)',
+  serviceProcedureMaxDurationLabel: 'Max duration (minutes)',
+  serviceProcedureRequiresAppointmentLabel: 'Requires appointment',
+  serviceProcedureRequiresAppointmentShortLabel: 'Appointment',
+  serviceProcedureDurationColumnLabel: 'Duration',
+  serviceProcedureCodesColumnLabel: 'Codes',
+  serviceProcedureCptCodeLabel: 'CPT code',
+  serviceProcedureHcpcsCodeLabel: 'HCPCS code',
+  serviceProcedureDefaultFeeLabel: 'Default fee',
+  serviceProcedureAuthorizationRequirementLabel:
+    'Authorization requirement',
+  serviceProcedureAuthorizationHint:
+    'Informational only. Does not replace insurance verification.',
+  serviceProcedureSectionGeneral: 'General information',
+  serviceProcedureSectionOperational: 'Operational settings',
+  serviceProcedureSectionBilling: 'Billing (optional)',
+  serviceProcedureSectionAuthorization: 'Authorization reference',
+  serviceProcedureCategoryClinicalService: 'Clinical Service',
+  serviceProcedureCategoryTherapy: 'Therapy',
+  serviceProcedureCategoryEvaluation: 'Evaluation',
+  serviceProcedureCategoryMedicationManagement: 'Medication Management',
+  serviceProcedureCategoryLabExam: 'Lab / Exam',
+  serviceProcedureCategoryProcedure: 'Procedure',
+  serviceProcedureCategoryOther: 'Other',
+  serviceProcedureAuthReqUnknown: 'Unknown',
+  serviceProcedureAuthReqMayBeRequired: 'May be required',
+  serviceProcedureAuthReqTypicallyRequired: 'Typically required',
+  serviceProcedureAuthReqNotUsuallyRequired: 'Not usually required',
+  serviceProcedureDurationMinutes: '{count} min',
+  serviceProcedureDurationRangeMinutes: '{min}–{max} min',
+  serviceProcedureDialogAddTitle: 'Add Service / Procedure',
+  serviceProcedureDialogEditTitle: 'Edit Service / Procedure',
+  serviceProcedureDialogViewTitle: 'Service / Procedure Details',
+  serviceProcedureDialogAddSubtitle:
+    'Define a reusable service for this subtenant.',
+  serviceProcedureDialogEditSubtitle:
+    'Update service settings. Deactivate instead of deleting.',
+  serviceProcedureNameRequired: 'Name is required.',
+  serviceProcedureCategoryRequired: 'Category is required.',
+  serviceProcedureDurationInvalid:
+    'Duration must be greater than 0 minutes.',
+  serviceProcedureDurationRangeInvalid:
+    'Max duration must be greater than or equal to min duration.',
+  serviceProcedureDefaultFeeInvalid:
+    'Default fee must be zero or greater.',
+  serviceProcedureNameDuplicate:
+    'A service with this name already exists.',
+  serviceProcedureCreateSuccess: 'Service created successfully.',
+  serviceProcedureUpdateSuccess: 'Service updated successfully.',
+  serviceProcedureSaveError:
+    'Could not save the service. Please try again.',
+  serviceProcedureLoadError:
+    'Could not load the service. Please try again.',
+  serviceProcedureActivate: 'Activate',
+  serviceProcedureDeactivate: 'Deactivate',
+  serviceProcedureActivateSuccess: 'Service activated successfully.',
+  serviceProcedureDeactivateSuccess: 'Service deactivated successfully.',
+  serviceProcedureStatusError:
+    'Could not update service status. Please try again.',
   users: 'Users',
   userListSubtitle: 'Manage tenant users, roles, and access.',
   userListSearchPlaceholder: 'Search users by name, email, or role…',
@@ -1200,6 +1276,7 @@ export default {
     'View complete information about this appointment.',
   appointmentDetailNumberLabel: 'Appointment Number',
   appointmentDetailTypeLabel: 'Type of Appointment',
+  appointmentDetailServicesLabel: 'Services / Procedures',
   appointmentDetailClinicianLabel: 'Clinician',
   appointmentDetailClinicianHint: 'Assigned clinician for this visit.',
   appointmentDetailClinicianEmpty: 'No clinician assigned.',
@@ -1240,8 +1317,9 @@ export default {
   appointmentColDateTime: 'Date & Time',
   appointmentColNumber: 'Appt. Number',
   appointmentColType: 'Type',
+  appointmentColServices: 'Services',
+  appointmentColPlaceOfService: 'Place',
   appointmentColClinician: 'Clinician',
-  appointmentColTelemedicine: 'Telemed.',
   appointmentColCarePlan: 'Care Plan',
   appointmentColReferral: 'Referral',
   appointmentActionView: 'View details',
@@ -1258,14 +1336,113 @@ export default {
   appointmentTypePlaceholder: 'Select appointment type',
   appointmentTypeRequired: 'Appointment type is required.',
   appointmentClientPlaceholder: 'Select client',
+  appointmentClientSearchPlaceholder: 'Search by name or client code…',
+  appointmentClientSearchHint:
+    'Type at least 3 characters to search by name or client code.',
+  appointmentClientSearchEmpty: 'No clients match your search.',
+  appointmentClientSearchMinLength:
+    'Type at least {min} characters to search.',
   appointmentClientRequired: 'Client is required.',
-  appointmentDuration: 'Duration (from type)',
+  appointmentServicesLabel: 'Services / Procedures',
+  appointmentServicesSearchPlaceholder: 'Search and add service...',
+  appointmentServicesSearchAdd: 'Search and add another service...',
+  appointmentServicesSearchEmpty: 'No matching services.',
+  appointmentServicesAddButton: 'Add',
+  appointmentServiceCatalogDurationFixed: '{count} min (fixed)',
+  appointmentServiceCatalogDurationRange: '{min}–{max} min',
+  appointmentServicesSelectedCount: '{count} selected',
+  appointmentServicesAddAnother: 'Add another service',
+  appointmentServicesCatalogEmpty:
+    'No appointment services available. '
+    + 'Please configure active services that require appointments '
+    + 'in Services / Procedures.',
+  appointmentServiceRequired: 'Select at least one service / procedure.',
+  appointmentPlaceOfService: 'Place of Service',
+  appointmentPlaceOfServicePlaceholder: 'Select place of service',
+  appointmentPlaceOfServiceRequired: 'Place of service is required.',
+  appointmentPlacesEmpty:
+    'No places of service available. '
+    + 'Please configure active places of service before creating appointments.',
+  appointmentTotalDurationTitle:
+    'Appointment Duration (from selected services)',
+  appointmentSuggestedFeeTotal: 'Suggested Fee (Total)',
+  appointmentSuggestedFeeValue: '${amount}',
+  appointmentCptCodes: 'CPT Codes',
+  appointmentServiceLineSummary:
+    'Service {index}: {name} — {count} min ({fixed})',
+  appointmentDurationFixedTag: 'fixed',
+  appointmentDurationSelectedTag: 'selected',
+  appointmentDurationFixedHint: 'Fixed duration',
+  appointmentDurationRangeHint: 'Allowed range: {min}–{max} min',
+  appointmentSelectServicesFirst: 'Select services to view availability.',
+  appointmentSelectPlaceFirst:
+    'Select a place of service to view availability.',
+  appointmentSelectDurationFirst:
+    'Set a valid duration to view availability.',
+  appointmentAvailabilityEmpty:
+    'No available times for the selected criteria.',
+  appointmentAvailabilityRequired: 'Select an available time.',
+  appointmentAvailabilityDurationHint:
+    'Showing available times for total duration of {count} min.',
+  appointmentAvailabilityRangesHint:
+    'White = open. Green = booked (click for details). '
+    + 'Yellow = break. Gray = outside working hours.',
+  appointmentAvailabilityOutsideHoursBlock: 'Outside hours · {time}',
+  appointmentAvailabilityBreakBlock: 'Break · {time}',
+  appointmentAvailabilityBookedBlock: 'Booked · {time}',
+  appointmentAvailabilityBookedBlockClient: '{client} · {time}',
+  appointmentAvailabilityBookedBlockDetail: '{client} · {services} · {time}',
+  appointmentAvailabilitySelectedTime: 'Selected: {time}',
+  appointmentAvailabilitySelectedWithClinician:
+    'Selected: {time} · {clinician}',
+  appointmentSchedulingStartTime: 'Start Time',
+  appointmentSchedulingEndTime: 'End Time',
+  appointmentTimeSpinnerIncreaseHour: 'Increase hour',
+  appointmentTimeSpinnerDecreaseHour: 'Decrease hour',
+  appointmentTimeSpinnerIncreaseMinute: 'Increase minute',
+  appointmentTimeSpinnerDecreaseMinute: 'Decrease minute',
+  appointmentTimeSpinnerIncreasePeriod: 'Increase period',
+  appointmentTimeSpinnerDecreasePeriod: 'Decrease period',
+  appointmentBookingConflict:
+    'The selected time does not have enough availability '
+    + 'for the total appointment duration. Please choose another slot.',
+  appointmentBookSeriesSuccess: '{count} appointments booked successfully.',
+  appointmentRepeatLabel: 'Repeat appointment',
+  appointmentRecurrenceFrequency: 'Frequency',
+  appointmentRecurrenceInterval: 'Repeat every',
+  appointmentRecurrenceDays: 'Days of week',
+  appointmentRecurrenceEnds: 'Ends',
+  appointmentRecurrenceCount: 'Number of appointments',
+  appointmentRecurrenceEndDate: 'End date',
+  appointmentRecurrenceDaily: 'Daily',
+  appointmentRecurrenceWeekly: 'Weekly',
+  appointmentRecurrenceMonthly: 'Monthly',
+  appointmentRecurrenceAfterCount: 'After number of appointments',
+  appointmentRecurrenceOnDate: 'On specific date',
+  placeOfServiceOffice: 'Office',
+  placeOfServiceTelehealth: 'Telehealth',
+  placeOfServiceHome: 'Home',
+  placeOfServiceSchool: 'School',
+  placeOfServiceCommunity: 'Community',
+  weekdayMon: 'Mon',
+  weekdayTue: 'Tue',
+  weekdayWed: 'Wed',
+  weekdayThu: 'Thu',
+  weekdayFri: 'Fri',
+  weekdaySat: 'Sat',
+  weekdaySun: 'Sun',
+  appointmentDuration: 'Duration',
+  appointmentDurationUnitMin: 'min',
   appointmentDurationMinutes: '{count} min',
   appointmentClinicianOptional: 'Clinician (Optional)',
   appointmentClinicianPlaceholder: 'Select clinician',
   appointmentClinicianHint:
     'Leave empty to assign an available clinician automatically.',
   appointmentClinicianAutoAssign: 'Auto-assigned clinician',
+  appointmentSupervisorOptional: 'Supervisor (Optional)',
+  appointmentSupervisorPlaceholder: 'Select supervisor',
+  appointmentSupervisorHint:
+    'Select the supervising clinician when required.',
   appointmentTelemedicine: 'Telemedicine',
   appointmentReferralOptional: 'Referral (Optional)',
   appointmentReferralPlaceholder: 'Select referral',
@@ -1285,9 +1462,8 @@ export default {
   appointmentLegendSelected: 'Selected',
   appointmentSlotsEmpty:
     'No available times for the selected criteria. '
-    + 'Try a different date, appointment type or clinician.',
-  appointmentSelectTypeFirst:
-    'Select an appointment type to view available times.',
+    + 'Try a different date, services, place of service or clinician.',
+  appointmentSelectTypeFirst: 'Select services to view available times.',
   appointmentSlotRequired: 'Select an available time slot.',
   appointmentPaginationSummary:
     'Showing {from} to {to} of {total} appointments',

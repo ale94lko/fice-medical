@@ -125,6 +125,7 @@ import {
   cancelAppointment,
   checkInAppointment,
   completeAppointment,
+  extractBookingConflicts,
   noShowAppointment,
   patchAppointment,
   rescheduleAppointment,
@@ -245,13 +246,24 @@ function confirmCancel(row) {
 async function onBook(body) {
   actionSaving.value = true
   try {
-    await bookAppointment(body)
+    const result = await bookAppointment(body)
     bookDrawerOpen.value = false
-    notifySuccess(t('appointmentBookSuccess'))
+    if (result.appointments?.length) {
+      notifySuccess(t('appointmentBookSeriesSuccess', {
+        count: result.appointments.length,
+      }))
+    } else {
+      notifySuccess(t('appointmentBookSuccess'))
+    }
     await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
-      notifyError(error)
+      const conflicts = extractBookingConflicts(error)
+      if (conflicts.length) {
+        notifyError(new Error(t('appointmentBookingConflict')))
+      } else {
+        notifyError(error)
+      }
     }
   } finally {
     actionSaving.value = false
@@ -266,8 +278,7 @@ async function onReschedule(payload) {
   try {
     await rescheduleAppointment(
       activeAppointment.value.appointmentId,
-      payload.newSlotId,
-      payload.notes,
+      payload,
     )
     rescheduleDrawerOpen.value = false
     notifySuccess(t('appointmentRescheduleSuccess'))

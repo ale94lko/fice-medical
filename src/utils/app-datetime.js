@@ -68,6 +68,68 @@ export function resolveIntlTimeZone(timezone = runtimeConfig.timezone) {
   return raw.replace(/_/g, '/')
 }
 
+/**
+ * Minutes east of UTC for login offsets like UTC-08:00 (-480).
+ * Returns null when the timezone is not an offset string.
+ */
+export function parseUtcOffsetMinutes(timezone = runtimeConfig.timezone) {
+  const raw = String(timezone ?? DEFAULT_CONFIG.timezone).trim()
+  const offsetMatch = /^UTC([+-])(\d{1,2})(?::(\d{2}))?$/i.exec(raw)
+  if (!offsetMatch) {
+    return null
+  }
+
+  const sign = offsetMatch[1] === '+' ? 1 : -1
+  const hours = Number(offsetMatch[2])
+  const minutes = Number(offsetMatch[3] ?? 0)
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+    return null
+  }
+
+  return sign * (hours * 60 + minutes)
+}
+
+/** Wall-clock minutes since midnight for login UTC±HH:MM timezones. */
+export function localWallClockMinutesNow(
+  timezone = runtimeConfig.timezone,
+  now = new Date(),
+) {
+  const offsetMinutes = parseUtcOffsetMinutes(timezone)
+  if (offsetMinutes == null) {
+    return null
+  }
+
+  const utcMinutes = now.getUTCHours() * 60 + now.getUTCMinutes()
+  const dayMinutes = 24 * 60
+  const localMinutes = utcMinutes + offsetMinutes
+
+  return ((localMinutes % dayMinutes) + dayMinutes) % dayMinutes
+}
+
+/** YYYY-MM-DD in a login UTC±HH:MM timezone. */
+export function localDayKeyFromLoginOffset(
+  iso,
+  timezone = runtimeConfig.timezone,
+) {
+  const offsetMinutes = parseUtcOffsetMinutes(timezone)
+  if (offsetMinutes == null) {
+    return null
+  }
+
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  const localMs = date.getTime() + offsetMinutes * 60 * 1000
+  const local = new Date(localMs)
+  const year = local.getUTCFullYear()
+  const month = String(local.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(local.getUTCDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
 function dateFormatSeparator(format) {
   if (format.includes('/')) {
     return '/'

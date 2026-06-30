@@ -1,15 +1,20 @@
 import { computed, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { calendarSourceIds, calendarViewModes } from
   'src/constants/calendar.js'
 import { useCalendarEventSources } from
   'src/composables/useCalendarEventSources.js'
 import { listCalendarAppointments } from 'src/utils/appointment-api.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
+import {
+  getAppDateTimeConfig,
+  resolveIntlTimeZone,
+} from 'src/utils/app-datetime.js'
 import {
   addMonthsToMonthKey,
   formatMonthYear,
   formatUtcDateLong,
   monthKeyFromDayKey,
-  resolveTenantTimeZone,
   todayLocalDayKey,
 } from 'src/utils/appointment-datetime.js'
 import {
@@ -28,10 +33,16 @@ import { useCalendarPermissions } from
   'src/composables/useCalendarPermissions.js'
 
 export function useAppointmentCalendar() {
-  const timeZone = resolveTenantTimeZone()
+  const authStore = useAuthStore()
+  const { configData } = storeToRefs(authStore)
+  const timeZone = computed(() =>
+    resolveIntlTimeZone(
+      configData.value?.timezone ?? getAppDateTimeConfig().timezone,
+    ),
+  )
   const { canSelectClinicianSources } = useCalendarPermissions()
   const viewMode = ref(calendarViewModes.week)
-  const focusDayKey = ref(todayLocalDayKey(timeZone))
+  const focusDayKey = ref(todayLocalDayKey(timeZone.value))
   const sidebarMonthKey = ref(monthKeyFromDayKey(focusDayKey.value))
   const loading = ref(false)
   const loadError = ref('')
@@ -43,7 +54,7 @@ export function useAppointmentCalendar() {
   const sources = useCalendarEventSources()
 
   const visibleRange = computed(() =>
-    visibleRangeForView(viewMode.value, focusDayKey.value, timeZone),
+    visibleRangeForView(viewMode.value, focusDayKey.value, timeZone.value),
   )
 
   const displayEvents = computed(() => {
@@ -81,7 +92,10 @@ export function useAppointmentCalendar() {
 
   const toolbarTitle = computed(() => {
     if (viewMode.value === calendarViewModes.month) {
-      return formatMonthYear(monthKeyFromDayKey(focusDayKey.value), timeZone)
+      return formatMonthYear(
+        monthKeyFromDayKey(focusDayKey.value),
+        timeZone.value,
+      )
     }
     if (viewMode.value === calendarViewModes.week) {
       const keys = weekDayKeys.value
@@ -89,11 +103,14 @@ export function useAppointmentCalendar() {
         return ''
       }
 
-      return `${formatUtcDateLong(`${keys[0]}T12:00:00.000Z`, timeZone)}`
-        + ` – ${formatUtcDateLong(`${keys[6]}T12:00:00.000Z`, timeZone)}`
+      return `${formatUtcDateLong(`${keys[0]}T12:00:00.000Z`, timeZone.value)}`
+        + ` – ${formatUtcDateLong(`${keys[6]}T12:00:00.000Z`, timeZone.value)}`
     }
 
-    return formatUtcDateLong(`${focusDayKey.value}T12:00:00.000Z`, timeZone)
+    return formatUtcDateLong(
+      `${focusDayKey.value}T12:00:00.000Z`,
+      timeZone.value,
+    )
   })
 
   async function loadEvents() {
@@ -127,7 +144,7 @@ export function useAppointmentCalendar() {
 
           mapAppointmentsToCalendarEvents(appointments, {
             sourceId,
-            timeZone,
+            timeZone: timeZone.value,
           }).forEach(event => {
             merged.set(event.id, event)
           })
@@ -136,7 +153,7 @@ export function useAppointmentCalendar() {
         const appointments = await listCalendarAppointments(params)
         mapAppointmentsToCalendarEvents(appointments, {
           sourceId: calendarSourceIds.myAppointments,
-          timeZone,
+          timeZone: timeZone.value,
         }).forEach(event => {
           merged.set(event.id, event)
         })
@@ -154,7 +171,7 @@ export function useAppointmentCalendar() {
   }
 
   function goToToday() {
-    focusDayKey.value = todayLocalDayKey(timeZone)
+    focusDayKey.value = todayLocalDayKey(timeZone.value)
     sidebarMonthKey.value = monthKeyFromDayKey(focusDayKey.value)
     scrollToNowKey.value += 1
   }

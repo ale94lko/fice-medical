@@ -532,6 +532,14 @@
               {{ t('subtenantListTitle') }}
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
+              v-if="showServicesProcedures"
+              icon="medical_services"
+              to="/administration/services"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminServices">
+              {{ t('serviceProcedureListTitle') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
               v-if="showAdminGeneral"
               icon="tune">
               {{ t('administrationGeneral') }}
@@ -752,6 +760,7 @@ const {
   showAdminGeneral,
   showAdminSubtenants,
   showAdminUsers,
+  showServicesProcedures,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')
 
