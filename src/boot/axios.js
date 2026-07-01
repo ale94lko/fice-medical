@@ -228,6 +228,12 @@ api.interceptors.request.use(
     config.headers = config.headers || {}
     config.headers['X-Tenant-Key'] = 'pruebas'//resolveTenantKeyFromHost()
 
+    // TODO(producción): quitar — header provisional ngrok (desarrollo).
+    // axios.get('https://…ngrok-free.dev/api', {
+    //   headers: { 'ngrok-skip-browser-warning': 'true' },
+    // })
+    config.headers['ngrok-skip-browser-warning'] = 'true'
+
     const url = config.url || ''
     const publicAuth = isPublicAuthUrl(url) || config.__refreshCall
 
