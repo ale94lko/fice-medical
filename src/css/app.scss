@@ -1362,9 +1362,12 @@ input:-webkit-autofill {
   background: linear-gradient(160deg, $secondary-2 0%, $page-bg 55%, $surface 100%);
 
   .login-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     min-width: 0;
     flex: 1 1 0;
-    flex-direction: column;
 
     &:not(.mobile) {
       flex: 1 1 auto;
@@ -1381,19 +1384,33 @@ input:-webkit-autofill {
     }
 
     .my-card {
-      width: 380px;
-      max-width: 100%;
-      padding: 28px 24px;
+      width: 340px;
+      max-width: calc(100% - 32px);
+      padding: 44px 24px;
       border-radius: $radius-lg !important;
       box-shadow: $shadow-md;
       border: 1px solid $border-subtle;
       background: $surface;
 
+      > form {
+        > .q-card__section.login-inputs {
+          padding: 0 !important;
+        }
+
+        > .q-card__actions {
+          flex-direction: column;
+          align-items: stretch;
+          padding: 24px 0 0 !important;
+        }
+      }
+
       .login-inputs {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
         padding-bottom: 0 !important;
+
+        .login-text-input + .login-text-input,
+        > .q-field + .q-field {
+          margin-top: 20px;
+        }
 
         .q-field--outlined {
           .q-field__label {
@@ -1412,7 +1429,7 @@ input:-webkit-autofill {
 
         .login-error-msg {
           color: $negative;
-          margin: 4px 0 0;
+          margin: 16px 0 0;
           line-height: 1.4;
         }
       }
@@ -1422,10 +1439,10 @@ input:-webkit-autofill {
         justify-content: center;
         align-items: center;
         width: 100%;
-        margin-top: 10px;
+        margin-top: 16px;
 
         .forgot-password {
-          margin: 10px;
+          margin: 0;
           color: $primary;
           cursor: pointer;
           font-weight: 500;

@@ -1360,9 +1360,7 @@ export default {
   appointmentPlaceOfService: 'Place of Service',
   appointmentPlaceOfServicePlaceholder: 'Select place of service',
   appointmentPlaceOfServiceRequired: 'Place of service is required.',
-  appointmentPlacesEmpty:
-    'No places of service available. '
-    + 'Please configure active places of service before creating appointments.',
+  appointmentPlacesEmpty: 'No places of service available.',
   appointmentTotalDurationTitle:
     'Appointment Duration (from selected services)',
   appointmentSuggestedFeeTotal: 'Suggested Fee (Total)',
@@ -1406,6 +1404,18 @@ export default {
   appointmentBookingConflict:
     'The selected time does not have enough availability '
     + 'for the total appointment duration. Please choose another slot.',
+  appointmentBookingAppointmentConflict:
+    'The selected time overlaps an existing appointment. '
+    + 'Please choose another slot.',
+  appointmentOverlapping: 'Overlapping',
+  appointmentEnableOverlappingHint:
+    'Enable overlapping to book at this time.',
+  appointmentScheduleBlockOverlapWarningBreak:
+    'This time overlaps a break or lunch block.',
+  appointmentScheduleBlockOverlapWarningOutside:
+    'This time is outside regular office hours.',
+  appointmentScheduleBlockOverlapWarningBoth:
+    'This time overlaps a break or lunch block and is outside office hours.',
   appointmentBookSeriesSuccess: '{count} appointments booked successfully.',
   appointmentRepeatLabel: 'Repeat appointment',
   appointmentRecurrenceFrequency: 'Frequency',

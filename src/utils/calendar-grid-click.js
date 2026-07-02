@@ -35,6 +35,7 @@ export function localMinutesFromGridOffsetY(
   rowHeightPx = calendarTimeRowHeightPx,
   gridHourStart = calendarHourStart,
   gridHourEnd = calendarHourEnd,
+  slotMinutes = calendarSlotMinutes,
 ) {
   const hourCount = gridHourEnd - gridHourStart + 1
   const gridHeight = hourCount * rowHeightPx
@@ -44,10 +45,16 @@ export function localMinutesFromGridOffsetY(
   )
   const raw = gridHourStart * 60
     + (clampedY / rowHeightPx) * 60
+  const gridStart = gridHourStart * 60
+  const gridEnd = (gridHourEnd + 1) * 60
+
+  if (slotMinutes <= 1) {
+    return Math.max(gridStart, Math.min(Math.round(raw), gridEnd - 1))
+  }
 
   return snapLocalMinutesToSlot(
     raw,
-    calendarSlotMinutes,
+    slotMinutes,
     gridHourStart,
     gridHourEnd,
   )

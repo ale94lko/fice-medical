@@ -4,6 +4,7 @@
 import {
   getAppDateTimeConfig,
   localDayKeyFromLoginOffset,
+  parseUtcOffsetMinutes,
   resolveIntlTimeZone,
 } from 'src/utils/app-datetime.js'
 import { parseUsDateString } from 'src/utils/client-form.js'
@@ -142,6 +143,35 @@ export function utcRangeForLocalDay(
     return { fromUtc: '', toUtc: '' }
   }
   const [, y, m, d] = match
+  const offsetMinutes = parseUtcOffsetMinutes(
+    getAppDateTimeConfig().timezone,
+  )
+  if (offsetMinutes != null) {
+    const dayStartUtcMs = Date.UTC(
+      Number(y),
+      Number(m) - 1,
+      Number(d),
+      0,
+      0,
+      0,
+      0,
+    ) - offsetMinutes * 60 * 1000
+    const dayEndUtcMs = Date.UTC(
+      Number(y),
+      Number(m) - 1,
+      Number(d),
+      23,
+      59,
+      59,
+      999,
+    ) - offsetMinutes * 60 * 1000
+
+    return {
+      fromUtc: new Date(dayStartUtcMs).toISOString(),
+      toUtc: new Date(dayEndUtcMs).toISOString(),
+    }
+  }
+
   const noonUtc = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d), 12))
   const offsetMs = getTimeZoneOffsetMs(noonUtc, timeZone)
   const startLocalAsUtc = new Date(

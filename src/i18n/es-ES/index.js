@@ -1410,9 +1410,7 @@ export default {
   appointmentPlaceOfService: 'Lugar de atención',
   appointmentPlaceOfServicePlaceholder: 'Seleccionar lugar de atención',
   appointmentPlaceOfServiceRequired: 'El lugar de atención es obligatorio.',
-  appointmentPlacesEmpty:
-    'No hay lugares de atención disponibles. '
-    + 'Configure lugares activos antes de crear citas.',
+  appointmentPlacesEmpty: 'No hay lugares de atención disponibles.',
   appointmentTotalDurationTitle:
     'Duración de la cita (servicios seleccionados)',
   appointmentSuggestedFeeTotal: 'Tarifa sugerida (total)',
@@ -1457,6 +1455,19 @@ export default {
   appointmentBookingConflict:
     'El horario seleccionado no tiene disponibilidad suficiente '
     + 'para la duración total. Elija otro horario.',
+  appointmentBookingAppointmentConflict:
+    'El horario seleccionado se superpone con otra cita. '
+    + 'Elija otro horario.',
+  appointmentOverlapping: 'Superposición',
+  appointmentEnableOverlappingHint:
+    'Active superposición para reservar en este horario.',
+  appointmentScheduleBlockOverlapWarningBreak:
+    'Este horario se superpone con un descanso o almuerzo.',
+  appointmentScheduleBlockOverlapWarningOutside:
+    'Este horario está fuera del horario habitual de consulta.',
+  appointmentScheduleBlockOverlapWarningBoth:
+    'Este horario se superpone con descanso o almuerzo '
+    + 'y está fuera del horario habitual de consulta.',
   appointmentBookSeriesSuccess: '{count} citas reservadas correctamente.',
   appointmentRepeatLabel: 'Repetir cita',
   appointmentRecurrenceFrequency: 'Frecuencia',

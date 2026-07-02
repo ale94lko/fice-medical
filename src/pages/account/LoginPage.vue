@@ -9,18 +9,16 @@
       <q-card class="my-card">
         <form @submit.prevent.stop="handleLogin">
           <q-card-section class="login-inputs">
-            <form-input
+            <LoginTextInput
               v-model="email"
-              stack-spacing
               icon-left="mail"
               :test-id="authTestIds.emailInput"
               :label="t('email')"
               :error-message="emailErrorMessage"
               :error="isEmailInvalid"
             />
-            <form-input
+            <LoginTextInput
               v-model="password"
-              stack-spacing
               icon-left="lock"
               type="password"
               :test-id="authTestIds.passwordInput"
@@ -67,7 +65,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth-store.js'
 import { siteBreakpointsPx } from 'components/constants.js'
-import FormInput from '../../components/FormInput.vue'
+import LoginTextInput from 'components/auth/LoginTextInput.vue'
 import LoginPromoPanel from '../../components/LoginPromoPanel.vue'
 import { authTestIds } from 'src/test-ids/index.js'
 

@@ -38,17 +38,6 @@
   @include app-single-line-field-control($app-input-height);
 }
 
-.login-container .login-inputs .q-field:not(:has(textarea)):not(.q-field--labeled) {
-  @include app-single-line-field-control($app-login-input-height);
-}
-
-.login-container .login-inputs .q-field.q-field--labeled:not(:has(textarea)) {
-  .q-field__control {
-    min-height: $app-login-input-height;
-    height: auto !important;
-  }
-}
-
 .q-field:has(textarea) {
   .q-field__control {
     height: auto !important;

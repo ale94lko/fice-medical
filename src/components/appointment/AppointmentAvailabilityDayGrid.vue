@@ -15,6 +15,7 @@
 
       <div class="col calendar-day-view__grid-wrap">
         <div
+          ref="gridRef"
           class="calendar-day-view__grid
             appointment-availability-day-grid__grid"
           :class="{
@@ -48,7 +49,12 @@
           <div
             v-if="selectionStyle"
             class="appointment-availability-day-grid__selection"
+            :class="{
+              'appointment-availability-day-grid__selection--dragging':
+                dragging,
+            }"
             :style="selectionStyle"
+            @pointerdown.stop="onSelectionPointerDown"
           />
         </div>
       </div>
@@ -77,6 +83,7 @@ import {
 import {
   calendarHourEnd,
   calendarHourStart,
+  calendarTimeRowHeightPx,
 } from 'src/constants/calendar.js'
 import { buildHourLabels } from 'src/utils/calendar-grid.js'
 import {
@@ -108,6 +115,8 @@ const emit = defineEmits(['select-time'])
 
 const { t } = useI18n()
 const bodyRef = ref(null)
+const gridRef = ref(null)
+const dragging = ref(false)
 const appointmentDetailOpen = ref(false)
 const appointmentDetailRecord = ref(null)
 
@@ -200,19 +209,66 @@ function onBlockClick(block) {
   appointmentDetailOpen.value = true
 }
 
+function emitTimeFromOffsetY(offsetY) {
+  emit('select-time', { dayKey: props.dayKey, offsetY })
+}
+
 function onGridClick(event) {
   if (props.readonly) {
     return
   }
 
-  const grid = event?.currentTarget
+  const grid = gridRef.value
   if (!grid?.getBoundingClientRect) {
     return
   }
 
   const rect = grid.getBoundingClientRect()
   const offsetY = event.clientY - rect.top
-  emit('select-time', { dayKey: props.dayKey, offsetY })
+  emitTimeFromOffsetY(offsetY)
+}
+
+function onSelectionPointerDown(event) {
+  if (props.readonly || !props.selectedWindow) {
+    return
+  }
+
+  const grid = gridRef.value
+  const selectionEl = event.currentTarget
+  if (!grid?.getBoundingClientRect || !selectionEl?.getBoundingClientRect) {
+    return
+  }
+
+  event.preventDefault()
+  dragging.value = true
+
+  const grabOffsetY = event.clientY
+    - selectionEl.getBoundingClientRect().top
+  const hourCount = calendarHourEnd - calendarHourStart + 1
+  const maxOffsetY = hourCount * calendarTimeRowHeightPx
+
+  function onPointerMove(moveEvent) {
+    const gridRect = grid.getBoundingClientRect()
+    const offsetY = Math.max(
+      0,
+      Math.min(
+        moveEvent.clientY - gridRect.top - grabOffsetY,
+        maxOffsetY,
+      ),
+    )
+    emitTimeFromOffsetY(offsetY)
+  }
+
+  function onPointerUp() {
+    dragging.value = false
+    window.removeEventListener('pointermove', onPointerMove)
+    window.removeEventListener('pointerup', onPointerUp)
+    window.removeEventListener('pointercancel', onPointerUp)
+  }
+
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+  window.addEventListener('pointercancel', onPointerUp)
 }
 
 function scrollToFocus() {

@@ -1,8 +1,11 @@
 <template>
   <div
     class="appointment-time-spinner row no-wrap items-stretch"
-    :class="{ 'appointment-time-spinner--readonly': readonly }">
-    <div class="appointment-time-spinner__segment col">
+    :class="{
+      'appointment-time-spinner--readonly': readonly,
+      'appointment-time-spinner--fluid': fluid,
+    }">
+    <div class="appointment-time-spinner__segment">
       <q-btn
         flat
         dense
@@ -30,7 +33,7 @@
       />
     </div>
 
-    <div class="appointment-time-spinner__segment col">
+    <div class="appointment-time-spinner__segment">
       <q-btn
         flat
         dense
@@ -58,7 +61,7 @@
       />
     </div>
 
-    <div class="appointment-time-spinner__segment col">
+    <div class="appointment-time-spinner__segment">
       <q-btn
         flat
         dense
@@ -91,7 +94,6 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { calendarSlotMinutes } from 'src/constants/calendar.js'
 import { parseTime12h } from 'src/utils/client-vitals.js'
 
 const props = defineProps({
@@ -99,7 +101,11 @@ const props = defineProps({
   readonly: { type: Boolean, default: false },
   minuteStep: {
     type: Number,
-    default: calendarSlotMinutes,
+    default: 1,
+  },
+  fluid: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -166,7 +172,7 @@ function stepHour(delta) {
 
 function stepMinute(delta) {
   const base = resolveBaseTime()
-  const step = Number(props.minuteStep) || calendarSlotMinutes
+  const step = Number(props.minuteStep) || 1
   const total = base.hours * 60 + base.minutes + delta * step
   const normalized = ((total % (24 * 60)) + (24 * 60)) % (24 * 60)
   const nextHours = Math.floor(normalized / 60)
@@ -199,13 +205,17 @@ function stepPeriod(delta) {
 @import 'src/css/quasar.variables';
 
 .appointment-time-spinner {
-  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  gap: 4px;
 
   &__segment {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    flex: 0 0 auto;
+    width: 38px;
     min-height: 56px;
     border: 1px solid $border-subtle;
     border-radius: 8px;
@@ -214,12 +224,12 @@ function stepPeriod(delta) {
   }
 
   &__value {
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     line-height: 1.1;
     color: $text-strong;
     padding: 0;
-    min-width: 2rem;
+    min-width: 0;
     text-align: center;
   }
 
@@ -231,6 +241,23 @@ function stepPeriod(delta) {
 
   &--readonly {
     opacity: 0.72;
+  }
+
+  &--fluid {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    gap: 6px;
+
+    .appointment-time-spinner__segment {
+      flex: 1 1 0;
+      width: auto;
+      min-width: 44px;
+    }
+
+    .appointment-time-spinner__value {
+      font-size: 0.875rem;
+    }
   }
 }
 </style>

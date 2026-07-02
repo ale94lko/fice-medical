@@ -14,7 +14,9 @@
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm
           appointment-book-dialog__body">
-        <p class="text-body2 text-grey-7 q-mb-md">
+        <p
+          v-if="dialogSubtitle"
+          class="text-body2 text-grey-7 q-mb-md">
           {{ dialogSubtitle }}
         </p>
 
@@ -125,47 +127,6 @@
               </p>
             </div>
 
-            <div class="col-12">
-              <div class="appointment-book-dialog__duration-card">
-                <p class="appointment-book-dialog__duration-title">
-                  {{ t('appointmentTotalDurationTitle') }}
-                </p>
-                <p class="appointment-book-dialog__duration-value">
-                  {{
-                    totalDurationMinutes
-                      ? t('appointmentDurationMinutes', {
-                        count: totalDurationMinutes,
-                      })
-                      : '—'
-                  }}
-                </p>
-                <ul
-                  v-if="serviceLines.length"
-                  class="appointment-book-dialog__duration-list">
-                  <li
-                    v-for="(line, index) in serviceLines"
-                    :key="line.serviceId">
-                    {{ t('appointmentServiceLineSummary', {
-                      index: index + 1,
-                      name: line.name,
-                      count: line.durationMin,
-                      fixed: line.fixedDuration
-                        ? t('appointmentDurationFixedTag')
-                        : t('appointmentDurationSelectedTag'),
-                    }) }}
-                  </li>
-                </ul>
-                <div class="appointment-book-dialog__fee-row q-mt-sm">
-                  <span>{{ t('appointmentSuggestedFeeTotal') }}</span>
-                  <strong>{{ suggestedFeeLabel }}</strong>
-                </div>
-                <div class="appointment-book-dialog__fee-row">
-                  <span>{{ t('appointmentCptCodes') }}</span>
-                  <strong>{{ cptCodesLabel }}</strong>
-                </div>
-              </div>
-            </div>
-
             <div class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('appointmentClinicianOptional')"
@@ -208,39 +169,6 @@
               </AddClientLabeledField>
             </div>
 
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('appointmentCarePlanOptional')"
-                :test-id="tid.field('care-plan')">
-                <FormSelect
-                  v-model="draft.carePlanId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  clearable
-                  :options="carePlanOptions"
-                  :test-id="tid.field('care-plan')"
-                />
-              </AddClientLabeledField>
-            </div>
-
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('appointmentReferralOptional')"
-                :test-id="tid.field('referral')">
-                <FormSelect
-                  v-model="draft.referralId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  clearable
-                  :options="referralOptions"
-                  :test-id="tid.field('referral')"
-                />
-              </AddClientLabeledField>
-            </div>
           </div>
         </template>
 
@@ -268,6 +196,9 @@
               :duration-minutes="totalDurationMinutes"
               :scheduling-fields="schedulingFields"
               :scheduling-field-error="schedulingFieldError"
+              :scheduling-needs-overlapping="schedulingNeedsOverlapping"
+              :allow-over-schedule-blocks="allowOverScheduleBlocks"
+              :schedule-block-overlap-types="scheduleBlockOverlapTypes"
               :empty-label="availabilityEmptyLabel"
               :readonly="schedulingLocked"
               @select-day="selectDay"
@@ -277,6 +208,7 @@
               @update-scheduling-end-time="setSchedulingEndTime"
               @commit-scheduling-start-time="commitSchedulingStartTime"
               @commit-scheduling-end-time="commitSchedulingEndTime"
+              @update:allow-over-schedule-blocks="setAllowOverScheduleBlocks"
               @refresh="reloadAvailability"
               @prev-month="shiftVisibleMonth(-1)"
               @next-month="shiftVisibleMonth(1)"
@@ -358,6 +290,45 @@
           </div>
         </div>
 
+        <div
+          v-if="mode === 'book'"
+          class="q-mt-lg">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('appointmentCarePlanOptional')"
+                :test-id="tid.field('care-plan')">
+                <FormSelect
+                  v-model="draft.carePlanId"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  clearable
+                  :options="carePlanOptions"
+                  :test-id="tid.field('care-plan')"
+                />
+              </AddClientLabeledField>
+            </div>
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('appointmentReferralOptional')"
+                :test-id="tid.field('referral')">
+                <FormSelect
+                  v-model="draft.referralId"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  clearable
+                  :options="referralOptions"
+                  :test-id="tid.field('referral')"
+                />
+              </AddClientLabeledField>
+            </div>
+          </div>
+        </div>
+
         <div class="q-mt-lg">
           <AddClientLabeledField
             :label="t('appointmentNotesOptional')"
@@ -435,7 +406,6 @@ import {
 } from 'src/composables/useAppointmentBooking.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import {
-  formatCodesSummary,
   formatFeeLabel,
   isDurationWithinServiceRange,
   sumServiceLineDurations,
@@ -563,6 +533,10 @@ const {
   commitSchedulingEndTime,
   schedulingFields,
   schedulingFieldError,
+  schedulingNeedsOverlapping,
+  allowOverScheduleBlocks,
+  scheduleBlockOverlapTypes,
+  setAllowOverScheduleBlocks,
   refreshDurationPreview,
   loadAvailability,
   applyBookingHint,
@@ -582,7 +556,7 @@ const dialogTitle = computed(() =>
 const dialogSubtitle = computed(() =>
   props.mode === 'reschedule'
     ? t('appointmentRescheduleSubtitle')
-    : t('appointmentAddSubtitle'),
+    : '',
 )
 
 const primaryButtonLabel = computed(() =>
@@ -607,10 +581,6 @@ const availabilityEmptyLabel = computed(() => {
 
 const suggestedFeeLabel = computed(() =>
   formatFeeLabel(sumSuggestedFees(serviceLines.value), t),
-)
-
-const cptCodesLabel = computed(() =>
-  formatCodesSummary(serviceLines.value),
 )
 
 const summaryVisible = computed(() => Boolean(selectedWindow.value))
@@ -1240,7 +1210,7 @@ function buildRecurrencePayload() {
 
 function buildBookPayload() {
   /* eslint-disable camelcase -- API book payload */
-  return {
+  const payload = {
     start_at_utc: selectedWindow.value?.startAtUtc,
     service_procedure_ids: serviceProcedureIds.value,
     duration_minutes: totalDurationMinutes.value,
@@ -1256,6 +1226,12 @@ function buildBookPayload() {
     repeat_appointment: Boolean(draft.value.repeatAppointment),
     recurrence: buildRecurrencePayload(),
   }
+
+  if (allowOverScheduleBlocks.value) {
+    payload.allow_over_schedule_blocks = true
+  }
+
+  return payload
   /* eslint-enable camelcase */
 }
 
@@ -1361,42 +1337,6 @@ watch(
 
   &__scheduling-section {
     margin-top: 2.75rem;
-  }
-
-  &__duration-card {
-    border: 1px solid rgba($primary, 0.2);
-    border-radius: 12px;
-    background: rgba($primary, 0.04);
-    padding: 14px 16px;
-  }
-
-  &__duration-title {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: $grey-7;
-    font-weight: 600;
-  }
-
-  &__duration-value {
-    margin: 6px 0 0;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: $primary;
-  }
-
-  &__duration-list {
-    margin: 10px 0 0;
-    padding-left: 18px;
-    font-size: 0.8125rem;
-    color: $text-strong;
-  }
-
-  &__fee-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    font-size: 0.8125rem;
-    color: $grey-7;
   }
 
   &__summary {

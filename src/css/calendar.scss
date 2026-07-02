@@ -646,7 +646,13 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     border-radius: 6px;
     background: rgba($primary, 0.18);
     border: 2px solid $primary;
-    pointer-events: none;
+    pointer-events: auto;
+    cursor: grab;
+    touch-action: none;
+
+    &--dragging {
+      cursor: grabbing;
+    }
   }
 
   &__selected {

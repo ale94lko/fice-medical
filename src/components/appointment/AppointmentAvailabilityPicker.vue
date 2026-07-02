@@ -57,22 +57,72 @@
         <div
           v-if="showSchedulingFields"
           class="appointment-availability-picker__schedule-fields q-mt-md">
-          <AddClientLabeledField
-            :label="t('appointmentSchedulingStartTime')"
-            class="q-mb-sm">
-            <AppointmentTimeSpinnerField
-              :model-value="schedulingFields.startTime"
-              :readonly="readonly"
-              @change="onStartTimeSpinnerChange"
+          <div class="appointment-availability-picker__scheduling-top q-mb-sm">
+            <div
+              v-if="durationValueLabel"
+              class="appointment-availability-picker__duration">
+              <div
+                class="appointment-availability-picker__duration-icon"
+                aria-hidden="true">
+                <q-icon name="schedule" size="20px" />
+              </div>
+              <span class="appointment-availability-picker__duration-label">
+                {{ t('appointmentDuration') }}
+              </span>
+              <span class="appointment-availability-picker__duration-value">
+                {{ durationValueLabel }}
+              </span>
+            </div>
+            <div class="appointment-availability-picker__time-column">
+              <div class="appointment-availability-picker__time-field">
+                <span
+                  class="form-field__label
+                    appointment-availability-picker__time-label">
+                  {{ t('appointmentSchedulingStartTime') }}
+                </span>
+                <AppointmentTimeSpinnerField
+                  :model-value="schedulingFields.startTime"
+                  :minute-step="1"
+                  fluid
+                  :readonly="readonly"
+                  @change="onStartTimeSpinnerChange"
+                />
+              </div>
+              <div class="appointment-availability-picker__time-field">
+                <span
+                  class="form-field__label
+                    appointment-availability-picker__time-label">
+                  {{ t('appointmentSchedulingEndTime') }}
+                </span>
+                <AppointmentTimeSpinnerField
+                  :model-value="schedulingFields.endTime"
+                  :minute-step="1"
+                  fluid
+                  :readonly="readonly"
+                  @change="onEndTimeSpinnerChange"
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="showOverlappingSection"
+            class="appointment-availability-picker__overlapping-block q-mb-sm">
+            <FormToggle
+              v-if="showOverlappingToggle"
+              :model-value="allowOverScheduleBlocks"
+              :label="t('appointmentOverlapping')"
+              :disable="readonly"
+              @update:model-value="
+                emit('update:allow-over-schedule-blocks', $event)
+              "
             />
-          </AddClientLabeledField>
-          <AddClientLabeledField :label="t('appointmentSchedulingEndTime')">
-            <AppointmentTimeSpinnerField
-              :model-value="schedulingFields.endTime"
-              :readonly="readonly"
-              @change="onEndTimeSpinnerChange"
-            />
-          </AddClientLabeledField>
+            <p
+              v-if="scheduleBlockOverlapWarning"
+              class="appointment-availability-picker__overlap-warning
+                text-body2 text-warning q-mb-none q-mt-none">
+              {{ scheduleBlockOverlapWarning }}
+            </p>
+          </div>
           <p
             v-if="schedulingErrorLabel"
             class="form-field__error q-mt-sm q-mb-none">
@@ -88,7 +138,7 @@
           <q-spinner color="primary" size="28px" />
         </div>
         <div
-          v-else-if="!selectedDayKey || !selectedDayWindows.length"
+          v-else-if="!selectedDayKey || !showDaySchedulePanel"
           class="q-pa-md">
           <p class="text-body2 text-grey-7 q-mb-none">
             {{ emptyLabel }}
@@ -152,12 +202,13 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormToggle from 'components/FormToggle.vue'
 import AppointmentTimeSpinnerField from
   'components/appointment/AppointmentTimeSpinnerField.vue'
 import AppointmentAvailabilityDayGrid from
   'components/appointment/AppointmentAvailabilityDayGrid.vue'
 import {
+  appointmentAvailabilityBlockTypes,
   appointmentAvailabilityPickerModes,
 } from 'components/constants.js'
 import {
@@ -188,6 +239,9 @@ const props = defineProps({
     }),
   },
   schedulingFieldError: { type: String, default: '' },
+  schedulingNeedsOverlapping: { type: Boolean, default: false },
+  allowOverScheduleBlocks: { type: Boolean, default: false },
+  scheduleBlockOverlapTypes: { type: Array, default: () => [] },
   emptyLabel: { type: String, default: '' },
   readonly: { type: Boolean, default: false },
 })
@@ -203,6 +257,7 @@ const emit = defineEmits([
   'update-scheduling-end-time',
   'commit-scheduling-start-time',
   'commit-scheduling-end-time',
+  'update:allow-over-schedule-blocks',
 ])
 
 const { t } = useI18n()
@@ -218,12 +273,70 @@ const showSchedulingFields = computed(() =>
   && !props.loading,
 )
 
+const showOverlappingToggle = computed(() =>
+  isRangesMode.value && Boolean(props.durationMinutes),
+)
+
+const showDaySchedulePanel = computed(() => {
+  if (!props.selectedDayKey) {
+    return false
+  }
+  if (!isRangesMode.value) {
+    return props.selectedDayWindows.length > 0
+  }
+
+  return props.selectedDayWindows.length > 0
+    || props.selectedDayBlocks.length > 0
+    || props.allowOverScheduleBlocks
+})
+
 const schedulingErrorLabel = computed(() => {
-  if (!props.schedulingFieldError) {
+  if (props.schedulingFieldError !== 'appointmentConflict') {
     return ''
   }
 
-  return t('appointmentBookingConflict')
+  return t('appointmentBookingAppointmentConflict')
+})
+
+const scheduleBlockOverlapWarning = computed(() => {
+  if (!props.allowOverScheduleBlocks && props.schedulingNeedsOverlapping) {
+    return t('appointmentEnableOverlappingHint')
+  }
+
+  if (
+    !props.allowOverScheduleBlocks
+    || !props.scheduleBlockOverlapTypes.length
+  ) {
+    return ''
+  }
+
+  const types = props.scheduleBlockOverlapTypes
+  const hasBreak = types.includes(appointmentAvailabilityBlockTypes.break)
+  const hasOutside = types.includes(appointmentAvailabilityBlockTypes.outside)
+  if (hasBreak && hasOutside) {
+    return t('appointmentScheduleBlockOverlapWarningBoth')
+  }
+  if (hasBreak) {
+    return t('appointmentScheduleBlockOverlapWarningBreak')
+  }
+  if (hasOutside) {
+    return t('appointmentScheduleBlockOverlapWarningOutside')
+  }
+
+  return ''
+})
+
+const showOverlappingSection = computed(() =>
+  showOverlappingToggle.value || Boolean(scheduleBlockOverlapWarning.value),
+)
+
+const durationValueLabel = computed(() => {
+  const minutes = Number(props.durationMinutes)
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    return ''
+  }
+
+  return t('appointmentDurationMinutes', { count: minutes })
 })
 
 const calendarCells = computed(() => {
@@ -353,8 +466,90 @@ function onEndTimeSpinnerChange(value) {
   }
 
   &__schedule-fields {
+    width: 100%;
     border-top: 1px solid $border-subtle;
     padding-top: 12px;
+  }
+
+  &__scheduling-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+  }
+
+  &__duration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+    min-width: 4.5rem;
+    text-align: center;
+    padding-top: 2px;
+  }
+
+  &__duration-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba($primary, 0.12);
+    color: $primary;
+    margin-bottom: 4px;
+  }
+
+  &__duration-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: $text-muted;
+  }
+
+  &__duration-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: $primary;
+    margin-top: 2px;
+  }
+
+  &__time-column {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
+    padding-top: 2px;
+  }
+
+  &__time-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__time-label {
+    margin-bottom: 0;
+    flex: 0 0 3.25rem;
+    line-height: 1.2;
+  }
+
+  &__overlapping-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+    border: 1px solid $border-subtle;
+    border-radius: 8px;
+    background: #fff;
+    padding: 8px 12px;
   }
 }
 </style>

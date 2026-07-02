@@ -15,6 +15,7 @@ export const calendarSourceIds = {
 export const calendarHourStart = 0
 export const calendarHourEnd = 23
 export const calendarSlotMinutes = 30
+export const appointmentBookingGridSlotMinutes = 1
 export const calendarHourCount = calendarHourEnd - calendarHourStart + 1
 export const calendarTimeRowHeightPx = 48
 export const calendarTimeGridHeightPx =

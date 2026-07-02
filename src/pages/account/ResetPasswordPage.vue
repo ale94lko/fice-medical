@@ -13,9 +13,8 @@
           </q-card-section>
           <q-card-section class="login-inputs">
             <template v-if="isTokenResetMode">
-              <form-input
+              <LoginTextInput
                 v-model="password"
-                stack-spacing
                 icon-left="lock"
                 type="password"
                 test-id="input_new_password"
@@ -23,9 +22,8 @@
                 :error="isPasswordInvalid"
                 :error-message="passwordErrorMessage"
               />
-              <form-input
+              <LoginTextInput
                 v-model="passwordRepeat"
-                stack-spacing
                 icon-left="lock"
                 type="password"
                 test-id="input_repeat_password"
@@ -40,9 +38,8 @@
               </q-item-label>
             </template>
             <template v-else>
-              <form-input
+              <LoginTextInput
                 v-model="email"
-                stack-spacing
                 icon-left="mail"
                 test-id="input_email"
                 maxlength="32"
@@ -95,7 +92,7 @@ import {
   quasarNotifyTypes,
   siteBreakpointsPx,
 } from 'components/constants.js'
-import FormInput from '../../components/FormInput.vue'
+import LoginTextInput from 'components/auth/LoginTextInput.vue'
 
 const route = useRoute()
 const router = useRouter()

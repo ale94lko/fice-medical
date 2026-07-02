@@ -7,9 +7,11 @@ import {
   calendarTimeRowHeightPx,
 } from 'src/constants/calendar.js'
 import {
-  localDateTimeToUtcIso,
+  addDaysToDayKey,
   localDayKeyFromUtc,
+  localDateTimeToUtcIso,
   resolveTenantTimeZone,
+  utcRangeForLocalDay,
 } from 'src/utils/appointment-datetime.js'
 import {
   localMinutesFromUtc,
@@ -25,6 +27,71 @@ export function availabilityRangeMinuteSpan(range, timeZone) {
   const end = localMinutesFromUtc(range.endAtUtc, tz)
 
   return { start, end }
+}
+
+export function availabilityRangeMinuteSpanForDay(
+  range,
+  dayKey,
+  timeZone = resolveTenantTimeZone(),
+) {
+  const tz = resolveTimeZone(timeZone)
+  const resolvedDayKey = String(dayKey ?? '').trim()
+  if (!resolvedDayKey || !range?.startAtUtc || !range?.endAtUtc) {
+    return null
+  }
+
+  const dayStartMs = Date.parse(utcRangeForLocalDay(resolvedDayKey, tz).fromUtc)
+  const dayEndExclusiveMs = Date.parse(
+    utcRangeForLocalDay(addDaysToDayKey(resolvedDayKey, 1), tz).fromUtc,
+  )
+  const rangeStartMs = Date.parse(range.startAtUtc)
+  const rangeEndMs = Date.parse(range.endAtUtc)
+
+  if (
+    !Number.isFinite(dayStartMs)
+    || !Number.isFinite(dayEndExclusiveMs)
+    || !Number.isFinite(rangeStartMs)
+    || !Number.isFinite(rangeEndMs)
+  ) {
+    return null
+  }
+
+  const clipStartMs = Math.max(rangeStartMs, dayStartMs)
+  const clipEndMs = Math.min(rangeEndMs, dayEndExclusiveMs)
+  if (clipEndMs <= clipStartMs) {
+    return null
+  }
+
+  return {
+    start: Math.round((clipStartMs - dayStartMs) / 60000),
+    end: Math.round((clipEndMs - dayStartMs) / 60000),
+  }
+}
+
+export function utcRangeOverlapsLocalDay(
+  range,
+  dayKey,
+  timeZone = resolveTenantTimeZone(),
+) {
+  return availabilityRangeMinuteSpanForDay(range, dayKey, timeZone) != null
+}
+
+export function blocksForLocalDay(
+  blocks = [],
+  dayKey,
+  timeZone = resolveTenantTimeZone(),
+) {
+  const tz = resolveTimeZone(timeZone)
+  const resolvedDayKey = String(dayKey ?? '').trim()
+  if (!resolvedDayKey) {
+    return []
+  }
+
+  return blocks.filter(block =>
+    block?.startAtUtc
+    && block?.endAtUtc
+    && utcRangeOverlapsLocalDay(block, resolvedDayKey, tz),
+  )
 }
 
 export function computeAvailabilityRangeStyle(
@@ -102,6 +169,186 @@ export function findBookingRangeAtMinute(
   return matches[0]
 }
 
+function spansOverlap(startA, endA, startB, endB) {
+  return startA < endB && endA > startB
+}
+
+export function findAppointmentConflictAtMinute(
+  blocks = [],
+  dayKey,
+  startMinutes,
+  durationMin,
+  timeZone = resolveTenantTimeZone(),
+) {
+  const duration = Number(durationMin)
+  const start = Number(startMinutes)
+  if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(start)) {
+    return null
+  }
+
+  const end = start + duration
+  const tz = resolveTimeZone(timeZone)
+  const resolvedDayKey = String(dayKey ?? '').trim()
+  if (!resolvedDayKey) {
+    return null
+  }
+
+  for (const block of blocks) {
+    if (block.blockType !== appointmentAvailabilityBlockTypes.appointment) {
+      continue
+    }
+    const span = availabilityRangeMinuteSpanForDay(block, resolvedDayKey, tz)
+    if (!span) {
+      continue
+    }
+    if (spansOverlap(start, end, span.start, span.end)) {
+      return block
+    }
+  }
+
+  return null
+}
+
+export function findScheduleBlockOverlapTypesAtMinute(
+  blocks = [],
+  dayKey,
+  startMinutes,
+  durationMin,
+  timeZone = resolveTenantTimeZone(),
+) {
+  const duration = Number(durationMin)
+  const start = Number(startMinutes)
+  if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(start)) {
+    return []
+  }
+
+  const end = start + duration
+  const tz = resolveTimeZone(timeZone)
+  const resolvedDayKey = String(dayKey ?? '').trim()
+  if (!resolvedDayKey) {
+    return []
+  }
+
+  const overlapTypes = new Set()
+
+  for (const block of blocks) {
+    if (
+      block.blockType !== appointmentAvailabilityBlockTypes.outside
+      && block.blockType !== appointmentAvailabilityBlockTypes.break
+    ) {
+      continue
+    }
+    const span = availabilityRangeMinuteSpanForDay(block, resolvedDayKey, tz)
+    if (!span) {
+      continue
+    }
+    if (spansOverlap(start, end, span.start, span.end)) {
+      overlapTypes.add(block.blockType)
+    }
+  }
+
+  return [...overlapTypes]
+}
+
+function resolveClinicianContextRange(
+  availableRanges = [],
+  preferredClinicianId = null,
+) {
+  if (preferredClinicianId != null) {
+    const preferred = availableRanges.find(
+      range => String(range.clinicianId) === String(preferredClinicianId),
+    )
+    if (preferred) {
+      return preferred
+    }
+  }
+
+  if (availableRanges[0]) {
+    return availableRanges[0]
+  }
+
+  return {
+    clinicianId: preferredClinicianId ?? null,
+    clinicianDisplayName: '',
+  }
+}
+
+export function resolveBookingAtMinute({
+  dayKey,
+  minutesLocal,
+  durationMin,
+  availableRanges = [],
+  blocks = [],
+  allowOverScheduleBlocks = false,
+  timeZone = resolveTenantTimeZone(),
+  preferredClinicianId = null,
+}) {
+  const duration = Number(durationMin)
+  const minute = Number(minutesLocal)
+  const resolvedDayKey = String(dayKey ?? '').trim()
+  if (
+    !resolvedDayKey
+    || !Number.isFinite(duration)
+    || duration <= 0
+    || !Number.isFinite(minute)
+  ) {
+    return { ok: false, reason: 'conflict' }
+  }
+
+  if (findAppointmentConflictAtMinute(
+    blocks,
+    resolvedDayKey,
+    minute,
+    duration,
+    timeZone,
+  )) {
+    return { ok: false, reason: 'appointmentConflict' }
+  }
+
+  const scheduleBlockOverlaps = findScheduleBlockOverlapTypesAtMinute(
+    blocks,
+    resolvedDayKey,
+    minute,
+    duration,
+    timeZone,
+  )
+
+  const range = findBookingRangeAtMinute(
+    availableRanges,
+    minute,
+    duration,
+    timeZone,
+    preferredClinicianId,
+  )
+
+  if (!range && !allowOverScheduleBlocks) {
+    return { ok: false, reason: 'conflict' }
+  }
+
+  const bookingRange = range ?? resolveClinicianContextRange(
+    availableRanges,
+    preferredClinicianId,
+  )
+
+  const window = buildWindowFromGridSelection({
+    dayKey: resolvedDayKey,
+    minutesLocal: minute,
+    durationMin: duration,
+    range: bookingRange,
+    timeZone,
+  })
+  if (!window) {
+    return { ok: false, reason: 'conflict' }
+  }
+
+  return {
+    ok: true,
+    window,
+    range: bookingRange,
+    scheduleBlockOverlaps,
+  }
+}
+
 export function buildWindowFromGridSelection({
   dayKey,
   minutesLocal,
@@ -176,12 +423,13 @@ export function calendarBlocksForDay(
       block?.startAtUtc
       && block?.endAtUtc
       && block.blockType !== appointmentAvailabilityBlockTypes.available
-      && localDayKeyFromUtc(block.startAtUtc, tz) === dayKey,
+      && utcRangeOverlapsLocalDay(block, dayKey, tz),
     )
     .map(block => ({
       ...block,
-      span: availabilityRangeMinuteSpan(block, tz),
+      span: availabilityRangeMinuteSpanForDay(block, dayKey, tz),
     }))
+    .filter(block => block.span && block.span.end > block.span.start)
     .sort((a, b) => {
       const layerDiff = (layerOrder[a.blockType] ?? 0)
         - (layerOrder[b.blockType] ?? 0)
