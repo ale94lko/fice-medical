@@ -1,1 +1,0 @@
-import{Ds as e,Ss as t,Zo as n,ns as r,so as i,vs as a}from"./index-BFVCDP2J.js";import{r as o,t as s}from"./QLayout-BTRXu-7S.js";var c={};function l(i,c){let l=t(`router-view`);return a(),n(s,{view:`hHh Lpr lff`},{default:e(()=>[r(o,null,{default:e(()=>[r(l)]),_:1})]),_:1})}var u=i(c,[[`render`,l]]);export{u as default};
