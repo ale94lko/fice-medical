@@ -84,6 +84,28 @@ export function formatClinicianPersonName(clinicianRow) {
 }
 
 /**
+ * Secondary line for clinician select options (NPI · specialty).
+ */
+export function formatClinicianOptionCaption(clinicianRow) {
+  if (!clinicianRow || typeof clinicianRow !== 'object') {
+    return ''
+  }
+
+  const parts = []
+  const npi = trim(clinicianRow.npi)
+  const specialty = trim(clinicianRow.specialty)
+
+  if (npi) {
+    parts.push(`NPI ${npi}`)
+  }
+  if (specialty) {
+    parts.push(specialty)
+  }
+
+  return parts.join(' · ')
+}
+
+/**
  * Prefix + first + middle + last + " - " + specialty.
  */
 export function formatClinicianDisplayLabel(clinicianRow) {

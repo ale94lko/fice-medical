@@ -193,8 +193,15 @@ export default {
   userRoles: 'Roles',
   userRolePlaceholder: 'Select role',
   userRolesPlaceholder: 'Select roles',
+  userRolesSearchPlaceholder: 'Search roles...',
+  userRolesSearchEmpty: 'No roles match your search.',
+  userRolesSelectedCount: '{count} selected',
+  userRolesClearAll: 'Clear all',
+  userRolesRemoveRole: 'Remove {role}',
   userRolesLoadError: 'Could not load roles. Please try again.',
   permissions: 'Permissions',
+  userPermissionsSubtitle:
+    'Select the modules and permissions this user will have access to.',
   userPermissionsPlaceholder: 'Select permissions',
   userPermissionsEmpty: 'No permissions available.',
   userPermissionsLoading: 'Loading permissions…',
@@ -1446,6 +1453,9 @@ export default {
   appointmentDurationMinutes: '{count} min',
   appointmentClinicianOptional: 'Clinician (Optional)',
   appointmentClinicianPlaceholder: 'Select clinician',
+  appointmentClinicianRequired: 'Clinician is required.',
+  appointmentSelectClinicianFirst:
+    'Select a clinician to view availability.',
   appointmentClinicianHint:
     'Leave empty to assign an available clinician automatically.',
   appointmentClinicianAutoAssign: 'Auto-assigned clinician',

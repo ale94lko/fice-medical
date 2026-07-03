@@ -68,6 +68,62 @@ export function formatModuleLabel(moduleKey) {
     .join(' ')
 }
 
+const MODULE_ICONS = {
+  ADDRESS: 'place',
+  ALLERGIES: 'vaccines',
+  APPOINTMENT: 'event',
+  APPOINTMENTS: 'event',
+  APPOINTMENT_SLOT: 'event',
+  BASIC_INFO_CLIENT: 'person',
+  CLIENT: 'person',
+  BILLING: 'payments',
+  CARE_PLANS: 'assignment',
+  CLINICAL_NOTES: 'description',
+  CLINICAL_AUDIT: 'fact_check',
+  CLINICIANS: 'medical_services',
+  CONTACT: 'contact_phone',
+  FOLLOW_UPS: 'follow_the_signs',
+  LABS_CLIENT: 'science',
+  MEDICAL_HISTORY: 'history_edu',
+  MEDICAL_NOTES_CLIENT: 'description',
+  REFERRALS: 'share',
+  SCREENINGS: 'monitor_heart',
+  STAFF_MEMBERS: 'badge',
+  TENANTS: 'apartment',
+  TENANTS_BILLING: 'payments',
+  TENANTS_USER: 'manage_accounts',
+  VITALS_CLIENT: 'favorite',
+}
+
+export function resolvePermissionModuleIcon(moduleKey, moduleLabel = '') {
+  const key = String(moduleKey ?? '').trim().toUpperCase()
+  if (MODULE_ICONS[key]) {
+    return MODULE_ICONS[key]
+  }
+
+  const label = String(moduleLabel ?? '').trim().toLowerCase()
+  if (label.includes('address')) {
+    return 'place'
+  }
+  if (label.includes('appointment')) {
+    return 'event'
+  }
+  if (label.includes('billing')) {
+    return 'payments'
+  }
+  if (label.includes('clinical')) {
+    return 'description'
+  }
+  if (label.includes('care plan')) {
+    return 'assignment'
+  }
+  if (label.includes('allerg')) {
+    return 'vaccines'
+  }
+
+  return 'folder'
+}
+
 function normalizePermissionEntry(entry, moduleId) {
   if (entry?.permission && typeof entry.permission === 'object') {
     return normalizePermissionEntry(entry.permission, moduleId)
@@ -79,6 +135,7 @@ function normalizePermissionEntry(entry, moduleId) {
       id: null,
       code,
       label: code,
+      description: '',
       moduleId,
     }
   }
@@ -97,9 +154,13 @@ function normalizePermissionEntry(entry, moduleId) {
     ?? entry?.permission?.name
     ?? '',
   ).trim()
+  const description = String(
+    entry?.description
+    ?? entry?.permission?.description
+    ?? '',
+  ).trim()
   const label = String(
     entry?.label
-    ?? entry?.description
     ?? entry?.name
     ?? entry?.permission?.label
     ?? entry?.permission?.name
@@ -110,6 +171,7 @@ function normalizePermissionEntry(entry, moduleId) {
     id: Number.isFinite(id) ? id : null,
     code,
     label,
+    description,
     moduleId,
   }
 }
@@ -150,6 +212,7 @@ export function mapPermissionGroupsToTreeNodes(groups = []) {
         : `module:${moduleKey}`,
       label: group.moduleLabel,
       moduleId: Number.isFinite(moduleId) ? moduleId : null,
+      moduleKey: String(group?.moduleKey ?? moduleKey ?? '').trim(),
       children: (group.permissions ?? []).map(perm => {
         const entry = typeof perm === 'string'
           ? { code: perm, id: null, label: perm }
@@ -163,6 +226,8 @@ export function mapPermissionGroupsToTreeNodes(groups = []) {
         return {
           id: String(permId),
           label: entry?.label ?? code,
+          code,
+          description: entry?.description ?? '',
           value: permId,
           moduleId: Number.isFinite(moduleId) ? moduleId : null,
         }

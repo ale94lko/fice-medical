@@ -3,6 +3,8 @@ import { apiPaths } from 'components/constants.js'
 import { extractEnvelopeListPagination } from 'components/helpers.js'
 import {
   formatClinicianDisplayLabel,
+  formatClinicianOptionCaption,
+  formatClinicianPersonName,
 } from 'src/utils/clinician-display.js'
 
 const DEFAULT_PAGE_SIZE = 100
@@ -37,6 +39,9 @@ export function normalizeClinicianFromApi(raw = {}) {
     staffCode: trim(staffMember.code),
     staffMember,
     personalInformation: personal,
+    photoFileId: personal?.photo_file_id
+      ?? personal?.photoFileId
+      ?? null,
     status: trim(raw.status ?? staffMember.status).toUpperCase(),
   }
 }
@@ -57,12 +62,17 @@ export function mapClinicianRowToSelectOption(row) {
     return null
   }
 
+  const name = formatClinicianPersonName(normalized) || label
+
   return {
     label,
     value: String(id),
+    name,
+    caption: formatClinicianOptionCaption(normalized),
     npi: normalized.npi,
     specialty: normalized.specialty,
     staffCode: normalized.staffCode,
+    photoFileId: normalized.photoFileId,
   }
 }
 

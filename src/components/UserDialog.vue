@@ -58,48 +58,49 @@
           </div>
           <div
             v-if="showFullUserFields"
-            class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="requiredLabel(t('status'))"
-              :test-id="tid.field('status')">
-              <FormSelect
-                v-model="local.status"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                lazy-rules="ondemand"
-                :readonly="readonly"
-                :options="statusOptions"
-                :rules="statusRules"
-                :placeholder="t('userStatusPlaceholder')"
-                :test-id="tid.field('status')"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div
-            v-if="showFullUserFields"
-            class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="requiredLabel(t('userRoles'))"
-              :test-id="tid.field('roles')">
-              <FormSelect
-                v-model="local.roles"
-                multiple
-                use-chips
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                lazy-rules="ondemand"
-                :readonly="readonly"
-                :loading="rolesLoading"
-                :options="roleOptions"
-                :rules="rolesRules"
-                :placeholder="t('userRolesPlaceholder')"
-                :test-id="tid.field('roles')"
-              />
-            </AddClientLabeledField>
+            class="col-12 user-dialog__roles-status-block">
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <AddClientLabeledField
+                  :label="requiredLabel(t('userRoles'))"
+                  :test-id="tid.field('roles')">
+                  <RoleMultiSelect
+                    v-model="local.roles"
+                    :readonly="readonly"
+                    :loading="rolesLoading"
+                    :options="roleOptions"
+                    :rules="rolesRules"
+                    :placeholder="t('userRolesPlaceholder')"
+                    :test-id="tid.field('roles')"
+                  />
+                </AddClientLabeledField>
+              </div>
+              <div class="col-12 col-md-6">
+                <AddClientLabeledField
+                  :label="requiredLabel(t('status'))"
+                  :test-id="tid.field('status')">
+                  <FormSelect
+                    v-model="local.status"
+                    outlined
+                    hide-bottom-space
+                    emit-value
+                    map-options
+                    lazy-rules="ondemand"
+                    :readonly="readonly"
+                    :options="statusOptions"
+                    :rules="statusRules"
+                    :placeholder="t('userStatusPlaceholder')"
+                    :test-id="tid.field('status')"
+                  />
+                </AddClientLabeledField>
+              </div>
+            </div>
+            <RoleMultiSelectChips
+              v-model="local.roles"
+              :options="roleOptions"
+              :readonly="readonly"
+              :test-id="tid.field('roles')"
+            />
           </div>
           <div
             v-if="showFullUserFields"
@@ -107,7 +108,10 @@
             <AddClientLabeledField
               :label="t('permissions')"
               :test-id="tid.field('permissions')">
-              <TreeComponent
+              <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
+                {{ t('userPermissionsSubtitle') }}
+              </p>
+              <PermissionModulePicker
                 v-model="local.permissions"
                 :nodes="permissionTreeNodes"
                 :readonly="readonly"
@@ -115,8 +119,6 @@
                 :test-id="tid.field('permissions-tree')"
                 :empty-label="t('userPermissionsEmpty')"
                 :loading-label="t('userPermissionsLoading')"
-                :expand-label="t('treeExpand')"
-                :collapse-label="t('treeCollapse')"
               />
             </AddClientLabeledField>
           </div>
@@ -176,6 +178,8 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import TextInput from 'components/FormInput.vue'
 import FormSelect from 'components/FormSelect.vue'
+import RoleMultiSelect from 'components/RoleMultiSelect.vue'
+import RoleMultiSelectChips from 'components/RoleMultiSelectChips.vue'
 import {
   quasarNotifyTypes,
   userDescriptionMaxLength,
@@ -183,8 +187,12 @@ import {
 } from 'components/constants.js'
 import { useAuthStore } from 'stores/auth-store.js'
 import { userDialogTestIds as tid } from 'src/test-ids/index.js'
-import TreeComponent from 'components/template/TreeComponent.vue'
-import { fetchTenantRoleOptions } from 'src/utils/tenant-roles-api.js'
+import PermissionModulePicker from 'components/PermissionModulePicker.vue'
+import {
+  applyRoleSelectionToPermissions,
+  fetchTenantRoleOptions,
+  mergeRolePermissionsIntoSelection,
+} from 'src/utils/tenant-roles-api.js'
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
 import { createEmptyUser, cloneUser } from 'src/utils/user-orders.js'
@@ -224,6 +232,7 @@ const permissionTreeNodes = ref([])
 const permissionsLoading = ref(false)
 const formRef = ref(null)
 const dialogBodyRef = ref(null)
+const skipRolePermissionSync = ref(false)
 
 const open = computed({
   get: () => props.modelValue,
@@ -327,6 +336,15 @@ async function loadRoleOptions() {
   rolesLoading.value = true
   try {
     roleOptions.value = await fetchTenantRoleOptions(tenantId)
+    if (isAddMode.value && (local.value.roles ?? []).length) {
+      skipRolePermissionSync.value = true
+      local.value.permissions = mergeRolePermissionsIntoSelection({
+        selectedRoleIds: local.value.roles ?? [],
+        currentPermissionIds: local.value.permissions ?? [],
+        roleOptions: roleOptions.value,
+      })
+      skipRolePermissionSync.value = false
+    }
   } catch {
     roleOptions.value = []
     $q.notify({
@@ -344,6 +362,7 @@ watch(
     if (!props.modelValue) {
       return
     }
+    skipRolePermissionSync.value = true
     local.value = cloneUser(props.user ?? createEmptyUser())
     if (props.mode === 'add' && !local.value.status) {
       local.value.status = userStatusValues.active
@@ -364,9 +383,30 @@ watch(
     }
     nextTick(() => {
       formRef.value?.resetValidation()
+      skipRolePermissionSync.value = false
     })
   },
   { immediate: true },
+)
+
+watch(
+  () => [...(local.value.roles ?? [])],
+  (nextRoles, previousRoles) => {
+    if (
+      skipRolePermissionSync.value
+      || readonly.value
+      || !isAddMode.value
+    ) {
+      return
+    }
+
+    local.value.permissions = applyRoleSelectionToPermissions({
+      previousRoleIds: previousRoles ?? [],
+      nextRoleIds: nextRoles ?? [],
+      currentPermissionIds: local.value.permissions ?? [],
+      roleOptions: roleOptions.value,
+    })
+  },
 )
 
 function onCancel() {

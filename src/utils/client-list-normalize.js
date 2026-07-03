@@ -11,6 +11,24 @@ import { resolveClientListPhoneEntries } from
 import { resolveClientListAllergyEntries } from
   'src/utils/client-list-allergies.js'
 
+function resolveClientListPhotoFileId(item) {
+  if (!item || typeof item !== 'object') {
+    return null
+  }
+
+  const personal = item.personal_information
+    ?? item.basic_info
+    ?? item.personalInformation
+    ?? item
+  const raw = personal.photo_file_id
+    ?? personal.photoFileId
+    ?? item.photo_file_id
+    ?? item.photoFileId
+  const id = Number(raw)
+
+  return Number.isFinite(id) && id > 0 ? id : null
+}
+
 function resolveListViewClinicianEntries(clinicians) {
   if (!Array.isArray(clinicians) || !clinicians.length) {
     return []
@@ -75,6 +93,7 @@ export function mapClientListViewItem(item, t) {
     clinicianEntries,
     [ck.admissionDate]: item.admission_date ?? '',
     [ck.status]: item.status ?? '',
+    [ck.photoFileId]: resolveClientListPhotoFileId(item),
   }
 
   return formatClientDisplay(mapped, t)

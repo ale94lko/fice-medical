@@ -69,6 +69,13 @@
                   </template>
                   <template #option="scope">
                     <q-item v-bind="scope.itemProps">
+                      <q-item-section
+                        avatar
+                        class="appointment-client-select__avatar-section">
+                        <ClinicianSelectAvatar
+                          :photo-file-id="scope.opt.photoFileId"
+                        />
+                      </q-item-section>
                       <q-item-section>
                         <q-item-label>{{ scope.opt.name }}</q-item-label>
                         <q-item-label
@@ -129,22 +136,17 @@
 
             <div class="col-12 col-md-6">
               <AddClientLabeledField
-                :label="t('appointmentClinicianOptional')"
+                :label="t('clinician')"
+                required
                 :test-id="tid.field('clinician')">
-                <FormSelect
+                <ClinicianFormSelect
                   v-model="draft.clinicianId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  clearable
                   :options="clinicianOptions"
                   :placeholder="t('appointmentClinicianPlaceholder')"
+                  :error="Boolean(errors.clinicianId)"
+                  :error-message="errors.clinicianId"
                   :test-id="tid.field('clinician')"
                 />
-                <template #hint>
-                  {{ t('appointmentClinicianHint') }}
-                </template>
               </AddClientLabeledField>
             </div>
 
@@ -392,6 +394,8 @@ import AppointmentRecurrenceSection from
   'components/appointment/AppointmentRecurrenceSection.vue'
 import AppointmentServiceLinesField from
   'components/appointment/AppointmentServiceLinesField.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
+import ClinicianSelectAvatar from 'components/ClinicianSelectAvatar.vue'
 import FormSelect from 'components/FormSelect.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import {
@@ -499,12 +503,16 @@ const totalDurationMinutes = computed(() =>
   sumServiceLineDurations(serviceLines.value) || null,
 )
 
+const resolvedSchedulingClinicianId = computed(() =>
+  props.mode === 'reschedule'
+    ? props.appointment?.clinicianId ?? null
+    : draft.value.clinicianId,
+)
+
 const schedulingFilters = computed(() => ({
   serviceProcedureIds: serviceProcedureIds.value,
   durationMinutes: totalDurationMinutes.value,
-  clinicianId: props.mode === 'reschedule'
-    ? props.appointment?.clinicianId
-    : draft.value.clinicianId,
+  clinicianId: resolvedSchedulingClinicianId.value,
   placeOfServiceId: draft.value.placeOfServiceId,
 }))
 
@@ -543,9 +551,17 @@ const {
   shiftVisibleMonth,
 } = booking
 
-const schedulingLocked = computed(() =>
-  props.mode === 'book' && !serviceLines.value.length,
-)
+const schedulingLocked = computed(() => {
+  if (props.mode === 'book' && !serviceLines.value.length) {
+    return true
+  }
+
+  if (!resolvedSchedulingClinicianId.value) {
+    return true
+  }
+
+  return false
+})
 
 const dialogTitle = computed(() =>
   props.mode === 'reschedule'
@@ -574,6 +590,9 @@ const availabilityEmptyLabel = computed(() => {
   }
   if (!totalDurationMinutes.value) {
     return t('appointmentSelectDurationFirst')
+  }
+  if (!resolvedSchedulingClinicianId.value) {
+    return t('appointmentSelectClinicianFirst')
   }
 
   return t('appointmentAvailabilityEmpty')
@@ -606,7 +625,7 @@ const summaryClinician = computed(() => {
     opt => opt.value === draft.value.clinicianId,
   )
 
-  return match?.label ?? t('appointmentClinicianAutoAssign')
+  return match?.name ?? match?.label ?? '—'
 })
 
 const summarySupervisor = computed(() => {
@@ -697,6 +716,7 @@ function mapRowToClientOption(row) {
     value: row.id,
     name: name || clientNumber || String(row?.id ?? ''),
     clientNumber,
+    photoFileId: row?.[ck.photoFileId] ?? null,
   }
 }
 
@@ -1047,7 +1067,7 @@ async function loadFormOptions() {
   clinicianOptions.value = clinicianResult.status === 'fulfilled'
     ? clinicianResult.value
       .map(option => ({
-        label: option.label,
+        ...option,
         value: Number(option.value),
       }))
       .filter(option => Number.isFinite(option.value))
@@ -1133,6 +1153,7 @@ async function onSchedulingInputsChanged() {
     serviceLines.value.length
     && draft.value.placeOfServiceId
     && totalDurationMinutes.value
+    && resolvedSchedulingClinicianId.value
   ) {
     await loadAvailability()
     tryApplyBookingHint()
@@ -1163,6 +1184,9 @@ function validateDraft() {
   }
   if (props.mode === 'book' && !draft.value.placeOfServiceId) {
     next.placeOfServiceId = t('appointmentPlaceOfServiceRequired')
+  }
+  if (props.mode === 'book' && !draft.value.clinicianId) {
+    next.clinicianId = t('appointmentClinicianRequired')
   }
   if (!selectedWindow.value) {
     next.availability = t('appointmentAvailabilityRequired')
@@ -1354,5 +1378,10 @@ watch(
   margin-bottom: 8px;
   font-size: 0.875rem;
   color: $text-strong;
+}
+
+.appointment-client-select__avatar-section {
+  min-width: 0;
+  padding-right: 8px;
 }
 </style>

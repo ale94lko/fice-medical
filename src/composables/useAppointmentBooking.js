@@ -564,7 +564,7 @@ export function useAppointmentBooking(getFilters, options = {}) {
       filters.durationMinutes ?? durationPreview.value?.default_duration_min,
     )
     if (!serviceIds.length || !Number.isFinite(durationMinutes)
-      || durationMinutes <= 0) {
+      || durationMinutes <= 0 || !filters.clinicianId) {
       clearAvailability()
 
       return
