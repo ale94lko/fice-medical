@@ -129,6 +129,58 @@ export function allergyRowHasPersistedApiId(entry) {
   return rowHasBackendAllergyId(entry)
 }
 
+export function visibleAllergyEntriesRequireDeletionReason(entries) {
+  return visibleAllergyEntries(entries).some(allergyRowHasPersistedApiId)
+}
+
+/**
+ * Marks NKA and removes local rows; persisted rows are kept with
+ * deletion_reason for PATCH on save.
+ */
+export function applyNoKnownAllergiesToSection(section, deletionReason = '') {
+  if (!section || typeof section !== 'object') {
+    return { ok: false }
+  }
+
+  const reasonText = trimAllergyField(deletionReason)
+  const visible = visibleAllergyEntries(section.entries ?? [])
+  const requiresReason = visible.some(allergyRowHasPersistedApiId)
+
+  if (requiresReason && !reasonText) {
+    return { ok: false }
+  }
+
+  section.noKnownAllergies = true
+  section.entries = visible
+    .filter(allergyRowHasPersistedApiId)
+    .map(entry => ({
+      ...entry,
+      // eslint-disable-next-line camelcase -- mirrors API row shape
+      deletion_reason: reasonText,
+    }))
+  section.draft = createEmptyAllergyDraft()
+
+  return { ok: true }
+}
+
+export function clearNoKnownAllergiesDeletionMarks(section) {
+  if (!section?.entries?.length) {
+    return
+  }
+
+  section.entries = section.entries.map(entry => {
+    if (!trimAllergyField(entry?.deletion_reason)) {
+      return entry
+    }
+
+    return {
+      ...entry,
+      // eslint-disable-next-line camelcase -- mirrors API row shape
+      deletion_reason: '',
+    }
+  })
+}
+
 /**
  * True when optional start year is set but outside the range allowed for
  * patient DOB (e.g. DOB was raised after the year was chosen).
@@ -393,33 +445,22 @@ function allergyStartDateIsoFromYear(year) {
 
 export function buildAllergiesPayload(section) {
   if (section?.noKnownAllergies) {
-    return { status: clientAllergiesNkaStatus }
+    const rows = (section?.entries ?? [])
+      .map(entry => mapAllergyEntryToApiRow(entry))
+      .filter(row => row.id != null && trimAllergyField(row.deletion_reason))
+
+    if (!rows.length) {
+      return { status: clientAllergiesNkaStatus }
+    }
+
+    return {
+      status: clientAllergiesNkaStatus,
+      entries: rows,
+    }
   }
 
   const rows = (section?.entries ?? [])
-    .map(entry => {
-      const normalized = normalizeAllergyEntry(entry)
-      if (!normalized.allergy || !normalized.severity) {
-        return null
-      }
-      const row = {
-        name: normalized.allergy,
-        severity: normalized.severity,
-        // eslint-disable-next-line camelcase -- register API shape
-        start_date: allergyStartDateIsoFromYear(normalized.startYear),
-      }
-      if (normalized.deletion_reason) {
-        // eslint-disable-next-line camelcase -- register API shape
-        row.deletion_reason = normalized.deletion_reason
-      }
-      if (rowHasBackendAllergyId(entry)) {
-        const raw = entry.apiId ?? entry.api_id
-        const numericId = Number(raw)
-        row.id = Number.isFinite(numericId) ? numericId : raw
-      }
-
-      return row
-    })
+    .map(entry => mapAllergyEntryToApiRow(entry))
     .filter(row => {
       if (trimAllergyField(row.deletion_reason)) {
         return row.id != null
@@ -429,4 +470,25 @@ export function buildAllergiesPayload(section) {
     })
 
   return { entries: rows }
+}
+
+function mapAllergyEntryToApiRow(entry) {
+  const normalized = normalizeAllergyEntry(entry)
+  const row = {
+    name: normalized.allergy,
+    severity: normalized.severity,
+    // eslint-disable-next-line camelcase -- register API shape
+    start_date: allergyStartDateIsoFromYear(normalized.startYear),
+  }
+  if (normalized.deletion_reason) {
+    // eslint-disable-next-line camelcase -- register API shape
+    row.deletion_reason = normalized.deletion_reason
+  }
+  if (rowHasBackendAllergyId(entry)) {
+    const raw = entry.apiId ?? entry.api_id
+    const numericId = Number(raw)
+    row.id = Number.isFinite(numericId) ? numericId : raw
+  }
+
+  return row
 }

@@ -215,14 +215,11 @@
       @confirm="onDeleteConfirm"
     />
 
-    <ModalComponent
+    <NoKnownAllergiesRemoveDialog
       v-model="noKnownAllergiesRemoveConfirmOpen"
-      test-id="no-known-allergies-remove"
-      :title="t('noKnownAllergiesRemoveModalTitle')"
-      :message="t('noKnownAllergiesRemoveModalMessage')"
-      :confirm-text="t('noKnownAllergiesRemoveModalConfirm')"
-      :cancel-text="t('cancel')"
+      :require-deletion-reason="noKnownAllergiesRequiresDeletionReason"
       @confirm="onConfirmNoKnownAllergiesRemove"
+      @cancel="onCancelNoKnownAllergiesRemove"
     />
     </template>
   </div>
@@ -240,7 +237,8 @@ import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AllergiesTable from 'components/AllergiesTable.vue'
 import AllergyEditDialog from 'components/AllergyEditDialog.vue'
 import AllergyDeleteDialog from 'components/AllergyDeleteDialog.vue'
-import ModalComponent from 'components/ModalComponent.vue'
+import NoKnownAllergiesRemoveDialog from
+  'components/NoKnownAllergiesRemoveDialog.vue'
 import {
   clientAllergyMaxNameLength,
   clientAllergySeverityValues,
@@ -251,6 +249,8 @@ import {
   allergyMaxStartYear,
   allergyMinStartYear,
   allergyRowHasPersistedApiId,
+  applyNoKnownAllergiesToSection,
+  clearNoKnownAllergiesDeletionMarks,
   createEmptyAllergyDraft,
   getAllergyDraftFieldErrorKeys,
   isDuplicateAllergyEntry,
@@ -258,6 +258,7 @@ import {
   trimAllergyField,
   validateAllergyForAdd,
   visibleAllergyEntries,
+  visibleAllergyEntriesRequireDeletionReason,
 } from 'src/utils/client-allergies.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useValidationSaveFeedback } from
@@ -360,20 +361,34 @@ const visibleEntries = computed(() =>
 
 const noKnownAllergiesRemoveConfirmOpen = ref(false)
 
+const noKnownAllergiesRequiresDeletionReason = computed(() =>
+  visibleAllergyEntriesRequireDeletionReason(section.value.entries ?? []),
+)
+
 function hasVisibleAllergies() {
   return visibleAllergyEntries(section.value.entries).length > 0
 }
 
-function applyNoKnownAllergiesConfirmed() {
-  section.value.noKnownAllergies = true
-  section.value.entries = []
-  section.value.draft = createEmptyAllergyDraft()
+function applyNoKnownAllergiesConfirmed(deletionReason = '') {
+  const result = applyNoKnownAllergiesToSection(
+    section.value,
+    deletionReason,
+  )
+  if (!result.ok) {
+    return false
+  }
   invalidDobRowIds.value = []
   applyDraftErrors({ ok: true })
+
+  return true
 }
 
-function onConfirmNoKnownAllergiesRemove() {
-  applyNoKnownAllergiesConfirmed()
+function onConfirmNoKnownAllergiesRemove(reason) {
+  applyNoKnownAllergiesConfirmed(reason)
+}
+
+function onCancelNoKnownAllergiesRemove() {
+  noKnownAllergiesRemoveConfirmOpen.value = false
 }
 
 function onNoKnownAllergiesToggle(nextValue) {
@@ -382,6 +397,7 @@ function onNoKnownAllergiesToggle(nextValue) {
   // Unchecking: remove confirmation and return to normal flow.
   if (!next) {
     section.value.noKnownAllergies = false
+    clearNoKnownAllergiesDeletionMarks(section.value)
     section.value.draft = createEmptyAllergyDraft()
     invalidDobRowIds.value = []
     applyDraftErrors({ ok: true })
