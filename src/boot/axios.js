@@ -26,6 +26,11 @@ import {
   isInvalidRefreshTokenError,
   markErrorAsSessionLogoutHandled,
 } from '../utils/api-session-error.js'
+import {
+  applyPasswordChangeRequiredFromApiError,
+  applyPasswordChangeRequiredFromApiResponse,
+  createPasswordChangeRequiredRejection,
+} from '../utils/api-password-change-required.js'
 import { deepMapRequestKeysToSnakeCase } from '../utils/request-key-case.js'
 //import { resolveTenantKeyFromHost } from '../utils/tenant-from-host.js'
 import { i18nGlobalT } from './i18n.js'
@@ -268,8 +273,18 @@ api.interceptors.request.use(
 )
 
 api.interceptors.response.use(
-  r => r,
+  async response => {
+    if (await applyPasswordChangeRequiredFromApiResponse(response)) {
+      return createPasswordChangeRequiredRejection(response)
+    }
+
+    return response
+  },
   async error => {
+    if (await applyPasswordChangeRequiredFromApiError(error)) {
+      return Promise.reject(error)
+    }
+
     const cfg = error.config
     if (cfg?.__refreshCall) {
       if (isInvalidRefreshTokenError(error)) {

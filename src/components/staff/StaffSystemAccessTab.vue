@@ -149,6 +149,10 @@ import { useAuthStore } from 'stores/auth-store.js'
 import { fetchTenantRoleOptions } from 'src/utils/tenant-roles-api.js'
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
+import {
+  buildNewPasswordRules,
+  createOptionalPasswordPolicyRule,
+} from 'src/utils/password-validation.js'
 
 const props = defineProps({
   modelValue: {
@@ -217,11 +221,17 @@ const passwordPlaceholder = computed(() =>
 )
 
 const passwordRules = computed(() => {
-  if (props.readonly || !isAddMode.value) {
+  if (props.readonly) {
     return []
   }
+  if (isAddMode.value) {
+    return buildNewPasswordRules(t)
+  }
+  if (props.isEdit) {
+    return [createOptionalPasswordPolicyRule(t)]
+  }
 
-  return [requiredRule(t('passwordRequired'))]
+  return []
 })
 
 const statusRules = computed(() =>

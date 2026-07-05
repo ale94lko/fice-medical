@@ -1192,6 +1192,8 @@ export const apiPaths = {
   oauthRefresh: '/oauth/v1/refresh',
   oauthForgotPassword: '/oauth/v1/forgot-password',
   oauthResetPassword: '/oauth/v1/reset-password',
+  oauthChangeInitialPassword: '/oauth/v1/change-initial-password',
+  oauthChangePassword: '/oauth/v1/change-password',
   logout: '/logout',
 }
 
@@ -1207,6 +1209,14 @@ export const authStorageKeys = {
   activeSubtenantId: 'activeSubtenantId',
   tenantId: 'tenantId',
   configData: 'configData',
+  userInfo: 'userInfo',
+  mustChangePassword: 'mustChangePassword',
+  passwordChangeMode: 'passwordChangeMode',
+}
+
+export const passwordChangeModes = {
+  initial: 'initial',
+  current: 'current',
 }
 
 export const appModuleNames = {

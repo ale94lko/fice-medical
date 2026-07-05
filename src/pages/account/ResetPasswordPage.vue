@@ -93,6 +93,11 @@ import {
   siteBreakpointsPx,
 } from 'components/constants.js'
 import LoginTextInput from 'components/auth/LoginTextInput.vue'
+import {
+  resolvePasswordConfirmMessage,
+  resolvePasswordPolicyMessage,
+  resolvePasswordChangeApiError,
+} from 'src/utils/password-validation.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -159,19 +164,16 @@ const emailErrorMessage = computed(() => {
 })
 
 const passwordErrorMessage = computed(() =>
-  password.value.length > 0 ? '' : t('passwordRequired'),
+  resolvePasswordPolicyMessage(password.value, t),
 )
 
-const passwordRepeatErrorMessage = computed(() => {
-  if (passwordRepeat.value.length === 0) {
-    return t('passwordRequired')
-  }
-  if (passwordRepeat.value !== password.value) {
-    return t('passwordsDoNotMatch')
-  }
-
-  return ''
-})
+const passwordRepeatErrorMessage = computed(() =>
+  resolvePasswordConfirmMessage(
+    password.value,
+    passwordRepeat.value,
+    t,
+  ),
+)
 
 async function handleSubmit() {
   submitError.value = ''
@@ -227,10 +229,11 @@ async function submitTokenReset() {
     })
     await goToLogin()
   } catch (err) {
-    const apiMsg = err?.response?.data?.message
-    submitError.value = typeof apiMsg === 'string' && apiMsg.trim()
-      ? apiMsg.trim()
-      : t('resetPasswordFailed')
+    submitError.value = resolvePasswordChangeApiError(
+      err,
+      t,
+      'resetPasswordFailed',
+    )
   } finally {
     loading.value = false
   }

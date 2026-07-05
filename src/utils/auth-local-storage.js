@@ -170,6 +170,60 @@ export function writeStoredConfigData(configData) {
   localStorage.setItem(keys.configData, JSON.stringify(configData))
 }
 
+export function readStoredUserInfo() {
+  const raw = localStorage.getItem(keys.userInfo)
+  if (!raw) {
+    return null
+  }
+  try {
+    const parsed = JSON.parse(raw)
+
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+export function writeStoredUserInfo(userInfo) {
+  if (!userInfo || typeof userInfo !== 'object') {
+    localStorage.removeItem(keys.userInfo)
+
+    return
+  }
+  localStorage.setItem(keys.userInfo, JSON.stringify(userInfo))
+}
+
+export function readStoredMustChangePassword() {
+  return localStorage.getItem(keys.mustChangePassword) === 'true'
+}
+
+export function writeStoredMustChangePassword(value) {
+  if (value) {
+    localStorage.setItem(keys.mustChangePassword, 'true')
+
+    return
+  }
+  localStorage.removeItem(keys.mustChangePassword)
+}
+
+export function readStoredPasswordChangeMode() {
+  const raw = localStorage.getItem(keys.passwordChangeMode)
+  if (raw === 'initial' || raw === 'current') {
+    return raw
+  }
+
+  return null
+}
+
+export function writeStoredPasswordChangeMode(mode) {
+  if (mode === 'initial' || mode === 'current') {
+    localStorage.setItem(keys.passwordChangeMode, mode)
+
+    return
+  }
+  localStorage.removeItem(keys.passwordChangeMode)
+}
+
 export function clearAuthLocalStorage() {
   [
     keys.token,
@@ -183,6 +237,9 @@ export function clearAuthLocalStorage() {
     keys.activeSubtenantId,
     keys.tenantId,
     keys.configData,
+    keys.userInfo,
+    keys.mustChangePassword,
+    keys.passwordChangeMode,
   ].forEach(k => localStorage.removeItem(k))
   clearSharedSessionInactivityState()
 }

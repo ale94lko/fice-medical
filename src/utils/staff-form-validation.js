@@ -1,4 +1,8 @@
 import { parseDisplayDate } from 'src/utils/app-datetime.js'
+import {
+  getPasswordPolicyViolation,
+  passwordPolicyMessageKey,
+} from 'src/utils/password-validation.js'
 
 export function resolveStaffApiErrorMessage(error, t) {
   const data = error?.response?.data
@@ -17,6 +21,20 @@ export function resolveStaffApiErrorMessage(error, t) {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function resolveSystemUserPasswordError(
+  password,
+  t,
+  { required = false } = {},
+) {
+  const value = String(password ?? '').trim()
+  if (!value) {
+    return required ? t('passwordRequired') : ''
+  }
+  const violation = getPasswordPolicyViolation(value)
+
+  return violation ? t(passwordPolicyMessageKey(violation)) : ''
+}
 
 export function validateStaffForm(form, {
   includeClinicalProfile,
@@ -69,8 +87,21 @@ export function validateStaffForm(form, {
       if (!hasRole) {
         errors.roles = t('fieldRequired')
       }
-      if (!String(systemUser.password ?? '').trim()) {
-        errors.password = t('passwordRequired')
+      const passwordError = resolveSystemUserPasswordError(
+        systemUser.password,
+        t,
+        { required: true },
+      )
+      if (passwordError) {
+        errors.password = passwordError
+      }
+    } else {
+      const passwordError = resolveSystemUserPasswordError(
+        systemUser.password,
+        t,
+      )
+      if (passwordError) {
+        errors.password = passwordError
       }
     }
   }

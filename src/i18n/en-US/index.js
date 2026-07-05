@@ -17,6 +17,13 @@ export default {
     'You have unsaved changes. If you switch site now, you will leave '
     + 'this record and your changes will be lost.',
   signOut: 'Sign out',
+  changePassword: 'Change password',
+  changePasswordTitle: 'Change password',
+  changePasswordSubtitle:
+    'Enter your current password and choose a new one.',
+  changePasswordSuccess: 'Your password has been updated.',
+  changePasswordFailed:
+    'Could not update your password. Please try again.',
   confirmSignOut: 'Are you sure you want to sign out?',
   confirmSignOutTitle: 'Confirm sign out',
   alreadySignOut: 'You have already signed out',
@@ -33,6 +40,32 @@ export default {
   resetPasswordFailed:
     'Could not reset your password. The link may have expired.',
   passwordsDoNotMatch: 'Passwords do not match.',
+  passwordMinLength: 'Password must be at least 8 characters.',
+  passwordRequiresUppercase:
+    'Password must include at least one uppercase letter.',
+  passwordRequiresLowercase:
+    'Password must include at least one lowercase letter.',
+  passwordRequiresNumber: 'Password must include at least one number.',
+  passwordRequiresSpecial:
+    'Password must include at least one special character.',
+  passwordPolicyInvalid: 'Password does not meet the required policy.',
+  passwordSameAsCurrent:
+    'New password must be different from your current password.',
+  currentPasswordIncorrect: 'Current password is incorrect.',
+  passwordMatchesHistory:
+    'New password cannot match any of your last 5 passwords.',
+  forcedChangePasswordTitle: 'Set a new password',
+  forcedChangePasswordSubtitle:
+    'Your account requires a new password before you can continue.',
+  forcedChangePasswordCurrentSubtitle:
+    'Enter your current password and choose a new one to continue.',
+  forcedChangePasswordCurrentLabel: 'Current password',
+  forcedChangePasswordNewLabel: 'New password',
+  forcedChangePasswordSubmit: 'Update password',
+  forcedChangePasswordSuccess:
+    'Your password has been updated. You can continue using the app.',
+  forcedChangePasswordFailed:
+    'Could not update your password. Please try again.',
   passwordRequired: 'Password is required.',
   emailRequired: 'Email is required',
   emailMaxLength: 'Email must be at most 32 characters',

@@ -196,6 +196,8 @@ import {
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
 import { createEmptyUser, cloneUser } from 'src/utils/user-orders.js'
+import { buildNewPasswordRules, createOptionalPasswordPolicyRule }
+  from 'src/utils/password-validation.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
 
@@ -286,11 +288,17 @@ const passwordPlaceholder = computed(() =>
 )
 
 const passwordRules = computed(() => {
-  if (readonly.value || !isAddMode.value) {
+  if (readonly.value) {
     return []
   }
+  if (isAddMode.value) {
+    return buildNewPasswordRules(t)
+  }
+  if (isEditMode.value) {
+    return [createOptionalPasswordPolicyRule(t)]
+  }
 
-  return [requiredRule(t('passwordRequired'))]
+  return []
 })
 
 const statusRules = computed(() =>

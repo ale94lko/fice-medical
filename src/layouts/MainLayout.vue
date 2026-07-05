@@ -33,6 +33,15 @@
             <q-list style="min-width: 100px">
               <q-item
                 clickable
+                :data-testid="layoutTestIds.changePassword"
+                @click="handleChangePassword">
+                <q-item-section avatar>
+                  <q-icon name="lock_reset" />
+                </q-item-section>
+                <q-item-section>{{ t('changePassword') }}</q-item-section>
+              </q-item>
+              <q-item
+                clickable
                 :data-testid="layoutTestIds.signOut"
                 @click="handleLogout">
                 <q-item-section avatar>
@@ -628,6 +637,7 @@
     @cancel="handleSignOutCancel"
   />
   <SessionExpiryDialog
+    v-if="!authStore.mustChangePassword"
     v-model="warningVisible"
     :countdown="formattedCountdown"
     :keep-open-loading="keepOpenLoading"
@@ -635,6 +645,7 @@
     @close-section="closeSection"
     @keep-open="keepSectionOpen"
   />
+  <ChangePasswordDialog v-model="showChangePasswordDialog" />
 </template>
 
 <script setup>
@@ -650,6 +661,7 @@ import {
 } from 'components/constants.js'
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
+import ChangePasswordDialog from 'components/ChangePasswordDialog.vue'
 import SessionExpiryDialog from 'components/SessionExpiryDialog.vue'
 import AppDrawerSubNavItem from 'components/AppDrawerSubNavItem.vue'
 import AppFooterPaginationHost from
@@ -690,6 +702,7 @@ const sidebar = ref(readInitialSidebarOpen())
 const sidebarExpanded = ref(false)
 const drawerHoverExpanded = ref(false)
 const showSignOutConfirm = ref(false)
+const showChangePasswordDialog = ref(false)
 const drawerOverlayBreakpoint = drawerMobileMaxPx + 1
 
 const clientMenuExpanded = ref(false)
@@ -905,6 +918,10 @@ function syncDrawerWithViewport() {
   if (tabletView.value) {
     sidebarExpanded.value = false
   }
+}
+
+const handleChangePassword = () => {
+  showChangePasswordDialog.value = true
 }
 
 const handleLogout = () => {

@@ -17,6 +17,7 @@ export const layoutTestIds = {
   menuToggle: 'layout-btn-menu-toggle',
   notifications: 'layout-btn-notifications',
   userMenu: 'layout-btn-user-menu',
+  changePassword: 'layout-menu-change-password',
   signOut: 'layout-menu-sign-out',
   navDashboard: 'layout-nav-dashboard',
   navCalendar: 'layout-nav-calendar',
@@ -42,6 +43,22 @@ export const sessionInactivityTestIds = {
   countdown: 'session-inactivity-countdown',
   closeSection: 'session-inactivity-btn-close-section',
   keepOpen: 'session-inactivity-btn-keep-open',
+}
+
+export const forcedChangePasswordTestIds = {
+  dialog: 'forced-change-password-dialog',
+  currentPassword: 'forced-change-password-input-current',
+  newPassword: 'forced-change-password-input-new',
+  repeatPassword: 'forced-change-password-input-repeat',
+  submit: 'forced-change-password-btn-submit',
+}
+
+export const changePasswordTestIds = {
+  dialog: 'change-password-dialog',
+  currentPassword: 'change-password-input-current',
+  newPassword: 'change-password-input-new',
+  repeatPassword: 'change-password-input-repeat',
+  submit: 'change-password-btn-submit',
 }
 
 export const adminTableTestIds = {

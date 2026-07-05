@@ -245,6 +245,41 @@ export function extractLoginSubtenants(body) {
   return normalizeLoginSubtenants(raw)
 }
 
+function findLoginUserInfo(node, depth = 0) {
+  if (!node || typeof node !== typeNames.object || depth > 5) {
+    return null
+  }
+  if (node.user_info && typeof node.user_info === typeNames.object) {
+    return node.user_info
+  }
+  if (node.userInfo && typeof node.userInfo === typeNames.object) {
+    return node.userInfo
+  }
+  if (node.data && typeof node.data === typeNames.object) {
+    return findLoginUserInfo(node.data, depth + 1)
+  }
+
+  return null
+}
+
+export function extractLoginUserInfo(body) {
+  const raw = findLoginUserInfo(body)
+  if (!raw) {
+    return null
+  }
+  const id = Number(raw.id)
+
+  return {
+    id: Number.isFinite(id) ? id : null,
+    username: String(raw.username ?? '').trim(),
+    status: raw.status ?? null,
+    description: String(raw.description ?? '').trim(),
+    changePassword: Boolean(
+      raw.change_password ?? raw.changePassword ?? false,
+    ),
+  }
+}
+
 export function extractLoginModules(body) {
   if (!body || typeof body !== 'object') {
     return []

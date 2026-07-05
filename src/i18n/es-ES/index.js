@@ -17,6 +17,13 @@ export default {
     'Tiene cambios sin guardar. Si cambia de sede ahora, saldrá de este '
     + 'registro y se perderán los cambios.',
   signOut: 'Cerrar sesión',
+  changePassword: 'Cambiar contraseña',
+  changePasswordTitle: 'Cambiar contraseña',
+  changePasswordSubtitle:
+    'Introduce tu contraseña actual y elige una nueva.',
+  changePasswordSuccess: 'Tu contraseña se ha actualizado.',
+  changePasswordFailed:
+    'No se pudo actualizar la contraseña. Inténtalo de nuevo.',
   confirmSignOut: '¿Seguro que deseas cerrar sesión?',
   confirmSignOutTitle: 'Confirmar cerrar sesión',
   alreadySignOut: 'Ya has cerrado sesión',
@@ -34,6 +41,34 @@ export default {
   resetPasswordFailed:
     'No se pudo restablecer la contraseña. El enlace puede haber expirado.',
   passwordsDoNotMatch: 'Las contraseñas no coinciden.',
+  passwordMinLength: 'La contraseña debe tener al menos 8 caracteres.',
+  passwordRequiresUppercase:
+    'La contraseña debe incluir al menos una letra mayúscula.',
+  passwordRequiresLowercase:
+    'La contraseña debe incluir al menos una letra minúscula.',
+  passwordRequiresNumber: 'La contraseña debe incluir al menos un número.',
+  passwordRequiresSpecial:
+    'La contraseña debe incluir al menos un carácter especial.',
+  passwordPolicyInvalid:
+    'La contraseña no cumple con la política requerida.',
+  passwordSameAsCurrent:
+    'La nueva contraseña debe ser distinta de la contraseña actual.',
+  currentPasswordIncorrect: 'La contraseña actual no es correcta.',
+  passwordMatchesHistory:
+    'La nueva contraseña no puede coincidir con ninguna de las '
+    + 'últimas 5 contraseñas.',
+  forcedChangePasswordTitle: 'Establecer nueva contraseña',
+  forcedChangePasswordSubtitle:
+    'Su cuenta requiere una nueva contraseña antes de continuar.',
+  forcedChangePasswordCurrentSubtitle:
+    'Introduzca su contraseña actual y elija una nueva para continuar.',
+  forcedChangePasswordCurrentLabel: 'Contraseña actual',
+  forcedChangePasswordNewLabel: 'Nueva contraseña',
+  forcedChangePasswordSubmit: 'Actualizar contraseña',
+  forcedChangePasswordSuccess:
+    'Su contraseña se actualizó correctamente. Ya puede continuar.',
+  forcedChangePasswordFailed:
+    'No se pudo actualizar la contraseña. Inténtelo de nuevo.',
   passwordRequired: 'La contraseña es obligatoria.',
   emailRequired: 'El correo es obligatorio',
   emailMaxLength: 'El correo debe tener como máximo 32 caracteres',

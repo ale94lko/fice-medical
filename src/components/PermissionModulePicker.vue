@@ -407,13 +407,13 @@ function onPermissionToggle(permission, checked) {
 @import 'src/css/quasar.variables';
 
 .q-tooltip.permission-module-picker__tooltip {
-  background: $white !important;
+  background: $secondary-2 !important;
   color: $text-strong !important;
   font-size: 0.8125rem !important;
   font-weight: 400 !important;
   line-height: 1.45 !important;
   padding: 8px 12px !important;
-  border: 1px solid $border-subtle;
+  border: 1px solid rgba($primary, 0.18);
   box-shadow: $shadow-sm;
   max-width: 300px;
 }

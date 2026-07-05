@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { apiPaths, permissionNames, typeNames } from 'components/constants.js'
+import { apiPaths, permissionNames, passwordChangeModes, typeNames }
+  from 'components/constants.js'
 import {
   hasAnyPermission,
   hasAssignedPermissions,
@@ -8,6 +9,7 @@ import {
 } from 'src/utils/auth-permissions.js'
 import {
   extractLoginSubtenants,
+  extractLoginUserInfo,
   extractOAuthTokenPayload,
 } from 'components/helpers.js'
 import {
@@ -16,24 +18,43 @@ import {
   readStoredConfigData,
   readStoredExpireAt,
   readStoredModules,
+  readStoredMustChangePassword,
+  readStoredPasswordChangeMode,
   readStoredPermissions,
   readStoredRefreshToken,
   readStoredSubtenants,
   readStoredToken,
   readStoredTenantId,
+  readStoredUserInfo,
   writeStoredActiveSubtenantId,
   writeStoredConfigData,
   writeStoredExpireAt,
   writeStoredModules,
+  writeStoredMustChangePassword,
+  writeStoredPasswordChangeMode,
   writeStoredPermissions,
   writeStoredRefreshToken,
   writeStoredSubtenants,
   writeStoredToken,
   writeStoredTenantId,
+  writeStoredUserInfo,
 } from '../utils/auth-local-storage.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
 import { syncAppDateTimeConfigFromAuth } from
   '../utils/sync-app-datetime-config.js'
+
+function resolveRestoredPasswordChangeMode(storedMode, userInfo) {
+  if (
+    storedMode === passwordChangeModes.initial
+    || storedMode === passwordChangeModes.current
+  ) {
+    return storedMode
+  }
+
+  return userInfo?.changePassword
+    ? passwordChangeModes.initial
+    : passwordChangeModes.current
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -48,10 +69,16 @@ export const useAuthStore = defineStore('auth', {
     activeSubtenantId: null,
     tenantId: null,
     configData: null,
+    userInfo: null,
+    mustChangePassword: false,
+    passwordChangeMode: null,
     _initialized: false,
   }),
   getters: {
     isAuthenticated: state => !!state.token,
+    requiresPasswordChange: state => state.mustChangePassword,
+    requiresCurrentPasswordForChange: state =>
+      state.passwordChangeMode === passwordChangeModes.current,
     activeSubtenant(state) {
       if (!state.subtenants.length) {
         return null
@@ -163,6 +190,53 @@ export const useAuthStore = defineStore('auth', {
       writeStoredToken(this.token)
       writeStoredExpireAt(this.expireAt)
     },
+    applyUserInfo(userInfo) {
+      if (!userInfo || typeof userInfo !== 'object') {
+        this.userInfo = null
+        this.mustChangePassword = false
+        this.passwordChangeMode = null
+        writeStoredUserInfo(null)
+        writeStoredMustChangePassword(false)
+        writeStoredPasswordChangeMode(null)
+
+        return
+      }
+
+      this.userInfo = { ...userInfo }
+      this.mustChangePassword = Boolean(userInfo.changePassword)
+      this.passwordChangeMode = this.mustChangePassword
+        ? passwordChangeModes.initial
+        : null
+      writeStoredUserInfo(this.userInfo)
+      writeStoredMustChangePassword(this.mustChangePassword)
+      writeStoredPasswordChangeMode(this.passwordChangeMode)
+    },
+    completePasswordChange() {
+      this.mustChangePassword = false
+      this.passwordChangeMode = null
+      if (this.userInfo) {
+        this.userInfo = {
+          ...this.userInfo,
+          changePassword: false,
+        }
+        writeStoredUserInfo(this.userInfo)
+      }
+      writeStoredMustChangePassword(false)
+      writeStoredPasswordChangeMode(null)
+    },
+    requirePasswordChange() {
+      this.mustChangePassword = true
+      this.passwordChangeMode = passwordChangeModes.current
+      if (this.userInfo) {
+        this.userInfo = {
+          ...this.userInfo,
+          changePassword: true,
+        }
+        writeStoredUserInfo(this.userInfo)
+      }
+      writeStoredMustChangePassword(true)
+      writeStoredPasswordChangeMode(passwordChangeModes.current)
+    },
     async login(email, pass, t) {
       try {
         const response = await apiInstance.post(apiPaths.oauthLogin, {
@@ -172,6 +246,7 @@ export const useAuthStore = defineStore('auth', {
 
         const td = extractOAuthTokenPayload(response.data)
         this.applyTokensFromApi(td)
+        this.applyUserInfo(extractLoginUserInfo(response.data))
         const subtenants = extractLoginSubtenants(response.data)
         if (subtenants.length) {
           this.applySubtenants(subtenants)
@@ -217,6 +292,9 @@ export const useAuthStore = defineStore('auth', {
       const activeSubtenantId = readStoredActiveSubtenantId()
       const tenantId = readStoredTenantId()
       const configData = readStoredConfigData()
+      const userInfo = readStoredUserInfo()
+      const mustChangePassword = readStoredMustChangePassword()
+      const storedPasswordChangeMode = readStoredPasswordChangeMode()
       if (token) {
         this.token = token
         this.expireAt = expireAt
@@ -225,6 +303,15 @@ export const useAuthStore = defineStore('auth', {
         this.permissions = permissions
         this.tenantId = tenantId
         this.configData = configData
+        this.userInfo = userInfo
+        this.mustChangePassword = mustChangePassword
+          || Boolean(userInfo?.changePassword)
+        this.passwordChangeMode = this.mustChangePassword
+          ? resolveRestoredPasswordChangeMode(
+            storedPasswordChangeMode,
+            userInfo,
+          )
+          : null
         syncAppDateTimeConfigFromAuth(configData)
         this.applySubtenants(subtenants, activeSubtenantId)
       }
@@ -239,6 +326,9 @@ export const useAuthStore = defineStore('auth', {
       this.activeSubtenantId = null
       this.tenantId = null
       this.configData = null
+      this.userInfo = null
+      this.mustChangePassword = false
+      this.passwordChangeMode = null
       syncAppDateTimeConfigFromAuth(null)
       clearAuthLocalStorage()
     },
@@ -259,6 +349,9 @@ export const useAuthStore = defineStore('auth', {
             this.activeSubtenantId = null
             this.tenantId = null
             this.configData = null
+            this.userInfo = null
+            this.mustChangePassword = false
+            this.passwordChangeMode = null
             syncAppDateTimeConfigFromAuth(null)
             if (this.router) {
               this.router.push('/login')
