@@ -201,6 +201,8 @@
       :entry="editingEntry"
       :entries="visibleEntries"
       :patient-dob="patientDob"
+      :patient-age="patientAge"
+      :patient-age-unit="patientAgeUnit"
       :allergy-catalog-options="allergyCatalogOptions"
       :allergy-catalog-loading="allergyCatalogLoading"
       @save="onEditSave"
@@ -280,6 +282,15 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  /** Used to infer birth year when DOB is not set. */
+  patientAge: {
+    type: [String, Number],
+    default: '',
+  },
+  patientAgeUnit: {
+    type: String,
+    default: '',
+  },
   readonly: {
     type: Boolean,
     default: false,
@@ -330,6 +341,12 @@ const section = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
 })
+
+const patientBirthContext = computed(() => ({
+  dobUs: props.patientDob ?? '',
+  age: props.patientAge,
+  ageUnit: props.patientAgeUnit,
+}))
 
 const noKnownAllergiesChecked = computed(
   () => Boolean(section.value.noKnownAllergies),
@@ -499,21 +516,26 @@ const deleteDialogRequiresReason = computed(() => {
 })
 
 watch(
-  () => [props.patientDob, section.value.entries],
+  () => [
+    props.patientDob,
+    props.patientAge,
+    props.patientAgeUnit,
+    section.value.entries,
+  ],
   () => {
     if (!invalidDobRowIds.value.length) {
       return
     }
     invalidDobRowIds.value = allergyEntriesDobInvalidIds(
       section.value.entries ?? [],
-      props.patientDob ?? '',
+      patientBirthContext.value,
     )
   },
   { deep: true },
 )
 
 const allergyMinYear = computed(() =>
-  allergyMinStartYear(props.patientDob ?? ''),
+  allergyMinStartYear(patientBirthContext.value),
 )
 
 const startYearHint = computed(() => {
@@ -569,11 +591,11 @@ function applySaveValidation() {
   }
 
   applyAllergyDraftFieldErrorKeys(
-    getAllergyDraftFieldErrorKeys(section.value, props.patientDob ?? ''),
+    getAllergyDraftFieldErrorKeys(section.value, patientBirthContext.value),
   )
   invalidDobRowIds.value = allergyEntriesDobInvalidIds(
     section.value.entries ?? [],
-    props.patientDob ?? '',
+    patientBirthContext.value,
   )
 }
 
@@ -625,7 +647,7 @@ async function onAddEntry() {
     draft.allergy,
     draft.severity,
     draft.startYear,
-    props.patientDob ?? '',
+    patientBirthContext.value,
   )
   if (!result.ok) {
     applyDraftErrors(result)

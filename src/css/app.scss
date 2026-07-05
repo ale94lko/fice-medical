@@ -1189,6 +1189,11 @@
     line-height: 1.25;
     color: $text-strong;
   }
+
+  .app-dialog-toolbar__title {
+    overflow: visible;
+    text-overflow: unset;
+  }
 }
 
 .app-dialog-toolbar__close {

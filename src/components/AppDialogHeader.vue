@@ -1,6 +1,6 @@
 <template>
   <q-toolbar class="app-dialog-toolbar">
-    <q-toolbar-title>
+    <q-toolbar-title class="app-dialog-toolbar__title">
       <slot />
     </q-toolbar-title>
     <q-space />

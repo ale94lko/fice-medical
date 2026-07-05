@@ -1974,11 +1974,12 @@ export default {
   noKnownAllergiesConfirmedSubtitle:
     'Desmarque "No se conocen alergias" para agregar información de alergias',
   noKnownAllergiesRemoveModalTitle:
-    'Se eliminarán las alergias existentes',
+    '¿Eliminar las alergias existentes?',
   noKnownAllergiesRemoveModalMessage:
-    'Este paciente tiene alergias registradas. Seleccionar '
-    + '"No se conocen alergias" eliminará todos los registros de '
-    + 'alergias existentes.',
+    'Este paciente ya tiene alergias registradas.\n'
+    + 'Al seleccionar "No se conocen alergias" se eliminarán todos los '
+    + 'registros de alergias existentes.\n'
+    + 'Esta acción no se puede deshacer.',
   noKnownAllergiesRemoveModalConfirm: 'Eliminar alergias y continuar',
   allergySearchPlaceholder: 'Buscar o escribir alergia...',
   allergySearchHint:

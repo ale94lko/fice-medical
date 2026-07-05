@@ -694,6 +694,8 @@
             :readonly="allergiesReadonly"
             :can-view="canViewAllergiesTab"
             :patient-dob="form[ck.dob]"
+            :patient-age="form[ck.age]"
+            :patient-age-unit="form[ck.ageUnit]"
             :allergy-catalog-options="allergyNameSelectOptions"
             :allergy-catalog-loading="catalogsLoading"
           />

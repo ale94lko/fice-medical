@@ -1,7 +1,7 @@
 <template>
   <q-dialog
-    v-model="modelValue"
     :data-testid="dialogTestId"
+    v-model="modelValue"
     persistent
     transition-show="scale"
     transition-hide="scale">
@@ -13,7 +13,7 @@
       </AppDialogHeader>
       <q-card-section
         :class=cardSectionClass>
-        <div class="text-body1">{{ message }}</div>
+        <div class="text-body1 modal-card__message">{{ message }}</div>
       </q-card-section>
       <q-card-actions
         align="right"
@@ -94,5 +94,9 @@ const onCancel = () => {
 <style scoped>
   .primary-action {
     padding: 7px 30px;
+  }
+
+  .modal-card__message {
+    white-space: pre-line;
   }
 </style>

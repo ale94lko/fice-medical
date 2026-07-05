@@ -131,11 +131,17 @@ export function useAddClientTabValidation({
       )
     }
     if (tab === addClientTabKeys.allergies) {
-      const dob = String(form.value[ck.dob] ?? '').trim()
+      const birthContext = {
+        dobUs: String(form.value[ck.dob] ?? '').trim(),
+        age: form.value[ck.age],
+        ageUnit: form.value[ck.ageUnit],
+      }
       const sec = form.value[clientFormSections.allergies]
-      const draftErrs = countAllergyDraftFieldErrors(sec, dob)
-      const rowErrs = allergyEntriesDobInvalidIds(sec?.entries ?? [], dob)
-        .length
+      const draftErrs = countAllergyDraftFieldErrors(sec, birthContext)
+      const rowErrs = allergyEntriesDobInvalidIds(
+        sec?.entries ?? [],
+        birthContext,
+      ).length
 
       return draftErrs + rowErrs
     }
@@ -234,26 +240,6 @@ export function useAddClientTabValidation({
   async function validateAllTabs() {
     resetTabErrorCounts()
 
-    const contactSection = form.value[clientFormSections.contact]
-    const businessRuleErrorKey = resolvePointOfContactSaveErrorKey(
-      contactSection,
-    ) || resolveMinorGuardianContactSaveErrorKey(form.value)
-    if (businessRuleErrorKey) {
-      tabErrorCounts.value = {
-        [addClientTabKeys.contact]: 1,
-      }
-      activeTab.value = addClientTabKeys.contact
-      await nextTick()
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t(businessRuleErrorKey),
-        position: 'top',
-      })
-      await notifyAndScrollToValidationErrors(panelScrollRef)
-
-      return false
-    }
-
     const counts = {}
     let totalErrors = 0
 
@@ -263,6 +249,17 @@ export function useAddClientTabValidation({
         counts[tab] = count
         totalErrors += count
       }
+    }
+
+    const contactSection = form.value[clientFormSections.contact]
+    const businessRuleErrorKey = resolvePointOfContactSaveErrorKey(
+      contactSection,
+    ) || resolveMinorGuardianContactSaveErrorKey(form.value)
+    if (businessRuleErrorKey) {
+      counts[addClientTabKeys.contact] = (
+        counts[addClientTabKeys.contact] ?? 0
+      ) + 1
+      totalErrors += 1
     }
 
     tabErrorCounts.value = counts
@@ -286,6 +283,14 @@ export function useAddClientTabValidation({
     if (firstInvalidTab && activeTab.value !== firstInvalidTab) {
       activeTab.value = firstInvalidTab
       await nextTick()
+    }
+
+    if (businessRuleErrorKey) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t(businessRuleErrorKey),
+        position: 'top',
+      })
     }
 
     await notifyAndScrollToValidationErrors(panelScrollRef)

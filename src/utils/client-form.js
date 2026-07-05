@@ -43,6 +43,30 @@ export function birthYearFromUsDob(dobUs) {
   return d ? d.getFullYear() : null
 }
 
+/**
+ * Birth year for validation when DOB is unknown but age + unit are set.
+ * Prefers explicit DOB; otherwise infers DOB from age relative to today.
+ */
+export function resolvePatientBirthYear({
+  dobUs,
+  age,
+  ageUnit,
+} = {}) {
+  const fromDob = birthYearFromUsDob(dobUs)
+  if (fromDob != null) {
+    return fromDob
+  }
+
+  const ageText = String(age ?? '').trim()
+  if (!ageText) {
+    return null
+  }
+
+  const inferredDob = dobUsDateFromAgeAndUnit(age, ageUnit)
+
+  return birthYearFromUsDob(inferredDob)
+}
+
 export function fullYearsBetween(dob, today) {
   let age = today.getFullYear() - dob.getFullYear()
   const monthDelta = today.getMonth() - dob.getMonth()

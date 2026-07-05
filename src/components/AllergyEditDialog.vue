@@ -181,6 +181,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  patientAge: {
+    type: [String, Number],
+    default: '',
+  },
+  patientAgeUnit: {
+    type: String,
+    default: '',
+  },
   allergyCatalogOptions: {
     type: Array,
     default: () => [],
@@ -225,7 +233,11 @@ const severityOptions = [
 ]
 
 const allergyMinYear = computed(() =>
-  allergyMinStartYear(props.patientDob ?? ''),
+  allergyMinStartYear({
+    dobUs: props.patientDob ?? '',
+    age: props.patientAge,
+    ageUnit: props.patientAgeUnit,
+  }),
 )
 
 const startYearHint = computed(() => {
@@ -246,6 +258,14 @@ const open = computed({
 const dialogTestId = modalTestIds.dialog('allergy-edit')
 const cancelTestId = modalTestIds.cancel('allergy-edit')
 const confirmTestId = modalTestIds.confirm('allergy-edit')
+
+function patientBirthContext() {
+  return {
+    dobUs: props.patientDob ?? '',
+    age: props.patientAge,
+    ageUnit: props.patientAgeUnit,
+  }
+}
 
 function normalizeAllergyForCompare(value) {
   return trimAllergyField(value).toLowerCase()
@@ -372,6 +392,19 @@ watch(
     if (localAllergy.value) {
       ensureAllergyOptionVisible(localAllergy.value)
     }
+    applyEditEntryValidation()
+  },
+)
+
+watch(
+  () => [
+    props.patientDob,
+    props.patientAge,
+    props.patientAgeUnit,
+    localStartYear.value,
+  ],
+  () => {
+    applyEditEntryValidation()
   },
 )
 
@@ -395,13 +428,31 @@ function applyErrors(result) {
       })
     } else if (result.errorKey === 'allergySeverityRequired') {
       severityError.value = t(result.errorKey)
-    } else if (result.errorKey === 'allergyStartYearInvalid') {
+    } else if (
+      result.errorKey === 'allergyStartYearInvalid'
+      || result.errorKey === 'allergyStartYearBeforeBirth'
+      || result.errorKey === 'allergyStartYearAfterCurrent'
+    ) {
       yearError.value = t(result.errorKey, {
         min: allergyMinYear.value,
         max: allergyMaxStartYear(),
       })
     }
   }
+}
+
+function applyEditEntryValidation() {
+  if (!open.value) {
+    return
+  }
+
+  const result = validateAllergyForAdd(
+    localAllergy.value,
+    localSeverity.value,
+    localStartYear.value,
+    patientBirthContext(),
+  )
+  applyErrors(result)
 }
 
 async function onSave() {
@@ -413,7 +464,7 @@ async function onSave() {
     localAllergy.value,
     localSeverity.value,
     localStartYear.value,
-    props.patientDob ?? '',
+    patientBirthContext(),
   )
   if (!result.ok) {
     applyErrors(result)

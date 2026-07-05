@@ -1909,11 +1909,12 @@ export default {
   noKnownAllergiesConfirmedTitle: 'No known allergies confirmed',
   noKnownAllergiesConfirmedSubtitle:
     'Uncheck "No known allergies" to add allergy information',
-  noKnownAllergiesRemoveModalTitle:
-    'Existing allergies will be removed',
+  noKnownAllergiesRemoveModalTitle: 'Remove existing allergies?',
   noKnownAllergiesRemoveModalMessage:
-    'This patient has recorded allergies. Selecting "No known allergies" '
-    + 'will remove all existing allergy records.',
+    'This patient already has recorded allergies.\n'
+    + 'Selecting "No known allergies" will remove all existing allergy '
+    + 'records.\n'
+    + 'This action cannot be undone.',
   noKnownAllergiesRemoveModalConfirm: 'Remove allergies & continue',
   allergySearchPlaceholder: 'Search or enter allergy...',
   allergySearchHint:

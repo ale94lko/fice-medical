@@ -6,7 +6,7 @@ import {
   clientAllergiesNkaStatus,
   clientMaxAge,
 } from 'components/constants.js'
-import { birthYearFromUsDob } from 'src/utils/client-form.js'
+import { resolvePatientBirthYear } from 'src/utils/client-form.js'
 
 const ALLERGY_NAME_RE = /^[a-zA-Z0-9\s\-()"']*$/
 
@@ -23,15 +23,50 @@ export function allergyMaxStartYear() {
 }
 
 /**
- * @param {string} [patientDobUs] Patient DOB as mm/dd/yyyy when known.
- *   Allergy start year cannot be before this calendar year.
+ * Normalizes allergy birth context from a legacy DOB string or object.
+ *
+ * @param {string|{
+ *   dobUs?: string,
+ *   age?: string|number,
+ *   ageUnit?: string,
+ * }} input
  */
-export function allergyMinStartYear(patientDobUs) {
+export function normalizeAllergyPatientBirthContext(input) {
+  if (typeof input === 'string') {
+    return { dobUs: input }
+  }
+  if (input && typeof input === 'object') {
+    return {
+      dobUs: String(input.dobUs ?? input.dob ?? '').trim(),
+      age: input.age,
+      ageUnit: input.ageUnit,
+    }
+  }
+
+  return { dobUs: '' }
+}
+
+function patientBirthYearFromContext(birthContext) {
+  const normalized = normalizeAllergyPatientBirthContext(birthContext)
+
+  return resolvePatientBirthYear(normalized)
+}
+
+/**
+ * Earliest allowed allergy start year for a patient.
+ *
+ * @param {string|{
+ *   dobUs?: string,
+ *   age?: string|number,
+ *   ageUnit?: string,
+ * }} birthContext Patient DOB and/or age + unit when DOB is not set.
+ */
+export function allergyMinStartYear(birthContext) {
   const base = Math.max(
     clientAllergyMinStartYear,
     allergyMaxStartYear() - clientMaxAge,
   )
-  const birthYear = birthYearFromUsDob(patientDobUs)
+  const birthYear = patientBirthYearFromContext(birthContext)
   if (birthYear == null) {
     return base
   }
@@ -156,7 +191,7 @@ export function isValidAllergyStartYear(value, patientDobUs) {
   return Number.isInteger(year) && year >= min && year <= max
 }
 
-function allergyStartYearErrorKey(value, patientDobUs) {
+function allergyStartYearErrorKey(value, birthContext) {
   const s = trimAllergyField(value)
   if (!s) {
     return null
@@ -167,7 +202,7 @@ function allergyStartYearErrorKey(value, patientDobUs) {
   }
 
   const year = Number(s)
-  const birthYear = birthYearFromUsDob(patientDobUs)
+  const birthYear = patientBirthYearFromContext(birthContext)
   if (birthYear != null && year < birthYear) {
     return 'allergyStartYearBeforeBirth'
   }
