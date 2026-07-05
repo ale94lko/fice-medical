@@ -1567,7 +1567,7 @@ input:-webkit-autofill {
     padding: 0 14px;
     margin-right: 2px;
     color: $text-muted;
-    font-weight: 600;
+    font-weight: 400;
     background: transparent;
     border-radius: 0;
 
@@ -1628,6 +1628,7 @@ input:-webkit-autofill {
     flex: 0 1 auto;
     min-width: 0;
     text-align: left;
+    font-weight: 400;
   }
 
   .contact-subtab-remove {
