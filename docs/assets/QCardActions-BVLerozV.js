@@ -1,1 +1,0 @@
-import{Hs as e,Ms as t,Nc as n,Ns as r,Uc as i,vc as a}from"./index-LJtDB142.js";var o=a({name:`QCardActions`,props:{...t,vertical:Boolean},setup(t,{slots:a}){let o=r(t),s=n(()=>`q-card__actions ${o.value} q-card__actions--${t.vertical===!0?`vert column`:`horiz row`}`);return()=>i(`div`,{class:s.value},e(a.default))}});export{o as t};
