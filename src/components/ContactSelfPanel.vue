@@ -8,6 +8,7 @@
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
           <FormInput
+            ref="addressLine1InputRef"
             v-model="contact.addressLine1"
             :external-label="true"
             :label="t('addressLine1')"
@@ -18,6 +19,7 @@
         </div>
         <div class="col-12 col-md-6">
           <FormInput
+            ref="addressLine2InputRef"
             v-model="contact.addressLine2"
             :external-label="true"
             :label="t('addressLine2Optional')"
@@ -83,6 +85,7 @@
         </div>
         <div class="col-12 col-md-6">
           <FormInput
+            ref="zipCodeInputRef"
             v-model="contact.zipCode"
             :external-label="true"
             :label="t('zipCode')"
@@ -112,6 +115,7 @@
               :label="t('phoneNumber')"
               :test-id="contactFieldTestId(`phone-${index}-number`)">
               <q-input
+                :ref="el => setPhoneInputRef(el, index)"
                 outlined
                 hide-bottom-space
                 lazy-rules="ondemand"
@@ -173,6 +177,7 @@
           class="row q-col-gutter-sm q-col-gutter-md contact-method-row">
           <div class="col-12 col-md-6">
             <FormInput
+              :ref="el => setEmailInputRef(el, index)"
               v-model="email.address"
               :external-label="true"
               :label="t('emailAddress')"
@@ -280,6 +285,7 @@
             :label="t('additionalNotes')"
             :test-id="contactFieldTestId('additionalNotes')">
             <q-input
+              ref="additionalNotesInputRef"
               v-model="contact.additionalNotes"
               outlined
               type="textarea"
@@ -299,8 +305,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  clearFieldValidation,
+  validateFields,
+} from 'src/composables/useValidatablePanelFields.js'
 import FormInput from './FormInput.vue'
 import FormToggle from './FormToggle.vue'
 import AddClientLabeledField from './AddClientLabeledField.vue'
@@ -505,4 +515,43 @@ function onPreferredCommToggle(value) {
 function onCommunicationAuthorizationChange(checked) {
   setCommunicationAuthorization(contact.value, checked)
 }
+
+const addressLine1InputRef = ref(null)
+const addressLine2InputRef = ref(null)
+const zipCodeInputRef = ref(null)
+const additionalNotesInputRef = ref(null)
+const phoneInputRefs = ref([])
+const emailInputRefs = ref([])
+
+function setPhoneInputRef(el, index) {
+  phoneInputRefs.value[index] = el
+}
+
+function setEmailInputRef(el, index) {
+  emailInputRefs.value[index] = el
+}
+
+function validatableFields() {
+  return [
+    addressLine1InputRef.value,
+    addressLine2InputRef.value,
+    zipCodeInputRef.value,
+    additionalNotesInputRef.value,
+    ...phoneInputRefs.value,
+    ...emailInputRefs.value,
+  ]
+}
+
+async function validateVisibleFields() {
+  await validateFields(validatableFields())
+}
+
+function clearVisibleFields() {
+  clearFieldValidation(validatableFields())
+}
+
+defineExpose({
+  validateVisibleFields,
+  clearVisibleFields,
+})
 </script>

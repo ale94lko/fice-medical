@@ -4,6 +4,11 @@ export const CONTACT_SAVE_BUSINESS_RULE_BANNERS = {
     messageKey: 'minorClientGuardianContactRequiredMessage',
     icon: 'groups',
   },
+  otherContactContactMethodRequired: {
+    titleKey: 'otherContactContactMethodRequiredTitle',
+    messageKey: 'otherContactContactMethodRequiredMessage',
+    icon: 'contact_phone',
+  },
 }
 
 export function resolveContactSaveBusinessRuleBanner(errorKey, t) {

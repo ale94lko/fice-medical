@@ -5,6 +5,7 @@ import {
   isValidAddressLine,
   isValidEmailAddress,
   isValidLettersField,
+  isCompletePhoneNumber,
   isValidPhoneChars,
   isValidZipCode,
 } from 'src/utils/client-contact-form.js'
@@ -32,18 +33,19 @@ export function useAddClientContactRules(t, lettersRule) {
     ],
     phoneNumber: [
       val => isValidPhoneChars(val) || t('phoneInvalid'),
+      val => isCompletePhoneNumber(val) || t('clientPhoneIncomplete'),
     ],
     emailAddress: [
       val => isValidEmailAddress(val) || t('clientEmailInvalid'),
     ],
     otherFirstName: [
-      lettersRule(t('firstNameRequired'), clientNameMaxLength, false),
+      lettersRule(t('firstNameRequired'), clientNameMaxLength, true),
     ],
     otherMiddleName: [
       lettersRule(t('firstNameRequired'), clientNameMaxLength, false),
     ],
     otherLastName: [
-      lettersRule(t('lastNameRequired'), clientNameMaxLength, false),
+      lettersRule(t('lastNameRequired'), clientNameMaxLength, true),
     ],
     additionalNotes: [
       val => {

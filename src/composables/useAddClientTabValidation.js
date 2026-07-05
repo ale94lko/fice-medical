@@ -15,6 +15,7 @@ import {
 import {
   countBasicTabFieldErrors,
   countContactTabFieldErrors,
+  buildContactSubTabErrorCounts,
 } from 'src/utils/add-client-form-validation.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
@@ -24,6 +25,15 @@ import {
 import {
   resolveMinorGuardianContactSaveErrorKey,
 } from 'src/utils/client-minor-guardian-validation.js'
+import {
+  otherContactIdsMissingContactMethod,
+} from 'src/utils/client-contact-form.js'
+import {
+  contactBusinessRuleExtraErrorCount,
+  resolveOtherContactContactMethodSaveErrorKey,
+} from 'src/utils/client-other-contact-validation.js'
+import { CONTACT_SUB_TAB_SELF } from
+  'src/composables/useContactSubTabs.js'
 
 export function useAddClientTabValidation({
   activeTab,
@@ -35,6 +45,7 @@ export function useAddClientTabValidation({
   fmhTabRef,
   vitalsTabRef,
   panelScrollRef,
+  contactTabRef,
   getBasicRules,
   getContactRules,
   validateReferralIntake,
@@ -43,8 +54,10 @@ export function useAddClientTabValidation({
   const ck = clientFieldKeys
   const tabErrorCounts = ref({})
   const contactSaveBusinessRuleErrorKey = ref(null)
+  const contactSubTabErrorCounts = ref({})
+  const otherContactMissingContactMethodIds = ref([])
 
-  function resolveContactBusinessRuleErrorKey() {
+  function resolveTabLevelContactBusinessRuleErrorKey() {
     const contactSection = form.value[clientFormSections.contact]
 
     return resolvePointOfContactSaveErrorKey(contactSection)
@@ -52,17 +65,42 @@ export function useAddClientTabValidation({
       || null
   }
 
+  function refreshOtherContactMissingContactMethodIds() {
+    const contactSection = form.value[clientFormSections.contact]
+    otherContactMissingContactMethodIds.value =
+      otherContactIdsMissingContactMethod(contactSection)
+  }
+
+  function resolveContactBusinessRuleErrorKey() {
+    return resolveTabLevelContactBusinessRuleErrorKey()
+      || resolveOtherContactContactMethodSaveErrorKey(
+        form.value[clientFormSections.contact],
+      )
+      || null
+  }
+
   watch(
     () => form.value,
     () => {
-      if (!contactSaveBusinessRuleErrorKey.value) {
-        return
+      if (otherContactMissingContactMethodIds.value.length) {
+        refreshOtherContactMissingContactMethodIds()
       }
-      contactSaveBusinessRuleErrorKey.value =
-        resolveContactBusinessRuleErrorKey()
+      if (contactSaveBusinessRuleErrorKey.value) {
+        contactSaveBusinessRuleErrorKey.value =
+          resolveTabLevelContactBusinessRuleErrorKey()
+      }
     },
     { deep: true },
   )
+
+  function rebuildContactSubTabErrorCounts() {
+    const contactSection = form.value[clientFormSections.contact]
+    contactSubTabErrorCounts.value = buildContactSubTabErrorCounts(
+      contactSection,
+      getContactRules?.(),
+      CONTACT_SUB_TAB_SELF,
+    )
+  }
 
   function tabIndex(tab) {
     return tabIndexInOrder(tab, tabOrder)
@@ -71,6 +109,8 @@ export function useAddClientTabValidation({
   function resetTabErrorCounts() {
     tabErrorCounts.value = {}
     contactSaveBusinessRuleErrorKey.value = null
+    contactSubTabErrorCounts.value = {}
+    otherContactMissingContactMethodIds.value = []
   }
 
   function tabErrorCount(tab) {
@@ -178,10 +218,12 @@ export function useAddClientTabValidation({
 
       return
     }
-    if (
-      tab === addClientTabKeys.basic
-      || tab === addClientTabKeys.contact
-    ) {
+    if (tab === addClientTabKeys.contact) {
+      await contactTabRef?.value?.clearSaveValidation?.()
+
+      return
+    }
+    if (tab === addClientTabKeys.basic) {
       clearQFormTabFieldErrors(tab)
     }
   }
@@ -192,10 +234,12 @@ export function useAddClientTabValidation({
 
       return
     }
-    if (
-      tab === addClientTabKeys.basic
-      || tab === addClientTabKeys.contact
-    ) {
+    if (tab === addClientTabKeys.contact) {
+      await contactTabRef?.value?.applySaveValidation?.()
+
+      return
+    }
+    if (tab === addClientTabKeys.basic) {
       await showQFormTabFieldErrors(tab)
     }
   }
@@ -223,6 +267,9 @@ export function useAddClientTabValidation({
       tabErrorCounts.value = {
         ...tabErrorCounts.value,
         [tab]: countTabErrors(tab),
+      }
+      if (tab === addClientTabKeys.contact) {
+        rebuildContactSubTabErrorCounts()
       }
       await applyTabFieldErrors(tab)
 
@@ -269,21 +316,45 @@ export function useAddClientTabValidation({
     }
 
     const businessRuleErrorKey = resolveContactBusinessRuleErrorKey()
-    if (businessRuleErrorKey) {
-      contactSaveBusinessRuleErrorKey.value = businessRuleErrorKey
-      counts[addClientTabKeys.contact] = (
-        counts[addClientTabKeys.contact] ?? 0
-      ) + 1
-      totalErrors += 1
+    const tabLevelBusinessRuleErrorKey =
+      resolveTabLevelContactBusinessRuleErrorKey()
+    refreshOtherContactMissingContactMethodIds()
+    if (tabLevelBusinessRuleErrorKey) {
+      contactSaveBusinessRuleErrorKey.value = tabLevelBusinessRuleErrorKey
+      const extraErrors = contactBusinessRuleExtraErrorCount(
+        tabLevelBusinessRuleErrorKey,
+      )
+      if (extraErrors > 0) {
+        counts[addClientTabKeys.contact] = (
+          counts[addClientTabKeys.contact] ?? 0
+        ) + extraErrors
+        totalErrors += extraErrors
+      }
     }
 
     tabErrorCounts.value = counts
 
     if (totalErrors === 0) {
+      for (const tab of tabOrder) {
+        await clearTabFieldErrors(tab)
+      }
+
       return true
     }
 
+    if ((counts[addClientTabKeys.contact] ?? 0) > 0) {
+      rebuildContactSubTabErrorCounts()
+    }
+
     const invalidTabs = tabOrder.filter(tab => (counts[tab] ?? 0) > 0)
+
+    // Drop stale q-field error state on tabs that now pass so a
+    // later save does not keep highlighting corrected fields.
+    for (const tab of tabOrder) {
+      if ((counts[tab] ?? 0) === 0) {
+        await clearTabFieldErrors(tab)
+      }
+    }
 
     // Visit every invalid tab so its fields mount (tab panels use
     // keep-alive) and show their error state, not just the tab the
@@ -317,5 +388,7 @@ export function useAddClientTabValidation({
     validateTabsThrough,
     validateAllTabs,
     contactSaveBusinessRuleErrorKey,
+    contactSubTabErrorCounts,
+    otherContactMissingContactMethodIds,
   }
 }

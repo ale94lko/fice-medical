@@ -136,20 +136,16 @@ export function canAddContactMethodRow(rows, kind) {
   return contactMethodRowHasValue(last, kind)
 }
 
-export function otherContactMeetsMinimumRequirements(other) {
+export function otherContactMeetsMinimumRequirements(
+  other,
+  clientAddress = null,
+) {
   const hasFirstName = Boolean(String(other?.firstName ?? '').trim())
   const hasLastName = Boolean(String(other?.lastName ?? '').trim())
-  const hasAddress = hasOtherAddressData(other)
-  const hasPhone = (other?.phones ?? []).some(
-    phone => contactMethodRowHasValue(phone, 'phone'),
-  )
-  const hasEmail = (other?.emails ?? []).some(
-    email => contactMethodRowHasValue(email, 'email'),
-  )
 
   return hasFirstName
     && hasLastName
-    && (hasAddress || hasPhone || hasEmail)
+    && otherContactHasContactMethod(other, clientAddress)
 }
 
 export function canAddAnotherOtherContact(contactSection) {
@@ -158,7 +154,9 @@ export function canAddAnotherOtherContact(contactSection) {
     return true
   }
 
-  return others.every(other => otherContactMeetsMinimumRequirements(other))
+  return others.every(other =>
+    otherContactMeetsMinimumRequirements(other, contactSection),
+  )
 }
 
 export function resolveOtherContactTabGroupKey(contact) {
@@ -276,6 +274,15 @@ export function isValidPhoneChars(value) {
   return PHONE_CHARS_RE.test(s)
 }
 
+export function isCompletePhoneNumber(value) {
+  const s = String(value ?? '').trim()
+  if (!s) {
+    return true
+  }
+
+  return normalizePhoneDigits(s).length === 10
+}
+
 export function normalizePhoneDigits(value) {
   return String(value ?? '').replace(/\D/g, '').slice(0, 10)
 }
@@ -318,6 +325,41 @@ function hasOtherAddressData(other) {
   return ADDRESS_FIELDS.some(
     key => String(other[key] ?? '').trim().length > 0,
   )
+}
+
+export function otherContactHasContactMethod(other, clientAddress) {
+  if (!other) {
+    return false
+  }
+  if (other.sameAsClientAddress && hasClientAddressData(clientAddress)) {
+    return true
+  }
+  if (hasOtherAddressData(other)) {
+    return true
+  }
+  if ((other.phones ?? []).some(
+    phone => contactMethodRowHasValue(phone, 'phone'),
+  )) {
+    return true
+  }
+  if ((other.emails ?? []).some(
+    email => contactMethodRowHasValue(email, 'email'),
+  )) {
+    return true
+  }
+
+  return false
+}
+
+export function otherContactIdsMissingContactMethod(
+  contactSection,
+) {
+  return (contactSection?.otherContacts ?? [])
+    .filter(other => !otherContactHasContactMethod(
+      other,
+      contactSection,
+    ))
+    .map(other => other.id)
 }
 
 export function otherContactHasData(other) {

@@ -1,7 +1,12 @@
 import { clientFieldKeys } from 'components/constants.js'
 import {
   countDuplicateContactMethodErrors,
+  countDuplicateEmails,
+  countDuplicatePhones,
 } from 'src/utils/client-contact-method-validation.js'
+import {
+  otherContactHasContactMethod,
+} from 'src/utils/client-contact-form.js'
 import { isSelfReferredSource } from 'src/utils/referral-intake.js'
 
 export function countFieldRuleErrors(value, rules) {
@@ -58,6 +63,87 @@ export function countBasicTabFieldErrors(form, rules, options = {}) {
   return count
 }
 
+export function countSelfContactSubTabErrors(contact, rules) {
+  if (!contact || !rules) {
+    return 0
+  }
+  let count = 0
+
+  count += countFieldRuleErrors(contact.addressLine1, rules.addressLine1)
+  count += countFieldRuleErrors(contact.addressLine2, rules.addressLine2)
+  count += countFieldRuleErrors(contact.zipCode, rules.zipCode)
+
+  for (const phone of contact.phones ?? []) {
+    count += countFieldRuleErrors(phone?.number, rules.phoneNumber)
+  }
+  for (const email of contact.emails ?? []) {
+    count += countFieldRuleErrors(email?.address, rules.emailAddress)
+  }
+  count += countFieldRuleErrors(
+    contact.additionalNotes,
+    rules.additionalNotes,
+  )
+  count += countDuplicatePhones(contact.phones)
+  count += countDuplicateEmails(contact.emails)
+
+  return count
+}
+
+export function countOtherContactSubTabErrors(other, contact, rules) {
+  if (!other || !rules) {
+    return 0
+  }
+  let count = 0
+
+  count += countFieldRuleErrors(other.firstName, rules.otherFirstName)
+  count += countFieldRuleErrors(other.middleName, rules.otherMiddleName)
+  count += countFieldRuleErrors(other.lastName, rules.otherLastName)
+  if (!other.sameAsClientAddress) {
+    count += countFieldRuleErrors(other.addressLine1, rules.addressLine1)
+    count += countFieldRuleErrors(other.addressLine2, rules.addressLine2)
+    count += countFieldRuleErrors(other.zipCode, rules.zipCode)
+  }
+  for (const phone of other.phones ?? []) {
+    count += countFieldRuleErrors(phone?.number, rules.phoneNumber)
+  }
+  for (const email of other.emails ?? []) {
+    count += countFieldRuleErrors(email?.address, rules.emailAddress)
+  }
+  count += countFieldRuleErrors(other.notes, rules.otherContactNotes)
+  if (!otherContactHasContactMethod(other, contact)) {
+    count += 1
+  }
+  count += countDuplicatePhones(other.phones)
+  count += countDuplicateEmails(other.emails)
+
+  return count
+}
+
+export function buildContactSubTabErrorCounts(
+  contact,
+  rules,
+  selfSubTabKey = 'self',
+) {
+  const counts = {}
+  if (!contact || !rules) {
+    return counts
+  }
+
+  const selfErrors = countSelfContactSubTabErrors(contact, rules)
+  if (selfErrors > 0) {
+    counts[selfSubTabKey] = selfErrors
+  }
+
+  for (const other of contact.otherContacts ?? []) {
+    const otherErrors = countOtherContactSubTabErrors(other, contact, rules)
+    if (otherErrors > 0) {
+      counts[other.id] = otherErrors
+    }
+  }
+
+  return counts
+}
+
 export function countContactTabFieldErrors(contact, rules) {
   if (!contact || !rules) {
     return 0
@@ -95,6 +181,9 @@ export function countContactTabFieldErrors(contact, rules) {
       count += countFieldRuleErrors(email?.address, rules.emailAddress)
     }
     count += countFieldRuleErrors(other.notes, rules.otherContactNotes)
+    if (!otherContactHasContactMethod(other, contact)) {
+      count += 1
+    }
   }
 
   count += countDuplicateContactMethodErrors(contact)

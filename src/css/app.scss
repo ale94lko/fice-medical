@@ -1654,6 +1654,42 @@ input:-webkit-autofill {
       }
     }
   }
+
+  .contact-subtab--error:not(.q-tab--active) {
+    color: $negative !important;
+    background: rgba($negative, 0.08);
+    border-radius: 4px;
+
+    .contact-subtab-icon,
+    .contact-subtab-text {
+      color: $negative !important;
+    }
+  }
+
+  .contact-subtab-error-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    padding: 0 5px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    color: $white;
+    background: $negative;
+    flex-shrink: 0;
+  }
+
+  .q-tab--active .contact-subtab-error-badge {
+    box-shadow: 0 0 0 1px rgba($primary, 0.35);
+  }
+
+  .contact-subtab--error:not(.q-tab--active) .contact-subtab-error-badge {
+    box-shadow: 0 0 0 1px rgba($negative, 0.12);
+  }
 }
 
 .content {

@@ -74,18 +74,18 @@ export function isClientMinor(form) {
   return ageYears != null && ageYears < CLIENT_MINOR_AGE_YEARS
 }
 
-export function isPersistableGuardianContact(other) {
+export function isPersistableGuardianContact(other, contactSection) {
   if (!other || other.deleted) {
     return false
   }
 
   return isGuardianContactType(other.contactType)
-    && otherContactMeetsMinimumRequirements(other)
+    && otherContactMeetsMinimumRequirements(other, contactSection)
 }
 
 export function hasPersistableGuardianContact(contactSection) {
   return (contactSection?.otherContacts ?? []).some(
-    isPersistableGuardianContact,
+    other => isPersistableGuardianContact(other, contactSection),
   )
 }
 

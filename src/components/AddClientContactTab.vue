@@ -18,6 +18,7 @@
     />
     <ContactSelfPanel
       v-if="activeSubTab === CONTACT_SUB_TAB_SELF"
+      ref="contactSelfPanelRef"
       v-model="contact"
       :rules="rules"
     />
@@ -31,9 +32,12 @@
       :toggle-test-id="tid.accordionToggle('other-contact')">
       <div class="other-contact-panel">
         <OtherContactPanel
+          ref="otherContactPanelRef"
           :contact="activeOtherContact"
           :client-address="contact"
           :rules="rules"
+          :show-contact-method-required-banner="
+            isOtherContactMissingContactMethod(activeOtherContact?.id)"
           :state-options="stateOptions"
           :phone-type-options="phoneTypeOptions"
           :email-type-options="emailTypeOptions"
@@ -65,8 +69,12 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  countOtherContactSubTabErrors,
+  countSelfContactSubTabErrors,
+} from 'src/utils/add-client-form-validation.js'
 import ContactSelfPanel from './ContactSelfPanel.vue'
 import ContactSaveBusinessRuleBanner from './ContactSaveBusinessRuleBanner.vue'
 import OtherContactPanel from './OtherContactPanel.vue'
@@ -101,6 +109,10 @@ const props = defineProps({
   readonly: { type: Boolean, default: false },
   canView: { type: Boolean, default: true },
   saveBusinessRuleErrorKey: { type: String, default: null },
+  otherContactMissingContactMethodIds: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits([
@@ -115,6 +127,8 @@ const { t } = useI18n()
 const removeConfirmOpen = ref(false)
 const pendingRemoveIndex = ref(-1)
 const pendingRemoveLabel = ref('')
+const contactSelfPanelRef = ref(null)
+const otherContactPanelRef = ref(null)
 
 const contact = computed({
   get: () => props.modelValue,
@@ -228,9 +242,93 @@ function dismissRemoveConfirm() {
   removeConfirmOpen.value = false
 }
 
+function isOtherContactMissingContactMethod(contactId) {
+  if (!contactId) {
+    return false
+  }
+
+  return props.otherContactMissingContactMethodIds.includes(contactId)
+}
+
+function resolveFirstInvalidContactSubTab(section) {
+  if (countSelfContactSubTabErrors(section, props.rules) > 0) {
+    return CONTACT_SUB_TAB_SELF
+  }
+
+  for (const other of section.otherContacts ?? []) {
+    if (countOtherContactSubTabErrors(other, section, props.rules) > 0) {
+      return other.id
+    }
+  }
+
+  return null
+}
+
+async function validateActiveSubTab() {
+  await nextTick()
+  if (props.activeSubTab === CONTACT_SUB_TAB_SELF) {
+    await contactSelfPanelRef.value?.validateVisibleFields?.()
+
+    return
+  }
+
+  await otherContactPanelRef.value?.validateVisibleFields?.()
+}
+
+async function applySaveValidation() {
+  const section = contact.value
+  const focusSubTab = resolveFirstInvalidContactSubTab(section)
+
+  if (countSelfContactSubTabErrors(section, props.rules) > 0) {
+    section.activeContactSubTab = CONTACT_SUB_TAB_SELF
+    await nextTick()
+    await contactSelfPanelRef.value?.validateVisibleFields?.()
+  }
+
+  for (const other of section.otherContacts ?? []) {
+    if (countOtherContactSubTabErrors(other, section, props.rules) === 0) {
+      continue
+    }
+    section.activeContactSubTab = other.id
+    section.otherContactExpanded = true
+    await nextTick()
+    await otherContactPanelRef.value?.validateVisibleFields?.()
+  }
+
+  if (focusSubTab) {
+    section.activeContactSubTab = focusSubTab
+    section.otherContactExpanded = focusSubTab !== CONTACT_SUB_TAB_SELF
+    await nextTick()
+    await validateActiveSubTab()
+  }
+}
+
+async function clearSaveValidation() {
+  const section = contact.value
+  const originalSubTab = props.activeSubTab
+
+  section.activeContactSubTab = CONTACT_SUB_TAB_SELF
+  await nextTick()
+  contactSelfPanelRef.value?.clearVisibleFields?.()
+
+  for (const other of section.otherContacts ?? []) {
+    section.activeContactSubTab = other.id
+    section.otherContactExpanded = true
+    await nextTick()
+    otherContactPanelRef.value?.clearVisibleFields?.()
+  }
+
+  section.activeContactSubTab = originalSubTab
+  section.otherContactExpanded = originalSubTab !== CONTACT_SUB_TAB_SELF
+  await nextTick()
+}
+
 defineExpose({
   CONTACT_SUB_TAB_SELF,
   requestRemoveOtherContactById,
+  applySaveValidation,
+  clearSaveValidation,
+  validateActiveSubTab,
 })
 </script>
 

@@ -1,6 +1,10 @@
 <template>
-  <FormField v-if="externalLabel" :label="props.label">
+  <FormField
+    v-if="externalLabel"
+    :label="props.label"
+    :required="props.required">
     <q-input
+      ref="inputRef"
       outlined
       hide-bottom-space
       class="full-width"
@@ -28,6 +32,7 @@
   </FormField>
   <q-input
     v-else
+    ref="inputRef"
     outlined
     :stack-label="stackSpacing"
     :hide-bottom-space="!stackSpacing"
@@ -111,6 +116,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  required: {
+    type: Boolean,
+    default: false,
+  },
   placeholder: {
     type: String,
     default: '',
@@ -122,6 +131,7 @@ const props = defineProps({
 })
 
 const model = defineModel({ type: String, default: '' })
+const inputRef = ref(null)
 
 const showPlainPassword = ref(false)
 
@@ -152,6 +162,19 @@ function onUpdate(value) {
   }
   model.value = next
 }
+
+async function validate() {
+  return inputRef.value?.validate?.()
+}
+
+function resetValidation() {
+  inputRef.value?.resetValidation?.()
+}
+
+defineExpose({
+  validate,
+  resetValidation,
+})
 </script>
 
 <style lang="scss" scoped>

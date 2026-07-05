@@ -1,5 +1,9 @@
 <template>
   <div class="other-contact-panel">
+    <ContactSaveBusinessRuleBanner
+      v-if="showContactMethodRequiredBanner"
+      error-key="otherContactContactMethodRequired"
+    />
     <div class="row q-col-gutter-sm q-col-gutter-md">
       <div class="col-12 col-md-6">
         <AddClientLabeledField
@@ -61,8 +65,10 @@
       </div>
       <div class="col-12 col-md-6">
         <FormInput
+          ref="firstNameInputRef"
           :model-value="contact.firstName"
           :external-label="true"
+          required
           :label="t('otherContactFirstName')"
           :rules="rules.otherFirstName"
           maxlength="30"
@@ -72,6 +78,7 @@
       </div>
       <div class="col-12 col-md-6">
         <FormInput
+          ref="middleNameInputRef"
           :model-value="contact.middleName"
           :external-label="true"
           :label="t('otherContactMiddleName')"
@@ -83,8 +90,10 @@
       </div>
       <div class="col-12 col-md-6">
         <FormInput
+          ref="lastNameInputRef"
           :model-value="contact.lastName"
           :external-label="true"
+          required
           :label="t('otherContactLastName')"
           :rules="rules.otherLastName"
           maxlength="30"
@@ -153,6 +162,7 @@
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
           <FormInput
+            ref="addressLine1InputRef"
             :model-value="contact.addressLine1"
             :external-label="true"
             :label="t('addressLine1')"
@@ -165,6 +175,7 @@
         </div>
         <div class="col-12 col-md-6">
           <FormInput
+            ref="addressLine2InputRef"
             :model-value="contact.addressLine2"
             :external-label="true"
             :label="t('addressLine2Optional')"
@@ -234,6 +245,7 @@
         </div>
         <div class="col-12 col-md-6">
           <FormInput
+            ref="zipCodeInputRef"
             :model-value="contact.zipCode"
             :external-label="true"
             :label="t('zipCode')"
@@ -260,6 +272,7 @@
               :label="t('phoneNumber')"
               :test-id="ocField(`phone-${index}-number`)">
               <q-input
+                :ref="el => setPhoneInputRef(el, index)"
                 outlined
                 hide-bottom-space
                 lazy-rules="ondemand"
@@ -324,6 +337,7 @@
             contact-method-row">
           <div class="col-12 col-md-6">
             <FormInput
+              :ref="el => setEmailInputRef(el, index)"
               :model-value="email.address"
               :external-label="true"
               :label="t('emailAddress')"
@@ -409,10 +423,15 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import {
+  clearFieldValidation,
+  validateFields,
+} from 'src/composables/useValidatablePanelFields.js'
 import { otherContactNotesMaxLength } from 'components/constants.js'
 import FormInput from './FormInput.vue'
+import ContactSaveBusinessRuleBanner from './ContactSaveBusinessRuleBanner.vue'
 import FormToggle from 'components/FormToggle.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
@@ -483,6 +502,10 @@ const props = defineProps({
     default: () => [],
   },
   catalogsLoading: {
+    type: Boolean,
+    default: false,
+  },
+  showContactMethodRequiredBanner: {
     type: Boolean,
     default: false,
   },
@@ -665,4 +688,47 @@ watch(
   },
   { deep: true },
 )
+
+const firstNameInputRef = ref(null)
+const middleNameInputRef = ref(null)
+const lastNameInputRef = ref(null)
+const addressLine1InputRef = ref(null)
+const addressLine2InputRef = ref(null)
+const zipCodeInputRef = ref(null)
+const phoneInputRefs = ref([])
+const emailInputRefs = ref([])
+
+function setPhoneInputRef(el, index) {
+  phoneInputRefs.value[index] = el
+}
+
+function setEmailInputRef(el, index) {
+  emailInputRefs.value[index] = el
+}
+
+function validatableFields() {
+  return [
+    firstNameInputRef.value,
+    middleNameInputRef.value,
+    lastNameInputRef.value,
+    addressLine1InputRef.value,
+    addressLine2InputRef.value,
+    zipCodeInputRef.value,
+    ...phoneInputRefs.value,
+    ...emailInputRefs.value,
+  ]
+}
+
+async function validateVisibleFields() {
+  await validateFields(validatableFields())
+}
+
+function clearVisibleFields() {
+  clearFieldValidation(validatableFields())
+}
+
+defineExpose({
+  validateVisibleFields,
+  clearVisibleFields,
+})
 </script>

@@ -1896,6 +1896,11 @@ export default {
   minorClientGuardianContactRequired:
     'Los clientes menores de 18 años deben tener al menos un contacto '
     + 'completo de tipo Guardian antes de guardar.',
+  otherContactContactMethodRequiredTitle:
+    'Método de contacto requerido',
+  otherContactContactMethodRequiredMessage:
+    'Ingrese al menos una dirección, número de teléfono o correo '
+    + 'electrónico para este contacto.',
   additionalNotes: 'Notas adicionales',
   additionalNotesPlaceholder: 'Ingrese notas adicionales aquí...',
   optional: 'Opcional',
@@ -1927,6 +1932,7 @@ export default {
     'Solo letras, números, puntos y guiones, máximo {max} caracteres',
   zipCodeInvalid: 'Ingrese un código postal válido',
   clientEmailInvalid: 'Ingrese un correo válido (máximo 32 caracteres)',
+  clientPhoneIncomplete: 'Ingrese un teléfono válido (10 dígitos)',
   phoneInvalid: 'El teléfono solo puede contener dígitos, +, -, () y espacios',
   duplicatePhone: 'Este número de teléfono ya está en la lista.',
   duplicateEmail: 'Esta dirección de correo ya está en la lista.',

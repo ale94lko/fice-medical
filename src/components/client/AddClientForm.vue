@@ -108,11 +108,7 @@
             :name="subTab.key"
             :disable="Boolean(subTab.disabled)"
             :data-testid="tid.subTab(subTab.key)"
-            :icon="subTab.removable ? undefined : subTab.icon"
-            :label="subTab.removable ? undefined : subTab.label"
-            :class="{
-              'contact-subtab--removable': subTab.removable,
-            }">
+            :class="contactSubTabClass(subTab)">
             <div
               v-if="subTab.removable"
               class="contact-subtab-label row items-center no-wrap">
@@ -123,6 +119,14 @@
               />
               <span class="contact-subtab-text ellipsis">
                 {{ contactSubTabLabel(subTab.key) }}
+              </span>
+              <span
+                v-if="contactSubTabErrorCount(subTab.key) > 0"
+                class="contact-subtab-error-badge"
+                :aria-label="t('tabErrorCountAria', {
+                  count: contactSubTabErrorCount(subTab.key),
+                })">
+                {{ contactSubTabErrorCount(subTab.key) }}
               </span>
               <q-btn
                 flat
@@ -136,6 +140,38 @@
                 @click.stop="onRemoveContactTab(subTab.key, $event)"
                 @mousedown.stop
               />
+            </div>
+            <div
+              v-else-if="subTab.key !== CONTACT_SUB_TAB_ADD"
+              class="contact-subtab-label row items-center no-wrap">
+              <q-icon
+                :name="subTab.icon"
+                size="18px"
+                class="contact-subtab-icon"
+              />
+              <span class="contact-subtab-text ellipsis">
+                {{ subTab.label }}
+              </span>
+              <span
+                v-if="contactSubTabErrorCount(subTab.key) > 0"
+                class="contact-subtab-error-badge"
+                :aria-label="t('tabErrorCountAria', {
+                  count: contactSubTabErrorCount(subTab.key),
+                })">
+                {{ contactSubTabErrorCount(subTab.key) }}
+              </span>
+            </div>
+            <div
+              v-else
+              class="contact-subtab-label row items-center no-wrap">
+              <q-icon
+                :name="subTab.icon"
+                size="18px"
+                class="contact-subtab-icon"
+              />
+              <span class="contact-subtab-text ellipsis">
+                {{ subTab.label }}
+              </span>
             </div>
           </q-tab>
         </q-tabs>
@@ -678,6 +714,8 @@
             :relationship-type-options="relationshipTypeSelectOptions"
             :catalogs-loading="catalogsLoading"
             :save-business-rule-error-key="contactSaveBusinessRuleErrorKey"
+            :other-contact-missing-contact-method-ids="
+              otherContactMissingContactMethodIds"
             @remove-other-contact="removeOtherContact"
             @responsible-for-payments-change="onResponsibleForPaymentsChange"
             @preferred-point-of-contact-change="
@@ -1253,6 +1291,8 @@ const {
   validateCurrentTabAndUnlock,
   validateAllTabs,
   contactSaveBusinessRuleErrorKey,
+  contactSubTabErrorCounts,
+  otherContactMissingContactMethodIds,
   tabErrorCount,
   tabLabelFor,
   hasSubTabs,
@@ -1262,6 +1302,7 @@ const {
   fmhTabRef,
   vitalsTabRef,
   panelScrollRef,
+  contactTabRef: addClientContactTabRef,
   initialActiveTab: props.initialActiveTab,
   initialActiveSubTab: props.initialActiveSubTab,
   validateReferralIntake: () => !isEditMode.value,
@@ -1401,21 +1442,34 @@ const {
   onResponsibleForPaymentsChange,
   onPreferredPointOfContactChange,
   CONTACT_SUB_TAB_SELF,
+  CONTACT_SUB_TAB_ADD,
 } = useContactSubTabs(
   () => form.value[contactSectionKey],
   contactCatalogOptions,
 )
 
-watch(activeTab, (tab, prev) => {
+watch(activeTab, async(tab, prev) => {
   if (tab === addClientTabKeys.contact && prev !== tab) {
+    if (Object.keys(contactSubTabErrorCounts.value).length) {
+      await nextTick()
+      await addClientContactTabRef.value?.applySaveValidation?.()
+
+      return
+    }
     activeContactSubTab.value = CONTACT_SUB_TAB_SELF
   }
 })
 
-watch(activeContactSubTab, () => {
-  if (isContactTabActive.value) {
-    scrollFormPanelToTop()
+watch(activeContactSubTab, async() => {
+  if (!isContactTabActive.value) {
+    return
   }
+  scrollFormPanelToTop()
+  if (contactSubTabErrorCount(activeContactSubTab.value) === 0) {
+    return
+  }
+  await nextTick()
+  await addClientContactTabRef.value?.validateActiveSubTab?.()
 })
 
 function onRemoveContactTab(contactId, event) {
@@ -1446,6 +1500,17 @@ function contactSubTabRenderKey(subTab) {
   }
 
   return `${subTab.key}-${contactSubTabLabel(subTab.key)}`
+}
+
+function contactSubTabErrorCount(tabKey) {
+  return contactSubTabErrorCounts.value[tabKey] ?? 0
+}
+
+function contactSubTabClass(subTab) {
+  return {
+    'contact-subtab--removable': subTab.removable,
+    'contact-subtab--error': contactSubTabErrorCount(subTab.key) > 0,
+  }
 }
 
 const duplicateSaveConfirmOpen = ref(false)

@@ -1833,6 +1833,9 @@ export default {
   minorClientGuardianContactRequired:
     'Clients under 18 years old must have at least one complete Guardian '
     + 'contact before saving.',
+  otherContactContactMethodRequiredTitle: 'Contact method required',
+  otherContactContactMethodRequiredMessage:
+    'Enter at least one address, phone number, or email for this contact.',
   additionalNotes: 'Additional notes',
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',
@@ -1863,6 +1866,7 @@ export default {
     'Letters, numbers, periods and hyphens only, max {max} characters',
   zipCodeInvalid: 'Enter a valid zip code',
   clientEmailInvalid: 'Enter a valid email (max 32 characters)',
+  clientPhoneIncomplete: 'Enter a valid phone number (10 digits)',
   phoneInvalid: 'Phone may only contain digits, +, -, (), and spaces',
   duplicatePhone: 'This phone number is already listed.',
   duplicateEmail: 'This email address is already listed.',
