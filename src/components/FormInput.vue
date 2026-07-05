@@ -5,10 +5,10 @@
     :required="props.required">
     <q-input
       ref="inputRef"
+      v-model="model"
       outlined
       hide-bottom-space
       class="full-width"
-      :model-value="model"
       :data-testid="props.testId"
       :type="resolvedType"
       :rules="props.rules || []"
@@ -17,8 +17,7 @@
       :error-message="props.errorMessage"
       :placeholder="props.placeholder || undefined"
       :disable="props.disable"
-      lazy-rules="ondemand"
-      @update:model-value="onUpdate">
+      lazy-rules="ondemand">
       <template v-if="iconLeft" #prepend>
         <q-icon :name="iconLeft" class="input-icon" />
       </template>
@@ -33,10 +32,10 @@
   <q-input
     v-else
     ref="inputRef"
+    v-model="model"
     outlined
     :stack-label="stackSpacing"
     :hide-bottom-space="!stackSpacing"
-    :model-value="model"
     :class="{ 'text-input--stack-spacing': stackSpacing }"
     :data-testid="props.testId"
     :type="resolvedType"
@@ -47,8 +46,7 @@
     :error-message="props.errorMessage"
     :placeholder="props.placeholder || undefined"
     :disable="props.disable"
-    lazy-rules="ondemand"
-    @update:model-value="onUpdate">
+    lazy-rules="ondemand">
     <template v-if="iconLeft" #prepend>
       <q-icon :name="iconLeft" class="input-icon" />
     </template>
@@ -128,9 +126,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  modelValue: {
+    type: String,
+    default: '',
+  },
 })
 
-const model = defineModel({ type: String, default: '' })
+const emit = defineEmits(['update:modelValue'])
+
 const inputRef = ref(null)
 
 const showPlainPassword = ref(false)
@@ -152,6 +155,11 @@ const maxlengthResolved = computed(() => {
   return Number.isFinite(n) ? n : undefined
 })
 
+const model = computed({
+  get: () => props.modelValue ?? '',
+  set: value => onUpdate(value),
+})
+
 function onUpdate(value) {
   let next = value == null ? '' : String(value)
   const maxLen = maxlengthResolved.value
@@ -160,7 +168,7 @@ function onUpdate(value) {
   } else if (maxLen != null) {
     next = next.slice(0, maxLen)
   }
-  model.value = next
+  emit('update:modelValue', next)
 }
 
 async function validate() {

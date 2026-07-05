@@ -267,12 +267,25 @@ function resolveFirstInvalidContactSubTab(section) {
 async function validateActiveSubTab() {
   await nextTick()
   if (props.activeSubTab === CONTACT_SUB_TAB_SELF) {
-    await contactSelfPanelRef.value?.validateVisibleFields?.()
+    if (countSelfContactSubTabErrors(contact.value, props.rules) > 0) {
+      await contactSelfPanelRef.value?.validateVisibleFields?.()
+    } else {
+      contactSelfPanelRef.value?.clearVisibleFields?.()
+    }
 
     return
   }
 
-  await otherContactPanelRef.value?.validateVisibleFields?.()
+  const other = activeOtherContact.value
+  if (!other) {
+    return
+  }
+
+  if (countOtherContactSubTabErrors(other, contact.value, props.rules) > 0) {
+    await otherContactPanelRef.value?.validateVisibleFields?.()
+  } else {
+    otherContactPanelRef.value?.clearVisibleFields?.()
+  }
 }
 
 async function applySaveValidation() {
@@ -283,16 +296,21 @@ async function applySaveValidation() {
     section.activeContactSubTab = CONTACT_SUB_TAB_SELF
     await nextTick()
     await contactSelfPanelRef.value?.validateVisibleFields?.()
+  } else {
+    section.activeContactSubTab = CONTACT_SUB_TAB_SELF
+    await nextTick()
+    contactSelfPanelRef.value?.clearVisibleFields?.()
   }
 
   for (const other of section.otherContacts ?? []) {
-    if (countOtherContactSubTabErrors(other, section, props.rules) === 0) {
-      continue
-    }
     section.activeContactSubTab = other.id
     section.otherContactExpanded = true
     await nextTick()
-    await otherContactPanelRef.value?.validateVisibleFields?.()
+    if (countOtherContactSubTabErrors(other, section, props.rules) > 0) {
+      await otherContactPanelRef.value?.validateVisibleFields?.()
+    } else {
+      otherContactPanelRef.value?.clearVisibleFields?.()
+    }
   }
 
   if (focusSubTab) {
