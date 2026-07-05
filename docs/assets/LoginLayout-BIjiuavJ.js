@@ -1,1 +1,0 @@
-import{$c as e,Lc as t,Mc as n,V as r,cl as i,rl as a}from"./index-8i84qvB7.js";import{r as o,t as s}from"./QLayout-Bd_aOBgr.js";var c={};function l(r,c){let l=a(`router-view`);return e(),n(s,{view:`hHh Lpr lff`},{default:i(()=>[t(o,null,{default:i(()=>[t(l)]),_:1})]),_:1})}var u=r(c,[[`render`,l]]);export{u as default};
