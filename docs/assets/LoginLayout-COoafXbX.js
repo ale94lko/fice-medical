@@ -1,1 +1,0 @@
-import{Cs as e,Os as t,Qo as n,co as r,rs as i,ys as a}from"./index-BrPP4kXD.js";import{r as o,t as s}from"./QLayout-D1x7_DF3.js";var c={};function l(r,c){let l=e(`router-view`);return a(),n(s,{view:`hHh Lpr lff`},{default:t(()=>[i(o,null,{default:t(()=>[i(l)]),_:1})]),_:1})}var u=r(c,[[`render`,l]]);export{u as default};
