@@ -211,6 +211,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     validateCurrentTabAndUnlock,
     validateTabsThrough,
     validateAllTabs,
+    contactSaveBusinessRuleErrorKey,
   } = useAddClientTabValidation({
     activeTab,
     formRef,
@@ -294,6 +295,7 @@ export function useAddClientForm(t, catalogs, options = {}) {
     validateCurrentTabAndUnlock,
     validateTabsThrough,
     validateAllTabs,
+    contactSaveBusinessRuleErrorKey,
     tabErrorCount,
     tabIndex,
     tabLabelFor,

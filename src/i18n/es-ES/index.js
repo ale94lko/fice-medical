@@ -1888,6 +1888,11 @@ export default {
   prefCommPointOfContactSaveRequiresSelection:
     'Seleccione un punto de contacto preferido cuando Punto de contacto '
     + 'esté seleccionado como método de comunicación preferido.',
+  minorClientGuardianContactRequiredTitle:
+    'Contacto de tutor requerido',
+  minorClientGuardianContactRequiredMessage:
+    'Este cliente es menor de 18 años y debe tener al menos un contacto '
+    + 'completo de tipo Guardian antes de guardar.',
   minorClientGuardianContactRequired:
     'Los clientes menores de 18 años deben tener al menos un contacto '
     + 'completo de tipo Guardian antes de guardar.',

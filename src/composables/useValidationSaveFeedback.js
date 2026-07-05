@@ -34,12 +34,17 @@ export function useValidationSaveFeedback() {
     }
   }
 
-  async function notifyAndScrollToValidationErrors(scrollTargetRef) {
-    $q.notify({
-      type: quasarNotifyTypes.negative,
-      message: t('validationFixErrorsBeforeProceed'),
-      position: 'top',
-    })
+  async function notifyAndScrollToValidationErrors(
+    scrollTargetRef,
+    { skipNotify = false } = {},
+  ) {
+    if (!skipNotify) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('validationFixErrorsBeforeProceed'),
+        position: 'top',
+      })
+    }
     await scrollValidationErrorsIntoView(scrollTargetRef)
   }
 

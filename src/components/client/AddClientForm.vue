@@ -677,6 +677,7 @@
             :contact-type-options="contactTypeSelectOptions"
             :relationship-type-options="relationshipTypeSelectOptions"
             :catalogs-loading="catalogsLoading"
+            :save-business-rule-error-key="contactSaveBusinessRuleErrorKey"
             @remove-other-contact="removeOtherContact"
             @responsible-for-payments-change="onResponsibleForPaymentsChange"
             @preferred-point-of-contact-change="
@@ -1251,6 +1252,7 @@ const {
   isDirty,
   validateCurrentTabAndUnlock,
   validateAllTabs,
+  contactSaveBusinessRuleErrorKey,
   tabErrorCount,
   tabLabelFor,
   hasSubTabs,

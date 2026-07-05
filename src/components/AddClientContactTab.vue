@@ -13,6 +13,9 @@
       v-else
       :disabled="readonly"
       class="add-client-form__readonly-fieldset">
+    <ContactSaveBusinessRuleBanner
+      :error-key="saveBusinessRuleErrorKey"
+    />
     <ContactSelfPanel
       v-if="activeSubTab === CONTACT_SUB_TAB_SELF"
       v-model="contact"
@@ -65,6 +68,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ContactSelfPanel from './ContactSelfPanel.vue'
+import ContactSaveBusinessRuleBanner from './ContactSaveBusinessRuleBanner.vue'
 import OtherContactPanel from './OtherContactPanel.vue'
 import AccordionSection from './AccordionSection.vue'
 import ModalComponent from './ModalComponent.vue'
@@ -96,6 +100,7 @@ const props = defineProps({
   catalogsLoading: { type: Boolean, default: false },
   readonly: { type: Boolean, default: false },
   canView: { type: Boolean, default: true },
+  saveBusinessRuleErrorKey: { type: String, default: null },
 })
 
 const emit = defineEmits([

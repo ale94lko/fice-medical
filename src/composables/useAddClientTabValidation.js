@@ -1,4 +1,4 @@
-import { nextTick, ref } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import {
   ADD_CLIENT_COMING_SOON_TABS,
   tabIndexInOrder,
@@ -24,9 +24,6 @@ import {
 import {
   resolveMinorGuardianContactSaveErrorKey,
 } from 'src/utils/client-minor-guardian-validation.js'
-import { useI18n } from 'vue-i18n'
-import { useQuasar } from 'quasar'
-import { quasarNotifyTypes } from 'components/constants.js'
 
 export function useAddClientTabValidation({
   activeTab,
@@ -42,11 +39,30 @@ export function useAddClientTabValidation({
   getContactRules,
   validateReferralIntake,
 }) {
-  const { t } = useI18n()
-  const $q = useQuasar()
   const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
   const ck = clientFieldKeys
   const tabErrorCounts = ref({})
+  const contactSaveBusinessRuleErrorKey = ref(null)
+
+  function resolveContactBusinessRuleErrorKey() {
+    const contactSection = form.value[clientFormSections.contact]
+
+    return resolvePointOfContactSaveErrorKey(contactSection)
+      || resolveMinorGuardianContactSaveErrorKey(form.value)
+      || null
+  }
+
+  watch(
+    () => form.value,
+    () => {
+      if (!contactSaveBusinessRuleErrorKey.value) {
+        return
+      }
+      contactSaveBusinessRuleErrorKey.value =
+        resolveContactBusinessRuleErrorKey()
+    },
+    { deep: true },
+  )
 
   function tabIndex(tab) {
     return tabIndexInOrder(tab, tabOrder)
@@ -54,6 +70,7 @@ export function useAddClientTabValidation({
 
   function resetTabErrorCounts() {
     tabErrorCounts.value = {}
+    contactSaveBusinessRuleErrorKey.value = null
   }
 
   function tabErrorCount(tab) {
@@ -251,11 +268,9 @@ export function useAddClientTabValidation({
       }
     }
 
-    const contactSection = form.value[clientFormSections.contact]
-    const businessRuleErrorKey = resolvePointOfContactSaveErrorKey(
-      contactSection,
-    ) || resolveMinorGuardianContactSaveErrorKey(form.value)
+    const businessRuleErrorKey = resolveContactBusinessRuleErrorKey()
     if (businessRuleErrorKey) {
+      contactSaveBusinessRuleErrorKey.value = businessRuleErrorKey
       counts[addClientTabKeys.contact] = (
         counts[addClientTabKeys.contact] ?? 0
       ) + 1
@@ -285,15 +300,9 @@ export function useAddClientTabValidation({
       await nextTick()
     }
 
-    if (businessRuleErrorKey) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t(businessRuleErrorKey),
-        position: 'top',
-      })
-    }
-
-    await notifyAndScrollToValidationErrors(panelScrollRef)
+    await notifyAndScrollToValidationErrors(panelScrollRef, {
+      skipNotify: Boolean(businessRuleErrorKey),
+    })
 
     return false
   }
@@ -307,5 +316,6 @@ export function useAddClientTabValidation({
     validateCurrentTabAndUnlock,
     validateTabsThrough,
     validateAllTabs,
+    contactSaveBusinessRuleErrorKey,
   }
 }

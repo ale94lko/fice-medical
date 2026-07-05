@@ -1826,6 +1826,10 @@ export default {
   prefCommPointOfContactSaveRequiresSelection:
     'Select a preferred point of contact when Point of Contact is selected '
     + 'as the preferred communication method.',
+  minorClientGuardianContactRequiredTitle: 'Guardian contact required',
+  minorClientGuardianContactRequiredMessage:
+    'This client is under 18 years old and must have at least one complete '
+    + 'Guardian contact before saving.',
   minorClientGuardianContactRequired:
     'Clients under 18 years old must have at least one complete Guardian '
     + 'contact before saving.',
