@@ -314,6 +314,18 @@ export function copyClientAddressToContact(clientAddress, target) {
     : clientCountryDefault
 }
 
+export function syncOtherContactsWithClientAddress(contactSection) {
+  if (!contactSection?.otherContacts?.length) {
+    return
+  }
+
+  for (const other of contactSection.otherContacts) {
+    if (other.sameAsClientAddress) {
+      copyClientAddressToContact(contactSection, other)
+    }
+  }
+}
+
 export function clearContactAddress(target) {
   for (const key of ADDRESS_FIELDS) {
     target[key] = ''

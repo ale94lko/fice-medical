@@ -686,7 +686,7 @@ watch(
       emitContact(next)
     }
   },
-  { deep: true },
+  { deep: true, immediate: true },
 )
 
 const firstNameInputRef = ref(null)

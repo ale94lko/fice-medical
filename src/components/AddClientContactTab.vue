@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   countOtherContactSubTabErrors,
@@ -88,6 +88,7 @@ import {
 import { usStates } from 'src/data/us-geography.js'
 import {
   resolveOtherContactTabLabel,
+  syncOtherContactsWithClientAddress,
 } from 'src/utils/client-contact-form.js'
 import {
   addClientTestIds as tid,
@@ -149,6 +150,31 @@ const activeOtherContact = computed(() => {
 
   return contact.value.otherContacts[index]
 })
+
+watch(
+  () => [
+    contact.value?.addressLine1,
+    contact.value?.addressLine2,
+    contact.value?.city,
+    contact.value?.state,
+    contact.value?.county,
+    contact.value?.zipCode,
+    contact.value?.country,
+  ],
+  () => {
+    syncOtherContactsWithClientAddress(contact.value)
+  },
+)
+
+watch(
+  () => props.activeSubTab,
+  tab => {
+    if (tab === CONTACT_SUB_TAB_SELF) {
+      return
+    }
+    syncOtherContactsWithClientAddress(contact.value)
+  },
+)
 
 const stateOptions = usStates
 
