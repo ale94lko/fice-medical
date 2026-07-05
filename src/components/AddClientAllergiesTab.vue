@@ -61,10 +61,14 @@
               hide-selected
               hide-dropdown-icon
               emit-value
+              map-options
               new-value-mode="add-unique"
               clearable
               input-debounce="0"
               @filter="onAllergyFilter"
+              @new-value="onNewAllergyName"
+              @input-value="onAllergyInputValue"
+              @blur="onAllergyBlur"
             />
           </AddClientLabeledField>
           <FormFieldHint
@@ -197,6 +201,8 @@
       :entry="editingEntry"
       :entries="visibleEntries"
       :patient-dob="patientDob"
+      :allergy-catalog-options="allergyCatalogOptions"
+      :allergy-catalog-loading="allergyCatalogLoading"
       @save="onEditSave"
     />
 
@@ -300,6 +306,7 @@ const draftSeverityError = ref('')
 const invalidDobRowIds = ref([])
 
 const filteredAllergyOptions = ref([])
+const allergySearchInput = ref('')
 
 const severityOptions = [
   {
@@ -394,6 +401,13 @@ function resolveCanonicalAllergyName(typed) {
 }
 
 watch(
+  () => section.value?.draft?.allergy,
+  val => {
+    allergySearchInput.value = trimAllergyField(val)
+  },
+)
+
+watch(
   () => props.allergyCatalogOptions,
   () => {
     const current = normalizeAllergyForCompare(section.value?.draft?.allergy)
@@ -425,6 +439,52 @@ function onAllergyFilter(val, update) {
       return raw && normalizeAllergyForCompare(raw).includes(needle)
     })
   })
+}
+
+function ensureAllergyOptionVisible(label) {
+  const normalized = normalizeAllergyForCompare(label)
+  if (!normalized) {
+    return
+  }
+
+  const exists = filteredAllergyOptions.value.some(opt => {
+    const raw = opt?.value ?? opt?.label ?? ''
+    return normalizeAllergyForCompare(raw) === normalized
+  })
+  if (exists) {
+    return
+  }
+
+  filteredAllergyOptions.value = [
+    { label, value: label },
+    ...filteredAllergyOptions.value,
+  ]
+}
+
+function onNewAllergyName(value, done) {
+  done(trimAllergyField(value), 'add-unique')
+}
+
+function onAllergyInputValue(val) {
+  allergySearchInput.value = val ?? ''
+}
+
+function onAllergyBlur() {
+  const typed = trimAllergyField(allergySearchInput.value)
+  if (!typed) {
+    return
+  }
+
+  const current = trimAllergyField(section.value.draft.allergy)
+  if (
+    current
+    && normalizeAllergyForCompare(current) === normalizeAllergyForCompare(typed)
+  ) {
+    return
+  }
+
+  ensureAllergyOptionVisible(typed)
+  section.value.draft.allergy = typed
 }
 
 /** Audit reason only when deleting an allergy already persisted (has apiId). */

@@ -21,16 +21,36 @@
             <AddClientLabeledField
               :label="t('allergyName')"
               :test-id="tid.allergyField('name')">
-              <q-input
+              <q-select
                 v-model="localAllergy"
                 outlined
                 hide-bottom-space
                 :data-testid="tid.allergyField('name')"
                 :error="Boolean(nameError)"
                 :error-message="nameError"
-                maxlength="100"
+                :placeholder="t('allergySearchPlaceholder')"
+                :options="filteredAllergyOptions"
+                :loading="allergyCatalogLoading"
+                use-input
+                fill-input
+                hide-selected
+                hide-dropdown-icon
+                emit-value
+                map-options
+                new-value-mode="add-unique"
+                clearable
+                input-debounce="0"
+                @filter="onAllergyFilter"
+                @new-value="onNewAllergyName"
+                @input-value="onAllergyInputValue"
+                @blur="onAllergyBlur"
               />
             </AddClientLabeledField>
+            <FormFieldHint
+              v-if="!nameError"
+              hint-class="allergy-name-hint">
+              {{ t('allergySearchHint') }}
+            </FormFieldHint>
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -126,6 +146,7 @@ import FormFieldHint from 'components/FormFieldHint.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
+  clientAllergyMaxNameLength,
   clientAllergySeverityValues,
 } from 'components/constants.js'
 import {
@@ -160,6 +181,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  allergyCatalogOptions: {
+    type: Array,
+    default: () => [],
+  },
+  allergyCatalogLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
@@ -174,6 +203,8 @@ const localStartYear = ref('')
 const nameError = ref('')
 const severityError = ref('')
 const yearError = ref('')
+const filteredAllergyOptions = ref([])
+const allergySearchInput = ref('')
 
 const severityOptions = [
   {
@@ -216,6 +247,112 @@ const dialogTestId = modalTestIds.dialog('allergy-edit')
 const cancelTestId = modalTestIds.cancel('allergy-edit')
 const confirmTestId = modalTestIds.confirm('allergy-edit')
 
+function normalizeAllergyForCompare(value) {
+  return trimAllergyField(value).toLowerCase()
+}
+
+function resolveCanonicalAllergyName(typed) {
+  const needle = normalizeAllergyForCompare(typed)
+  if (!needle) {
+    return null
+  }
+
+  const match = (props.allergyCatalogOptions ?? []).find(opt => {
+    const raw = opt?.value ?? opt?.label ?? ''
+    return normalizeAllergyForCompare(raw) === needle
+  })
+
+  return match?.value ?? match?.label ?? null
+}
+
+function ensureAllergyOptionVisible(label) {
+  const normalized = normalizeAllergyForCompare(label)
+  if (!normalized) {
+    return
+  }
+
+  const exists = filteredAllergyOptions.value.some(opt => {
+    const raw = opt?.value ?? opt?.label ?? ''
+    return normalizeAllergyForCompare(raw) === normalized
+  })
+  if (exists) {
+    return
+  }
+
+  filteredAllergyOptions.value = [
+    { label, value: label },
+    ...filteredAllergyOptions.value,
+  ]
+}
+
+function onAllergyFilter(val, update) {
+  const needle = normalizeAllergyForCompare(val)
+  update(() => {
+    if (!needle) {
+      filteredAllergyOptions.value = []
+      return
+    }
+
+    const all = props.allergyCatalogOptions ?? []
+    filteredAllergyOptions.value = all.filter(opt => {
+      const raw = String(opt?.label ?? opt?.value ?? '')
+      return raw && normalizeAllergyForCompare(raw).includes(needle)
+    })
+  })
+}
+
+function onNewAllergyName(value, done) {
+  done(trimAllergyField(value), 'add-unique')
+}
+
+function onAllergyInputValue(val) {
+  allergySearchInput.value = val ?? ''
+}
+
+function onAllergyBlur() {
+  const typed = trimAllergyField(allergySearchInput.value)
+  if (!typed) {
+    return
+  }
+
+  const current = trimAllergyField(localAllergy.value)
+  if (
+    current
+    && normalizeAllergyForCompare(current) === normalizeAllergyForCompare(typed)
+  ) {
+    return
+  }
+
+  ensureAllergyOptionVisible(typed)
+  localAllergy.value = typed
+}
+
+watch(
+  () => localAllergy.value,
+  val => {
+    allergySearchInput.value = trimAllergyField(val)
+  },
+)
+
+watch(
+  () => props.allergyCatalogOptions,
+  () => {
+    const current = normalizeAllergyForCompare(localAllergy.value)
+    if (!current) {
+      filteredAllergyOptions.value = []
+      return
+    }
+
+    ensureAllergyOptionVisible(localAllergy.value)
+    const all = props.allergyCatalogOptions ?? []
+    filteredAllergyOptions.value = all.filter(opt => {
+      const raw = String(opt?.label ?? opt?.value ?? '')
+      return raw && normalizeAllergyForCompare(raw).includes(current)
+    })
+  },
+  { immediate: true, deep: true },
+)
+
 watch(
   () => props.modelValue,
   visible => {
@@ -231,6 +368,10 @@ watch(
     localStartYear.value = year != null && year !== ''
       ? String(year)
       : ''
+    allergySearchInput.value = trimAllergyField(localAllergy.value)
+    if (localAllergy.value) {
+      ensureAllergyOptionVisible(localAllergy.value)
+    }
   },
 )
 
@@ -248,7 +389,10 @@ function applyErrors(result) {
       || result.errorKey === 'allergyNameInvalid'
       || result.errorKey === 'allergyAddRequired'
     ) {
-      nameError.value = t(result.errorKey, { max: 100 })
+      nameError.value = t(result.errorKey, {
+        max: clientAllergyMaxNameLength,
+        maxName: clientAllergyMaxNameLength,
+      })
     } else if (result.errorKey === 'allergySeverityRequired') {
       severityError.value = t(result.errorKey)
     } else if (result.errorKey === 'allergyStartYearInvalid') {
@@ -261,6 +405,10 @@ function applyErrors(result) {
 }
 
 async function onSave() {
+  const typed = trimAllergyField(localAllergy.value)
+  const canonical = resolveCanonicalAllergyName(typed)
+  localAllergy.value = canonical ?? typed
+
   const result = validateAllergyForAdd(
     localAllergy.value,
     localSeverity.value,
