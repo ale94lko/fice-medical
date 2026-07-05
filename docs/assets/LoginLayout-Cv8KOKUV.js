@@ -1,0 +1,1 @@
+import{V as e,Wc as t,hl as n,ol as r,ul as i,zc as a}from"./index-IcjzY94B.js";import{r as o,t as s}from"./QLayout-B61fQw06.js";var c={};function l(e,c){let l=i(`router-view`);return r(),a(s,{view:`hHh Lpr lff`},{default:n(()=>[t(o,null,{default:n(()=>[t(l)]),_:1})]),_:1})}var u=e(c,[[`render`,l]]);export{u as default};
