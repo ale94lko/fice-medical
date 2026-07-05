@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import 'src/css/quasar.variables';
 
 .appointment-detail-dialog {
@@ -166,7 +167,7 @@
     font-size: 0.9375rem;
     line-height: 1.35;
     font-weight: 700;
-    color: darken($positive, 6%);
+    color: color.adjust($positive, $lightness: -6%);
   }
 
   &__hero-status-hint {
@@ -253,12 +254,12 @@
 
     &--blue {
       background: rgba($info, 0.14);
-      color: darken($info, 8%);
+      color: color.adjust($info, $lightness: -8%);
     }
 
     &--green {
       background: rgba($positive, 0.14);
-      color: darken($positive, 8%);
+      color: color.adjust($positive, $lightness: -8%);
     }
 
     &--purple {
@@ -268,7 +269,7 @@
 
     &--orange {
       background: rgba($warning, 0.16);
-      color: darken($warning, 8%);
+      color: color.adjust($warning, $lightness: -8%);
     }
 
     &--teal {

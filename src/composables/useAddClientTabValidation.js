@@ -271,11 +271,21 @@ export function useAddClientTabValidation({
       return true
     }
 
-    const firstInvalidTab = tabOrder.find(tab => (counts[tab] ?? 0) > 0)
-    if (firstInvalidTab) {
+    const invalidTabs = tabOrder.filter(tab => (counts[tab] ?? 0) > 0)
+
+    // Visit every invalid tab so its fields mount (tab panels use
+    // keep-alive) and show their error state, not just the tab the
+    // user lands on. We still finish on the first invalid tab.
+    for (const tab of invalidTabs) {
+      activeTab.value = tab
+      await nextTick()
+      await applyTabFieldErrors(tab)
+    }
+
+    const firstInvalidTab = invalidTabs[0]
+    if (firstInvalidTab && activeTab.value !== firstInvalidTab) {
       activeTab.value = firstInvalidTab
       await nextTick()
-      await applyTabFieldErrors(firstInvalidTab)
     }
 
     await notifyAndScrollToValidationErrors(panelScrollRef)

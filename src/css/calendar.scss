@@ -1,3 +1,4 @@
+@use 'sass:color';
 @import 'src/css/quasar.variables';
 
 $calendar-time-gutter-width: 44px;
@@ -610,7 +611,7 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 
     &--break {
       background: rgba($warning, 0.42);
-      border-color: rgba(darken($warning, 8%), 0.35);
+      border-color: rgba(color.adjust($warning, $lightness: -8%), 0.35);
     }
 
     &--appointment {
@@ -632,7 +633,7 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     font-size: 0.72rem;
     font-weight: 600;
     line-height: 1.25;
-    color: darken($positive, 12%);
+    color: color.adjust($positive, $lightness: -12%);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
