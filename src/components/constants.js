@@ -64,15 +64,20 @@ export const userFieldKeys = {
   role: 'role',
   status: 'status',
   lastLogin: 'lastLogin',
+  createdAt: 'createdAt',
 }
 
 export const userDescriptionMaxLength = 500
 
 export const userListColumnKeys = {
+  user: 'user',
+  roles: 'roles',
+  status: 'status',
+  lastLogin: 'lastLogin',
+  createdAt: 'createdAt',
+  actions: 'actions',
   email: 'email',
   role: 'role',
-  status: 'status',
-  actions: 'actions',
 }
 
 export const subtenantStatusValues = {
@@ -955,6 +960,7 @@ export const staffEntryPoints = {
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   staffList: '/staff/v1',
+  staffWithoutSystemUser: '/staff/v1/without-system-user',
   staffById: id => `/staff/v1/${encodeURIComponent(String(id ?? '').trim())}`,
   staffStatus: id => `/staff/v1/${encodeURIComponent(
     String(id ?? '').trim(),

@@ -14,6 +14,8 @@ export const useAdminStore = defineStore('admin', {
       page: 1,
       limit: 20,
       q: null,
+      status: null,
+      role: null,
     },
   }),
   actions: {
@@ -29,6 +31,8 @@ export const useAdminStore = defineStore('admin', {
       const page = Number(params.page ?? this.userListQuery.page ?? 1)
       const limit = Number(params.limit ?? this.userListQuery.limit ?? 20)
       const q = params.q ?? this.userListQuery.q ?? null
+      const status = params.status ?? this.userListQuery.status ?? null
+      const role = params.role ?? this.userListQuery.role ?? null
       const safePage = Number.isFinite(page) && page >= 1 ? page : 1
       const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
 
@@ -36,12 +40,16 @@ export const useAdminStore = defineStore('admin', {
         page: safePage,
         limit: safeLimit,
         q: q ? String(q).trim() : '',
+        status: status ? String(status).trim() : '',
+        role: role ? String(role).trim() : '',
       }, t)
 
       this.applyUserListResult(result, {
         page: safePage,
         limit: safeLimit,
         q: q ? String(q).trim() : null,
+        status: status ? String(status).trim() : null,
+        role: role ? String(role).trim() : null,
       })
     },
     async createUser(payload, t, options = {}) {

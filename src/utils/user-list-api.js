@@ -44,9 +44,17 @@ export async function listTenantUsers(params = {}, t) {
   const limit = Number(params.limit ?? 20)
   const offset = (page - 1) * limit
   const q = String(params.q ?? '').trim()
+  const status = String(params.status ?? '').trim()
+  const role = String(params.role ?? '').trim()
   const queryParams = { limit, offset }
   if (q) {
     queryParams.q = q
+  }
+  if (status) {
+    queryParams.status = status
+  }
+  if (role) {
+    queryParams.role = role
   }
   const response = await apiInstance.get(apiPaths.tenantsUsersList, {
     params: queryParams,

@@ -8,6 +8,7 @@ import {
 } from 'components/constants.js'
 import {
   extractLoginSubtenants,
+  extractLoginUserInfo,
   extractOAuthTokenPayload,
 } from 'components/helpers.js'
 import {
@@ -145,6 +146,10 @@ async function persistTokensFromResponse(body) {
   const { useAuthStore } = await import('stores/auth-store.js')
   const authStore = useAuthStore()
   authStore.applyTokensFromApi(td)
+  const userInfo = extractLoginUserInfo(body)
+  if (userInfo) {
+    authStore.applyUserInfo(userInfo)
+  }
   const subtenants = extractLoginSubtenants(body)
   if (subtenants.length) {
     authStore.applySubtenants(subtenants)

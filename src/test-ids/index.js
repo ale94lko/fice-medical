@@ -17,6 +17,10 @@ export const layoutTestIds = {
   menuToggle: 'layout-btn-menu-toggle',
   notifications: 'layout-btn-notifications',
   userMenu: 'layout-btn-user-menu',
+  userMenuMyProfile: 'layout-menu-user-my-profile',
+  userMenuSettings: 'layout-menu-user-settings',
+  userMenuHelp: 'layout-menu-user-help',
+  headerStaffProfile: 'layout-header-staff-profile',
   changePassword: 'layout-menu-change-password',
   signOut: 'layout-menu-sign-out',
   navDashboard: 'layout-nav-dashboard',
@@ -71,7 +75,10 @@ export const userListTestIds = {
   addUser: 'user-list-btn-add',
   rowView: id => toTestId('user-list-row', id, 'btn-view'),
   rowEdit: id => toTestId('user-list-row', id, 'btn-edit'),
+  rowPassword: id => toTestId('user-list-row', id, 'btn-password'),
   rowMore: id => toTestId('user-list-row', id, 'btn-more'),
+  roleFilter: 'user-list-filter-role',
+  statusFilter: 'user-list-filter-status',
   rowDelete: id => toTestId('user-list-row', id, 'btn-delete'),
 }
 

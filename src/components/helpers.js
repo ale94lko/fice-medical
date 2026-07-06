@@ -18,6 +18,7 @@ import {
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
 import { apiDateToDisplay } from 'src/utils/app-datetime.js'
+import { normalizeLoginStaffMember } from 'src/utils/login-staff-member.js'
 import {
   clinicianInitialsFromPersonName,
   formatClinicianDisplayLabel,
@@ -268,8 +269,8 @@ export function extractLoginUserInfo(body) {
     return null
   }
   const id = Number(raw.id)
-
-  return {
+  const staffMember = normalizeLoginStaffMember(raw)
+  const userInfo = {
     id: Number.isFinite(id) ? id : null,
     username: String(raw.username ?? '').trim(),
     status: raw.status ?? null,
@@ -277,7 +278,10 @@ export function extractLoginUserInfo(body) {
     changePassword: Boolean(
       raw.change_password ?? raw.changePassword ?? false,
     ),
+    staffMember: staffMember ?? null,
   }
+
+  return userInfo
 }
 
 export function extractLoginModules(body) {

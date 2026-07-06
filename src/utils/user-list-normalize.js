@@ -4,6 +4,13 @@ import {
 } from 'components/constants.js'
 import { adminTableStatusVariants } from 'src/constants/admin-table.js'
 import { mapUserStatusFromApi } from 'src/utils/user-register-payload.js'
+import { normalizeStaffMemberFromApi } from
+  'src/utils/login-staff-member.js'
+import {
+  resolveUserInitials,
+  formatUserLastLogin,
+  formatUserCreatedAt,
+} from 'src/utils/user-list-display.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -116,11 +123,24 @@ export function mapUserListViewItem(item, t) {
   const roleLabels = resolveRoleLabels(normalizedRoles)
   const roleIds = resolveRoleIds(normalizedRoles)
   const permissions = normalizePermissionCodes(item)
+  const staffMember = normalizeStaffMemberFromApi(item)
+  const accountEmail = trim(item.email ?? item.username)
+  const displayName = staffMember?.name || resolveUserDisplayName(item)
+  const email = accountEmail || staffMember?.email || ''
+  const photoFileId = staffMember?.photoFileId ?? null
+  const lastLoginRaw = item.last_login ?? item.lastLogin ?? ''
+  const lastLoginLabel = formatUserLastLogin(lastLoginRaw, t)
+  const createdAtRaw = item.created_at ?? item.createdAt ?? ''
+  const createdAtLabel = formatUserCreatedAt(createdAtRaw)
+  const tenantStaffIdRaw = staffMember?.id
+    ?? item.tenant_staff_id
+    ?? item.tenantStaffId
+    ?? null
 
   return {
     id: item.id,
-    [uk.name]: resolveUserDisplayName(item),
-    [uk.email]: trim(item.email ?? item.username),
+    [uk.name]: displayName,
+    [uk.email]: email,
     [uk.roles]: roleLabels,
     rolesCodes: roleIds.length ? roleIds : normalizedRoles.map(r => r.name),
     roleCode: roleIds[0] ?? normalizedRoles[0]?.name ?? '',
@@ -130,6 +150,17 @@ export function mapUserListViewItem(item, t) {
     [uk.status]: status,
     statusCode,
     statusVariant: resolveUserStatusVariant(statusCode),
+    [uk.lastLogin]: lastLoginLabel || '—',
+    lastLoginRaw,
+    [uk.createdAt]: createdAtLabel || '—',
+    createdAtRaw,
+    photoFileId,
+    initials: resolveUserInitials(displayName, email),
+    staffMember,
+    tenantStaffId: Number.isFinite(Number(tenantStaffIdRaw))
+      && Number(tenantStaffIdRaw) > 0
+      ? Number(tenantStaffIdRaw)
+      : null,
   }
 }
 

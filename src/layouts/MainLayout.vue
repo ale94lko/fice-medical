@@ -23,35 +23,11 @@
           icon="notifications"
           :data-testid="layoutTestIds.notifications"
         />
-        <q-btn
-          flat
-          round
-          dense
-          icon="manage_accounts"
-          :data-testid="layoutTestIds.userMenu">
-          <q-menu class="user-menu app-light-menu">
-            <q-list style="min-width: 100px">
-              <q-item
-                clickable
-                :data-testid="layoutTestIds.changePassword"
-                @click="handleChangePassword">
-                <q-item-section avatar>
-                  <q-icon name="lock_reset" />
-                </q-item-section>
-                <q-item-section>{{ t('changePassword') }}</q-item-section>
-              </q-item>
-              <q-item
-                clickable
-                :data-testid="layoutTestIds.signOut"
-                @click="handleLogout">
-                <q-item-section avatar>
-                  <q-icon name="logout" />
-                </q-item-section>
-                <q-item-section>{{ t('signOut') }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+        <AppHeaderUserMenu
+          class="q-ml-xs"
+          @change-password="handleChangePassword"
+          @logout="handleLogout"
+        />
       </q-toolbar>
     </q-header>
     <q-footer class="app-footer">
@@ -667,6 +643,7 @@ import AppDrawerSubNavItem from 'components/AppDrawerSubNavItem.vue'
 import AppFooterPaginationHost from
   'components/admin-table/AppFooterPaginationHost.vue'
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
+import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { layoutTestIds } from 'src/test-ids/index.js'

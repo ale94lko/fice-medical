@@ -57,6 +57,34 @@
             </AddClientLabeledField>
           </div>
           <div
+            v-if="isAddMode && !readonly"
+            class="col-12">
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <AddClientLabeledField
+                  :label="t('userRelatedStaffLabel')"
+                  :test-id="tid.field('tenant-staff')">
+                  <StaffWithoutSystemUserSelect
+                    v-model="local.tenantStaffId"
+                    :active="open"
+                    :placeholder="t('userRelatedStaffPlaceholder')"
+                    :test-id="tid.field('tenant-staff')"
+                  />
+                </AddClientLabeledField>
+              </div>
+              <div class="col-12 col-md-6">
+                <AddClientLabeledField
+                  :label="t('userChangePasswordRequiredLabel')"
+                  :test-id="tid.field('change-password-required')">
+                  <FormToggle
+                    v-model="local.changePasswordRequired"
+                    :test-id="tid.field('change-password-required')"
+                  />
+                </AddClientLabeledField>
+              </div>
+            </div>
+          </div>
+          <div
             v-if="showFullUserFields"
             class="col-12 user-dialog__roles-status-block">
             <div class="row q-col-gutter-md">
@@ -178,8 +206,11 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import TextInput from 'components/FormInput.vue'
 import FormSelect from 'components/FormSelect.vue'
+import FormToggle from 'components/FormToggle.vue'
 import RoleMultiSelect from 'components/RoleMultiSelect.vue'
 import RoleMultiSelectChips from 'components/RoleMultiSelectChips.vue'
+import StaffWithoutSystemUserSelect from
+  'components/StaffWithoutSystemUserSelect.vue'
 import {
   quasarNotifyTypes,
   userDescriptionMaxLength,
@@ -380,6 +411,12 @@ watch(
     }
     if (props.mode === 'add' && !Array.isArray(local.value.permissions)) {
       local.value.permissions = []
+    }
+    if (
+      props.mode === 'add'
+      && local.value.changePasswordRequired == null
+    ) {
+      local.value.changePasswordRequired = true
     }
     local.value.password = ''
     if (props.mode === 'add' || props.mode === 'view') {

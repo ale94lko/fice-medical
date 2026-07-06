@@ -17,6 +17,11 @@ export default {
     'Tiene cambios sin guardar. Si cambia de sede ahora, saldrá de este '
     + 'registro y se perderán los cambios.',
   signOut: 'Cerrar sesión',
+  headerUserMyProfile: 'Mi perfil',
+  headerUserSettings: 'Configuración',
+  headerUserHelpSupport: 'Ayuda y soporte',
+  headerUserMenuAria: 'Menú de usuario de {name}',
+  headerUserMenuGenericAria: 'Menú de usuario',
   changePassword: 'Cambiar contraseña',
   changePasswordTitle: 'Cambiar contraseña',
   changePasswordSubtitle:
@@ -229,7 +234,13 @@ export default {
   userListSubtitle:
     'Gestione usuarios, roles y accesos del tenant.',
   userListSearchPlaceholder:
-    'Buscar usuarios por nombre, correo o rol…',
+    'Buscar por nombre, correo o rol…',
+  userListFilterAllRoles: 'Todos los roles',
+  userListFilterAllStatuses: 'Todos los estados',
+  userListColUser: 'Usuario',
+  userListLastLoginToday: 'Hoy, {time}',
+  userListLastLoginYesterday: 'Ayer, {time}',
+  userListResetPasswordAction: 'Restablecer contraseña',
   userListEmpty: 'No se encontraron usuarios.',
   userListSearchEmpty: 'Ningún usuario coincide con la búsqueda.',
   userListError:
@@ -237,6 +248,7 @@ export default {
   userListPaginationSummary: '{from}–{to} de {total} usuarios',
   userListColName: 'Nombre',
   userListColLastLogin: 'Último acceso',
+  userListColCreatedAt: 'Fecha de creación',
   addUser: 'Añadir usuario',
   userRole: 'Rol',
   userRoles: 'Roles',
@@ -278,6 +290,11 @@ export default {
   userDialogViewTitle: 'Ver usuario',
   userDialogAddSubtitle:
     'Cree una nueva cuenta de usuario para este tenant.',
+  userRelatedStaffLabel: 'Staff / clínico relacionado',
+  userRelatedStaffPlaceholder: 'Buscar staff o clínico',
+  userRelatedStaffEmpty:
+    'No hay staff ni clínicos sin cuenta de usuario.',
+  userChangePasswordRequiredLabel: 'Cambio de contraseña obligatorio',
   userCreateSuccess: 'Usuario creado correctamente.',
   userUpdateSuccess: 'Usuario actualizado correctamente.',
   userSaveError:

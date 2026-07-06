@@ -80,6 +80,8 @@ export function createEmptyUser(overrides = {}) {
     status: userStatusValues.active,
     statusCode: userStatusValues.active,
     [userFieldKeys.lastLogin]: '',
+    tenantStaffId: null,
+    changePasswordRequired: true,
     ...overrides,
   }
 }
@@ -104,6 +106,14 @@ export function cloneUser(user) {
     [userFieldKeys.name]: user[userFieldKeys.name] ?? user.name ?? '',
     [userFieldKeys.lastLogin]:
       user[userFieldKeys.lastLogin] ?? user.lastLogin ?? '',
+    tenantStaffId: user.tenantStaffId ?? user.tenant_staff_id ?? null,
+    staffMember: user.staffMember ?? user.staff_member ?? null,
+    changePasswordRequired: Boolean(
+      user.changePasswordRequired
+      ?? user.change_password_required
+      ?? user.changePassword
+      ?? true,
+    ),
   })
 }
 

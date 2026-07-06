@@ -88,17 +88,25 @@ export function buildUserRegisterRequest(user, options = {}) {
   const allowedSubtenantIds = Number.isFinite(activeSubtenantId)
     ? [activeSubtenantId]
     : []
-
-  return {
+  const tenantStaffId = Number(user?.tenantStaffId)
+  const body = {
     username: String(user?.email ?? '').trim(),
     password: String(user?.password ?? '').trim(),
     description: String(user?.description ?? '').trim(),
     status: mapUserStatusToApi(user?.status ?? user?.statusCode),
-    changePassword: true,
+    changePassword: Boolean(
+      user?.changePasswordRequired ?? user?.changePassword ?? true,
+    ),
     newUser: true,
     roles: normalizeNumericIds(user?.roles),
     permissions,
     modules,
     allowedSubtenantIds,
   }
+
+  if (Number.isFinite(tenantStaffId) && tenantStaffId > 0) {
+    body.tenantStaffId = tenantStaffId
+  }
+
+  return body
 }

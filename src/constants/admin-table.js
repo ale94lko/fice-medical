@@ -32,4 +32,5 @@ export const adminTableIds = {
   payments: 'payments',
   documents: 'documents',
   reports: 'reports',
+  users: 'users',
 }

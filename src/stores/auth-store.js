@@ -127,6 +127,17 @@ export const useAuthStore = defineStore('auth', {
         permissionNames.editTenantsUser,
         permissionNames.deleteTenantsUser,
       ]),
+    linkedStaffProfile(state) {
+      const profile = state.userInfo?.staffMember
+      if (!profile || typeof profile !== 'object') {
+        return null
+      }
+      if (!profile.name && !profile.position) {
+        return null
+      }
+
+      return profile
+    },
   },
   actions: {
     applySubtenants(subtenants, preferredId = null) {

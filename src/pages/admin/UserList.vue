@@ -11,22 +11,53 @@
       :title="t('users')"
       :subtitle="t('userListSubtitle')">
       <template #center>
-        <q-input
-          :model-value="searchQuery"
-          outlined
-          clearable
-          hide-bottom-space
-          class="admin-list-page__search-input user-list-page__search"
-          :data-testid="userListTestIds.search"
-          :disable="loading"
-          :placeholder="t('userListSearchPlaceholder')"
-          :aria-label="t('userListSearchPlaceholder')"
-          @update:model-value="setSearchQuery"
-          @clear="resetSearchQuery">
-          <template #prepend>
-            <q-icon name="search" size="18px" />
-          </template>
-        </q-input>
+        <div
+          class="user-list-page__toolbar row items-center no-wrap">
+          <q-input
+            :model-value="searchQuery"
+            outlined
+            clearable
+            hide-bottom-space
+            class="admin-list-page__search-input user-list-page__search"
+            :data-testid="userListTestIds.search"
+            :disable="loading"
+            :placeholder="t('userListSearchPlaceholder')"
+            :aria-label="t('userListSearchPlaceholder')"
+            @update:model-value="setSearchQuery"
+            @clear="resetSearchQuery">
+            <template #prepend>
+              <q-icon name="search" size="18px" />
+            </template>
+          </q-input>
+          <q-select
+            v-model="roleFilter"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            class="user-list-page__filter"
+            :disable="loading"
+            :options="roleFilterOptions"
+            :data-testid="userListTestIds.roleFilter">
+            <template #prepend>
+              <q-icon name="filter_alt" size="18px" />
+            </template>
+          </q-select>
+          <q-select
+            v-model="statusFilter"
+            outlined
+            hide-bottom-space
+            emit-value
+            map-options
+            class="user-list-page__filter"
+            :disable="loading"
+            :options="statusFilterOptions"
+            :data-testid="userListTestIds.statusFilter">
+            <template #prepend>
+              <q-icon name="radio_button_checked" size="18px" />
+            </template>
+          </q-select>
+        </div>
       </template>
       <template #actions>
         <div
@@ -49,13 +80,10 @@
     </AdminListPageHeader>
 
     <AdminTablePanel
-      class="admin-list-page__table-panel"
-      inline-column-settings
-      :show-column-settings="false"
-      :column-settings-test-id="adminTableTestIds.columnSettings"
-      @open-column-settings="columnSettingsOpen = true">
+      class="admin-list-page__table-panel user-list-page__table-panel"
+      :show-column-settings="false">
       <AdminQTable
-        class="table admin-data-table admin-data-table--inline-column-settings"
+        class="table admin-data-table user-list-page__table"
         flat
         row-key="id"
         binary-state-sort
@@ -66,40 +94,27 @@
         :columns="visibleColumns"
         :loading="false"
         @request="onTableRequest">
-        <template #header-cell-actions="scope">
-          <q-th
-            :props="scope"
-            class="admin-data-table__actions-header-cell">
-            <AdminTableColumnSettingsHeader
-              :label="scope.col.label"
-              :test-id="adminTableTestIds.columnSettings"
-              @open="columnSettingsOpen = true"
-            />
-          </q-th>
-        </template>
 
-        <template #body-cell-email="scope">
+        <template #body-cell-user="scope">
           <q-td :props="scope" class="admin-data-table__primary-cell">
-            <button
-              type="button"
-              class="admin-data-table__link"
-              :data-testid="userListTestIds.rowView(scope.row.id)"
-              @click="viewRow(scope.row)">
-              <AdminTableSearchHighlight
-                :text="scope.row[uk.email] || '—'"
-                :query="highlightQuery"
-              />
-            </button>
+            <AdminTableUserIdentityCell
+              :name="scope.row[uk.name]"
+              :email="scope.row[uk.email]"
+              :caption="scope.row.staffMember?.position"
+              :initials="scope.row.initials"
+              :photo-file-id="scope.row.photoFileId"
+              :highlight-query="highlightQuery"
+              :name-test-id="userListTestIds.rowView(scope.row.id)"
+              @open="viewRow(scope.row)"
+            />
           </q-td>
         </template>
 
-        <template #body-cell-role="scope">
-          <q-td
-            :props="scope"
-            class="admin-data-table__secondary-cell">
-            <AdminTableSearchHighlight
-              :text="scope.row[uk.role] || '—'"
-              :query="highlightQuery"
+        <template #body-cell-roles="scope">
+          <q-td :props="scope">
+            <AdminTableRoleBadgesCell
+              :roles="scope.row[uk.roles] ?? []"
+              :highlight-query="highlightQuery"
             />
           </q-td>
         </template>
@@ -114,27 +129,74 @@
           </q-td>
         </template>
 
+        <template #body-cell-createdAt="scope">
+          <q-td
+            :props="scope"
+            class="admin-data-table__secondary-cell">
+            {{ scope.row[uk.createdAt] || '—' }}
+          </q-td>
+        </template>
+
+        <template #body-cell-lastLogin="scope">
+          <q-td
+            :props="scope"
+            class="admin-data-table__secondary-cell">
+            {{ scope.row[uk.lastLogin] || '—' }}
+          </q-td>
+        </template>
+
         <template #row-actions="{ row }">
-          <AdminTableRowActions
-            :show-view="canViewUsers"
-            :show-edit="canEditUser"
-            :show-more="canDeleteUser"
-            :view-test-id="userListTestIds.rowView(row.id)"
-            :edit-test-id="userListTestIds.rowEdit(row.id)"
-            :more-test-id="userListTestIds.rowMore(row.id)"
-            @view="viewRow(row)"
-            @edit="editRow(row)">
-            <template #more>
-              <q-item
-                v-if="canDeleteUser"
-                v-close-popup
-                clickable
-                :data-testid="userListTestIds.rowDelete(row.id)"
-                @click="confirmDelete(row)">
-                <q-item-section>{{ t('delete') }}</q-item-section>
-              </q-item>
-            </template>
-          </AdminTableRowActions>
+          <div class="admin-table-row-actions">
+            <q-btn
+              v-if="canEditUser"
+              flat
+              round
+              dense
+              icon="edit"
+              class="app-btn-icon-action"
+              :data-testid="userListTestIds.rowEdit(row.id)"
+              :size="siteBreakpoints.SM"
+              :title="t('edit')"
+              :aria-label="t('edit')"
+              @click="editRow(row)"
+            />
+            <q-btn
+              v-if="canEditUser"
+              flat
+              round
+              dense
+              icon="vpn_key"
+              class="app-btn-icon-action"
+              :data-testid="userListTestIds.rowPassword(row.id)"
+              :size="siteBreakpoints.SM"
+              :title="t('userListResetPasswordAction')"
+              :aria-label="t('userListResetPasswordAction')"
+              @click="editRow(row)"
+            />
+            <q-btn
+              v-if="canDeleteUser"
+              flat
+              round
+              dense
+              icon="more_vert"
+              class="app-btn-icon-action"
+              :data-testid="userListTestIds.rowMore(row.id)"
+              :size="siteBreakpoints.SM"
+              :title="t('moreActions')"
+              :aria-label="t('moreActions')">
+              <q-menu anchor="bottom right" self="top right">
+                <q-list dense>
+                  <q-item
+                    v-close-popup
+                    clickable
+                    :data-testid="userListTestIds.rowDelete(row.id)"
+                    @click="confirmDelete(row)">
+                    <q-item-section>{{ t('delete') }}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+          </div>
         </template>
 
         <template #no-data>
@@ -153,17 +215,6 @@
         </template>
       </AdminQTable>
     </AdminTablePanel>
-
-    <AdminTableColumnSettingsDialog
-      v-model="columnSettingsOpen"
-      :preferences="columnPreferences"
-      :column-labels="columnLabels"
-      :default-order="defaultColumnOrder"
-      :is-required-column="isRequiredColumn"
-      :is-locked-column="isLockedColumn"
-      @save="onSaveColumnPreferences"
-      @reset="onResetColumnPreferences"
-    />
 
     <UserDialog
       v-model="dialogOpen"
@@ -199,32 +250,27 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
+  siteBreakpoints,
   siteBreakpointsPx,
   userFieldKeys,
   userListColumnKeys,
+  userStatusValues,
 } from 'components/constants.js'
 import { useAdminStore } from 'stores/admin-store.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
-import AdminTableColumnSettingsDialog from
-  'components/admin-table/AdminTableColumnSettingsDialog.vue'
-import AdminTableColumnSettingsHeader from
-  'components/admin-table/AdminTableColumnSettingsHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AdminTableRowActions from
-  'components/admin-table/AdminTableRowActions.vue'
-import AdminTableSearchHighlight from
-  'components/admin-table/AdminTableSearchHighlight.vue'
+import AdminTableRoleBadgesCell from
+  'components/admin-table/AdminTableRoleBadgesCell.vue'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
+import AdminTableUserIdentityCell from
+  'components/admin-table/AdminTableUserIdentityCell.vue'
 import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import UserDialog from 'components/UserDialog.vue'
-import { adminTableIds } from 'src/constants/admin-table.js'
-import { useAdminTableColumnPreferences } from
-  'src/composables/useAdminTableColumnPreferences.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { useUserPermissions } from 'src/composables/useUserPermissions.js'
@@ -233,12 +279,10 @@ import {
   USER_LIST_SEARCH_MIN_LENGTH,
   isUserListServerSearchQuery,
 } from 'src/utils/user-list-search.js'
+import { fetchTenantRoleOptions } from 'src/utils/tenant-roles-api.js'
 import { useAuthStore } from 'stores/auth-store.js'
 import { cloneUser, userToUpdatePayload } from 'src/utils/user-orders.js'
-import {
-  adminTableTestIds,
-  userListTestIds,
-} from 'src/test-ids/index.js'
+import { userListTestIds } from 'src/test-ids/index.js'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -250,14 +294,15 @@ const uk = userFieldKeys
 const col = userListColumnKeys
 
 const {
-  canViewUsers,
   canAddUser,
   canEditUser,
   canDeleteUser,
 } = useUserPermissions()
 
 const loading = ref(false)
-const columnSettingsOpen = ref(false)
+const roleFilter = ref(null)
+const statusFilter = ref(null)
+const roleFilterOptions = ref([])
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
 const dialogSaving = ref(false)
@@ -269,32 +314,11 @@ const searchQuery = ref('')
 let debounceTimer = null
 
 const tablePagination = ref({
-  sortBy: col.email,
+  sortBy: col.user,
   descending: false,
   page: 1,
   rowsPerPage: 20,
   rowsNumber: 0,
-})
-
-const defaultColumnOrder = [
-  col.email,
-  col.role,
-  col.status,
-  col.actions,
-]
-
-const {
-  preferences: columnPreferences,
-  savePreferences: saveColumnPreferences,
-  resetPreferences: resetColumnPreferences,
-  buildVisibleColumns,
-  isRequiredColumn,
-  isLockedColumn,
-} = useAdminTableColumnPreferences({
-  tableId: adminTableIds.users,
-  defaultOrder: defaultColumnOrder,
-  requiredColumns: [col.email, col.actions],
-  lockedColumns: [col.email, col.actions],
 })
 
 const sourceRows = computed(() => adminStore.userList)
@@ -308,27 +332,42 @@ const highlightQuery = computed(() =>
 )
 const rows = computed(() => sourceRows.value)
 
-const allColumns = computed(() => [
+const statusFilterOptions = computed(() => [
+  { label: t('userListFilterAllStatuses'), value: null },
   {
-    name: col.email,
-    required: true,
-    label: t('email'),
-    align: 'left',
-    field: row => row[uk.email],
-    sortable: true,
-    headerStyle: 'min-width: 220px',
-    style: 'min-width: 220px',
+    label: t('userStatusActive'),
+    value: userStatusValues.active,
   },
   {
-    name: col.role,
-    required: false,
+    label: t('userStatusInactive'),
+    value: userStatusValues.inactive,
+  },
+  {
+    label: t('userStatusPending'),
+    value: userStatusValues.pending,
+  },
+])
+
+const visibleColumns = computed(() => [
+  {
+    name: col.user,
+    required: true,
+    label: t('userListColUser'),
+    align: 'left',
+    field: row => row[uk.name],
+    sortable: true,
+    headerStyle: 'min-width: 260px',
+    style: 'min-width: 260px',
+  },
+  {
+    name: col.roles,
+    required: true,
     label: t('userRoles'),
     align: 'left',
-    field: row => row[uk.role],
-    sortable: true,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
-    classes: 'admin-data-table__secondary-cell',
+    field: row => row[uk.roles],
+    sortable: false,
+    headerStyle: 'min-width: 180px',
+    style: 'min-width: 180px',
   },
   {
     name: col.status,
@@ -341,26 +380,38 @@ const allColumns = computed(() => [
     style: 'min-width: 120px',
   },
   {
+    name: col.createdAt,
+    required: false,
+    label: t('userListColCreatedAt'),
+    align: 'left',
+    field: row => row[uk.createdAt],
+    sortable: false,
+    headerStyle: 'min-width: 160px',
+    style: 'min-width: 160px',
+    classes: 'admin-data-table__secondary-cell',
+  },
+  {
+    name: col.lastLogin,
+    required: false,
+    label: t('userListColLastLogin'),
+    align: 'left',
+    field: row => row[uk.lastLogin],
+    sortable: false,
+    headerStyle: 'min-width: 160px',
+    style: 'min-width: 160px',
+    classes: 'admin-data-table__secondary-cell',
+  },
+  {
     name: col.actions,
     required: true,
     label: t('actions'),
     align: 'center',
-    field: row => row.actions,
+    field: () => '',
     sortable: false,
     headerStyle: 'min-width: 132px',
     style: 'min-width: 132px',
   },
 ])
-
-const columnLabels = computed(() =>
-  Object.fromEntries(
-    allColumns.value.map(column => [column.name, column.label]),
-  ),
-)
-
-const visibleColumns = computed(() =>
-  buildVisibleColumns(allColumns.value),
-)
 
 const deleteConfirmMessage = computed(() => {
   const email = pendingDeleteUser.value?.[uk.email]
@@ -392,6 +443,31 @@ function tablePaginationFromStore(paginationPayload) {
   }
 }
 
+async function loadRoleFilterOptions() {
+  const tenantId = authStore.tenantId
+  if (!tenantId) {
+    roleFilterOptions.value = [
+      { label: t('userListFilterAllRoles'), value: null },
+    ]
+    return
+  }
+
+  try {
+    const options = await fetchTenantRoleOptions(tenantId)
+    roleFilterOptions.value = [
+      { label: t('userListFilterAllRoles'), value: null },
+      ...options.map(option => ({
+        label: option.label ?? option.name,
+        value: String(option.value ?? option.id),
+      })),
+    ]
+  } catch {
+    roleFilterOptions.value = [
+      { label: t('userListFilterAllRoles'), value: null },
+    ]
+  }
+}
+
 async function loadUsers(paginationPayload) {
   loading.value = true
   try {
@@ -401,6 +477,8 @@ async function loadUsers(paginationPayload) {
       q: isUserListServerSearchQuery(trimmedQuery.value)
         ? trimmedQuery.value
         : null,
+      status: statusFilter.value,
+      role: roleFilter.value,
     }, t)
     tablePagination.value = tablePaginationFromStore(paginationPayload)
   } catch (error) {
@@ -443,6 +521,25 @@ function resetSearchQuery() {
   tablePagination.value = { ...tablePagination.value, page: 1 }
   scheduleSearchReload()
 }
+
+function onFilterChange() {
+  tablePagination.value = { ...tablePagination.value, page: 1 }
+  loadUsers(tablePagination.value)
+}
+
+watch(roleFilter, (next, previous) => {
+  if (next === previous) {
+    return
+  }
+  onFilterChange()
+})
+
+watch(statusFilter, (next, previous) => {
+  if (next === previous) {
+    return
+  }
+  onFilterChange()
+})
 
 function onTableRequest(props) {
   const { pagination } = props
@@ -593,14 +690,6 @@ async function onDialogSave({ user, permissionTreeNodes }) {
   }
 }
 
-function onSaveColumnPreferences(prefs) {
-  saveColumnPreferences(prefs)
-}
-
-function onResetColumnPreferences() {
-  resetColumnPreferences()
-}
-
 onMounted(async() => {
   setFooterPagination({
     page: tablePagination.value.page,
@@ -612,6 +701,7 @@ onMounted(async() => {
     onPageChange,
     onRowsPerPageChange,
   })
+  await loadRoleFilterOptions()
   await loadUsers(tablePagination.value)
   maybeOpenAddFromRoute()
 })
@@ -643,18 +733,17 @@ const showGrid = computed(() => $q.screen.width <= siteBreakpointsPx.XXS)
 </script>
 
 <style lang="scss" scoped>
-.user-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
+@import 'src/css/quasar.variables';
 
-  .admin-list-page__table-panel {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
+.user-list-page {
+  &__table {
+    :deep(thead tr th) {
+      background: #f8fafc;
+    }
+
+    :deep(tbody tr:nth-child(even) td) {
+      background: rgba($primary, 0.02);
+    }
   }
 }
 </style>
