@@ -244,6 +244,17 @@
       </q-card-section>
 
       <q-card-actions align="right" class="app-dialog-card__actions">
+        <GenerateDocumentAction
+          v-if="readonly && local.id && clientId"
+          :document-type="documentTypes.carePlan"
+          :context="{
+            clientId,
+            carePlanId: local.id,
+          }"
+          flat
+          :label="t('generateDocumentAction')"
+          button-class="app-btn-outline q-mr-sm"
+        />
         <q-btn
           no-caps
           flat
@@ -308,6 +319,8 @@ import SubsectionHeading from 'components/SubsectionHeading.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
 import CarePlanGoalsTable from 'components/CarePlanGoalsTable.vue'
 import CarePlanGoalDialog from 'components/CarePlanGoalDialog.vue'
+import GenerateDocumentAction from
+  'components/documents/GenerateDocumentAction.vue'
 import {
   carePlanDescriptionMaxLength,
   carePlanNameMaxLength,
@@ -325,11 +338,16 @@ import {
 } from 'src/utils/care-plan-orders.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
+import { documentTypes } from 'src/utils/document-generation-constants.js'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false,
+  },
+  clientId: {
+    type: [String, Number],
+    default: null,
   },
   plan: {
     type: Object,

@@ -5,7 +5,8 @@ import {
   mapUserListViewItem,
   mapUsersListFromApi,
 } from 'src/utils/user-list-normalize.js'
-import { buildUserRegisterRequest } from 'src/utils/user-register-payload.js'
+import { buildUserRegisterRequest, buildUserUpdateRequest }
+  from 'src/utils/user-register-payload.js'
 
 function unwrapListRoot(body) {
   const root = body?.data ?? body
@@ -81,6 +82,7 @@ export async function createTenantUser(payload, options = {}) {
   const body = buildUserRegisterRequest(payload, {
     activeSubtenantId: options.activeSubtenantId,
     permissionTreeNodes: options.permissionTreeNodes,
+    roleOptions: options.roleOptions,
   })
   const response = await apiInstance.post(
     apiPaths.tenantsUsersCreate,
@@ -90,15 +92,12 @@ export async function createTenantUser(payload, options = {}) {
   return unwrapData(response.data)
 }
 
-export async function updateTenantUser(userId, payload) {
-  const body = {
-    username: String(payload?.username ?? payload?.email ?? '').trim(),
-    description: String(payload?.description ?? '').trim(),
-  }
-  const password = String(payload?.password ?? '').trim()
-  if (password) {
-    body.password = password
-  }
+export async function updateTenantUser(userId, payload, options = {}) {
+  const body = buildUserUpdateRequest(payload, {
+    permissionTreeNodes: options.permissionTreeNodes,
+    activeSubtenantId: options.activeSubtenantId,
+    roleOptions: options.roleOptions,
+  })
 
   const response = await apiInstance.patch(
     apiPaths.tenantUserById(userId),

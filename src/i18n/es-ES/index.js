@@ -22,6 +22,53 @@ export default {
   headerUserHelpSupport: 'Ayuda y soporte',
   headerUserMenuAria: 'Menú de usuario de {name}',
   headerUserMenuGenericAria: 'Menú de usuario',
+  myProfilePageTitle: 'Mi perfil',
+  myProfilePageSubtitle:
+    'Administra tu información personal y la configuración de tu cuenta.',
+  myProfileTabPersonal: 'Información personal',
+  myProfileTabAccount: 'Cuenta y seguridad',
+  myProfileTabPreferences: 'Preferencias',
+  myProfileTabActivity: 'Actividad',
+  myProfileSectionPreview: 'Vista previa del perfil',
+  myProfileSectionPreviewHint:
+    'Así es como otros ven tu perfil.',
+  myProfileSectionQuickActions: 'Acciones rápidas',
+  myProfileFieldClinic: 'Clínica',
+  myProfileFieldSystemRole: 'Rol del sistema',
+  myProfileFieldMemberSince: 'Miembro desde',
+  myProfileQuickChangePasswordHint: 'Actualiza la contraseña de tu cuenta',
+  myProfileQuickTwoFactor: 'Autenticación en dos pasos',
+  myProfileQuickTwoFactorHint: 'Administra la configuración 2FA',
+  myProfileQuickDownloadData: 'Descargar mis datos',
+  myProfileQuickDownloadDataHint: 'Exporta los datos de tu cuenta',
+  myProfileComingSoon: 'Esta sección estará disponible pronto.',
+  myProfileLoadError:
+    'No se pudo cargar tu perfil. Inténtalo de nuevo.',
+  generateDocumentAction: 'Generar documento',
+  generateDocumentDialogTitle: 'Generar documento',
+  generateDocumentDialogSubtitle:
+    'Elige un formato e idioma para el archivo exportado.',
+  generateDocumentFormatLabel: 'Formato',
+  generateDocumentFormatPlaceholder: 'Seleccionar formato',
+  generateDocumentLocaleLabel: 'Idioma',
+  generateDocumentLocalePlaceholder: 'Seleccionar idioma',
+  generateDocumentLocaleEs: 'Español',
+  generateDocumentLocaleEn: 'Inglés',
+  generateDocumentSuccess: 'Documento generado: {fileName}',
+  generateDocumentError:
+    'No se pudo generar el documento. Inténtalo de nuevo.',
+  generateDocumentTypesError:
+    'No se pudieron cargar los formatos. Inténtalo de nuevo.',
+  generateDocumentMissingFields:
+    'Falta información requerida para generar este documento.',
+  generatedDocumentsTitle: 'Documentos generados',
+  generatedDocumentsEmpty: 'Aún no hay documentos generados.',
+  generatedDocumentsRefresh: 'Actualizar documentos generados',
+  generatedDocumentsDownload: 'Descargar documento',
+  generatedDocumentsLoadError:
+    'No se pudieron cargar los documentos generados.',
+  generatedDocumentsDownloadError:
+    'No se pudo descargar el documento. Inténtalo de nuevo.',
   changePassword: 'Cambiar contraseña',
   changePasswordTitle: 'Cambiar contraseña',
   changePasswordSubtitle:

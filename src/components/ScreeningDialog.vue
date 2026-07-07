@@ -233,6 +233,17 @@
         v-if="template && !loading"
         align="right"
         class="app-dialog-card__actions">
+        <GenerateDocumentAction
+          v-if="!ui.canEditDraft && screening.id"
+          :document-type="documentTypes.screeningReport"
+          :context="{
+            clientId: patientId,
+            screeningId: screening.id,
+          }"
+          flat
+          :label="t('generateDocumentAction')"
+          button-class="app-btn-outline q-mr-sm"
+        />
         <q-btn
           no-caps
           flat
@@ -305,7 +316,10 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import ScreeningEditor from 'components/ScreeningEditor.vue'
+import GenerateDocumentAction from
+  'components/documents/GenerateDocumentAction.vue'
 import { screeningStatuses, quasarNotifyTypes } from 'components/constants.js'
+import { documentTypes } from 'src/utils/document-generation-constants.js'
 import { todayDateUs } from 'src/utils/client-form.js'
 import { answersMapFromArray } from 'src/utils/screening-answers.js'
 import {

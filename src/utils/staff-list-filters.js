@@ -4,7 +4,7 @@ import {
 } from 'components/constants.js'
 import { staffStatuses } from 'components/constants.js'
 
-/* eslint-disable camelcase -- API query param keys in summary filters */
+/* eslint-disable camelcase -- API query param keys for staff list filters */
 export const STAFF_LIST_SUMMARY_FILTERS = {
   totalStaff: {},
   clinicians: { staff_type: staffStaffTypes.clinicians },
@@ -21,7 +21,6 @@ export function createEmptyStaffListFilters() {
   return {
     employmentStatuses: [],
     positions: [],
-    roles: [],
     staffType: staffStaffTypes.all,
     credentialStatus: '',
     hireDateFrom: '',
@@ -38,9 +37,6 @@ export function countActiveStaffListFilters(filters) {
     count += 1
   }
   if (filters.positions?.length) {
-    count += 1
-  }
-  if (filters.roles?.length) {
     count += 1
   }
   if (
@@ -100,9 +96,6 @@ export function buildStaffListQueryParams({
   if (Array.isArray(panel.positions) && panel.positions.length) {
     params.position = panel.positions.join(',')
   }
-  if (Array.isArray(panel.roles) && panel.roles.length) {
-    params.role = panel.roles.join(',')
-  }
   if (
     panel.staffType
     && panel.staffType !== staffStaffTypes.all
@@ -131,7 +124,6 @@ export function staffListFiltersToApiPayload(filters) {
   return {
     employmentStatuses: [...(filters.employmentStatuses ?? [])],
     positions: [...(filters.positions ?? [])],
-    roles: [...(filters.roles ?? [])],
     staffType: filters.staffType ?? staffStaffTypes.all,
     credentialStatus: filters.credentialStatus ?? '',
     hireDateFrom: filters.hireDateFrom ?? '',

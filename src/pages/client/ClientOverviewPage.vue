@@ -11,6 +11,7 @@
     <ClientOverviewHeader
       v-if="header"
       class="client-overview-page__header"
+      :client-id="clientId"
       :header="header"
       :billing="sidebar?.billing"
       :insurance="sidebar?.insurance"

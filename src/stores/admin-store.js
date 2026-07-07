@@ -54,21 +54,9 @@ export const useAdminStore = defineStore('admin', {
     },
     async createUser(payload, t, options = {}) {
       await createTenantUser(payload, options)
-      await this.getUserList(
-        { page: 1, limit: this.userListQuery.limit },
-        t,
-      )
     },
-    async updateUser(userId, payload, t) {
-      await updateTenantUser(userId, payload)
-      await this.getUserList(
-        {
-          page: this.userListQuery.page,
-          limit: this.userListQuery.limit,
-          q: this.userListQuery.q,
-        },
-        t,
-      )
+    async updateUser(userId, payload, t, options = {}) {
+      await updateTenantUser(userId, payload, options)
     },
     async deleteUser(userId, t) {
       await deleteTenantUser(userId)
@@ -77,6 +65,8 @@ export const useAdminStore = defineStore('admin', {
           page: this.userListQuery.page,
           limit: this.userListQuery.limit,
           q: this.userListQuery.q,
+          status: this.userListQuery.status,
+          role: this.userListQuery.role,
         },
         t,
       )

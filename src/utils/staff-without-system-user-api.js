@@ -19,12 +19,13 @@ export function mapStaffWithoutSystemUserToSelectOption(row, t) {
   }
 
   const name = String(row?.name ?? '').trim()
-  const staffNo = String(row?.staff_no ?? row?.code ?? '').trim()
+  const staffNo = String(row?.staff_no ?? row?.code ?? row?.staffNo ?? '')
+    .trim()
   const position = String(
-    row?.position_label ?? row?.position ?? '',
+    row?.position_label ?? row?.position ?? row?.positionLabel ?? '',
   ).trim()
   const isClinician = Boolean(
-    row?.is_clinician ?? row?.position_is_clinical,
+    row?.is_clinician ?? row?.position_is_clinical ?? row?.isClinician,
   )
   const captionParts = [staffNo, position].filter(Boolean)
   if (isClinician) {
@@ -40,6 +41,22 @@ export function mapStaffWithoutSystemUserToSelectOption(row, t) {
     isClinician,
     caption: captionParts.join(' · '),
   }
+}
+
+export function mapStaffMemberToSelectOption(staffMember, t) {
+  if (!staffMember || staffMember.id == null) {
+    return null
+  }
+
+  /* eslint-disable camelcase -- API list item shape */
+  return mapStaffWithoutSystemUserToSelectOption({
+    id: staffMember.id,
+    name: staffMember.name,
+    staff_no: staffMember.staffNo,
+    position: staffMember.position,
+    is_clinician: staffMember.isClinician,
+  }, t)
+  /* eslint-enable camelcase */
 }
 
 export function mapStaffWithoutSystemUserRows(items, t) {

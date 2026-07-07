@@ -2,6 +2,10 @@ import {
   userFieldKeys,
   userStatusValues,
 } from 'components/constants.js'
+import {
+  buildUserUpdateRequest,
+  resolveTenantStaffIdFromUser,
+} from 'src/utils/user-register-payload.js'
 
 function normalizeRoleId(value) {
   const id = Number(value)
@@ -93,6 +97,7 @@ export function cloneUser(user) {
 
   const roles = normalizeRoles(user)
   const permissions = normalizePermissions(user)
+  const tenantStaffId = resolveTenantStaffIdFromUser(user)
 
   return createEmptyUser({
     id: user.id ?? null,
@@ -106,7 +111,7 @@ export function cloneUser(user) {
     [userFieldKeys.name]: user[userFieldKeys.name] ?? user.name ?? '',
     [userFieldKeys.lastLogin]:
       user[userFieldKeys.lastLogin] ?? user.lastLogin ?? '',
-    tenantStaffId: user.tenantStaffId ?? user.tenant_staff_id ?? null,
+    tenantStaffId,
     staffMember: user.staffMember ?? user.staff_member ?? null,
     changePasswordRequired: Boolean(
       user.changePasswordRequired
@@ -117,15 +122,6 @@ export function cloneUser(user) {
   })
 }
 
-export function userToUpdatePayload(user) {
-  const payload = {
-    username: String(user?.email ?? user?.username ?? '').trim(),
-    description: String(user?.description ?? '').trim(),
-  }
-  const password = String(user?.password ?? '').trim()
-  if (password) {
-    payload.password = password
-  }
-
-  return payload
+export function userToUpdatePayload(user, options = {}) {
+  return buildUserUpdateRequest(user, options)
 }

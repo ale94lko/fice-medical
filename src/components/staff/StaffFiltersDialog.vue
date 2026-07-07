@@ -54,23 +54,6 @@
           </div>
 
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('staffFilterRole')">
-              <FormSelect
-                v-model="local.roles"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                multiple
-                use-chips
-                clearable
-                :options="roleOptions"
-                :placeholder="t('staffFilterRolePlaceholder')"
-              />
-            </AddClientLabeledField>
-          </div>
-
-          <div class="col-12 col-md-6">
             <AddClientLabeledField :label="t('staffFilterStaffType')">
               <FormSelect
                 v-model="local.staffType"
@@ -169,10 +152,6 @@ const props = defineProps({
     default: () => createEmptyStaffListFilters(),
   },
   positionOptions: {
-    type: Array,
-    default: () => [],
-  },
-  roleOptions: {
     type: Array,
     default: () => [],
   },

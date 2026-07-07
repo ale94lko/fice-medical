@@ -12,9 +12,47 @@ function readItems(envelope) {
   return Array.isArray(envelope.items) ? envelope.items : []
 }
 
+function readSummary(envelope) {
+  const summary = envelope?.summary ?? {}
+  const totalStaff = Number(summary.total_staff ?? summary.totalStaff ?? 0)
+  const clinicians = Number(summary.clinicians ?? 0)
+  const activeStaff = Number(summary.active_staff ?? summary.activeStaff ?? 0)
+  const onLeave = Number(summary.on_leave ?? summary.onLeave ?? 0)
+  const expiringCredentials = Number(
+    summary.expiring_credentials ?? summary.expiringCredentials ?? 0,
+  )
+
+  return {
+    totalStaff: Number.isFinite(totalStaff) && totalStaff >= 0
+      ? totalStaff
+      : 0,
+    clinicians: Number.isFinite(clinicians) && clinicians >= 0
+      ? clinicians
+      : 0,
+    activeStaff: Number.isFinite(activeStaff) && activeStaff >= 0
+      ? activeStaff
+      : 0,
+    onLeave: Number.isFinite(onLeave) && onLeave >= 0 ? onLeave : 0,
+    expiringCredentials:
+      Number.isFinite(expiringCredentials) && expiringCredentials >= 0
+        ? expiringCredentials
+        : 0,
+  }
+}
+
 /**
  * @param {Record<string, unknown>} params
- * @returns {Promise<{ items: unknown[], pagination: Record<string, unknown> }>}
+ * @returns {Promise<{
+ *   items: unknown[],
+ *   pagination: Record<string, unknown>,
+ *   summary: {
+ *     totalStaff: number,
+ *     clinicians: number,
+ *     activeStaff: number,
+ *     onLeave: number,
+ *     expiringCredentials: number,
+ *   },
+ * }>}
  */
 export async function fetchStaffListPage(params = {}) {
   const response = await apiInstance.get(apiPaths.staffList, { params })
@@ -23,6 +61,7 @@ export async function fetchStaffListPage(params = {}) {
   return {
     items: readItems(envelope),
     pagination: extractEnvelopeListPagination(envelope) ?? {},
+    summary: readSummary(envelope),
   }
 }
 
@@ -41,61 +80,16 @@ export async function loadStaffListView({
     summaryFilter,
     filters,
   })
-  const { items, pagination } = await fetchStaffListPage(params)
+  const { items, pagination, summary } = await fetchStaffListPage(params)
   const rows = items
     .map(item => mapStaffListItem(item, t))
     .filter(Boolean)
 
-  return { rows, pagination, params }
-}
-
-export async function fetchStaffSummaryCount(options = {}) {
-  const params = buildStaffListQueryParams({
-    ...options,
-    page: 0,
-    limit: 1,
-  })
-  const { pagination } = await fetchStaffListPage(params)
-
-  return Number(pagination?.total ?? 0) || 0
-}
-
-export async function fetchStaffSummaryMetrics({
-  panelFilters = null,
-} = {}) {
-  const filters = panelFilters ?? {}
-  const [
-    totalStaff,
-    clinicians,
-    activeStaff,
-    onLeave,
-    expiringCredentials,
-  ] = await Promise.all([
-    fetchStaffSummaryCount({ filters }),
-    fetchStaffSummaryCount({
-      filters,
-      summaryFilter: 'clinicians',
-    }),
-    fetchStaffSummaryCount({
-      filters,
-      summaryFilter: 'activeStaff',
-    }),
-    fetchStaffSummaryCount({
-      filters,
-      summaryFilter: 'onLeave',
-    }),
-    fetchStaffSummaryCount({
-      filters,
-      summaryFilter: 'expiringCredentials',
-    }),
-  ])
-
   return {
-    totalStaff,
-    clinicians,
-    activeStaff,
-    onLeave,
-    expiringCredentials,
+    rows,
+    pagination,
+    summary,
+    params,
   }
 }
 
@@ -148,19 +142,4 @@ export async function fetchStaffPositionIsClinical(code) {
   const envelope = readEnvelope(response)
 
   return Boolean(envelope.is_clinical)
-}
-
-export async function fetchRolesList() {
-  const response = await apiInstance.get(apiPaths.rolesList)
-  const envelope = readEnvelope(response)
-  const items = Array.isArray(envelope.items)
-    ? envelope.items
-    : Array.isArray(envelope)
-      ? envelope
-      : []
-
-  return items.map(row => ({
-    label: String(row.name ?? row.label ?? '').trim(),
-    value: row.id ?? row.role_id ?? row.value,
-  })).filter(opt => opt.label && opt.value != null)
 }

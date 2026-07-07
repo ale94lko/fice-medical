@@ -182,6 +182,17 @@
           </q-td>
         </template>
 
+        <template #body-cell-username="scope">
+          <q-td
+            :props="scope"
+            class="admin-data-table__secondary-cell">
+            <AdminTableSearchHighlight
+              :text="scope.row[fk.username] || '—'"
+              :query="highlightQuery"
+            />
+          </q-td>
+        </template>
+
         <template #body-cell-status="scope">
           <q-td :props="scope">
             <AdminTableStatusCell
@@ -297,7 +308,6 @@
       v-model="filtersOpen"
       :filters="panelFilters"
       :position-options="positionOptions"
-      :role-options="roleOptions"
       @apply="onApplyFilters"
     />
 
@@ -376,8 +386,6 @@ import {
   staffListFiltersToApiPayload,
 } from 'src/utils/staff-list-filters.js'
 import {
-  fetchRolesList,
-  fetchStaffSummaryMetrics,
   loadStaffListView,
   patchStaffStatus,
   patchStaffStatusBulk,
@@ -413,7 +421,6 @@ const staffPagination = ref(null)
 const changeStatusTargetIds = ref([])
 const deactivatingRow = ref(null)
 const positionOptions = ref([])
-const roleOptions = ref([])
 
 const summaryMetrics = ref({
   totalStaff: 0,
@@ -533,6 +540,16 @@ const allColumns = computed(() => [
     style: 'min-width: 140px',
   },
   {
+    name: col.username,
+    required: false,
+    label: t('username'),
+    align: 'left',
+    field: row => row[fk.username],
+    sortable: false,
+    headerStyle: 'min-width: 200px',
+    style: 'min-width: 200px',
+  },
+  {
     name: col.status,
     required: true,
     label: t('status'),
@@ -613,27 +630,15 @@ function staffTablePaginationFromStore(paginationPayload) {
   }
 }
 
-async function loadSummaryMetrics() {
-  try {
-    summaryMetrics.value = await fetchStaffSummaryMetrics({
-      panelFilters: panelFilters.value,
-    })
-  } catch {
-    summaryMetrics.value = {
-      totalStaff: 0,
-      clinicians: 0,
-      activeStaff: 0,
-      onLeave: 0,
-      expiringCredentials: 0,
-    }
-  }
-}
-
 async function loadStaffList(paginationPayload) {
   loading.value = true
   try {
     const limit = resolveApiLimit(paginationPayload.rowsPerPage)
-    const { rows: nextRows, pagination } = await loadStaffListView({
+    const {
+      rows: nextRows,
+      pagination,
+      summary,
+    } = await loadStaffListView({
       page: Math.max(0, paginationPayload.page - 1),
       limit,
       q: searchQuery.value,
@@ -644,7 +649,13 @@ async function loadStaffList(paginationPayload) {
     staffRows.value = nextRows
     staffPagination.value = pagination
     tablePagination.value = staffTablePaginationFromStore(paginationPayload)
-    await loadSummaryMetrics()
+    summaryMetrics.value = summary ?? {
+      totalStaff: 0,
+      clinicians: 0,
+      activeStaff: 0,
+      onLeave: 0,
+      expiringCredentials: 0,
+    }
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -824,12 +835,6 @@ async function loadFilterOptions() {
       : []
   } catch {
     positionOptions.value = []
-  }
-
-  try {
-    roleOptions.value = await fetchRolesList()
-  } catch {
-    roleOptions.value = []
   }
 }
 

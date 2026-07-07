@@ -10,6 +10,11 @@ const routes = [
         component: () => import('pages/dashboard/DashboardPage.vue'),
       },
       {
+        path: 'account/profile',
+        name: 'MyProfile',
+        component: () => import('pages/account/MyProfilePage.vue'),
+      },
+      {
         path: 'calendar',
         name: 'Calendar',
         component: () => import('pages/calendar/CalendarPage.vue'),

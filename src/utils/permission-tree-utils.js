@@ -9,6 +9,7 @@ const ACTION_PREFIXES = [
   'BOOK_',
   'CANCEL_',
   'RESCHEDULE_',
+  'GENERATE_',
   'MANAGE_',
 ]
 

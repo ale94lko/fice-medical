@@ -281,7 +281,7 @@ import {
 } from 'src/utils/user-list-search.js'
 import { fetchTenantRoleOptions } from 'src/utils/tenant-roles-api.js'
 import { useAuthStore } from 'stores/auth-store.js'
-import { cloneUser, userToUpdatePayload } from 'src/utils/user-orders.js'
+import { cloneUser } from 'src/utils/user-orders.js'
 import { userListTestIds } from 'src/test-ids/index.js'
 
 const { t } = useI18n()
@@ -657,25 +657,32 @@ async function onDeleteConfirm() {
   }
 }
 
-async function onDialogSave({ user, permissionTreeNodes }) {
+async function onDialogSave({ user, permissionTreeNodes, roleOptions }) {
   dialogSaving.value = true
   try {
     if (dialogMode.value === 'add') {
       await adminStore.createUser(user, t, {
         activeSubtenantId: authStore.activeSubtenantId,
         permissionTreeNodes,
+        roleOptions,
       })
       $q.notify({
         type: quasarNotifyTypes.positive,
         message: t('userCreateSuccess'),
       })
+      tablePagination.value = { ...tablePagination.value, page: 1 }
+      await loadUsers(tablePagination.value)
     } else {
-      const payload = userToUpdatePayload(user)
-      await adminStore.updateUser(user.id, payload, t)
+      await adminStore.updateUser(user.id, user, t, {
+        permissionTreeNodes,
+        roleOptions,
+        activeSubtenantId: authStore.activeSubtenantId,
+      })
       $q.notify({
         type: quasarNotifyTypes.positive,
         message: t('userUpdateSuccess'),
       })
+      await loadUsers(tablePagination.value)
     }
     closeDialog()
   } catch (error) {

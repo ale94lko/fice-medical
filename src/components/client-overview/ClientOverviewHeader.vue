@@ -23,6 +23,21 @@
               </span>
             </div>
 
+            <div
+              v-if="clientId"
+              class="client-overview-header__generate-doc">
+              <GenerateDocumentAction
+                :document-type="documentTypes.clientProfile"
+                :context="{ clientId }"
+                dense
+                size="sm"
+                :label="t('generateDocumentAction')"
+                button-class="app-btn-outline
+                  client-overview-header__generate-doc-btn"
+                @generated="emit('document-generated')"
+              />
+            </div>
+
             <button
               v-if="missingItems.length"
               type="button"
@@ -377,9 +392,16 @@ import AdminTableClinicianAvatars from
 import AdminTableContactOverflow from
   'components/admin-table/AdminTableContactOverflow.vue'
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
+import GenerateDocumentAction from
+  'components/documents/GenerateDocumentAction.vue'
+import { documentTypes } from 'src/utils/document-generation-constants.js'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
+  clientId: {
+    type: [String, Number],
+    default: null,
+  },
   header: {
     type: Object,
     required: true,
@@ -402,7 +424,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['review-missing', 'edit'])
+const emit = defineEmits(['review-missing', 'edit', 'document-generated'])
 
 const { t } = useI18n()
 const $q = useQuasar()

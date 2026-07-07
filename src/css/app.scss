@@ -10,6 +10,7 @@
 @import 'login-promo-panel';
 @import 'calendar';
 @import 'appointment-detail-dialog';
+@import 'my-profile-page';
 
 
 .app-layout .q-page-container {
@@ -1431,6 +1432,11 @@
   width: 100%;
   max-width: 920px;
   min-width: 320px;
+}
+
+.generate-document-dialog.insurance-dialog.app-dialog-card {
+  max-width: 460px;
+  min-width: 300px;
 }
 
 .subtenant-dialog.insurance-dialog.app-dialog-card {

@@ -62,6 +62,7 @@
 
     <CarePlanDialog
       v-model="dialogOpen"
+      :client-id="clientId"
       :mode="dialogMode"
       :plan="activePlan"
       :clinician-options="resolvedClinicianOptions"

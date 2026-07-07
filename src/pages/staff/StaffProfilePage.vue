@@ -6,6 +6,13 @@
       :title="profileTitle"
       :subtitle="profileSubtitle">
       <template #actions>
+        <GenerateDocumentAction
+          :document-type="documentTypes.staffProfile"
+          :context="{ staffId: route.params.id }"
+          :label="t('generateDocumentAction')"
+          button-class="app-btn-primary q-mr-sm"
+          :outline="false"
+        />
         <q-btn
           v-if="canEditStaff"
           no-caps
@@ -92,7 +99,10 @@ import AdminListPageHeader from
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import GenerateDocumentAction from
+  'components/documents/GenerateDocumentAction.vue'
 import { useStaffPermissions } from 'src/composables/useStaffPermissions.js'
+import { documentTypes } from 'src/utils/document-generation-constants.js'
 import { fetchStaffById } from 'src/utils/staff-api.js'
 import { mapStaffListItem } from 'src/utils/staff-list-normalize.js'
 import { staffFieldKeys as fk } from 'src/utils/staff-list-columns.js'

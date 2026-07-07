@@ -4,6 +4,8 @@ import {
   staffStatusLabel,
   staffStatusVariant,
 } from 'src/utils/staff-status.js'
+import { normalizeStaffSystemUserFromApi } from
+  'src/utils/staff-system-user.js'
 
 function formatHireDate(value) {
   return apiDateToDisplay(value) || String(value ?? '').trim()
@@ -18,6 +20,13 @@ export function mapStaffListItem(item, t) {
   const isClinician = Boolean(
     item.is_clinician ?? item.position_is_clinical,
   )
+  const systemUser = normalizeStaffSystemUserFromApi(item)
+  const roleLabel = systemUser?.roleName
+    || String(
+      item.role_label ?? item.role ?? item.system_role ?? '',
+    ).trim()
+  const username = systemUser?.username
+    || String(item.username ?? '').trim()
 
   return {
     id: item.id,
@@ -27,10 +36,10 @@ export function mapStaffListItem(item, t) {
     [fk.position]: String(
       item.position_label ?? item.position ?? '',
     ).trim(),
-    [fk.role]: String(
-      item.role_label ?? item.role ?? item.system_role ?? '',
-    ).trim(),
-    [fk.username]: String(item.username ?? '').trim(),
+    [fk.role]: roleLabel,
+    [fk.username]: username,
+    systemUser,
+    tenantUserId: systemUser?.tenantUserId ?? null,
     [fk.npi]: String(item.npi ?? '').trim(),
     [fk.status]: staffStatusLabel(statusRaw, t),
     statusRaw,

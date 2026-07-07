@@ -52,14 +52,20 @@
           :empty-label="t('clinicalNoteListEmpty')"
           :can-edit="canEditClinicalNotes"
           :can-delete="canDeleteClinicalNotes"
-          :can-download="canViewClinicalNotes"
+          :can-download="canGenerateDocuments"
           @view="openView"
           @edit="openEdit"
           @delete="confirmDelete"
-          @download="onDownload"
+          @download="onExport"
         />
       </AdminTablePanel>
     </template>
+
+    <GenerateDocumentDialog
+      v-model="exportDialogOpen"
+      :document-type="documentTypes.clinicalNote"
+      :context="exportContext"
+    />
 
     <ClinicalNoteDialog
       v-model="dialogOpen"
@@ -97,14 +103,18 @@ import ModalComponent from 'components/ModalComponent.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { useClientClinicalNotePermissions } from
   'src/composables/useClientClinicalNotePermissions.js'
+import { useDocumentGenerationPermissions } from
+  'src/composables/useDocumentGenerationPermissions.js'
 import {
   apiErrorMessage,
   createClinicalNote,
   deleteClinicalNote,
-  downloadClinicalNote,
   signClinicalNote,
   updateClinicalNote,
 } from 'src/utils/clinical-note-api.js'
+import GenerateDocumentDialog from
+  'components/documents/GenerateDocumentDialog.vue'
+import { documentTypes } from 'src/utils/document-generation-constants.js'
 import {
   mapClinicalNotesListFromApi,
   normalizeClinicalNoteDetail,
@@ -147,6 +157,7 @@ const {
   canDeleteClinicalNotes,
   canSignClinicalNotes,
 } = useClientClinicalNotePermissions()
+const { canGenerateDocuments } = useDocumentGenerationPermissions()
 
 const saving = ref(false)
 
@@ -155,6 +166,8 @@ const dialogMode = ref('add')
 const activeNote = ref(null)
 const deleteDialogOpen = ref(false)
 const pendingDeleteNote = ref(null)
+const exportDialogOpen = ref(false)
+const exportContext = ref({})
 
 const hasClientId = computed(() =>
   Boolean(String(props.clientId ?? '').trim()),
@@ -280,28 +293,16 @@ async function onDeleteConfirmed() {
   }
 }
 
-async function onDownload(row) {
-  if (!row?.id) {
+async function onExport(row) {
+  if (!row?.id || !canGenerateDocuments.value) {
     return
   }
-  try {
-    const response = await downloadClinicalNote(clientId.value, row.id)
-    const url = window.URL.createObjectURL(new Blob([response.data]))
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `clinical-note-${row.id}.txt`)
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    window.URL.revokeObjectURL(url)
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: apiErrorMessage(error) || t('clinicalNoteDownloadError'),
-      })
-    }
+
+  exportContext.value = {
+    clientId: clientId.value,
+    clinicalNoteId: row.id,
   }
+  exportDialogOpen.value = true
 }
 
 async function persistNote(note) {

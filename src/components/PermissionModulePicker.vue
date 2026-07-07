@@ -269,9 +269,9 @@ function onPermissionToggle(permission, checked) {
     max-height: 420px;
     overflow: auto;
     padding: 4px;
-    border: 1px solid $border-subtle;
+    border: 1px solid rgba($positive, 0.16);
     border-radius: $radius-md;
-    background: $surface;
+    background: #f0fdf4;
   }
 
   &__grid {
@@ -392,7 +392,7 @@ function onPermissionToggle(permission, checked) {
   }
 
   &--readonly &__panel {
-    background: $surface-muted;
+    background: #ecfdf5;
   }
 
   @media (max-width: 767px) {

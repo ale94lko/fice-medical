@@ -265,6 +265,13 @@
         align="right"
         class="app-dialog-card__actions appointment-detail-dialog__actions">
         <div class="appointment-detail-dialog__actions-left">
+          <GenerateDocumentAction
+            v-if="record?.id"
+            :document-type="documentTypes.appointmentSummary"
+            :context="{ appointmentId: record.id }"
+            :label="t('generateDocumentAction')"
+            button-class="app-btn-outline"
+          />
           <q-btn
             no-caps
             outline
@@ -311,6 +318,9 @@ import {
 } from 'src/utils/appointment-datetime.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import GenerateDocumentAction from
+  'components/documents/GenerateDocumentAction.vue'
+import { documentTypes } from 'src/utils/document-generation-constants.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },

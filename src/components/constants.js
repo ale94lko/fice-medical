@@ -374,6 +374,7 @@ export const storedFileCategories = {
   xray: 'XRAY',
   consentForm: 'CONSENT_FORM',
   insuranceDocument: 'INSURANCE_DOCUMENT',
+  generatedDocument: 'GENERATED_DOCUMENT',
   companyLogo: 'COMPANY_LOGO',
 }
 
@@ -844,6 +845,8 @@ export const permissionNames = {
   editCredentials: 'EDIT_CREDENTIALS',
   viewSubtenants: 'VIEW_SUBTENANTS',
   editSubtenants: 'EDIT_SUBTENANTS',
+  generateDocuments: 'GENERATE_DOCUMENTS',
+  viewFiles: 'VIEW_FILES',
 }
 
 export const clientPermissionNames = {
@@ -1178,6 +1181,8 @@ export const apiPaths = {
   storedFilePreview: id => `/files/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/preview`,
+  documentsTypes: '/documents/v1/types',
+  documentsGenerate: '/documents/v1/generate',
   patientLabs: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/labs`,

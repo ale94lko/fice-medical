@@ -1,6 +1,25 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
-import { normalizeStoredFile } from 'src/utils/stored-file-normalize.js'
+import { extractEnvelopeListPagination } from 'components/helpers.js'
+import {
+  mapStoredFilesList,
+  normalizeStoredFile,
+} from 'src/utils/stored-file-normalize.js'
+
+function unwrapListRoot(body) {
+  const root = body?.data ?? body
+  if (Array.isArray(root?.items)) {
+    return root
+  }
+  if (Array.isArray(root?.content)) {
+    return { items: root.content, pagination: root.pagination }
+  }
+  if (Array.isArray(root)) {
+    return { items: root, pagination: null }
+  }
+
+  return root
+}
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -83,6 +102,44 @@ export async function deleteStoredFile(fileId) {
   await apiInstance.delete(apiPaths.storedFileById(parseStoredFileId(fileId)))
 }
 
+export async function listStoredFiles(params = {}) {
+  const queryParams = {}
+  if (params.category) {
+    queryParams.category = String(params.category)
+  }
+  if (params.entityType) {
+    // eslint-disable-next-line camelcase -- query param for API
+    queryParams.entity_type = String(params.entityType)
+  }
+  if (params.entityId != null) {
+    // eslint-disable-next-line camelcase -- query param for API
+    queryParams.entity_id = Number(params.entityId)
+  }
+  if (params.clientId != null) {
+    // eslint-disable-next-line camelcase -- query param for API
+    queryParams.client_id = Number(params.clientId)
+  }
+  if (params.page != null) {
+    queryParams.page = Number(params.page)
+  }
+  if (params.limit != null) {
+    queryParams.limit = Number(params.limit)
+  }
+
+  const response = await apiInstance.get(apiPaths.storedFilesList, {
+    params: queryParams,
+  })
+  const root = unwrapListRoot(response.data)
+  const pagination = extractEnvelopeListPagination(root)
+    ?? root?.pagination
+    ?? null
+
+  return {
+    items: mapStoredFilesList(root?.items ?? []),
+    pagination,
+  }
+}
+
 export async function resolveStoredFileImageSrc(fileId) {
   const id = Number(fileId)
   if (!Number.isFinite(id) || id <= 0) {
@@ -114,4 +171,5 @@ export const filesApi = {
   blob: fetchStoredFileBlob,
   download: downloadStoredFile,
   delete: deleteStoredFile,
+  list: listStoredFiles,
 }

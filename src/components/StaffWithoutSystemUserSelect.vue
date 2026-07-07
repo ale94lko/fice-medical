@@ -89,6 +89,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  presetOptions: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -139,19 +143,24 @@ function mergeUniqueOptions(current, incoming) {
   return next
 }
 
+function mergePresetOptions(options) {
+  return mergeUniqueOptions(props.presetOptions ?? [], options ?? [])
+}
+
 function ensureSelectedInOptions(options) {
+  let next = mergePresetOptions(options)
   const selected = selectedOption.value
   if (!selected?.value) {
-    return options ?? []
+    return next
   }
-  const exists = (options ?? []).some(
+  const exists = next.some(
     option => option.value === selected.value,
   )
   if (exists) {
-    return options ?? []
+    return next
   }
 
-  return [selected, ...(options ?? [])]
+  return [selected, ...next]
 }
 
 function resetState() {
@@ -410,6 +419,24 @@ watch(
     void bootstrapBrowseOptions()
   },
   { immediate: true },
+)
+
+watch(
+  () => props.presetOptions,
+  () => {
+    filteredOptions.value = ensureSelectedInOptions(filteredOptions.value)
+    const value = props.modelValue
+    if (!value) {
+      return
+    }
+    const match = filteredOptions.value.find(
+      option => option.value === value,
+    )
+    if (match) {
+      selectedOption.value = match
+    }
+  },
+  { deep: true },
 )
 
 watch(

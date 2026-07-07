@@ -42,6 +42,23 @@ export const layoutTestIds = {
   navAdminServices: 'layout-nav-admin-services',
 }
 
+export const myProfileTestIds = {
+  page: 'my-profile-page',
+  summary: 'my-profile-summary',
+  changePassword: 'my-profile-quick-change-password',
+  tab: name => toTestId('my-profile-tab', name),
+}
+
+export const documentGenerationTestIds = {
+  dialog: 'generate-document-dialog',
+  format: 'generate-document-field-format',
+  locale: 'generate-document-field-locale',
+  submit: 'generate-document-btn-submit',
+  generatedList: 'generated-documents-list',
+  trigger: type => toTestId('generate-document-btn', type),
+  download: id => toTestId('generated-document-btn-download', id),
+}
+
 export const sessionInactivityTestIds = {
   dialog: 'session-inactivity-dialog',
   countdown: 'session-inactivity-countdown',

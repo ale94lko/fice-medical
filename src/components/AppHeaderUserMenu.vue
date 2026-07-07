@@ -80,16 +80,17 @@
       </div>
 
       <q-list class="app-header-user-menu__list">
+        <q-item
+          v-close-popup
+          clickable
+          :data-testid="layoutTestIds.userMenuMyProfile"
+          @click="goMyProfile">
+          <q-item-section avatar>
+            <q-icon name="person_outline" />
+          </q-item-section>
+          <q-item-section>{{ t('headerUserMyProfile') }}</q-item-section>
+        </q-item>
         <template v-if="hasStaffProfile">
-          <q-item
-            v-close-popup
-            clickable
-            :data-testid="layoutTestIds.userMenuMyProfile">
-            <q-item-section avatar>
-              <q-icon name="person_outline" />
-            </q-item-section>
-            <q-item-section>{{ t('headerUserMyProfile') }}</q-item-section>
-          </q-item>
           <q-item
             v-close-popup
             clickable
@@ -146,6 +147,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import HeaderUserAvatar from 'components/HeaderUserAvatar.vue'
@@ -155,6 +157,7 @@ import { layoutTestIds } from 'src/test-ids/index.js'
 const emit = defineEmits(['change-password', 'logout'])
 
 const { t } = useI18n()
+const router = useRouter()
 const authStore = useAuthStore()
 const { linkedStaffProfile, activeSubtenant } = storeToRefs(authStore)
 
@@ -169,4 +172,8 @@ const menuAriaLabel = computed(() =>
     ? t('headerUserMenuAria', { name: staffProfile.value.name })
     : t('headerUserMenuGenericAria'),
 )
+
+function goMyProfile() {
+  router.push({ name: 'MyProfile' })
+}
 </script>

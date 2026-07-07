@@ -40,7 +40,7 @@
             </AddClientLabeledField>
           </div>
           <div
-            v-if="!readonly"
+            v-if="isAddMode && !readonly"
             class="col-12 col-md-6">
             <AddClientLabeledField
               :label="passwordLabel"
@@ -57,32 +57,32 @@
             </AddClientLabeledField>
           </div>
           <div
+            v-if="showStaffField"
+            class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('userRelatedStaffLabel')"
+              :test-id="tid.field('tenant-staff')">
+              <StaffWithoutSystemUserSelect
+                v-model="local.tenantStaffId"
+                :active="open"
+                :readonly="readonly"
+                :preset-options="staffSelectPresetOptions"
+                :placeholder="t('userRelatedStaffPlaceholder')"
+                :test-id="tid.field('tenant-staff')"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div
             v-if="isAddMode && !readonly"
-            class="col-12">
-            <div class="row q-col-gutter-md">
-              <div class="col-12 col-md-6">
-                <AddClientLabeledField
-                  :label="t('userRelatedStaffLabel')"
-                  :test-id="tid.field('tenant-staff')">
-                  <StaffWithoutSystemUserSelect
-                    v-model="local.tenantStaffId"
-                    :active="open"
-                    :placeholder="t('userRelatedStaffPlaceholder')"
-                    :test-id="tid.field('tenant-staff')"
-                  />
-                </AddClientLabeledField>
-              </div>
-              <div class="col-12 col-md-6">
-                <AddClientLabeledField
-                  :label="t('userChangePasswordRequiredLabel')"
-                  :test-id="tid.field('change-password-required')">
-                  <FormToggle
-                    v-model="local.changePasswordRequired"
-                    :test-id="tid.field('change-password-required')"
-                  />
-                </AddClientLabeledField>
-              </div>
-            </div>
+            class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('userChangePasswordRequiredLabel')"
+              :test-id="tid.field('change-password-required')">
+              <FormToggle
+                v-model="local.changePasswordRequired"
+                :test-id="tid.field('change-password-required')"
+              />
+            </AddClientLabeledField>
           </div>
           <div
             v-if="showFullUserFields"
@@ -226,9 +226,15 @@ import {
 } from 'src/utils/tenant-roles-api.js'
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
+import { fetchTenantUser } from 'src/utils/user-list-api.js'
+import { mapStaffMemberToSelectOption } from
+  'src/utils/staff-without-system-user-api.js'
 import { createEmptyUser, cloneUser } from 'src/utils/user-orders.js'
-import { buildNewPasswordRules, createOptionalPasswordPolicyRule }
-  from 'src/utils/password-validation.js'
+import {
+  resolvePermissionIdsFromUserSelection,
+  resolveTenantStaffIdFromUser,
+} from 'src/utils/user-register-payload.js'
+import { buildNewPasswordRules } from 'src/utils/password-validation.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
 
@@ -275,7 +281,25 @@ const open = computed({
 const readonly = computed(() => props.mode === 'view')
 const isAddMode = computed(() => props.mode === 'add')
 const isEditMode = computed(() => props.mode === 'edit')
-const showFullUserFields = computed(() => isAddMode.value || readonly.value)
+const showFullUserFields = computed(() =>
+  isAddMode.value || isEditMode.value || readonly.value,
+)
+
+const showStaffField = computed(() =>
+  isAddMode.value || isEditMode.value || readonly.value,
+)
+
+const staffSelectPresetOptions = computed(() => {
+  const id = Number(local.value.tenantStaffId)
+  const staff = local.value.staffMember
+  if (!Number.isFinite(id) || id <= 0 || Number(staff?.id) !== id) {
+    return []
+  }
+
+  const option = mapStaffMemberToSelectOption(staff, t)
+
+  return option ? [option] : []
+})
 
 const dialogTitle = computed(() => {
   if (props.mode === 'view') {
@@ -319,27 +343,19 @@ const passwordPlaceholder = computed(() =>
 )
 
 const passwordRules = computed(() => {
-  if (readonly.value) {
+  if (!isAddMode.value || readonly.value) {
     return []
   }
-  if (isAddMode.value) {
-    return buildNewPasswordRules(t)
-  }
-  if (isEditMode.value) {
-    return [createOptionalPasswordPolicyRule(t)]
-  }
 
-  return []
+  return buildNewPasswordRules(t)
 })
 
 const statusRules = computed(() =>
-  readonly.value || isEditMode.value
-    ? []
-    : [requiredRule(t('fieldRequired'))],
+  readonly.value ? [] : [requiredRule(t('fieldRequired'))],
 )
 
 const rolesRules = computed(() => (
-  readonly.value || isEditMode.value
+  readonly.value
     ? []
     : [
       val => (Array.isArray(val) && val.length > 0) || t('fieldRequired'),
@@ -375,15 +391,6 @@ async function loadRoleOptions() {
   rolesLoading.value = true
   try {
     roleOptions.value = await fetchTenantRoleOptions(tenantId)
-    if (isAddMode.value && (local.value.roles ?? []).length) {
-      skipRolePermissionSync.value = true
-      local.value.permissions = mergeRolePermissionsIntoSelection({
-        selectedRoleIds: local.value.roles ?? [],
-        currentPermissionIds: local.value.permissions ?? [],
-        roleOptions: roleOptions.value,
-      })
-      skipRolePermissionSync.value = false
-    }
   } catch {
     roleOptions.value = []
     $q.notify({
@@ -395,41 +402,72 @@ async function loadRoleOptions() {
   }
 }
 
+async function hydrateDialogUser() {
+  if (!props.modelValue) {
+    return
+  }
+
+  skipRolePermissionSync.value = true
+  let sourceUser = props.user
+  if (isEditMode.value && props.user?.id) {
+    try {
+      sourceUser = await fetchTenantUser(props.user.id, t)
+    } catch {
+      sourceUser = props.user
+    }
+  }
+
+  local.value = cloneUser(sourceUser ?? createEmptyUser())
+  if (
+    !local.value.tenantStaffId
+    && local.value.staffMember?.id != null
+  ) {
+    local.value.tenantStaffId = resolveTenantStaffIdFromUser(local.value)
+  }
+  if (props.mode === 'add' && !local.value.status) {
+    local.value.status = userStatusValues.active
+  }
+  if (!Array.isArray(local.value.roles)) {
+    local.value.roles = []
+  }
+  if (!Array.isArray(local.value.permissions)) {
+    local.value.permissions = []
+  }
+  if (
+    props.mode === 'add'
+    && local.value.changePasswordRequired == null
+  ) {
+    local.value.changePasswordRequired = true
+  }
+  local.value.password = ''
+
+  if (isAddMode.value || isEditMode.value || readonly.value) {
+    await Promise.all([loadRoleOptions(), loadPermissionTree()])
+    local.value.permissions = resolvePermissionIdsFromUserSelection(
+      local.value.permissions ?? [],
+      permissionTreeNodes.value,
+    )
+    if ((local.value.roles ?? []).length) {
+      local.value.permissions = mergeRolePermissionsIntoSelection({
+        selectedRoleIds: local.value.roles ?? [],
+        currentPermissionIds: local.value.permissions ?? [],
+        roleOptions: roleOptions.value,
+      })
+    }
+  } else {
+    roleOptions.value = []
+    permissionTreeNodes.value = []
+  }
+
+  await nextTick()
+  formRef.value?.resetValidation()
+  skipRolePermissionSync.value = false
+}
+
 watch(
   () => [props.modelValue, props.user, props.mode],
   () => {
-    if (!props.modelValue) {
-      return
-    }
-    skipRolePermissionSync.value = true
-    local.value = cloneUser(props.user ?? createEmptyUser())
-    if (props.mode === 'add' && !local.value.status) {
-      local.value.status = userStatusValues.active
-    }
-    if (props.mode === 'add' && !Array.isArray(local.value.roles)) {
-      local.value.roles = []
-    }
-    if (props.mode === 'add' && !Array.isArray(local.value.permissions)) {
-      local.value.permissions = []
-    }
-    if (
-      props.mode === 'add'
-      && local.value.changePasswordRequired == null
-    ) {
-      local.value.changePasswordRequired = true
-    }
-    local.value.password = ''
-    if (props.mode === 'add' || props.mode === 'view') {
-      loadRoleOptions()
-      loadPermissionTree()
-    } else {
-      roleOptions.value = []
-      permissionTreeNodes.value = []
-    }
-    nextTick(() => {
-      formRef.value?.resetValidation()
-      skipRolePermissionSync.value = false
-    })
+    hydrateDialogUser()
   },
   { immediate: true },
 )
@@ -440,7 +478,6 @@ watch(
     if (
       skipRolePermissionSync.value
       || readonly.value
-      || !isAddMode.value
     ) {
       return
     }
@@ -469,9 +506,11 @@ async function onSave() {
   emit('save', {
     user: cloneUser({
       ...local.value,
+      tenantStaffId: resolveTenantStaffIdFromUser(local.value),
       password: local.value.password,
     }),
-    permissionTreeNodes: isAddMode.value ? permissionTreeNodes.value : [],
+    permissionTreeNodes: readonly.value ? [] : permissionTreeNodes.value,
+    roleOptions: readonly.value ? [] : roleOptions.value,
   })
 }
 </script>
