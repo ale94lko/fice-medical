@@ -1,1 +1,0 @@
-import{Jc as e,Uc as t,V as n,ml as r,ul as i,yl as a}from"./index-zuDqFFPS.js";import{r as o,t as s}from"./QLayout-CCG25EXk.js";var c={};function l(n,c){let l=r(`router-view`);return i(),t(s,{view:`hHh Lpr lff`},{default:a(()=>[e(o,null,{default:a(()=>[e(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};
