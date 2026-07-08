@@ -734,6 +734,19 @@ export default {
   clientProfilePhotoCropSave: 'Guardar foto',
   clientProfilePhotoCropZoomIn: 'Acercar',
   clientProfilePhotoCropZoomOut: 'Alejar',
+  profilePhotoMenuTakePhoto: 'Tomar foto',
+  profilePhotoMenuUploadPhoto: 'Subir foto',
+  profilePhotoCameraTitle: 'Tomar una foto',
+  profilePhotoCameraSubtitle:
+    'Permita el acceso a la cámara para tomar una foto y luego confírmela.',
+  profilePhotoCameraCapture: 'Capturar',
+  profilePhotoCameraRetake: 'Repetir',
+  profilePhotoCameraUsePhoto: 'Usar foto',
+  profilePhotoCameraSelectLabel: 'Cámara',
+  profilePhotoCameraDeviceDefault: 'Cámara {number}',
+  profilePhotoCameraPermissionError: 'Se denegó el permiso de la cámara.',
+  profilePhotoCameraUnavailable:
+    'La cámara no está disponible en este navegador.',
   cancelClientEditTitle: '¿Descartar cambios?',
   cancelClientEditMessage:
     'Tiene cambios sin guardar. Si sale ahora, se perderán.',

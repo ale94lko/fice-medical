@@ -103,6 +103,9 @@ export const userListTestIds = {
 export const userDialogTestIds = {
   field: name => toTestId('user-dialog-field', name),
   btn: name => toTestId('user-dialog-btn', name),
+  photoMenu: 'user-dialog-photo-menu',
+  photoTake: 'user-dialog-photo-take',
+  photoUpload: 'user-dialog-photo-upload',
 }
 
 export const subtenantListTestIds = {
@@ -242,6 +245,7 @@ export const clientPageTestIds = {
   close: 'client-page-btn-close',
   breadcrumbClients: 'client-page-breadcrumb-clients',
   profilePhotoCamera: 'client-page-profile-photo-camera',
+  profilePhotoCameraSelect: 'client-page-profile-photo-camera-select',
   profilePhotoCropDialog: 'client-page-profile-photo-crop-dialog',
   profilePhotoCropViewport: 'client-page-profile-photo-crop-viewport',
   profilePhotoCropZoom: 'client-page-profile-photo-crop-zoom',

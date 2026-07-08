@@ -23,6 +23,16 @@
           ref="formRef"
           greedy
           @submit.prevent="onSave">
+          <div class="row q-col-gutter-md q-mb-md">
+            <div class="col-12">
+              <ClientProfilePhotoField
+                :file-id="local.photoFileId"
+                :file-category="userProfileCategory"
+                :disabled="readonly"
+                @update:file-id="local.photoFileId = $event"
+              />
+            </div>
+          </div>
           <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -207,12 +217,14 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import TextInput from 'components/FormInput.vue'
 import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
+import ClientProfilePhotoField from 'components/ClientProfilePhotoField.vue'
 import RoleMultiSelect from 'components/RoleMultiSelect.vue'
 import RoleMultiSelectChips from 'components/RoleMultiSelectChips.vue'
 import StaffWithoutSystemUserSelect from
   'components/StaffWithoutSystemUserSelect.vue'
 import {
   quasarNotifyTypes,
+  storedFileCategories,
   userDescriptionMaxLength,
   userStatusValues,
 } from 'components/constants.js'
@@ -320,6 +332,8 @@ const statusOptions = computed(() => [
   { label: t('userStatusActive'), value: userStatusValues.active },
   { label: t('userStatusInactive'), value: userStatusValues.inactive },
 ])
+
+const userProfileCategory = storedFileCategories.userProfile
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 

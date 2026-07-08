@@ -23,21 +23,55 @@
         />
       </div>
     </div>
-    <button
-      type="button"
+    <q-btn
+      flat
+      round
+      dense
+      icon="photo_camera"
       class="client-profile-photo-field__camera-btn"
-      :disabled="disabled || uploading"
+      :disable="disabled || uploading"
       :data-testid="clientPageTestIds.profilePhotoCamera"
-      :aria-label="t('clientProfilePhotoUpload')"
-      @click="openPicker">
-      <q-icon name="photo_camera" size="18px" />
-    </button>
+      :aria-label="t('clientProfilePhotoUpload')">
+      <q-menu
+        anchor="bottom right"
+        self="top right"
+        class="app-light-menu client-profile-photo-field__menu"
+        :offset="[0, 8]">
+        <q-list dense class="client-profile-photo-field__menu-list">
+          <q-item
+            v-close-popup
+            clickable
+            class="client-profile-photo-field__menu-item"
+            :disable="disabled || uploading"
+            @click="openCamera">
+            <q-item-section avatar>
+              <q-icon name="photo_camera" color="primary" size="18px" />
+            </q-item-section>
+            <q-item-section>
+              {{ t('profilePhotoMenuTakePhoto') }}
+            </q-item-section>
+          </q-item>
+          <q-item
+            v-close-popup
+            clickable
+            class="client-profile-photo-field__menu-item"
+            :disable="disabled || uploading"
+            @click="openPicker">
+            <q-item-section avatar>
+              <q-icon name="upload" color="primary" size="18px" />
+            </q-item-section>
+            <q-item-section>
+              {{ t('profilePhotoMenuUploadPhoto') }}
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-btn>
     <input
       ref="fileInputRef"
       type="file"
       class="client-profile-photo-field__input"
       accept="image/jpeg,image/png,image/webp,image/gif"
-      capture="user"
       @change="onFileInput"
     />
 
@@ -47,6 +81,12 @@
       :saving="uploading"
       @confirm="onCropConfirm"
       @cancel="onCropCancel"
+    />
+
+    <ProfilePhotoCameraDialog
+      v-model="cameraDialogOpen"
+      @confirm="onCameraConfirm"
+      @cancel="onCameraCancel"
     />
   </div>
 </template>
@@ -59,6 +99,8 @@ import ClientOverviewProfileAvatarPlaceholder from
   'components/client-overview/ClientOverviewProfileAvatarPlaceholder.vue'
 import ClientProfilePhotoCropDialog from
   'components/ClientProfilePhotoCropDialog.vue'
+import ProfilePhotoCameraDialog from
+  'components/ProfilePhotoCameraDialog.vue'
 import {
   clientProfilePhotoMaxBytes,
   clientProfilePhotoMimeTypes,
@@ -97,6 +139,7 @@ const fileInputRef = ref(null)
 const uploading = ref(false)
 const cropDialogOpen = ref(false)
 const pendingCropFile = ref(null)
+const cameraDialogOpen = ref(false)
 
 const fileIdRef = toRef(props, 'fileId')
 const { previewSrc } = useStoredFilePreview(fileIdRef)
@@ -108,11 +151,50 @@ function openPicker() {
   fileInputRef.value?.click()
 }
 
+function openCamera() {
+  if (props.disabled || uploading.value) {
+    return
+  }
+  cameraDialogOpen.value = true
+}
+
 function onFileInput(event) {
   const file = event.target?.files?.[0]
   if (fileInputRef.value) {
     fileInputRef.value.value = ''
   }
+  if (!file) {
+    return
+  }
+  if (!clientProfilePhotoMimeTypes.includes(file.type)) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('clientProfilePhotoInvalidType'),
+      position: 'top',
+    })
+
+    return
+  }
+  if (file.size > clientProfilePhotoMaxBytes) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('clientProfilePhotoTooLarge'),
+      position: 'top',
+    })
+
+    return
+  }
+
+  pendingCropFile.value = file
+  cropDialogOpen.value = true
+}
+
+function onCameraCancel() {
+  cameraDialogOpen.value = false
+}
+
+function onCameraConfirm(file) {
+  cameraDialogOpen.value = false
   if (!file) {
     return
   }

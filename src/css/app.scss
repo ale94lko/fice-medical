@@ -616,6 +616,35 @@
   &__input {
     display: none;
   }
+
+  &__menu {
+    min-width: 0;
+    width: 148px;
+    max-width: 148px;
+
+    .client-profile-photo-field__menu-list {
+      padding: 4px 0;
+    }
+
+    .client-profile-photo-field__menu-item {
+      min-height: 34px;
+      padding: 4px 8px;
+      margin: 2px 4px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: $text-strong;
+
+      .q-item__section--main {
+        min-width: 0;
+        white-space: nowrap;
+      }
+
+      .q-item__section--avatar {
+        min-width: 24px !important;
+        padding-right: 6px !important;
+      }
+    }
+  }
 }
 
 .client-profile-photo-crop-dialog.app-dialog-card {

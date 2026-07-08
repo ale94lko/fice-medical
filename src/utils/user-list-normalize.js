@@ -127,7 +127,10 @@ export function mapUserListViewItem(item, t) {
   const accountEmail = trim(item.email ?? item.username)
   const displayName = staffMember?.name || resolveUserDisplayName(item)
   const email = accountEmail || staffMember?.email || ''
-  const photoFileId = staffMember?.photoFileId ?? null
+  const photoFileId = item?.photo_file_id
+    ?? item?.photoFileId
+    ?? staffMember?.photoFileId
+    ?? null
   const lastLoginRaw = item.last_login ?? item.lastLogin ?? ''
   const lastLoginLabel = formatUserLastLogin(lastLoginRaw, t)
   const createdAtRaw = item.created_at ?? item.createdAt ?? ''

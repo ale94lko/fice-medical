@@ -77,6 +77,7 @@ export function createEmptyUser(overrides = {}) {
     id: null,
     [userFieldKeys.name]: '',
     email: '',
+    photoFileId: null,
     password: '',
     roles: [],
     permissions: [],
@@ -98,10 +99,16 @@ export function cloneUser(user) {
   const roles = normalizeRoles(user)
   const permissions = normalizePermissions(user)
   const tenantStaffId = resolveTenantStaffIdFromUser(user)
+  const photoFileId = user?.photo_file_id
+    ?? user?.photoFileId
+    ?? user?.photo_file?.id
+    ?? user?.photoFile?.id
+    ?? null
 
   return createEmptyUser({
     id: user.id ?? null,
     email: user.email ?? user[userFieldKeys.email] ?? user.username ?? '',
+    photoFileId,
     password: String(user?.password ?? '').trim(),
     roles,
     permissions,

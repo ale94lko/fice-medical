@@ -121,6 +121,7 @@ function buildUserMutationBody(user, options = {}, mutation = {}) {
     username: String(user?.email ?? user?.username ?? '').trim(),
     description: String(user?.description ?? '').trim(),
     status: mapUserStatusToApi(user?.status ?? user?.statusCode),
+    photoFileId: user?.photoFileId ?? user?.photo_file_id ?? null,
     roles,
     permissions,
     modules,

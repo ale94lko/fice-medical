@@ -703,6 +703,18 @@ export default {
   clientProfilePhotoCropSave: 'Save photo',
   clientProfilePhotoCropZoomIn: 'Zoom in',
   clientProfilePhotoCropZoomOut: 'Zoom out',
+  profilePhotoMenuTakePhoto: 'Take photo',
+  profilePhotoMenuUploadPhoto: 'Upload photo',
+  profilePhotoCameraTitle: 'Take a photo',
+  profilePhotoCameraSubtitle:
+    'Allow camera access to take a photo, then confirm to use it.',
+  profilePhotoCameraCapture: 'Capture',
+  profilePhotoCameraRetake: 'Retake',
+  profilePhotoCameraUsePhoto: 'Use photo',
+  profilePhotoCameraSelectLabel: 'Camera',
+  profilePhotoCameraDeviceDefault: 'Camera {number}',
+  profilePhotoCameraPermissionError: 'Camera permission was denied.',
+  profilePhotoCameraUnavailable: 'Camera is not available in this browser.',
   cancelClientEditTitle: 'Discard changes?',
   cancelClientEditMessage:
     'You have unsaved changes. If you leave now, they will be lost.',

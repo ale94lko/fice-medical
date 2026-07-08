@@ -368,6 +368,7 @@ export const storedFileMimeTypes = [
 export const storedFileCategories = {
   clientProfile: 'CLIENT_PROFILE',
   clinicianProfile: 'CLINICIAN_PROFILE',
+  userProfile: 'USER_PROFILE',
   labResult: 'LAB_RESULT',
   clinicalDocument: 'CLINICAL_DOCUMENT',
   prescription: 'PRESCRIPTION',
