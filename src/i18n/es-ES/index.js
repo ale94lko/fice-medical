@@ -174,7 +174,8 @@ export default {
   subtenantListEmpty: 'No se encontraron subtenants.',
   subtenantListError:
     'No se pudieron cargar los subtenants. Inténtelo de nuevo.',
-  subtenantListPaginationSummary: '{from}–{to} de {total} subtenants',
+  subtenantListPaginationSummary:
+    'Mostrando {from} a {to} de {total} subtenants',
   subtenantNameLabel: 'Nombre',
   subtenantCodeLabel: 'Código',
   subtenantMainLabel: 'Sucursal principal',
@@ -209,7 +210,7 @@ export default {
   serviceProcedureListError:
     'No se pudieron cargar los servicios. Inténtelo de nuevo.',
   serviceProcedureListPaginationSummary:
-    '{from}–{to} de {total} servicios',
+    'Mostrando {from} a {to} de {total} servicios',
   serviceProcedureListSearchPlaceholder:
     'Buscar por nombre, categoría o código…',
   serviceProcedureCategoryFilterPlaceholder: 'Todas las categorías',
@@ -292,7 +293,8 @@ export default {
   userListSearchEmpty: 'Ningún usuario coincide con la búsqueda.',
   userListError:
     'No se pudieron cargar los usuarios. Inténtelo de nuevo.',
-  userListPaginationSummary: '{from}–{to} de {total} usuarios',
+  userListPaginationSummary:
+    'Mostrando {from} a {to} de {total} usuarios',
   userListColName: 'Nombre',
   userListColLastLogin: 'Último acceso',
   userListColCreatedAt: 'Fecha de creación',
@@ -406,7 +408,7 @@ export default {
   staffListEmpty: 'No se encontró personal.',
   staffListSearchEmpty: 'Ningún miembro coincide con la búsqueda.',
   staffListPaginationSummary:
-    'Mostrando {from} a {to} de {total} registros',
+    'Mostrando {from} a {to} de {total} miembros del personal',
   staffListAddStaff: 'Agregar personal',
   staffListAddClinician: 'Agregar clínico',
   staffListColStaffNo: 'N.º personal',
@@ -823,6 +825,113 @@ export default {
   fieldRequired: 'Este campo es obligatorio.',
   screeningTemplatesError:
     'No se pudieron cargar las plantillas de tamizaje.',
+  screeningTemplateListTitle: 'Plantillas de tamizaje',
+  screeningTemplateListSubtitle:
+    'Gestiona las plantillas de tamizaje disponibles para tu organización.',
+  screeningTemplateListSearchPlaceholder: 'Buscar plantillas',
+  screeningTemplateStatusFilterPlaceholder: 'Filtrar por estado',
+  screeningTemplateShowArchived: 'Mostrar archivadas',
+  screeningTemplateListAdd: 'Nueva plantilla',
+  screeningTemplateListEmpty: 'No se encontraron plantillas de tamizaje.',
+  screeningTemplateListError:
+    'No se pudieron cargar las plantillas de tamizaje.',
+  screeningTemplateListPaginationSummary:
+    'Mostrando {from} a {to} de {total} plantillas de tamizaje',
+  screeningTemplateLoadError: 'No se pudo cargar la plantilla.',
+  screeningTemplateNameLabel: 'Nombre',
+  screeningTemplateCategoryLabel: 'Categoría',
+  screeningTemplateVersionLabel: 'Versión',
+  screeningTemplateStatusLabel: 'Estado',
+  screeningTemplateDescriptionLabel: 'Descripción',
+  screeningTemplateStatusActive: 'Activa',
+  screeningTemplateStatusInactive: 'Inactiva',
+  screeningTemplateStatusArchived: 'Archivada',
+  screeningTemplateActivate: 'Activar',
+  screeningTemplateDeactivate: 'Desactivar',
+  screeningTemplateDelete: 'Eliminar',
+  screeningTemplateStatusSuccess: 'Estado de la plantilla actualizado.',
+  screeningTemplateStatusError:
+    'No se pudo actualizar el estado de la plantilla.',
+  screeningTemplateDeleteSuccess: 'Plantilla archivada correctamente.',
+  screeningTemplateDeleteError: 'No se pudo archivar la plantilla.',
+  screeningTemplateDeleteConfirmTitle: 'Archivar plantilla',
+  screeningTemplateDeleteConfirmMessage:
+    'La plantilla "{name}" se archivará y se ocultará de los nuevos '
+    + 'tamizajes. ¿Deseas continuar?',
+  screeningTemplateCreateSuccess: 'Plantilla creada correctamente.',
+  screeningTemplateUpdateSuccess: 'Plantilla actualizada correctamente.',
+  screeningTemplateSaveError: 'No se pudo guardar la plantilla.',
+  screeningTemplateDialogAddTitle: 'Nueva plantilla de tamizaje',
+  screeningTemplateDialogEditTitle: 'Editar plantilla de tamizaje',
+  screeningTemplateDialogViewTitle: 'Plantilla de tamizaje',
+  screeningTemplateDialogAddSubtitle:
+    'Define las secciones y preguntas de esta plantilla.',
+  screeningTemplateDialogEditSubtitle:
+    'Actualiza los metadatos y la estructura de la plantilla.',
+  screeningTemplateCopyFromLabel: 'Copiar desde una plantilla existente',
+  screeningTemplateCopyFromPlaceholder: 'Selecciona una plantilla a copiar',
+  screeningTemplateCopyName: '{name} (Copia)',
+  screeningTemplateCopyError: 'No se pudo copiar la plantilla seleccionada.',
+  screeningTemplateCopyConfirmTitle: 'Tienes información sin guardar',
+  screeningTemplateCopyConfirmMessage:
+    'Los datos que introdujiste podrían borrarse. Elige si quieres '
+    + 'reemplazarlos con la plantilla seleccionada, mantener tus cambios '
+    + 'actuales o añadir el contenido de la plantilla a lo que ya tienes.',
+  screeningTemplateCopyKeep: 'Mantener mis cambios',
+  screeningTemplateCopyAppend: 'Añadir a lo actual',
+  screeningTemplateCopyReplace: 'Reemplazar',
+  screeningTemplateMoveQuestionUp: 'Subir pregunta',
+  screeningTemplateMoveQuestionDown: 'Bajar pregunta',
+  screeningTemplateMoveSectionUp: 'Subir sección',
+  screeningTemplateMoveSectionDown: 'Bajar sección',
+  screeningTemplatePreview: 'Vista previa',
+  screeningTemplatePreviewTitle: 'Vista previa de la plantilla',
+  screeningTemplateEditorTab: 'Editor',
+  screeningTemplatePreviewTab: 'Vista previa',
+  screeningTemplatePreviewEmpty:
+    'Agrega secciones y preguntas para ver la vista previa.',
+  screeningTemplatePreviewNoQuestions:
+    'Esta sección aún no tiene preguntas.',
+  screeningTemplateUntitledName: 'Plantilla sin título',
+  screeningTemplateUntitledSection: 'Sección sin título',
+  screeningTemplateUntitledQuestion: 'Pregunta sin título',
+  screeningTemplateInUseWarning:
+    'Esta plantilla ya la usan uno o más tamizajes. No se puede modificar '
+    + 'su estructura. Crea una plantilla nueva en su lugar.',
+  screeningTemplateSectionGeneral: 'Información general',
+  screeningTemplateSectionStructure: 'Secciones y preguntas',
+  screeningTemplateAddSection: 'Agregar sección',
+  screeningTemplateRemoveSection: 'Eliminar sección',
+  screeningTemplateSectionTitleLabel: 'Título de la sección',
+  screeningTemplateSectionDescriptionLabel: 'Descripción de la sección',
+  screeningTemplateQuestionNumber: 'Pregunta {number}',
+  screeningTemplateRemoveQuestion: 'Eliminar pregunta',
+  screeningTemplateQuestionLabelLabel: 'Pregunta',
+  screeningTemplateQuestionTypeLabel: 'Tipo de campo',
+  screeningTemplateQuestionHelpLabel: 'Texto de ayuda',
+  screeningTemplateQuestionRequiredLabel: 'Obligatoria',
+  screeningTemplateOptionsLabel: 'Opciones',
+  screeningTemplateOptionPlaceholder: 'Valor de la opción',
+  screeningTemplateRemoveOption: 'Eliminar opción',
+  screeningTemplateAddOption: 'Agregar opción',
+  screeningTemplateAddQuestion: 'Agregar pregunta',
+  screeningTemplateNameRequired: 'El nombre es obligatorio.',
+  screeningTemplateSectionsRequired: 'Agrega al menos una sección.',
+  screeningTemplateSectionTitleRequired:
+    'El título de la sección es obligatorio.',
+  screeningTemplateQuestionsRequired: 'Agrega al menos una pregunta.',
+  screeningTemplateQuestionLabelRequired:
+    'El texto de la pregunta es obligatorio.',
+  screeningTemplateOptionsRequired:
+    'Agrega al menos una opción para este tipo de campo.',
+  screeningFieldTypeText: 'Texto',
+  screeningFieldTypeTextarea: 'Párrafo',
+  screeningFieldTypeDate: 'Fecha',
+  screeningFieldTypeNumber: 'Número',
+  screeningFieldTypeSelect: 'Lista desplegable',
+  screeningFieldTypeRadio: 'Opción única',
+  screeningFieldTypeChips: 'Opción múltiple',
+  screeningFieldTypeYesNo: 'Sí / No',
   screeningListError: 'No se pudieron cargar los tamizajes.',
   screeningLoadError: 'No se pudo cargar el tamizaje.',
   screeningCreateError: 'No se pudo crear el tamizaje.',

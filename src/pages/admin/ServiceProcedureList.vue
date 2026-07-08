@@ -11,37 +11,37 @@
       :title="t('serviceProcedureListTitle')"
       :subtitle="t('serviceProcedureListSubtitle')">
       <template #center>
-        <div class="row q-col-gutter-sm items-center full-width">
-          <div class="col-12 col-md-7">
-            <q-input
-              :model-value="searchQuery"
-              outlined
-              clearable
-              hide-bottom-space
-              class="admin-list-page__search-input"
-              :data-testid="serviceProcedureListTestIds.search"
-              :disable="loading"
-              :placeholder="t('serviceProcedureListSearchPlaceholder')"
-              :aria-label="t('serviceProcedureListSearchPlaceholder')"
-              @update:model-value="onSearchInput"
-              @clear="resetSearch">
-              <template #prepend>
-                <q-icon name="search" size="18px" />
-              </template>
-            </q-input>
-          </div>
-          <div class="col-12 col-md-5">
-            <FormSelect
-              :model-value="categoryFilter"
-              :options="categoryFilterOptions"
-              clearable
-              outlined
-              hide-bottom-space
-              :disable="loading"
-              :test-id="serviceProcedureListTestIds.categoryFilter"
-              @update:model-value="onCategoryFilterChange"
-            />
-          </div>
+        <div
+          class="service-procedure-list-page__toolbar
+            row items-center no-wrap">
+          <q-input
+            :model-value="searchQuery"
+            outlined
+            clearable
+            hide-bottom-space
+            class="admin-list-page__search-input
+              service-procedure-list-page__search"
+            :data-testid="serviceProcedureListTestIds.search"
+            :disable="loading"
+            :placeholder="t('serviceProcedureListSearchPlaceholder')"
+            :aria-label="t('serviceProcedureListSearchPlaceholder')"
+            @update:model-value="onSearchInput"
+            @clear="resetSearch">
+            <template #prepend>
+              <q-icon name="search" size="18px" />
+            </template>
+          </q-input>
+          <FormSelect
+            :model-value="categoryFilter"
+            :options="categoryFilterOptions"
+            clearable
+            outlined
+            hide-bottom-space
+            class="service-procedure-list-page__filter"
+            :disable="loading"
+            :test-id="serviceProcedureListTestIds.categoryFilter"
+            @update:model-value="onCategoryFilterChange"
+          />
         </div>
       </template>
       <template #actions>

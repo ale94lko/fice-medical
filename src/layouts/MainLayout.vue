@@ -525,6 +525,14 @@
               {{ t('serviceProcedureListTitle') }}
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
+              v-if="showScreeningTemplates"
+              icon="fact_check"
+              to="/administration/screening-templates"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminScreeningTemplates">
+              {{ t('screeningTemplateListTitle') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
               v-if="showAdminGeneral"
               icon="tune">
               {{ t('administrationGeneral') }}
@@ -557,6 +565,22 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminSubtenants">
                 {{ t('subtenantListTitle') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showServicesProcedures"
+                icon="medical_services"
+                to="/administration/services"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminServices">
+                {{ t('serviceProcedureListTitle') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showScreeningTemplates"
+                icon="fact_check"
+                to="/administration/screening-templates"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminScreeningTemplates">
+                {{ t('screeningTemplateListTitle') }}
               </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showAdminGeneral"
@@ -751,6 +775,7 @@ const {
   showAdminSubtenants,
   showAdminUsers,
   showServicesProcedures,
+  showScreeningTemplates,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')
 

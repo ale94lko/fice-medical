@@ -1150,6 +1150,197 @@
   }
 }
 
+.subtenant-list-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 56px);
+  box-sizing: border-box;
+
+  .admin-list-page__header {
+    margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
+  }
+
+  .admin-list-page__title {
+    font-size: 1.375rem;
+    line-height: 1.65rem;
+  }
+
+  .admin-list-page__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0;
+  }
+}
+
+.service-procedure-list-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 56px);
+  box-sizing: border-box;
+
+  .admin-list-page__header {
+    margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
+  }
+
+  .admin-list-page__title {
+    font-size: 1.375rem;
+    line-height: 1.65rem;
+  }
+
+  .admin-list-page__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .admin-list-page__center {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    margin-left: 12px;
+    margin-right: 12px;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  &__toolbar {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  &__search {
+    flex: 1 1 280px;
+    max-width: 280px;
+    min-width: 160px;
+    width: auto;
+  }
+
+  &__filter {
+    flex: 0 0 auto;
+    width: 200px;
+
+    .q-field {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .admin-list-page__title-row {
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    &__toolbar {
+      flex-wrap: wrap;
+    }
+
+    &__search {
+      flex: 1 1 100%;
+      max-width: none;
+    }
+
+    &__filter {
+      flex: 1 1 100%;
+      width: auto;
+    }
+  }
+}
+
+.screening-template-list-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 56px);
+  box-sizing: border-box;
+
+  .admin-list-page__header {
+    margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
+  }
+
+  .admin-list-page__title {
+    font-size: 1.375rem;
+    line-height: 1.65rem;
+  }
+
+  .admin-list-page__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .admin-list-page__center {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    margin-left: 12px;
+    margin-right: 12px;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  &__toolbar {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  &__search {
+    flex: 1 1 280px;
+    max-width: 280px;
+    min-width: 160px;
+    width: auto;
+  }
+
+  &__filter {
+    flex: 0 0 auto;
+    width: 200px;
+
+    .q-field {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .admin-list-page__title-row {
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    &__toolbar {
+      flex-wrap: wrap;
+    }
+
+    &__search {
+      flex: 1 1 100%;
+      max-width: none;
+    }
+
+    &__filter {
+      flex: 1 1 100%;
+      width: auto;
+    }
+  }
+}
+
 .staff-list-summary {
   @media (min-width: 1440px) {
     display: flex;

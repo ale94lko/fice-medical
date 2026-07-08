@@ -83,7 +83,7 @@ export function toggleChipAnswer(current, option, questionOptions) {
   const list = Array.isArray(current) ? [...current] : []
   const idx = list.findIndex(
     item => item === token
-      || item === optionValue(findOptionByStoredValue(questionOptions, item)),
+      || optionValue(findOptionByStoredValue(questionOptions, item)) === token,
   )
   if (idx >= 0) {
     list.splice(idx, 1)

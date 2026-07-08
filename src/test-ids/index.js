@@ -40,6 +40,7 @@ export const layoutTestIds = {
   navAdminUsers: 'layout-nav-admin-users',
   navAdminSubtenants: 'layout-nav-admin-subtenants',
   navAdminServices: 'layout-nav-admin-services',
+  navAdminScreeningTemplates: 'layout-nav-admin-screening-templates',
 }
 
 export const myProfileTestIds = {
@@ -134,6 +135,51 @@ export const serviceProcedureDialogTestIds = {
   dialog: 'service-procedure-dialog',
   field: name => toTestId('service-procedure-dialog-field', name),
   btn: name => toTestId('service-procedure-dialog-btn', name),
+}
+
+export const screeningTemplateListTestIds = {
+  page: 'screening-template-list-page',
+  search: 'screening-template-list-input-search',
+  statusFilter: 'screening-template-list-select-status',
+  showArchived: 'screening-template-list-toggle-archived',
+  add: 'screening-template-list-btn-add',
+  rowView: id => toTestId('screening-tpl-row', id, 'btn-view'),
+  rowEdit: id => toTestId('screening-tpl-row', id, 'btn-edit'),
+  rowMore: id => toTestId('screening-tpl-row', id, 'btn-more'),
+  rowPreview: id => toTestId('screening-tpl-row', id, 'preview'),
+  rowActivate: id => toTestId('screening-tpl-row', id, 'activate'),
+  rowDeactivate: id => toTestId('screening-tpl-row', id, 'deactivate'),
+  rowDelete: id => toTestId('screening-tpl-row', id, 'delete'),
+}
+
+export const screeningTemplateDialogTestIds = {
+  dialog: 'screening-template-dialog',
+  previewDialog: 'screening-template-preview-dialog',
+  field: name => toTestId('screening-template-dialog-field', name),
+  btn: name => toTestId('screening-template-dialog-btn', name),
+  addSection: 'screening-template-dialog-btn-add-section',
+  removeSection: index =>
+    toTestId('screening-template-dialog-section', index, 'remove'),
+  moveSectionUp: index =>
+    toTestId('screening-template-dialog-section', index, 'move-up'),
+  moveSectionDown: index =>
+    toTestId('screening-template-dialog-section', index, 'move-down'),
+  sectionField: (index, name) =>
+    toTestId('screening-template-dialog-section', index, name),
+  addQuestion: index =>
+    toTestId('screening-template-dialog-section', index, 'add-question'),
+  removeQuestion: (sIndex, qIndex) =>
+    toTestId('screening-template-dialog-question', `${sIndex}-${qIndex}`,
+      'remove'),
+  moveQuestionUp: (sIndex, qIndex) =>
+    toTestId('screening-template-dialog-question', `${sIndex}-${qIndex}`,
+      'move-up'),
+  moveQuestionDown: (sIndex, qIndex) =>
+    toTestId('screening-template-dialog-question', `${sIndex}-${qIndex}`,
+      'move-down'),
+  copyConfirm: 'screening-template-copy-confirm',
+  copyConfirmBtn: name =>
+    toTestId('screening-template-copy-confirm-btn', name),
 }
 
 export const clientListTestIds = {

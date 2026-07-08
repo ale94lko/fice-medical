@@ -107,7 +107,6 @@
         v-for="(opt, optIndex) in question.options"
         :key="optionKey(opt, optIndex)"
         no-caps
-        flat
         :outline="!isChipSelected(opt)"
         :unelevated="isChipSelected(opt)"
         :color="isChipSelected(opt) ? 'primary' : undefined"
@@ -136,7 +135,6 @@
         v-for="opt in yesNoOptions"
         :key="opt.value"
         no-caps
-        flat
         :outline="stringValue !== opt.value"
         :unelevated="stringValue === opt.value"
         :color="stringValue === opt.value ? 'primary' : undefined"

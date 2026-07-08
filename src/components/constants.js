@@ -572,6 +572,12 @@ export const screeningStatuses = {
   cancelled: 'cancelled',
 }
 
+export const screeningTemplateStatusValues = {
+  active: 'ACTIVE',
+  inactive: 'INACTIVE',
+  archived: 'ARCHIVED',
+}
+
 export const screeningClinicalKeys = {
   mood: 'mood',
   sleepQuality: 'sleep_quality',
@@ -847,6 +853,7 @@ export const permissionNames = {
   editSubtenants: 'EDIT_SUBTENANTS',
   generateDocuments: 'GENERATE_DOCUMENTS',
   viewFiles: 'VIEW_FILES',
+  manageScreeningTemplates: 'MANAGE_SCREENING_TEMPLATES',
 }
 
 export const clientPermissionNames = {
@@ -1133,6 +1140,13 @@ export const apiPaths = {
   screeningTemplateById: id => `/screenings/v1/templates/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
+  screeningTemplatesManage: '/screenings/v1/templates/manage',
+  screeningTemplateManageById: id => `/screenings/v1/templates/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/manage`,
+  screeningTemplateStatus: id => `/screenings/v1/templates/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/status`,
   clientScreenings: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/screenings`,

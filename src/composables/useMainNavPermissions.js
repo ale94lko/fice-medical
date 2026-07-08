@@ -24,6 +24,7 @@ const administrationPermissions = [
   permissionNames.viewTenants,
   permissionNames.viewAuditLog,
   permissionNames.viewSubtenants,
+  permissionNames.manageScreeningTemplates,
 ]
 
 const humanResourcesPermissions = [
@@ -148,6 +149,10 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.viewCatalog),
   )
 
+  const showScreeningTemplates = computed(() =>
+    hasPermission(permissions.value, permissionNames.manageScreeningTemplates),
+  )
+
   return {
     showDashboard,
     showCalendarMenu,
@@ -171,6 +176,7 @@ export function useMainNavPermissions() {
     showAdminSubtenants,
     showAdminUsers,
     showServicesProcedures,
+    showScreeningTemplates,
   }
 }
 

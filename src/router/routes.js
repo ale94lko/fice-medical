@@ -96,6 +96,23 @@ const routes = [
         },
       },
       {
+        path: 'administration/screening-templates/add',
+        name: 'AdminScreeningTemplatesAdd',
+        component: () => import('pages/admin/ScreeningTemplateList.vue'),
+        meta: {
+          requiresPermission: permissionNames.manageScreeningTemplates,
+          screeningTemplateListAutoOpen: 'add',
+        },
+      },
+      {
+        path: 'administration/screening-templates',
+        name: 'AdminScreeningTemplatesList',
+        component: () => import('pages/admin/ScreeningTemplateList.vue'),
+        meta: {
+          requiresPermission: permissionNames.manageScreeningTemplates,
+        },
+      },
+      {
         path: 'administration/users/add',
         name: 'AdminUsersAdd',
         component: () => import('pages/admin/UserList.vue'),
