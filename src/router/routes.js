@@ -130,6 +130,14 @@ const routes = [
         },
       },
       {
+        path: 'resources',
+        name: 'ClinicalResourcesList',
+        component: () => import('pages/clinical/ClinicalResourceListPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewClinicalResources,
+        },
+      },
+      {
         path: 'staff',
         component: () => import('pages/staff/StaffList.vue'),
         meta: {

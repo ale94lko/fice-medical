@@ -40,6 +40,8 @@ import {
   writeStoredUserInfo,
 } from '../utils/auth-local-storage.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
+import { clearClinicalResourceUserRolesCache } from
+  '../utils/clinical-resource-user-roles.js'
 import { syncAppDateTimeConfigFromAuth } from
   '../utils/sync-app-datetime-config.js'
 
@@ -122,6 +124,7 @@ export const useAuthStore = defineStore('auth', {
         permissionNames.viewTenants,
         permissionNames.viewAuditLog,
         permissionNames.viewSubtenants,
+        permissionNames.manageClinicalResources,
         permissionNames.viewTenantsUser,
         permissionNames.addTenantsUser,
         permissionNames.editTenantsUser,
@@ -341,6 +344,7 @@ export const useAuthStore = defineStore('auth', {
       this.mustChangePassword = false
       this.passwordChangeMode = null
       syncAppDateTimeConfigFromAuth(null)
+      clearClinicalResourceUserRolesCache()
       clearAuthLocalStorage()
     },
     init() {

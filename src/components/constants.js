@@ -539,6 +539,7 @@ export const catalogNames = {
   payer: 'payer',
   allergyName: 'allergy_name',
   referralSource: 'referral_source',
+  resourceCategory: 'resource_category',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -855,6 +856,8 @@ export const permissionNames = {
   generateDocuments: 'GENERATE_DOCUMENTS',
   viewFiles: 'VIEW_FILES',
   manageScreeningTemplates: 'MANAGE_SCREENING_TEMPLATES',
+  viewClinicalResources: 'VIEW_CLINICAL_RESOURCES',
+  manageClinicalResources: 'MANAGE_CLINICAL_RESOURCES',
 }
 
 export const clientPermissionNames = {
@@ -967,6 +970,52 @@ export const staffEntryPoints = {
   addStaff: 'ADD_STAFF',
   addClinician: 'ADD_CLINICIAN',
 }
+
+export const clinicalResourceTypeValues = {
+  externalLink: 'ExternalLink',
+  document: 'Document',
+}
+
+export const clinicalResourceStatusValues = {
+  active: 'ACTIVE',
+  inactive: 'INACTIVE',
+  archived: 'ARCHIVED',
+}
+
+export const clinicalResourcePinnedMax = 5
+
+export const clinicalResourcePinRoleNames = {
+  tenantAdmin: 'TENANT_ADMIN',
+  superAdmin: 'SUPER_ADMIN',
+}
+
+export const clinicalResourceFieldKeys = {
+  title: 'title',
+  category: 'category',
+  type: 'type',
+  keywords: 'keywords',
+  content: 'content',
+  url: 'url',
+  status: 'status',
+  pinned: 'pinned',
+  favorite: 'favorite',
+  updatedAt: 'updatedAt',
+}
+
+export const clinicalResourceListColumnKeys = {
+  title: 'title',
+  category: 'category',
+  type: 'type',
+  status: 'status',
+  updatedAt: 'updatedAt',
+  pinned: 'pinned',
+  favorite: 'favorite',
+  actions: 'actions',
+}
+
+export const clinicalResourceDocumentExtensions = [
+  '.pdf', '.doc', '.docx', '.txt', '.rtf',
+]
 
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
@@ -1221,6 +1270,31 @@ export const apiPaths = {
   oauthChangeInitialPassword: '/oauth/v1/change-initial-password',
   oauthChangePassword: '/oauth/v1/change-password',
   logout: '/logout',
+  clinicalResourcesList: '/clinical-resources/v1',
+  clinicalResourcesPinned: '/clinical-resources/v1/pinned',
+  clinicalResourceById: id => `/clinical-resources/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  clinicalResourceDocument: id => `/clinical-resources/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/document`,
+  clinicalResourceDocumentDownload: (id, preview = false) => {
+    const base = `/clinical-resources/v1/${encodeURIComponent(
+      String(id ?? '').trim(),
+    )}/document/download`
+    const flag = preview ? 'true' : 'false'
+
+    return `${base}?preview=${flag}`
+  },
+  clinicalResourceStatus: id => `/clinical-resources/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/status`,
+  clinicalResourcePin: id => `/clinical-resources/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/pin`,
+  clinicalResourceFavorite: id => `/clinical-resources/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/favorite`,
 }
 
 export const authStorageKeys = {

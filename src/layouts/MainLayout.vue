@@ -16,6 +16,10 @@
         </q-toolbar-title>
         <q-space />
         <SubtenantToolbar class="q-mr-xs" />
+        <ClinicalResourcesQuickPanel
+          v-if="showClinicalResourcesMenu"
+          class="q-mr-xs"
+        />
         <q-btn
           flat
           round
@@ -97,6 +101,27 @@
               :offset="[8, 0]"
               class="app-drawer-tooltip">
               {{ t('calendar') }}
+            </q-tooltip>
+          </q-item>
+          <q-item
+            v-if="showClinicalResourcesMenu"
+            clickable
+            v-ripple
+            :to="{ name: 'ClinicalResourcesList' }"
+            :data-testid="layoutTestIds.navClinicalResources"
+            :active="isClinicalResourcesActive"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="menu_book" />
+            </q-item-section>
+            <q-item-section>{{ t('navClinicalResources') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navClinicalResources') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -666,6 +691,8 @@ import SessionExpiryDialog from 'components/SessionExpiryDialog.vue'
 import AppDrawerSubNavItem from 'components/AppDrawerSubNavItem.vue'
 import AppFooterPaginationHost from
   'components/admin-table/AppFooterPaginationHost.vue'
+import ClinicalResourcesQuickPanel from
+  'components/clinical/ClinicalResourcesQuickPanel.vue'
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
@@ -776,6 +803,7 @@ const {
   showAdminUsers,
   showServicesProcedures,
   showScreeningTemplates,
+  showClinicalResourcesMenu,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')
 
@@ -787,6 +815,10 @@ const isStaffActive = computed(() => route.path.startsWith('/staff'))
 
 const isUsersActive = computed(() =>
   route.path.startsWith('/administration/users'),
+)
+
+const isClinicalResourcesActive = computed(() =>
+  route.path.startsWith('/resources'),
 )
 
 const isAdministrationActive = computed(() =>

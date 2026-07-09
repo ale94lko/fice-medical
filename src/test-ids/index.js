@@ -41,6 +41,7 @@ export const layoutTestIds = {
   navAdminSubtenants: 'layout-nav-admin-subtenants',
   navAdminServices: 'layout-nav-admin-services',
   navAdminScreeningTemplates: 'layout-nav-admin-screening-templates',
+  navClinicalResources: 'layout-nav-clinical-resources',
 }
 
 export const myProfileTestIds = {
@@ -121,6 +122,49 @@ export const subtenantDialogTestIds = {
   dialog: 'subtenant-dialog',
   field: name => toTestId('subtenant-dialog-field', name),
   btn: name => toTestId('subtenant-dialog-btn', name),
+}
+
+export const clinicalResourceTestIds = {
+  listPage: 'clinical-resource-list-page',
+  listSearch: 'clinical-resource-list-input-search',
+  listCategoryFilter: 'clinical-resource-list-select-category',
+  listTypeFilter: 'clinical-resource-list-select-type',
+  listStatusFilter: 'clinical-resource-list-select-status',
+  listAdd: 'clinical-resource-list-btn-add',
+  tabAll: 'clinical-resource-list-tab-all',
+  tabPinned: 'clinical-resource-list-tab-pinned',
+  tabFavorites: 'clinical-resource-list-tab-favorites',
+  rowOpen: id => toTestId('clinical-resource-list-row', id, 'btn-open'),
+  rowView: id => toTestId('clinical-resource-list-row', id, 'btn-view'),
+  rowEdit: id => toTestId('clinical-resource-list-row', id, 'btn-edit'),
+  rowActivate: id => toTestId(
+    'clinical-resource-list-row',
+    id,
+    'btn-activate',
+  ),
+  rowDeactivate: id => toTestId(
+    'clinical-resource-list-row',
+    id,
+    'btn-deactivate',
+  ),
+  rowDelete: id => toTestId('clinical-resource-list-row', id, 'btn-delete'),
+  rowMore: id => toTestId('clinical-resource-list-row', id, 'btn-more'),
+  rowFavorite: id => toTestId('clinical-resource-list-row', id, 'btn-favorite'),
+  rowPin: id => toTestId('clinical-resource-list-row', id, 'btn-pin'),
+  detailDialog: 'clinical-resource-detail-dialog',
+  formField: name => toTestId('clinical-resource-form-field', name),
+  breadcrumbResources: 'clinical-resource-breadcrumb-resources',
+  quickPanelTrigger: 'clinical-resource-quick-panel-trigger',
+  quickPanelMenu: 'clinical-resource-quick-panel-menu',
+  quickPanelSearch: 'clinical-resource-quick-panel-input-search',
+  quickPanelBrowseAll: 'clinical-resource-quick-panel-btn-browse-all',
+  quickPanelItem: id => toTestId('clinical-resource-quick-panel-item', id),
+}
+
+export const clinicalResourceDialogTestIds = {
+  dialog: 'clinical-resource-dialog',
+  field: name => toTestId('clinical-resource-dialog-field', name),
+  btn: name => toTestId('clinical-resource-dialog-btn', name),
 }
 
 export const serviceProcedureListTestIds = {
