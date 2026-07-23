@@ -23,7 +23,7 @@
           ref="formRef"
           greedy
           @submit.prevent="onSave">
-          <div class="row q-col-gutter-md q-mb-md">
+          <div v-if="!isAddMode" class="row q-col-gutter-md q-mb-md">
             <div class="col-12">
               <ClientProfilePhotoField
                 :file-id="local.photoFileId"
@@ -432,6 +432,9 @@ async function hydrateDialogUser() {
   }
 
   local.value = cloneUser(sourceUser ?? createEmptyUser())
+  if (isAddMode.value) {
+    local.value.photoFileId = null
+  }
   if (
     !local.value.tenantStaffId
     && local.value.staffMember?.id != null

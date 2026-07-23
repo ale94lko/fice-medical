@@ -12,21 +12,21 @@
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
           <AddClientLabeledField
-            :label="requiredLabel(t('email'))"
+            :label="emailLabel"
             :error="Boolean(fieldErrors.email)"
             :error-message="fieldErrors.email">
             <TextInput
               v-model="systemUser.email"
               hide-bottom-space
               :external-label="false"
-              :disable="readonly"
+              :disable="emailReadonly"
               :placeholder="t('emailAddressPlaceholder')"
-              :rules="readonly ? [] : emailRules"
+              :rules="emailReadonly ? [] : emailRules"
             />
           </AddClientLabeledField>
         </div>
         <div
-          v-if="!readonly"
+          v-if="isAddMode && !readonly"
           class="col-12 col-md-6">
           <AddClientLabeledField
             :label="passwordLabel"
@@ -43,63 +43,71 @@
           </AddClientLabeledField>
         </div>
         <div
-          v-if="showFullUserFields"
+          v-if="isAddMode && !readonly"
           class="col-12 col-md-6">
-          <AddClientLabeledField
-            :label="requiredLabel(t('status'))"
-            :error="Boolean(fieldErrors.status)"
-            :error-message="fieldErrors.status">
-            <FormSelect
-              v-model="systemUser.status"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              lazy-rules="ondemand"
-              :readonly="readonly"
-              :options="statusOptions"
-              :rules="statusRules"
-              :placeholder="t('userStatusPlaceholder')"
-            />
+          <AddClientLabeledField :label="t('userChangePasswordRequiredLabel')">
+            <FormToggle v-model="systemUser.changePasswordRequired" />
           </AddClientLabeledField>
         </div>
         <div
           v-if="showFullUserFields"
-          class="col-12 col-md-6">
-          <AddClientLabeledField
-            :label="requiredLabel(t('userRoles'))"
-            :error="Boolean(fieldErrors.roles)"
-            :error-message="fieldErrors.roles">
-            <FormSelect
-              v-model="systemUser.roles"
-              multiple
-              use-chips
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              lazy-rules="ondemand"
-              :readonly="readonly"
-              :loading="rolesLoading"
-              :options="roleOptions"
-              :rules="rolesRules"
-              :placeholder="t('userRolesPlaceholder')"
-            />
-          </AddClientLabeledField>
+          class="col-12 user-dialog__roles-status-block">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="requiredLabel(t('userRoles'))"
+                :error="Boolean(fieldErrors.roles)"
+                :error-message="fieldErrors.roles">
+                <RoleMultiSelect
+                  v-model="systemUser.roles"
+                  :readonly="readonly"
+                  :loading="rolesLoading"
+                  :options="roleOptions"
+                  :rules="rolesRules"
+                  :placeholder="t('userRolesPlaceholder')"
+                />
+              </AddClientLabeledField>
+            </div>
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="requiredLabel(t('status'))"
+                :error="Boolean(fieldErrors.status)"
+                :error-message="fieldErrors.status">
+                <FormSelect
+                  v-model="systemUser.status"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  lazy-rules="ondemand"
+                  :readonly="readonly"
+                  :options="statusOptions"
+                  :rules="statusRules"
+                  :placeholder="t('userStatusPlaceholder')"
+                />
+              </AddClientLabeledField>
+            </div>
+          </div>
+          <RoleMultiSelectChips
+            v-model="systemUser.roles"
+            :options="roleOptions"
+            :readonly="readonly"
+          />
         </div>
         <div
           v-if="showFullUserFields"
           class="col-12">
           <AddClientLabeledField :label="t('permissions')">
-            <TreeComponent
+            <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
+              {{ t('userPermissionsSubtitle') }}
+            </p>
+            <PermissionModulePicker
               v-model="systemUser.permissions"
               :nodes="permissionTreeNodes"
               :readonly="readonly"
               :loading="permissionsLoading"
               :empty-label="t('userPermissionsEmpty')"
               :loading-label="t('userPermissionsLoading')"
-              :expand-label="t('treeExpand')"
-              :collapse-label="t('treeCollapse')"
             />
           </AddClientLabeledField>
         </div>
@@ -118,41 +126,38 @@
           </AddClientLabeledField>
         </div>
       </div>
-
-      <div
-        v-if="showFullUserFields && !readonly"
-        class="staff-system-access-hint row items-start q-mt-md">
-        <q-icon name="info_outline" color="primary" size="18px" />
-        <span class="text-body2 q-ml-sm">
-          {{ t('staffSystemAccessRoleHint') }}
-        </span>
-      </div>
     </AccordionSection>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import FormToggle from 'components/FormToggle.vue'
 import TextInput from 'components/FormInput.vue'
-import TreeComponent from 'components/template/TreeComponent.vue'
+import RoleMultiSelect from 'components/RoleMultiSelect.vue'
+import RoleMultiSelectChips from 'components/RoleMultiSelectChips.vue'
+import PermissionModulePicker from 'components/PermissionModulePicker.vue'
 import {
   quasarNotifyTypes,
   userDescriptionMaxLength,
   userStatusValues,
 } from 'components/constants.js'
 import { useAuthStore } from 'stores/auth-store.js'
-import { fetchTenantRoleOptions } from 'src/utils/tenant-roles-api.js'
+import {
+  applyRoleSelectionToPermissions,
+  fetchTenantRoleOptions,
+  mergeRolePermissionsIntoSelection,
+} from 'src/utils/tenant-roles-api.js'
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
-import {
-  buildNewPasswordRules,
-  createOptionalPasswordPolicyRule,
-} from 'src/utils/password-validation.js'
+import { resolvePermissionIdsFromUserSelection } from
+  'src/utils/user-register-payload.js'
+import { buildNewPasswordRules } from 'src/utils/password-validation.js'
 
 const props = defineProps({
   modelValue: {
@@ -183,6 +188,7 @@ const roleOptions = ref([])
 const rolesLoading = ref(false)
 const permissionTreeNodes = ref([])
 const permissionsLoading = ref(false)
+const skipRolePermissionSync = ref(false)
 
 const systemUser = computed({
   get: () => props.modelValue,
@@ -192,7 +198,16 @@ const systemUser = computed({
 const fieldErrors = computed(() => props.fieldErrors ?? {})
 
 const isAddMode = computed(() => !props.isEdit)
-const showFullUserFields = computed(() => isAddMode.value || props.readonly)
+const emailReadonly = computed(() => props.readonly || props.isEdit)
+const showFullUserFields = computed(() =>
+  isAddMode.value || props.isEdit || props.readonly,
+)
+
+const emailLabel = computed(() =>
+  emailReadonly.value
+    ? t('email')
+    : requiredLabel(t('email')),
+)
 
 const statusOptions = computed(() => [
   { label: t('userStatusActive'), value: userStatusValues.active },
@@ -221,27 +236,19 @@ const passwordPlaceholder = computed(() =>
 )
 
 const passwordRules = computed(() => {
-  if (props.readonly) {
+  if (!isAddMode.value || props.readonly) {
     return []
   }
-  if (isAddMode.value) {
-    return buildNewPasswordRules(t)
-  }
-  if (props.isEdit) {
-    return [createOptionalPasswordPolicyRule(t)]
-  }
 
-  return []
+  return buildNewPasswordRules(t)
 })
 
 const statusRules = computed(() =>
-  props.readonly || props.isEdit
-    ? []
-    : [requiredRule(t('fieldRequired'))],
+  props.readonly ? [] : [requiredRule(t('fieldRequired'))],
 )
 
 const rolesRules = computed(() => (
-  props.readonly || props.isEdit
+  props.readonly
     ? []
     : [
       val => (Array.isArray(val) && val.length > 0) || t('fieldRequired'),
@@ -288,43 +295,103 @@ async function loadRoleOptions() {
   }
 }
 
-function loadUserCatalogs() {
-  if (isAddMode.value || props.readonly) {
-    loadRoleOptions()
-    loadPermissionTree()
+function ensureSystemUserDefaults() {
+  const next = { ...systemUser.value }
+  let changed = false
+
+  if (isAddMode.value && !next.status) {
+    next.status = userStatusValues.active
+    changed = true
+  }
+  if (!Array.isArray(next.roles)) {
+    next.roles = []
+    changed = true
+  }
+  if (!Array.isArray(next.permissions)) {
+    next.permissions = []
+    changed = true
+  }
+  if (
+    isAddMode.value
+    && next.changePasswordRequired == null
+  ) {
+    next.changePasswordRequired = true
+    changed = true
+  }
+  if (isAddMode.value) {
+    next.password = next.password ?? ''
+    changed = true
+  }
+
+  if (changed) {
+    systemUser.value = next
+  }
+}
+
+async function hydrateUserCatalogs() {
+  ensureSystemUserDefaults()
+
+  if (!showFullUserFields.value) {
+    roleOptions.value = []
+    permissionTreeNodes.value = []
     return
   }
 
-  roleOptions.value = []
-  permissionTreeNodes.value = []
+  skipRolePermissionSync.value = true
+  await Promise.all([loadRoleOptions(), loadPermissionTree()])
+
+  const resolvedPermissions = resolvePermissionIdsFromUserSelection(
+    systemUser.value.permissions ?? [],
+    permissionTreeNodes.value,
+  )
+  let permissions = resolvedPermissions
+  if ((systemUser.value.roles ?? []).length) {
+    permissions = mergeRolePermissionsIntoSelection({
+      selectedRoleIds: systemUser.value.roles ?? [],
+      currentPermissionIds: resolvedPermissions,
+      roleOptions: roleOptions.value,
+    })
+  }
+
+  systemUser.value = {
+    ...systemUser.value,
+    permissions,
+  }
+
+  await nextTick()
+  skipRolePermissionSync.value = false
 }
+
+watch(
+  () => [...(systemUser.value.roles ?? [])],
+  (nextRoles, previousRoles) => {
+    if (
+      skipRolePermissionSync.value
+      || props.readonly
+    ) {
+      return
+    }
+
+    systemUser.value = {
+      ...systemUser.value,
+      permissions: applyRoleSelectionToPermissions({
+        previousRoleIds: previousRoles ?? [],
+        nextRoleIds: nextRoles ?? [],
+        currentPermissionIds: systemUser.value.permissions ?? [],
+        roleOptions: roleOptions.value,
+      }),
+    }
+  },
+)
 
 watch(
   () => [props.isEdit, props.readonly],
   () => {
-    loadUserCatalogs()
+    hydrateUserCatalogs()
   },
 )
 
 onMounted(() => {
-  if (isAddMode.value && !systemUser.value.status) {
-    systemUser.value = {
-      ...systemUser.value,
-      status: userStatusValues.active,
-    }
-  }
-  if (!Array.isArray(systemUser.value.roles)) {
-    systemUser.value = {
-      ...systemUser.value,
-      roles: [],
-    }
-  }
-  if (!Array.isArray(systemUser.value.permissions)) {
-    systemUser.value = {
-      ...systemUser.value,
-      permissions: [],
-    }
-  }
-  loadUserCatalogs()
+  hydrateUserCatalogs()
 })
 </script>

@@ -9,7 +9,7 @@
             <TextInput
               v-model="clinical.npi"
               :external-label="true"
-              :disable="readonly"
+              :disable="npiFieldDisabled"
               :error="Boolean(fieldErrors.npi)"
               :error-message="fieldErrors.npi"
             />
@@ -53,27 +53,16 @@
           </AddClientLabeledField>
         </div>
       </div>
-
-      <div v-if="clinical.taxonomies?.length" class="q-mt-md">
-        <p class="text-body2 text-weight-medium q-mb-sm">
-          {{ t('staffTaxonomiesTitle') }}
-        </p>
-        <div class="row q-gutter-sm">
-          <q-chip
-            v-for="(tax, index) in clinical.taxonomies"
-            :key="`tax-${index}`"
-            dense
-            :color="tax.isPrimary ? 'primary' : 'grey-3'"
-            :text-color="tax.isPrimary ? 'white' : 'dark'"
-            :icon="tax.isPrimary ? 'star' : undefined">
-            {{ taxonomyLabel(tax) }}
-          </q-chip>
-        </div>
-        <p class="text-caption text-grey-7 q-mt-sm q-mb-none">
-          {{ t('staffTaxonomiesHint') }}
-        </p>
-      </div>
     </AccordionSection>
+
+    <q-separator class="section-separator q-my-md" />
+
+    <StaffTaxonomiesSection
+      :model-value="clinical.taxonomies"
+      :readonly="readonly"
+      :field-errors="fieldErrors"
+      @update:model-value="onTaxonomiesUpdate"
+    />
 
     <q-separator class="section-separator q-my-md" />
 
@@ -168,6 +157,7 @@ import FormSelect from 'components/FormSelect.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import StaffLicenseDialog from 'components/staff/StaffLicenseDialog.vue'
 import StaffLicensesTable from 'components/staff/StaffLicensesTable.vue'
+import StaffTaxonomiesSection from 'components/staff/StaffTaxonomiesSection.vue'
 import TextInput from 'components/TextInput.vue'
 import {
   createEmptyStaffLicense,
@@ -199,6 +189,10 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  npiReadonly: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -215,11 +209,15 @@ const clinical = computed({
   set: val => emit('update:modelValue', val),
 })
 
-function taxonomyLabel(tax) {
-  const name = tax.displayName ?? tax.display_name ?? tax.code ?? ''
-  const code = tax.code ? ` (${tax.code})` : ''
+const npiFieldDisabled = computed(() =>
+  props.readonly || props.npiReadonly,
+)
 
-  return `${name}${code}`.trim() || '—'
+function onTaxonomiesUpdate(taxonomies) {
+  clinical.value = {
+    ...clinical.value,
+    taxonomies,
+  }
 }
 
 function openAddLicense() {

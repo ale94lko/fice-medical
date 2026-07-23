@@ -47,6 +47,8 @@
                 v-model:system-access-enabled="systemAccessEnabled"
                 :show-npi-lookup="isClinicianEntry"
                 :readonly="readonly"
+                :is-edit-mode="isEditMode"
+                :has-existing-system-user="hasExistingSystemUser"
                 :can-create-system-user="canCreateSystemUser"
                 :prefix-options="prefixOptions"
                 :suffix-options="suffixOptions"
@@ -71,6 +73,7 @@
               <StaffClinicalProfileTab
                 v-model="form.clinical"
                 :readonly="readonly"
+                :npi-readonly="Boolean(form.basic?.npiLookupFound)"
                 :credential-options="credentialOptions"
                 :specialty-options="specialtyOptions"
                 :supervisor-options="supervisorOptions"
@@ -153,6 +156,7 @@ import {
   watch,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import ModalComponent from 'components/ModalComponent.vue'
 import StaffBasicInfoTab from 'components/staff/StaffBasicInfoTab.vue'
 import StaffContactTab from 'components/staff/StaffContactTab.vue'
@@ -160,12 +164,21 @@ import StaffEmploymentTab from 'components/staff/StaffEmploymentTab.vue'
 import StaffSystemAccessTab from 'components/staff/StaffSystemAccessTab.vue'
 import StaffClinicalProfileTab from
   'components/staff/StaffClinicalProfileTab.vue'
-import { staffEntryPoints } from 'components/constants.js'
+import {
+  quasarNotifyTypes,
+  staffEntryPoints,
+} from 'components/constants.js'
 import { fetchStaffPositionIsClinical } from 'src/utils/staff-api.js'
 import {
   createEmptyStaffClinical,
+  staffHasExistingSystemUser,
 } from 'src/utils/staff-form.js'
-import { prefillStaffFormFromNpiLookup } from 'src/utils/staff-npi-lookup.js'
+import {
+  extractTaxonomiesFromNpiLookup,
+  prefillStaffFormFromNpiLookup,
+} from 'src/utils/staff-npi-lookup.js'
+import { resolveTaxonomiesAgainstCatalog } from
+  'src/utils/provider-taxonomy-api.js'
 import {
   emailTypeSelectOptions,
   phoneTypeSelectOptions,
@@ -233,6 +246,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:activeTabLabel'])
 
 const { t } = useI18n()
+const $q = useQuasar()
 
 const formRef = ref(null)
 const panelScrollRef = ref(null)
@@ -246,12 +260,15 @@ const form = computed({
   set: val => emit('update:modelValue', val),
 })
 
+const isClinicianRecord = computed(() => Boolean(form.value.isClinician))
+
 const isClinicianEntry = computed(() =>
-  props.entryPoint === staffEntryPoints.addClinician,
+  props.entryPoint === staffEntryPoints.addClinician
+  || isClinicianRecord.value,
 )
 
 const showClinicalProfileTab = computed(() =>
-  isClinicianEntry.value || positionIsClinical.value,
+  isClinicianRecord.value || positionIsClinical.value,
 )
 
 const systemAccessEnabled = computed({
@@ -269,6 +286,10 @@ const systemAccessEnabled = computed({
     }
   },
 })
+
+const hasExistingSystemUser = computed(() =>
+  staffHasExistingSystemUser(form.value.employment?.systemUser),
+)
 
 const showSystemAccessTab = computed(() => systemAccessEnabled.value)
 
@@ -365,7 +386,7 @@ watch(activeTab, () => {
 })
 
 async function resolvePositionClinical(code) {
-  if (isClinicianEntry.value) {
+  if (isClinicianRecord.value) {
     positionIsClinical.value = true
     return
   }
@@ -392,7 +413,7 @@ watch(
     const becameNonClinical = wasClinical && !positionIsClinical.value
     if (
       becameNonClinical
-      && !isClinicianEntry.value
+      && !isClinicianRecord.value
       && hasClinicalData()
       && code !== prev
     ) {
@@ -456,10 +477,20 @@ function cancelPositionChange() {
   pendingPositionChange.value = null
 }
 
-function onNpiLookupResult(result) {
+async function onNpiLookupResult(result) {
   if (!result?.found) {
     return
   }
+
+  const rawTaxonomies = extractTaxonomiesFromNpiLookup(result)
+  let catalogTaxonomies = []
+  let missingCodes = []
+  if (rawTaxonomies.length) {
+    const resolved = await resolveTaxonomiesAgainstCatalog(rawTaxonomies)
+    catalogTaxonomies = resolved.taxonomies
+    missingCodes = resolved.missingCodes
+  }
+
   form.value = prefillStaffFormFromNpiLookup(form.value, result, {
     phoneTypeOptions: phoneTypeSelectOptions(),
     emailTypeOptions: emailTypeSelectOptions(),
@@ -469,7 +500,18 @@ function onNpiLookupResult(result) {
     genderOptions: props.genderOptions,
     credentialOptions: props.credentialOptions,
     specialtyOptions: props.specialtyOptions,
+    taxonomiesOverride: catalogTaxonomies,
   })
+
+  if (missingCodes.length) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('staffTaxonomyNpiMissingCatalog', {
+        codes: missingCodes.join(', '),
+      }),
+      timeout: 8000,
+    })
+  }
 }
 
 function focusTabForField(field) {
@@ -483,13 +525,14 @@ function focusTabForField(field) {
     'username',
     'roleId',
   ]
+  const clinicalFields = ['npi', 'taxonomies']
   if (basicFields.includes(field)) {
     activeTab.value = 'basic'
   } else if (systemAccessFields.includes(field)) {
     activeTab.value = 'systemAccess'
   } else if (employmentFields.includes(field)) {
     activeTab.value = 'employment'
-  } else if (field === 'npi') {
+  } else if (clinicalFields.includes(field)) {
     activeTab.value = 'clinical'
   }
 }

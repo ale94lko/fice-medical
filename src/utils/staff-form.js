@@ -1,6 +1,7 @@
 import { staffEntryPoints, userStatusValues } from 'components/constants.js'
 import { apiDateToDisplay } from 'src/utils/app-datetime.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
+import { mapUserStatusFromApi } from 'src/utils/user-register-payload.js'
 
 export function createEmptyStaffAddress() {
   return {
@@ -56,13 +57,38 @@ export function createEmptyStaffSystemUser() {
     enabled: false,
     email: '',
     password: '',
+    changePasswordRequired: true,
     status: userStatusValues.active,
     roles: [],
     permissions: [],
     description: '',
     username: '',
     roleId: null,
+    tenantUserId: null,
   }
+}
+
+export function staffHasExistingSystemUser(systemUser = {}) {
+  const tenantUserId = Number(
+    systemUser.tenantUserId ?? systemUser.tenant_user_id,
+  )
+  if (Number.isFinite(tenantUserId) && tenantUserId > 0) {
+    return true
+  }
+
+  const username = String(
+    systemUser.username ?? systemUser.email ?? '',
+  ).trim()
+
+  return Boolean(username)
+}
+
+function resolveSystemUserEnabled(systemUser = {}) {
+  if (staffHasExistingSystemUser(systemUser)) {
+    return true
+  }
+
+  return Boolean(systemUser.enabled)
 }
 
 function normalizeStaffSystemUserFromApi(systemUser = {}) {
@@ -73,12 +99,24 @@ function normalizeStaffSystemUserFromApi(systemUser = {}) {
     : roleId != null && roleId !== ''
       ? [roleId]
       : []
+  const tenantUserId = Number(
+    systemUser.tenant_user_id ?? systemUser.tenantUserId,
+  )
 
   return {
-    enabled: Boolean(systemUser.enabled),
+    enabled: resolveSystemUserEnabled(systemUser),
     email: String(systemUser.email ?? username).trim(),
     password: '',
-    status: systemUser.status ?? userStatusValues.active,
+    changePasswordRequired: Boolean(
+      systemUser.change_password_required
+      ?? systemUser.changePasswordRequired
+      ?? systemUser.change_password
+      ?? systemUser.changePassword
+      ?? true,
+    ),
+    status: mapUserStatusFromApi(
+      systemUser.status ?? userStatusValues.active,
+    ),
     roles,
     permissions: Array.isArray(systemUser.permissions)
       ? systemUser.permissions
@@ -86,6 +124,9 @@ function normalizeStaffSystemUserFromApi(systemUser = {}) {
     description: String(systemUser.description ?? '').trim(),
     username,
     roleId,
+    tenantUserId: Number.isFinite(tenantUserId) && tenantUserId > 0
+      ? tenantUserId
+      : null,
   }
 }
 
@@ -143,6 +184,80 @@ function mapApiDate(value) {
   return apiDateToDisplay(value) || String(value ?? '').trim()
 }
 
+export function resolveStaffIsClinician(apiData = {}) {
+  if (apiData.is_clinician != null || apiData.isClinician != null) {
+    return Boolean(apiData.is_clinician ?? apiData.isClinician)
+  }
+
+  if (apiData.clinician || apiData.clinical_profile) {
+    return true
+  }
+
+  return Boolean(apiData.position_is_clinical ?? apiData.positionIsClinical)
+}
+
+function mapTaxonomyRowFromApi(row = {}, { isPrimary = false } = {}) {
+  return {
+    code: String(row.code ?? '').trim(),
+    displayName: String(
+      row.display_name ?? row.displayName ?? '',
+    ).trim(),
+    definition: String(row.definition ?? '').trim(),
+    grouping: String(row.grouping ?? '').trim(),
+    classification: String(row.classification ?? '').trim(),
+    specialization: String(
+      row.specialization ?? '',
+    ).trim(),
+    isPrimary: Boolean(isPrimary || row.is_primary || row.isPrimary),
+  }
+}
+
+function resolveClinicalTaxonomies(clinical = {}) {
+  const taxonomies = []
+  const primary = clinical.primary_taxonomy ?? clinical.primaryTaxonomy
+  if (primary && typeof primary === 'object') {
+    taxonomies.push(mapTaxonomyRowFromApi(primary, { isPrimary: true }))
+  }
+
+  const secondary = clinical.secondary_taxonomies
+    ?? clinical.secondaryTaxonomies
+    ?? []
+  secondary.forEach(row => {
+    taxonomies.push(mapTaxonomyRowFromApi(row, { isPrimary: false }))
+  })
+
+  if (taxonomies.length) {
+    return taxonomies.filter(row => row.code)
+  }
+
+  return (clinical.taxonomies ?? [])
+    .map(row => mapTaxonomyRowFromApi(row))
+    .filter(row => row.code)
+}
+
+function resolveApiEmployment(apiData = {}) {
+  const employment = apiData.employment ?? {}
+
+  return {
+    status: employment.status ?? apiData.status ?? 'active',
+    position: employment.position ?? apiData.position ?? '',
+    hireDate: mapApiDate(
+      employment.hire ?? employment.hire_date ?? apiData.hire,
+    ),
+    terminationDate: mapApiDate(
+      employment.termination
+      ?? employment.termination_date
+      ?? apiData.termination,
+    ),
+    systemUser: normalizeStaffSystemUserFromApi(
+      employment.system_user ?? apiData.system_user ?? {},
+    ),
+    compensation: (
+      employment.compensation ?? apiData.compensation ?? []
+    ).map(normalizeStaffCompensationRow),
+  }
+}
+
 export function normalizeStaffCompensationRow(row) {
   return {
     id: row.id ?? nextStaffCompensationId(),
@@ -184,6 +299,7 @@ export function createEmptyStaffForm(
   if (!apiData) {
     return {
       entryPoint,
+      isClinician: entryPoint === staffEntryPoints.addClinician,
       basic: createEmptyStaffBasic(),
       contact: createEmptyStaffContact(),
       employment: createEmptyStaffEmployment(),
@@ -195,11 +311,16 @@ export function createEmptyStaffForm(
     ?? apiData.basic_information
     ?? {}
   const contact = apiData.contact_information ?? {}
-  const employment = apiData.employment ?? {}
   const clinical = apiData.clinician ?? apiData.clinical_profile ?? {}
+  const isClinician = resolveStaffIsClinician(apiData)
+  const resolvedEntryPoint = isClinician
+    ? staffEntryPoints.addClinician
+    : entryPoint
+  const employment = resolveApiEmployment(apiData)
 
   return {
-    entryPoint,
+    entryPoint: resolvedEntryPoint,
+    isClinician,
     basic: {
       prefix: personal.prefix ?? '',
       firstName: personal.first_name ?? '',
@@ -236,29 +357,22 @@ export function createEmptyStaffForm(
         : [createEmptyStaffEmail()],
     },
     employment: {
-      status: employment.status ?? 'active',
-      position: employment.position ?? '',
-      hireDate: mapApiDate(employment.hire ?? employment.hire_date),
-      terminationDate: mapApiDate(
-        employment.termination ?? employment.termination_date,
-      ),
-      systemUser: normalizeStaffSystemUserFromApi(employment.system_user),
+      status: employment.status,
+      position: employment.position,
+      hireDate: employment.hireDate,
+      terminationDate: employment.terminationDate,
+      systemUser: employment.systemUser,
       compensationDraft: createEmptyStaffCompensation(),
-      compensation: (employment.compensation ?? []).map(
-        normalizeStaffCompensationRow,
-      ),
+      compensation: employment.compensation,
     },
     clinical: {
       npi: clinical.npi ?? '',
       credential: clinical.credential ?? '',
-      primarySpecialty: clinical.primary_specialty ?? '',
-      taxonomies: (clinical.taxonomies ?? []).map(row => ({
-        code: row.code ?? '',
-        displayName: row.display_name ?? row.displayName ?? '',
-        isPrimary: Boolean(row.is_primary ?? row.isPrimary),
-      })),
+      primarySpecialty:
+        clinical.primary_specialty ?? clinical.specialty ?? '',
+      taxonomies: resolveClinicalTaxonomies(clinical),
       licenses: (clinical.licenses ?? []).map(normalizeStaffLicenseRow),
-      supervisorId: clinical.supervisor_id ?? null,
+      supervisorId: clinical.supervisor_id ?? clinical.supervisorId ?? null,
     },
   }
 }

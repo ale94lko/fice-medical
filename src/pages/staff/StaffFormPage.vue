@@ -1,5 +1,7 @@
 <template>
   <q-page class="admin-page add-client-page fit">
+    <AppLoadingOverlay scope="content" :showing="loading" />
+
     <StaffPageHeader
       :title="pageTitle"
       :subtitle="pageSubtitle"
@@ -17,7 +19,7 @@
           color="primary"
           class="app-btn-primary"
           :loading="saving"
-          :disable="saving"
+          :disable="saving || loading"
           :label="t('save')"
           @click="onSave"
         />
@@ -26,7 +28,7 @@
           outline
           color="primary"
           class="app-btn-outline"
-          :disable="saving"
+          :disable="saving || loading"
           :label="t('close')"
           @click="onClose"
         />
@@ -36,6 +38,7 @@
     <q-card flat bordered class="add-client-page__card">
       <q-card-section class="add-client-page__card-body q-pa-md">
         <StaffForm
+          v-if="!loading"
           ref="staffFormRef"
           v-model="form"
           :entry-point="entryPoint"
@@ -63,6 +66,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import StaffForm from 'components/staff/StaffForm.vue'
 import StaffPageHeader from 'components/staff/StaffPageHeader.vue'
 import {
@@ -100,6 +104,7 @@ const { canEditStaff, canCreateSystemUser } = useStaffPermissions()
 const form = ref(createEmptyStaffForm())
 const staffFormRef = ref(null)
 const activeTabLabel = ref('')
+const loading = ref(true)
 const saving = ref(false)
 const photoFileId = ref(null)
 const fieldErrors = ref({})
@@ -155,16 +160,21 @@ const entryPoint = computed(() => {
 })
 
 const isEditMode = computed(() => Boolean(staffId.value))
+const isClinicianRecord = computed(() => Boolean(form.value.isClinician))
 const isClinicianEntry = computed(() =>
-  entryPoint.value === staffEntryPoints.addClinician,
+  entryPoint.value === staffEntryPoints.addClinician || isClinicianRecord.value,
 )
 const readonly = computed(() => isEditMode.value && !canEditStaff.value)
 const canSave = computed(() => !readonly.value && canEditStaff.value)
-const photoDisabled = computed(() => saving.value || readonly.value)
+const photoDisabled = computed(() =>
+  saving.value || readonly.value || loading.value,
+)
 
 const pageTitle = computed(() => {
   if (isEditMode.value) {
-    return t('editStaff')
+    return isClinicianRecord.value
+      ? t('editClinician')
+      : t('editStaff')
   }
   if (isClinicianEntry.value) {
     return t('addNewClinician')
@@ -174,6 +184,9 @@ const pageTitle = computed(() => {
 })
 
 const pageSubtitle = computed(() => {
+  if (isEditMode.value && isClinicianRecord.value) {
+    return t('addNewClinicianSubtitle')
+  }
   if (isClinicianEntry.value) {
     return t('addNewClinicianSubtitle')
   }
@@ -183,7 +196,9 @@ const pageSubtitle = computed(() => {
 
 const breadcrumbCurrent = computed(() => {
   if (isEditMode.value) {
-    return t('editStaff')
+    return isClinicianRecord.value
+      ? t('editClinicianBreadcrumb')
+      : t('editStaff')
   }
   if (isClinicianEntry.value) {
     return t('addClinicianBreadcrumb')
@@ -256,7 +271,7 @@ async function loadCatalogOptions() {
 }
 
 function includeClinicalOnSave() {
-  if (isClinicianEntry.value) {
+  if (form.value.isClinician) {
     return true
   }
 
@@ -285,7 +300,7 @@ async function onSave() {
   try {
     const payload = buildStaffRegisterBody({
       form: form.value,
-      entryPoint: entryPoint.value,
+      entryPoint: form.value.entryPoint ?? entryPoint.value,
       photoFileId: photoFileId.value,
       includeClinicalProfile,
       isEdit: isEditMode.value,
@@ -318,12 +333,17 @@ function onClose() {
 }
 
 onMounted(async() => {
-  form.value = createEmptyStaffForm(entryPoint.value)
-  await Promise.all([
-    loadCatalogOptions(),
-    loadStaffRecord(),
-  ])
-  markStaffFormPristine()
+  loading.value = true
+  try {
+    form.value = createEmptyStaffForm(entryPoint.value)
+    await Promise.all([
+      loadCatalogOptions(),
+      loadStaffRecord(),
+    ])
+    markStaffFormPristine()
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 

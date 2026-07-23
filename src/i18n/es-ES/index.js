@@ -478,6 +478,8 @@ export default {
   addNewClinicianSubtitle: 'Crear un perfil de clínico.',
   addClinicianBreadcrumb: 'Agregar clínico',
   editStaff: 'Editar personal',
+  editClinician: 'Editar clínico',
+  editClinicianBreadcrumb: 'Editar clínico',
   staffProfile: 'Perfil del personal',
   tabStaffBasicInformation: 'Información básica',
   tabStaffContactInformation: 'Información de contacto',
@@ -552,9 +554,50 @@ export default {
   staffCompensationHourly: 'Por hora',
   staffCompensationSalary: 'Salario',
   staffCompensationPerVisit: 'Por visita',
-  staffTaxonomiesTitle: 'Taxonomías',
+  staffTaxonomiesTitle: 'Taxonomía',
+  staffTaxonomiesSectionSubtitle:
+    'Revise las taxonomías agregadas a este clínico. '
+    + 'Marque una como principal con el ícono de estrella.',
+  staffTaxonomiesAddedTitle: 'Taxonomías agregadas ({count})',
+  staffTaxonomiesEmpty: 'Aún no hay taxonomías agregadas.',
+  staffTaxonomiesTotal: 'Total: {count} taxonomías',
+  staffTaxonomyAddTitle: 'Agregar taxonomía',
+  staffTaxonomyAddSubtitle:
+    'Busque en el catálogo oficial NUCC y agregue un código.',
+  staffTaxonomyAddConfirm: 'Agregar taxonomía',
+  staffTaxonomySetAsPrimaryLabel: 'Marcar como taxonomía principal',
+  staffTaxonomyColPrimary: 'Principal',
+  staffTaxonomyColCode: 'Código',
+  staffTaxonomyColDescription: 'Descripción',
+  staffTaxonomyColSpecialty: 'Especialidad',
+  staffTaxonomyColType: 'Tipo',
+  staffTaxonomyPrimaryBadge: 'Principal',
+  staffTaxonomySetPrimary: 'Marcar como principal',
+  staffTaxonomyTypePhysician: 'Médico',
+  staffTaxonomyTypeNonPhysician: 'No médico',
+  staffTaxonomySearchPlaceholder: 'Buscar por código o descripción...',
+  staffTaxonomyFiltersPlaceholder: 'Filtros',
+  staffTaxonomyDuplicate: 'Esta taxonomía ya está agregada.',
+  staffTaxonomyDeleteTitle: 'Quitar taxonomía',
+  staffTaxonomyDeleteMessage:
+    '¿Seguro que desea quitar esta taxonomía?',
+  staffPrimaryTaxonomyLabel: 'Taxonomía',
+  staffPrimaryTaxonomyPlaceholder:
+    'Buscar taxonomía NUCC por nombre o código',
+  staffPrimaryTaxonomyRequired: 'La taxonomía principal es obligatoria.',
+  staffSecondaryTaxonomiesLabel: 'Taxonomías secundarias',
+  staffSecondaryTaxonomiesPlaceholder:
+    'Buscar y agregar taxonomías NUCC adicionales',
+  staffTaxonomySearchEmpty: 'No se encontraron taxonomías.',
+  staffTaxonomyCodeNotInCatalog:
+    'Código de taxonomía no encontrado en el catálogo de referencia',
+  staffTaxonomyNpiMissingCatalog:
+    'La taxonomía {codes} del registro NPI no está disponible en el '
+    + 'catálogo local. Pida a un administrador que importe los datos '
+    + 'de referencia NUCC.',
   staffTaxonomiesHint:
-    'Las taxonomías se obtienen del NPI y se muestran como referencia.',
+    'Puede agregar varias taxonomías. Solo una puede marcarse como '
+    + 'principal.',
   staffLicensesTitle: 'Licencias y credenciales',
   staffLicensesSubtitle:
     'Agregue licencias profesionales y adjunte documentos de respaldo.',

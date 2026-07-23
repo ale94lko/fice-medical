@@ -858,6 +858,7 @@ export const permissionNames = {
   manageScreeningTemplates: 'MANAGE_SCREENING_TEMPLATES',
   viewClinicalResources: 'VIEW_CLINICAL_RESOURCES',
   manageClinicalResources: 'MANAGE_CLINICAL_RESOURCES',
+  viewReferenceData: 'VIEW_REFERENCE_DATA',
 }
 
 export const clientPermissionNames = {
@@ -1029,6 +1030,10 @@ export const apiPaths = {
   staffPositionIsClinical: code => `/staff/v1/positions/${encodeURIComponent(
     String(code ?? '').trim(),
   )}/is-clinical`,
+  providerTaxonomies: '/reference-data/v1/taxonomies',
+  providerTaxonomyByCode: code => `/reference-data/v1/taxonomies/${
+    encodeURIComponent(String(code ?? '').trim())
+  }`,
   rolesList: '/roles/v1',
   cliniciansList: '/staff/v1/clinicians',
   clientsList: '/client/v1/list-view',

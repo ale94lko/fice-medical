@@ -79,11 +79,12 @@ function mapSystemUser(systemUser = {}, { isEdit }) {
 
   if (!isEdit && systemUser.enabled) {
     payload.password = trim(systemUser.password)
-  } else if (isEdit && systemUser.enabled) {
-    const password = trim(systemUser.password)
-    if (password) {
-      payload.password = password
-    }
+    payload.change_password = Boolean(
+      systemUser.changePasswordRequired
+      ?? systemUser.change_password
+      ?? systemUser.changePassword
+      ?? true,
+    )
   }
 
   return payload
@@ -117,11 +118,12 @@ function mapClinicalProfile(clinical) {
     npi: trim(clinical.npi),
     credential: trim(clinical.credential),
     primary_specialty: trim(clinical.primarySpecialty),
-    taxonomies: (clinical.taxonomies ?? []).map(row => ({
-      code: trim(row.code),
-      display_name: trim(row.display_name ?? row.displayName),
-      is_primary: Boolean(row.is_primary ?? row.isPrimary),
-    })),
+    taxonomies: (clinical.taxonomies ?? [])
+      .map(row => ({
+        code: trim(row.code),
+        is_primary: Boolean(row.is_primary ?? row.isPrimary),
+      }))
+      .filter(row => row.code),
     licenses: (clinical.licenses ?? []).map(row => ({
       type: trim(row.type),
       identifier: trim(row.identifier),

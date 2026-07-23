@@ -453,6 +453,8 @@ export default {
   addNewClinicianSubtitle: 'Create a new clinician profile.',
   addClinicianBreadcrumb: 'Add Clinician',
   editStaff: 'Edit Staff',
+  editClinician: 'Edit Clinician',
+  editClinicianBreadcrumb: 'Edit Clinician',
   staffProfile: 'Staff Profile',
   tabStaffBasicInformation: 'Basic Information',
   tabStaffContactInformation: 'Contact Information',
@@ -525,9 +527,48 @@ export default {
   staffCompensationHourly: 'Hourly',
   staffCompensationSalary: 'Salary',
   staffCompensationPerVisit: 'Per visit',
-  staffTaxonomiesTitle: 'Taxonomies',
+  staffTaxonomiesTitle: 'Taxonomy',
+  staffTaxonomiesSectionSubtitle:
+    'Review the taxonomies added to this clinician. '
+    + 'Mark one as primary using the star icon.',
+  staffTaxonomiesAddedTitle: 'Added Taxonomies ({count})',
+  staffTaxonomiesEmpty: 'No taxonomies added yet.',
+  staffTaxonomiesTotal: 'Total: {count} taxonomies',
+  staffTaxonomyAddTitle: 'Add Taxonomy',
+  staffTaxonomyAddSubtitle:
+    'Search the official NUCC catalog and add a taxonomy code.',
+  staffTaxonomyAddConfirm: 'Add Taxonomy',
+  staffTaxonomySetAsPrimaryLabel: 'Set as primary taxonomy',
+  staffTaxonomyColPrimary: 'Primary',
+  staffTaxonomyColCode: 'Code',
+  staffTaxonomyColDescription: 'Description',
+  staffTaxonomyColSpecialty: 'Specialty',
+  staffTaxonomyColType: 'Type',
+  staffTaxonomyPrimaryBadge: 'Primary',
+  staffTaxonomySetPrimary: 'Set as Primary',
+  staffTaxonomyTypePhysician: 'Physician',
+  staffTaxonomyTypeNonPhysician: 'Non-Physician',
+  staffTaxonomySearchPlaceholder: 'Search by code or description...',
+  staffTaxonomyFiltersPlaceholder: 'Filters',
+  staffTaxonomyDuplicate: 'This taxonomy is already added.',
+  staffTaxonomyDeleteTitle: 'Remove taxonomy',
+  staffTaxonomyDeleteMessage:
+    'Are you sure you want to remove this taxonomy?',
+  staffPrimaryTaxonomyLabel: 'Taxonomy',
+  staffPrimaryTaxonomyPlaceholder: 'Search NUCC taxonomy by name or code',
+  staffPrimaryTaxonomyRequired: 'Primary taxonomy is required.',
+  staffSecondaryTaxonomiesLabel: 'Secondary taxonomies',
+  staffSecondaryTaxonomiesPlaceholder:
+    'Search and add additional NUCC taxonomies',
+  staffTaxonomySearchEmpty: 'No matching taxonomies found.',
+  staffTaxonomyCodeNotInCatalog:
+    'Taxonomy code not found in reference catalog',
+  staffTaxonomyNpiMissingCatalog:
+    'Taxonomy {codes} from NPI Registry is not available in the local '
+    + 'catalog. Ask an administrator to import NUCC reference data.',
   staffTaxonomiesHint:
-    'Taxonomies are populated from NPI lookup and shown for reference.',
+    'You can add multiple taxonomies. Only one taxonomy can be marked '
+    + 'as primary.',
   staffLicensesTitle: 'Licenses & credentials',
   staffLicensesSubtitle:
     'Add professional licenses and upload supporting documents.',

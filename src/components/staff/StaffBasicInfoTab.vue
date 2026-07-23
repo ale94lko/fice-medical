@@ -192,7 +192,7 @@
     <div class="fields">
       <FormToggle
         v-model="systemAccessEnabled"
-        :disable="readonly || !canCreateSystemUser"
+        :disable="systemAccessToggleDisabled"
         :label="t('staffSystemAccessEnabledLabel')"
       />
     </div>
@@ -253,12 +253,26 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isEditMode: {
+    type: Boolean,
+    default: false,
+  },
+  hasExistingSystemUser: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const systemAccessEnabled = defineModel('systemAccessEnabled', {
   type: Boolean,
   default: false,
 })
+
+const systemAccessToggleDisabled = computed(() =>
+  props.readonly
+  || !props.canCreateSystemUser
+  || (props.isEditMode && props.hasExistingSystemUser),
+)
 
 const emit = defineEmits(['update:modelValue', 'npi-result'])
 

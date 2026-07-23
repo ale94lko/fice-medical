@@ -102,7 +102,7 @@ function mapTaxonomiesFromClinician(clinician) {
       code: String(row.code ?? '').trim(),
       displayName: String(row.display_name ?? row.displayName ?? '').trim(),
       isPrimary: Boolean(row.is_primary ?? row.isPrimary),
-    }))
+    })).filter(row => row.code)
   }
 
   const rows = []
@@ -110,7 +110,9 @@ function mapTaxonomiesFromClinician(clinician) {
   if (primary?.code) {
     rows.push({
       code: String(primary.code ?? '').trim(),
-      displayName: String(primary.display_name ?? '').trim(),
+      displayName: String(
+        primary.display_name ?? primary.displayName ?? '',
+      ).trim(),
       isPrimary: true,
     })
   }
@@ -120,12 +122,18 @@ function mapTaxonomiesFromClinician(clinician) {
     }
     rows.push({
       code: String(row.code ?? '').trim(),
-      displayName: String(row.display_name ?? '').trim(),
-      isPrimary: Boolean(row.is_primary),
+      displayName: String(
+        row.display_name ?? row.displayName ?? '',
+      ).trim(),
+      isPrimary: Boolean(row.is_primary ?? row.isPrimary),
     })
   }
 
-  return rows
+  return rows.filter(row => row.code)
+}
+
+export function extractTaxonomiesFromNpiLookup(lookup) {
+  return mapTaxonomiesFromClinician(lookup?.clinician ?? lookup)
 }
 
 function mapLookupLicenses(apiLicenses, existingLicenses) {
@@ -208,6 +216,7 @@ export function prefillStaffFormFromNpiLookup(
     credentialOptions = [],
     specialtyOptions = [],
     genderOptions = [],
+    taxonomiesOverride = null,
   } = catalogOptions
 
   const personal = lookup.personal_information ?? {}
@@ -215,7 +224,9 @@ export function prefillStaffFormFromNpiLookup(
   const apiAddress = personal.addresses?.[0] ?? {}
   const names = resolvePersonalNames(lookup, form.basic ?? {}, genderOptions)
 
-  const taxonomies = mapTaxonomiesFromClinician(clinician)
+  const taxonomies = Array.isArray(taxonomiesOverride)
+    ? taxonomiesOverride
+    : mapTaxonomiesFromClinician(clinician)
   const primarySpecialtyRaw = clinician.primary_specialty
     ?? clinician.specialty
     ?? taxonomies.find(row => row.isPrimary)?.displayName
@@ -283,9 +294,9 @@ export function prefillStaffFormFromNpiLookup(
         form.clinical?.primarySpecialty,
         resolveCatalogOrRaw(specialtyOptions, primarySpecialtyRaw),
       ),
-      taxonomies: (form.clinical?.taxonomies ?? []).length
-        ? form.clinical.taxonomies
-        : taxonomies,
+      taxonomies: taxonomies.length
+        ? taxonomies
+        : (form.clinical?.taxonomies ?? []),
       licenses: mapLookupLicenses(
         clinician.licenses,
         form.clinical?.licenses,
