@@ -553,12 +553,7 @@ async function onDialogSave(form) {
   dialogSaving.value = true
   try {
     if (dialogMode.value === 'add') {
-      await createClinicalResource(
-        form,
-        form.type === clinicalResourceTypeValues.document
-          ? form.documentFile
-          : null,
-      )
+      await createClinicalResource(form)
       $q.notify({
         type: quasarNotifyTypes.positive,
         message: t('clinicalResourceCreateSuccess'),

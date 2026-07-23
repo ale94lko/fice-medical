@@ -35,12 +35,6 @@ function parseKeywords(value) {
     .filter(Boolean)
 }
 
-function parseStoredFileId(value) {
-  const id = Number(value)
-
-  return Number.isFinite(id) && id > 0 ? id : null
-}
-
 function resolveCategoryFromApi(raw = {}) {
   return trim(
     raw.category
@@ -124,9 +118,9 @@ export function buildClinicalResourceRequest(
   const keywords = parseKeywords(form.keywords)
   const content = trim(form.content) || null
   const url = trim(form.url) || null
-  const storedFileId = parseStoredFileId(form.storedFileId)
+  const isExternalLink = type === clinicalResourceTypeValues.externalLink
+  const isDocument = type === clinicalResourceTypeValues.document
 
-  /* eslint-disable camelcase -- API payload */
   const body = {}
   if (!partial || title) {
     body.title = title
@@ -140,17 +134,25 @@ export function buildClinicalResourceRequest(
   if (!partial || form.keywords != null) {
     body.keywords = keywords
   }
-  if (!partial || form.content != null) {
-    body.content = content
-  }
-  if (!partial || form.url != null) {
-    body.url = url
-  }
   if (!partial || form.status != null) {
     body.status = status
   }
-  if (storedFileId) {
-    body.stored_file_id = storedFileId
+
+  if (isExternalLink) {
+    if (!partial || form.url != null) {
+      body.url = url
+    }
+  } else if (isDocument) {
+    if (!partial || form.content != null) {
+      body.content = content
+    }
+  } else {
+    if (!partial || form.content != null) {
+      body.content = content
+    }
+    if (!partial || form.url != null) {
+      body.url = url
+    }
   }
 
   return body

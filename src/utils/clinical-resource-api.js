@@ -1,5 +1,5 @@
 import { apiInstance } from 'boot/axios'
-import { apiPaths } from 'components/constants.js'
+import { apiPaths, clinicalResourceTypeValues } from 'components/constants.js'
 import {
   buildClinicalResourceRequest,
   normalizeClinicalResourceFromApi,
@@ -157,24 +157,43 @@ export async function fetchClinicalResourceById(id, t) {
   }
 }
 
-function buildClinicalResourceFormData(form, file = null) {
+function buildClinicalResourceDocumentFormData(form, file) {
   const formData = new FormData()
   const resourceJson = JSON.stringify(buildClinicalResourceRequest(form))
   formData.append(
     'resource',
     new Blob([resourceJson], { type: 'application/json' }),
   )
-  if (file) {
-    formData.append('document', file)
-  }
+  formData.append('document', file)
 
   return formData
 }
 
+/**
+ * Create clinical resource.
+ * - ExternalLink → application/json body (no multipart)
+ * - Document → multipart/form-data with resource + document parts
+ */
 export async function createClinicalResource(form, file = null) {
+  const type = String(form?.type ?? '').trim()
+  const isDocument = type === clinicalResourceTypeValues.document
+
+  if (isDocument) {
+    const documentFile = file ?? form?.documentFile ?? null
+    if (!documentFile) {
+      throw new Error('Document file is required')
+    }
+    const response = await apiInstance.post(
+      apiPaths.clinicalResourcesList,
+      buildClinicalResourceDocumentFormData(form, documentFile),
+    )
+
+    return normalizeClinicalResourceFromApi(unwrapData(response.data))
+  }
+
   const response = await apiInstance.post(
     apiPaths.clinicalResourcesList,
-    buildClinicalResourceFormData(form, file),
+    buildClinicalResourceRequest(form),
   )
 
   return normalizeClinicalResourceFromApi(unwrapData(response.data))
