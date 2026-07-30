@@ -324,12 +324,8 @@
               :label="t('referralAssignedClinician')"
             />
             <div class="referral-coordination-grid__control">
-                <FormSelect
+                <ClinicianFormSelect
                   v-model="local.assignedClinicianId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
                   clearable
                   :readonly="readonly"
                   :options="clinicianOptions"
@@ -407,6 +403,7 @@ import FormFieldLabel from 'components/FormFieldLabel.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
 import ReferralDocumentUploadField from
   'components/ReferralDocumentUploadField.vue'

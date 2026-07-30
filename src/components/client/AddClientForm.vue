@@ -676,21 +676,35 @@
                   <AddClientLabeledField
                     :label="t('clinicians')"
                     :test-id="tid.field(ck.clinicians)">
-                    <FormSelect
-                      v-model="form[ck.clinicians]"
+                    <ClinicianFormSelect
+                      :model-value="form[ck.clinicians]"
                       multiple
-                      use-chips
-                      outlined
-                      hide-bottom-space
-                      emit-value
-                      map-options
                       clearable
+                      :show-selected-in-field="false"
                       class="full-width"
+                      :disable="basicInfoReadonly"
                       :loading="cliniciansLoading"
                       :options="assignedClinicianOptions"
+                      :placeholder="t('assignedCliniciansPlaceholder')"
                       :test-id="tid.field(ck.clinicians)"
+                      @update:model-value="onAssignedCliniciansUpdate"
                     />
                   </AddClientLabeledField>
+                </div>
+                <div
+                  v-if="selectedAssignedClinicians.length"
+                  class="col-12">
+                  <AdminTablePanel
+                    class="assigned-clinicians-table-panel"
+                    :show-column-settings="false">
+                    <AssignedCliniciansTable
+                      :entries="selectedAssignedClinicians"
+                      :can-edit="!basicInfoReadonly"
+                      :empty-label="t('assignedCliniciansEmpty')"
+                      @delete="removeAssignedClinician"
+                      @set-primary="setPrimaryAssignedClinician"
+                    />
+                  </AdminTablePanel>
                 </div>
               </div>
           </AddClientAccordionSection>
@@ -749,6 +763,7 @@
             :readonly="insuranceReadonly"
             :can-view="canViewInsuranceTab"
             :patient-name="patientFullName"
+            :client-id="props.clientId"
             :payer-catalog-items="payerCatalogItems"
             :payer-catalog-loading="catalogsLoading"
           />
@@ -1006,6 +1021,9 @@ import TextInput from '../FormInput.vue'
 import ClientDateField from '../ClientDateField.vue'
 import AddClientLabeledField from '../AddClientLabeledField.vue'
 import FormSelect from '../FormSelect.vue'
+import ClinicianFormSelect from '../ClinicianFormSelect.vue'
+import AssignedCliniciansTable from '../AssignedCliniciansTable.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import ModalComponent from '../ModalComponent.vue'
 import AddClientContactTab from '../AddClientContactTab.vue'
 import AddClientFamilyMedicalHistoryTab
@@ -1032,6 +1050,10 @@ import { useRegisterUnsavedChanges } from
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
 import { useContactSubTabs } from 'src/composables/useContactSubTabs.js'
 import { resolveOtherContactTabLabel } from 'src/utils/client-contact-form.js'
+import {
+  ensureCliniciansSelectionOrder,
+  withPrimaryClinicianFirst,
+} from 'src/utils/client-clinicians-form.js'
 import {
   addClientTabKeys,
   clientFormSections,
@@ -1694,6 +1716,72 @@ const patientFullName = computed(() => {
   return name
 })
 
+const selectedAssignedClinicians = computed(() => {
+  const selectedIds = Array.isArray(form.value[ck.clinicians])
+    ? form.value[ck.clinicians].map(id => String(id))
+    : []
+  if (!selectedIds.length) {
+    return []
+  }
+  const byId = new Map(
+    (assignedClinicianOptions.value ?? []).map(option => [
+      String(option.value),
+      option,
+    ]),
+  )
+
+  return selectedIds
+    .map((id, index) => {
+      const option = byId.get(id)
+      if (!option) {
+        return null
+      }
+
+      return {
+        ...option,
+        isPrimary: index === 0,
+      }
+    })
+    .filter(Boolean)
+})
+
+function onAssignedCliniciansUpdate(nextIds) {
+  const previous = Array.isArray(form.value[ck.clinicians])
+    ? form.value[ck.clinicians]
+    : []
+  form.value[ck.clinicians] = ensureCliniciansSelectionOrder(
+    previous,
+    nextIds,
+  )
+}
+
+function setPrimaryAssignedClinician(row) {
+  const primaryId = String(row?.value ?? '').trim()
+  if (!primaryId) {
+    return
+  }
+  const current = Array.isArray(form.value[ck.clinicians])
+    ? form.value[ck.clinicians]
+    : []
+  form.value[ck.clinicians] = withPrimaryClinicianFirst(
+    current,
+    primaryId,
+  )
+}
+
+function removeAssignedClinician(row) {
+  const removeId = String(row?.value ?? '')
+  if (!removeId) {
+    return
+  }
+  const current = Array.isArray(form.value[ck.clinicians])
+    ? form.value[ck.clinicians]
+    : []
+  form.value[ck.clinicians] = current.filter(
+    id => String(id) !== removeId,
+  )
+}
+
 const cancelModalTitle = computed(() =>
   isEditMode.value
     ? t('cancelClientEditTitle')
@@ -2227,6 +2315,7 @@ defineExpose({
   formBusyMessage,
   setProfilePhotoFileId,
   profilePhotoReadonly: basicInfoReadonly,
+  patientFullName,
 })
 </script>
 

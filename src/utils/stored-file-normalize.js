@@ -42,6 +42,15 @@ export function normalizeStoredFile(raw) {
     uploadedBy: parseOptionalNumber(row.uploaded_by ?? row.uploadedBy),
     uploadedAt: trim(row.uploaded_at ?? row.uploadedAt) || null,
     createdAt: trim(row.created_at ?? row.createdAt) || null,
+    url: trim(
+      row.url
+      ?? row.public_url
+      ?? row.publicUrl
+      ?? row.download_url
+      ?? row.downloadUrl
+      ?? row.file_url
+      ?? row.fileUrl,
+    ) || null,
   }
 }
 

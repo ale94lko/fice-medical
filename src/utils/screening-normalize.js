@@ -78,10 +78,19 @@ export function normalizeScreeningTemplateSummary(template) {
 
 export function normalizeScreeningAnswer(answer) {
   const a = answer ?? {}
+  const value = a.value
+  if (Array.isArray(value)) {
+    return {
+      questionId: String(a.question_id ?? a.questionId ?? '').trim(),
+      value: value
+        .map(item => String(item ?? '').trim())
+        .filter(Boolean),
+    }
+  }
 
   return {
     questionId: String(a.question_id ?? a.questionId ?? '').trim(),
-    value: a.value ?? '',
+    value: value ?? '',
   }
 }
 

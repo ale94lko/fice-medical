@@ -26,18 +26,55 @@ export function answersMapFromArray(answers) {
     if (!questionId) {
       continue
     }
-    map[questionId] = item?.value ?? ''
+    map[questionId] = normalizeAnswerValue(item?.value)
   }
 
   return map
+}
+
+/**
+ * Normalizes API/UI answer values. CHIPS may arrive as string[] from API.
+ * Legacy comma-joined strings are split for chips UI compatibility.
+ */
+export function normalizeAnswerValue(value) {
+  if (value === null || value === undefined) {
+    return ''
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map(item => String(item ?? '').trim())
+      .filter(Boolean)
+  }
+  if (typeof value === 'boolean') {
+    return value
+  }
+
+  return value
+}
+
+export function coerceChipAnswerList(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map(item => String(item ?? '').trim())
+      .filter(Boolean)
+  }
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return []
+  }
+  if (raw.includes(', ')) {
+    return raw.split(', ').map(part => part.trim()).filter(Boolean)
+  }
+
+  return [raw]
 }
 
 export function isAnswerEmpty(value, fieldType) {
   if (value === null || value === undefined) {
     return true
   }
-  if (fieldType === screeningFieldTypes.chips && Array.isArray(value)) {
-    return value.length === 0
+  if (fieldType === screeningFieldTypes.chips) {
+    return coerceChipAnswerList(value).length === 0
   }
   if (typeof value === 'boolean') {
     return false
@@ -80,7 +117,7 @@ export function countAnsweredQuestions(template, answersMap) {
 
 export function toggleChipAnswer(current, option, questionOptions) {
   const token = optionValue(option)
-  const list = Array.isArray(current) ? [...current] : []
+  const list = [...coerceChipAnswerList(current)]
   const idx = list.findIndex(
     item => item === token
       || optionValue(findOptionByStoredValue(questionOptions, item)) === token,
@@ -96,11 +133,9 @@ export function toggleChipAnswer(current, option, questionOptions) {
 
 export function isChipSelected(current, option, questionOptions) {
   const token = optionValue(option)
-  if (!Array.isArray(current)) {
-    return false
-  }
+  const list = coerceChipAnswerList(current)
 
-  return current.some(
+  return list.some(
     item => item === token
       || optionValue(findOptionByStoredValue(questionOptions, item))
         === token,

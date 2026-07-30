@@ -45,7 +45,10 @@ function serializeAnswerValue(value) {
       .map(item => String(item ?? '').trim())
       .filter(Boolean)
 
-    return items.length ? items.join(', ') : null
+    return items.length ? items : null
+  }
+  if (typeof value === 'boolean') {
+    return value ? 'yes' : 'no'
   }
   const trimmed = String(value).trim()
 

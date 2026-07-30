@@ -72,12 +72,8 @@
               :label="t('labOrderingClinician')"
               required
               :test-id="tid.field('clinician')">
-              <FormSelect
+              <ClinicianFormSelect
                 v-model="local.orderingClinicianId"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
                 :readonly="readonly"
                 :options="clinicianOptions"
                 :error="Boolean(errors.orderingClinicianId)"
@@ -229,12 +225,8 @@
             <AddClientLabeledField
               :label="t('labReviewedBy')"
               :test-id="tid.field('reviewed-by')">
-              <FormSelect
+              <ClinicianFormSelect
                 v-model="local.reviewedBy"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
                 clearable
                 :readonly="readonly"
                 :options="clinicianOptions"
@@ -424,6 +416,7 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import SubsectionHeading from './SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import LabAttachmentUploadField from 'components/LabAttachmentUploadField.vue'
 import LabComponentDialog from 'components/LabComponentDialog.vue'
 import {

@@ -324,16 +324,18 @@
           :label="readonly ? t('close') : t('cancel')"
           @click="onCancel"
         />
-        <q-btn
-          v-if="!readonly"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          :data-testid="saveTestId"
-          :label="saveLabel"
-          @click="onSave"
-        />
+          <q-btn
+            v-if="!readonly"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            :data-testid="saveTestId"
+            :label="saveLabel"
+            :loading="saving"
+            :disable="saving"
+            @click="onSave"
+          />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -342,6 +344,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import AppDialogHeader from './AppDialogHeader.vue'
 import AddClientLabeledField from './AddClientLabeledField.vue'
 import SubsectionHeading from './SubsectionHeading.vue'
@@ -355,6 +358,7 @@ import {
   clientInsuranceMedicaidRecipientIdLength,
   clientInsuranceMedicareMemberIdLength,
   clientInsuranceRelationshipValues,
+  quasarNotifyTypes,
 } from './constants.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
@@ -374,6 +378,8 @@ import {
   filterInsurancePayers,
   formatPayerPlanLabel,
 } from 'src/utils/insurance-payers.js'
+import { resolveInsuranceCardAttachment } from
+  'src/utils/insurance-card-file.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
 
@@ -398,6 +404,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  clientId: {
+    type: [String, Number],
+    default: null,
+  },
   payerCatalogItems: {
     type: Array,
     default: () => [],
@@ -411,6 +421,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const $q = useQuasar()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const dialogBodyScrollRef = ref(null)
@@ -419,6 +430,7 @@ const validationErrors = ref({})
 const payerOptions = ref([])
 const payerSelection = ref(null)
 const payerSearch = ref('')
+const saving = ref(false)
 
 const priorityOptions = insurancePriorityOptions
 const typeOptions = insuranceTypeOptions
@@ -488,7 +500,16 @@ watch(
       return
     }
     validationErrors.value = {}
-    local.value = JSON.parse(JSON.stringify(props.profile ?? {}))
+    const raw = props.profile ?? {}
+    local.value = {
+      ...JSON.parse(JSON.stringify({
+        ...raw,
+        frontCardFile: null,
+        backCardFile: null,
+      })),
+      frontCardFile: raw.frontCardFile ?? null,
+      backCardFile: raw.backCardFile ?? null,
+    }
     syncPayerUiFromProfile()
     syncSubscriberFromRelationship()
   },
@@ -615,8 +636,34 @@ async function onSave() {
     return
   }
   validationErrors.value = {}
-  emit('save', { ...local.value })
-  open.value = false
+
+  saving.value = true
+  try {
+    const clientId = String(props.clientId ?? '').trim()
+    const uploadOpts = clientId ? { clientId } : {}
+    const [frontCardFile, backCardFile] = await Promise.all([
+      resolveInsuranceCardAttachment(local.value.frontCardFile, uploadOpts),
+      resolveInsuranceCardAttachment(local.value.backCardFile, uploadOpts),
+    ])
+    emit('save', {
+      ...local.value,
+      frontCardFile,
+      backCardFile,
+    })
+    open.value = false
+  } catch (error) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: String(
+        error?.response?.data?.message
+        ?? error?.message
+        ?? t('insuranceCardUploadError'),
+      ),
+      position: 'top',
+    })
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

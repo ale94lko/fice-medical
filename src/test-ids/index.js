@@ -330,6 +330,16 @@ export const addClientTestIds = {
   fmhBtnAdd: 'add-client-fmh-btn-add',
   fmhRowEdit: id => toTestId('add-client-fmh-row', id, 'btn-edit'),
   fmhRowDelete: id => toTestId('add-client-fmh-row', id, 'btn-delete'),
+  assignedClinicianRowRemove: id => toTestId(
+    'add-client-assigned-clinician-row',
+    id,
+    'btn-remove',
+  ),
+  assignedClinicianRowSetPrimary: id => toTestId(
+    'add-client-assigned-clinician-row',
+    id,
+    'btn-set-primary',
+  ),
   allergyField: name => toTestId('add-client-allergy-field', name),
   allergySeverity: token => toTestId('add-client-allergy-severity', token),
   allergyBtnAdd: 'add-client-allergy-btn-add',

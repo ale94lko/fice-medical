@@ -72,12 +72,8 @@
             :label="t('followUpAssignedProvider')"
             required
             :test-id="tid.field('provider')">
-            <FormSelect
+            <ClinicianFormSelect
               v-model="local.assignedProviderId"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
               :readonly="props.readonly"
               :options="props.clinicianOptions"
               :placeholder="t('followUpAssignedProviderPlaceholder')"
@@ -265,6 +261,7 @@ import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import { followUpNotesMaxLength } from 'components/constants.js'

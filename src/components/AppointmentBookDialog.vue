@@ -154,12 +154,8 @@
               <AddClientLabeledField
                 :label="t('appointmentSupervisorOptional')"
                 :test-id="tid.field('supervisor')">
-                <FormSelect
+                <ClinicianFormSelect
                   v-model="draft.supervisorId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
                   clearable
                   :options="supervisorOptions"
                   :placeholder="t('appointmentSupervisorPlaceholder')"

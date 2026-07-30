@@ -17,6 +17,7 @@ import { combineRecordedDateTime } from 'src/utils/client-vitals.js'
 import {
   resolvePrimaryClinicianIdForApi,
 } from 'src/utils/client-clinicians-form.js'
+import { insuranceCardFileIdForApi } from 'src/utils/insurance-card-file.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -30,19 +31,6 @@ function catalogKeyFromLabel(mapObj, displayValue) {
   const found = Object.entries(mapObj).find(([, label]) => label === d)
 
   return found ? found[0] : null
-}
-
-function insuranceCardUrl(fileOrUrl) {
-  if (fileOrUrl == null) {
-    return null
-  }
-  if (typeof fileOrUrl === 'string') {
-    const s = fileOrUrl.trim()
-
-    return s || null
-  }
-
-  return null
 }
 
 function payerPlanName(profile) {
@@ -93,8 +81,8 @@ function mapInsuranceProfile(profile) {
       profile.status,
     ) || 'active',
     deactivation_reason: trimInsuranceField(profile.deactivationReason) || null,
-    front_card_url: insuranceCardUrl(profile.frontCardFile),
-    back_card_url: insuranceCardUrl(profile.backCardFile),
+    front_card_file_id: insuranceCardFileIdForApi(profile.frontCardFile),
+    back_card_file_id: insuranceCardFileIdForApi(profile.backCardFile),
   }
 
   const apiId = profile?.apiId

@@ -90,12 +90,8 @@
                 :label="t('clinicalNoteClinician')"
                 required
                 :test-id="tid.field('clinician')">
-                <FormSelect
+                <ClinicianFormSelect
                   v-model="local.clinicianId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
                   :readonly="readonly"
                   :options="clinicianOptions"
                   :placeholder="t('clinicalNoteClinicianPlaceholder')"
@@ -291,7 +287,7 @@ import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
-import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'

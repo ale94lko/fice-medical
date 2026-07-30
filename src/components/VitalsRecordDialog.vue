@@ -274,12 +274,8 @@
             </div>
             <div class="col-12 col-md-6">
               <AddClientLabeledField :label="t('vitalsRecordedBy')" required>
-                <FormSelect
+                <ClinicianFormSelect
                   v-model="localDraft.recordedBy"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
                   clearable
                   class="full-width"
                   :readonly="readonly"
@@ -348,7 +344,7 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import { clientVitalsPainLevelValues } from 'components/constants.js'
 import {
   VITALS_LIMITS,

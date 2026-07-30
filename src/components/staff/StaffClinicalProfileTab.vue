@@ -110,12 +110,8 @@
       icon="supervisor_account"
       :title="t('staffClinicalSupervisionTitle')">
       <AddClientLabeledField :label="t('staffSupervisorLabel')">
-        <FormSelect
+        <ClinicianFormSelect
           v-model="clinical.supervisorId"
-          outlined
-          hide-bottom-space
-          emit-value
-          map-options
           clearable
           :readonly="readonly"
           :options="supervisorOptions"
@@ -154,6 +150,7 @@ import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import StaffLicenseDialog from 'components/staff/StaffLicenseDialog.vue'
 import StaffLicensesTable from 'components/staff/StaffLicensesTable.vue'

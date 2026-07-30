@@ -57,6 +57,7 @@
       :profile="activeProfile"
       :section="section"
       :patient-name="patientName"
+      :client-id="clientId"
       :payer-catalog-items="payerCatalogItems"
       :payer-catalog-loading="payerCatalogLoading"
       @save="onDialogSave"
@@ -91,6 +92,10 @@ defineProps({
   patientName: {
     type: String,
     default: '',
+  },
+  clientId: {
+    type: [String, Number],
+    default: null,
   },
   payerCatalogItems: {
     type: Array,

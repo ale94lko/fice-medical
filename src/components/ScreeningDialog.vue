@@ -45,12 +45,8 @@
                 <AddClientLabeledField
                   :label="t('assignedClinician')"
                   :test-id="tid.field('clinician')">
-                  <FormSelect
+                  <ClinicianFormSelect
                     v-model="headerForm.clinicianId"
-                    outlined
-                    hide-bottom-space
-                    emit-value
-                    map-options
                     clearable
                     class="full-width"
                     :disable="!canEditMeta"
@@ -314,6 +310,7 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import ScreeningEditor from 'components/ScreeningEditor.vue'
 import GenerateDocumentAction from

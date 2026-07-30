@@ -6,7 +6,7 @@
       :message="pageBusyMessage"
     />
     <AddClientPageHeader
-      :title="t('editClient')"
+      :title="pageTitle"
       :subtitle="t('editClientSubtitle')"
       :breadcrumb-current="t('editClient')"
       :active-tab-label="activeTabLabel || t('tabBasicInformation')"
@@ -105,6 +105,17 @@ const pageBusyMessage = computed(() => {
 const canSaveForm = computed(
   () => clientFormRef.value?.canSaveForm ?? true,
 )
+const clientDisplayName = computed(() =>
+  String(clientFormRef.value?.patientFullName ?? '').trim(),
+)
+const pageTitle = computed(() => {
+  const name = clientDisplayName.value
+  if (name) {
+    return t('editClientWithName', { name })
+  }
+
+  return t('editClient')
+})
 const profilePhotoDisabled = computed(() => {
   const formRef = clientFormRef.value
   if (!formRef) {

@@ -635,10 +635,33 @@ function insuranceLabelFromApiKey(mapObj, rawKey) {
   return null
 }
 
-function insuranceUrlOrNull(value) {
-  const s = String(value ?? '').trim()
+function mapInsuranceCardAttachmentFromApi(fileIdRaw, fileObj) {
+  const nested = fileObj && typeof fileObj === 'object' ? fileObj : null
+  const fileId = parseOptionalNumber(
+    fileIdRaw
+    ?? nested?.id
+    ?? nested?.ID,
+  )
+  if (fileId == null) {
+    return null
+  }
 
-  return s || null
+  return {
+    fileId,
+    name: String(
+      nested?.original_filename
+      ?? nested?.originalFilename
+      ?? nested?.name
+      ?? '',
+    ).trim() || null,
+    type: String(
+      nested?.content_type
+      ?? nested?.contentType
+      ?? nested?.mime_type
+      ?? nested?.mimeType
+      ?? '',
+    ).trim() || null,
+  }
 }
 
 function mapInsuranceProfileFromApi(row) {
@@ -692,11 +715,13 @@ function mapInsuranceProfileFromApi(row) {
         row?.insurance_status ?? row?.insuranceStatus,
       )
       ?? clientInsuranceStatusValues.active,
-    frontCardFile: insuranceUrlOrNull(
-      row?.front_card_url ?? row?.frontCardUrl,
+    frontCardFile: mapInsuranceCardAttachmentFromApi(
+      row?.front_card_file_id ?? row?.frontCardFileId,
+      row?.front_card_file ?? row?.frontCardFile,
     ),
-    backCardFile: insuranceUrlOrNull(
-      row?.back_card_url ?? row?.backCardUrl,
+    backCardFile: mapInsuranceCardAttachmentFromApi(
+      row?.back_card_file_id ?? row?.backCardFileId,
+      row?.back_card_file ?? row?.backCardFile,
     ),
     deleted: false,
     deletedAt: null,

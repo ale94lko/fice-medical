@@ -80,12 +80,8 @@
               :label="t('carePlanInterventionClinician')"
               required
               :test-id="tid.field('intervention-clinician')">
-              <FormSelect
+              <ClinicianFormSelect
                 v-model="local.responsibleClinicianId"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
                 :readonly="readonly"
                 :options="clinicianOptions"
                 :placeholder="t('carePlanClinicianPlaceholder')"
@@ -144,6 +140,7 @@ import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import {
   carePlanDescriptionMaxLength,
