@@ -1,107 +1,149 @@
 <template>
   <div
     v-if="rows.length"
-    class="fmh-table-wrap
-      fmh-table-wrap--wide">
-    <table
-      class="fmh-table
-        fmh-table--wide">
-      <thead>
-        <tr>
-          <th>{{ t('labColTestName') }}</th>
-          <th>{{ t('labColCategory') }}</th>
-          <th>{{ t('labColOrderedDate') }}</th>
-          <th>{{ t('labColCollectedDate') }}</th>
-          <th>{{ t('labColResultDate') }}</th>
-          <th>{{ t('status') }}</th>
-          <th>{{ t('labColAbnormal') }}</th>
-          <th class="fmh-table-actions-col">
-            {{ t('actions') }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="row in rows" :key="row.id">
-          <td>{{ row.testName || '—' }}</td>
-          <td>
-            <span
-              v-if="row.category"
-              class="lab-category-badge"
-              :class="`lab-category-badge--${row.category}`">
-              {{ categoryLabel(row.category) }}
-            </span>
-            <span v-else>—</span>
-          </td>
-          <td>{{ row.orderedDate || '—' }}</td>
-          <td>{{ row.collectedDate || '—' }}</td>
-          <td>{{ row.resultDate || '—' }}</td>
-          <td>
-            <span
-              class="lab-status-badge"
-              :class="`lab-status-badge--${row.status}`">
-              {{ statusLabel(row.status) }}
-            </span>
-          </td>
-          <td>
-            <span
-              class="lab-abnormal-badge"
-              :class="row.abnormalResult
-                ? 'lab-abnormal-badge--yes'
-                : 'lab-abnormal-badge--no'">
-              {{ row.abnormalResult ? t('yes') : t('no') }}
-            </span>
-          </td>
-          <td class="fmh-table-actions">
-            <q-btn
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action"
-              color="primary"
-              icon="visibility"
-              :data-testid="tid.rowView(row.id)"
-              :aria-label="t('labActionView')"
-              @click="emit('view', row)"
-            />
-            <q-btn
-              v-if="canEdit"
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action"
-              color="primary"
-              icon="edit"
-              :data-testid="tid.rowEdit(row.id)"
-              :aria-label="t('edit')"
-              @click="emit('edit', row)"
-            />
-            <q-btn
-              flat
-              round
-              size="sm"
-              class="app-btn-icon-action"
-              color="primary"
-              icon="download"
-              :data-testid="tid.rowDownload(row.id)"
-              :aria-label="t('labActionDownload')"
-              @click="emit('download', row)"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    class="admin-data-table__scroll">
+    <AdminQTable
+      class="table admin-data-table admin-data-table--embedded
+        admin-data-table--inline-column-settings"
+      flat
+      hide-bottom
+      row-key="id"
+      :rows="rows"
+      :columns="columns"
+      :pagination="tablePagination">
+      <template #body-cell-testName="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__primary-cell">
+          {{ scope.row.testName || '—' }}
+        </q-td>
+      </template>
+
+      <template #body-cell-category="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__secondary-cell">
+          <span
+            v-if="scope.row.category"
+            class="lab-category-badge"
+            :class="`lab-category-badge--${String(scope.row.category)
+              .toLowerCase()}`">
+            {{ categoryLabel(scope.row.category) }}
+          </span>
+          <span v-else>—</span>
+        </q-td>
+      </template>
+
+      <template #body-cell-orderedDate="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__secondary-cell">
+          {{ scope.row.orderedDate || '—' }}
+        </q-td>
+      </template>
+
+      <template #body-cell-collectedDate="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__secondary-cell">
+          {{ scope.row.collectedDate || '—' }}
+        </q-td>
+      </template>
+
+      <template #body-cell-resultDate="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__secondary-cell">
+          {{ scope.row.resultDate || '—' }}
+        </q-td>
+      </template>
+
+      <template #body-cell-status="scope">
+        <q-td :props="scope">
+          <span
+            class="lab-status-badge"
+            :class="`lab-status-badge--${String(scope.row.status ?? '')
+              .toLowerCase()}`">
+            {{ statusLabel(scope.row.status) }}
+          </span>
+        </q-td>
+      </template>
+
+      <template #body-cell-abnormal="scope">
+        <q-td :props="scope">
+          <span
+            class="lab-abnormal-badge"
+            :class="scope.row.abnormalResult
+              ? 'lab-abnormal-badge--yes'
+              : 'lab-abnormal-badge--no'">
+            {{ scope.row.abnormalResult ? t('yes') : t('no') }}
+          </span>
+        </q-td>
+      </template>
+
+      <template #row-actions="{ row }">
+        <div class="admin-table-row-actions">
+          <q-btn
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            :icon="adminTableActionIcons.view"
+            :data-testid="tid.rowView(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('labActionView')"
+            :aria-label="t('labActionView')"
+            @click="emit('view', row)"
+          />
+          <q-btn
+            v-if="canEdit"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            :icon="adminTableActionIcons.edit"
+            :data-testid="tid.rowEdit(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('edit')"
+            :aria-label="t('edit')"
+            @click="emit('edit', row)"
+          />
+          <q-btn
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="download"
+            :data-testid="tid.rowDownload(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('labActionDownload')"
+            :aria-label="t('labActionDownload')"
+            @click="emit('download', row)"
+          />
+        </div>
+      </template>
+    </AdminQTable>
   </div>
-  <p v-else class="fmh-empty text-body2 text-grey-7">
-    {{ emptyLabel }}
-  </p>
+
+  <div
+    v-else
+    class="admin-data-table__empty full-width row flex-center
+      text-grey-7 q-gutter-sm q-pa-lg">
+    <q-icon name="inbox" size="md" />
+    <span>{{ emptyLabel }}</span>
+  </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminQTable from 'components/AdminQTable.vue'
+import { siteBreakpoints } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
 
-defineProps({
+const props = defineProps({
   rows: {
     type: Array,
     default: () => [],
@@ -123,6 +165,86 @@ defineProps({
 const emit = defineEmits(['view', 'edit', 'download'])
 
 const { t } = useI18n()
+
+const tablePagination = { rowsPerPage: 0 }
+
+const rows = computed(() => props.rows ?? [])
+
+const columns = computed(() => [
+  {
+    name: 'testName',
+    label: t('labColTestName'),
+    align: 'left',
+    field: row => row.testName,
+    sortable: false,
+    headerStyle: 'min-width: 160px',
+    style: 'min-width: 160px',
+  },
+  {
+    name: 'category',
+    label: t('labColCategory'),
+    align: 'left',
+    field: row => row.category,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
+  },
+  {
+    name: 'orderedDate',
+    label: t('labColOrderedDate'),
+    align: 'left',
+    field: row => row.orderedDate,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'collectedDate',
+    label: t('labColCollectedDate'),
+    align: 'left',
+    field: row => row.collectedDate,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'resultDate',
+    label: t('labColResultDate'),
+    align: 'left',
+    field: row => row.resultDate,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'status',
+    label: t('status'),
+    align: 'left',
+    field: row => row.status,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: 'abnormal',
+    label: t('labColAbnormal'),
+    align: 'left',
+    field: row => row.abnormalResult,
+    sortable: false,
+    headerStyle: 'min-width: 96px',
+    style: 'min-width: 96px',
+  },
+  {
+    name: 'actions',
+    label: t('actions'),
+    align: 'center',
+    field: row => row.id,
+    sortable: false,
+    required: true,
+    headerStyle: 'min-width: 132px',
+    style: 'min-width: 132px',
+  },
+])
 
 function statusLabel(status) {
   const key = labI18nKey('labStatus', status)

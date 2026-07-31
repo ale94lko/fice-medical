@@ -5,7 +5,8 @@ import { clientFormSections } from 'components/constants.js'
 import { buildFollowUpsForSave } from 'src/utils/client-follow-ups.js'
 
 /**
- * PATCH /client/v1/{id} — includes follow_ups only when there are changes.
+ * PATCH /client/v1/{id} — includes follow_ups / labs only when there are
+ * changes (empty arrays would wipe existing records on replace).
  */
 export function buildClientUpdateBody(form) {
   const body = buildClientRegisterBody(form)
@@ -18,6 +19,10 @@ export function buildClientUpdateBody(form) {
     body.follow_ups = followUps
   } else {
     delete body.follow_ups
+  }
+
+  if (!Array.isArray(body.labs) || body.labs.length === 0) {
+    delete body.labs
   }
 
   return body

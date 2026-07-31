@@ -100,6 +100,7 @@
         <div class="col-12">
           <AddClientLabeledField
             :label="t('allergySeverity')"
+            required
             :test-id="tid.allergyField('severity')">
             <div class="allergy-severity-grid">
               <q-btn
@@ -157,7 +158,7 @@
       :toggle-test-id="tid.accordionToggle('allergies-existing')">
       <template v-if="!noKnownAllergiesChecked">
         <AdminTablePanel
-          class="allergies-table-panel"
+          class="allergies-table-panel admin-table-panel--wide"
           :show-column-settings="false">
           <AllergiesTable
             :entries="visibleEntries"

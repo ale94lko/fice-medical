@@ -83,7 +83,7 @@
       section-test-id="add-client-accordion-fmh-personal"
       :toggle-test-id="tid.accordionToggle('fmh-personal')">
       <AdminTablePanel
-        class="family-medical-history-table-panel"
+        class="family-medical-history-table-panel admin-table-panel--wide"
         :show-column-settings="false">
         <FamilyMedicalHistoryTable
           :entries="personalEntries"
@@ -104,7 +104,7 @@
       section-test-id="add-client-accordion-fmh-family"
       :toggle-test-id="tid.accordionToggle('fmh-family')">
       <AdminTablePanel
-        class="family-medical-history-table-panel"
+        class="family-medical-history-table-panel admin-table-panel--wide"
         :show-column-settings="false">
         <FamilyMedicalHistoryTable
           :entries="familyEntries"

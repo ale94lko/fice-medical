@@ -44,7 +44,7 @@
       </div>
 
       <AdminTablePanel
-        class="screenings-table-panel q-mt-md"
+        class="screenings-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
         <ScreeningsTable
           :rows="screeningRows"

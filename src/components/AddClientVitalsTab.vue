@@ -32,7 +32,7 @@
       </div>
 
       <AdminTablePanel
-        class="vitals-table-panel q-mt-md"
+        class="vitals-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
         <VitalsHistoryTable
           :entries="sortedEntries"

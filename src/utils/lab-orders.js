@@ -117,7 +117,7 @@ export function nextLocalId(prefix) {
 }
 
 export function isAbnormalFlag(flag) {
-  const f = String(flag ?? '').trim().toLowerCase()
+  const f = String(flag ?? '').trim().toUpperCase()
   if (!f || f === labFlags.normal) {
     return false
   }
@@ -229,10 +229,16 @@ export function filterLabs(list, filters = {}) {
     if (search && !String(row.testName ?? '').toLowerCase().includes(search)) {
       return false
     }
-    if (status && row.status !== status) {
+    if (
+      status
+      && String(row.status ?? '').trim().toLowerCase() !== status
+    ) {
       return false
     }
-    if (category && row.category !== category) {
+    if (
+      category
+      && String(row.category ?? '').trim().toLowerCase() !== category
+    ) {
       return false
     }
     const ordered = parseUsDateToSortable(row.orderedDate)

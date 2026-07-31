@@ -1,43 +1,51 @@
 <template>
   <div class="add-client-labs-tab">
-    <template v-if="!canView">
-      <div class="labs-panel q-pa-lg text-center">
-        <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
-        <p class="text-body1 text-grey-8 q-mb-none">
-          {{ t('labsNoPermission') }}
-        </p>
-      </div>
-    </template>
+    <div
+      v-if="!canView"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('labsNoPermission') }}
+      </p>
+    </div>
 
     <template v-else>
-      <div class="row items-center justify-between q-mb-md">
-        <div>
-          <h2 class="labs-panel__title q-mb-xs">{{ t('labsTitle') }}</h2>
-          <p class="labs-panel__subtitle text-body2 text-grey-7">
+      <div class="labs-header row items-start">
+        <div class="col">
+          <h2 class="labs-title">
+            {{ t('labsTitle') }}
+          </h2>
+          <p class="labs-subtitle text-body2">
             {{ t('labsSubtitle') }}
           </p>
         </div>
-        <q-btn
-          v-if="!readonly"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="add"
-          :disable="loading"
-          :data-testid="tid.btn('add')"
-          :label="t('labAdd')"
-          @click="openAdd"
-        />
+        <div v-if="!readonly" class="col-auto">
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :disable="loading"
+            :data-testid="tid.btn('add')"
+            :label="t('labAdd')"
+            @click="openAdd"
+          />
+        </div>
       </div>
 
-      <div v-if="loading" class="labs-panel q-pa-xl flex flex-center">
+      <div
+        v-if="loading"
+        class="fmh-list-card q-pa-xl flex flex-center q-mt-md">
         <AppBrandLoading inline />
       </div>
 
-      <div v-else class="labs-panel q-pa-md">
+      <AdminTablePanel
+        v-else
+        class="labs-table-panel admin-table-panel--wide q-mt-md"
+        :show-column-settings="false">
         <LabsTable
-          :rows="paginatedLabs"
+          :rows="labs"
           :can-edit="!readonly"
           :can-delete="canDelete"
           :empty-label="t('labListEmpty')"
@@ -45,30 +53,7 @@
           @edit="openEdit"
           @download="onRowDownload"
         />
-
-        <div
-          v-if="labs.length"
-          class="row items-center justify-between q-mt-md">
-          <p class="text-body2 text-grey-7 q-mb-none">
-            {{
-              t('labPaginationSummary', {
-                from: pageFrom,
-                to: pageTo,
-                total: labs.length,
-              })
-            }}
-          </p>
-          <q-pagination
-            v-model="page"
-            :max="pageCount"
-            max-pages="6"
-            direction-links
-            boundary-links
-            color="primary"
-            size="sm"
-          />
-        </div>
-      </div>
+      </AdminTablePanel>
     </template>
 
     <LabOrderDialog
@@ -82,14 +67,14 @@
       @download-attachment="onDownloadAttachment"
       @remove-attachment="onRemoveAttachment"
     />
-
   </div>
 </template>
 
 <script setup>
-import { computed, defineModel, ref, watch } from 'vue'
+import { computed, defineModel, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import LabOrderDialog from 'components/LabOrderDialog.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import LabsTable from 'components/LabsTable.vue'
@@ -141,8 +126,6 @@ const { t } = useI18n()
 const $q = useQuasar()
 
 const loading = ref(false)
-const page = ref(1)
-const pageSize = 10
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -161,34 +144,6 @@ const resolvedClinicianOptions = computed(() => {
   }
 
   return [{ label: 'Dr. John Smith', value: 'clin-1' }]
-})
-
-const pageCount = computed(() =>
-  Math.max(1, Math.ceil(labs.value.length / pageSize)),
-)
-
-const paginatedLabs = computed(() => {
-  const start = (page.value - 1) * pageSize
-
-  return labs.value.slice(start, start + pageSize)
-})
-
-const pageFrom = computed(() => {
-  if (!labs.value.length) {
-    return 0
-  }
-
-  return (page.value - 1) * pageSize + 1
-})
-
-const pageTo = computed(() =>
-  Math.min(page.value * pageSize, labs.value.length),
-)
-
-watch(pageCount, maxPage => {
-  if (page.value > maxPage) {
-    page.value = 1
-  }
 })
 
 function labRowHasDetail(row) {
@@ -433,25 +388,3 @@ async function onRemoveAttachment(fileId) {
 }
 
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.labs-panel {
-  background: $surface;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-}
-
-.labs-panel__title {
-  margin: 0;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: $text-strong;
-}
-
-.labs-panel__subtitle {
-  margin: 0;
-}
-</style>

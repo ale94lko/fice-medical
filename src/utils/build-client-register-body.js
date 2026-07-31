@@ -256,7 +256,7 @@ function buildLabsForRegister(form) {
   return labs
     .filter(lab => !lab?.deletedAt)
     .map(lab => labToApiPayload(lab))
-    .filter(payload => trim(payload?.test_name).length > 0)
+    .filter(payload => trim(payload?.lab_name).length > 0)
 }
 
 function buildContacts(form) {

@@ -322,7 +322,8 @@
                   <span
                     v-if="comp.flag"
                     class="lab-order-dialog__flag"
-                    :class="`lab-order-dialog__flag--${comp.flag}`">
+                    :class="`lab-order-dialog__flag--${String(comp.flag ?? '')
+                      .toLowerCase()}`">
                     {{ flagLabel(comp.flag) }}
                   </span>
                   <span v-else>—</span>

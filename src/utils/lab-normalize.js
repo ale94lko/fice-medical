@@ -35,6 +35,36 @@ function parseOptionalBool(value) {
   return null
 }
 
+/** API enums: BLOOD_TEST, ORDERED, LOW, CRITICAL_LOW, … */
+export function toLabApiEnum(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return null
+  }
+
+  return raw.replace(/[\s-]+/g, '_').toUpperCase()
+}
+
+/** Numeric server ids only (skips local ids like lab-…). */
+export function parseLabApiEntityId(value) {
+  if (value == null || value === '') {
+    return null
+  }
+  const raw = String(value).trim()
+  if (!/^\d+$/.test(raw)) {
+    return null
+  }
+  const n = Number(raw)
+
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
+function trimOrNull(value) {
+  const text = String(value ?? '').trim()
+
+  return text || null
+}
+
 export function normalizeLabFile(raw) {
   return normalizeStoredFile(raw)
 }
@@ -65,7 +95,7 @@ export function normalizeLabComponent(raw) {
     referenceRangeUnit: String(
       c.reference_range_unit ?? c.referenceRangeUnit ?? '',
     ).trim() || null,
-    flag: String(c.flag ?? '').trim().toLowerCase() || null,
+    flag: toLabApiEnum(c.flag),
     resultDate: isoDateToUsDateString(
       c.result_date ?? c.resultDate ?? '',
     ),
@@ -87,7 +117,7 @@ export function normalizeLabSummary(raw) {
     testName: String(
       l.lab_name ?? l.labName ?? l.test_name ?? l.testName ?? '',
     ).trim(),
-    category: String(l.category ?? '').trim().toLowerCase() || null,
+    category: toLabApiEnum(l.category),
     orderedDate: isoDateToUsDateString(
       l.ordered_date ?? l.orderedDate ?? '',
     ),
@@ -97,7 +127,7 @@ export function normalizeLabSummary(raw) {
     resultDate: String(
       isoDateToUsDateString(l.result_date ?? l.resultDate ?? ''),
     ).trim() || null,
-    status: String(l.status ?? labStatuses.draft).trim().toLowerCase(),
+    status: toLabApiEnum(l.status) || labStatuses.draft,
     abnormalResult: parseOptionalBool(
       l.abnormal_result ?? l.abnormalResult,
     ),
@@ -120,7 +150,7 @@ export function normalizeLabDetail(raw) {
     orderingClinicianName: String(
       l.ordering_clinician_name ?? l.orderingClinicianName ?? '',
     ).trim() || null,
-    priority: String(l.priority ?? '').trim().toLowerCase() || null,
+    priority: toLabApiEnum(l.priority),
     specimenType: String(
       l.specimen_type ?? l.specimenType ?? '',
     ).trim() || null,
@@ -143,40 +173,70 @@ export function normalizeLabDetail(raw) {
   }
 }
 
+function resolveAbnormalResult(lab) {
+  if (typeof lab?.abnormalResult === 'boolean') {
+    return lab.abnormalResult
+  }
+
+  return computeLabAbnormalResult(
+    lab?.components ?? [],
+    lab?.abnormalResultManual,
+  )
+}
+
+function mapComponentToApiPayload(component) {
+  /* eslint-disable camelcase -- API snake_case */
+  const payload = {
+    component_name: component.componentName,
+    clinical_key: component.clinicalKey,
+    value: component.value,
+    unit: component.unit,
+    reference_range_low: component.referenceRangeLow,
+    reference_range_high: component.referenceRangeHigh,
+    reference_range_unit: component.referenceRangeUnit,
+    flag: toLabApiEnum(component.flag),
+    result_date: usDateToIso(component.resultDate) || null,
+    result_time: component.resultTime,
+    notes: component.notes,
+    abnormal_indicator: component.abnormalIndicator,
+  }
+  /* eslint-enable camelcase */
+  const id = parseLabApiEntityId(component.id)
+  if (id != null) {
+    payload.id = id
+  }
+
+  return payload
+}
+
 export function labToApiPayload(lab, { draft = false } = {}) {
   /* eslint-disable camelcase -- API snake_case */
+  const status = draft
+    ? labStatuses.draft
+    : (toLabApiEnum(lab.status) || labStatuses.ordered)
   const body = {
-    lab_name: lab.testName,
-    category: lab.category,
+    lab_name: trimOrNull(lab.testName),
+    category: toLabApiEnum(lab.category),
     ordering_clinician_id: lab.orderingClinicianId,
-    status: draft ? labStatuses.draft : lab.status,
+    status,
     ordered_date: usDateToIso(lab.orderedDate) || null,
-    priority: lab.priority,
+    priority: toLabApiEnum(lab.priority),
     specimen_type: lab.specimenType,
     collected_date: usDateToIso(lab.collectedDate) || null,
     collection_location: lab.collectionLocation,
     result_date: usDateToIso(lab.resultDate) || null,
+    abnormal_result: resolveAbnormalResult(lab),
     abnormal_result_manual: lab.abnormalResultManual,
     reviewed_by: lab.reviewedBy,
     reviewed_date: usDateToIso(lab.reviewedDate) || null,
     result_summary: lab.resultSummary,
     components: (lab.components ?? [])
       .filter(c => !c.deletedAt)
-      .map(c => ({
-        id: c.id || undefined,
-        component_name: c.componentName,
-        clinical_key: c.clinicalKey,
-        value: c.value,
-        unit: c.unit,
-        reference_range_low: c.referenceRangeLow,
-        reference_range_high: c.referenceRangeHigh,
-        reference_range_unit: c.referenceRangeUnit,
-        flag: c.flag,
-        result_date: usDateToIso(c.resultDate) || null,
-        result_time: c.resultTime,
-        notes: c.notes,
-        abnormal_indicator: c.abnormalIndicator,
-      })),
+      .map(mapComponentToApiPayload),
+  }
+  const id = parseLabApiEntityId(lab.id)
+  if (id != null) {
+    body.id = id
   }
 
   return body

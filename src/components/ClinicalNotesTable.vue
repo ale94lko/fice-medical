@@ -1,106 +1,109 @@
 <template>
-  <AdminQTable
+  <div
     v-if="rows.length"
-    class="table admin-data-table admin-data-table--embedded
-      admin-data-table--inline-column-settings"
-    flat
-    hide-bottom
-    row-key="id"
-    :rows="rows"
-    :columns="columns"
-    :pagination="tablePagination">
-    <template #body-cell-noteDateTime="scope">
-      <q-td
-        :props="scope"
-        class="admin-data-table__secondary-cell">
-        {{ scope.row.noteDateTimeDisplay || '—' }}
-      </q-td>
-    </template>
+    class="admin-data-table__scroll">
+    <AdminQTable
+      class="table admin-data-table admin-data-table--embedded
+        admin-data-table--inline-column-settings"
+      flat
+      hide-bottom
+      row-key="id"
+      :rows="rows"
+      :columns="columns"
+      :pagination="tablePagination">
+      <template #body-cell-noteDateTime="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__secondary-cell">
+          {{ scope.row.noteDateTimeDisplay || '—' }}
+        </q-td>
+      </template>
 
-    <template #body-cell-clinician="scope">
-      <q-td :props="scope">
-        <AdminTableClinicianAvatars
-          v-if="scope.row.clinicianEntries?.length"
-          :entries="scope.row.clinicianEntries"
-        />
-        <span v-else>—</span>
-      </q-td>
-    </template>
+      <template #body-cell-clinician="scope">
+        <q-td :props="scope">
+          <AdminTableClinicianAvatars
+            v-if="scope.row.clinicianEntries?.length"
+            :entries="scope.row.clinicianEntries"
+          />
+          <span v-else>—</span>
+        </q-td>
+      </template>
 
-    <template #body-cell-status="scope">
-      <q-td :props="scope">
-        <AdminTableStatusCell
-          :label="statusLabel(scope.row.status)"
-          :variant="statusVariant(scope.row.status)"
-        />
-      </q-td>
-    </template>
+      <template #body-cell-status="scope">
+        <q-td :props="scope">
+          <AdminTableStatusCell
+            :label="statusLabel(scope.row.status)"
+            :variant="statusVariant(scope.row.status)"
+          />
+        </q-td>
+      </template>
 
-    <template #body-cell-summary="scope">
-      <q-td
-        :props="scope"
-        class="admin-data-table__secondary-cell
-          clinical-notes-table__summary">
-        {{ scope.row.summaryPreview || '—' }}
-      </q-td>
-    </template>
+      <template #body-cell-summary="scope">
+        <q-td
+          :props="scope"
+          class="admin-data-table__secondary-cell
+            clinical-notes-table__summary">
+          {{ scope.row.summaryPreview || '—' }}
+        </q-td>
+      </template>
 
-    <template #row-actions="{ row }">
-      <div class="admin-table-row-actions">
-        <q-btn
-          flat
-          round
-          dense
-          class="app-btn-icon-action"
-          :icon="adminTableActionIcons.view"
-          :data-testid="tid.rowView(row.id)"
-          :size="siteBreakpoints.SM"
-          :title="t('clinicalNoteActionView')"
-          :aria-label="t('clinicalNoteActionView')"
-          @click="emit('view', row)"
-        />
-        <q-btn
-          v-if="canDownloadRow(row)"
-          flat
-          round
-          dense
-          class="app-btn-icon-action"
-          icon="download"
-          :data-testid="tid.rowDownload(row.id)"
-          :size="siteBreakpoints.SM"
-          :title="t('clinicalNoteActionDownload')"
-          :aria-label="t('clinicalNoteActionDownload')"
-          @click="emit('download', row)"
-        />
-        <q-btn
-          v-if="canEditRow(row)"
-          flat
-          round
-          dense
-          class="app-btn-icon-action"
-          :icon="adminTableActionIcons.edit"
-          :data-testid="tid.rowEdit(row.id)"
-          :size="siteBreakpoints.SM"
-          :title="t('edit')"
-          :aria-label="t('edit')"
-          @click="emit('edit', row)"
-        />
-        <q-btn
-          v-if="canDeleteRow(row)"
-          flat
-          round
-          dense
-          class="app-btn-icon-action"
-          icon="delete"
-          :data-testid="tid.rowDelete(row.id)"
-          :size="siteBreakpoints.SM"
-          :title="t('delete')"
-          :aria-label="t('delete')"
-          @click="emit('delete', row)"
-        />
-      </div>
-    </template>
-  </AdminQTable>
+      <template #row-actions="{ row }">
+        <div class="admin-table-row-actions">
+          <q-btn
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            :icon="adminTableActionIcons.view"
+            :data-testid="tid.rowView(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('clinicalNoteActionView')"
+            :aria-label="t('clinicalNoteActionView')"
+            @click="emit('view', row)"
+          />
+          <q-btn
+            v-if="canDownloadRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="download"
+            :data-testid="tid.rowDownload(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('clinicalNoteActionDownload')"
+            :aria-label="t('clinicalNoteActionDownload')"
+            @click="emit('download', row)"
+          />
+          <q-btn
+            v-if="canEditRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            :icon="adminTableActionIcons.edit"
+            :data-testid="tid.rowEdit(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('edit')"
+            :aria-label="t('edit')"
+            @click="emit('edit', row)"
+          />
+          <q-btn
+            v-if="canDeleteRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="delete"
+            :data-testid="tid.rowDelete(row.id)"
+            :size="siteBreakpoints.SM"
+            :title="t('delete')"
+            :aria-label="t('delete')"
+            @click="emit('delete', row)"
+          />
+        </div>
+      </template>
+    </AdminQTable>
+  </div>
 
   <div
     v-else

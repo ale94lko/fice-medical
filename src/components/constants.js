@@ -614,18 +614,18 @@ export const labCategories = {
 }
 
 export const labPriorities = {
-  routine: 'routine',
-  stat: 'stat',
-  urgent: 'urgent',
+  routine: 'ROUTINE',
+  stat: 'STAT',
+  urgent: 'URGENT',
 }
 
 export const labFlags = {
-  normal: 'normal',
-  low: 'low',
-  high: 'high',
-  criticalLow: 'critical_low',
-  criticalHigh: 'critical_high',
-  abnormal: 'abnormal',
+  normal: 'NORMAL',
+  low: 'LOW',
+  high: 'HIGH',
+  criticalLow: 'CRITICAL_LOW',
+  criticalHigh: 'CRITICAL_HIGH',
+  abnormal: 'ABNORMAL',
 }
 
 export const labAbnormalValues = {

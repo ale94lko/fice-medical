@@ -442,12 +442,12 @@
   overflow: hidden;
 }
 
-.app-layout .q-page-container:has(.client-list-page),
-.app-layout .q-page-container:has(.staff-list-page),
-.app-layout .q-page-container:has(.user-list-page),
-.app-layout .q-page-container:has(.subtenant-list-page) {
+.app-layout .q-page-container:has(.admin-list-page) {
   flex: 1 1 auto;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .app-layout .q-page-container:has(.client-overview-page) {
@@ -734,6 +734,7 @@
   .admin-page.client-list-page,
   .admin-page.user-list-page,
   .admin-page.staff-list-page,
+  .admin-page.subtenant-list-page,
   .admin-page.client-overview-page,
   .admin-page.calendar-page {
     padding: 6px 10px 0;
@@ -745,11 +746,6 @@
 }
 
 .client-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -789,25 +785,8 @@
     width: 100%;
   }
 
-  .admin-list-page__table-panel {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .admin-table-panel__table-wrap {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .admin-data-table {
-    flex: 1 1 auto;
-    min-height: 180px;
-    max-height: none;
-    height: 0;
+  &__summary {
+    flex-shrink: 0;
   }
 
   &__not-assigned {
@@ -1027,12 +1006,6 @@
 }
 
 .user-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -1137,27 +1110,6 @@
     }
   }
 
-  .admin-list-page__table-panel {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .admin-table-panel__table-wrap {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .admin-data-table {
-    flex: 1 1 auto;
-    min-height: 180px;
-    max-height: none;
-    height: 0;
-  }
-
   @media (max-width: 1023px) {
     .admin-list-page__title-row {
       flex-wrap: wrap;
@@ -1181,12 +1133,6 @@
 }
 
 .subtenant-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -1205,15 +1151,13 @@
     line-height: 1.25rem;
     margin-bottom: 0;
   }
+
+  .admin-list-page__actions {
+    margin-top: 0;
+  }
 }
 
 .service-procedure-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -1290,12 +1234,6 @@
 }
 
 .screening-template-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -1372,12 +1310,6 @@
 }
 
 .clinical-resource-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -1481,12 +1413,6 @@
 }
 
 .staff-list-page {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: calc(100dvh - 56px);
-  box-sizing: border-box;
-
   .admin-list-page__header {
     margin-bottom: 8px;
   }
@@ -1526,28 +1452,8 @@
     width: 100%;
   }
 
-  .admin-list-page__table-panel {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .admin-table-panel__table-wrap {
-    flex: 1 1 auto;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .admin-data-table {
-    flex: 1 1 auto;
-    min-height: 180px;
-    max-height: none;
-    height: 0;
-  }
-
   &__summary {
+    flex-shrink: 0;
     margin-top: 12px;
   }
 
@@ -3754,34 +3660,36 @@ input:-webkit-autofill {
   }
 }
 
-.add-client-insurance-tab {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px 0 16px;
+.add-client-insurance-tab,
+.add-client-care-plans-tab {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: 8px 0 8px;
+
+  .admin-table-panel,
+  .admin-data-table__scroll,
+  .admin-data-table {
+    width: 100%;
+    max-width: none;
+  }
+
+  .admin-data-table .q-table {
+    width: 100%;
+  }
 }
 
 .add-client-clinical-notes-tab {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px 0 16px;
-}
-
-.add-client-care-plans-tab {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px 0 16px;
+  padding: 8px 0 8px;
 }
 
 .add-client-referrals-tab {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px 0 16px;
+  padding: 8px 0 8px;
 }
 
 .add-client-appointments-tab {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 8px 0 16px;
+  padding: 8px 0 8px;
 }
 
 .insurance-header {
@@ -3797,6 +3705,10 @@ input:-webkit-autofill {
 }
 
 .vitals-header {
+  gap: 16px;
+}
+
+.labs-header {
   gap: 16px;
 }
 
@@ -3840,6 +3752,13 @@ input:-webkit-autofill {
   color: $text-strong;
 }
 
+.labs-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
 .care-plans-title {
   margin: 0;
   font-size: 1.125rem;
@@ -3862,6 +3781,11 @@ input:-webkit-autofill {
 }
 
 .insurance-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.labs-subtitle {
   margin: 4px 0 0;
   color: $text-muted;
 }
@@ -3904,6 +3828,10 @@ input:-webkit-autofill {
 }
 
 .vitals-table-panel {
+  margin-top: 12px;
+}
+
+.labs-table-panel {
   margin-top: 12px;
 }
 

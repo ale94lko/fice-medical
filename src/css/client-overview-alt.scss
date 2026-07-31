@@ -255,6 +255,13 @@
     min-width: 0;
   }
 
+  &__contact {
+    .admin-contact-overflow--header .admin-contact-overflow__value {
+      font-weight: 500;
+      color: $table-text-secondary;
+    }
+  }
+
   &__status {
     display: inline-flex;
     align-items: center;

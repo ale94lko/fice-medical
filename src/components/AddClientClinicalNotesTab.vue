@@ -45,7 +45,7 @@
       </div>
 
       <AdminTablePanel
-        class="clinical-notes-table-panel q-mt-md"
+        class="clinical-notes-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
         <ClinicalNotesTable
           :rows="noteRows"

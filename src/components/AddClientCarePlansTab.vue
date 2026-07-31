@@ -45,7 +45,7 @@
       </div>
 
       <AdminTablePanel
-        class="care-plans-table-panel q-mt-md"
+        class="care-plans-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
         <CarePlansTable
           :rows="planRows"

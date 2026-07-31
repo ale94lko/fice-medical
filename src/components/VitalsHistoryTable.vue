@@ -1,14 +1,16 @@
 <template>
-  <AdminQTable
+  <div
     v-if="rows.length"
-    class="table admin-data-table admin-data-table--embedded
-      admin-data-table--inline-column-settings"
-    flat
-    hide-bottom
-    row-key="id"
-    :rows="rows"
-    :columns="columns"
-    :pagination="tablePagination">
+    class="admin-data-table__scroll">
+    <AdminQTable
+      class="table admin-data-table admin-data-table--embedded
+        admin-data-table--inline-column-settings"
+      flat
+      hide-bottom
+      row-key="id"
+      :rows="rows"
+      :columns="columns"
+      :pagination="tablePagination">
     <template #body-cell-recordedDateTime="scope">
       <q-td
         :props="scope"
@@ -124,7 +126,8 @@
         </span>
       </div>
     </template>
-  </AdminQTable>
+    </AdminQTable>
+  </div>
 
   <div
     v-else

@@ -195,7 +195,8 @@
                 <span
                   v-if="local.flag"
                   class="lab-flag-preview"
-                  :class="`lab-flag-preview--${local.flag}`">
+                  :class="`lab-flag-preview--${String(local.flag ?? '')
+                    .toLowerCase()}`">
                   {{ flagLabel(local.flag) }}
                 </span>
                 <span v-else>—</span>

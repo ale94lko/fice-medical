@@ -34,7 +34,7 @@
     </div>
 
     <AdminTablePanel
-      class="insurance-table-panel q-mt-md"
+      class="insurance-table-panel admin-table-panel--wide q-mt-md"
       :show-column-settings="false">
       <InsuranceProfilesTable
         :profiles="visibleProfiles"

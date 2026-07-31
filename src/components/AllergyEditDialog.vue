@@ -75,6 +75,7 @@
           <div class="col-12">
             <AddClientLabeledField
               :label="t('allergySeverity')"
+              required
               :test-id="tid.allergyField('severity')">
               <div class="allergy-severity-grid">
                 <q-btn
