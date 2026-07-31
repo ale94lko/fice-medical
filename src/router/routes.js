@@ -6,6 +6,10 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
+        path: '',
+        redirect: '/dashboard',
+      },
+      {
         path: 'dashboard',
         component: () => import('pages/dashboard/DashboardPage.vue'),
       },

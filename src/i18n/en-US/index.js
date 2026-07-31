@@ -334,6 +334,85 @@ export default {
   userDeleteSuccess: 'User deleted successfully.',
   userDeleteError: 'Could not delete the user. Please try again.',
   dashboard: 'Dashboard',
+  dashboardSubtitle:
+    'Overview of operations for the active location.',
+  dashboardCustomize: 'Customize panel',
+  dashboardDoneEditing: 'Done',
+  dashboardEditSubtitle:
+    'Drag cards to reorder. Change size or visibility; '
+    + 'changes save automatically.',
+  dashboardCustomizeTitle: 'Customize dashboard',
+  dashboardCustomizeHint:
+    'Show or hide widgets, set size, and drag to reorder.',
+  dashboardDragHandle: 'Drag to reorder',
+  dashboardWidgetVisible: 'Visible',
+  dashboardWidgetHidden: 'Hidden',
+  dashboardWidgetHiddenHint: 'Hidden from the panel. Turn on to show it.',
+  dashboardRefresh: 'Refresh',
+  dashboardComingSoon: 'Coming soon',
+  dashboardComingSoonMessage:
+    'This widget will be available in a future release.',
+  dashboardEmptyTitle: 'No widgets to show',
+  dashboardEmptyMessage:
+    'Your permissions do not include dashboard widgets yet, '
+    + 'or all widgets are hidden. Try customizing the panel.',
+  dashboardLoadError:
+    'Could not load the dashboard. Please try again.',
+  dashboardConfigLoadError:
+    'Could not load dashboard preferences.',
+  dashboardConfigSaveSuccess: 'Dashboard preferences saved.',
+  dashboardConfigSaveError:
+    'Could not save dashboard preferences.',
+  dashboardWidgetEmpty: 'No data right now.',
+  dashboardOpenLink: 'Open',
+  dashboardTotalCount: 'Total: {count}',
+  dashboardChartTotal: 'Total',
+  dashboardSizeS: 'Small',
+  dashboardSizeM: 'Medium',
+  dashboardSizeL: 'Large',
+  dashboardMetricTotalStaff: 'Total staff',
+  dashboardMetricClinicians: 'Clinicians',
+  dashboardMetricActive: 'Active',
+  dashboardMetricActiveStaff: 'Active staff',
+  dashboardMetricInactive: 'Inactive',
+  dashboardMetricOther: 'Other',
+  dashboardMetricCompleted: 'Completed',
+  dashboardMetricArchived: 'Archived',
+  dashboardMetricUnsigned: 'Unsigned',
+  dashboardMetricOverdue: 'Overdue',
+  dashboardCarePlanClientId: 'Client {id}',
+  dashboardMetricOnLeave: 'On leave',
+  dashboardMetricExpiringCredentials: 'Expiring credentials',
+  dashboardWidgetAppointmentsTodayLabel: 'Appointments today',
+  dashboardWidgetAppointmentsNext48hLabel:
+    'Appointments next 48h',
+  dashboardWidgetAppointmentsWeekChartLabel:
+    'Appointments this week',
+  dashboardWidgetClientsTotalLabel: 'Total clients',
+  dashboardWidgetClientsMissingInfoLabel:
+    'Clients missing information',
+  dashboardWidgetClientsRecentLabel: 'Recently added clients',
+  dashboardWidgetFollowupsOverdueLabel: 'Overdue follow-ups',
+  dashboardWidgetFollowupsDueSoonLabel: 'Follow-ups due soon',
+  dashboardWidgetLabsPendingLabel: 'Pending labs',
+  dashboardWidgetLabsAbnormalLabel: 'Abnormal labs',
+  dashboardWidgetScreeningsIncompleteLabel:
+    'Incomplete screenings',
+  dashboardWidgetCareplansActiveLabel: 'Active care plans',
+  dashboardWidgetReferralsOpenLabel: 'Open referrals',
+  dashboardWidgetStaffSummaryLabel: 'Staff summary',
+  dashboardWidgetCredentialsExpiringLabel:
+    'Credentials expiring',
+  dashboardWidgetClinicalResourcesPinnedLabel:
+    'Pinned clinical resources',
+  dashboardWidgetUsersActiveLabel: 'Active users',
+  dashboardWidgetAuditRecentLabel: 'Recent audit activity',
+  dashboardWidgetBillingPendingLabel: 'Pending billing',
+  dashboardWidgetClaimsStatusLabel: 'Claims status',
+  dashboardWidgetAuthorizationsExpiringLabel:
+    'Authorizations expiring',
+  dashboardWidgetPaymentsRecentLabel: 'Recent payments',
+  dashboardWidgetRevenueTrendLabel: 'Revenue trend',
   calendar: 'Calendar',
   calendarPageTitle: 'Calendar',
   calendarPageSubtitle:

@@ -138,13 +138,9 @@ const hasPatientId = computed(() => {
 
 const patientId = computed(() => String(props.patientId ?? '').trim())
 
-const resolvedClinicianOptions = computed(() => {
-  if (props.clinicianOptions?.length) {
-    return props.clinicianOptions
-  }
-
-  return [{ label: 'Dr. John Smith', value: 'clin-1' }]
-})
+const resolvedClinicianOptions = computed(() =>
+  props.clinicianOptions?.length ? props.clinicianOptions : [],
+)
 
 function labRowHasDetail(row) {
   return Array.isArray(row?.components)

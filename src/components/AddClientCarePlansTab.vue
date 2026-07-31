@@ -146,13 +146,9 @@ const hasClientId = computed(() => {
 
 const clientId = computed(() => String(props.clientId ?? '').trim())
 
-const resolvedClinicianOptions = computed(() => {
-  if (props.clinicianOptions?.length) {
-    return props.clinicianOptions
-  }
-
-  return [{ label: 'Dr. John Smith', value: 5 }]
-})
+const resolvedClinicianOptions = computed(() =>
+  props.clinicianOptions?.length ? props.clinicianOptions : [],
+)
 
 const carePlansRaw = computed(() =>
   Array.isArray(props.carePlans) ? props.carePlans : [],

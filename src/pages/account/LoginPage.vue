@@ -116,7 +116,7 @@ async function handleLogin() {
         t
       )
       if (result) {
-        await router.push('/')
+        await router.push('/dashboard')
       }
     } catch (error) {
       loginError.value = error.message || t('networkError')

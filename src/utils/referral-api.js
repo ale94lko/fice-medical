@@ -1,16 +1,6 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import {
-  mockCloseClientReferral,
-  mockCreateClientReferral,
-  mockDeleteClientReferral,
-  mockDeleteReferralDocument,
-  mockGetClientReferral,
-  mockListClientReferrals,
-  mockUpdateClientReferral,
-  mockUploadReferralDocument,
-} from 'src/utils/referral-mock-store.js'
-import {
   mapReferralsListFromApi,
   isReferralSchedulable,
   normalizeReferralDetail,
@@ -18,18 +8,6 @@ import {
   normalizeReferralOption,
   referralToApiPayload,
 } from 'src/utils/referral-normalize.js'
-
-function useMockFallback(error) {
-  const status = error?.response?.status
-  if (status === 404 || status === 501 || status === 502 || status === 503) {
-    return true
-  }
-  if (!error?.response) {
-    return true
-  }
-
-  return false
-}
 
 function unwrapList(body) {
   const root = body?.data ?? body
@@ -64,22 +42,12 @@ export function apiErrorMessage(error, fallback = 'Request failed') {
 }
 
 export async function listClientReferrals(clientId, params = {}) {
-  try {
-    const response = await apiInstance.get(
-      apiPaths.clientReferrals(clientId),
-      { params },
-    )
+  const response = await apiInstance.get(
+    apiPaths.clientReferrals(clientId),
+    { params },
+  )
 
-    return mapReferralsListFromApi(unwrapList(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mapReferralsListFromApi(
-      mockListClientReferrals(clientId, params),
-    )
-  }
+  return mapReferralsListFromApi(unwrapList(response.data))
 }
 
 export async function listClientReferralOptions(
@@ -97,117 +65,57 @@ export async function listClientReferralOptions(
 }
 
 export async function fetchClientReferral(clientId, referralId) {
-  try {
-    const response = await apiInstance.get(
-      apiPaths.clientReferralById(clientId, referralId),
-    )
+  const response = await apiInstance.get(
+    apiPaths.clientReferralById(clientId, referralId),
+  )
 
-    return normalizeReferralDetail(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-    const row = mockGetClientReferral(clientId, referralId)
-    if (!row) {
-      throw error
-    }
-
-    return normalizeReferralDetail(row)
-  }
+  return normalizeReferralDetail(unwrapData(response.data))
 }
 
 export async function createClientReferral(clientId, referral) {
   const body = referralToApiPayload(referral)
-  try {
-    const response = await apiInstance.post(
-      apiPaths.clientReferrals(clientId),
-      body,
-    )
+  const response = await apiInstance.post(
+    apiPaths.clientReferrals(clientId),
+    body,
+  )
 
-    return normalizeReferralDetail(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeReferralDetail(
-      mockCreateClientReferral(clientId, body),
-    )
-  }
+  return normalizeReferralDetail(unwrapData(response.data))
 }
 
 export async function updateClientReferral(clientId, referral) {
   const body = referralToApiPayload(referral)
-  try {
-    const response = await apiInstance.patch(
-      apiPaths.clientReferralById(clientId, referral.id),
-      body,
-    )
+  const response = await apiInstance.patch(
+    apiPaths.clientReferralById(clientId, referral.id),
+    body,
+  )
 
-    return normalizeReferralDetail(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeReferralDetail(
-      mockUpdateClientReferral(clientId, referral.id, body),
-    )
-  }
+  return normalizeReferralDetail(unwrapData(response.data))
 }
 
 export async function closeClientReferral(clientId, referralId) {
-  try {
-    const response = await apiInstance.post(
-      apiPaths.clientReferralClose(clientId, referralId),
-    )
+  const response = await apiInstance.post(
+    apiPaths.clientReferralClose(clientId, referralId),
+  )
 
-    return normalizeReferralDetail(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeReferralDetail(
-      mockCloseClientReferral(clientId, referralId),
-    )
-  }
+  return normalizeReferralDetail(unwrapData(response.data))
 }
 
 export async function deleteClientReferral(clientId, referralId) {
-  try {
-    await apiInstance.delete(
-      apiPaths.clientReferralById(clientId, referralId),
-    )
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    mockDeleteClientReferral(clientId, referralId)
-  }
+  await apiInstance.delete(
+    apiPaths.clientReferralById(clientId, referralId),
+  )
 }
 
 export async function uploadReferralFile(clientId, referralId, file) {
   const formData = new FormData()
   formData.append('file', file)
-  try {
-    const response = await apiInstance.post(
-      apiPaths.clientReferralFiles(clientId, referralId),
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } },
-    )
+  const response = await apiInstance.post(
+    apiPaths.clientReferralFiles(clientId, referralId),
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
 
-    return normalizeReferralFile(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeReferralFile(
-      mockUploadReferralDocument(clientId, referralId, file),
-    )
-  }
+  return normalizeReferralFile(unwrapData(response.data))
 }
 
 /** @deprecated use uploadReferralFile */
@@ -234,17 +142,9 @@ export async function deleteReferralFile(
   referralId,
   fileId,
 ) {
-  try {
-    await apiInstance.delete(
-      apiPaths.clientReferralFileById(clientId, referralId, fileId),
-    )
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    mockDeleteReferralDocument(clientId, referralId, fileId)
-  }
+  await apiInstance.delete(
+    apiPaths.clientReferralFileById(clientId, referralId, fileId),
+  )
 }
 
 /** @deprecated use deleteReferralFile */

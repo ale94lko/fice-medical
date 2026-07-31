@@ -1,33 +1,11 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import {
-  mockAddLabAttachment,
-  mockCreatePatientLab,
-  mockGetLabAttachmentBlob,
-  mockGetPatientLab,
-  mockListPatientLabs,
-  mockSavePatientLab,
-  mockSoftDeleteLabAttachment,
-  mockSoftDeletePatientLab,
-} from 'src/utils/lab-mock-store.js'
-import {
   labToApiPayload,
   mapClientLabsListFromApi,
   normalizeLabDetail,
   normalizeLabFile,
 } from 'src/utils/lab-normalize.js'
-
-function useMockFallback(error) {
-  const status = error?.response?.status
-  if (status === 404 || status === 501 || status === 502 || status === 503) {
-    return true
-  }
-  if (!error?.response) {
-    return true
-  }
-
-  return false
-}
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -38,160 +16,86 @@ function unwrapData(body) {
 }
 
 export async function listPatientLabs(patientId) {
-  try {
-    const response = await apiInstance.get(apiPaths.patientLabs(patientId))
-    const data = unwrapData(response.data)
-    const list = Array.isArray(data) ? data : data?.items ?? []
+  const response = await apiInstance.get(apiPaths.patientLabs(patientId))
+  const data = unwrapData(response.data)
+  const list = Array.isArray(data) ? data : data?.items ?? []
 
-    return mapClientLabsListFromApi(list)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mapClientLabsListFromApi(mockListPatientLabs(patientId))
-  }
+  return mapClientLabsListFromApi(list)
 }
 
 export async function fetchPatientLab(patientId, labId) {
-  try {
-    const response = await apiInstance.get(
-      apiPaths.patientLabById(patientId, labId),
-    )
-    const data = unwrapData(response.data)
+  const response = await apiInstance.get(
+    apiPaths.patientLabById(patientId, labId),
+  )
+  const data = unwrapData(response.data)
 
-    return normalizeLabDetail(data?.lab ?? data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockGetPatientLab(patientId, labId)
-  }
+  return normalizeLabDetail(data?.lab ?? data)
 }
 
 export async function createPatientLab(patientId, payload) {
-  try {
-    const body = labToApiPayload(payload, { draft: false })
-    const response = await apiInstance.post(
-      apiPaths.patientLabs(patientId),
-      body,
-    )
-    const data = unwrapData(response.data)
+  const body = labToApiPayload(payload, { draft: false })
+  const response = await apiInstance.post(
+    apiPaths.patientLabs(patientId),
+    body,
+  )
+  const data = unwrapData(response.data)
 
-    return {
-      labId: data?.lab_id ?? data?.labId ?? data?.id,
-      status: data?.status,
-    }
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockCreatePatientLab(patientId, payload)
+  return {
+    labId: data?.lab_id ?? data?.labId ?? data?.id,
+    status: data?.status,
   }
 }
 
 export async function savePatientLabDraft(patientId, labId, payload) {
-  try {
-    const body = labToApiPayload(payload, { draft: true })
-    const response = await apiInstance.put(
-      apiPaths.patientLabDraft(patientId, labId),
-      body,
-    )
-    const data = unwrapData(response.data)
+  const body = labToApiPayload(payload, { draft: true })
+  const response = await apiInstance.put(
+    apiPaths.patientLabDraft(patientId, labId),
+    body,
+  )
+  const data = unwrapData(response.data)
 
-    return normalizeLabDetail(data?.lab ?? data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockSavePatientLab(patientId, labId, payload, { asDraft: true })
-  }
+  return normalizeLabDetail(data?.lab ?? data)
 }
 
 export async function updatePatientLab(patientId, labId, payload) {
-  try {
-    const body = labToApiPayload(payload)
-    const response = await apiInstance.put(
-      apiPaths.patientLabById(patientId, labId),
-      body,
-    )
-    const data = unwrapData(response.data)
+  const body = labToApiPayload(payload)
+  const response = await apiInstance.put(
+    apiPaths.patientLabById(patientId, labId),
+    body,
+  )
+  const data = unwrapData(response.data)
 
-    return normalizeLabDetail(data?.lab ?? data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockSavePatientLab(patientId, labId, payload)
-  }
+  return normalizeLabDetail(data?.lab ?? data)
 }
 
 export async function deletePatientLab(patientId, labId) {
-  try {
-    await apiInstance.delete(apiPaths.patientLabById(patientId, labId))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    mockSoftDeletePatientLab(patientId, labId)
-  }
+  await apiInstance.delete(apiPaths.patientLabById(patientId, labId))
 }
 
 export async function uploadLabFile(clientId, labId, file) {
   const formData = new FormData()
   formData.append('file', file)
-  try {
-    const response = await apiInstance.post(
-      apiPaths.clientLabFiles(clientId, labId),
-      formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } },
-    )
+  const response = await apiInstance.post(
+    apiPaths.clientLabFiles(clientId, labId),
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
 
-    return normalizeLabFile(unwrapData(response.data))
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-    const dataUrl = await readFileAsDataUrl(file)
-
-    return normalizeLabFile(
-      mockAddLabAttachment(clientId, labId, {
-        name: file.name,
-        mimeType: file.type,
-        size: file.size,
-        dataUrl,
-      }).at(-1) ?? {},
-    )
-  }
+  return normalizeLabFile(unwrapData(response.data))
 }
 
 /** @deprecated use uploadLabFile */
 export const uploadLabAttachment = uploadLabFile
 
 export async function downloadLabFile(clientId, labId, fileId) {
-  try {
-    const response = await apiInstance.get(
-      apiPaths.clientLabFileDownload(clientId, labId, fileId),
-      { responseType: 'blob' },
-    )
+  const response = await apiInstance.get(
+    apiPaths.clientLabFileDownload(clientId, labId, fileId),
+    { responseType: 'blob' },
+  )
 
-    return {
-      blob: response.data,
-      fileName: extractFileName(response.headers),
-    }
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-    const meta = mockGetLabAttachmentBlob(clientId, labId, fileId)
-    const blob = await dataUrlToBlob(meta.dataUrl, meta.mimeType)
-
-    return { blob, fileName: meta.name }
+  return {
+    blob: response.data,
+    fileName: extractFileName(response.headers),
   }
 }
 
@@ -199,47 +103,13 @@ export async function downloadLabFile(clientId, labId, fileId) {
 export const downloadLabAttachment = downloadLabFile
 
 export async function deleteLabFile(clientId, labId, fileId) {
-  try {
-    await apiInstance.delete(
-      apiPaths.clientLabFileById(clientId, labId, fileId),
-    )
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    mockSoftDeleteLabAttachment(clientId, labId, fileId)
-  }
+  await apiInstance.delete(
+    apiPaths.clientLabFileById(clientId, labId, fileId),
+  )
 }
 
 /** @deprecated use deleteLabFile */
 export const deleteLabAttachment = deleteLabFile
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
-}
-
-async function dataUrlToBlob(dataUrl, mimeType) {
-  try {
-    const response = await fetch(dataUrl)
-
-    return await response.blob()
-  } catch {
-    const base64 = String(dataUrl).split(',')[1] ?? ''
-    const bytes = atob(base64)
-    const arr = new Uint8Array(bytes.length)
-    for (let i = 0; i < bytes.length; i += 1) {
-      arr[i] = bytes.charCodeAt(i)
-    }
-
-    return new Blob([arr], { type: mimeType || 'application/octet-stream' })
-  }
-}
 
 function extractFileName(headers) {
   const raw = headers?.['content-disposition'] ?? ''

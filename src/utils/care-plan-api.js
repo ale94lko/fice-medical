@@ -1,14 +1,6 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import {
-  mockGetClientCarePlan,
-  mockListClientCarePlans,
-  mockSaveCarePlanTree,
-  mockSignCarePlan,
-  mockUpdateCarePlanStatus,
-  mockUpdateOutcomeMeasureCurrentValue,
-} from 'src/utils/care-plan-mock-store.js'
-import {
   carePlanGoalToApiPayload,
   carePlanToApiPayload,
   interventionToApiPayload,
@@ -21,18 +13,6 @@ import {
   isTemporaryCarePlanId,
   refreshCarePlanProgress,
 } from 'src/utils/care-plan-orders.js'
-
-function useMockFallback(error) {
-  const status = error?.response?.status
-  if (status === 404 || status === 501 || status === 502 || status === 503) {
-    return true
-  }
-  if (!error?.response) {
-    return true
-  }
-
-  return false
-}
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -126,28 +106,20 @@ export async function listClientCarePlans(
   clientId,
   { status = null, page = 0, limit = 20 } = {},
 ) {
-  try {
-    const params = { page, limit }
-    if (status) {
-      params.status = status
-    }
-    const response = await apiInstance.get(
-      apiPaths.clientCarePlans(clientId),
-      { params },
-    )
-    const data = unwrapData(response.data)
-    const list = Array.isArray(data) ? data : data?.items ?? []
+  const params = { page, limit }
+  if (status) {
+    params.status = status
+  }
+  const response = await apiInstance.get(
+    apiPaths.clientCarePlans(clientId),
+    { params },
+  )
+  const data = unwrapData(response.data)
+  const list = Array.isArray(data) ? data : data?.items ?? []
 
-    return {
-      items: mapCarePlansListFromApi(list),
-      pagination: data?.pagination ?? null,
-    }
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockListClientCarePlans(clientId, { status, page, limit })
+  return {
+    items: mapCarePlansListFromApi(list),
+    pagination: data?.pagination ?? null,
   }
 }
 
@@ -156,48 +128,28 @@ export async function fetchClientCarePlan(
   planId,
   { includeDetails = true } = {},
 ) {
-  try {
-    const detailParams = {
-      include_details: includeDetails, // eslint-disable-line camelcase
-    }
-    const response = await apiInstance.get(
-      apiPaths.clientCarePlanById(clientId, planId),
-      { params: detailParams },
-    )
-    const data = unwrapData(response.data)
-
-    return normalizeCarePlanDetail(data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeCarePlanDetail(
-      mockGetClientCarePlan(clientId, planId),
-    )
+  const detailParams = {
+    include_details: includeDetails, // eslint-disable-line camelcase
   }
+  const response = await apiInstance.get(
+    apiPaths.clientCarePlanById(clientId, planId),
+    { params: detailParams },
+  )
+  const data = unwrapData(response.data)
+
+  return normalizeCarePlanDetail(data)
 }
 
 export async function createClientCarePlan(clientId, plan) {
-  try {
-    const body = carePlanToApiPayload(plan)
-    const response = await apiInstance.post(
-      apiPaths.clientCarePlans(clientId),
-      body,
-    )
-    const data = unwrapData(response.data)
-    const planId = data?.id ?? data?.care_plan_id
+  const body = carePlanToApiPayload(plan)
+  const response = await apiInstance.post(
+    apiPaths.clientCarePlans(clientId),
+    body,
+  )
+  const data = unwrapData(response.data)
+  const planId = data?.id ?? data?.care_plan_id
 
-    return syncCarePlanChildren(clientId, planId, plan)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeCarePlanDetail(
-      mockSaveCarePlanTree(clientId, plan),
-    )
-  }
+  return syncCarePlanChildren(clientId, planId, plan)
 }
 
 export async function updateClientCarePlan(clientId, plan) {
@@ -205,61 +157,33 @@ export async function updateClientCarePlan(clientId, plan) {
   if (isTemporaryCarePlanId(planId)) {
     return createClientCarePlan(clientId, plan)
   }
-  try {
-    const body = carePlanToApiPayload(plan)
-    await apiInstance.patch(
-      apiPaths.clientCarePlanById(clientId, planId),
-      body,
-    )
+  const body = carePlanToApiPayload(plan)
+  await apiInstance.patch(
+    apiPaths.clientCarePlanById(clientId, planId),
+    body,
+  )
 
-    return syncCarePlanChildren(clientId, planId, plan)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeCarePlanDetail(
-      mockSaveCarePlanTree(clientId, plan),
-    )
-  }
+  return syncCarePlanChildren(clientId, planId, plan)
 }
 
 export async function changeCarePlanStatus(clientId, planId, status) {
-  try {
-    const response = await apiInstance.patch(
-      apiPaths.clientCarePlanStatus(clientId, planId),
-      { status },
-    )
-    const data = unwrapData(response.data)
+  const response = await apiInstance.patch(
+    apiPaths.clientCarePlanStatus(clientId, planId),
+    { status },
+  )
+  const data = unwrapData(response.data)
 
-    return normalizeCarePlanSummary(data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return mockUpdateCarePlanStatus(clientId, planId, status)
-  }
+  return normalizeCarePlanSummary(data)
 }
 
 export async function signClientCarePlan(clientId, planId, signature) {
-  try {
-    const response = await apiInstance.post(
-      apiPaths.clientCarePlanSign(clientId, planId),
-      { signature },
-    )
-    const data = unwrapData(response.data)
+  const response = await apiInstance.post(
+    apiPaths.clientCarePlanSign(clientId, planId),
+    { signature },
+  )
+  const data = unwrapData(response.data)
 
-    return normalizeCarePlanDetail(data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeCarePlanDetail(
-      mockSignCarePlan(clientId, planId, signature),
-    )
-  }
+  return normalizeCarePlanDetail(data)
 }
 
 export async function updateOutcomeMeasureCurrentValue(
@@ -269,36 +193,22 @@ export async function updateOutcomeMeasureCurrentValue(
   measureId,
   currentValue,
 ) {
-  try {
-    const body = {
-      // eslint-disable-next-line camelcase
-      current_value: parseOptionalNumber(currentValue),
-    }
-    const response = await apiInstance.patch(
-      apiPaths.clientCarePlanMeasureCurrentValue(
-        clientId,
-        planId,
-        goalId,
-        measureId,
-      ),
-      body,
-    )
-    const data = unwrapData(response.data)
-
-    return normalizeCarePlanDetail(data?.care_plan ?? data)
-  } catch (error) {
-    if (!useMockFallback(error)) {
-      throw error
-    }
-
-    return normalizeCarePlanDetail(mockUpdateOutcomeMeasureCurrentValue(
+  const body = {
+    // eslint-disable-next-line camelcase
+    current_value: parseOptionalNumber(currentValue),
+  }
+  const response = await apiInstance.patch(
+    apiPaths.clientCarePlanMeasureCurrentValue(
       clientId,
       planId,
       goalId,
       measureId,
-      parseOptionalNumber(currentValue),
-    ))
-  }
+    ),
+    body,
+  )
+  const data = unwrapData(response.data)
+
+  return normalizeCarePlanDetail(data?.care_plan ?? data)
 }
 
 export function prepareCarePlanForSave(plan) {

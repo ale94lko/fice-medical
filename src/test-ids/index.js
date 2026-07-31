@@ -229,6 +229,23 @@ export const screeningTemplateDialogTestIds = {
     toTestId('screening-template-copy-confirm-btn', name),
 }
 
+export const dashboardTestIds = {
+  page: 'dashboard-page',
+  noAccess: 'dashboard-no-access',
+  empty: 'dashboard-empty',
+  grid: 'dashboard-grid',
+  refresh: 'dashboard-btn-refresh',
+  customize: 'dashboard-btn-customize',
+  customizeSave: 'dashboard-customize-btn-save',
+  customizeCancel: 'dashboard-customize-btn-cancel',
+  customizeToggle: id => toTestId('dashboard-customize-toggle', id),
+  customizeSize: id => toTestId('dashboard-customize-size', id),
+  cardDrag: id => toTestId('dashboard-card-drag', id),
+  cardSize: id => toTestId('dashboard-card-size', id),
+  cardVisible: id => toTestId('dashboard-card-visible', id),
+  widget: id => toTestId('dashboard-widget', id),
+}
+
 export const clientListTestIds = {
   page: 'client-list-page',
   search: 'client-list-input-search',

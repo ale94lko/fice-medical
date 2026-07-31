@@ -357,6 +357,91 @@ export default {
   userDeleteError:
     'No se pudo eliminar el usuario. Inténtelo de nuevo.',
   dashboard: 'Panel',
+  dashboardSubtitle:
+    'Resumen operativo de la ubicación activa.',
+  dashboardCustomize: 'Personalizar panel',
+  dashboardDoneEditing: 'Listo',
+  dashboardEditSubtitle:
+    'Arrastre las tarjetas para reordenar. Cambie tamaño o '
+    + 'visibilidad; los cambios se guardan solos.',
+  dashboardCustomizeTitle: 'Personalizar panel',
+  dashboardCustomizeHint:
+    'Muestre u oculte widgets, elija el tamaño y arrastre para '
+    + 'reordenar.',
+  dashboardDragHandle: 'Arrastrar para reordenar',
+  dashboardWidgetVisible: 'Visible',
+  dashboardWidgetHidden: 'Oculto',
+  dashboardWidgetHiddenHint:
+    'Oculto en el panel. Actívelo para mostrarlo.',
+  dashboardRefresh: 'Actualizar',
+  dashboardComingSoon: 'Próximamente',
+  dashboardComingSoonMessage:
+    'Este widget estará disponible en una versión futura.',
+  dashboardEmptyTitle: 'No hay widgets para mostrar',
+  dashboardEmptyMessage:
+    'Sus permisos aún no incluyen widgets del panel, o todos '
+    + 'están ocultos. Pruebe a personalizar el panel.',
+  dashboardLoadError:
+    'No se pudo cargar el panel. Inténtelo de nuevo.',
+  dashboardConfigLoadError:
+    'No se pudieron cargar las preferencias del panel.',
+  dashboardConfigSaveSuccess:
+    'Preferencias del panel guardadas.',
+  dashboardConfigSaveError:
+    'No se pudieron guardar las preferencias del panel.',
+  dashboardWidgetEmpty: 'No hay datos por ahora.',
+  dashboardOpenLink: 'Abrir',
+  dashboardTotalCount: 'Total: {count}',
+  dashboardChartTotal: 'Total',
+  dashboardSizeS: 'Pequeño',
+  dashboardSizeM: 'Mediano',
+  dashboardSizeL: 'Grande',
+  dashboardMetricTotalStaff: 'Personal total',
+  dashboardMetricClinicians: 'Clínicos',
+  dashboardMetricActive: 'Activos',
+  dashboardMetricActiveStaff: 'Personal activo',
+  dashboardMetricInactive: 'Inactivos',
+  dashboardMetricOther: 'Otros',
+  dashboardMetricCompleted: 'Completados',
+  dashboardMetricArchived: 'Archivados',
+  dashboardMetricUnsigned: 'Sin firmar',
+  dashboardMetricOverdue: 'Vencidos',
+  dashboardCarePlanClientId: 'Cliente {id}',
+  dashboardMetricOnLeave: 'De baja',
+  dashboardMetricExpiringCredentials: 'Credenciales por vencer',
+  dashboardWidgetAppointmentsTodayLabel: 'Citas de hoy',
+  dashboardWidgetAppointmentsNext48hLabel:
+    'Citas en las próximas 48 h',
+  dashboardWidgetAppointmentsWeekChartLabel:
+    'Citas de esta semana',
+  dashboardWidgetClientsTotalLabel: 'Clientes totales',
+  dashboardWidgetClientsMissingInfoLabel:
+    'Clientes con información incompleta',
+  dashboardWidgetClientsRecentLabel: 'Clientes recientes',
+  dashboardWidgetFollowupsOverdueLabel:
+    'Seguimientos vencidos',
+  dashboardWidgetFollowupsDueSoonLabel:
+    'Seguimientos próximos',
+  dashboardWidgetLabsPendingLabel: 'Labs pendientes',
+  dashboardWidgetLabsAbnormalLabel: 'Labs anormales',
+  dashboardWidgetScreeningsIncompleteLabel:
+    'Screenings incompletos',
+  dashboardWidgetCareplansActiveLabel:
+    'Planes de cuidado activos',
+  dashboardWidgetReferralsOpenLabel: 'Referidos abiertos',
+  dashboardWidgetStaffSummaryLabel: 'Resumen de personal',
+  dashboardWidgetCredentialsExpiringLabel:
+    'Credenciales por vencer',
+  dashboardWidgetClinicalResourcesPinnedLabel:
+    'Recursos clínicos fijados',
+  dashboardWidgetUsersActiveLabel: 'Usuarios activos',
+  dashboardWidgetAuditRecentLabel: 'Actividad de auditoría',
+  dashboardWidgetBillingPendingLabel: 'Facturación pendiente',
+  dashboardWidgetClaimsStatusLabel: 'Estado de claims',
+  dashboardWidgetAuthorizationsExpiringLabel:
+    'Autorizaciones por vencer',
+  dashboardWidgetPaymentsRecentLabel: 'Pagos recientes',
+  dashboardWidgetRevenueTrendLabel: 'Tendencia de ingresos',
   calendar: 'Calendario',
   calendarPageTitle: 'Calendario',
   calendarPageSubtitle:

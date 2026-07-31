@@ -56,7 +56,7 @@ export function validateScreeningMeasurements({ weight, height }, t) {
 }
 
 /**
- * Normalizes measurement inputs for API/mock persistence.
+ * Normalizes measurement inputs for API persistence.
  * Recalculates BMI server-side style (ignores client bmi).
  */
 export function normalizeScreeningMeasurements({ weight, height }) {

@@ -1020,6 +1020,8 @@ export const clinicalResourceDocumentExtensions = [
 
 export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
+  dashboard: '/dashboard/v1',
+  dashboardConfig: '/dashboard/v1/config',
   staffList: '/staff/v1',
   staffWithoutSystemUser: '/staff/v1/without-system-user',
   staffById: id => `/staff/v1/${encodeURIComponent(String(id ?? '').trim())}`,
