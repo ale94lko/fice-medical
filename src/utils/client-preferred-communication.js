@@ -3,6 +3,7 @@ import { clientPreferredCommunicationValues as pref }
   from 'components/constants.js'
 import { todayDateUs } from 'src/utils/client-form.js'
 import { resolveOtherContactTabLabel } from 'src/utils/client-contact-form.js'
+import { formatPersonDisplayName } from 'src/utils/person-display-name.js'
 
 const COMM_PREF_FROM_API = {
   email: pref.email,
@@ -180,15 +181,21 @@ export function resolvePointOfContactSelectLabel(
   t,
   catalogOptions = {},
 ) {
-  const parts = [
-    other.firstName,
-    other.middleName,
-    other.lastName,
-  ]
-    .map(part => String(part ?? '').trim())
-    .filter(Boolean)
-  if (parts.length) {
-    return parts.join(' ')
+  const name = formatPersonDisplayName(
+    {
+      prefix: other?.prefix,
+      firstName: other?.firstName,
+      middleName: other?.middleName,
+      lastName: other?.lastName,
+      suffix: other?.suffix,
+    },
+    {
+      prefixSelectOptions: catalogOptions.prefixSelectOptions ?? [],
+      suffixSelectOptions: catalogOptions.suffixSelectOptions ?? [],
+    },
+  )
+  if (name) {
+    return name
   }
 
   return resolveOtherContactTabLabel(other, index, t, catalogOptions)

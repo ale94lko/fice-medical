@@ -1,8 +1,42 @@
 import { apiInstance } from 'boot/axios'
-import { apiPaths } from 'components/constants.js'
+import { apiPaths, catalogNames } from 'components/constants.js'
 import { extractEnvelopeListPagination } from 'components/helpers.js'
 import { mapStaffListItem } from 'src/utils/staff-list-normalize.js'
 import { buildStaffListQueryParams } from 'src/utils/staff-list-filters.js'
+import {
+  catalogItemsFromCatalog,
+  fetchCatalogsByNames,
+  mapCatalogItemsToSelectOptions,
+} from 'src/utils/catalogs.js'
+
+let personNameCatalogOptions = null
+
+async function resolvePersonNameCatalogOptions() {
+  if (personNameCatalogOptions) {
+    return personNameCatalogOptions
+  }
+  try {
+    const catalogs = await fetchCatalogsByNames([
+      catalogNames.prefix,
+      catalogNames.suffix,
+    ])
+    personNameCatalogOptions = {
+      prefixSelectOptions: mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalogs[catalogNames.prefix]),
+      ),
+      suffixSelectOptions: mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalogs[catalogNames.suffix]),
+      ),
+    }
+  } catch {
+    personNameCatalogOptions = {
+      prefixSelectOptions: [],
+      suffixSelectOptions: [],
+    }
+  }
+
+  return personNameCatalogOptions
+}
 
 function readEnvelope(response) {
   return response?.data?.data ?? response?.data ?? {}
@@ -81,8 +115,9 @@ export async function loadStaffListView({
     filters,
   })
   const { items, pagination, summary } = await fetchStaffListPage(params)
+  const catalogOptions = await resolvePersonNameCatalogOptions()
   const rows = items
-    .map(item => mapStaffListItem(item, t))
+    .map(item => mapStaffListItem(item, t, catalogOptions))
     .filter(Boolean)
 
   return {

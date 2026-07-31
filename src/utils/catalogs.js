@@ -41,9 +41,20 @@ export function resolveCatalogOptionLabel(options, raw) {
   if (!Array.isArray(options) || !options.length) {
     return trimmed
   }
+  const match = findCatalogSelectOption(options, trimmed)
+
+  return match?.label ?? trimmed
+}
+
+export function findCatalogSelectOption(options, raw) {
+  const trimmed = String(raw ?? '').trim()
+  if (!trimmed || !Array.isArray(options) || !options.length) {
+    return null
+  }
   const needle = trimmed.toLowerCase()
   const token = needle.replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
-  const match = options.find(option => {
+
+  return options.find(option => {
     const value = String(option?.value ?? '').trim()
     const label = String(option?.label ?? '').trim()
     if (!value && !label) {
@@ -60,9 +71,7 @@ export function resolveCatalogOptionLabel(options, raw) {
       || labelLower === needle
       || valueToken === token
     )
-  })
-
-  return match?.label ?? trimmed
+  }) ?? null
 }
 
 export function resolveCatalogSelectValue(options, raw) {

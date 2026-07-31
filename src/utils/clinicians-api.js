@@ -1,14 +1,48 @@
 import { apiInstance } from 'boot/axios'
-import { apiPaths } from 'components/constants.js'
+import { apiPaths, catalogNames } from 'components/constants.js'
 import { extractEnvelopeListPagination } from 'components/helpers.js'
 import {
   formatClinicianDisplayLabel,
   formatClinicianOptionCaption,
   formatClinicianPersonName,
 } from 'src/utils/clinician-display.js'
+import {
+  catalogItemsFromCatalog,
+  fetchCatalogsByNames,
+  mapCatalogItemsToSelectOptions,
+} from 'src/utils/catalogs.js'
 
 const DEFAULT_PAGE_SIZE = 100
 const DEFAULT_CLINICIAN_STATUS = 'ACTIVE'
+
+let personNameCatalogOptions = null
+
+async function resolvePersonNameCatalogOptions() {
+  if (personNameCatalogOptions) {
+    return personNameCatalogOptions
+  }
+  try {
+    const catalogs = await fetchCatalogsByNames([
+      catalogNames.prefix,
+      catalogNames.suffix,
+    ])
+    personNameCatalogOptions = {
+      prefixSelectOptions: mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalogs[catalogNames.prefix]),
+      ),
+      suffixSelectOptions: mapCatalogItemsToSelectOptions(
+        catalogItemsFromCatalog(catalogs[catalogNames.suffix]),
+      ),
+    }
+  } catch {
+    personNameCatalogOptions = {
+      prefixSelectOptions: [],
+      suffixSelectOptions: [],
+    }
+  }
+
+  return personNameCatalogOptions
+}
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -50,19 +84,20 @@ export function normalizeClinicianFromApi(raw = {}) {
  * @param {Record<string, unknown>} row
  * @returns {({ label: string, value: string }) | null}
  */
-export function mapClinicianRowToSelectOption(row) {
+export function mapClinicianRowToSelectOption(row, catalogOptions = {}) {
   const normalized = normalizeClinicianFromApi(row)
   const id = normalized.id
   if (id == null || id === '') {
     return null
   }
 
-  const label = formatClinicianDisplayLabel(normalized)
+  const label = formatClinicianDisplayLabel(normalized, catalogOptions)
   if (!label) {
     return null
   }
 
-  const name = formatClinicianPersonName(normalized) || label
+  const name = formatClinicianPersonName(normalized, catalogOptions)
+    || label
 
   return {
     label,
@@ -145,8 +180,9 @@ export async function fetchAllCliniciansSelectOptions({
     page += 1
   }
 
+  const catalogOptions = await resolvePersonNameCatalogOptions()
   const options = all
-    .map(mapClinicianRowToSelectOption)
+    .map(row => mapClinicianRowToSelectOption(row, catalogOptions))
     .filter(Boolean)
     .sort((a, b) =>
       a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }),

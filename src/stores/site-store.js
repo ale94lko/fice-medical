@@ -65,22 +65,36 @@ export const useSiteStore = defineStore('site', {
     clientListColumnCatalog: [],
     clientListColumnPreferences: defaultClientListColumnPreferences(),
     suffixCatalogSelectOptions: null,
+    prefixCatalogSelectOptions: null,
   }),
   actions: {
     async resolveSuffixCatalogSelectOptions() {
-      if (this.suffixCatalogSelectOptions) {
+      if (
+        this.suffixCatalogSelectOptions
+        && this.prefixCatalogSelectOptions
+      ) {
         return this.suffixCatalogSelectOptions
       }
       try {
-        const catalogs = await fetchCatalogsByNames([catalogNames.suffix])
-        const catalog = catalogs[catalogNames.suffix]
-        this.suffixCatalogSelectOptions = catalog
+        const catalogs = await fetchCatalogsByNames([
+          catalogNames.suffix,
+          catalogNames.prefix,
+        ])
+        const suffixCatalog = catalogs[catalogNames.suffix]
+        this.suffixCatalogSelectOptions = suffixCatalog
           ? mapCatalogItemsToSelectOptions(
-            catalogItemsFromCatalog(catalog),
+            catalogItemsFromCatalog(suffixCatalog),
+          )
+          : []
+        const prefixCatalog = catalogs[catalogNames.prefix]
+        this.prefixCatalogSelectOptions = prefixCatalog
+          ? mapCatalogItemsToSelectOptions(
+            catalogItemsFromCatalog(prefixCatalog),
           )
           : []
       } catch {
         this.suffixCatalogSelectOptions = []
+        this.prefixCatalogSelectOptions = []
       }
 
       return this.suffixCatalogSelectOptions
@@ -104,8 +118,13 @@ export const useSiteStore = defineStore('site', {
         root.columns,
       )
       this.clientListSourceById = indexClientListSource(list)
+      await this.resolveSuffixCatalogSelectOptions()
+      const nameCatalogOptions = {
+        prefixSelectOptions: this.prefixCatalogSelectOptions ?? [],
+        suffixSelectOptions: this.suffixCatalogSelectOptions ?? [],
+      }
       this.clientList = list
-        .map(item => mapClientListViewItem(item, t))
+        .map(item => mapClientListViewItem(item, t, nameCatalogOptions))
         .filter(Boolean)
       this.clientListPagination = extractEnvelopeListPagination(root)
       this.clientListQuery = {

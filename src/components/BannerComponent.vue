@@ -75,7 +75,7 @@
                     :data-testid="tid.row(m.patientId)"
                     @click="onPickMatch(m)">
                     <data-item-component
-                      :title="displayMatchName(m.fullName)"
+                      :title="displayMatchName(m)"
                       :sub-title="dobLabel(m.dateOfBirth)"
                       sub-title-icon="event"
                       icon="person">
@@ -136,6 +136,8 @@ import { useI18n } from 'vue-i18n'
 import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { sortDuplicateMatches } from 'src/utils/client-duplicate-match-sort.js'
 import { addClientTestIds } from 'src/test-ids/index.js'
+import { formatPersonDisplayNameFromRecord } from
+  'src/utils/person-display-name.js'
 import DataItemComponent from 'components/template/DataItemComponent.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 
@@ -265,55 +267,19 @@ function badgeIconForConfidence(confidence) {
   return 'help'
 }
 
-function displayMatchName(rawName) {
-  const name = String(rawName ?? '').trim()
-  if (!name) {
-    return ''
+function displayMatchName(match) {
+  if (!match || typeof match !== 'object') {
+    return formatPersonDisplayNameFromRecord(
+      {},
+      {},
+      String(match ?? '').trim(),
+    )
   }
 
-  const prefixes = new Set([
-    'DR',
-    'MR',
-    'MRS',
-    'MS',
-    'PROF',
-    'REV',
-    'FR',
-    'FATHER',
-    'MOTHER',
-    'SISTER',
-    'BROTHER',
-  ])
-  const suffixes = new Set([
-    'JR',
-    'SR',
-    'II',
-    'III',
-    'IV',
-    'V',
-    'VI',
-  ])
-
-  const tokens = name
-    .replace(/\s+/g, ' ')
-    .replace(/[.,]+$/u, '')
-    .split(' ')
-    .filter(Boolean)
-
-  if (tokens.length > 1) {
-    const last = tokens[tokens.length - 1].replace(/[.,]+$/u, '')
-    if (suffixes.has(last.toUpperCase())) {
-      tokens.pop()
-    }
-  }
-
-  if (tokens.length > 1) {
-    const first = tokens[0].replace(/[.,]+$/u, '')
-    if (prefixes.has(first.toUpperCase())) {
-      tokens.shift()
-    }
-  }
-
-  return tokens.join(' ').trim()
+  return formatPersonDisplayNameFromRecord(
+    match,
+    {},
+    match.fullName || match.full_name || match.name,
+  )
 }
 </script>

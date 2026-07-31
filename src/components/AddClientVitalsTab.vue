@@ -39,6 +39,10 @@
           :can-edit="!readonly"
           :empty-label="t('vitalsHistoryEmpty')"
           :clinician-options="clinicianOptions"
+          :patient-dob="patientDob"
+          :patient-age="patientAge"
+          :patient-age-unit="patientAgeUnit"
+          :patient-gender="patientGender"
           @edit="openEditDialog"
           @delete="openDelete"
         />
@@ -48,6 +52,10 @@
         v-model="recordDialogOpen"
         :entry="editingEntry"
         :clinician-options="clinicianOptions"
+        :patient-dob="patientDob"
+        :patient-age="patientAge"
+        :patient-age-unit="patientAgeUnit"
+        :patient-gender="patientGender"
         :readonly="readonly"
         @save="onRecordSave"
       />
@@ -99,6 +107,22 @@ const props = defineProps({
   canView: {
     type: Boolean,
     default: true,
+  },
+  patientDob: {
+    type: String,
+    default: '',
+  },
+  patientAge: {
+    type: [String, Number],
+    default: '',
+  },
+  patientAgeUnit: {
+    type: String,
+    default: '',
+  },
+  patientGender: {
+    type: String,
+    default: '',
   },
 })
 

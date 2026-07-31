@@ -266,13 +266,29 @@
             :show-view="canViewClient"
             :show-edit="canViewClient"
             :show-change-status="canChangeStatus"
+            :show-more="canViewClient"
             :view-test-id="clientListTestIds.rowView(row.id)"
             :edit-test-id="clientListTestIds.rowEdit(row.id)"
             :change-status-test-id="clientListTestIds.rowStatus(row.id)"
+            :more-test-id="clientListTestIds.rowMore(row.id)"
             @view="viewRow(row)"
             @edit="editRow(row)"
-            @change-status="changeStatus([row])"
-          />
+            @change-status="changeStatus([row])">
+            <template #more>
+              <q-item
+                v-close-popup
+                clickable
+                :data-testid="clientListTestIds.rowOverviewAlt(row.id)"
+                @click="openClientOverviewAlt(row)">
+                <q-item-section avatar>
+                  <q-icon name="science" size="18px" />
+                </q-item-section>
+                <q-item-section>
+                  {{ t('clientOverviewAltListAction') }}
+                </q-item-section>
+              </q-item>
+            </template>
+          </AdminTableRowActions>
         </template>
 
         <template #no-data>
@@ -770,6 +786,14 @@ function openClientOverview(row) {
     return
   }
   router.push({ name: 'ClientOverview', params: { id: String(id) } })
+}
+
+function openClientOverviewAlt(row) {
+  const id = row?.id
+  if (id == null || id === '') {
+    return
+  }
+  router.push({ name: 'ClientOverviewAlt', params: { id: String(id) } })
 }
 
 function assignClinicians() {

@@ -10,6 +10,8 @@ import { resolveClientListPhoneEntries } from
   'src/utils/client-list-phones.js'
 import { resolveClientListAllergyEntries } from
   'src/utils/client-list-allergies.js'
+import { formatPersonDisplayNameFromRecord } from
+  'src/utils/person-display-name.js'
 
 function resolveClientListPhotoFileId(item) {
   if (!item || typeof item !== 'object') {
@@ -62,10 +64,15 @@ function resolveListViewClinicianEntries(clinicians) {
     .filter(Boolean)
 }
 
-export function mapClientListViewItem(item, t) {
+export function mapClientListViewItem(item, t, options = {}) {
   if (!item || item.id == null) {
     return null
   }
+
+  const {
+    prefixSelectOptions = [],
+    suffixSelectOptions = [],
+  } = options
 
   const emailEntries = item.email != null
     ? resolveClientListEmailEntries({ emails: item.email })
@@ -83,7 +90,14 @@ export function mapClientListViewItem(item, t) {
   const mapped = {
     id: item.id,
     [ck.clientNumber]: String(item.client_number ?? '').trim(),
-    [ck.name]: String(item.name ?? '').trim(),
+    [ck.name]: formatPersonDisplayNameFromRecord(
+      item,
+      {
+        prefixSelectOptions,
+        suffixSelectOptions,
+      },
+      item.name,
+    ),
     [ck.email]: emailEntries[0]?.email ?? '',
     emailEntries,
     phoneEntries,

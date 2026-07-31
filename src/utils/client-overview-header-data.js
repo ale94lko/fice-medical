@@ -8,6 +8,8 @@ import {
   clinicianAvatarStyle,
   clinicianInitialsFromPersonName,
 } from 'src/utils/clinician-display.js'
+import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
+import { formatClientDisplayName } from 'src/utils/client-display-name.js'
 import {
   isoDateToUsDateString,
   normalizeIdNumberMaskedDisplay,
@@ -19,16 +21,8 @@ function trim(value) {
   return String(value ?? '').trim()
 }
 
-function formatClientName(form) {
-  const parts = [
-    form?.[ck.prefix],
-    form?.[ck.firstName],
-    form?.[ck.middleName],
-    form?.[ck.lastName],
-    form?.[ck.suffix],
-  ].map(trim).filter(Boolean)
-
-  return parts.join(' ') || '—'
+function formatClientName(form, options) {
+  return formatClientDisplayName(form, options) || '—'
 }
 
 function clientInitialsFromForm(form) {
@@ -121,28 +115,7 @@ function resolveClinicianCards(form, rawClient, clinicianOptions = []) {
   }).filter(card => card.name)
 }
 
-function resolveFormFieldLabel(value) {
-  if (value == null || value === '') {
-    return '—'
-  }
-  if (typeof value === 'object') {
-    const label = trim(value.label)
-    if (label) {
-      return label
-    }
-    const nested = trim(value.value)
-
-    return nested || '—'
-  }
-
-  return trim(value) || '—'
-}
-
-function resolveCatalogFieldLabel(
-  field,
-  catalogOptions,
-  resolveCatalogSelectValue,
-) {
+function resolveCatalogFieldLabel(field, catalogOptions) {
   if (field == null || field === '') {
     return '—'
   }
@@ -156,22 +129,10 @@ function resolveCatalogFieldLabel(
       return '—'
     }
 
-    return resolveCatalogFieldLabel(
-      nested,
-      catalogOptions,
-      resolveCatalogSelectValue,
-    )
+    return resolveCatalogFieldLabel(nested, catalogOptions)
   }
 
-  const resolved = resolveCatalogSelectValue?.(
-    catalogOptions,
-    trim(field),
-  )
-  if (resolved && typeof resolved === 'object') {
-    return trim(resolved.label) || '—'
-  }
-
-  return trim(resolved ?? field) || '—'
+  return resolveCatalogOptionLabel(catalogOptions, trim(field)) || '—'
 }
 
 function formatIdNumberMaskedLine(form) {
@@ -364,7 +325,9 @@ export function buildClientOverviewHeaderData(
     raceSelectOptions = [],
     ethnicitySelectOptions = [],
     preferredLanguageSelectOptions = [],
-    resolveCatalogSelectValue = null,
+    prefixSelectOptions = [],
+    suffixSelectOptions = [],
+    genderSelectOptions = [],
     appointments = [],
     t,
   } = {},
@@ -374,23 +337,27 @@ export function buildClientOverviewHeaderData(
   const admissionDate = trim(form?.[ck.admissionDate])
 
   return {
-    fullName: formatClientName(form),
+    fullName: formatClientName(form, {
+      prefixSelectOptions,
+      suffixSelectOptions,
+    }),
     clientNumber: trim(form?.[ck.clientNumber]),
     photoFileId: form?.[ck.photoFileId] ?? null,
     clientInitials: clientInitialsFromForm(form),
     status: trim(form?.[ck.status]) || 'active',
     statusLabel: resolveStatusLabel(form?.[ck.status], t),
     dobAgeLine: formatDobAgeLine(form, t),
-    gender: resolveFormFieldLabel(form?.[ck.gender]),
+    gender: resolveCatalogFieldLabel(
+      form?.[ck.gender],
+      genderSelectOptions,
+    ),
     race: resolveCatalogFieldLabel(
       form?.[ck.race],
       raceSelectOptions,
-      resolveCatalogSelectValue,
     ),
     ethnicity: resolveCatalogFieldLabel(
       form?.[ck.ethnicity],
       ethnicitySelectOptions,
-      resolveCatalogSelectValue,
     ),
     idNumberMasked: formatIdNumberMaskedLine(form),
     phones: resolveContactPhones(contact),
@@ -400,7 +367,6 @@ export function buildClientOverviewHeaderData(
     preferredLanguage: resolveCatalogFieldLabel(
       form?.[ck.preferredLanguage],
       preferredLanguageSelectOptions,
-      resolveCatalogSelectValue,
     ),
     clinicians: resolveClinicianCards(form, rawClient, clinicianOptions),
     nextAppointment: appointmentSummary.nextAppointment,

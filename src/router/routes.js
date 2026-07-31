@@ -51,6 +51,14 @@ const routes = [
         },
       },
       {
+        path: 'clients/:id/overview-alt',
+        name: 'ClientOverviewAlt',
+        component: () => import('pages/client/ClientOverviewAltPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewClient,
+        },
+      },
+      {
         path: 'clients/:id/edit',
         name: 'EditClient',
         component: () => import('pages/client/EditClientPage.vue'),

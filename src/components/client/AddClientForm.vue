@@ -793,6 +793,10 @@
                 :readonly="vitalsReadonly"
                 :can-view="canViewVitalsTab"
                 :clinician-options="assignedClinicianOptions"
+                :patient-dob="form[ck.dob]"
+                :patient-age="form[ck.age]"
+                :patient-age-unit="form[ck.ageUnit]"
+                :patient-gender="form[ck.gender]"
               />
               <AddClientScreeningsTab
                 v-else-if="subTab.key === CLINICAL_SCREENINGS_SUB_TAB"
@@ -1050,6 +1054,7 @@ import { useRegisterUnsavedChanges } from
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
 import { useContactSubTabs } from 'src/composables/useContactSubTabs.js'
 import { resolveOtherContactTabLabel } from 'src/utils/client-contact-form.js'
+import { formatClientDisplayName } from 'src/utils/client-display-name.js'
 import {
   ensureCliniciansSelectionOrder,
   withPrimaryClinicianFirst,
@@ -1699,22 +1704,13 @@ const ssnFieldRules = computed(() => [
 
 const activeTabLabel = computed(() => tabLabelFor(activeTab.value))
 
-const patientFullName = computed(() => {
-  const parts = [
-    form.value[ck.firstName],
-    form.value[ck.middleName],
-    form.value[ck.lastName],
-  ]
-    .map(part => String(part ?? '').trim())
-    .filter(Boolean)
-  const suffix = String(form.value[ck.suffix] ?? '').trim()
-  let name = parts.join(' ')
-  if (suffix) {
-    name = `${name} ${suffix}`.trim()
-  }
-
-  return name
-})
+const patientFullName = computed(() => formatClientDisplayName(
+  form.value,
+  {
+    prefixSelectOptions: prefixSelectOptions.value,
+    suffixSelectOptions: suffixSelectOptions.value,
+  },
+))
 
 const selectedAssignedClinicians = computed(() => {
   const selectedIds = Array.isArray(form.value[ck.clinicians])

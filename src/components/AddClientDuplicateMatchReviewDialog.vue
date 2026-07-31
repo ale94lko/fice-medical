@@ -219,6 +219,7 @@ import {
   formatPhoneUs,
   normalizePhoneDigits,
 } from 'src/utils/client-contact-form.js'
+import { formatClientDisplayName } from 'src/utils/client-display-name.js'
 import DataItemComponent from 'components/template/DataItemComponent.vue'
 
 const props = defineProps({
@@ -371,12 +372,9 @@ const confidencePillClass = computed(() => {
 })
 
 const existingClientDisplayName = computed(() => {
-  const first = trim(props.previewForm?.[ck.firstName])
-  const middle = trim(props.previewForm?.[ck.middleName])
-  const last = trim(props.previewForm?.[ck.lastName])
+  const name = formatClientDisplayName(props.previewForm ?? {})
 
-  const parts = [first, middle, last].filter(Boolean)
-  return parts.length ? parts.join(' ') : '—'
+  return name || '—'
 })
 
 const matchScorePercent = computed(

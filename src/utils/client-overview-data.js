@@ -11,6 +11,7 @@ import {
   sortClientListAllergyItemsBySeverity,
 } from 'src/utils/client-list-allergy-severity.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
+import { formatPersonDisplayName } from 'src/utils/person-display-name.js'
 import { visibleInsuranceProfiles } from 'src/utils/client-insurance.js'
 import { sortVitalsEntriesDesc } from 'src/utils/client-vitals.js'
 import { normalizeAppointment } from 'src/utils/appointment-normalize.js'
@@ -258,10 +259,13 @@ function summariesFromForm(form, t, rawClient = null) {
     if (other?.deleted) {
       continue
     }
-    const name = [
-      other.firstName,
-      other.lastName,
-    ].map(trim).filter(Boolean).join(' ')
+    const name = formatPersonDisplayName({
+      prefix: other.prefix,
+      firstName: other.firstName,
+      middleName: other.middleName,
+      lastName: other.lastName,
+      suffix: other.suffix,
+    })
     if (name) {
       contactItems.push({
         label: name,

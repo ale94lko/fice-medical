@@ -459,6 +459,7 @@ import {
   otherContactPhoneAddTestId,
   otherContactPhoneRemoveTestId,
 } from 'src/test-ids/index.js'
+import { formatPersonDisplayName } from 'src/utils/person-display-name.js'
 
 const props = defineProps({
   contact: {
@@ -566,15 +567,27 @@ function setField(key, value) {
   emitContact({ ...props.contact, [key]: value })
 }
 
+function otherContactDisplayName(contact) {
+  return formatPersonDisplayName(
+    {
+      prefix: contact?.prefix,
+      firstName: contact?.firstName,
+      middleName: contact?.middleName,
+      lastName: contact?.lastName,
+      suffix: contact?.suffix,
+    },
+    {
+      prefixSelectOptions: props.prefixOptions,
+      suffixSelectOptions: props.suffixOptions,
+    },
+  )
+}
+
 function onResponsibleForPaymentsChange(value) {
   emit('set-responsible-for-payments', {
     contactId: props.contact.id,
     value,
-    label: [
-      props.contact.firstName,
-      props.contact.middleName,
-      props.contact.lastName,
-    ].filter(part => String(part ?? '').trim()).join(' ')
+    label: otherContactDisplayName(props.contact)
       || t('otherContactTabGeneric', { n: 1 }),
   })
 }
@@ -583,11 +596,7 @@ function onPreferredPointOfContactChange(value) {
   emit('set-preferred-point-of-contact', {
     contactId: props.contact.id,
     value,
-    label: [
-      props.contact.firstName,
-      props.contact.middleName,
-      props.contact.lastName,
-    ].filter(part => String(part ?? '').trim()).join(' ')
+    label: otherContactDisplayName(props.contact)
       || t('otherContactTabGeneric', { n: 1 }),
   })
 }

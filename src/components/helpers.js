@@ -12,6 +12,7 @@ import {
   resolveClientListEmailSearchText,
 } from 'src/utils/client-list-email.js'
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
+import { formatPersonDisplayName } from 'src/utils/person-display-name.js'
 import {
   formatSsnMasked,
   normalizeIdNumberMaskedDisplay,
@@ -312,18 +313,24 @@ export function extractLoginPermissions(body) {
   return []
 }
 
-export function formatClientListName(firstName, middleName, lastName, suffix) {
-  const first = String(firstName ?? '').trim()
-  const middle = String(middleName ?? '').trim()
-  const last = String(lastName ?? '').trim()
-  const suf = String(suffix ?? '').trim()
-  if (!last && !first) {
-    return ''
-  }
-  const middlePart = middle ? ` ${middle}` : ''
-  const suffixPart = suf ? ` ${suf}` : ''
-
-  return `${last}, ${first}${middlePart}${suffixPart}`.trim()
+export function formatClientListName(
+  firstName,
+  middleName,
+  lastName,
+  suffix,
+  prefix = '',
+  catalogOptions = {},
+) {
+  return formatPersonDisplayName(
+    {
+      prefix,
+      firstName,
+      middleName,
+      lastName,
+      suffix,
+    },
+    catalogOptions,
+  )
 }
 
 export function buildClientCreateBody(form) {
@@ -515,7 +522,7 @@ export function mapClient(client, options = {}) {
   if (!client || typeof client !== typeNames.object) {
     return null
   }
-  const { suffixSelectOptions = [] } = options
+  const { suffixSelectOptions = [], prefixSelectOptions = [] } = options
   const ck = clientFieldKeys
   const personal = clientPersonalInfo(client)
   const firstName = String(
@@ -534,6 +541,13 @@ export function mapClient(client, options = {}) {
     suffixSelectOptions,
     suffixRaw,
   ) || suffixRaw
+  const prefixRaw = String(
+    personal.prefix ?? client.prefix ?? client[ck.prefix] ?? '',
+  ).trim()
+  const prefix = resolveCatalogOptionLabel(
+    prefixSelectOptions,
+    prefixRaw,
+  ) || prefixRaw
   const dob = personal.dob ?? client.dob ?? ''
   const idNumberMasked = normalizeIdNumberMaskedDisplay(
     personal.id_number_masked ?? client.id_number_masked ?? '',
@@ -559,6 +573,7 @@ export function mapClient(client, options = {}) {
     [ck.firstName]: firstName,
     [ck.middleName]: middleName,
     [ck.lastName]: lastName,
+    [ck.prefix]: prefix,
     [ck.suffix]: suffix,
     [ck.gender]: mapGenderLabelForList(
       personal.gender ?? personal.sex ?? client.gender ?? client.sex,
@@ -569,7 +584,12 @@ export function mapClient(client, options = {}) {
       firstName,
       middleName,
       lastName,
-      suffix,
+      suffixRaw,
+      prefixRaw,
+      {
+        prefixSelectOptions,
+        suffixSelectOptions,
+      },
     ),
     [ck.email]: emailEntries[0]?.email ?? '',
     emailEntries,

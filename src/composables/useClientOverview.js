@@ -47,7 +47,9 @@ export function useClientOverview(clientId) {
       ethnicitySelectOptions: catalogs.ethnicitySelectOptions.value,
       preferredLanguageSelectOptions:
         catalogs.preferredLanguageOptions.value,
-      resolveCatalogSelectValue: catalogs.resolveCatalogSelectValue,
+      prefixSelectOptions: catalogs.prefixSelectOptions.value,
+      suffixSelectOptions: catalogs.suffixSelectOptions.value,
+      genderSelectOptions: catalogs.genderOptions.value,
       appointments: summaries.value.appointmentsRaw ?? [],
       t,
     })
@@ -151,6 +153,9 @@ export function useClientOverview(clientId) {
     missingItems,
     activityItems,
     moduleCards,
+    form,
+    rawClient,
+    summaries,
     loadOverview,
   }
 }

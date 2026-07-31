@@ -246,6 +246,7 @@ export const clientListTestIds = {
   rowAssign: id => toTestId('client-list-row', id, 'btn-assign'),
   rowStatus: id => toTestId('client-list-row', id, 'btn-status'),
   rowMore: id => toTestId('client-list-row', id, 'btn-more'),
+  rowOverviewAlt: id => toTestId('client-list-row', id, 'btn-overview-alt'),
 }
 
 export const staffListTestIds = {
@@ -282,6 +283,23 @@ export const clientOverviewTestIds = {
   moduleCard: id => toTestId('client-overview-module', id),
   moduleDialog: 'client-overview-module-dialog',
   allergiesDialogList: 'client-overview-allergies-dialog-list',
+}
+
+export const clientOverviewAltTestIds = {
+  page: 'client-overview-alt-page',
+  header: 'client-overview-alt-header',
+  openClassic: 'client-overview-alt-btn-classic',
+  edit: 'client-overview-alt-btn-edit',
+  reviewMissing: 'client-overview-alt-btn-review-missing',
+  tabs: 'client-overview-alt-tabs',
+  tab: key => toTestId('client-overview-alt-tab', key),
+  basicInfo: 'client-overview-alt-basic-info',
+  contact: 'client-overview-alt-contact',
+  allergies: 'client-overview-alt-allergies',
+  insurance: 'client-overview-alt-insurance',
+  modulesTab: key => toTestId('client-overview-alt-modules', key),
+  sidebar: 'client-overview-alt-sidebar',
+  viewAllActivity: 'client-overview-alt-btn-view-all-activity',
 }
 
 export const clientPageTestIds = {

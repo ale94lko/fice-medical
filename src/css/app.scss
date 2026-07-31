@@ -5,6 +5,7 @@
 @import 'form-field';
 @import 'admin-table-standard';
 @import 'client-overview';
+@import 'client-overview-alt';
 @import 'session-expiry-dialog';
 @import 'forced-change-password-dialog';
 @import 'login-promo-panel';
@@ -3542,6 +3543,207 @@ input:-webkit-autofill {
   color: $text-muted;
 }
 
+.add-client-vitals-tab__unit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-muted;
+  white-space: nowrap;
+  padding-right: 2px;
+  user-select: none;
+}
+
+.add-client-vitals-tab__level {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.add-client-vitals-tab__level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 210px;
+  height: $app-input-height;
+  min-height: $app-input-height;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  border: 1px solid transparent;
+  overflow: hidden;
+
+  &--empty {
+    color: $text-muted;
+    background: $surface-muted;
+    border-color: $border-subtle;
+  }
+
+  &--normal {
+    color: #1b5e20;
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+  }
+
+  &--average {
+    color: #1b5e20;
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+  }
+
+  &--concerning {
+    color: #f57f17;
+    background: #fffde7;
+    border-color: #fff176;
+  }
+
+  &--low {
+    color: #e65100;
+    background: #fff3e0;
+    border-color: #ffcc80;
+  }
+
+  &--brain {
+    color: #bf360c;
+    background: #fbe9e7;
+    border-color: #ffab91;
+  }
+
+  &--cyanosis {
+    color: #b71c1c;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+
+  &--fever {
+    color: #e65100;
+    background: #fff3e0;
+    border-color: #ffcc80;
+  }
+
+  &--hyperthermia {
+    color: #b71c1c;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+
+  &--death {
+    color: #ffffff;
+    background: #4a148c;
+    border-color: #6a1b9a;
+  }
+
+  &--hypothermia {
+    color: #0d47a1;
+    background: #e3f2fd;
+    border-color: #90caf9;
+  }
+
+  &--bp-elevated {
+    color: #f57f17;
+    background: #fffde7;
+    border-color: #fff176;
+  }
+
+  &--bp-stage1 {
+    color: #c62828;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+
+  &--bp-stage2 {
+    color: #b71c1c;
+    background: #ffcdd2;
+    border-color: #e57373;
+  }
+
+  &--bp-crisis {
+    color: #ffffff;
+    background: #880e4f;
+    border-color: #ad1457;
+  }
+
+  &--bp-hypotension {
+    color: #0d47a1;
+    background: #e3f2fd;
+    border-color: #90caf9;
+  }
+
+  &--hr-bradycardia {
+    color: #b71c1c;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+
+  &--hr-tachycardia {
+    color: #b71c1c;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+
+  &--hr-yellow {
+    color: #f57f17;
+    background: #fffde7;
+    border-color: #fff176;
+  }
+
+  &--rr-slow {
+    color: #0d47a1;
+    background: #e3f2fd;
+    border-color: #90caf9;
+  }
+
+  &--rr-fast {
+    color: #f57f17;
+    background: #fffde7;
+    border-color: #fff176;
+  }
+
+  &--rr-yellow {
+    color: #f57f17;
+    background: #fff8e1;
+    border-color: #ffe082;
+  }
+
+  &--bmi-underweight {
+    color: #0d47a1;
+    background: #e3f2fd;
+    border-color: #90caf9;
+  }
+
+  &--bmi-normal {
+    color: #1b5e20;
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+  }
+
+  &--bmi-overweight {
+    color: #f57f17;
+    background: #fffde7;
+    border-color: #fff176;
+  }
+
+  &--bmi-obesity1 {
+    color: #e65100;
+    background: #fff3e0;
+    border-color: #ffcc80;
+  }
+
+  &--bmi-obesity2 {
+    color: #bf360c;
+    background: #fbe9e7;
+    border-color: #ffab91;
+  }
+
+  &--bmi-obesity3 {
+    color: #b71c1c;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+}
+
 .add-client-vitals-tab__pain-level {
   width: 100%;
 }
@@ -3877,6 +4079,91 @@ input:-webkit-autofill {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.vitals-history-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  &--plain {
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    font-weight: 400;
+    color: inherit;
+  }
+
+  &:not(.vitals-history-status--plain) {
+    cursor: help;
+  }
+
+  &--normal,
+  &--average,
+  &--bmi-normal {
+    color: #1b5e20;
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+  }
+
+  &--concerning,
+  &--bp-elevated,
+  &--fever,
+  &--hr-yellow,
+  &--rr-fast,
+  &--rr-yellow,
+  &--bmi-overweight {
+    color: #f57f17;
+    background: #fffde7;
+    border-color: #fff176;
+  }
+
+  &--low,
+  &--brain,
+  &--hyperthermia,
+  &--bp-stage1,
+  &--bmi-obesity1 {
+    color: #e65100;
+    background: #fff3e0;
+    border-color: #ffcc80;
+  }
+
+  &--cyanosis,
+  &--death,
+  &--bp-stage2,
+  &--bp-crisis,
+  &--hr-bradycardia,
+  &--hr-tachycardia,
+  &--bmi-obesity2,
+  &--bmi-obesity3 {
+    color: #b71c1c;
+    background: #ffebee;
+    border-color: #ef9a9a;
+  }
+
+  &--hypothermia,
+  &--bp-hypotension,
+  &--rr-slow,
+  &--bmi-underweight {
+    color: #0d47a1;
+    background: #e3f2fd;
+    border-color: #90caf9;
+  }
+}
+
+.vitals-history-status__value {
+  min-width: 0;
 }
 
 .admin-data-table--embedded

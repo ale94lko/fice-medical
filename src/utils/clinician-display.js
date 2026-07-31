@@ -1,3 +1,9 @@
+import {
+  formatPersonDisplayName,
+  formatPersonDisplayNameFromRecord,
+  personNamePartsFromRecord,
+} from 'src/utils/person-display-name.js'
+
 function trim(value) {
   return String(value ?? '').trim()
 }
@@ -24,7 +30,7 @@ function personalFromClinicianRow(row) {
     ?? null
 }
 
-function fallbackClinicianName(row) {
+function fallbackClinicianName(row, catalogOptions = {}) {
   const staffMember = staffMemberFromRow(row)
   const code = trim(staffMember?.code)
 
@@ -32,55 +38,35 @@ function fallbackClinicianName(row) {
     return code
   }
 
-  return trim(
-    row?.name
-    ?? row?.full_name
-    ?? row?.fullName
-    ?? row?.clinician_name
-    ?? row?.clinicianName
-    ?? row?.display_name
-    ?? row?.displayName,
-  )
+  return formatPersonDisplayNameFromRecord(row, catalogOptions)
 }
 
 /**
- * Prefix + first + middle + last from clinician API row.
+ * Prefix + first + middle + last, Suffix (canonical). Specialty not included.
  */
-export function formatClinicianPersonName(clinicianRow) {
+export function formatClinicianPersonName(clinicianRow, catalogOptions = {}) {
   if (!clinicianRow || typeof clinicianRow !== 'object') {
     return ''
   }
 
   const personal = personalFromClinicianRow(clinicianRow)
-  if (personal) {
-    const prefix = trim(personal.prefix)
-    const first = trim(personal.first_name ?? personal.firstName)
-    const middle = trim(personal.middle_name ?? personal.middleName)
-    const last = trim(personal.last_name ?? personal.lastName)
-    const nameParts = [first, middle, last].filter(Boolean)
-
-    if (nameParts.length) {
-      const fullName = nameParts.join(' ')
-
-      return prefix ? `${prefix} ${fullName}`.trim() : fullName
-    }
+  const staffMember = staffMemberFromRow(clinicianRow)
+  const partsSource = personal
+    ?? staffMember
+    ?? clinicianRow
+  const parts = personNamePartsFromRecord(partsSource)
+  const fromParts = formatPersonDisplayName(parts, catalogOptions)
+  if (fromParts) {
+    return fromParts
   }
 
-  const directFirst = trim(clinicianRow.first_name ?? clinicianRow.firstName)
-  const directMiddle = trim(
-    clinicianRow.middle_name ?? clinicianRow.middleName,
-  )
-  const directLast = trim(clinicianRow.last_name ?? clinicianRow.lastName)
-  const directPrefix = trim(clinicianRow.prefix)
-  const directParts = [directFirst, directMiddle, directLast].filter(Boolean)
-
-  if (directParts.length) {
-    const fullName = directParts.join(' ')
-
-    return directPrefix ? `${directPrefix} ${fullName}`.trim() : fullName
+  const directParts = personNamePartsFromRecord(clinicianRow)
+  const fromDirect = formatPersonDisplayName(directParts, catalogOptions)
+  if (fromDirect) {
+    return fromDirect
   }
 
-  return fallbackClinicianName(clinicianRow)
+  return fallbackClinicianName(clinicianRow, catalogOptions)
 }
 
 /**
@@ -106,15 +92,21 @@ export function formatClinicianOptionCaption(clinicianRow) {
 }
 
 /**
- * Prefix + first + middle + last + " - " + specialty.
+ * Person name (canonical) + " - " + specialty. Extra info preserved.
  */
-export function formatClinicianDisplayLabel(clinicianRow) {
+export function formatClinicianDisplayLabel(
+  clinicianRow,
+  catalogOptions = {},
+) {
   if (!clinicianRow || typeof clinicianRow !== 'object') {
     return ''
   }
 
   const specialty = trim(clinicianRow.specialty)
-  const personName = formatClinicianPersonName(clinicianRow)
+  const personName = formatClinicianPersonName(
+    clinicianRow,
+    catalogOptions,
+  )
 
   if (personName && specialty) {
     return `${personName} - ${specialty}`
@@ -172,9 +164,11 @@ export function clinicianAvatarStyle(seed) {
 }
 
 export function clinicianInitialsFromPersonName(name) {
-  const personPart = trim(String(name ?? '').split(' - ')[0])
+  const personPart = trim(
+    String(name ?? '').split(' - ')[0].split(',')[0],
+  )
   const parts = personPart.split(/\s+/).filter(Boolean)
-  const skipPrefixes = new Set(['dr.', 'dr', 'mr.', 'mrs.', 'ms.'])
+  const skipPrefixes = new Set(['dr.', 'dr', 'mr.', 'mrs.', 'ms.', 'mr'])
   const meaningful = parts.filter(
     part => !skipPrefixes.has(part.toLowerCase()),
   )

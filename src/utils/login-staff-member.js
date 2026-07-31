@@ -1,4 +1,5 @@
-import { formatClinicianPersonName } from 'src/utils/clinician-display.js'
+import { formatPersonDisplayNameFromRecord } from
+  'src/utils/person-display-name.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -21,12 +22,8 @@ function readPhotoFileId(staff) {
 }
 
 function readStaffDisplayName(staff) {
-  const direct = trim(staff?.name)
-  if (direct) {
-    return direct
-  }
-
-  return formatClinicianPersonName(staff)
+  return formatPersonDisplayNameFromRecord(staff, {}, staff?.name)
+    || trim(staff?.name)
 }
 
 function readStaffPosition(staff) {

@@ -1,15 +1,25 @@
 import { clientVitalsPainLevelValues } from 'components/constants.js'
+import { calculateBmiFromUs } from 'src/utils/bmi-us.js'
 import {
   formatDateUs,
+  fullMonthsBetween,
+  fullYearsBetween,
   isCompleteUsDateString,
+  normalizeAgeUnitKind,
   parseUsDateString,
+  startOfDay,
 } from 'src/utils/client-form.js'
+
+export {
+  calculateBmiFromUs,
+  formatBmiDisplay,
+} from 'src/utils/bmi-us.js'
 
 export const VITALS_LIMITS = {
   systolic: { min: 1, max: 300 },
-  diastolic: { min: 1, max: 200 },
-  heartRate: { min: 20, max: 250 },
-  respiratoryRate: { min: 5, max: 80 },
+  diastolic: { min: 1, max: 180 },
+  heartRate: { min: 0, max: 300 },
+  respiratoryRate: { min: 0, max: 120 },
   temperature: { min: 90, max: 115 },
   oxygenSaturation: { min: 0, max: 100 },
   weight: { min: 1, max: 1500 },
@@ -92,7 +102,8 @@ export function createEmptyVitalsDraft() {
     temperature: '',
     oxygenSaturation: '',
     weight: '',
-    height: '',
+    heightFeet: '',
+    heightInches: '',
     painLevel: '',
     notes: '',
     recordedDate: date,
@@ -111,6 +122,137 @@ export function createEmptyVitalsSection() {
 
 export function sanitizeIntegerInput(value, maxDigits = 4) {
   return String(value ?? '').replace(/\D/g, '').slice(0, maxDigits)
+}
+
+export function sanitizeOxygenSaturationInput(value) {
+  const digits = String(value ?? '').replace(/\D/g, '')
+  let result = ''
+  for (const ch of digits) {
+    const next = `${result}${ch}`
+    if (next.length > 3 || Number(next) > 100) {
+      break
+    }
+    result = next
+  }
+
+  return result
+}
+
+export function wouldOxygenSaturationAcceptDigit(current, digit, selection) {
+  if (!/^\d$/.test(String(digit))) {
+    return false
+  }
+  const value = String(current ?? '')
+  const start = selection?.start ?? value.length
+  const end = selection?.end ?? value.length
+  const next = `${value.slice(0, start)}${digit}${value.slice(end)}`
+  if (!/^\d*$/.test(next) || next.length > 3) {
+    return false
+  }
+
+  return Number(next) <= 100
+}
+
+export function sanitizeCappedIntegerInput(value, max) {
+  const digits = String(value ?? '').replace(/\D/g, '')
+  if (!Number.isFinite(max) || max < 0) {
+    return ''
+  }
+  let result = ''
+  for (const ch of digits) {
+    const next = `${result}${ch}`
+    if (Number(next) > max) {
+      break
+    }
+    result = next
+  }
+
+  return result
+}
+
+export function getDiastolicInputMax(systolic) {
+  let max = VITALS_LIMITS.diastolic.max
+  const sys = parsePositiveInt(systolic)
+  if (sys != null && !Number.isNaN(sys) && sys > 1) {
+    max = Math.min(max, sys - 1)
+  }
+
+  return max
+}
+
+export function sanitizeBpSystolicInput(value) {
+  return sanitizeCappedIntegerInput(value, VITALS_LIMITS.systolic.max)
+}
+
+export function sanitizeBpDiastolicInput(value, systolic) {
+  return sanitizeCappedIntegerInput(value, getDiastolicInputMax(systolic))
+}
+
+export function wouldBpAcceptDigit(current, digit, selection, max) {
+  if (!/^\d$/.test(String(digit))) {
+    return false
+  }
+  if (!Number.isFinite(max) || max < 0) {
+    return false
+  }
+  const value = String(current ?? '')
+  const start = selection?.start ?? value.length
+  const end = selection?.end ?? value.length
+  const next = `${value.slice(0, start)}${digit}${value.slice(end)}`
+  if (!/^\d*$/.test(next)) {
+    return false
+  }
+
+  return Number(next) <= max
+}
+
+export function sanitizeTemperatureInput(
+  value,
+  max = VITALS_LIMITS.temperature.max,
+) {
+  const raw = String(value ?? '').replace(/[^\d.]/g, '')
+  let result = ''
+  for (const ch of raw) {
+    if (ch === '.') {
+      if (!result || result.includes('.')) {
+        continue
+      }
+      result += ch
+      continue
+    }
+    const next = `${result}${ch}`
+    const [whole, frac = ''] = next.split('.')
+    if (whole.length > 3 || frac.length > 1) {
+      break
+    }
+    const numeric = next.endsWith('.') ? Number(whole) : Number(next)
+    if (Number.isFinite(numeric) && numeric > max) {
+      break
+    }
+    result = next
+  }
+
+  return result
+}
+
+export function wouldTemperatureAcceptChar(current, char, selection) {
+  if (!/^[\d.]$/.test(String(char))) {
+    return false
+  }
+  const value = String(current ?? '')
+  const start = selection?.start ?? value.length
+  const end = selection?.end ?? value.length
+  const next = `${value.slice(0, start)}${char}${value.slice(end)}`
+  if (next.endsWith('.') && (next.match(/\./g) || []).length === 1) {
+    const whole = next.slice(0, -1)
+    if (!/^\d+$/.test(whole)) {
+      return false
+    }
+
+    return Number(whole) <= VITALS_LIMITS.temperature.max
+  }
+
+  return sanitizeTemperatureInput(next) === next
 }
 
 export function sanitizeDecimalInput(value, maxDigits = 5) {
@@ -155,30 +297,503 @@ export function parseDecimal(value) {
   return Number.isFinite(n) ? n : NaN
 }
 
-export function calculateBmiFromUs(weightLbs, heightIn) {
-  const weight = parseDecimal(weightLbs)
-  const height = parseDecimal(heightIn)
-  if (
-    weight == null
-    || height == null
-    || weight <= 0
-    || height <= 0
-  ) {
+export function combineFeetInchesToTotal(feetVal, inchesVal) {
+  const feetStr = String(feetVal ?? '').trim()
+  const inchesStr = String(inchesVal ?? '').trim()
+  if (!feetStr && !inchesStr) {
     return null
   }
-  const weightKg = weight * 0.45359237
-  const heightM = height * 0.0254
-  const bmi = weightKg / (heightM * heightM)
+  const feet = feetStr ? parsePositiveInt(feetStr) : 0
+  const inches = inchesStr ? parsePositiveInt(inchesStr) : 0
+  if (
+    feet == null
+    || Number.isNaN(feet)
+    || inches == null
+    || Number.isNaN(inches)
+  ) {
+    return NaN
+  }
+  if (feet < 0 || inches < 0 || inches >= 12) {
+    return NaN
+  }
 
-  return Number.isFinite(bmi) ? Math.round(bmi * 10) / 10 : null
+  return feet * 12 + inches
 }
 
-export function formatBmiDisplay(bmi) {
-  if (bmi == null || !Number.isFinite(bmi)) {
+export function splitInchesToFeetParts(totalInches) {
+  const n = parseDecimal(totalInches)
+  if (n == null || Number.isNaN(n) || n <= 0) {
+    return { feet: '', inches: '' }
+  }
+  const rounded = Math.round(n)
+  let feet = Math.floor(rounded / 12)
+  let inches = rounded % 12
+  if (inches >= 12) {
+    feet += 1
+    inches = 0
+  }
+
+  return {
+    feet: String(feet),
+    inches: String(inches),
+  }
+}
+
+export function formatHeightFtIn(totalInches) {
+  const n = Number(totalInches)
+  if (!Number.isFinite(n) || n <= 0) {
+    return '—'
+  }
+  const { feet, inches } = splitInchesToFeetParts(n)
+  if (!feet && !inches) {
     return '—'
   }
 
-  return String(bmi)
+  return `${feet || '0'}'${inches || '0'}"`
+}
+
+export function draftHeightToInches(draft) {
+  return combineFeetInchesToTotal(
+    draft?.heightFeet,
+    draft?.heightInches,
+  )
+}
+
+/**
+ * SpO2 bands from pulse-oximeter chart (non-overlapping).
+ * 95–100 normal, 91–94 concerning, 86–90 low,
+ * 80–85 brain effects, ≤79 cyanosis.
+ */
+export function resolveOxygenSaturationLevel(value) {
+  const n = parsePositiveInt(value)
+  if (n == null || Number.isNaN(n)) {
+    return null
+  }
+  if (n > 100) {
+    return null
+  }
+  if (n >= 95) {
+    return {
+      modifier: 'normal',
+      labelKey: 'vitalsSpo2Normal',
+    }
+  }
+  if (n >= 91) {
+    return {
+      modifier: 'concerning',
+      labelKey: 'vitalsSpo2Concerning',
+    }
+  }
+  if (n >= 86) {
+    return {
+      modifier: 'low',
+      labelKey: 'vitalsSpo2Low',
+    }
+  }
+  if (n >= 80) {
+    return {
+      modifier: 'brain',
+      labelKey: 'vitalsSpo2Brain',
+    }
+  }
+
+  return {
+    modifier: 'cyanosis',
+    labelKey: 'vitalsSpo2Cyanosis',
+  }
+}
+
+/**
+ * Body temperature bands (°F) from clinical thermometer chart.
+ * >107.6 death, 105.8–107.6 hyperthermia, 100.4–105.8 fever,
+ * 96.8–100.4 normal, <96.8 hypothermia.
+ */
+export function resolveTemperatureLevel(value) {
+  const raw = String(value ?? '').trim().replace(/\.$/, '')
+  const n = parseDecimal(raw)
+  if (n == null || Number.isNaN(n)) {
+    return null
+  }
+  if (n > 107.6) {
+    return {
+      modifier: 'death',
+      labelKey: 'vitalsTempDeath',
+    }
+  }
+  if (n >= 105.8) {
+    return {
+      modifier: 'hyperthermia',
+      labelKey: 'vitalsTempHyperthermia',
+    }
+  }
+  if (n >= 100.4) {
+    return {
+      modifier: 'fever',
+      labelKey: 'vitalsTempFever',
+    }
+  }
+  if (n >= 96.8) {
+    return {
+      modifier: 'average',
+      labelKey: 'vitalsTempNormal',
+    }
+  }
+
+  return {
+    modifier: 'hypothermia',
+    labelKey: 'vitalsTempHypothermia',
+  }
+}
+
+/**
+ * Adult BP categories (ACC/AHA chart) plus hypotension.
+ * Hypotension: systolic < 90 or diastolic < 60.
+ * Evaluated after hypertensive stages so high readings win.
+ */
+export function resolveBloodPressureLevel(systolic, diastolic) {
+  const sys = parsePositiveInt(systolic)
+  const dia = parsePositiveInt(diastolic)
+  if (
+    sys == null
+    || dia == null
+    || Number.isNaN(sys)
+    || Number.isNaN(dia)
+  ) {
+    return null
+  }
+  if (sys > 180 || dia > 120) {
+    return {
+      modifier: 'bp-crisis',
+      labelKey: 'vitalsBpCrisis',
+    }
+  }
+  if (sys >= 140 || dia >= 90) {
+    return {
+      modifier: 'bp-stage2',
+      labelKey: 'vitalsBpStage2',
+    }
+  }
+  if (sys >= 130 || dia >= 80) {
+    return {
+      modifier: 'bp-stage1',
+      labelKey: 'vitalsBpStage1',
+    }
+  }
+  if (sys < 90 || dia < 60) {
+    return {
+      modifier: 'bp-hypotension',
+      labelKey: 'vitalsBpHypotension',
+    }
+  }
+  if (sys >= 120 && sys <= 129 && dia < 80) {
+    return {
+      modifier: 'bp-elevated',
+      labelKey: 'vitalsBpElevated',
+    }
+  }
+  if (sys < 120 && dia < 80) {
+    return {
+      modifier: 'normal',
+      labelKey: 'vitalsBpNormal',
+    }
+  }
+
+  return null
+}
+
+const HEART_RATE_AGE_BANDS = [
+  {
+    id: 'newborn',
+    match: ({ ageMonths }) => ageMonths <= 1,
+    normalMin: 90,
+    normalMax: 160,
+    alertLow: 90,
+    alertHigh: 180,
+  },
+  {
+    id: 'infant',
+    match: ({ ageMonths }) => ageMonths > 1 && ageMonths <= 12,
+    normalMin: 80,
+    normalMax: 140,
+    alertLow: 80,
+    alertHigh: 160,
+  },
+  {
+    id: 'toddler',
+    match: ({ ageYears }) => ageYears >= 1 && ageYears <= 3,
+    normalMin: 75,
+    normalMax: 120,
+    alertLow: 70,
+    alertHigh: 140,
+  },
+  {
+    id: 'preschool',
+    match: ({ ageYears }) => ageYears > 3 && ageYears <= 5,
+    normalMin: 70,
+    normalMax: 110,
+    alertLow: 65,
+    alertHigh: 130,
+  },
+  {
+    id: 'school',
+    match: ({ ageYears }) => ageYears > 5 && ageYears <= 12,
+    normalMin: 60,
+    normalMax: 100,
+    alertLow: 60,
+    alertHigh: 120,
+  },
+  {
+    id: 'adolescent',
+    match: ({ ageYears }) => ageYears > 12 && ageYears < 18,
+    normalMin: 60,
+    normalMax: 100,
+    alertLow: 55,
+    alertHigh: 110,
+  },
+  {
+    id: 'adult',
+    match: () => true,
+    normalMin: 60,
+    normalMax: 100,
+    alertLow: 40,
+    alertHigh: 130,
+  },
+]
+
+/** Used when DOB and age are both missing. */
+export const DEFAULT_ADULT_VITALS_AGE_CONTEXT = {
+  ageYears: 30,
+  ageMonths: 360,
+}
+
+export function resolvePatientAgeContextForVitals({
+  dobUs,
+  age,
+  ageUnit,
+  asOfDateUs,
+} = {}) {
+  const asOf = isCompleteUsDateString(asOfDateUs)
+    ? parseUsDateString(asOfDateUs)
+    : startOfDay(new Date())
+  if (!asOf) {
+    return { ...DEFAULT_ADULT_VITALS_AGE_CONTEXT }
+  }
+  const dob = parseUsDateString(dobUs)
+  if (dob) {
+    return {
+      ageMonths: fullMonthsBetween(dob, asOf),
+      ageYears: fullYearsBetween(dob, asOf),
+    }
+  }
+  const ageText = String(age ?? '').trim()
+  if (!ageText) {
+    return { ...DEFAULT_ADULT_VITALS_AGE_CONTEXT }
+  }
+  const n = Number(ageText)
+  if (!Number.isFinite(n) || n < 0) {
+    return { ...DEFAULT_ADULT_VITALS_AGE_CONTEXT }
+  }
+  const kind = normalizeAgeUnitKind(ageUnit)
+  if (kind === 'days') {
+    const ageMonths = Math.floor(n / 30)
+
+    return { ageMonths, ageYears: 0 }
+  }
+  if (kind === 'months') {
+    return {
+      ageMonths: n,
+      ageYears: Math.floor(n / 12),
+    }
+  }
+
+  return {
+    ageMonths: n * 12,
+    ageYears: n,
+  }
+}
+
+export function resolveHeartRateThresholds(ageContext) {
+  if (!ageContext) {
+    return null
+  }
+  const band = HEART_RATE_AGE_BANDS.find(item => item.match(ageContext))
+  if (!band) {
+    return null
+  }
+
+  return {
+    id: band.id,
+    normalMin: band.normalMin,
+    normalMax: band.normalMax,
+    alertLow: band.alertLow,
+    alertHigh: band.alertHigh,
+  }
+}
+
+export function resolveHeartRateLevel(value, ageContext) {
+  const n = parsePositiveInt(value)
+  if (n == null || Number.isNaN(n)) {
+    return null
+  }
+  const thresholds = resolveHeartRateThresholds(ageContext)
+  if (!thresholds) {
+    return null
+  }
+  if (n < thresholds.alertLow) {
+    return {
+      modifier: 'hr-bradycardia',
+      labelKey: 'vitalsHrBradycardia',
+    }
+  }
+  if (n > thresholds.alertHigh) {
+    return {
+      modifier: 'hr-tachycardia',
+      labelKey: 'vitalsHrTachycardia',
+    }
+  }
+  if (n >= thresholds.normalMin && n <= thresholds.normalMax) {
+    return {
+      modifier: 'normal',
+      labelKey: 'vitalsHrNormal',
+    }
+  }
+
+  return {
+    modifier: 'hr-yellow',
+    labelKey: 'vitalsHrYellow',
+  }
+}
+
+export function sanitizeHeartRateInput(value) {
+  return sanitizeCappedIntegerInput(value, VITALS_LIMITS.heartRate.max)
+}
+
+const RESPIRATORY_RATE_AGE_BANDS = [
+  {
+    id: 'newborn',
+    match: ({ ageMonths }) => ageMonths <= 1,
+    normalMin: 30,
+    normalMax: 60,
+    alertLow: 30,
+    alertHigh: 60,
+  },
+  {
+    id: 'infant',
+    match: ({ ageMonths }) => ageMonths > 1 && ageMonths <= 12,
+    normalMin: 30,
+    normalMax: 60,
+    alertLow: 30,
+    alertHigh: 60,
+  },
+  {
+    id: 'toddler',
+    match: ({ ageYears }) => ageYears >= 1 && ageYears <= 3,
+    normalMin: 24,
+    normalMax: 40,
+    alertLow: 20,
+    alertHigh: 40,
+  },
+  {
+    id: 'preschool',
+    match: ({ ageYears }) => ageYears > 3 && ageYears <= 5,
+    normalMin: 22,
+    normalMax: 34,
+    alertLow: 18,
+    alertHigh: 34,
+  },
+  {
+    id: 'school',
+    match: ({ ageYears }) => ageYears > 5 && ageYears <= 12,
+    normalMin: 18,
+    normalMax: 30,
+    alertLow: 14,
+    alertHigh: 30,
+  },
+  {
+    id: 'adolescent',
+    match: ({ ageYears }) => ageYears > 12 && ageYears <= 18,
+    normalMin: 12,
+    normalMax: 20,
+    alertLow: 10,
+    alertHigh: 24,
+  },
+  {
+    id: 'adult',
+    match: ({ ageYears }) => ageYears >= 19 && ageYears <= 64,
+    normalMin: 12,
+    normalMax: 20,
+    alertLow: 10,
+    alertHigh: 24,
+  },
+  {
+    id: 'older',
+    match: () => true,
+    normalMin: 12,
+    normalMax: 20,
+    alertLow: 10,
+    alertHigh: 24,
+  },
+]
+
+export function resolveRespiratoryRateThresholds(ageContext) {
+  if (!ageContext) {
+    return null
+  }
+  const band = RESPIRATORY_RATE_AGE_BANDS.find(
+    item => item.match(ageContext),
+  )
+  if (!band) {
+    return null
+  }
+
+  return {
+    id: band.id,
+    normalMin: band.normalMin,
+    normalMax: band.normalMax,
+    alertLow: band.alertLow,
+    alertHigh: band.alertHigh,
+  }
+}
+
+export function resolveRespiratoryRateLevel(value, ageContext) {
+  const n = parsePositiveInt(value)
+  if (n == null || Number.isNaN(n)) {
+    return null
+  }
+  const thresholds = resolveRespiratoryRateThresholds(ageContext)
+  if (!thresholds) {
+    return null
+  }
+  if (n < thresholds.alertLow) {
+    return {
+      modifier: 'rr-slow',
+      labelKey: 'vitalsRrSlow',
+    }
+  }
+  if (n > thresholds.alertHigh) {
+    return {
+      modifier: 'rr-fast',
+      labelKey: 'vitalsRrFast',
+    }
+  }
+  if (n >= thresholds.normalMin && n <= thresholds.normalMax) {
+    return {
+      modifier: 'normal',
+      labelKey: 'vitalsRrNormal',
+    }
+  }
+
+  return {
+    modifier: 'rr-yellow',
+    labelKey: 'vitalsRrYellow',
+  }
+}
+
+export function sanitizeRespiratoryRateInput(value) {
+  return sanitizeCappedIntegerInput(
+    value,
+    VITALS_LIMITS.respiratoryRate.max,
+  )
 }
 
 export function combineRecordedDateTime(dateUs, time12h) {
@@ -222,7 +837,8 @@ export function vitalsDraftHasContent(draft) {
     'temperature',
     'oxygenSaturation',
     'weight',
-    'height',
+    'heightFeet',
+    'heightInches',
     'painLevel',
     'notes',
     'recordedBy',
@@ -243,7 +859,7 @@ function validateRequiredInt(value, min, max) {
   if (Number.isNaN(n)) {
     return 'invalid'
   }
-  if (n <= 0) {
+  if (min > 0 && n <= 0) {
     return 'positive'
   }
   if (!inRange(n, min, max)) {
@@ -304,6 +920,30 @@ function validateOptionalDecimal(value, min, max) {
     return 'positive'
   }
   if (!inRange(n, min, max)) {
+    return 'range'
+  }
+
+  return null
+}
+
+function validateOptionalHeight(draft) {
+  const feetStr = String(draft?.heightFeet ?? '').trim()
+  const inchesStr = String(draft?.heightInches ?? '').trim()
+  if (!feetStr && !inchesStr) {
+    return null
+  }
+  const total = combineFeetInchesToTotal(feetStr, inchesStr)
+  if (total == null || Number.isNaN(total)) {
+    return 'invalid'
+  }
+  if (total <= 0) {
+    return 'positive'
+  }
+  if (!inRange(
+    total,
+    VITALS_LIMITS.height.min,
+    VITALS_LIMITS.height.max,
+  )) {
     return 'range'
   }
 
@@ -390,17 +1030,26 @@ export function validateVitalsDraft(draft) {
     VITALS_LIMITS.weight.min,
     VITALS_LIMITS.weight.max,
   )
-  const height = validateOptionalDecimal(
-    draft?.height,
-    VITALS_LIMITS.height.min,
-    VITALS_LIMITS.height.max,
-  )
+  const height = validateOptionalHeight(draft)
 
   if (sys) {
     errors.systolic = sys
   }
   if (dia) {
     errors.diastolic = dia
+  }
+  if (!sys && !dia) {
+    const sysN = parsePositiveInt(draft?.systolic)
+    const diaN = parsePositiveInt(draft?.diastolic)
+    if (
+      sysN != null
+      && diaN != null
+      && !Number.isNaN(sysN)
+      && !Number.isNaN(diaN)
+      && diaN >= sysN
+    ) {
+      errors.diastolic = 'order'
+    }
   }
   if (hr) {
     errors.heartRate = hr
@@ -445,7 +1094,9 @@ export function countVitalsDraftFieldErrors(section) {
 }
 
 export function normalizeVitalsEntry(draft) {
-  const bmi = calculateBmiFromUs(draft.weight, draft.height)
+  const heightInches = draftHeightToInches(draft)
+  const height = Number.isFinite(heightInches) ? heightInches : null
+  const bmi = calculateBmiFromUs(draft.weight, height)
 
   return {
     systolic: parsePositiveInt(draft.systolic),
@@ -455,7 +1106,7 @@ export function normalizeVitalsEntry(draft) {
     temperature: parseDecimal(draft.temperature),
     oxygenSaturation: parsePositiveInt(draft.oxygenSaturation) ?? null,
     weight: parseDecimal(draft.weight) ?? null,
-    height: parseDecimal(draft.height) ?? null,
+    height,
     bmi,
     painLevel: String(draft.painLevel ?? '').trim() || null,
     notes: String(draft.notes ?? '').trim(),
@@ -466,6 +1117,8 @@ export function normalizeVitalsEntry(draft) {
 }
 
 export function draftFromVitalsEntry(entry) {
+  const heightParts = splitInchesToFeetParts(entry?.height)
+
   return {
     systolic: entry?.systolic != null ? String(entry.systolic) : '',
     diastolic: entry?.diastolic != null ? String(entry.diastolic) : '',
@@ -481,7 +1134,8 @@ export function draftFromVitalsEntry(entry) {
         ? String(entry.oxygenSaturation)
         : '',
     weight: entry?.weight != null ? String(entry.weight) : '',
-    height: entry?.height != null ? String(entry.height) : '',
+    heightFeet: heightParts.feet,
+    heightInches: heightParts.inches,
     painLevel: entry?.painLevel ?? '',
     notes: entry?.notes ?? '',
     recordedDate: entry?.recordedDate ?? '',

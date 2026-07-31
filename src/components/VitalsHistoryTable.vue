@@ -23,7 +23,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        {{ formatBloodPressure(scope.row) }}
+        <VitalsHistoryStatusValue
+          :value="formatBloodPressure(scope.row)"
+          :modifier="statusFor(scope.row, 'bloodPressure').modifier"
+          :label="statusFor(scope.row, 'bloodPressure').label"
+        />
       </q-td>
     </template>
 
@@ -31,7 +35,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        {{ displayValue(scope.row.heartRate) }}
+        <VitalsHistoryStatusValue
+          :value="displayValue(scope.row.heartRate)"
+          :modifier="statusFor(scope.row, 'heartRate').modifier"
+          :label="statusFor(scope.row, 'heartRate').label"
+        />
       </q-td>
     </template>
 
@@ -39,7 +47,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        {{ displayValue(scope.row.temperature) }}
+        <VitalsHistoryStatusValue
+          :value="displayValue(scope.row.temperature)"
+          :modifier="statusFor(scope.row, 'temperature').modifier"
+          :label="statusFor(scope.row, 'temperature').label"
+        />
       </q-td>
     </template>
 
@@ -47,7 +59,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        {{ displayValue(scope.row.oxygenSaturation) }}
+        <VitalsHistoryStatusValue
+          :value="displayValue(scope.row.oxygenSaturation)"
+          :modifier="statusFor(scope.row, 'oxygenSaturation').modifier"
+          :label="statusFor(scope.row, 'oxygenSaturation').label"
+        />
       </q-td>
     </template>
 
@@ -55,7 +71,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        {{ formatBmiDisplay(scope.row.bmi) }}
+        <VitalsHistoryStatusValue
+          :value="formatBmiDisplay(scope.row.bmi)"
+          :modifier="statusFor(scope.row, 'bmi').modifier"
+          :label="statusFor(scope.row, 'bmi').label"
+        />
       </q-td>
     </template>
 
@@ -119,11 +139,19 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
+import VitalsHistoryStatusValue from
+  'components/VitalsHistoryStatusValue.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { resolveBmiClassification } from 'src/utils/bmi-us.js'
 import {
   formatBmiDisplay,
   formatRecordedDateTimeDisplay,
+  resolveBloodPressureLevel,
+  resolveHeartRateLevel,
+  resolveOxygenSaturationLevel,
+  resolvePatientAgeContextForVitals,
+  resolveTemperatureLevel,
 } from 'src/utils/client-vitals.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
@@ -143,6 +171,22 @@ const props = defineProps({
   canEdit: {
     type: Boolean,
     default: true,
+  },
+  patientDob: {
+    type: String,
+    default: '',
+  },
+  patientAge: {
+    type: [String, Number],
+    default: '',
+  },
+  patientAgeUnit: {
+    type: String,
+    default: '',
+  },
+  patientGender: {
+    type: String,
+    default: '',
   },
 })
 
@@ -229,6 +273,57 @@ const columns = computed(() => [
     style: 'min-width: 96px',
   },
 ])
+
+function ageContextForRow(row) {
+  return resolvePatientAgeContextForVitals({
+    dobUs: props.patientDob,
+    age: props.patientAge,
+    ageUnit: props.patientAgeUnit,
+    asOfDateUs: row?.recordedDate,
+  })
+}
+
+function toStatus(level) {
+  if (!level?.labelKey) {
+    return { modifier: '', label: '' }
+  }
+
+  return {
+    modifier: level.modifier || '',
+    label: t(level.labelKey),
+  }
+}
+
+function statusFor(row, field) {
+  const ageContext = ageContextForRow(row)
+  if (field === 'bloodPressure') {
+    return toStatus(
+      resolveBloodPressureLevel(row?.systolic, row?.diastolic),
+    )
+  }
+  if (field === 'heartRate') {
+    return toStatus(resolveHeartRateLevel(row?.heartRate, ageContext))
+  }
+  if (field === 'temperature') {
+    return toStatus(resolveTemperatureLevel(row?.temperature))
+  }
+  if (field === 'oxygenSaturation') {
+    return toStatus(
+      resolveOxygenSaturationLevel(row?.oxygenSaturation),
+    )
+  }
+  if (field === 'bmi') {
+    return toStatus(
+      resolveBmiClassification({
+        bmi: row?.bmi,
+        ageContext,
+        sex: props.patientGender,
+      }),
+    )
+  }
+
+  return { modifier: '', label: '' }
+}
 
 function displayValue(value) {
   if (value == null || value === '') {

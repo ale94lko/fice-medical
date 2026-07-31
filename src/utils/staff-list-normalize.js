@@ -6,12 +6,14 @@ import {
 } from 'src/utils/staff-status.js'
 import { normalizeStaffSystemUserFromApi } from
   'src/utils/staff-system-user.js'
+import { formatPersonDisplayNameFromRecord } from
+  'src/utils/person-display-name.js'
 
 function formatHireDate(value) {
   return apiDateToDisplay(value) || String(value ?? '').trim()
 }
 
-export function mapStaffListItem(item, t) {
+export function mapStaffListItem(item, t, catalogOptions = {}) {
   if (!item || item.id == null) {
     return null
   }
@@ -27,11 +29,16 @@ export function mapStaffListItem(item, t) {
     ).trim()
   const username = systemUser?.username
     || String(item.username ?? '').trim()
+  const displayName = formatPersonDisplayNameFromRecord(
+    item,
+    catalogOptions,
+    item.name,
+  ) || String(item.name ?? '').trim()
 
   return {
     id: item.id,
     [fk.staffNo]: String(item.staff_no ?? item.code ?? '').trim(),
-    [fk.name]: String(item.name ?? '').trim(),
+    [fk.name]: displayName,
     [fk.email]: String(item.email ?? '').trim(),
     [fk.position]: String(
       item.position_label ?? item.position ?? '',
