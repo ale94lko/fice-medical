@@ -2160,9 +2160,20 @@ function applyMappedClientSections(mapped) {
   if (!mapped) {
     return
   }
+  // Keep clinical rows in sync with backend-generated ids so:
+  // - tables refresh after save
+  // - delete / deactivate reason requirements apply to persisted rows
   const nextAllergies = mapped[clientFormSections.allergies]
   if (nextAllergies) {
     form.value[clientFormSections.allergies] = nextAllergies
+  }
+  const nextInsurance = mapped[clientFormSections.insurance]
+  if (nextInsurance) {
+    form.value[clientFormSections.insurance] = nextInsurance
+  }
+  const nextFmh = mapped[clientFormSections.familyMedicalHistory]
+  if (nextFmh) {
+    form.value[clientFormSections.familyMedicalHistory] = nextFmh
   }
   const nextFollowUps = mapped[clientFormSections.followUps]
   if (nextFollowUps) {
@@ -2206,9 +2217,8 @@ async function executeSave() {
         t,
       )
 
-      // Keep allergy rows in sync with backend-generated ids so:
-      // - the table refreshes after save
-      // - delete reason requirements apply to persisted rows
+      // Remap clinical sections from the API response so local rows get
+      // backend ids (allergies, insurance, FMH, follow-ups).
       const mapped = (updated && typeof updated === 'object')
         ? siteStore.buildEditFormFromClient(
           updated,
