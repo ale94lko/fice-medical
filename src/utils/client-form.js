@@ -8,8 +8,11 @@ import {
   sanitizeDisplayDateInput,
   startOfDay as appStartOfDay,
 } from 'src/utils/app-datetime.js'
+import {
+  LETTERS_AND_SPACES_RE,
+  NON_LETTERS_OR_SPACES_RE,
+} from 'src/utils/text-input-chars.js'
 
-const LETTERS_RE = /^[A-Za-z\s]+$/
 const SSN_PATTERN =
   /^(?!000|666|9\d\d)\d{3}-?(?!00)\d{2}-?(?!0000)\d{4}$/
 const ITIN_PATTERN = /^9\d{2}-?\d{2}-?\d{4}$/
@@ -211,16 +214,16 @@ export function isLettersOnly(value, maxLen) {
     return true
   }
 
-  return LETTERS_RE.test(s) && s.length <= maxLen
+  return LETTERS_AND_SPACES_RE.test(s) && s.length <= maxLen
 }
 
-/** Strips non-letters (A–Z, spaces) and caps length while typing. */
+/** Strips non-letters (keeps Unicode letters incl. ñ + spaces). */
 export function sanitizeLettersOnlyInput(value, maxLen) {
   const limit = Number(maxLen)
   const safeMax = Number.isFinite(limit) && limit > 0 ? limit : 30
 
   return String(value ?? '')
-    .replace(/[^A-Za-z\s]/g, '')
+    .replace(NON_LETTERS_OR_SPACES_RE, '')
     .slice(0, safeMax)
 }
 

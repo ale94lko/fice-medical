@@ -128,6 +128,7 @@
 
     <FamilyMedicalHistoryDeleteDialog
       v-model="deleteDialogOpen"
+      :require-deletion-reason="deleteDialogRequiresReason"
       @confirm="onDeleteConfirm"
     />
     </template>
@@ -155,6 +156,7 @@ import {
 } from 'components/constants.js'
 import {
   createEmptyFamilyMedicalHistoryDraft,
+  fmhRowHasPersistedApiId,
   getFamilyMedicalHistoryDraftFieldErrorKeys,
   isDuplicateFamilyMedicalHistoryEntry,
   nextFamilyMedicalHistoryId,
@@ -350,25 +352,44 @@ function openDelete(entry) {
   deleteDialogOpen.value = true
 }
 
+/** Audit reason only when deleting an entry already persisted (has apiId). */
+const deleteDialogRequiresReason = computed(() =>
+  fmhRowHasPersistedApiId(deletingEntry.value),
+)
+
 function onDeleteConfirm(reason) {
   const entry = deletingEntry.value
   if (!entry?.id) {
     return
   }
   const index = section.value.entries.findIndex(e => e.id === entry.id)
-  if (index >= 0) {
-    if (!section.value.deletionAudit) {
-      section.value.deletionAudit = []
-    }
-    section.value.deletionAudit.push({
-      familyRelationship: entry.familyRelationship,
-      medicalConditions: entry.medicalConditions,
-      reason: String(reason).trim(),
-    })
-    section.value.entries.splice(index, 1)
-    notifySuccess(t('fmhDeletedSuccess'))
+  if (index < 0) {
+    deletingEntry.value = null
+
+    return
   }
+  const reasonText = trimFamilyMedicalField(reason)
+  if (fmhRowHasPersistedApiId(entry) && !reasonText) {
+    return
+  }
+  if (!fmhRowHasPersistedApiId(entry)) {
+    section.value.entries.splice(index, 1)
+    deletingEntry.value = null
+    notifySuccess(t('fmhDeletedSuccess'))
+
+    return
+  }
+  if (!section.value.deletionAudit) {
+    section.value.deletionAudit = []
+  }
+  section.value.deletionAudit.push({
+    familyRelationship: entry.familyRelationship,
+    medicalConditions: entry.medicalConditions,
+    reason: reasonText,
+  })
+  section.value.entries.splice(index, 1)
   deletingEntry.value = null
+  notifySuccess(t('fmhDeletedSuccess'))
 }
 
 defineExpose({

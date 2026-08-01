@@ -198,7 +198,7 @@ export default {
   serviceProcedureListPaginationSummary:
     'Showing {from} to {to} of {total} services',
   serviceProcedureListSearchPlaceholder:
-    'Search by name, category, or code…',
+    'Search by name, category or code…',
   serviceProcedureCategoryFilterPlaceholder: 'All categories',
   serviceProcedureNameLabel: 'Name',
   serviceProcedureCategoryLabel: 'Category',
@@ -219,7 +219,7 @@ export default {
     'Informational only. Does not replace insurance verification.',
   serviceProcedureSectionGeneral: 'General information',
   serviceProcedureSectionOperational: 'Operational settings',
-  serviceProcedureSectionBilling: 'Billing (optional)',
+  serviceProcedureSectionBilling: 'Billing',
   serviceProcedureSectionAuthorization: 'Authorization reference',
   serviceProcedureCategoryClinicalService: 'Clinical Service',
   serviceProcedureCategoryTherapy: 'Therapy',
@@ -266,7 +266,7 @@ export default {
   users: 'Users',
   userListSubtitle: 'Manage tenant users, roles, and access.',
   userListSearchPlaceholder:
-    'Search by name, email, or role…',
+    'Search by name, email or role…',
   userListFilterAllRoles: 'All roles',
   userListFilterAllStatuses: 'All statuses',
   userListColUser: 'User',
@@ -542,7 +542,7 @@ export default {
   tabStaffClinicalProfile: 'Clinical Profile',
   staffFormSaveComingSoon:
     'Staff form save is not fully configured yet.',
-  staffNpiLookupLabel: 'Lookup Clinician by NPI (Optional)',
+  staffNpiLookupLabel: 'Lookup Clinician by NPI',
   staffNpiLookupPlaceholder: 'Enter NPI to search the registry',
   staffNpiLookupFoundTitle: 'Clinician found in NPI Registry',
   staffNpiLookupFoundHint:
@@ -568,7 +568,7 @@ export default {
   staffCredentialLabel: 'Credential',
   staffPrimarySpecialtyLabel: 'Primary Specialty',
   staffClinicalSupervisionTitle: 'Clinical Supervision',
-  staffSupervisorLabel: 'Supervisor (optional)',
+  staffSupervisorLabel: 'Supervisor',
   staffSupervisorPlaceholder: 'Search supervisor…',
   staffSupervisorHint:
     'Select the clinician who supervises this clinician. Leave blank '
@@ -681,6 +681,8 @@ export default {
     'Could not save column preferences. Please try again.',
   clientListNotAssigned: 'Not Assigned',
   clientListSummaryViewClients: 'View clients',
+  clientListSummaryAllClients: 'All Clients',
+  clientListSummaryAllClientsHint: 'All clients in this clinic',
   clientListSummaryUpcomingAppointments: 'Upcoming Appointments',
   clientListSummaryUpcomingAppointmentsHint: 'In the next 48 hours',
   clientListSummaryMissingInformation: 'Missing Information',
@@ -828,7 +830,7 @@ export default {
   editClientSubtitle: 'Update client information and save your changes.',
   clientProfilePhotoUpload: 'Upload or take profile photo',
   clientProfilePhotoInvalidType:
-    'Profile photo must be a JPG, PNG, or WebP image.',
+    'Profile photo must be a JPG, PNG or WebP image.',
   clientProfilePhotoTooLarge:
     'Profile photo is too large. Maximum size is 25 MB.',
   clientProfilePhotoUploadError: 'Could not upload the profile photo.',
@@ -877,7 +879,7 @@ export default {
     + 'once name and at least one contact method or address are provided.',
   contactAddMinimumRequired:
     'Complete first name, last name, and at least one address, '
-    + 'phone, or email to add a new contact.',
+    + 'phone or email to add a new contact.',
   preferredPointOfContactChanged:
     '{name} is now the preferred point of contact.',
   responsibleForPaymentsChanged:
@@ -984,7 +986,7 @@ export default {
   screeningTemplateCopyConfirmTitle: 'You have unsaved information',
   screeningTemplateCopyConfirmMessage:
     'The data you entered may be lost. Choose whether to replace it '
-    + 'with the selected template, keep your current changes, or add the '
+    + 'with the selected template, keep your current changes or add the '
     + 'template content to what you already have.',
   screeningTemplateCopyKeep: 'Keep my changes',
   screeningTemplateCopyAppend: 'Add to current',
@@ -1127,9 +1129,9 @@ export default {
   labRefRangeLow: 'Reference Range Low',
   labRefRangeHigh: 'Reference Range High',
   labComponentResultDate: 'Result Date',
-  labComponentResultTime: 'Result Time (optional)',
+  labComponentResultTime: 'Result Time',
   labComponentResultTimePlaceholder: '10:30 AM',
-  labComponentNotes: 'Notes (optional)',
+  labComponentNotes: 'Notes',
   labComponentPreview: 'Component Preview',
   labComponentAdd: 'Add Component',
   labComponentSaveAnother: 'Save & Add Another',
@@ -1314,7 +1316,7 @@ export default {
   carePlanGoalViewTitle: 'View Goal',
   carePlanGoalSubtitle: 'Define a goal for this care plan.',
   carePlanGoalSectionInfo: 'Goal Information',
-  carePlanGoalSectionProgress: 'Progress (Optional)',
+  carePlanGoalSectionProgress: 'Progress',
   carePlanGoalSectionMeasures: 'Outcome Measurement',
   carePlanGoalSectionInterventions: 'Interventions',
   carePlanGoalTitle: 'Goal Title',
@@ -1536,7 +1538,7 @@ export default {
   referralSectionCoordination: 'Coordination',
   referralSectionClinical: 'Clinical Details',
   referralSectionDocuments: 'Documents',
-  referralSectionDocumentsOptional: 'Documents (Optional)',
+  referralSectionDocumentsOptional: 'Documents',
   referralReasonFor: 'Reason for Referral',
   referralFollowUpTooltip:
     'Indicates whether follow-up actions are required after this referral.',
@@ -1580,7 +1582,7 @@ export default {
   referralDocumentDeleteError: 'Unable to delete document.',
   referralDocumentTooLarge: 'File exceeds the 10 MB limit.',
   referralDocumentTypeInvalid:
-    'File type not allowed. Use PDF, DOC, DOCX, JPG, or PNG.',
+    'File type not allowed. Use PDF, DOC, DOCX, JPG or PNG.',
   referralDocumentInvalid: 'Select a valid file.',
   referralTypeRequired: 'Referral type is required.',
   referralDateRequired: 'Referral date is required.',
@@ -1605,7 +1607,7 @@ export default {
   referralSourcePlaceholder: 'Select referral source',
   referralSourceRequired: 'Referral source is required.',
   referralSourceDetails: 'Referral Source Details',
-  referralSourceDetailsOptional: 'Referral Source Details (Optional)',
+  referralSourceDetailsOptional: 'Referral Source Details',
   referralSourceDetailsPlaceholder:
     'Enter additional referral information',
   referralIntakeSelfReferredTitle: 'Self-Referred',
@@ -1798,7 +1800,7 @@ export default {
   appointmentDuration: 'Duration',
   appointmentDurationUnitMin: 'min',
   appointmentDurationMinutes: '{count} min',
-  appointmentClinicianOptional: 'Clinician (Optional)',
+  appointmentClinicianOptional: 'Clinician',
   appointmentClinicianPlaceholder: 'Select clinician',
   appointmentClinicianRequired: 'Clinician is required.',
   appointmentSelectClinicianFirst:
@@ -1806,20 +1808,20 @@ export default {
   appointmentClinicianHint:
     'Leave empty to assign an available clinician automatically.',
   appointmentClinicianAutoAssign: 'Auto-assigned clinician',
-  appointmentSupervisorOptional: 'Supervisor (Optional)',
+  appointmentSupervisorOptional: 'Supervisor',
   appointmentSupervisorPlaceholder: 'Select supervisor',
   appointmentSupervisorHint:
     'Select the supervising clinician when required.',
   appointmentTelemedicine: 'Telemedicine',
-  appointmentReferralOptional: 'Referral (Optional)',
+  appointmentReferralOptional: 'Referral',
   appointmentReferralPlaceholder: 'Select referral',
   appointmentReferralHint:
     'Linking the referral helps track the referral source.',
-  appointmentCarePlanOptional: 'Care Plan (Optional)',
+  appointmentCarePlanOptional: 'Care Plan',
   appointmentCarePlanPlaceholder: 'Select care plan',
   appointmentCarePlanHint:
     'Linking to a care plan helps maintain continuity of care.',
-  appointmentNotesOptional: 'Notes (Optional)',
+  appointmentNotesOptional: 'Notes',
   appointmentNotesPlaceholder: 'Add any notes for this appointment...',
   appointmentNotesMaxLength: 'Notes cannot exceed {max} characters.',
   appointmentSummaryTitle: 'Selected Appointment Summary',
@@ -1866,9 +1868,9 @@ export default {
   followUpCount: '{count} follow ups | {count} follow up | {count} follow ups',
   followUpSectionInfo: 'Follow Up Information',
   followUpSectionDetails: 'Details',
-  followUpSectionRelated: 'Related To (Optional)',
-  followUpSectionNotes: 'Notes (Optional)',
-  followUpSectionReminder: 'Reminder (Optional)',
+  followUpSectionRelated: 'Related To',
+  followUpSectionNotes: 'Notes',
+  followUpSectionReminder: 'Reminder',
   followUpType: 'Type',
   followUpTypePlaceholder: 'Select type',
   followUpTypeRequired: 'Type is required.',
@@ -2156,7 +2158,7 @@ export default {
     + 'contact before saving.',
   otherContactContactMethodRequiredTitle: 'Contact method required',
   otherContactContactMethodRequiredMessage:
-    'Enter at least one address, phone number, or email for this contact.',
+    'Enter at least one address, phone number or email for this contact.',
   additionalNotes: 'Additional notes',
   additionalNotesPlaceholder: 'Enter any additional notes here...',
   optional: 'Optional',
@@ -2166,7 +2168,7 @@ export default {
   otherContactExpand: 'Show other contact',
   otherContactCollapse: 'Hide other contact',
   otherContactEmptyHint:
-    'Add emergency contacts, billing contacts, or other related people.',
+    'Add emergency contacts, billing contacts or other related people.',
   addOtherContact: 'Add Contact',
   removeOtherContact: 'Remove contact',
   removeOtherContactTitle: 'Remove contact',
@@ -2219,11 +2221,12 @@ export default {
   fmhUpdatedSuccess: 'Family medical history entry updated.',
   fmhDeletedSuccess: 'Family medical history entry deleted.',
   fmhEditTitle: 'Edit Family Medical History',
-  fmhDeleteTitle: 'Confirmation message',
-  fmhDeleteMessage:
-    'Are you sure you want to delete the selected item? '
-    + 'This action is permanent and cannot be undone. '
-    + 'For audit purposes, please provide a reason for the deletion.',
+  fmhDeleteTitle: 'Confirm Delete',
+  fmhDeleteMessage: 'Are you sure you want to delete the selected item?',
+  fmhDeleteMessageBold:
+    'This action is permanent and cannot be undone.',
+  fmhDeleteReasonHint:
+    'For audit purposes, please provide a reason for the deletion.',
   fmhDeleteReasonLabel: 'Reason for deletion',
   fmhDeleteReasonRequired: 'A reason for deletion is required.',
   allergiesAddSectionTitle: 'Allergies',
@@ -2253,9 +2256,9 @@ export default {
   clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Start Year',
   allergyStartYearHint:
-    'Optional. Year the allergy was first identified.',
+    'Year the allergy was first identified.',
   allergyStartYearHintCurrentYearOnly:
-    'Optional. Year the allergy was first identified.',
+    'Year the allergy was first identified.',
   allergyAdd: 'Add',
   allergyAddRequired: 'Enter an allergy and select a severity to add.',
   allergyNameRequired: 'Allergy is required when other fields are filled.',
@@ -2411,7 +2414,7 @@ export default {
   insuranceSubscriberName: 'Subscriber Name',
   insuranceSubscriberPlaceholder: 'Enter subscriber name',
   insuranceIdentifiersTitle:
-    'Additional Identifiers (applies to this insurance profile)',
+    'Program & Additional Identifiers',
   insuranceMedicaidId: 'Medicaid Recipient ID',
   insuranceMedicaidPlaceholder: 'Enter Medicaid ID',
   insuranceMedicareId: 'Medicare Member ID',
@@ -2420,7 +2423,7 @@ export default {
   insuranceGoldenCardPlaceholder: 'Enter Golden Card ID',
   insuranceOtherId: 'Other Insurance ID',
   insuranceOtherIdPlaceholder: 'Enter other insurance ID',
-  insuranceCardSectionTitle: 'Insurance Card (Optional)',
+  insuranceCardSectionTitle: 'Insurance Card',
   insuranceCardSectionSubtitle: 'Upload images of the insurance card',
   insuranceCardFront: 'Front of Card',
   insuranceCardBack: 'Back of Card',
@@ -2435,14 +2438,16 @@ export default {
   insuranceCardCameraUnavailable:
     'Camera is not available in this browser.',
   insuranceCardCameraPermissionError: 'Camera permission was denied.',
-  insuranceCardFileType: 'Allowed formats: PNG, JPG, or PDF.',
+  insuranceCardFileType: 'Allowed formats: PNG, JPG or PDF.',
   insuranceCardFileSize: 'File must be 5MB or smaller.',
   insuranceCardUploadError: 'Could not upload the insurance card image.',
   insuranceStatus: 'Insurance Status',
   insuranceDeactivateTitle: 'Deactivate Insurance Profile',
   insuranceDeactivateMessage:
     'This insurance profile will be marked as inactive and will no longer be '
-    + 'available for new billing, claims, or authorizations.',
+    + 'available for new billing, claims or authorizations.',
+  insuranceDeactivationReasonHint:
+    'For audit purposes, please provide a reason for the deactivation.',
   insuranceDeactivationReasonLabel: 'Deactivation Reason',
   insuranceDeactivateConfirm: 'Deactivate',
   insuranceActionDeactivate: 'Deactivate insurance profile',
@@ -2467,7 +2472,8 @@ export default {
   insuranceMedicaidIdInvalid: 'Medicaid ID must be exactly 10 digits.',
   insuranceMedicareIdRequired: 'Medicare Member ID is required.',
   insuranceMedicareIdInvalid:
-    'Medicare ID must be exactly 11 letters and/or digits.',
+    'Enter a valid Medicare MBI (11 characters) or legacy HICN '
+    + '(9 digits, optional 1–2 letters/digits).',
   insuranceGoldenCardRequired: 'Golden Card Member ID is required.',
   insuranceGoldenCardInvalid: 'Golden Card ID must be exactly 8 digits.',
   insuranceIdentifierInvalid:
@@ -2554,7 +2560,7 @@ export default {
   clinicalResourceUrlInvalid: 'Enter a valid http or https URL.',
   clinicalResourceDocumentLabel: 'Document',
   clinicalResourceDocumentUploadHint:
-    'Drag and drop a file here, or click to browse',
+    'Drag and drop a file here or click to browse',
   clinicalResourceDocumentFormats: 'PDF, DOC, DOCX, TXT or RTF',
   clinicalResourceDocumentNoFile: 'No file uploaded',
   clinicalResourceDocumentRemove: 'Remove file',

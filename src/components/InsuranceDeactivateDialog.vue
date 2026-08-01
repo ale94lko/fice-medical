@@ -17,18 +17,23 @@
         <p class="text-body1 q-mb-md">
           {{ t('insuranceDeactivateMessage') }}
         </p>
-        <AddClientLabeledField
-          required
-          :label="t('insuranceDeactivationReasonLabel')">
-          <q-input
-            v-model="reason"
-            outlined
-            type="textarea"
-            rows="3"
-            counter
-            maxlength="500"
-          />
-        </AddClientLabeledField>
+        <template v-if="requireDeactivationReason">
+          <p class="text-body2 q-mb-md">
+            {{ t('insuranceDeactivationReasonHint') }}
+          </p>
+          <AddClientLabeledField
+            required
+            :label="t('insuranceDeactivationReasonLabel')">
+            <q-input
+              v-model="reason"
+              outlined
+              type="textarea"
+              rows="3"
+              counter
+              maxlength="500"
+            />
+          </AddClientLabeledField>
+        </template>
       </q-card-section>
       <q-card-actions
         align="right"
@@ -47,7 +52,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
-          :disable="!hasReason"
+          :disable="requireDeactivationReason && !hasReason"
           :data-testid="modalTestIds.confirm('insurance-deactivate')"
           :label="t('insuranceDeactivateConfirm')"
           @click="onConfirm"
@@ -68,6 +73,14 @@ const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false,
+  },
+  /**
+   * When true, show audit reason field and require it to confirm.
+   * Insurance tab sets this only for profiles with persisted apiId.
+   */
+  requireDeactivationReason: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -100,7 +113,7 @@ function onCancel() {
 }
 
 function onConfirm() {
-  if (!hasReason.value) {
+  if (props.requireDeactivationReason && !hasReason.value) {
     return
   }
   emit('confirm', String(reason.value ?? '').trim())

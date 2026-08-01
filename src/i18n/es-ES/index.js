@@ -233,7 +233,7 @@ export default {
     'Solo informativo. No sustituye la verificación con el seguro.',
   serviceProcedureSectionGeneral: 'Información general',
   serviceProcedureSectionOperational: 'Configuración operativa',
-  serviceProcedureSectionBilling: 'Facturación (opcional)',
+  serviceProcedureSectionBilling: 'Facturación',
   serviceProcedureSectionAuthorization: 'Referencia de autorización',
   serviceProcedureCategoryClinicalService: 'Servicio clínico',
   serviceProcedureCategoryTherapy: 'Terapia',
@@ -379,7 +379,7 @@ export default {
     'Este widget estará disponible en una versión futura.',
   dashboardEmptyTitle: 'No hay widgets para mostrar',
   dashboardEmptyMessage:
-    'Sus permisos aún no incluyen widgets del panel, o todos '
+    'Sus permisos aún no incluyen widgets del panel o todos '
     + 'están ocultos. Pruebe a personalizar el panel.',
   dashboardLoadError:
     'No se pudo cargar el panel. Inténtelo de nuevo.',
@@ -573,7 +573,7 @@ export default {
   tabStaffClinicalProfile: 'Perfil clínico',
   staffFormSaveComingSoon:
     'El guardado del formulario de personal aún no está configurado.',
-  staffNpiLookupLabel: 'Buscar clínico por NPI (opcional)',
+  staffNpiLookupLabel: 'Buscar clínico por NPI',
   staffNpiLookupPlaceholder: 'Ingrese NPI para buscar en el registro',
   staffNpiLookupFoundTitle: 'Clínico encontrado en el registro NPI',
   staffNpiLookupFoundHint:
@@ -599,7 +599,7 @@ export default {
   staffCredentialLabel: 'Credencial',
   staffPrimarySpecialtyLabel: 'Especialidad principal',
   staffClinicalSupervisionTitle: 'Supervisión clínica',
-  staffSupervisorLabel: 'Supervisor (opcional)',
+  staffSupervisorLabel: 'Supervisor',
   staffSupervisorPlaceholder: 'Buscar supervisor…',
   staffSupervisorHint:
     'Seleccione el clínico que supervisa a este clínico. Deje en blanco '
@@ -718,6 +718,8 @@ export default {
   clientListPerPage: '{count} por página',
   clientListNotAssigned: 'Sin asignar',
   clientListSummaryViewClients: 'Ver clientes',
+  clientListSummaryAllClients: 'Todos los clientes',
+  clientListSummaryAllClientsHint: 'Todos los clientes de esta clínica',
   clientListSummaryUpcomingAppointments: 'Próximas citas',
   clientListSummaryUpcomingAppointmentsHint: 'En las próximas 48 horas',
   clientListSummaryMissingInformation: 'Información faltante',
@@ -1177,9 +1179,9 @@ export default {
   labRefRangeLow: 'Rango bajo',
   labRefRangeHigh: 'Rango alto',
   labComponentResultDate: 'Fecha del resultado',
-  labComponentResultTime: 'Hora (opcional)',
+  labComponentResultTime: 'Hora',
   labComponentResultTimePlaceholder: '10:30 AM',
-  labComponentNotes: 'Notas (opcional)',
+  labComponentNotes: 'Notas',
   labComponentPreview: 'Vista previa',
   labComponentAdd: 'Agregar componente',
   labComponentSaveAnother: 'Guardar y agregar otro',
@@ -1374,7 +1376,7 @@ export default {
   carePlanGoalViewTitle: 'Ver objetivo',
   carePlanGoalSubtitle: 'Defina un objetivo para este plan de cuidado.',
   carePlanGoalSectionInfo: 'Información del objetivo',
-  carePlanGoalSectionProgress: 'Progreso (opcional)',
+  carePlanGoalSectionProgress: 'Progreso',
   carePlanGoalSectionMeasures: 'Medidas de resultado',
   carePlanGoalSectionInterventions: 'Intervenciones',
   carePlanGoalTitle: 'Título del objetivo',
@@ -1600,7 +1602,7 @@ export default {
   referralSectionCoordination: 'Coordinación',
   referralSectionClinical: 'Detalles clínicos',
   referralSectionDocuments: 'Documentos',
-  referralSectionDocumentsOptional: 'Documentos (Opcional)',
+  referralSectionDocumentsOptional: 'Documentos',
   referralReasonFor: 'Motivo de la referencia',
   referralFollowUpTooltip:
     'Indica si se requieren acciones de seguimiento tras esta referencia.',
@@ -1669,7 +1671,7 @@ export default {
   referralSourcePlaceholder: 'Seleccionar origen',
   referralSourceRequired: 'El origen de la referencia es obligatorio.',
   referralSourceDetails: 'Detalles del origen',
-  referralSourceDetailsOptional: 'Detalles del origen (opcional)',
+  referralSourceDetailsOptional: 'Detalles del origen',
   referralSourceDetailsPlaceholder:
     'Ingrese información adicional de la referencia',
   referralIntakeSelfReferredTitle: 'Autorreferido',
@@ -1867,7 +1869,7 @@ export default {
   appointmentDuration: 'Duración',
   appointmentDurationUnitMin: 'min',
   appointmentDurationMinutes: '{count} min',
-  appointmentClinicianOptional: 'Clínico (opcional)',
+  appointmentClinicianOptional: 'Clínico',
   appointmentClinicianPlaceholder: 'Seleccionar clínico',
   appointmentClinicianRequired: 'El clínico es obligatorio.',
   appointmentSelectClinicianFirst:
@@ -1875,20 +1877,20 @@ export default {
   appointmentClinicianHint:
     'Deje vacío para asignar un clínico disponible automáticamente.',
   appointmentClinicianAutoAssign: 'Clínico asignado automáticamente',
-  appointmentSupervisorOptional: 'Supervisor (opcional)',
+  appointmentSupervisorOptional: 'Supervisor',
   appointmentSupervisorPlaceholder: 'Seleccionar supervisor',
   appointmentSupervisorHint:
     'Seleccione el clínico supervisor cuando sea necesario.',
   appointmentTelemedicine: 'Telemedicina',
-  appointmentReferralOptional: 'Referencia (opcional)',
+  appointmentReferralOptional: 'Referencia',
   appointmentReferralPlaceholder: 'Seleccionar referencia',
   appointmentReferralHint:
     'Vincular la referencia ayuda a rastrear el origen.',
-  appointmentCarePlanOptional: 'Plan de cuidado (opcional)',
+  appointmentCarePlanOptional: 'Plan de cuidado',
   appointmentCarePlanPlaceholder: 'Seleccionar plan de cuidado',
   appointmentCarePlanHint:
     'Vincular un plan de cuidado ayuda a mantener continuidad.',
-  appointmentNotesOptional: 'Notas (opcional)',
+  appointmentNotesOptional: 'Notas',
   appointmentNotesPlaceholder: 'Agregue notas para esta cita...',
   appointmentNotesMaxLength: 'Las notas no pueden superar {max} caracteres.',
   appointmentSummaryTitle: 'Resumen de la cita seleccionada',
@@ -1937,9 +1939,9 @@ export default {
     '{count} seguimientos | {count} seguimiento | {count} seguimientos',
   followUpSectionInfo: 'Información del seguimiento',
   followUpSectionDetails: 'Detalles',
-  followUpSectionRelated: 'Relacionado con (opcional)',
-  followUpSectionNotes: 'Notas (opcional)',
-  followUpSectionReminder: 'Recordatorio (opcional)',
+  followUpSectionRelated: 'Relacionado con',
+  followUpSectionNotes: 'Notas',
+  followUpSectionReminder: 'Recordatorio',
   followUpType: 'Tipo',
   followUpTypePlaceholder: 'Seleccionar tipo',
   followUpTypeRequired: 'El tipo es obligatorio.',
@@ -2300,11 +2302,13 @@ export default {
   fmhUpdatedSuccess: 'Entrada de historial médico familiar actualizada.',
   fmhDeletedSuccess: 'Entrada de historial médico familiar eliminada.',
   fmhEditTitle: 'Editar historial médico familiar',
-  fmhDeleteTitle: 'Mensaje de confirmación',
+  fmhDeleteTitle: 'Confirmar eliminación',
   fmhDeleteMessage:
-    '¿Seguro que desea eliminar el elemento seleccionado? '
-    + 'Esta acción es permanente y no se puede deshacer. '
-    + 'Para fines de auditoría, indique el motivo de la eliminación.',
+    '¿Seguro que desea eliminar el elemento seleccionado?',
+  fmhDeleteMessageBold:
+    'Esta acción es permanente y no se puede deshacer.',
+  fmhDeleteReasonHint:
+    'Para fines de auditoría, indique el motivo de la eliminación.',
   fmhDeleteReasonLabel: 'Motivo de eliminación',
   fmhDeleteReasonRequired: 'El motivo de eliminación es obligatorio.',
   allergiesAddSectionTitle: 'Alergias',
@@ -2337,9 +2341,9 @@ export default {
   clientYearPickerSubtitleEmpty: '—',
   allergyStartYear: 'Año de inicio',
   allergyStartYearHint:
-    'Opcional. Año en que la alergia fue identificada por primera vez.',
+    'Año en que la alergia fue identificada por primera vez.',
   allergyStartYearHintCurrentYearOnly:
-    'Opcional. Año en que la alergia fue identificada por primera vez.',
+    'Año en que la alergia fue identificada por primera vez.',
   allergyAdd: 'Agregar',
   allergyAddRequired: 'Ingrese una alergia y seleccione la severidad.',
   allergyNameRequired:
@@ -2500,7 +2504,7 @@ export default {
   insuranceSubscriberName: 'Nombre del titular',
   insuranceSubscriberPlaceholder: 'Ingrese nombre del titular',
   insuranceIdentifiersTitle:
-    'Identificadores adicionales (aplican a este perfil)',
+    'Programa e identificadores adicionales',
   insuranceMedicaidId: 'ID de beneficiario Medicaid',
   insuranceMedicaidPlaceholder: 'Ingrese ID de Medicaid',
   insuranceMedicareId: 'ID de miembro Medicare',
@@ -2509,7 +2513,7 @@ export default {
   insuranceGoldenCardPlaceholder: 'Ingrese ID Golden Card',
   insuranceOtherId: 'Otro ID de seguro',
   insuranceOtherIdPlaceholder: 'Ingrese otro ID de seguro',
-  insuranceCardSectionTitle: 'Tarjeta de seguro (opcional)',
+  insuranceCardSectionTitle: 'Tarjeta de seguro',
   insuranceCardSectionSubtitle: 'Suba imágenes de la tarjeta de seguro',
   insuranceCardFront: 'Frente de la tarjeta',
   insuranceCardBack: 'Reverso de la tarjeta',
@@ -2534,6 +2538,8 @@ export default {
   insuranceDeactivateMessage:
     'Este perfil de seguro se marcará como inactivo y ya no estará disponible '
     + 'para nuevas facturaciones, reclamaciones o autorizaciones.',
+  insuranceDeactivationReasonHint:
+    'Para fines de auditoría, indique el motivo de la desactivación.',
   insuranceDeactivationReasonLabel: 'Motivo de desactivación',
   insuranceDeactivateConfirm: 'Desactivar',
   insuranceActionDeactivate: 'Desactivar perfil de seguro',
@@ -2560,7 +2566,8 @@ export default {
   insuranceMedicaidIdInvalid: 'El ID Medicaid debe ser exactamente 10 dígitos.',
   insuranceMedicareIdRequired: 'El ID de miembro Medicare es obligatorio.',
   insuranceMedicareIdInvalid:
-    'El ID Medicare debe tener exactamente 11 letras y/o números.',
+    'Ingrese un MBI de Medicare válido (11 caracteres) o un HICN '
+    + 'heredado (9 dígitos, 1–2 letras/números opcionales).',
   insuranceGoldenCardRequired: 'El ID Golden Card es obligatorio.',
   insuranceGoldenCardInvalid:
     'El ID Golden Card debe ser exactamente 8 dígitos.',

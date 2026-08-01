@@ -3,8 +3,7 @@ import {
   familyMedicalHistoryMaxRelationshipLength,
   familyMedicalHistorySelfValue,
 } from 'components/constants.js'
-
-const MEDICAL_CONDITIONS_RE = /^[a-zA-Z0-9\s.,'()/-]*$/
+import { MEDICAL_CONDITIONS_RE } from 'src/utils/text-input-chars.js'
 
 let entryIdCounter = 0
 
@@ -51,6 +50,17 @@ export function trimFamilyMedicalField(value) {
   }
 
   return String(value).trim()
+}
+
+function rowHasBackendFmhId(entry) {
+  const raw = entry?.apiId ?? entry?.api_id
+
+  return raw != null && String(raw).trim() !== ''
+}
+
+/** True when this row came from the API (audit reason required on delete). */
+export function fmhRowHasPersistedApiId(entry) {
+  return rowHasBackendFmhId(entry)
 }
 
 export function normalizeFamilyMedicalHistoryEntry(entry) {

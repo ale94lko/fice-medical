@@ -17,7 +17,11 @@ import {
   normalizeVisibleColumnsFromApi,
   preferencesFromColumnConfig,
 } from 'src/utils/client-list-columns.js'
-import { mapClientListViewItem } from 'src/utils/client-list-normalize.js'
+import {
+  emptyClientListSummary,
+  mapClientListSummary,
+  mapClientListViewItem,
+} from 'src/utils/client-list-normalize.js'
 import {
   catalogItemsFromCatalog,
   fetchCatalogsByNames,
@@ -60,6 +64,7 @@ export const useSiteStore = defineStore('site', {
     clientList: [],
     clientListSourceById: {},
     clientListPagination: null,
+    clientListSummary: emptyClientListSummary(),
     clientListQuery: { page: 1, limit: 20, filter: null, q: null },
     clientListVisibleColumns: [],
     clientListColumnCatalog: [],
@@ -104,6 +109,7 @@ export const useSiteStore = defineStore('site', {
         this.clientList = []
         this.clientListSourceById = {}
         this.clientListPagination = null
+        this.clientListSummary = emptyClientListSummary()
         this.clientListVisibleColumns = []
         this.clientListQuery = {
           ...this.clientListQuery,
@@ -127,6 +133,9 @@ export const useSiteStore = defineStore('site', {
         .map(item => mapClientListViewItem(item, t, nameCatalogOptions))
         .filter(Boolean)
       this.clientListPagination = extractEnvelopeListPagination(root)
+      if (Object.prototype.hasOwnProperty.call(root, 'summary')) {
+        this.clientListSummary = mapClientListSummary(root.summary)
+      }
       this.clientListQuery = {
         ...this.clientListQuery,
         ...queryPatch,
@@ -178,7 +187,10 @@ export const useSiteStore = defineStore('site', {
         const limit = Number(params.limit ?? this.clientListQuery.limit ?? 20)
         const safePage = Number.isFinite(page) && page >= 1 ? page : 1
         const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
-        const filter = params.filter ?? this.clientListQuery.filter ?? null
+        // Explicit `filter: null` must clear; do not fall back via `??`.
+        const filter = Object.prototype.hasOwnProperty.call(params, 'filter')
+          ? (params.filter || null)
+          : (this.clientListQuery.filter ?? null)
         const apiPage = Math.max(0, safePage - 1)
         const queryParams = {
           page: apiPage,

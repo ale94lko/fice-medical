@@ -254,6 +254,7 @@ export const clientListTestIds = {
   changeStatus: 'client-list-btn-change-status',
   filters: 'client-list-btn-filters',
   columnSettings: 'client-list-btn-column-settings',
+  summaryAll: 'client-list-summary-all',
   summaryUpcoming: 'client-list-summary-upcoming',
   summaryMissing: 'client-list-summary-missing',
   summaryBilling: 'client-list-summary-billing',

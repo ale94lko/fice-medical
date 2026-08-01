@@ -7,9 +7,11 @@ import {
   syncPreferredPointOfContactFlags,
   defaultPreferredCommunicationList,
 } from 'src/utils/client-preferred-communication.js'
+import {
+  ADDRESS_LINE_RE,
+  OPTIONAL_LETTERS_AND_SPACES_RE,
+} from 'src/utils/text-input-chars.js'
 
-const ADDRESS_LINE_RE = /^[a-zA-Z0-9.\-\s]*$/
-const LETTERS_ONLY_RE = /^[a-zA-Z\s]*$/
 const ZIP_CODE_RE = /^(?:\d{5}|\d{5}-\d{4}|\d{5}-\d{5}|[A-Z]\d[A-Z] \d[A-Z]\d)$/
 const EMAIL_RE = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
 const PHONE_CHARS_RE = /^[\d+\-() ]*$/
@@ -244,7 +246,7 @@ export function isValidLettersField(value, maxLen = 50) {
     return true
   }
 
-  return LETTERS_ONLY_RE.test(s) && s.length <= maxLen
+  return OPTIONAL_LETTERS_AND_SPACES_RE.test(s) && s.length <= maxLen
 }
 
 export function isValidZipCode(value) {

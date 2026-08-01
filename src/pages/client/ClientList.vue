@@ -359,6 +359,7 @@ import ClientListSummaryCards from 'components/ClientListSummaryCards.vue'
 import { adminTableTestIds } from 'src/test-ids/index.js'
 import { clientListTestIds } from 'src/test-ids/index.js'
 import {
+  CLIENT_LIST_SUMMARY_ALL,
   CLIENT_LIST_SUMMARY_FILTERS,
   useClientListColumnPreferences,
 } from 'src/composables/useClientListColumnPreferences.js'
@@ -369,6 +370,8 @@ import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { isClientListServerSearchQuery } from
   'src/utils/client-list-search.js'
+import { emptyClientListSummary } from
+  'src/utils/client-list-normalize.js'
 import {
   clientListAllergySeverityBadgeClass as allergySeverityBadgeClass,
 } from 'src/utils/client-list-allergy-severity.js'
@@ -405,12 +408,9 @@ const {
   columnCatalog,
 } = useClientListColumnPreferences()
 
-const summaryMetrics = ref({
-  upcomingAppointments: 12,
-  missingInformation: 5,
-  pendingBilling: 8,
-  authorizationsExpiring: 3,
-})
+const summaryMetrics = computed(() =>
+  siteStore.clientListSummary ?? emptyClientListSummary(),
+)
 
 const tablePagination = ref({
   sortBy: col.clientNumber,
@@ -442,6 +442,8 @@ async function loadClientsOrSearch(paginationPayload) {
   try {
     const q = String(searchQuery.value ?? '').trim()
     if (isClientListServerSearchQuery(q)) {
+      // Search does not combine with card filter.
+      activeSummaryFilter.value = ''
       await siteStore.searchClientList({
         q,
         page: paginationPayload.page,
@@ -689,9 +691,14 @@ function onSummaryFilter(cardId) {
   if (isSearchActive.value) {
     clearSearchQueryWithoutReload()
   }
-  activeSummaryFilter.value = activeSummaryFilter.value === cardId
-    ? ''
-    : cardId
+  if (cardId === CLIENT_LIST_SUMMARY_ALL) {
+    // Full list: no card filter, page 1, keep rows-per-page.
+    activeSummaryFilter.value = ''
+  } else {
+    activeSummaryFilter.value = activeSummaryFilter.value === cardId
+      ? ''
+      : cardId
+  }
   tablePagination.value = {
     ...tablePagination.value,
     page: 1,

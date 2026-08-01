@@ -77,7 +77,7 @@
               required
               :test-id="tid.insuranceField('memberId')">
               <q-input
-                v-model="local.memberId"
+                :model-value="local.memberId"
                 outlined
                 hide-bottom-space
                 :readonly="readonly"
@@ -86,6 +86,7 @@
                 :error="Boolean(fieldError('memberId'))"
                 :error-message="errorText('memberId')"
                 :data-testid="tid.insuranceField('memberId')"
+                @update:model-value="onMemberIdInput"
               />
             </AddClientLabeledField>
           </div>
@@ -192,7 +193,7 @@
                 :required="medicaidRequired"
                 :test-id="tid.insuranceField('medicaidId')">
                 <q-input
-                  v-model="local.medicaidRecipientId"
+                  :model-value="local.medicaidRecipientId"
                   outlined
                   hide-bottom-space
                   :readonly="readonly"
@@ -201,6 +202,7 @@
                   :error="Boolean(fieldError('medicaidRecipientId'))"
                   :error-message="errorText('medicaidRecipientId')"
                   :data-testid="tid.insuranceField('medicaidId')"
+                  @update:model-value="onMedicaidIdInput"
                 />
               </AddClientLabeledField>
             </div>
@@ -210,7 +212,7 @@
                 :required="medicareRequired"
                 :test-id="tid.insuranceField('medicareId')">
                 <q-input
-                  v-model="local.medicareMemberId"
+                  :model-value="local.medicareMemberId"
                   outlined
                   hide-bottom-space
                   :readonly="readonly"
@@ -219,6 +221,7 @@
                   :error="Boolean(fieldError('medicareMemberId'))"
                   :error-message="errorText('medicareMemberId')"
                   :data-testid="tid.insuranceField('medicareId')"
+                  @update:model-value="onMedicareIdInput"
                 />
               </AddClientLabeledField>
             </div>
@@ -228,14 +231,16 @@
                 :required="goldenCardRequired"
                 :test-id="tid.insuranceField('goldenCardId')">
                 <q-input
-                  v-model="local.goldenCardMemberId"
+                  :model-value="local.goldenCardMemberId"
                   outlined
                   hide-bottom-space
                   :readonly="readonly"
                   :placeholder="t('insuranceGoldenCardPlaceholder')"
                   :maxlength="clientInsuranceGoldenCardMemberIdLength"
+                  :error="Boolean(fieldError('goldenCardMemberId'))"
                   :error-message="errorText('goldenCardMemberId')"
                   :data-testid="tid.insuranceField('goldenCardId')"
+                  @update:model-value="onGoldenCardIdInput"
                 />
               </AddClientLabeledField>
             </div>
@@ -244,7 +249,7 @@
                 :label="t('insuranceOtherId')"
                 :test-id="tid.insuranceField('otherId')">
                 <q-input
-                  v-model="local.otherInsuranceId"
+                  :model-value="local.otherInsuranceId"
                   outlined
                   hide-bottom-space
                   :readonly="readonly"
@@ -253,6 +258,7 @@
                   :error="Boolean(fieldError('otherInsuranceId'))"
                   :error-message="errorText('otherInsuranceId')"
                   :data-testid="tid.insuranceField('otherId')"
+                  @update:model-value="onOtherIdInput"
                 />
               </AddClientLabeledField>
             </div>
@@ -368,10 +374,15 @@ import {
   insuranceStatusOptions,
   insuranceTypeOptions,
   isSubscriberNameRequired,
+  normalizeInsuranceIdentifierFields,
   requiresGoldenCardMemberId,
   requiresMedicaidRecipientId,
   requiresMedicareMemberId,
   resolvePayerFromProfile,
+  sanitizeGoldenCardMemberIdInput,
+  sanitizeMedicaidRecipientIdInput,
+  sanitizeMedicareMemberIdInput,
+  sanitizePlanMemberIdInput,
   validateInsuranceProfile,
 } from 'src/utils/client-insurance.js'
 import {
@@ -510,6 +521,7 @@ watch(
       frontCardFile: raw.frontCardFile ?? null,
       backCardFile: raw.backCardFile ?? null,
     }
+    normalizeInsuranceIdentifierFields(local.value)
     syncPayerUiFromProfile()
     syncSubscriberFromRelationship()
   },
@@ -608,6 +620,30 @@ function errorText(key) {
   return t(code)
 }
 
+function onMemberIdInput(value) {
+  local.value.memberId = sanitizePlanMemberIdInput(value)
+}
+
+function onMedicaidIdInput(value) {
+  local.value.medicaidRecipientId = sanitizeMedicaidRecipientIdInput(
+    value,
+  )
+}
+
+function onMedicareIdInput(value) {
+  local.value.medicareMemberId = sanitizeMedicareMemberIdInput(value)
+}
+
+function onGoldenCardIdInput(value) {
+  local.value.goldenCardMemberId = sanitizeGoldenCardMemberIdInput(
+    value,
+  )
+}
+
+function onOtherIdInput(value) {
+  local.value.otherInsuranceId = sanitizePlanMemberIdInput(value)
+}
+
 function onCancel() {
   open.value = false
 }
@@ -624,6 +660,7 @@ async function onSave() {
     local.value.planName = ''
   }
 
+  normalizeInsuranceIdentifierFields(local.value)
   const result = validateInsuranceProfile(
     local.value,
     props.section,

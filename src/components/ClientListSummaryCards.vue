@@ -3,14 +3,13 @@
     <div
       v-for="card in cards"
       :key="card.id"
-      class="col-12 col-sm-6 col-lg-3">
+      class="client-list-summary__col col-12 col-sm-6 col-md-4 col-xl">
       <article
         class="client-list-summary__card"
         :class="[
           `client-list-summary__card--${card.tone}`,
           {
-            'client-list-summary__card--active':
-              activeFilter === card.id,
+            'client-list-summary__card--active': isCardActive(card.id),
           },
         ]"
         :data-testid="card.testId"
@@ -49,6 +48,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { CLIENT_LIST_SUMMARY_ALL } from
+  'src/composables/useClientListColumnPreferences.js'
 import { clientListTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -66,7 +67,24 @@ const emit = defineEmits(['filter'])
 
 const { t } = useI18n()
 
+function isCardActive(cardId) {
+  if (cardId === CLIENT_LIST_SUMMARY_ALL) {
+    return !props.activeFilter
+  }
+
+  return props.activeFilter === cardId
+}
+
 const cards = computed(() => [
+  {
+    id: CLIENT_LIST_SUMMARY_ALL,
+    tone: 'teal',
+    icon: 'groups',
+    label: t('clientListSummaryAllClients'),
+    description: t('clientListSummaryAllClientsHint'),
+    count: props.metrics.totalClients ?? 0,
+    testId: clientListTestIds.summaryAll,
+  },
   {
     id: 'upcomingAppointments',
     tone: 'blue',

@@ -112,3 +112,47 @@ export function mapClientListViewItem(item, t, options = {}) {
 
   return formatClientDisplay(mapped, t)
 }
+
+function nonNegativeCount(value) {
+  const n = Number(value)
+
+  return Number.isFinite(n) && n >= 0 ? n : 0
+}
+
+export function emptyClientListSummary() {
+  return {
+    totalClients: 0,
+    upcomingAppointments: 0,
+    missingInformation: 0,
+    pendingBilling: 0,
+    authorizationsExpiring: 0,
+  }
+}
+
+/**
+ * Maps `data.summary` from GET /client/v1/list-view.
+ * @param {Record<string, unknown>|null|undefined} raw
+ */
+export function mapClientListSummary(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return emptyClientListSummary()
+  }
+
+  return {
+    totalClients: nonNegativeCount(
+      raw.total_clients ?? raw.totalClients,
+    ),
+    upcomingAppointments: nonNegativeCount(
+      raw.upcoming_appointments ?? raw.upcomingAppointments,
+    ),
+    missingInformation: nonNegativeCount(
+      raw.missing_information ?? raw.missingInformation,
+    ),
+    pendingBilling: nonNegativeCount(
+      raw.pending_billing ?? raw.pendingBilling,
+    ),
+    authorizationsExpiring: nonNegativeCount(
+      raw.authorizations_expiring ?? raw.authorizationsExpiring,
+    ),
+  }
+}

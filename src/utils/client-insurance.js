@@ -17,18 +17,42 @@ import {
 } from 'src/utils/client-form.js'
 import { findPayerById } from 'src/utils/insurance-payers.js'
 
-const GENERIC_MEMBER_ID_RE = new RegExp(
+/** Plan Member ID / Other Insurance ID */
+const PLAN_MEMBER_ID_RE = new RegExp(
   `^[A-Za-z0-9]{1,${clientInsuranceMaxMemberIdLength}}$`,
 )
-const MEDICARE_MEMBER_ID_RE = new RegExp(
-  `^[A-Za-z0-9]{${clientInsuranceMedicareMemberIdLength}}$`,
+
+/** Medicare MBI (11 chars, position-specific alphabet). */
+const MEDICARE_MBI_RE = new RegExp(
+  '^[1-9][A-HJ-KMNP-RT-Y0-9][A-HJ-KMNP-RT-Y0-9][0-9]'
+  + '[A-HJ-KMNP-RT-Y][A-HJ-KMNP-RT-Y0-9][0-9]'
+  + '[A-HJ-KMNP-RT-Y][A-HJ-KMNP-RT-Y][0-9][0-9]$',
 )
+
+/** Legacy HICN: 9 digits + optional 0–2 alphanumeric. */
+const MEDICARE_HICN_RE = /^\d{9}[A-Za-z0-9]{0,2}$/
+
 const MEDICAID_RECIPIENT_ID_RE = new RegExp(
   `^\\d{${clientInsuranceMedicaidRecipientIdLength}}$`,
 )
 const GOLDEN_CARD_ID_RE = new RegExp(
   `^\\d{${clientInsuranceGoldenCardMemberIdLength}}$`,
 )
+
+/** Per-position MBI allowed chars (uppercase). */
+const MEDICARE_MBI_POS_RE = [
+  /^[1-9]$/,
+  /^[A-HJ-KMNP-RT-Y0-9]$/,
+  /^[A-HJ-KMNP-RT-Y0-9]$/,
+  /^\d$/,
+  /^[A-HJ-KMNP-RT-Y]$/,
+  /^[A-HJ-KMNP-RT-Y0-9]$/,
+  /^\d$/,
+  /^[A-HJ-KMNP-RT-Y]$/,
+  /^[A-HJ-KMNP-RT-Y]$/,
+  /^\d$/,
+  /^\d$/,
+]
 
 const MEDICARE_TYPES = new Set([
   clientInsuranceTypeValues.medicare,
@@ -53,6 +77,7 @@ export function nextInsuranceId() {
 export function createEmptyInsuranceProfile() {
   return {
     id: nextInsuranceId(),
+    apiId: null,
     payerId: null,
     payerName: '',
     planName: '',
@@ -89,6 +114,17 @@ export function trimInsuranceField(value) {
   }
 
   return String(value).trim()
+}
+
+function rowHasBackendInsuranceId(entry) {
+  const raw = entry?.apiId ?? entry?.api_id
+
+  return raw != null && String(raw).trim() !== ''
+}
+
+/** True when this profile came from the API (reason required on deactivate). */
+export function insuranceRowHasPersistedApiId(entry) {
+  return rowHasBackendInsuranceId(entry)
 }
 
 export function visibleInsuranceProfiles(section) {
@@ -136,26 +172,89 @@ export function isSubscriberNameRequired(relationship) {
   return relationship !== clientInsuranceRelationshipValues.self
 }
 
+function digitsOnlyInput(value, maxLen) {
+  return String(value ?? '').replace(/\D/g, '').slice(0, maxLen)
+}
+
+function alphanumericUpperInput(value, maxLen) {
+  return String(value ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, maxLen)
+}
+
+/** Plan Member ID / Other Insurance ID while typing. */
+export function sanitizePlanMemberIdInput(value) {
+  return alphanumericUpperInput(value, clientInsuranceMaxMemberIdLength)
+}
+
+export function sanitizeMedicaidRecipientIdInput(value) {
+  return digitsOnlyInput(
+    value,
+    clientInsuranceMedicaidRecipientIdLength,
+  )
+}
+
+export function sanitizeGoldenCardMemberIdInput(value) {
+  return digitsOnlyInput(
+    value,
+    clientInsuranceGoldenCardMemberIdLength,
+  )
+}
+
+function isHicnDigitPrefix(out) {
+  return /^\d*$/.test(out) && out.length <= 9
+}
+
+/**
+ * Medicare MBI or legacy HICN while typing: uppercase, reject invalid
+ * chars for the active position under either format.
+ */
+export function sanitizeMedicareMemberIdInput(value) {
+  const raw = String(value ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+  let out = ''
+  for (const ch of raw) {
+    if (out.length >= clientInsuranceMedicareMemberIdLength) {
+      break
+    }
+    const i = out.length
+    const mbiOk = MEDICARE_MBI_POS_RE[i]?.test(ch)
+    let hicnOk = false
+    if (i < 9) {
+      hicnOk = isHicnDigitPrefix(out) && /^\d$/.test(ch)
+    } else {
+      hicnOk = /^\d{9}$/.test(out.slice(0, 9)) && /^[A-Z0-9]$/.test(ch)
+    }
+    if (mbiOk || hicnOk) {
+      out += ch
+    }
+  }
+
+  return out
+}
+
 export function isValidMemberId(value) {
-  const s = trimInsuranceField(value)
+  const s = sanitizePlanMemberIdInput(value)
   if (!s) {
     return false
   }
 
-  return GENERIC_MEMBER_ID_RE.test(s)
+  return PLAN_MEMBER_ID_RE.test(s)
 }
 
 export function isValidMedicareMemberId(value) {
-  const s = trimInsuranceField(value)
+  const s = sanitizeMedicareMemberIdInput(value)
   if (!s) {
     return false
   }
 
-  return MEDICARE_MEMBER_ID_RE.test(s)
+  return MEDICARE_MBI_RE.test(s) || MEDICARE_HICN_RE.test(s)
 }
 
 export function isValidMedicaidRecipientId(value) {
-  const s = trimInsuranceField(value)
+  const s = sanitizeMedicaidRecipientIdInput(value)
   if (!s) {
     return false
   }
@@ -164,7 +263,7 @@ export function isValidMedicaidRecipientId(value) {
 }
 
 export function isValidGoldenCardMemberId(value) {
-  const s = trimInsuranceField(value)
+  const s = sanitizeGoldenCardMemberIdInput(value)
   if (!s) {
     return false
   }
@@ -173,12 +272,12 @@ export function isValidGoldenCardMemberId(value) {
 }
 
 export function isValidOptionalIdentifier(value) {
-  const s = trimInsuranceField(value)
+  const s = sanitizePlanMemberIdInput(value)
   if (!s) {
     return true
   }
 
-  return GENERIC_MEMBER_ID_RE.test(s)
+  return PLAN_MEMBER_ID_RE.test(s)
 }
 
 function compareUsDates(a, b) {
@@ -356,6 +455,28 @@ export function validateInsuranceProfile(
     ok: Object.keys(errors).length === 0,
     errors,
   }
+}
+
+/** Uppercase / strip identifiers to match input sanitizers before save. */
+export function normalizeInsuranceIdentifierFields(profile) {
+  if (!profile || typeof profile !== 'object') {
+    return profile
+  }
+  profile.memberId = sanitizePlanMemberIdInput(profile.memberId)
+  profile.otherInsuranceId = sanitizePlanMemberIdInput(
+    profile.otherInsuranceId,
+  )
+  profile.medicaidRecipientId = sanitizeMedicaidRecipientIdInput(
+    profile.medicaidRecipientId,
+  )
+  profile.medicareMemberId = sanitizeMedicareMemberIdInput(
+    profile.medicareMemberId,
+  )
+  profile.goldenCardMemberId = sanitizeGoldenCardMemberIdInput(
+    profile.goldenCardMemberId,
+  )
+
+  return profile
 }
 
 export function softDeleteInsuranceProfile(profile) {

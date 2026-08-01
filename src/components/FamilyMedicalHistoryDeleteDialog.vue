@@ -11,20 +11,29 @@
         {{ t('fmhDeleteTitle') }}
       </AppDialogHeader>
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
-        <p class="text-body1 q-mb-md">
+        <p class="text-body1 q-mb-sm">
           {{ t('fmhDeleteMessage') }}
         </p>
-        <AddClientLabeledField :label="t('fmhDeleteReasonLabel')">
-          <q-input
-            v-model="reason"
-            outlined
-            type="textarea"
-            rows="3"
-            :error="Boolean(reasonError)"
-            :error-message="reasonError"
-            maxlength="500"
-          />
-        </AddClientLabeledField>
+        <p class="text-body2 text-weight-bold q-mb-md">
+          {{ t('fmhDeleteMessageBold') }}
+        </p>
+        <template v-if="requireDeletionReason">
+          <p class="text-body2 q-mb-md">
+            {{ t('fmhDeleteReasonHint') }}
+          </p>
+          <AddClientLabeledField
+            required
+            :label="t('fmhDeleteReasonLabel')">
+            <q-input
+              v-model="reason"
+              outlined
+              type="textarea"
+              rows="3"
+              counter
+              maxlength="500"
+            />
+          </AddClientLabeledField>
+        </template>
       </q-card-section>
       <q-card-actions
         align="right"
@@ -42,6 +51,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :disable="requireDeletionReason && !hasDeletionReason"
           :label="t('confirm')"
           @click="onConfirm"
         />
@@ -61,6 +71,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  /**
+   * When true, show audit reason field and require it to confirm.
+   * FMH tab sets this only when deleting a row with persisted apiId.
+   */
+  requireDeletionReason: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
@@ -68,7 +86,10 @@ const emit = defineEmits(['update:modelValue', 'confirm'])
 const { t } = useI18n()
 
 const reason = ref('')
-const reasonError = ref('')
+
+const hasDeletionReason = computed(
+  () => String(reason.value ?? '').trim().length > 0,
+)
 
 const open = computed({
   get: () => props.modelValue,
@@ -80,7 +101,6 @@ watch(
   visible => {
     if (visible) {
       reason.value = ''
-      reasonError.value = ''
     }
   },
 )
@@ -90,14 +110,10 @@ function onCancel() {
 }
 
 function onConfirm() {
-  const s = String(reason.value ?? '').trim()
-  if (!s) {
-    reasonError.value = t('fmhDeleteReasonRequired')
-
+  if (props.requireDeletionReason && !hasDeletionReason.value) {
     return
   }
-  emit('confirm', s)
+  emit('confirm', String(reason.value ?? '').trim())
   open.value = false
 }
 </script>
-

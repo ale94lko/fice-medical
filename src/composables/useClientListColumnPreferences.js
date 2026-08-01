@@ -19,6 +19,8 @@ export const CLIENT_LIST_LOCKED_COLUMNS = [
   col.actions,
 ]
 
+export const CLIENT_LIST_SUMMARY_ALL = 'allClients'
+
 export const CLIENT_LIST_SUMMARY_FILTERS = {
   upcomingAppointments: 'upcoming_appointments',
   missingInformation: 'missing_information',

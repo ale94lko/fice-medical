@@ -898,6 +898,20 @@
 }
 
 .client-list-summary {
+  @media (min-width: 1440px) {
+    display: flex;
+    flex-wrap: nowrap;
+
+    &__col {
+      flex: 1 1 0;
+      max-width: 20%;
+    }
+  }
+
+  &__col {
+    min-width: 0;
+  }
+
   &__card {
     display: flex;
     flex-direction: column;
@@ -977,6 +991,11 @@
       color: #16a34a;
     }
 
+    &--teal {
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
     &--purple {
       background: #ede9fe;
       color: #7c3aed;
@@ -1011,6 +1030,10 @@
 
   &__card--green {
     border-top: 3px solid #16a34a;
+  }
+
+  &__card--teal {
+    border-top: 3px solid #0f766e;
   }
 
   &__card--purple {

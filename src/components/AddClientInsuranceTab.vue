@@ -65,6 +65,7 @@
 
     <InsuranceDeactivateDialog
       v-model="deactivateDialogOpen"
+      :require-deactivation-reason="deactivateRequiresReason"
       @confirm="onDeactivateConfirm"
     />
     </template>
@@ -85,6 +86,8 @@ import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   createEmptyInsuranceProfile,
   deactivateInsuranceProfile,
+  insuranceRowHasPersistedApiId,
+  trimInsuranceField,
   visibleInsuranceProfiles,
 } from 'src/utils/client-insurance.js'
 
@@ -156,6 +159,11 @@ function openDeactivate(profile) {
   deactivateDialogOpen.value = true
 }
 
+/** Audit reason only when deactivating a profile already persisted. */
+const deactivateRequiresReason = computed(() =>
+  insuranceRowHasPersistedApiId(deletingProfile.value),
+)
+
 function onDialogSave(profile) {
   const profiles = [...(section.value.profiles ?? [])]
   const idx = profiles.findIndex(item => item.id === profile.id)
@@ -179,10 +187,14 @@ function onDialogSave(profile) {
 
 function onDeactivateConfirm(reason) {
   const profile = deletingProfile.value
-  if (!profile || !String(reason ?? '').trim()) {
+  if (!profile) {
     return
   }
-  deactivateInsuranceProfile(profile, reason)
+  const reasonText = trimInsuranceField(reason)
+  if (insuranceRowHasPersistedApiId(profile) && !reasonText) {
+    return
+  }
+  deactivateInsuranceProfile(profile, reasonText)
   $q.notify({
     type: quasarNotifyTypes.positive,
     message: t('insuranceDeactivatedSuccess'),

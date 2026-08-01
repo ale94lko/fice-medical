@@ -7,8 +7,7 @@ import {
   clientMaxAge,
 } from 'components/constants.js'
 import { resolvePatientBirthYear } from 'src/utils/client-form.js'
-
-const ALLERGY_NAME_RE = /^[a-zA-Z0-9\s\-()"']*$/
+import { ALLERGY_NAME_RE } from 'src/utils/text-input-chars.js'
 
 let allergyIdCounter = 0
 
