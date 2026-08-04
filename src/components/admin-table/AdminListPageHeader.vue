@@ -2,7 +2,7 @@
   <header class="admin-list-page__header">
     <div
       class="admin-list-page__title-row row items-center
-        justify-between no-wrap">
+        justify-between">
       <div class="admin-list-page__heading">
         <h1 class="admin-list-page__title">
           <slot name="title">{{ title }}</slot>

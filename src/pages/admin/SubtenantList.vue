@@ -11,22 +11,7 @@
       :title="t('subtenantListTitle')"
       :subtitle="t('subtenantListSubtitle')">
       <template #actions>
-        <div
-          class="admin-list-page__actions row items-center
-            q-gutter-sm no-wrap">
-          <q-btn
-            v-if="canAddSubtenant"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="subtenantListTestIds.add"
-            :disable="loading"
-            :label="t('subtenantListAdd')"
-            @click="openAddDialog"
-          />
-        </div>
+        <AdminListPageActions :actions="pageActions" />
       </template>
     </AdminListPageHeader>
 
@@ -152,6 +137,8 @@ import {
   subtenantListColumnKeys,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -354,6 +341,19 @@ function openAddDialog() {
   activeSubtenant.value = null
   dialogOpen.value = true
 }
+
+const pageActions = computed(() => [
+  {
+    key: 'addSubtenant',
+    label: t('subtenantListAdd'),
+    icon: 'add',
+    variant: 'primary',
+    testId: subtenantListTestIds.add,
+    disable: loading.value,
+    visible: canAddSubtenant.value,
+    onClick: openAddDialog,
+  },
+])
 
 function maybeOpenAddFromRoute() {
   if (route.meta.subtenantListAutoOpen === 'add' && canAddSubtenant.value) {

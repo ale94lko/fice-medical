@@ -29,18 +29,7 @@
         </div>
       </template>
       <template #actions>
-        <q-btn
-          v-if="canAddClinicalResource"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="add"
-          :data-testid="clinicalResourceTestIds.listAdd"
-          :disable="loading"
-          :label="t('clinicalResourceListAdd')"
-          @click="openAddDialog"
-        />
+        <AdminListPageActions :actions="pageActions" />
       </template>
     </AdminListPageHeader>
 
@@ -267,6 +256,8 @@ import {
   siteBreakpoints,
   siteBreakpointsPx,
 } from 'components/constants.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -521,6 +512,19 @@ function openAddDialog() {
   dialogMode.value = 'add'
   dialogOpen.value = true
 }
+
+const pageActions = computed(() => [
+  {
+    key: 'addClinicalResource',
+    label: t('clinicalResourceListAdd'),
+    icon: 'add',
+    variant: 'primary',
+    testId: clinicalResourceTestIds.listAdd,
+    disable: loading.value,
+    visible: canAddClinicalResource.value,
+    onClick: openAddDialog,
+  },
+])
 
 async function openRowDialog(mode, row) {
   dialogMode.value = mode

@@ -1,7 +1,7 @@
 <template>
-  <div class="calendar-toolbar row items-center q-col-gutter-sm">
-    <div class="col-auto row items-center q-gutter-sm">
-      <div class="row items-center no-wrap">
+  <div class="calendar-toolbar">
+    <div class="calendar-toolbar__nav">
+      <div class="calendar-toolbar__arrows">
         <q-btn
           flat
           round
@@ -24,27 +24,32 @@
       </p>
     </div>
 
-    <div class="col row justify-end items-center q-gutter-sm">
-      <q-btn
-        v-if="canBookAppointment"
-        no-caps
-        outline
-        color="primary"
-        class="app-btn-outline"
-        icon="add"
-        :label="t('appointmentAddButton')"
-        :data-testid="calendarTestIds.btnAddAppointment"
-        @click="emit('add-appointment')"
-      />
-      <q-btn
-        no-caps
-        outline
-        color="primary"
-        class="app-btn-outline calendar-toolbar__today"
-        :data-testid="calendarTestIds.btnToday"
-        :label="t('calendarToday')"
-        @click="emit('today')"
-      />
+    <div class="calendar-toolbar__actions">
+      <div class="calendar-toolbar__buttons">
+        <q-btn
+          v-if="canBookAppointment"
+          no-caps
+          no-wrap
+          outline
+          color="primary"
+          class="app-btn-outline calendar-toolbar__action-btn"
+          icon="add"
+          :label="t('appointmentAddButton')"
+          :data-testid="calendarTestIds.btnAddAppointment"
+          @click="emit('add-appointment')"
+        />
+        <q-btn
+          no-caps
+          no-wrap
+          outline
+          color="primary"
+          class="app-btn-outline calendar-toolbar__today
+            calendar-toolbar__action-btn"
+          :data-testid="calendarTestIds.btnToday"
+          :label="t('calendarToday')"
+          @click="emit('today')"
+        />
+      </div>
       <q-btn-toggle
         :model-value="viewMode"
         no-caps

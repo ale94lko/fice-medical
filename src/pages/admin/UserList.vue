@@ -60,22 +60,7 @@
         </div>
       </template>
       <template #actions>
-        <div
-          class="admin-list-page__actions row items-center
-            q-gutter-sm no-wrap">
-          <q-btn
-            v-if="canAddUser"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="userListTestIds.addUser"
-            :disable="loading"
-            :label="t('addUser')"
-            @click="openAddDialog"
-          />
-        </div>
+        <AdminListPageActions :actions="pageActions" />
       </template>
     </AdminListPageHeader>
 
@@ -258,6 +243,8 @@ import {
 } from 'components/constants.js'
 import { useAdminStore } from 'stores/admin-store.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -599,6 +586,19 @@ function openAddDialog() {
   activeUser.value = null
   dialogOpen.value = true
 }
+
+const pageActions = computed(() => [
+  {
+    key: 'addUser',
+    label: t('addUser'),
+    icon: 'add',
+    variant: 'primary',
+    testId: userListTestIds.addUser,
+    disable: loading.value,
+    visible: canAddUser.value,
+    onClick: openAddDialog,
+  },
+])
 
 function maybeOpenAddFromRoute() {
   if (route.meta.userListAutoOpen === 'add' && canAddUser.value) {

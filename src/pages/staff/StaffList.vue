@@ -29,57 +29,7 @@
         </q-input>
       </template>
       <template #actions>
-        <div
-          class="admin-list-page__actions row items-center
-            q-gutter-sm no-wrap">
-          <q-btn
-            v-if="canAddClinician"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="staffListTestIds.addClinician"
-            :disable="loading"
-            :label="t('staffListAddClinician')"
-            @click="goAddClinician"
-          />
-          <q-btn
-            v-if="canAddStaff"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="staffListTestIds.addStaff"
-            :disable="loading"
-            :label="t('staffListAddStaff')"
-            @click="goAddStaff"
-          />
-          <q-btn
-            v-if="canChangeStatus"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="sync"
-            :data-testid="staffListTestIds.changeStatus"
-            :disable="selected.length === 0 || loading"
-            :label="t('changeStatus')"
-            @click="openBulkChangeStatus"
-          />
-          <q-btn
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline admin-list-page__filters-btn"
-            icon="filter_alt"
-            :data-testid="staffListTestIds.filters"
-            :disable="loading"
-            :label="filtersButtonLabel"
-            @click="filtersOpen = true"
-          />
-        </div>
+        <AdminListPageActions :actions="pageActions" />
       </template>
     </AdminListPageHeader>
 
@@ -346,6 +296,8 @@ import {
   staffStatuses,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTableColumnSettingsDialog from
@@ -473,6 +425,51 @@ const filtersButtonLabel = computed(() => {
 
   return t('staffListFiltersActive', { count })
 })
+
+const pageActions = computed(() => [
+  {
+    key: 'addClinician',
+    label: t('staffListAddClinician'),
+    icon: 'add',
+    variant: 'primary',
+    testId: staffListTestIds.addClinician,
+    disable: loading.value,
+    visible: canAddClinician.value,
+    onClick: goAddClinician,
+  },
+  {
+    key: 'addStaff',
+    label: t('staffListAddStaff'),
+    icon: 'add',
+    variant: 'primary',
+    testId: staffListTestIds.addStaff,
+    disable: loading.value,
+    visible: canAddStaff.value,
+    onClick: goAddStaff,
+  },
+  {
+    key: 'changeStatus',
+    label: t('changeStatus'),
+    icon: 'sync',
+    variant: 'outline',
+    testId: staffListTestIds.changeStatus,
+    disable: selected.value.length === 0 || loading.value,
+    visible: canChangeStatus.value,
+    onClick: openBulkChangeStatus,
+  },
+  {
+    key: 'filters',
+    label: filtersButtonLabel.value,
+    icon: 'filter_alt',
+    variant: 'outline',
+    testId: staffListTestIds.filters,
+    disable: loading.value,
+    className: 'admin-list-page__filters-btn',
+    onClick: () => {
+      filtersOpen.value = true
+    },
+  },
+])
 
 const emptyMessage = computed(() =>
   isSearchActive.value || countActiveStaffListFilters(panelFilters.value)

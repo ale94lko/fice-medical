@@ -86,6 +86,7 @@ export const changePasswordTestIds = {
 
 export const adminTableTestIds = {
   columnSettings: 'admin-table-btn-column-settings',
+  pageActionsMenu: 'admin-list-page-btn-actions-menu',
 }
 
 export const userListTestIds = {

@@ -31,34 +31,7 @@
           ? t('dashboardEditSubtitle')
           : t('dashboardSubtitle')">
         <template #actions>
-          <div
-            class="admin-list-page__actions row items-center
-              q-gutter-sm no-wrap">
-            <q-btn
-              no-caps
-              outline
-              color="primary"
-              class="app-btn-outline"
-              icon="refresh"
-              :disable="loading"
-              :data-testid="dashboardTestIds.refresh"
-              :label="t('dashboardRefresh')"
-              @click="loadDashboard"
-            />
-            <q-btn
-              no-caps
-              unelevated
-              color="primary"
-              class="app-btn-primary"
-              :icon="editMode ? 'check' : 'tune'"
-              :disable="loading"
-              :data-testid="dashboardTestIds.customize"
-              :label="editMode
-                ? t('dashboardDoneEditing')
-                : t('dashboardCustomize')"
-              @click="toggleEditMode"
-            />
-          </div>
+          <AdminListPageActions :actions="pageActions" />
         </template>
       </AdminListPageHeader>
 
@@ -137,6 +110,8 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
@@ -344,6 +319,33 @@ async function toggleEditMode() {
   }
   editMode.value = true
 }
+
+const pageActions = computed(() => [
+  {
+    key: 'refresh',
+    label: t('dashboardRefresh'),
+    icon: 'refresh',
+    variant: 'outline',
+    testId: dashboardTestIds.refresh,
+    disable: loading.value,
+    onClick: () => {
+      void loadDashboard()
+    },
+  },
+  {
+    key: 'customize',
+    label: editMode.value
+      ? t('dashboardDoneEditing')
+      : t('dashboardCustomize'),
+    icon: editMode.value ? 'check' : 'tune',
+    variant: 'primary',
+    testId: dashboardTestIds.customize,
+    disable: loading.value,
+    onClick: () => {
+      void toggleEditMode()
+    },
+  },
+])
 
 async function persistConfig(nextConfig) {
   const snapshot = cloneConfig(configWidgets.value)

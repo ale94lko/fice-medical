@@ -48,6 +48,7 @@
   &__title-row {
     gap: 12px;
     align-items: flex-start;
+    flex-wrap: nowrap;
   }
 
   &__title {
@@ -77,6 +78,32 @@
   &__actions {
     flex-shrink: 0;
     margin-top: 2px;
+  }
+
+  &__actions-menu-btn {
+    width: $app-button-height !important;
+    min-width: $app-button-height !important;
+    height: $app-button-height !important;
+    min-height: $app-button-height !important;
+    padding: 0 !important;
+    border-radius: $radius-md;
+    color: $primary;
+    background: $white !important;
+    flex: 0 0 $app-button-height;
+
+    &::before {
+      border: 1px solid $primary !important;
+      border-radius: inherit;
+    }
+
+    .q-icon {
+      font-size: 22px;
+      color: $primary;
+    }
+  }
+
+  &__actions-menu {
+    min-width: 220px;
   }
 
   &__center {
@@ -1064,5 +1091,42 @@
       font-size: 2rem;
       line-height: 2.4rem;
     }
+
+    &__title-row {
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: flex-start;
+      row-gap: 8px;
+      column-gap: 8px;
+    }
+
+    &__heading {
+      flex: 1 1 100%;
+      order: 1;
+      min-width: 0;
+    }
+
+    &__center {
+      order: 2;
+      flex: 1 1 auto;
+      min-width: 0;
+      max-width: none !important;
+      margin: 0 !important;
+    }
+
+    &__actions {
+      order: 3;
+      margin-left: 0;
+      margin-top: 0;
+      align-self: flex-end;
+    }
+  }
+
+  .staff-list-page .admin-list-page__center,
+  .client-list-page .admin-list-page__center,
+  .user-list-page .admin-list-page__center {
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 }

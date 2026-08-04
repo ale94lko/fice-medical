@@ -29,56 +29,7 @@
         </q-input>
       </template>
       <template #actions>
-        <div
-          class="admin-list-page__actions row items-center
-            q-gutter-sm no-wrap">
-          <q-btn
-            v-if="canAddClient"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="clientListTestIds.addClient"
-            :disable="loading"
-            :label="t('addClient')"
-            @click="addClient"
-          />
-          <q-btn
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="person_add"
-            :data-testid="clientListTestIds.assignClinicians"
-            :disable="selected.length === 0 || loading"
-            :label="t('assignClinician')"
-            @click="assignClinicians"
-          />
-          <q-btn
-            v-if="canChangeStatus"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="sync"
-            :data-testid="clientListTestIds.changeStatus"
-            :disable="selected.length === 0 || loading"
-            :label="t('changeStatus')"
-            @click="changeStatus(selected)"
-          />
-          <q-btn
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline admin-list-page__filters-btn"
-            icon="filter_alt"
-            :data-testid="clientListTestIds.filters"
-            :disable="loading"
-            :label="t('filters')"
-            @click="showFilters"
-          />
-        </div>
+        <AdminListPageActions :actions="pageActions" />
       </template>
     </AdminListPageHeader>
 
@@ -334,6 +285,8 @@ import {
   siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTableClinicianAvatars from
@@ -814,6 +767,48 @@ const changeStatus = () => {
 const showFilters = () => {
   console.log('Show Filters')
 }
+
+const pageActions = computed(() => [
+  {
+    key: 'addClient',
+    label: t('addClient'),
+    icon: 'add',
+    variant: 'primary',
+    testId: clientListTestIds.addClient,
+    disable: loading.value,
+    visible: canAddClient.value,
+    onClick: addClient,
+  },
+  {
+    key: 'assignClinicians',
+    label: t('assignClinician'),
+    icon: 'person_add',
+    variant: 'outline',
+    testId: clientListTestIds.assignClinicians,
+    disable: selected.value.length === 0 || loading.value,
+    onClick: assignClinicians,
+  },
+  {
+    key: 'changeStatus',
+    label: t('changeStatus'),
+    icon: 'sync',
+    variant: 'outline',
+    testId: clientListTestIds.changeStatus,
+    disable: selected.value.length === 0 || loading.value,
+    visible: canChangeStatus.value,
+    onClick: changeStatus,
+  },
+  {
+    key: 'filters',
+    label: t('filters'),
+    icon: 'filter_alt',
+    variant: 'outline',
+    testId: clientListTestIds.filters,
+    disable: loading.value,
+    className: 'admin-list-page__filters-btn',
+    onClick: showFilters,
+  },
+])
 
 function editRow(row) {
   const id = row?.id

@@ -10,9 +10,9 @@
   >
     <q-menu
       v-model="menuOpen"
-      fit
       anchor="bottom right"
       self="top right"
+      :offset="[0, 8]"
       class="clinical-resources-quick-panel app-light-menu"
       :data-testid="clinicalResourceTestIds.quickPanelMenu"
       @before-show="onMenuBeforeShow">
@@ -257,9 +257,12 @@ onMounted(() => {
 @import 'src/css/quasar.variables.scss';
 
 .clinical-resources-quick-panel {
+  width: min(420px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+
   &__card {
-    width: 420px;
-    max-width: 92vw;
+    width: 100%;
+    max-width: 100%;
     border-radius: 12px;
     overflow: hidden;
   }

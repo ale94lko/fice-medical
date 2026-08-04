@@ -45,22 +45,7 @@
         </div>
       </template>
       <template #actions>
-        <div
-          class="admin-list-page__actions row items-center
-            q-gutter-sm no-wrap">
-          <q-btn
-            v-if="canAddServiceProcedure"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :data-testid="serviceProcedureListTestIds.add"
-            :disable="loading"
-            :label="t('serviceProcedureListAdd')"
-            @click="openAddDialog"
-          />
-        </div>
+        <AdminListPageActions :actions="pageActions" />
       </template>
     </AdminListPageHeader>
 
@@ -194,6 +179,8 @@ import {
   siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -420,6 +407,19 @@ function openAddDialog() {
   dialogMode.value = 'add'
   dialogOpen.value = true
 }
+
+const pageActions = computed(() => [
+  {
+    key: 'addServiceProcedure',
+    label: t('serviceProcedureListAdd'),
+    icon: 'add',
+    variant: 'primary',
+    testId: serviceProcedureListTestIds.add,
+    disable: loading.value,
+    visible: canAddServiceProcedure.value,
+    onClick: openAddDialog,
+  },
+])
 
 async function openRowDialog(mode, row) {
   dialogMode.value = mode

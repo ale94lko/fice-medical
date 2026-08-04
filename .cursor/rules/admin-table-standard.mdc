@@ -13,6 +13,7 @@ Antes de crear o modificar un listado con tabla, usar los componentes y estilos 
 | Necesidad | Componente |
 |-----------|------------|
 | Título 40px + subtítulo 16px + slot acciones | `AdminListPageHeader` |
+| Acciones de página (desktop botones / mobile ⋮) | `AdminListPageActions` |
 | Card tabla + toolbar + ⚙ columnas en header | `AdminTablePanel` |
 | Tabla Quasar | `AdminQTable` + clase `admin-data-table` |
 | Paginación fija inferior | `AdminTablePaginationBar` |

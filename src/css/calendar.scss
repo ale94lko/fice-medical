@@ -94,8 +94,24 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 }
 
 .calendar-toolbar {
-  width: 100%;
+  display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &__arrows {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
 
   &__title {
     margin: 0;
@@ -103,13 +119,35 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     font-weight: 600;
     line-height: 1.2;
     color: $text-strong;
-    min-width: 140px;
+    min-width: 0;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+    min-width: 0;
+  }
+
+  &__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__action-btn {
+    white-space: nowrap;
   }
 
   &__view-toggle {
     border: 1px solid $border-subtle;
     border-radius: $radius-md;
     overflow: hidden;
+    flex: 0 0 auto;
   }
 }
 
@@ -761,5 +799,93 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     flex: 0 0 auto;
     max-width: none;
     width: 100%;
+  }
+
+  .calendar-toolbar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    &__nav {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    &__title {
+      font-size: 1rem;
+    }
+
+    &__actions {
+      flex: 0 0 auto;
+      margin-left: auto;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-start;
+    }
+
+    &__buttons {
+      justify-content: flex-end;
+    }
+
+    &__view-toggle {
+      flex: 0 0 auto;
+    }
+  }
+}
+
+@media (max-width: 599px) {
+  .calendar-toolbar {
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+
+    &__nav {
+      width: 100%;
+    }
+
+    &__title {
+      flex: 1 1 auto;
+    }
+
+    &__actions {
+      margin-left: 0;
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
+    &__buttons {
+      width: 100%;
+      justify-content: flex-start;
+
+      .calendar-toolbar__action-btn {
+        flex: 1 0 auto;
+        width: auto;
+        min-width: min-content;
+        max-width: 100%;
+      }
+    }
+
+    &__action-btn.app-btn-outline {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+
+    &__view-toggle {
+      width: 100%;
+      display: flex;
+
+      .q-btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding-left: 6px;
+        padding-right: 6px;
+        font-size: 0.8125rem;
+      }
+    }
   }
 }
