@@ -815,6 +815,14 @@
                 :can-delete="canDeleteLabsTab"
                 :clinician-options="assignedClinicianOptions"
               />
+              <AddClientMedicationsTab
+                v-else-if="subTab.key === CLINICAL_MEDICATIONS_SUB_TAB"
+                :client-id="props.clientId"
+                :medications="clientMedications"
+                :pharmacies="clientPharmacies"
+                :prescription-consent="clientPrescriptionConsent"
+                :clinician-options="assignedClinicianOptions"
+              />
               <AddClientCarePlansTab
                 v-else-if="subTab.key === CLINICAL_CARE_PLANS_SUB_TAB"
                 :client-id="props.clientId"
@@ -1035,6 +1043,7 @@ import AddClientFamilyMedicalHistoryTab
 import AddClientVitalsTab from '../AddClientVitalsTab.vue'
 import AddClientScreeningsTab from '../AddClientScreeningsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
+import AddClientMedicationsTab from '../AddClientMedicationsTab.vue'
 import AddClientCarePlansTab from '../AddClientCarePlansTab.vue'
 import AddClientClinicalNotesTab from '../AddClientClinicalNotesTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
@@ -1095,6 +1104,7 @@ import {
   CLINICAL_VITALS_SUB_TAB,
   CLINICAL_SCREENINGS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
+  CLINICAL_MEDICATIONS_SUB_TAB,
   CLINICAL_CARE_PLANS_SUB_TAB,
   CLINICAL_CLINICAL_NOTES_SUB_TAB,
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
@@ -1239,6 +1249,40 @@ const clientCarePlans = computed(() => {
   const list = raw?.care_plans ?? raw?.carePlans
 
   return Array.isArray(list) ? list : []
+})
+
+const clientMedications = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.medications ?? raw?.Medications
+
+  return Array.isArray(list) ? list : []
+})
+
+const clientPharmacies = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const raw = siteStore.clientListSourceById[id]
+  const list = raw?.pharmacies ?? raw?.Pharmacies
+
+  return Array.isArray(list) ? list : []
+})
+
+const clientPrescriptionConsent = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  if (!id) {
+    return null
+  }
+  const raw = siteStore.clientListSourceById[id]
+
+  return raw?.prescription_consent
+    ?? raw?.prescriptionConsent
+    ?? null
 })
 
 const clientReferrals = computed(() => {

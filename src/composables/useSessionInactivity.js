@@ -20,6 +20,7 @@ import {
   broadcastSessionInactivityKeepOpenDone,
   broadcastSessionInactivityKeepOpenFailed,
   broadcastSessionInactivityKeepOpenPending,
+  beginFreshSessionInactivityClock,
   claimSessionInactivityCloseLock,
   claimSessionInactivityKeepOpenLock,
   dismissSharedSessionWarning,
@@ -215,12 +216,12 @@ export function useSessionInactivity() {
       return
     }
 
-    const shared = readSharedSessionInactivityState()
-    if (!shared?.lastActivityAt) {
-      recordSharedSessionActivity({ force: true })
-    }
-
-    syncUIFromSharedState()
+    // Never rehydrate a warning from a previous session after auth.
+    beginFreshSessionInactivityClock()
+    warningVisible.value = false
+    secondsRemaining.value = 0
+    keepOpenLoading.value = false
+    closingSection.value = false
 
     SESSION_ACTIVITY_EVENTS.forEach(eventName => {
       window.addEventListener(eventName, recordActivity, { passive: true })

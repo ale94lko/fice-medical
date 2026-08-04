@@ -40,6 +40,8 @@ import {
   writeStoredUserInfo,
 } from '../utils/auth-local-storage.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
+import { beginFreshSessionInactivityClock } from
+  '../utils/session-inactivity-sync.js'
 import { clearClinicalResourceUserRolesCache } from
   '../utils/clinical-resource-user-roles.js'
 import { syncAppDateTimeConfigFromAuth } from
@@ -268,6 +270,7 @@ export const useAuthStore = defineStore('auth', {
           this.applySubtenants(td.subtenants)
         }
         clearSessionExpiredUiSuppression()
+        beginFreshSessionInactivityClock()
 
         return true
       } catch (error) {

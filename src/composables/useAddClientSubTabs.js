@@ -15,6 +15,9 @@ export const CLINICAL_SCREENINGS_SUB_TAB =
 
 export const CLINICAL_LABS_SUB_TAB = addClientClinicalSubTabKeys.labs
 
+export const CLINICAL_MEDICATIONS_SUB_TAB =
+  addClientClinicalSubTabKeys.medications
+
 export const CLINICAL_CARE_PLANS_SUB_TAB =
   addClientClinicalSubTabKeys.carePlans
 
@@ -108,6 +111,11 @@ export const ADD_CLIENT_SUB_TABS = {
       key: addClientClinicalSubTabKeys.labs,
       icon: 'science',
       labelKey: 'subTabLabs',
+    },
+    {
+      key: addClientClinicalSubTabKeys.medications,
+      icon: 'medication',
+      labelKey: 'subTabMedications',
     },
   ],
   [addClientTabKeys.careCoordination]: [

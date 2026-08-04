@@ -2302,7 +2302,9 @@ input:-webkit-autofill {
   overflow-x: hidden;
   overflow-y: auto;
   padding-top: 8px;
+  padding-right: 12px;
   padding-bottom: 8px;
+  scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -2983,13 +2985,6 @@ input:-webkit-autofill {
 .other-contact-add-tab {
   flex-shrink: 0;
   font-weight: 600;
-}
-
-.other-contact-address-box {
-  padding: 16px;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-md;
-  background: $surface;
 }
 
 .toggle-field {
@@ -3720,6 +3715,14 @@ input:-webkit-autofill {
   }
 }
 
+.add-client-medications-tab {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: 8px 0 8px;
+  overflow-x: hidden;
+}
+
 .add-client-clinical-notes-tab {
   padding: 8px 0 8px;
 }
@@ -3753,6 +3756,10 @@ input:-webkit-autofill {
 }
 
 .care-plans-header {
+  gap: 16px;
+}
+
+.medications-header {
   gap: 16px;
 }
 
@@ -3806,6 +3813,13 @@ input:-webkit-autofill {
   color: $text-strong;
 }
 
+.medications-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
 .referrals-title {
   margin: 0;
   font-size: 1.125rem;
@@ -3841,6 +3855,11 @@ input:-webkit-autofill {
 }
 
 .care-plans-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.medications-subtitle {
   margin: 4px 0 0;
   color: $text-muted;
 }
@@ -3897,6 +3916,20 @@ input:-webkit-autofill {
 
 .care-plans-table-panel {
   margin-top: 12px;
+}
+
+.medications-table-panel {
+  margin-top: 12px;
+}
+
+.medications-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .referrals-table-panel {

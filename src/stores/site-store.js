@@ -246,20 +246,6 @@ export const useSiteStore = defineStore('site', {
         throw error
       }
     },
-    async createClient(form, t) {
-      const body = buildClientCreateBody(form)
-      const response = await apiInstance.post(apiPaths.clientsCreate, body)
-      const created = extractClientMutationResponse(response.data)
-      await this.getClientList(
-        {
-          page: 1,
-          limit: this.clientListQuery.limit,
-        },
-        t,
-      )
-
-      return created
-    },
     async fetchClientById(clientId) {
       const id = String(clientId ?? '').trim()
       if (!id) {
@@ -269,6 +255,22 @@ export const useSiteStore = defineStore('site', {
       const client = extractClientMutationResponse(response.data)
       if (!client || typeof client !== 'object') {
         throw new Error('Client not found')
+      }
+      this.clientListSourceById[id] = client
+
+      return client
+    },
+    /**
+     * List-view rows omit clinical nests (medications, care plans, etc.).
+     * After getClientList replaces the index, put back the create/patch body.
+     */
+    putClientDetailInSource(client) {
+      if (!client || typeof client !== 'object') {
+        return null
+      }
+      const id = String(client.id ?? client.client_id ?? '').trim()
+      if (!id) {
+        return null
       }
       this.clientListSourceById[id] = client
 
@@ -299,6 +301,21 @@ export const useSiteStore = defineStore('site', {
 
       return this.buildEditFormFromClient(raw, options)
     },
+    async createClient(form, t) {
+      const body = buildClientCreateBody(form)
+      const response = await apiInstance.post(apiPaths.clientsCreate, body)
+      const created = extractClientMutationResponse(response.data)
+      await this.getClientList(
+        {
+          page: 1,
+          limit: this.clientListQuery.limit,
+        },
+        t,
+      )
+      this.putClientDetailInSource(created)
+
+      return created
+    },
     async updateClient(clientId, form, t) {
       const id = String(clientId ?? '').trim()
       if (!id) {
@@ -307,9 +324,6 @@ export const useSiteStore = defineStore('site', {
       const body = buildClientUpdateBody(form)
       const response = await apiInstance.patch(apiPaths.clientById(id), body)
       const updated = extractClientMutationResponse(response.data)
-      if (updated && typeof updated === 'object') {
-        this.clientListSourceById[id] = updated
-      }
       await this.getClientList(
         {
           page: this.clientListQuery.page,
@@ -317,6 +331,7 @@ export const useSiteStore = defineStore('site', {
         },
         t,
       )
+      this.putClientDetailInSource(updated)
 
       return updated
     },
@@ -331,9 +346,6 @@ export const useSiteStore = defineStore('site', {
       )
       const client = extractClientMutationResponse(response.data)
       const warnings = extractClientWarnings(response.data)
-      if (client && typeof client === 'object') {
-        this.clientListSourceById[id] = client
-      }
       await this.getClientList(
         {
           page: this.clientListQuery.page,
@@ -341,6 +353,7 @@ export const useSiteStore = defineStore('site', {
         },
         t,
       )
+      this.putClientDetailInSource(client)
 
       return { client, warnings }
     },

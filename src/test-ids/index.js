@@ -434,6 +434,23 @@ export const labTestIds = {
   rowDownload: id => toTestId('lab-row', id, 'btn-download'),
 }
 
+export const pharmacyTestIds = {
+  dialog: mode => toTestId('pharmacy-dialog', mode),
+  btn: name => toTestId('pharmacy-dialog-btn', name),
+  field: name => toTestId('pharmacy-dialog-field', name),
+}
+
+export const medicationTestIds = {
+  dialog: mode => toTestId('medication-dialog', mode),
+  btn: name => toTestId('medication-dialog-btn', name),
+  field: name => toTestId('medication-dialog-field', name),
+  rowView: id => toTestId('medication-row', id, 'btn-view'),
+  rowEdit: id => toTestId('medication-row', id, 'btn-edit'),
+  rowMore: id => toTestId('medication-row', id, 'btn-more'),
+  rowStatus: id => toTestId('medication-row', id, 'btn-status'),
+  rowDelete: id => toTestId('medication-row', id, 'btn-delete'),
+}
+
 export const carePlanTestIds = {
   btn: name => toTestId('care-plan-btn', name),
   field: name => toTestId('care-plan-field', name),

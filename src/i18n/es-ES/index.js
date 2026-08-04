@@ -2701,4 +2701,207 @@ export default {
     '¿Archivar "{name}"? Los recursos pueden necesitar otra categoría.',
   clinicalResourceCategoryArchiveSuccess: 'Categoría archivada.',
   clinicalResourceCategoryArchiveError: 'No se pudo archivar la categoría.',
+  subTabMedications: 'Medicamentos',
+  medicationsTitle: 'Recetas',
+  medicationsSubtitle:
+    'Consulte y gestione los medicamentos prescritos o reportados '
+    + 'para este paciente.',
+  medicationAdd: 'Añadir medicamento',
+  medicationSaveClientFirst:
+    'Guarde primero al paciente para crear y gestionar medicamentos.',
+  medicationNoPermission:
+    'No tiene permiso para ver medicamentos.',
+  medicationListEmpty:
+    'Aún no hay medicamentos. Añada uno para comenzar.',
+  medicationListError: 'No se pudieron cargar los medicamentos.',
+  medicationCatalogsError:
+    'No se pudieron cargar los catálogos de medicamentos.',
+  medicationSaveError: 'No se pudo guardar el medicamento.',
+  medicationSaved: 'Medicamento guardado correctamente.',
+  medicationDeleted: 'Medicamento eliminado.',
+  medicationDeleteError: 'No se pudo eliminar el medicamento.',
+  medicationDeleteTitle: '¿Eliminar medicamento?',
+  medicationDeleteMessage:
+    'Este medicamento se eliminará del registro del paciente.',
+  medicationStatusUpdated: 'Estado del medicamento actualizado.',
+  medicationStatusError:
+    'No se pudo actualizar el estado del medicamento.',
+  medicationChangeStatusTitle: 'Cambiar estado del medicamento',
+  medicationChangeStatusSubtitle:
+    'Seleccione el nuevo estado para este medicamento.',
+  medicationChangeStatusSave: 'Actualizar estado',
+  medicationAddTitle: 'Añadir medicamento (receta)',
+  medicationAddSubtitle: 'Introduzca la información del medicamento.',
+  medicationEditTitle: 'Editar medicamento',
+  medicationViewTitle: 'Ver medicamento',
+  medicationViewSubtitle: 'Detalles del medicamento de este paciente.',
+  medicationSave: 'Guardar medicamento',
+  medicationSectionInfo: 'Información del medicamento',
+  medicationSectionDetails: 'Detalles de la receta',
+  medicationSectionPharmacy: 'Farmacia para este medicamento',
+  medicationSectionAdditional: 'Información adicional',
+  medicationFieldMedication: 'Medicamento',
+  medicationMedicationPlaceholder:
+    'Busque un medicamento o selecciónelo de la lista',
+  medicationGenericName: 'Nombre genérico',
+  medicationDosage: 'Dosis',
+  medicationDosagePlaceholder: 'p. ej. 500, 10, 0.25',
+  medicationDosageUnit: 'Unidad de dosis',
+  medicationRoute: 'Vía',
+  medicationFrequency: 'Frecuencia',
+  medicationStartDate: 'Fecha de inicio',
+  medicationEndDate: 'Fecha de fin',
+  medicationPrescriber: 'Prescriptor',
+  medicationPrescriberPlaceholder: 'Buscar prescriptor',
+  medicationReason: 'Motivo / Diagnóstico',
+  medicationReasonPlaceholder:
+    'Busque un diagnóstico o introduzca el motivo',
+  medicationInstructions: 'Instrucciones',
+  medicationInstructionsPlaceholder:
+    'Introduzca instrucciones de dosificación '
+    + '(p. ej. Tomar con comida, al acostarse...)',
+  medicationNotes: 'Notas',
+  medicationNotesPlaceholder: 'Introduzca notas adicionales',
+  medicationPharmacyModePreferred:
+    'Usar la farmacia preferida del paciente',
+  medicationPharmacyModeSelected: 'Seleccionar otra farmacia',
+  medicationPharmacyModeNone: 'Sin farmacia para este medicamento',
+  medicationPharmacySearchPlaceholder: 'Seleccionar farmacia',
+  medicationAddPharmacy: 'Añadir nueva farmacia',
+  medicationSetPreferred:
+    'Establecer la farmacia seleccionada como preferida '
+    + 'para este paciente',
+  medicationSetPreferredHint:
+    'La farmacia preferida se usa de forma predeterminada '
+    + 'para nuevas recetas.',
+  medicationAddAnother: 'Añadir otro medicamento después de guardar',
+  medicationAddAnotherHint:
+    'Mantenga este formulario abierto para añadir varios medicamentos.',
+  medicationPreferredBadge: 'Preferida',
+  medicationNoPreferredPharmacy:
+    'No hay farmacia preferida configurada para este paciente.',
+  medicationPreferredPharmacyTitle: 'Farmacia preferida',
+  medicationPharmacyViewEdit: 'Ver / Editar',
+  medicationConsentCardTitle:
+    'Consentimiento de historial de recetas',
+  medicationConsentGivenBadge: 'Consentimiento otorgado',
+  medicationConsentNotGivenBadge: 'Sin consentimiento',
+  medicationConsentGivenText:
+    'El paciente da consentimiento para recuperar el historial '
+    + 'de recetas.',
+  medicationConsentNotGivenText:
+    'El paciente no ha dado consentimiento para recuperar el '
+    + 'historial de recetas.',
+  medicationConsentViewDetails: 'Ver detalles',
+  medicationConsentSaved: 'Consentimiento guardado correctamente.',
+  medicationConsentSaveError: 'No se pudo guardar el consentimiento.',
+  medicationColMedication: 'Medicamento',
+  medicationColDosage: 'Dosis',
+  medicationColRouteFrequency: 'Vía / Frecuencia',
+  medicationColPrescriber: 'Prescriptor',
+  medicationColPharmacy: 'Farmacia',
+  medicationColStartDate: 'Fecha de inicio',
+  medicationColEndDate: 'Fecha de fin',
+  medicationActionView: 'Ver',
+  medicationActionMore: 'Más opciones',
+  medicationActionChangeStatus: 'Cambiar estado',
+  medicationStatusActive: 'Activo',
+  medicationStatusCompleted: 'Completado',
+  medicationStatusDiscontinued: 'Discontinuado',
+  medicationSelectUnit: 'Seleccionar unidad',
+  medicationSelectRoute: 'Seleccionar vía',
+  medicationSelectFrequency: 'Seleccionar frecuencia',
+  medicationSelectStatus: 'Seleccionar estado',
+  medicationMedicationRequired: 'El medicamento es obligatorio.',
+  medicationDosageRequired: 'La dosis es obligatoria.',
+  medicationDosageUnitRequired: 'La unidad de dosis es obligatoria.',
+  medicationRouteRequired: 'La vía es obligatoria.',
+  medicationFrequencyRequired: 'La frecuencia es obligatoria.',
+  medicationStartDateRequired: 'La fecha de inicio es obligatoria.',
+  medicationEndDateInvalid:
+    'La fecha de fin debe ser igual o posterior a la de inicio.',
+  medicationPrescriberRequired: 'El prescriptor es obligatorio.',
+  medicationInstructionsRequired: 'Las instrucciones son obligatorias.',
+  medicationStatusRequired: 'El estado es obligatorio.',
+  medicationPharmacyRequired:
+    'Seleccione una farmacia o cambie el modo de farmacia.',
+  pharmacySaved: 'Farmacia guardada correctamente.',
+  pharmacySaveError: 'No se pudo guardar la farmacia.',
+  pharmacyAddTitle: 'Añadir farmacia',
+  pharmacyAddSubtitle: 'Añada una farmacia para que use este paciente.',
+  pharmacyEditTitle: 'Editar farmacia',
+  pharmacyViewTitle: 'Ver farmacia',
+  pharmacySave: 'Guardar farmacia',
+  pharmacyName: 'Nombre de la farmacia',
+  pharmacyNamePlaceholder: 'Introduzca el nombre de la farmacia',
+  pharmacyPhone: 'Teléfono',
+  pharmacyPhonePlaceholder: '(305) 555-1241',
+  pharmacyAddress: 'Dirección',
+  pharmacyAddressPlaceholder: 'Introduzca la dirección',
+  pharmacyFax: 'Fax',
+  pharmacyFaxPlaceholder: '(305) 555-1242',
+  pharmacyCity: 'Ciudad',
+  pharmacyCityPlaceholder: 'Introduzca la ciudad',
+  pharmacyState: 'Estado',
+  pharmacyStatePlaceholder: 'Seleccione un estado',
+  pharmacyZip: 'Código postal',
+  pharmacyZipPlaceholder: 'Introduzca el código postal',
+  pharmacyCountry: 'País',
+  pharmacyNotes: 'Notas',
+  pharmacyNotesPlaceholder: 'Introduzca notas adicionales',
+  pharmacySetPreferred:
+    'Establecer como farmacia preferida para este paciente',
+  pharmacySetPreferredHint:
+    'La farmacia preferida se usa de forma predeterminada para nuevas '
+    + 'recetas.',
+  pharmacyNameRequired: 'El nombre de la farmacia es obligatorio.',
+  pharmacyAddressRequired: 'La dirección es obligatoria.',
+  pharmacyCityRequired: 'La ciudad es obligatoria.',
+  pharmacyStateRequired: 'El estado es obligatorio.',
+  pharmacyZipRequired: 'El código postal es obligatorio.',
+  pharmacyCountryRequired: 'El país es obligatorio.',
+  pharmacyPlacesSearch: 'Buscar farmacias',
+  pharmacyPlacesQuery: 'Buscar',
+  pharmacyPlacesQueryPlaceholder:
+    'Busque por nombre, ciudad, código postal, estado o dirección',
+  pharmacyPlacesName: 'Nombre de la farmacia',
+  pharmacyPlacesZip: 'Código postal',
+  pharmacyPlacesCity: 'Ciudad',
+  pharmacyPlacesState: 'Estado',
+  pharmacyPlacesAddress: 'Dirección',
+  pharmacyPlacesSearchBtn: 'Buscar',
+  pharmacyPlacesEmpty:
+    'No se encontraron farmacias. Pruebe otros términos de búsqueda.',
+  pharmacyPlacesUnavailable:
+    'La búsqueda de farmacias no está disponible en este momento.',
+  pharmacyPlacesError:
+    'No se pudieron buscar farmacias. Inténtelo de nuevo.',
+  pharmacyPlacesOsmAttribution:
+    'Búsqueda de farmacias con Photon / datos de OpenStreetMap '
+    + '© colaboradores de OpenStreetMap (ODbL).',
+  addressPlacesSearch: 'Buscar dirección',
+  addressPlacesQuery: 'Buscar',
+  addressPlacesQueryPlaceholder:
+    'Busque por calle, ciudad, código postal o estado',
+  addressPlacesSearchBtn: 'Buscar',
+  addressPlacesEmpty:
+    'No se encontraron direcciones. Pruebe otros términos de búsqueda.',
+  addressPlacesUnavailable:
+    'La búsqueda de direcciones no está disponible en este momento.',
+  addressPlacesError:
+    'No se pudieron buscar direcciones. Inténtelo de nuevo.',
+  addressPlacesOsmAttribution:
+    'Búsqueda de direcciones con Photon / datos de OpenStreetMap '
+    + '© colaboradores de OpenStreetMap (ODbL).',
+  medicationConsentTitle:
+    'Consentimiento de historial de recetas',
+  medicationConsentSubtitle:
+    'Registre si el paciente dio consentimiento para compartir su '
+    + 'historial de recetas.',
+  medicationConsentLabel: 'El paciente ha dado su consentimiento',
+  medicationConsentNotes: 'Notas',
+  medicationConsentNotesPlaceholder: 'Introduzca notas adicionales',
+  medicationConsentedAt: 'Consentimiento otorgado el {date}',
+  medicationConsentUpdatedAt: 'Última actualización el {date}',
+  medicationConsentSave: 'Guardar consentimiento',
 }

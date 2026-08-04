@@ -27,6 +27,18 @@ function devApiProxy(target) {
     '/screenings': { ...o },
     '/staff': { ...o },
     '/logout': { ...o },
+    '/reference-data': { ...o },
+  }
+}
+
+function photonDevProxy() {
+  return {
+    '/photon': {
+      target: 'https://photon.komoot.io',
+      changeOrigin: true,
+      secure: true,
+      rewrite: path => path.replace(/^\/photon/, ''),
+    },
   }
 }
 
@@ -124,6 +136,7 @@ export default defineConfig((ctx) => {
       port: 8090,
       open: true, // opens browser window automatically
       proxy: {
+        ...(ctx.dev ? photonDevProxy() : {}),
         ...(ctx.dev && apiProxyTarget
           ? devApiProxy(apiProxyTarget)
           : {}),

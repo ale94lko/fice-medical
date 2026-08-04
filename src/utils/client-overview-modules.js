@@ -17,6 +17,7 @@ const MODULE_TONES = {
   clinicalNotes: 'slate',
   carePlans: 'green',
   labs: 'purple',
+  medications: 'teal',
   referrals: 'orange',
   appointments: 'blue',
   careTeam: 'slate',

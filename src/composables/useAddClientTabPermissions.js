@@ -34,6 +34,9 @@ const SUB_TAB_VIEW = {
   [addClientClinicalSubTabKeys.labs]: [
     clientPermissionNames.viewLabsClient,
   ],
+  [addClientClinicalSubTabKeys.medications]: [
+    clientPermissionNames.viewMedications,
+  ],
   [addClientCareCoordinationSubTabKeys.referrals]: [
     clientPermissionNames.viewReferrals,
   ],
@@ -69,6 +72,10 @@ const SUB_TAB_EDIT = {
   [addClientClinicalSubTabKeys.labs]: [
     clientPermissionNames.editLabsClient,
     clientPermissionNames.addLabsClient,
+  ],
+  [addClientClinicalSubTabKeys.medications]: [
+    clientPermissionNames.editMedications,
+    clientPermissionNames.addMedications,
   ],
   [addClientCareCoordinationSubTabKeys.referrals]: [
     clientPermissionNames.editReferrals,

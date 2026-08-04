@@ -15,6 +15,8 @@ import {
 } from 'src/utils/gh-pages-router.js'
 
 import { canAccessRoute } from 'src/composables/useMainNavPermissions.js'
+import { clearSharedSessionInactivityState } from
+  'src/utils/session-inactivity-sync.js'
 
 function resolveSessionAccess(authStore) {
   let expireAt = new Date(authStore.expireAt)
@@ -48,6 +50,8 @@ function getRouteAccessMeta(to) {
 
 function resolveProtectedNavigation(to, authStore) {
   if (!resolveSessionAccess(authStore)) {
+    clearSharedSessionInactivityState()
+
     return '/login'
   }
 

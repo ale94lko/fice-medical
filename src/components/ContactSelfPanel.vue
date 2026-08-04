@@ -7,14 +7,15 @@
       :toggle-test-id="tid.accordionToggle('client-address')">
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
-          <FormInput
+          <AddressSearchField
             ref="addressLine1InputRef"
             v-model="contact.addressLine1"
-            :external-label="true"
             :label="t('addressLine1')"
             :rules="rules.addressLine1"
             maxlength="100"
             :test-id="contactFieldTestId('addressLine1')"
+            test-id-prefix="client-address-places"
+            @select="applyAddressDetails"
           />
         </div>
         <div class="col-12 col-md-6">
@@ -314,10 +315,12 @@ import {
 import FormInput from './FormInput.vue'
 import FormToggle from './FormToggle.vue'
 import AddClientLabeledField from './AddClientLabeledField.vue'
+import AddressSearchField from './AddressSearchField.vue'
 import FormSelect from './FormSelect.vue'
 import AccordionSection from './AccordionSection.vue'
 import SubsectionHeading from './SubsectionHeading.vue'
 import AddClientMethodRowActions from './AddClientMethodRowActions.vue'
+import { withExtraSelectOption } from 'src/utils/address-places-search.js'
 import {
   clientEmailTypeValues,
   clientPhoneTypeValues,
@@ -384,9 +387,17 @@ function emailAddressRules(index) {
 }
 
 const stateOptions = usStates
-const cityOptions = computed(() => getCitiesForState(contact.value.state))
+const cityOptions = computed(() =>
+  withExtraSelectOption(
+    getCitiesForState(contact.value.state),
+    contact.value.city,
+  ),
+)
 const countyOptions = computed(() =>
-  getCountiesForStateCity(contact.value.state, contact.value.city),
+  withExtraSelectOption(
+    getCountiesForStateCity(contact.value.state, contact.value.city),
+    contact.value.county,
+  ),
 )
 
 const phoneTypeOptions = computed(() =>
@@ -473,6 +484,30 @@ function onClientStateChange() {
 
 function onClientCityChange() {
   contact.value.county = ''
+}
+
+function applyAddressDetails(details) {
+  if (!details) {
+    return
+  }
+  if (details.addressLine1) {
+    contact.value.addressLine1 = details.addressLine1
+  }
+  if (details.addressLine2) {
+    contact.value.addressLine2 = details.addressLine2
+  }
+  if (details.state) {
+    contact.value.state = details.state
+  }
+  if (details.city) {
+    contact.value.city = details.city
+  }
+  if (details.county) {
+    contact.value.county = details.county
+  }
+  if (details.zipCode) {
+    contact.value.zipCode = details.zipCode
+  }
 }
 
 function onPhoneInput(index, val) {

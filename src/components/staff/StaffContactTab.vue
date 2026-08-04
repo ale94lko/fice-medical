@@ -5,13 +5,14 @@
       :title="t('staffAddressSectionTitle')">
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
-          <AddClientLabeledField :label="t('addressLine1')">
-            <TextInput
-              v-model="contact.address.address"
-              :external-label="true"
-              :readonly="readonly"
-            />
-          </AddClientLabeledField>
+          <AddressSearchField
+            v-model="contact.address.address"
+            :label="t('addressLine1')"
+            :readonly="readonly"
+            test-id-prefix="staff-address-places"
+            test-id="staff-address-line-1"
+            @select="applyAddressDetails"
+          />
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField :label="t('addressLine2Optional')">
@@ -184,6 +185,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AddressSearchField from 'components/AddressSearchField.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
 import FormSelect from 'components/FormSelect.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
@@ -254,6 +256,32 @@ function onPhoneInput(index, val) {
     phoneNumber: formatPhoneUs(val),
   }
   contact.value = { ...contact.value, phones }
+}
+
+function applyAddressDetails(details) {
+  if (!details) {
+    return
+  }
+  const address = { ...contact.value.address }
+  if (details.addressLine1) {
+    address.address = details.addressLine1
+  }
+  if (details.addressLine2) {
+    address.address2 = details.addressLine2
+  }
+  if (details.state) {
+    address.state = details.state
+  }
+  if (details.city) {
+    address.city = details.city
+  }
+  if (details.county) {
+    address.county = details.county
+  }
+  if (details.zipCode) {
+    address.zipCode = details.zipCode
+  }
+  contact.value = { ...contact.value, address }
 }
 
 function canAddPhone(index) {

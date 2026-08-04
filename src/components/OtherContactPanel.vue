@@ -147,11 +147,13 @@
       </div>
     </div>
 
-    <div class="other-contact-address-box q-mt-md">
-      <SubsectionHeading
-        icon="place"
-        :title="t('contactAddress')"
-      />
+    <q-separator class="section-separator" />
+
+    <AccordionSection
+      icon="place"
+      :title="t('contactAddress')"
+      :section-test-id="ocField('accordion-address')"
+      :toggle-test-id="ocField('accordion-address-toggle')">
       <FormToggle
         :model-value="contact.sameAsClientAddress"
         :label="t('sameAsClientAddress')"
@@ -161,16 +163,18 @@
       />
       <div class="row q-col-gutter-sm q-col-gutter-md">
         <div class="col-12 col-md-6">
-          <FormInput
+          <AddressSearchField
             ref="addressLine1InputRef"
             :model-value="contact.addressLine1"
-            :external-label="true"
             :label="t('addressLine1')"
             :rules="rules.addressLine1"
             :disable="addressDisabled"
             maxlength="100"
             :test-id="ocField('addressLine1')"
+            :reset-key="contact.id"
+            :test-id-prefix="`other-contact-${contact.id}-places`"
             @update:model-value="setField('addressLine1', $event)"
+            @select="applyAddressDetails"
           />
         </div>
         <div class="col-12 col-md-6">
@@ -257,9 +261,15 @@
           />
         </div>
       </div>
-    </div>
+    </AccordionSection>
 
-    <div class="q-mt-md">
+    <q-separator class="section-separator" />
+
+    <AccordionSection
+      icon="phone"
+      :title="t('contactMethods')"
+      :section-test-id="ocField('accordion-contact-methods')"
+      :toggle-test-id="ocField('accordion-contact-methods-toggle')">
       <div class="contact-methods-block">
         <SubsectionHeading icon="phone" :title="t('phone')" />
         <div
@@ -386,9 +396,15 @@
           </div>
         </div>
       </div>
-    </div>
+    </AccordionSection>
 
-    <div class="q-mt-md">
+    <q-separator class="section-separator" />
+
+    <AccordionSection
+      icon="description"
+      :title="t('additionalNotes')"
+      :section-test-id="ocField('accordion-notes')"
+      :toggle-test-id="ocField('accordion-notes-toggle')">
       <AddClientLabeledField
         :label="t('additionalNotes')"
         :test-id="ocField('notes')">
@@ -406,7 +422,7 @@
           @update:model-value="setField('notes', $event)"
         />
       </AddClientLabeledField>
-    </div>
+    </AccordionSection>
 
     <div v-if="showDelete" class="q-mt-lg flex justify-end">
       <q-btn
@@ -434,10 +450,13 @@ import FormInput from './FormInput.vue'
 import ContactSaveBusinessRuleBanner from './ContactSaveBusinessRuleBanner.vue'
 import FormToggle from 'components/FormToggle.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AddressSearchField from 'components/AddressSearchField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import AccordionSection from './AccordionSection.vue'
 import SubsectionHeading
   from './SubsectionHeading.vue'
 import AddClientMethodRowActions from 'components/AddClientMethodRowActions.vue'
+import { withExtraSelectOption } from 'src/utils/address-places-search.js'
 import {
   getCitiesForState,
   getCountiesForStateCity,
@@ -553,10 +572,18 @@ const addressDisabled = computed(
   () => Boolean(props.contact.sameAsClientAddress),
 )
 
-const cityOptions = computed(() => getCitiesForState(props.contact.state))
+const cityOptions = computed(() =>
+  withExtraSelectOption(
+    getCitiesForState(props.contact.state),
+    props.contact.city,
+  ),
+)
 
 const countyOptions = computed(() =>
-  getCountiesForStateCity(props.contact.state, props.contact.city),
+  withExtraSelectOption(
+    getCountiesForStateCity(props.contact.state, props.contact.city),
+    props.contact.county,
+  ),
 )
 
 function emitContact(patch) {
@@ -673,6 +700,21 @@ function onCityChange(val) {
     ...props.contact,
     city: val,
     county: '',
+  })
+}
+
+function applyAddressDetails(details) {
+  if (!details || addressDisabled.value) {
+    return
+  }
+  emitContact({
+    ...props.contact,
+    addressLine1: details.addressLine1 || props.contact.addressLine1,
+    addressLine2: details.addressLine2 || props.contact.addressLine2,
+    state: details.state || props.contact.state,
+    city: details.city || props.contact.city,
+    county: details.county || props.contact.county,
+    zipCode: details.zipCode || props.contact.zipCode,
   })
 }
 

@@ -117,6 +117,17 @@ export function clearSharedSessionInactivityState() {
   localStorage.removeItem(sessionInactivityStorageKeys.keepOpenLock)
 }
 
+/**
+ * Drop any leftover warning / stale activity clock (e.g. after login or
+ * when starting monitoring for a newly authenticated session).
+ */
+export function beginFreshSessionInactivityClock() {
+  clearSharedSessionInactivityState()
+  lastSharedActivityWriteAt = 0
+
+  return recordSharedSessionActivity({ force: true })
+}
+
 export function getSharedWarningSecondsRemaining() {
   const shared = readSharedSessionInactivityState()
   if (!shared?.warningDeadlineAt) {

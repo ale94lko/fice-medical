@@ -200,6 +200,7 @@ export const addClientClinicalSubTabKeys = {
   clinicalNotes: 'clinicalNotes',
   carePlans: 'carePlans',
   labs: 'labs',
+  medications: 'medications',
 }
 
 export const addClientCareCoordinationSubTabKeys = {
@@ -540,6 +541,9 @@ export const catalogNames = {
   allergyName: 'allergy_name',
   referralSource: 'referral_source',
   resourceCategory: 'resource_category',
+  dosageUnit: 'dosage_unit',
+  medicationRoute: 'medication_route',
+  medicationFrequency: 'medication_frequency',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -573,6 +577,28 @@ export const screeningStatuses = {
   completed: 'completed',
   cancelled: 'cancelled',
 }
+
+export const medicationStatuses = {
+  active: 'ACTIVE',
+  discontinued: 'DISCONTINUED',
+  completed: 'COMPLETED',
+}
+
+export const pharmacyModeValues = {
+  preferred: 'PREFERRED',
+  selected: 'SELECTED',
+  none: 'NONE',
+}
+
+export const pharmacyNameMaxLength = 160
+export const pharmacyPhoneMaxLength = 30
+export const pharmacyFaxMaxLength = 30
+export const pharmacyAddressMaxLength = 200
+export const pharmacyCityMaxLength = 100
+export const pharmacyZipMaxLength = 12
+export const pharmacyNotesMaxLength = 500
+
+export const medicationConsentNotesMaxLength = 500
 
 export const screeningTemplateStatusValues = {
   active: 'ACTIVE',
@@ -908,6 +934,14 @@ export const clientPermissionNames = {
   addReferrals: 'ADD_REFERRALS',
   editReferrals: 'EDIT_REFERRALS',
   deleteReferrals: 'DELETE_REFERRALS',
+  viewMedications: 'VIEW_MEDICATIONS',
+  addMedications: 'ADD_MEDICATIONS',
+  editMedications: 'EDIT_MEDICATIONS',
+  deleteMedications: 'DELETE_MEDICATIONS',
+  viewPharmacies: 'VIEW_PHARMACIES',
+  addPharmacies: 'ADD_PHARMACIES',
+  editPharmacies: 'EDIT_PHARMACIES',
+  deletePharmacies: 'DELETE_PHARMACIES',
 }
 
 export const appointmentStatuses = {
@@ -1221,6 +1255,35 @@ export const apiPaths = {
   clientScreeningCancel: (clientId, screeningId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/screenings/${encodeURIComponent(String(screeningId ?? '').trim())}/cancel`,
+  clientMedications: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/medications`,
+  clientMedicationById: (clientId, medicationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/medications/${encodeURIComponent(String(medicationId ?? '').trim())}`,
+  clientMedicationStatus: (clientId, medicationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/medications/${
+    encodeURIComponent(String(medicationId ?? '').trim())
+  }/status`,
+  clientPharmacies: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/pharmacies`,
+  clientPharmacyById: (clientId, pharmacyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/pharmacies/${encodeURIComponent(String(pharmacyId ?? '').trim())}`,
+  clientPharmacySetPreferred: (clientId, pharmacyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/pharmacies/${
+    encodeURIComponent(String(pharmacyId ?? '').trim())
+  }/set-preferred`,
+  clientPrescriptionConsent: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/prescription-consent`,
+  referenceMedications: '/reference-data/v1/medications',
+  referenceMedicationById: id => `/reference-data/v1/medications/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
   clientLabs: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/labs`,
