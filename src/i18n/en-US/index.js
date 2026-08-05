@@ -2044,6 +2044,7 @@ export default {
   actions: 'Actions',
   edit: 'Edit',
   delete: 'Delete',
+  remove: 'Remove',
   addClient: 'Add Client',
   addNewClient: 'Add New Client',
   addNewClientSubtitle: 'Create a new client profile',

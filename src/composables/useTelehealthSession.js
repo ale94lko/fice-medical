@@ -235,6 +235,7 @@ function createTelehealthSessionState() {
   let stomp = null
   let heartbeatTimer = null
   let pollTimer = null
+  let chatPollTimer = null
   let elapsedTimer = null
   let mediaStarted = false
   let webrtcStarted = false
@@ -252,6 +253,79 @@ function createTelehealthSessionState() {
   const isClient = computed(() =>
     role.value === telehealthRoles.client || isGuest.value,
   )
+
+  function upsertChatMessage(msg) {
+    if (!msg || msg.type === 'message_deleted') {
+      return
+    }
+    if (chatMessages.value.some(m => m.id === msg.id)) {
+      return
+    }
+    chatMessages.value = [...chatMessages.value, msg]
+  }
+
+  function applyChatPayload(payload) {
+    const msg = normalizeTelehealthChatMessage(payload)
+    if (!msg) {
+      return
+    }
+    if (msg.type === 'message_deleted') {
+      chatMessages.value = chatMessages.value.filter(
+        m => m.id !== msg.messageId,
+      )
+
+      return
+    }
+    upsertChatMessage(msg)
+  }
+
+  function mergeChatMessages(incoming) {
+    const list = Array.isArray(incoming) ? incoming : []
+    if (!list.length) {
+      return
+    }
+    const byId = new Map(
+      chatMessages.value.map(item => [item.id, item]),
+    )
+    for (const msg of list) {
+      if (msg?.id == null || msg.type === 'message_deleted') {
+        continue
+      }
+      byId.set(msg.id, msg)
+    }
+    chatMessages.value = [...byId.values()].sort((a, b) => {
+      const aTime = String(a.createdAt || '')
+      const bTime = String(b.createdAt || '')
+      if (aTime && bTime && aTime !== bTime) {
+        return aTime.localeCompare(bTime)
+      }
+
+      return Number(a.id) - Number(b.id)
+    })
+  }
+
+  function stopChatPolling() {
+    if (chatPollTimer) {
+      clearInterval(chatPollTimer)
+      chatPollTimer = null
+    }
+  }
+
+  function startChatPolling() {
+    stopChatPolling()
+    // Guest may miss staff STOMP chat frames; poll public list as backup.
+    if (!isGuest.value) {
+      return
+    }
+    chatPollTimer = setInterval(() => {
+      if (phase.value !== 'in_call' || !guestAuth.value?.guestKey) {
+        return
+      }
+      publicListTelehealthChat(guestAuth.value)
+        .then(mergeChatMessages)
+        .catch(() => {})
+    }, 2500)
+  }
   const isEnded = computed(() => isTelehealthTerminalStatus(status.value))
   const isInProgress = computed(
     () => status.value === telehealthSessionStatuses.inProgress,
@@ -364,6 +438,7 @@ function createTelehealthSessionState() {
       clientAdmittedOnce = false
       stopHeartbeat()
       stopPolling()
+      stopChatPolling()
       stopElapsedTicker()
       teardownMedia()
 
@@ -696,6 +771,7 @@ function createTelehealthSessionState() {
     webrtc.cleanup()
     mediaStarted = false
     webrtcStarted = false
+    stopChatPolling()
     teardownStomp()
   }
 
@@ -770,11 +846,13 @@ function createTelehealthSessionState() {
       scheduleGuestWebRtcRetries()
       scheduleClinicianOfferRetries()
       await loadChat()
+      startChatPolling()
       if (!isGuest.value) {
         await loadFiles()
       }
     } catch (err) {
       mediaStarted = false
+      stopChatPolling()
       setError(err, 'Could not start media')
     }
   }
@@ -965,22 +1043,7 @@ function createTelehealthSessionState() {
           .then(() => tryStartWebRtc())
           .catch(() => {})
       },
-      onChat: payload => {
-        const msg = normalizeTelehealthChatMessage(payload)
-        if (!msg) {
-          return
-        }
-        if (msg.type === 'message_deleted') {
-          chatMessages.value = chatMessages.value.filter(
-            m => m.id !== msg.messageId,
-          )
-
-          return
-        }
-        if (!chatMessages.value.some(m => m.id === msg.id)) {
-          chatMessages.value = [...chatMessages.value, msg]
-        }
-      },
+      onChat: applyChatPayload,
       onFiles: isGuest.value
         ? undefined
         : payload => {
@@ -1021,6 +1084,8 @@ function createTelehealthSessionState() {
     teardownStomp()
     stomp = createTelehealthStompClient(stompOptions({
       sessionId,
+      // Guest waiting socket must also hear chat (provider may write early).
+      onChat: applyChatPayload,
       onWaiting: payload => {
         applyWaitingPayload(payload)
         if (tryEnterCallAfterAdmitCheck(session.value)) {
@@ -1048,6 +1113,32 @@ function createTelehealthSessionState() {
     stomp.connect()
   }
 
+  async function resolveJoinSession(sessionId) {
+    try {
+      return await joinTelehealthSession(sessionId, {
+        role: role.value,
+        displayName: displayName.value,
+      })
+    } catch (err) {
+      const status = Number(err?.response?.status)
+      // Already in the meet (or idempotent join) — continue via GET.
+      if (status !== 400 && status !== 409) {
+        throw err
+      }
+      const existing = await getTelehealthSession(sessionId)
+      const self = findSelfParticipant(
+        existing,
+        role.value,
+        displayName.value,
+      )
+      if (!existing?.selfParticipantId && !self) {
+        throw err
+      }
+
+      return existing
+    }
+  }
+
   async function join({
     sessionId,
     joinRole,
@@ -1063,10 +1154,7 @@ function createTelehealthSessionState() {
         role.value = telehealthRoles.client
       }
       displayName.value = String(name ?? '').trim()
-      const joined = await joinTelehealthSession(sessionId, {
-        role: role.value,
-        displayName: displayName.value,
-      })
+      const joined = await resolveJoinSession(sessionId)
       const self = findSelfParticipant(
         joined,
         role.value,
@@ -1309,14 +1397,14 @@ function createTelehealthSessionState() {
 
   async function loadChat() {
     if (isGuest.value) {
-      chatMessages.value = await publicListTelehealthChat(guestAuth.value)
+      mergeChatMessages(await publicListTelehealthChat(guestAuth.value))
 
       return
     }
     if (!session.value?.id) {
       return
     }
-    chatMessages.value = await listTelehealthChat(session.value.id)
+    mergeChatMessages(await listTelehealthChat(session.value.id))
   }
 
   async function sendChat(body) {
@@ -1327,9 +1415,7 @@ function createTelehealthSessionState() {
     const msg = isGuest.value
       ? await publicPostTelehealthChat(guestAuth.value, text)
       : await postTelehealthChat(session.value.id, text)
-    if (msg && !chatMessages.value.some(m => m.id === msg.id)) {
-      chatMessages.value = [...chatMessages.value, msg]
-    }
+    upsertChatMessage(msg)
 
     return msg
   }

@@ -394,20 +394,24 @@ async function onLobbyJoin(payload) {
     microphoneTested: Boolean(payload.microphoneTested),
     speakerTested: Boolean(payload.speakerTested),
   }
-  await join({
-    sessionId: sessionId.value,
-    joinRole: preferredRole.value,
-    name: payload.displayName,
-    previewStream: payload.previewStream || null,
-    mediaPrefs: {
-      audioEnabled: payload.microphoneEnabled !== false,
-      videoEnabled: payload.cameraEnabled !== false,
-      speakerEnabled: payload.speakerEnabled !== false,
-    },
-  })
-  // Client ready is sent with Join session (no separate button).
-  if (preferredRole.value === telehealthRoles.client) {
-    await markReady(readyFlags.value)
+  try {
+    await join({
+      sessionId: sessionId.value,
+      joinRole: preferredRole.value,
+      name: payload.displayName,
+      previewStream: payload.previewStream || null,
+      mediaPrefs: {
+        audioEnabled: payload.microphoneEnabled !== false,
+        videoEnabled: payload.cameraEnabled !== false,
+        speakerEnabled: payload.speakerEnabled !== false,
+      },
+    })
+    // Client ready is sent with Join session (no separate button).
+    if (preferredRole.value === telehealthRoles.client) {
+      await markReady(readyFlags.value)
+    }
+  } catch {
+    // join/markReady already set session.error for the lobby.
   }
 }
 

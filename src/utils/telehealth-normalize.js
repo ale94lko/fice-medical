@@ -419,34 +419,116 @@ export function normalizeTelehealthSession(raw) {
   }
 }
 
-export function normalizeTelehealthChatMessage(raw) {
-  if (!raw || typeof raw !== 'object') {
+/**
+ * STOMP / REST chat payloads may be bare, `{ data }`, or `{ message }`.
+ * Prefer the nested object when the wrapper has no message id.
+ */
+function unwrapChatMessagePayload(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
     return null
   }
-  if (trimStr(raw.type).toLowerCase() === 'message_deleted') {
+  let body = raw
+  const nestedData = raw.data
+  if (
+    nestedData
+    && typeof nestedData === 'object'
+    && !Array.isArray(nestedData)
+    && raw.id == null
+    && raw.message_id == null
+    && raw.messageId == null
+  ) {
+    body = nestedData
+  }
+  const nestedMessage = body.message
+  if (
+    nestedMessage
+    && typeof nestedMessage === 'object'
+    && !Array.isArray(nestedMessage)
+    && body.id == null
+    && body.message_id == null
+    && body.messageId == null
+  ) {
+    body = nestedMessage
+  }
+
+  return body
+}
+
+function chatMessageBodyText(raw) {
+  if (raw == null || typeof raw !== 'object') {
+    return ''
+  }
+  if (typeof raw.message === 'string') {
+    return String(
+      raw.body ?? raw.text ?? raw.content ?? raw.message ?? '',
+    )
+  }
+  const nested = raw.message
+  const fromNested = (
+    nested
+    && typeof nested === 'object'
+    && !Array.isArray(nested)
+  )
+    ? (nested.body ?? nested.text ?? nested.content)
+    : null
+
+  return String(
+    raw.body
+    ?? raw.text
+    ?? raw.content
+    ?? fromNested
+    ?? '',
+  )
+}
+
+export function normalizeTelehealthChatMessage(raw) {
+  const payload = unwrapChatMessagePayload(raw)
+  if (!payload) {
+    return null
+  }
+  const typeToken = trimStr(
+    payload.type ?? raw?.type,
+  ).toLowerCase()
+  if (typeToken === 'message_deleted') {
     return {
       type: 'message_deleted',
-      messageId: toNumberOrNull(raw.message_id ?? raw.messageId ?? raw.id),
+      messageId: toNumberOrNull(
+        payload.message_id
+        ?? payload.messageId
+        ?? payload.id
+        ?? raw?.message_id
+        ?? raw?.messageId
+        ?? raw?.id,
+      ),
     }
   }
-  const id = toNumberOrNull(raw.id ?? raw.message_id)
+  const id = toNumberOrNull(
+    payload.id ?? payload.message_id ?? payload.messageId,
+  )
   if (id == null) {
     return null
   }
 
   return {
     id,
-    sessionId: toNumberOrNull(raw.session_id ?? raw.sessionId),
+    sessionId: toNumberOrNull(payload.session_id ?? payload.sessionId),
     participantId: toNumberOrNull(
-      raw.participant_id ?? raw.participantId,
+      payload.participant_id ?? payload.participantId,
     ),
-    displayName: trimStr(raw.display_name ?? raw.displayName),
-    role: trimStr(raw.role).toUpperCase(),
-    messageType: trimStr(
-      raw.message_type ?? raw.messageType ?? 'TEXT',
+    displayName: trimStr(
+      payload.display_name
+      ?? payload.displayName
+      ?? payload.sender_name
+      ?? payload.senderName,
+    ),
+    role: trimStr(
+      payload.role ?? payload.sender_role ?? payload.senderRole,
     ).toUpperCase(),
-    body: String(raw.body ?? ''),
-    createdAt: trimStr(raw.created_at ?? raw.createdAt),
+    messageType: trimStr(
+      payload.message_type ?? payload.messageType ?? 'TEXT',
+    ).toUpperCase(),
+    body: chatMessageBodyText(payload),
+    createdAt: trimStr(payload.created_at ?? payload.createdAt),
   }
 }
 

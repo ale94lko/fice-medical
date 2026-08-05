@@ -2119,6 +2119,7 @@ export default {
   actions: 'Acciones',
   edit: 'Editar',
   delete: 'Eliminar',
+  remove: 'Quitar',
   addClient: 'Adicionar Cliente',
   addNewClient: 'Adicionar nuevo cliente',
   addNewClientSubtitle: 'Crear un nuevo perfil de cliente',

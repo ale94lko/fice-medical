@@ -108,13 +108,50 @@ async function withMeetPublicRetry(requestFn, {
   throw lastError
 }
 
+function firstApiErrorText(data) {
+  if (!data || typeof data !== 'object') {
+    return ''
+  }
+  const direct = String(
+    data.message
+    ?? data.error_description
+    ?? data.errorDescription
+    ?? data.error
+    ?? '',
+  ).trim()
+  if (direct) {
+    return direct
+  }
+  const errors = data.errors
+  if (typeof errors === 'string' && errors.trim()) {
+    return errors.trim()
+  }
+  if (Array.isArray(errors)) {
+    const first = errors.find(item => String(item ?? '').trim())
+
+    return String(first ?? '').trim()
+  }
+  if (errors && typeof errors === 'object') {
+    for (const value of Object.values(errors)) {
+      if (Array.isArray(value) && value.length) {
+        return String(value[0] ?? '').trim()
+      }
+      if (value != null && String(value).trim()) {
+        return String(value).trim()
+      }
+    }
+  }
+
+  return ''
+}
+
 export function apiErrorMessage(error, fallback = 'Request failed') {
   const status = Number(error?.response?.status)
-  const apiMessage = error?.response?.data?.message
+  const apiMessage = firstApiErrorText(error?.response?.data)
   if (status === 429) {
     return String(
       apiMessage
-      ?? 'Too many requests. Please wait and try again.',
+      || 'Too many requests. Please wait and try again.',
     )
   }
   if (
@@ -123,11 +160,11 @@ export function apiErrorMessage(error, fallback = 'Request failed') {
   ) {
     return String(
       apiMessage
-      ?? 'This invite is no longer valid. Ask for a new invite link.',
+      || 'This invite is no longer valid. Ask for a new invite link.',
     )
   }
 
-  return String(apiMessage ?? error?.message ?? fallback)
+  return String(apiMessage || error?.message || fallback)
 }
 
 export async function createTelehealthSession(appointmentId) {
