@@ -160,6 +160,7 @@ export default {
   sessionExpirySecureFooter:
     'Tu sesión permanecerá segura hasta que expire.',
   save: 'Guardar',
+  copy: 'Copiar',
   confirm: 'Confirmar',
   cancel: 'Cancelar',
   description: 'Descripción',
@@ -1783,6 +1784,9 @@ export default {
   appointmentPlaceOfService: 'Lugar de atención',
   appointmentPlaceOfServicePlaceholder: 'Seleccionar lugar de atención',
   appointmentPlaceOfServiceRequired: 'El lugar de atención es obligatorio.',
+  appointmentTelemedicineBookHint:
+    'Esta visita se marca como telemedicina. Tras reservar se crea el '
+    + 'enlace de la reunión y se avisa al cliente por email/SMS.',
   appointmentPlacesEmpty: 'No hay lugares de atención disponibles.',
   appointmentTotalDurationTitle:
     'Duración de la cita (servicios seleccionados)',
@@ -2202,7 +2206,8 @@ export default {
   removeEmail: 'Quitar correo',
   preferredCommunication: 'Método de comunicación preferido',
   preferredCommunicationHint:
-    'Seleccione una o más formas de contactar a este cliente.',
+    'Seleccione una o más formas de contactar a este cliente '
+    + '(email y/o móvil SMS para avisos de citas).',
   prefCommProviderDidNotAsk: 'El proveedor no preguntó',
   prefCommPatientDeclined: 'El paciente declinó especificar',
   prefCommWorkPhone: 'Teléfono del trabajo',
@@ -2904,4 +2909,146 @@ export default {
   medicationConsentedAt: 'Consentimiento otorgado el {date}',
   medicationConsentUpdatedAt: 'Última actualización el {date}',
   medicationConsentSave: 'Guardar consentimiento',
+  telehealthBrand: 'FiCE Teleconsulta',
+  telehealthAppointmentSection: 'Teleconsulta',
+  telehealthJoinFromAppointment: 'Unirse a teleconsulta',
+  telehealthCopyInvite: 'Copiar enlace',
+  telehealthOpenMeet: 'Abrir meet',
+  telehealthInvitePending:
+    'El enlace del cliente está pendiente (falló la creación o el aviso).',
+  telehealthSessionPending:
+    'La sesión de teleconsulta aún no está lista para esta cita.',
+  telehealthClientInviteHint:
+    'Enlace mágico del cliente (sin login). El staff entra por la sesión.',
+  telehealthCreateFailed: 'No se pudo iniciar la sesión de teleconsulta.',
+  telehealthLobbyTitle: '¿Listo para unirse?',
+  telehealthLobbySubtitle:
+    'Compruebe audio y video antes de unirse a la sesión.',
+  telehealthLobbyCameraOff: 'Cámara apagada',
+  telehealthLobbyDeviceUnknown: 'Dispositivo predeterminado',
+  telehealthLobbySpeakerDefault: 'Altavoces del sistema',
+  telehealthLobbyTrustTitle: 'Está en buenas manos',
+  telehealthLobbyTrustBodyClient:
+    'Su sesión es privada, segura y cumple HIPAA. '
+    + 'Nadie puede unirse hasta que su proveedor lo admita.',
+  telehealthLobbyTrustBodyStaff:
+    'Su sesión es privada, segura y cumple HIPAA.',
+  telehealthLobbyLearnMore: 'Más información',
+  telehealthLobbyTroubleshoot: 'Solucionar dispositivos',
+  telehealthLobbyPrivacyDialog:
+    'FiCE Telehealth usa conexiones cifradas. Los clientes esperan en una '
+    + 'sala privada hasta que un clínico los admita a la visita.',
+  telehealthDisplayName: 'Nombre para mostrar',
+  telehealthCameraTest: 'Cámara',
+  telehealthMicTest: 'Micrófono',
+  telehealthSpeakerTest: 'Altavoz',
+  telehealthJoin: 'Unirse a la sesión',
+  telehealthWaitingClientTitle: 'Esperando al clínico',
+  telehealthWaitingClientBody:
+    'Está en una sala de espera privada. La visita comienza cuando '
+    + 'su proveedor lo admita.',
+  telehealthWaitingClientStatus: 'En sala de espera',
+  telehealthWaitingClientTrustTitle: 'Ya casi',
+  telehealthWaitingClientTrustBody:
+    'Mantenga esta ventana abierta. Entrará a la meet automáticamente '
+    + 'cuando el clínico lo admita.',
+  telehealthWaitingClinicianTitle: 'Sala de espera',
+  telehealthWaitingClinicianBody:
+    'Admita participantes cuando estén listos y luego inicie la visita.',
+  telehealthWaitingEmpty: 'Aún no hay participantes en espera.',
+  telehealthWaitingPanelTitle: 'Sala de espera',
+  telehealthStatusScheduled: 'Programada',
+  telehealthStatusWaitingRoom: 'Sala de espera',
+  telehealthStatusReady: 'Lista',
+  telehealthStatusInProgress: 'En curso',
+  telehealthStatusCompleted: 'Finalizada',
+  telehealthStatusCancelled: 'Cancelada',
+  telehealthStatusFailed: 'Fallida',
+  telehealthParticipantWaiting: 'En espera',
+  telehealthParticipantAdmitted: 'Admitido',
+  telehealthParticipantInSession: 'En sesión',
+  telehealthParticipantLeft: 'Salió',
+  telehealthRoleClinician: 'Clínico',
+  telehealthRoleClient: 'Cliente',
+  telehealthRoleGuest: 'Invitado',
+  telehealthReadyBadge: 'Listo',
+  telehealthAdmit: 'Admitir',
+  telehealthStart: 'Iniciar visita',
+  telehealthLeave: 'Salir',
+  telehealthMinimize: 'Seguir en ventana flotante',
+  telehealthFloatTitle: 'Llamada de teleconsulta',
+  telehealthFloatRestore: 'Volver a la llamada',
+  telehealthFinish: 'Finalizar visita',
+  telehealthMeetingCode: 'Código {code}',
+  telehealthConnected: 'Conectado',
+  telehealthLocalVideo: 'Usted',
+  telehealthRemoteVideo: 'Participante',
+  telehealthLocalScreenShare: 'Está compartiendo su pantalla',
+  telehealthLocalScreenShareHint:
+    'Los demás pueden verla. No se muestra la vista previa aquí '
+    + 'para evitar el efecto espejo.',
+  telehealthRemoteScreenShare: 'Pantalla compartida',
+  telehealthToggleMic: 'Activar o silenciar micrófono',
+  telehealthToggleCam: 'Activar o desactivar cámara',
+  telehealthToggleSpeaker: 'Activar o silenciar altavoz',
+  telehealthScreenShare: 'Compartir pantalla',
+  telehealthStopScreenShare: 'Dejar de compartir pantalla',
+  telehealthScreenShareUnavailable:
+    'Compartir pantalla no está disponible para este participante',
+  telehealthSideMenuLabel: 'Menús de la reunión',
+  telehealthMeetInfoTitle: 'Información',
+  telehealthMeetInfoAppointmentTitle: 'Cita',
+  telehealthMeetInfoSessionTitle: 'Sesión',
+  telehealthMeetInfoCodeLabel: 'Código de reunión',
+  telehealthMeetInfoStatusLabel: 'Estado',
+  telehealthMeetInfoDateLabel: 'Fecha',
+  telehealthMeetInfoTimeLabel: 'Hora',
+  telehealthMeetInfoDurationLabel: 'Duración',
+  telehealthMeetInfoDurationMinutes: '{minutes} min',
+  telehealthElapsed: 'Transcurrido {time}',
+  telehealthChatTitle: 'Mensajes',
+  telehealthChatEmpty: 'Aún no hay mensajes.',
+  telehealthChatPlaceholder: 'Escriba un mensaje',
+  telehealthChatSend: 'Enviar',
+  telehealthChatUnknown: 'Participante',
+  telehealthFilesTitle: 'Archivos',
+  telehealthFilesPick: 'Elija un archivo para subir',
+  telehealthFilesEmpty: 'Aún no hay archivos compartidos.',
+  telehealthFileFallback: 'Archivo {id}',
+  telehealthDownload: 'Descargar',
+  telehealthEndedTitle: 'Visita finalizada',
+  telehealthEndedBody:
+    'Ha salido de la teleconsulta. '
+    + 'Puede marcar la visita como completada o volver a la app.',
+  telehealthEndedDuration: 'Duración: {duration}',
+  telehealthEndedDurationLabel: 'Duración de la llamada',
+  telehealthMarkCompleted: 'Marcar como completada',
+  telehealthEndedCompleted:
+    'Esta visita está marcada como completada.',
+  telehealthBackToCalendar: 'Volver al calendario',
+  telehealthBackToAppointment: 'Volver a la cita',
+  telehealthBackToApp: 'Volver a la app',
+  telehealthBackToMeet: 'Volver a la meet',
+  telehealthClientInviteLabel: 'Enlace de invitación del cliente',
+  telehealthResendInviteEmail: 'Email',
+  telehealthResendInviteOtherEmail:
+    'Enviar a un email distinto al del cliente',
+  telehealthResendInviteEmailRequired:
+    'Introduzca el email para enviar la invitación.',
+  telehealthResendInvite: 'Reenviar invitación',
+  telehealthInviteCopied: 'Enlace de invitación copiado.',
+  telehealthInviteCopyFailed: 'No se pudo copiar el enlace.',
+  telehealthInviteResent:
+    'Invitación enviada. Los enlaces anteriores ya no sirven '
+    + '— use el enlace nuevo.',
+  telehealthInviteInvalid:
+    'Esta invitación ya no es válida. Solicite un enlace nuevo.',
+  telehealthRateLimited:
+    'Demasiadas solicitudes. Espere un momento e intente de nuevo.',
+  telehealthStompRejected:
+    'Conexión en tiempo real rechazada. Revise la invitación y la sesión.',
+  telehealthCopy: 'Copiar',
+  telehealthGuestLinkInvalid: 'Este enlace de reunión no es válido.',
+  telehealthGuestLinkMissingParams:
+    'Faltan tenant, subtenant, code o token en el enlace.',
 }

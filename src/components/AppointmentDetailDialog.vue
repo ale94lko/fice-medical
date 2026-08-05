@@ -152,7 +152,7 @@
                 {{ t('appointmentPlaceOfService') }}
               </p>
               <p class="appointment-detail-dialog__cell-value">
-                {{ record?.placeOfServiceName || '—' }}
+                {{ placeOfServiceLabel }}
               </p>
             </div>
           </div>
@@ -195,6 +195,47 @@
             </div>
           </div>
         </div>
+
+        <section
+          v-if="showTelehealthSection"
+          class="appointment-detail-dialog__telehealth-card q-mb-md">
+          <h3 class="appointment-detail-dialog__section-heading">
+            <q-icon name="videocam" size="18px" />
+            {{ t('telehealthAppointmentSection') }}
+          </h3>
+          <p
+            v-if="invitePending"
+            class="text-body2 text-grey-7 q-mb-sm">
+            {{ t('telehealthInvitePending') }}
+          </p>
+          <p
+            v-else-if="telehealthInviteUrl"
+            class="text-body2 text-grey-7 q-mb-sm">
+            {{ t('telehealthClientInviteHint') }}
+          </p>
+          <div
+            v-if="telehealthInviteUrl"
+            class="appointment-detail-dialog__telehealth-actions">
+            <q-btn
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              icon="content_copy"
+              :label="t('telehealthCopyInvite')"
+              @click="onCopyInvite"
+            />
+            <q-btn
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              icon="open_in_new"
+              :label="t('telehealthOpenMeet')"
+              @click="onOpenMeet"
+            />
+          </div>
+        </section>
 
         <div class="appointment-detail-dialog__lower">
           <section class="appointment-detail-dialog__notes-card">
@@ -266,9 +307,9 @@
         class="app-dialog-card__actions appointment-detail-dialog__actions">
         <div class="appointment-detail-dialog__actions-left">
           <GenerateDocumentAction
-            v-if="record?.id"
+            v-if="appointmentId"
             :document-type="documentTypes.appointmentSummary"
-            :context="{ appointmentId: record.id }"
+            :context="{ appointmentId }"
             :label="t('generateDocumentAction')"
             button-class="app-btn-outline"
           />
@@ -291,6 +332,16 @@
             @click="onClose"
           />
           <q-btn
+            v-if="showStaffTelehealthJoin"
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="videocam"
+            :label="t('telehealthJoinFromAppointment')"
+            @click="onJoinStaffTelehealth"
+          />
+          <q-btn
             v-if="canViewClient && record?.clientId"
             no-caps
             unelevated
@@ -311,16 +362,29 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { copyToClipboard, useQuasar } from 'quasar'
-import { appointmentStatuses } from 'components/constants.js'
+import {
+  appointmentStatuses,
+  telehealthRoles,
+} from 'components/constants.js'
 import {
   formatUtcDateLong,
   formatUtcTimeRange,
 } from 'src/utils/appointment-datetime.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { useTelehealthPermissions } from
+  'src/composables/useTelehealthPermissions.js'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
+import {
+  canStartTelehealthForAppointmentStatus,
+  isTelemedicineAppointment,
+} from 'src/utils/telehealth-normalize.js'
+import {
+  copyTelehealthInviteUrl,
+  openTelehealthInviteUrl,
+} from 'src/utils/telehealth-appointment-ui.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -333,11 +397,55 @@ const { t } = useI18n()
 const router = useRouter()
 const $q = useQuasar()
 const { canViewClient } = useClientPermissions()
+const {
+  canCreateTelehealth,
+  canJoinTelehealth,
+} = useTelehealthPermissions()
 
 const open = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value),
 })
+
+const appointmentId = computed(() =>
+  props.record?.appointmentId ?? props.record?.id ?? null,
+)
+
+const telehealthInviteUrl = computed(() =>
+  String(props.record?.telehealthInviteUrl ?? '').trim(),
+)
+
+const telehealthSessionId = computed(() =>
+  props.record?.telehealthSessionId ?? null,
+)
+
+const showTelehealthSection = computed(() =>
+  isTelemedicineAppointment(props.record),
+)
+
+const invitePending = computed(() =>
+  showTelehealthSection.value && !telehealthInviteUrl.value,
+)
+
+const showStaffTelehealthJoin = computed(() => {
+  if (!telehealthSessionId.value) {
+    return false
+  }
+  if (!(canJoinTelehealth.value || canCreateTelehealth.value)) {
+    return false
+  }
+  if (!canStartTelehealthForAppointmentStatus(props.record?.status)) {
+    return false
+  }
+
+  return showTelehealthSection.value
+})
+
+const placeOfServiceLabel = computed(() =>
+  props.record?.placeOfServiceDisplayName
+  || props.record?.placeOfServiceName
+  || '—',
+)
 
 const dateLabel = computed(() =>
   formatUtcDateLong(props.record?.startAtUtc) || '—',
@@ -471,6 +579,32 @@ function statusLabel(status) {
 
 function onClose() {
   open.value = false
+}
+
+async function onJoinStaffTelehealth() {
+  const sessionId = telehealthSessionId.value
+  if (!sessionId) {
+    $q.notify({
+      type: 'warning',
+      message: t('telehealthSessionPending'),
+    })
+
+    return
+  }
+  open.value = false
+  await router.push({
+    name: 'TelehealthSession',
+    params: { sessionId: String(sessionId) },
+    query: { role: telehealthRoles.clinician },
+  })
+}
+
+async function onCopyInvite() {
+  await copyTelehealthInviteUrl(telehealthInviteUrl.value, $q, t)
+}
+
+function onOpenMeet() {
+  openTelehealthInviteUrl(telehealthInviteUrl.value)
 }
 
 function copyAppointmentNumber() {

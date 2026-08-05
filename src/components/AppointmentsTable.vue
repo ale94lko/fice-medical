@@ -70,7 +70,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        {{ scope.row.placeOfServiceName || '—' }}
+        {{
+          scope.row.placeOfServiceDisplayName
+            || scope.row.placeOfServiceName
+            || '—'
+        }}
       </q-td>
     </template>
 
@@ -209,7 +213,8 @@ const columns = computed(() => [
     name: 'placeOfService',
     label: t('appointmentColPlaceOfService'),
     align: 'left',
-    field: row => row.placeOfServiceName,
+    field: row => row.placeOfServiceDisplayName
+      || row.placeOfServiceName,
     sortable: false,
     headerStyle: 'min-width: 110px',
     style: 'min-width: 110px',

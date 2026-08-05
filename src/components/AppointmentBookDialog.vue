@@ -116,6 +116,11 @@
                 class="text-caption text-grey-7 q-mt-xs">
                 {{ t('appointmentPlacesEmpty') }}
               </p>
+              <p
+                v-else-if="selectedPlaceIsTelemedicine"
+                class="text-caption text-grey-7 q-mt-xs">
+                {{ t('appointmentTelemedicineBookHint') }}
+              </p>
             </div>
 
             <div class="col-12">
@@ -418,6 +423,7 @@ import {
 } from 'src/utils/appointment-api.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
 import {
+  isTelemedicinePlaceOfService,
   listActivePlacesOfService,
   resolveDefaultPlaceOfServiceId,
 } from 'src/utils/place-of-service-api.js'
@@ -632,13 +638,19 @@ const summarySupervisor = computed(() => {
   return match?.label ?? ''
 })
 
-const summaryPlaceOfService = computed(() => {
-  const match = placeOptions.value.find(
+const selectedPlaceOption = computed(() =>
+  placeOptions.value.find(
     opt => opt.value === draft.value.placeOfServiceId,
-  )
+  ) ?? null,
+)
 
-  return match?.label ?? '—'
-})
+const selectedPlaceIsTelemedicine = computed(() =>
+  isTelemedicinePlaceOfService(selectedPlaceOption.value?.raw ?? {}),
+)
+
+const summaryPlaceOfService = computed(() =>
+  selectedPlaceOption.value?.label ?? '—',
+)
 
 const summaryServices = computed(() =>
   serviceLines.value
@@ -1235,6 +1247,8 @@ function buildBookPayload() {
     service_procedure_ids: serviceProcedureIds.value,
     duration_minutes: totalDurationMinutes.value,
     place_of_service_id: draft.value.placeOfServiceId,
+    // Backend creates meet + invite when true (no front session POST).
+    telemedicine: selectedPlaceIsTelemedicine.value,
     client_id: Number(resolvedClientId.value),
     notes: draft.value.notes || null,
     clinician_id: selectedWindow.value?.clinicianId

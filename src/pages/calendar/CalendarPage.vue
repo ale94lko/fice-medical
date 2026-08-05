@@ -140,6 +140,8 @@ import {
   extractBookingConflicts,
 } from 'src/utils/appointment-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { notifyBookedAppointment } from
+  'src/utils/telehealth-appointment-ui.js'
 import { calendarTestIds } from 'src/test-ids/index.js'
 
 const { t } = useI18n()
@@ -246,7 +248,7 @@ async function onBookAppointment(body) {
         count: result.appointments.length,
       })
       : t('appointmentBookSuccess')
-    $q.notify({ type: 'positive', message })
+    notifyBookedAppointment($q, t, result, message)
     await reloadEvents()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {

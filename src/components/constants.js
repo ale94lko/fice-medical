@@ -942,7 +942,59 @@ export const clientPermissionNames = {
   addPharmacies: 'ADD_PHARMACIES',
   editPharmacies: 'EDIT_PHARMACIES',
   deletePharmacies: 'DELETE_PHARMACIES',
+  viewTelehealth: 'VIEW_TELEHEALTH',
+  createTelehealth: 'CREATE_TELEHEALTH',
+  manageTelehealth: 'MANAGE_TELEHEALTH',
+  joinTelehealth: 'JOIN_TELEHEALTH',
+  admitTelehealth: 'ADMIT_TELEHEALTH',
+  startTelehealth: 'START_TELEHEALTH',
+  finishTelehealth: 'FINISH_TELEHEALTH',
+  chatTelehealth: 'CHAT_TELEHEALTH',
+  uploadTelehealthFiles: 'UPLOAD_TELEHEALTH_FILES',
+  deleteTelehealthFiles: 'DELETE_TELEHEALTH_FILES',
 }
+
+export const telehealthSessionStatuses = {
+  scheduled: 'SCHEDULED',
+  waitingRoom: 'WAITING_ROOM',
+  ready: 'READY',
+  inProgress: 'IN_PROGRESS',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+  failed: 'FAILED',
+}
+
+export const telehealthParticipantStatuses = {
+  waiting: 'WAITING',
+  admitted: 'ADMITTED',
+  inSession: 'IN_SESSION',
+  left: 'LEFT',
+}
+
+export const telehealthRoles = {
+  clinician: 'CLINICIAN',
+  client: 'CLIENT',
+  guest: 'GUEST',
+}
+
+export const telehealthChatMessageTypes = {
+  text: 'TEXT',
+  system: 'SYSTEM',
+  join: 'JOIN',
+  leave: 'LEAVE',
+}
+
+export const telehealthFileCategories = {
+  clinicalDocument: 'CLINICAL_DOCUMENT',
+  labResult: 'LAB_RESULT',
+  prescription: 'PRESCRIPTION',
+  xray: 'XRAY',
+  consentForm: 'CONSENT_FORM',
+}
+
+export const telehealthHeartbeatIntervalMs = 30000
+
+export const telehealthChatBodyMaxLength = 4000
 
 export const appointmentStatuses = {
   pending: 'PENDING',
@@ -1284,6 +1336,69 @@ export const apiPaths = {
   referenceMedicationById: id => `/reference-data/v1/medications/${
     encodeURIComponent(String(id ?? '').trim())
   }`,
+  // Meet REST (JWT staff + public guest). SockJS stays at /telehealth.
+  telehealthSessions: '/meet/v1/sessions',
+  telehealthSession: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  telehealthSessionJoin: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/join`,
+  telehealthSessionLeave: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/leave`,
+  telehealthWaitingRoomReady: id => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/waiting-room/ready`,
+  telehealthSessionAdmit: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/admit`,
+  telehealthSessionStart: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/start`,
+  telehealthSessionFinish: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/finish`,
+  telehealthSessionParticipants: id => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/participants`,
+  telehealthSessionHeartbeat: id => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/heartbeat`,
+  telehealthSessionChat: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/chat`,
+  telehealthSessionChatMessage: (id, messageId) => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/chat/${encodeURIComponent(String(messageId ?? '').trim())}`,
+  telehealthSessionFiles: id => `/meet/v1/sessions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/files`,
+  telehealthSessionFileById: (id, fileId) => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
+  telehealthSessionFileDownload: (id, fileId) => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}/download`,
+  telehealthScreenShareStart: id => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/screen-share/start`,
+  telehealthScreenShareStop: id => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/screen-share/stop`,
+  telehealthSessionResendInvite: id => `/meet/v1/sessions/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/resend-invite`,
+  telehealthPublicJoin: '/meet/v1/public/join',
+  telehealthPublicLobby: '/meet/v1/public/lobby',
+  telehealthPublicSession: '/meet/v1/public/session',
+  telehealthPublicWaitingReady: '/meet/v1/public/waiting-room/ready',
+  telehealthPublicHeartbeat: '/meet/v1/public/heartbeat',
+  telehealthPublicLeave: '/meet/v1/public/leave',
+  telehealthPublicChat: '/meet/v1/public/chat',
+  telehealthPublicChatSend: '/meet/v1/public/chat/send',
+  // SockJS + STOMP only (HTTP URL; probes GET /telehealth/info).
+  telehealthSockJs: '/telehealth',
   clientLabs: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/labs`,

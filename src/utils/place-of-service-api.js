@@ -72,6 +72,23 @@ export function formatPlaceOfServiceOptionLabel(name, code) {
   return label || normalizedCode
 }
 
+/** CMS telehealth POS codes / name heuristics for appointment.telemedicine. */
+export function isTelemedicinePlaceOfService(place = {}) {
+  const code = String(place?.code ?? place?.placeOfServiceCode ?? '').trim()
+  if (code === '02' || code === '10') {
+    return true
+  }
+  const name = String(
+    place?.name ?? place?.placeOfServiceName ?? '',
+  ).toLowerCase()
+
+  return (
+    name.includes('tele')
+    || name.includes('virtual')
+    || name.includes('video')
+  )
+}
+
 export function mapPlaceOfServiceOptions(rows = []) {
   return rows
     .map(normalizePlaceOfServiceFromApi)

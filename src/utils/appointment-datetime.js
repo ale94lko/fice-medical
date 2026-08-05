@@ -9,17 +9,24 @@ import {
 } from 'src/utils/app-datetime.js'
 import { parseUsDateString } from 'src/utils/client-form.js'
 
-export function resolveTenantTimeZone() {
-  const configured = resolveIntlTimeZone(getAppDateTimeConfig().timezone)
-  if (configured) {
-    return configured
-  }
+/** Browser / OS local IANA zone (guest-facing displays). */
+export function resolveBrowserTimeZone() {
   try {
     // eslint-disable-next-line new-cap
     return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
   } catch {
     return 'UTC'
   }
+}
+
+/** Tenant/clinic zone from app config (staff scheduling). */
+export function resolveTenantTimeZone() {
+  const configured = resolveIntlTimeZone(getAppDateTimeConfig().timezone)
+  if (configured) {
+    return configured
+  }
+
+  return resolveBrowserTimeZone()
 }
 
 function parseUtcDate(iso) {

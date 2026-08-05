@@ -520,6 +520,13 @@ export function calendarBlockToAppointmentRecord(block) {
     endAtUtc: block.endAtUtc,
     durationMin: block.durationMin,
     status: block.status,
+    telemedicine: block.telemedicine === true,
+    telehealthInviteUrl: block.telehealthInviteUrl || null,
+    telehealthSessionId: block.telehealthSessionId ?? null,
+    placeOfServiceId: block.placeOfServiceId ?? null,
+    placeOfServiceName: block.placeOfServiceName || null,
+    placeOfServiceCode: block.placeOfServiceCode || null,
+    placeOfServiceDisplayName: block.placeOfServiceDisplayName || null,
   }
 }
 

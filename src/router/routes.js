@@ -197,6 +197,26 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/telehealth/sessions/:sessionId',
+    name: 'TelehealthSession',
+    component: () => import('pages/telehealth/TelehealthSessionPage.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAnyPermission: [
+        clientPermissionNames.viewTelehealth,
+        clientPermissionNames.joinTelehealth,
+        clientPermissionNames.createTelehealth,
+        clientPermissionNames.manageTelehealth,
+      ],
+    },
+  },
+  {
+    path: '/meet',
+    name: 'TelehealthMeet',
+    component: () => import('pages/telehealth/TelehealthMeetPage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
     path: '/login',
     component: () => import('layouts/LoginLayout.vue'),
     meta: { requiresAuth: false },

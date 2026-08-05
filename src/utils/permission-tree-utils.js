@@ -11,6 +11,13 @@ const ACTION_PREFIXES = [
   'RESCHEDULE_',
   'GENERATE_',
   'MANAGE_',
+  'CREATE_',
+  'JOIN_',
+  'ADMIT_',
+  'START_',
+  'FINISH_',
+  'CHAT_',
+  'UPLOAD_',
 ]
 
 const MODULE_LABELS = {
@@ -34,6 +41,8 @@ const MODULE_LABELS = {
   SCREENINGS: 'Screenings',
   SCREENING_TEMPLATES: 'Screening Templates',
   STAFF_MEMBERS: 'Staff Members',
+  TELEHEALTH: 'Telehealth',
+  TELEHEALTH_FILES: 'Telehealth Files',
   TENANTS: 'Tenants',
   TENANTS_BILLING: 'Billing',
   TENANTS_USER: 'Tenants User',
@@ -92,6 +101,8 @@ const MODULE_ICONS = {
   SCREENINGS: 'monitor_heart',
   SCREENING_TEMPLATES: 'fact_check',
   STAFF_MEMBERS: 'badge',
+  TELEHEALTH: 'videocam',
+  TELEHEALTH_FILES: 'attach_file',
   TENANTS: 'apartment',
   TENANTS_BILLING: 'payments',
   TENANTS_USER: 'manage_accounts',

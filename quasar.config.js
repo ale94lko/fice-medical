@@ -28,6 +28,10 @@ function devApiProxy(target) {
     '/staff': { ...o },
     '/logout': { ...o },
     '/reference-data': { ...o },
+    // Meet REST API
+    '/meet': { ...o },
+    // SockJS + STOMP (not REST)
+    '/telehealth': { ...o, ws: true },
   }
 }
 
@@ -101,7 +105,12 @@ export default defineConfig((ctx) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.define = {
+          ...(viteConf.define || {}),
+          global: 'globalThis',
+        }
+      },
       // viteVuePluginOptions: {},
       extendWebpack(cfg) {
         cfg.output.filename = '[name].[hash].js'

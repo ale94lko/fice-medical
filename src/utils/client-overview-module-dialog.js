@@ -561,7 +561,9 @@ function buildAppointmentsDialogDetail({ rawClient }) {
       status: display(item.status),
       clinician: display(item.clinicianDisplayName),
       duration: item.durationMin ? `${item.durationMin} min` : '—',
-      placeOfService: display(item.placeOfServiceName),
+      placeOfService: display(
+        item.placeOfServiceDisplayName || item.placeOfServiceName,
+      ),
       notes: display(item.notes),
     }))
 

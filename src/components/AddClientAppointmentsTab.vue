@@ -132,6 +132,8 @@ import {
 } from 'src/utils/appointment-api.js'
 import { mapAppointmentsList } from 'src/utils/appointment-normalize.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { notifyBookedAppointment } from
+  'src/utils/telehealth-appointment-ui.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
@@ -248,13 +250,12 @@ async function onBook(body) {
   try {
     const result = await bookAppointment(body)
     bookDrawerOpen.value = false
-    if (result.appointments?.length) {
-      notifySuccess(t('appointmentBookSeriesSuccess', {
+    const message = result.appointments?.length
+      ? t('appointmentBookSeriesSuccess', {
         count: result.appointments.length,
-      }))
-    } else {
-      notifySuccess(t('appointmentBookSuccess'))
-    }
+      })
+      : t('appointmentBookSuccess')
+    notifyBookedAppointment($q, t, result, message)
     await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {

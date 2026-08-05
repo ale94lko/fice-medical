@@ -18,6 +18,43 @@ function parseOptionalBool(value) {
   return value === true || value === 'true' || value === 1 || value === '1'
 }
 
+function resolvePlaceOfServiceFields(row = {}) {
+  const nested = row.place_of_service ?? row.placeOfService
+  const nestedObj = nested && typeof nested === 'object' ? nested : null
+  const id = parseOptionalNumber(
+    row.place_of_service_id
+    ?? row.placeOfServiceId
+    ?? nestedObj?.id,
+  )
+  const code = trim(
+    row.place_of_service_code
+    ?? row.placeOfServiceCode
+    ?? nestedObj?.code,
+  )
+  const name = trim(
+    row.place_of_service_name
+    ?? row.placeOfServiceName
+    ?? nestedObj?.name,
+  )
+  const displayName = trim(
+    row.place_of_service_display_name
+    ?? row.placeOfServiceDisplayName
+    ?? nestedObj?.display_name
+    ?? nestedObj?.displayName,
+  ) || (
+    code && name
+      ? `${code} - ${name}`
+      : (name || code)
+  )
+
+  return {
+    placeOfServiceId: id,
+    placeOfServiceCode: code,
+    placeOfServiceName: name,
+    placeOfServiceDisplayName: displayName || null,
+  }
+}
+
 export function normalizeAppointmentClinician(raw) {
   const row = raw ?? {}
   const id = parseOptionalNumber(row.id ?? row.clinician_id)
@@ -187,6 +224,13 @@ function normalizeAvailabilityAppointmentBlock(raw) {
     serviceProcedures: appointment.serviceProcedures,
     status: appointment.status,
     durationMin: appointment.durationMin,
+    telemedicine: appointment.telemedicine,
+    telehealthInviteUrl: appointment.telehealthInviteUrl,
+    telehealthSessionId: appointment.telehealthSessionId,
+    placeOfServiceId: appointment.placeOfServiceId,
+    placeOfServiceName: appointment.placeOfServiceName,
+    placeOfServiceCode: appointment.placeOfServiceCode,
+    placeOfServiceDisplayName: appointment.placeOfServiceDisplayName,
   }
 }
 
@@ -229,6 +273,14 @@ export function normalizeAvailabilityCalendarBlock(raw) {
     durationMin: parseOptionalNumber(
       row.duration_min ?? row.durationMin,
     ),
+    telemedicine: parseOptionalBool(row.telemedicine),
+    telehealthInviteUrl: trim(
+      row.telehealth_invite_url ?? row.telehealthInviteUrl,
+    ) || null,
+    telehealthSessionId: parseOptionalNumber(
+      row.telehealth_session_id ?? row.telehealthSessionId,
+    ),
+    ...resolvePlaceOfServiceFields(row),
   }
 }
 
@@ -272,15 +324,7 @@ export function normalizeAppointment(raw) {
     ) || formatClinicianDisplayLabel(row.supervisor),
     serviceProcedures,
     servicesLabel,
-    placeOfServiceId: parseOptionalNumber(
-      row.place_of_service_id ?? row.placeOfServiceId,
-    ),
-    placeOfServiceName: trim(
-      row.place_of_service_name ?? row.placeOfServiceName,
-    ),
-    placeOfServiceCode: trim(
-      row.place_of_service_code ?? row.placeOfServiceCode,
-    ),
+    ...resolvePlaceOfServiceFields(row),
     appointmentTypeId: parseOptionalNumber(
       row.appointment_type_id ?? row.appointmentTypeId,
     ),
@@ -297,6 +341,12 @@ export function normalizeAppointment(raw) {
     telemedicine: parseOptionalBool(row.telemedicine),
     telemedicineAllowed: parseOptionalBool(
       row.telemedicine_allowed ?? row.telemedicineAllowed,
+    ),
+    telehealthInviteUrl: trim(
+      row.telehealth_invite_url ?? row.telehealthInviteUrl,
+    ) || null,
+    telehealthSessionId: parseOptionalNumber(
+      row.telehealth_session_id ?? row.telehealthSessionId,
     ),
     notes: trim(row.notes) || null,
     referralId: parseOptionalNumber(row.referral_id ?? row.referralId),
