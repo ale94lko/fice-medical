@@ -32,7 +32,11 @@
       <q-card-section
         class="app-dialog-card__body appointment-detail-dialog__body
           q-px-lg q-pt-md q-pb-md">
-        <div class="appointment-detail-dialog__hero">
+        <div class="appointment-detail-dialog__hero"
+          :class="{
+            'appointment-detail-dialog__hero--with-telehealth':
+              showTelehealthSection,
+          }">
           <div class="appointment-detail-dialog__hero-card">
             <div class="appointment-detail-dialog__hero-icon">
               <q-icon name="assignment" size="20px" />
@@ -77,6 +81,44 @@
               <p class="appointment-detail-dialog__hero-status-hint">
                 {{ statusHint }}
               </p>
+            </div>
+          </div>
+
+          <div
+            v-if="showTelehealthSection"
+            class="appointment-detail-dialog__hero-card
+              appointment-detail-dialog__hero-card--telehealth">
+            <div
+              class="appointment-detail-dialog__hero-icon
+                appointment-detail-dialog__hero-icon--telehealth">
+              <q-icon name="videocam" size="20px" />
+            </div>
+            <div class="appointment-detail-dialog__hero-telehealth">
+              <p class="appointment-detail-dialog__hero-label">
+                {{ t('telehealthAppointmentSection') }}
+              </p>
+              <p
+                v-if="invitePending"
+                class="appointment-detail-dialog__hero-status-hint">
+                {{ t('telehealthInvitePending') }}
+              </p>
+              <div
+                v-else-if="telehealthInviteUrl"
+                class="appointment-detail-dialog__hero-value-row">
+                <p class="appointment-detail-dialog__hero-value">
+                  {{ t('telehealthClientInviteLabel') }}
+                </p>
+                <q-btn
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  icon="content_copy"
+                  :aria-label="t('telehealthCopyClientLink')"
+                  :title="t('telehealthCopyClientLink')"
+                  @click="onCopyInvite"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -195,47 +237,6 @@
             </div>
           </div>
         </div>
-
-        <section
-          v-if="showTelehealthSection"
-          class="appointment-detail-dialog__telehealth-card q-mb-md">
-          <h3 class="appointment-detail-dialog__section-heading">
-            <q-icon name="videocam" size="18px" />
-            {{ t('telehealthAppointmentSection') }}
-          </h3>
-          <p
-            v-if="invitePending"
-            class="text-body2 text-grey-7 q-mb-sm">
-            {{ t('telehealthInvitePending') }}
-          </p>
-          <p
-            v-else-if="telehealthInviteUrl"
-            class="text-body2 text-grey-7 q-mb-sm">
-            {{ t('telehealthClientInviteHint') }}
-          </p>
-          <div
-            v-if="telehealthInviteUrl"
-            class="appointment-detail-dialog__telehealth-actions">
-            <q-btn
-              no-caps
-              outline
-              color="primary"
-              class="app-btn-outline"
-              icon="content_copy"
-              :label="t('telehealthCopyInvite')"
-              @click="onCopyInvite"
-            />
-            <q-btn
-              no-caps
-              outline
-              color="primary"
-              class="app-btn-outline"
-              icon="open_in_new"
-              :label="t('telehealthOpenMeet')"
-              @click="onOpenMeet"
-            />
-          </div>
-        </section>
 
         <div class="appointment-detail-dialog__lower">
           <section class="appointment-detail-dialog__notes-card">
@@ -383,7 +384,6 @@ import {
 } from 'src/utils/telehealth-normalize.js'
 import {
   copyTelehealthInviteUrl,
-  openTelehealthInviteUrl,
 } from 'src/utils/telehealth-appointment-ui.js'
 
 const props = defineProps({
@@ -601,10 +601,6 @@ async function onJoinStaffTelehealth() {
 
 async function onCopyInvite() {
   await copyTelehealthInviteUrl(telehealthInviteUrl.value, $q, t)
-}
-
-function onOpenMeet() {
-  openTelehealthInviteUrl(telehealthInviteUrl.value)
 }
 
 function copyAppointmentNumber() {

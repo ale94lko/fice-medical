@@ -71,8 +71,22 @@
     gap: 12px;
     margin-bottom: 16px;
 
+    &--with-telehealth {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    @media (max-width: 899px) {
+      &--with-telehealth {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     @media (max-width: 767px) {
       grid-template-columns: 1fr;
+
+      &--with-telehealth {
+        grid-template-columns: 1fr;
+      }
     }
   }
 
@@ -85,6 +99,21 @@
     border-radius: $radius-md;
     background: $surface;
     min-width: 0;
+  }
+
+  &__hero-card--telehealth {
+    border-color: rgba($primary, 0.28);
+    background: rgba($primary, 0.05);
+  }
+
+  &__hero-icon--telehealth {
+    color: $primary;
+    background: rgba($primary, 0.12);
+  }
+
+  &__hero-telehealth {
+    min-width: 0;
+    flex: 1 1 auto;
   }
 
   &__hero-card--status {

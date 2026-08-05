@@ -122,10 +122,11 @@
               dense
               :icon="scope.row[fk.pinned] ? 'push_pin' : 'outlined_flag'"
               :color="scope.row[fk.pinned] ? 'primary' : 'grey-7'"
-              :disable="!scope.row[fk.pinned] && pinnedCount >= pinnedMax"
+              :disable="isPinActionDisabled(scope.row)"
               :aria-label="scope.row[fk.pinned]
                 ? t('clinicalResourceUnpin')
                 : t('clinicalResourcePin')"
+              :title="pinActionTitle(scope.row)"
               :data-testid="clinicalResourceTestIds.rowPin(scope.row.id)"
               @click="togglePin(scope.row)"
             />
@@ -702,6 +703,9 @@ async function toggleFavorite(row) {
 }
 
 async function togglePin(row) {
+  if (isPinActionDisabled(row)) {
+    return
+  }
   const mutation = row[fk.pinned]
     ? () => unpinClinicalResource(row.id)
     : () => pinClinicalResource(row.id)
@@ -715,6 +719,34 @@ async function togglePin(row) {
     await refreshPinnedCount()
     void reloadList()
   }
+}
+
+function isInactiveResource(row) {
+  return String(row?.status ?? '').toUpperCase()
+    !== clinicalResourceStatusValues.active
+}
+
+function isInactivePinBlocked(row) {
+  return !row?.[fk.pinned] && isInactiveResource(row)
+}
+
+function isPinActionDisabled(row) {
+  if (isInactivePinBlocked(row)) {
+    return true
+  }
+
+  return !row?.[fk.pinned] && pinnedCount.value >= pinnedMax
+}
+
+function pinActionTitle(row) {
+  if (isInactivePinBlocked(row)) {
+    return t('clinicalResourcePinInactiveDisabled')
+  }
+  if (row?.[fk.pinned]) {
+    return t('clinicalResourceUnpin')
+  }
+
+  return t('clinicalResourcePin')
 }
 
 async function toggleResourceStatus(row) {

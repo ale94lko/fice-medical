@@ -2522,6 +2522,8 @@ export default {
   clinicalResourceToggleFavorite: 'Toggle favorite',
   clinicalResourcePin: 'Pin resource',
   clinicalResourceUnpin: 'Unpin resource',
+  clinicalResourcePinInactiveDisabled:
+    'Only active resources can be pinned.',
   clinicalResourcePinnedCounter: '{count}/{max} pinned',
   clinicalResourcePinError: 'Could not update pinned state.',
   clinicalResourceFavoriteError: 'Could not update favorite.',
@@ -2806,6 +2808,7 @@ export default {
   telehealthAppointmentSection: 'Telehealth',
   telehealthJoinFromAppointment: 'Join teleconsult',
   telehealthCopyInvite: 'Copy invite',
+  telehealthCopyClientLink: 'Copy client link',
   telehealthOpenMeet: 'Open meet',
   telehealthInvitePending:
     'Client invite link is pending (meet creation or notification failed).',

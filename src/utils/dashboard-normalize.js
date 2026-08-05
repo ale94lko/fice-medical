@@ -287,6 +287,16 @@ export function humanizeWidgetFieldKey(key) {
 export function resolveDashboardNavigation(widget, item = null) {
   const row = item && typeof item === 'object' ? item : null
   if (row) {
+    // Appointment rows often include client_id; prefer opening details.
+    const appointmentId = trimString(
+      row.appointment_id ?? row.appointmentId,
+    )
+    if (appointmentId) {
+      return {
+        action: 'appointmentDetail',
+        appointmentId,
+      }
+    }
     const clientId = trimString(row.client_id ?? row.clientId)
     if (clientId) {
       return {
@@ -297,15 +307,6 @@ export function resolveDashboardNavigation(widget, item = null) {
     const itemLink = trimString(row.deep_link ?? row.deepLink)
     if (itemLink) {
       return { path: itemLink }
-    }
-    const appointmentId = trimString(
-      row.appointment_id ?? row.appointmentId,
-    )
-    if (appointmentId) {
-      return {
-        name: 'Calendar',
-        query: { appointment_id: appointmentId },
-      }
     }
   }
   const widgetLink = trimString(widget?.deepLink ?? widget?.deep_link)

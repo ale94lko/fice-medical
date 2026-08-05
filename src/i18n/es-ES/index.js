@@ -2617,6 +2617,8 @@ export default {
   clinicalResourceToggleFavorite: 'Alternar favorito',
   clinicalResourcePin: 'Fijar recurso',
   clinicalResourceUnpin: 'Desfijar recurso',
+  clinicalResourcePinInactiveDisabled:
+    'Solo se pueden fijar recursos activos.',
   clinicalResourcePinnedCounter: '{count}/{max} fijados',
   clinicalResourcePinError: 'No se pudo actualizar el estado fijado.',
   clinicalResourceFavoriteError: 'No se pudo actualizar el favorito.',
@@ -2925,6 +2927,7 @@ export default {
   telehealthAppointmentSection: 'Teleconsulta',
   telehealthJoinFromAppointment: 'Unirse a teleconsulta',
   telehealthCopyInvite: 'Copiar enlace',
+  telehealthCopyClientLink: 'Copiar enlace del cliente',
   telehealthOpenMeet: 'Abrir meet',
   telehealthInvitePending:
     'El enlace del cliente está pendiente (falló la creación o el aviso).',

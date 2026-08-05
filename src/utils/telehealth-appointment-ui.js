@@ -45,43 +45,20 @@ export function openTelehealthInviteUrl(url) {
   window.open(value, '_blank', 'noopener,noreferrer')
 }
 
-/**
- * Success notify after book; adds copy/open when invite is present.
- */
+/** Success notify after booking an appointment. */
 export function notifyBookedAppointment($q, t, result, baseMessage) {
   const appointment = pickBookedAppointment(result)
-  if (!appointment?.telemedicine) {
-    $q.notify({ type: 'positive', message: baseMessage })
+  if (appointment?.telemedicine) {
+    const inviteUrl = String(appointment.telehealthInviteUrl ?? '').trim()
+    if (!inviteUrl) {
+      $q.notify({
+        type: 'warning',
+        message: `${baseMessage} ${t('telehealthInvitePending')}`,
+        timeout: 7000,
+      })
 
-    return
+      return
+    }
   }
-  const inviteUrl = String(appointment.telehealthInviteUrl ?? '').trim()
-  if (!inviteUrl) {
-    $q.notify({
-      type: 'warning',
-      message: `${baseMessage} ${t('telehealthInvitePending')}`,
-      timeout: 7000,
-    })
-
-    return
-  }
-  $q.notify({
-    type: 'positive',
-    message: baseMessage,
-    timeout: 9000,
-    actions: [
-      {
-        label: t('telehealthCopyInvite'),
-        color: 'white',
-        handler: () => {
-          void copyTelehealthInviteUrl(inviteUrl, $q, t)
-        },
-      },
-      {
-        label: t('telehealthOpenMeet'),
-        color: 'white',
-        handler: () => openTelehealthInviteUrl(inviteUrl),
-      },
-    ],
-  })
+  $q.notify({ type: 'positive', message: baseMessage })
 }

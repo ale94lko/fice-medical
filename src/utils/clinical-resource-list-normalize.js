@@ -131,7 +131,18 @@ function clinicalResourcePriorityRank(row) {
   const pinned = Boolean(row?.[fk.pinned])
   const favorite = Boolean(row?.[fk.favorite])
   const status = String(row?.[fk.status] ?? '').toUpperCase()
+  const isActive = status === clinicalResourceStatusValues.active
 
+  // Inactive (and other non-active) always last — even if favorite/pinned.
+  if (!isActive) {
+    if (status === clinicalResourceStatusValues.inactive) {
+      return 4
+    }
+
+    return 5
+  }
+
+  // Active only:
   // 1) pinned + favorite
   if (pinned && favorite) {
     return 0
@@ -145,15 +156,8 @@ function clinicalResourcePriorityRank(row) {
     return 2
   }
   // 4) active
-  if (status === clinicalResourceStatusValues.active) {
-    return 3
-  }
-  // 5) inactive (and any other non-active status last)
-  if (status === clinicalResourceStatusValues.inactive) {
-    return 4
-  }
 
-  return 5
+  return 3
 }
 
 function resolveClinicalResourceSortValue(row, sortBy) {
@@ -200,12 +204,12 @@ function compareSortValues(a, b) {
 }
 
 /**
- * Priority:
+ * Priority (active first):
  * 1) pinned + favorite
  * 2) pinned
  * 3) favorite
  * 4) active
- * 5) inactive
+ * 5) inactive (always last, even if favorite)
  * Within each group, apply the active column sort.
  */
 export function sortClinicalResourceRows(

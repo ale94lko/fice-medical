@@ -102,6 +102,11 @@
         </div>
       </div>
     </template>
+
+    <AppointmentDetailDialog
+      v-model="appointmentDetailOpen"
+      :record="appointmentDetailRecord"
+    />
   </q-page>
 </template>
 
@@ -115,10 +120,13 @@ import AdminListPageActions from
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import AppointmentDetailDialog from 'components/AppointmentDetailDialog.vue'
 import DashboardWidget from 'components/dashboard/DashboardWidget.vue'
 import DashboardWidgetCard from
   'components/dashboard/DashboardWidgetCard.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { fetchAppointment } from 'src/utils/appointment-api.js'
 import {
   fetchDashboard,
   fetchDashboardConfig,
@@ -150,6 +158,8 @@ const gridEl = ref(null)
 const dragSourceId = ref(null)
 const lastReorderHover = ref(null)
 const dragOrderDirty = ref(false)
+const appointmentDetailOpen = ref(false)
+const appointmentDetailRecord = ref(null)
 const dragAutoScroll = createDragAutoScroll()
 let persistSeq = 0
 
@@ -451,12 +461,39 @@ function onDragOver(hoverIndex, event) {
   dragOrderDirty.value = true
 }
 
+async function openAppointmentDetail(appointmentId) {
+  const id = String(appointmentId ?? '').trim()
+  if (!id) {
+    return
+  }
+  loading.value = true
+  try {
+    appointmentDetailRecord.value = await fetchAppointment(id)
+    appointmentDetailOpen.value = true
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('appointmentActionError'),
+      })
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
 function onNavigate(target) {
   if (editMode.value || !target) {
     return
   }
+  if (target.action === 'appointmentDetail') {
+    void openAppointmentDetail(target.appointmentId)
+
+    return
+  }
   if (typeof target === 'string') {
     void router.push(target)
+
     return
   }
   void router.push(target)

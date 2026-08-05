@@ -105,6 +105,7 @@ const rows = computed(() =>
 function rowKey(row, index) {
   return String(
     row?.id
+      ?? row?.appointment_id
       ?? row?.client_id
       ?? row?.resource_id
       ?? index,

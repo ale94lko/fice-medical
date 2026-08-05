@@ -42,8 +42,8 @@ export function buildClinicalResourceListParams(state) {
     limit: state.tablePagination.value.rowsPerPage,
     q: state.searchQuery.value,
     // Omit status so ACTIVE + INACTIVE are returned (archived excluded
-    // by API default). Client-side sort groups: pinned+favorite → pinned
-    // → favorite → active → inactive.
+    // by API default). Client-side sort: active (pinned+favorite → pinned
+    // → favorite → rest), then inactive last (even if favorite).
   }
 }
 
