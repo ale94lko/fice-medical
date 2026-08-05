@@ -230,10 +230,19 @@ export function useTelehealthWebRtc() {
     return stream
   }
 
+  function resolveIceServers(iceServers = []) {
+    if (Array.isArray(iceServers) && iceServers.length) {
+      return iceServers
+    }
+    // Fallback STUN so peers behind NAT can still gather candidates
+    // when the session payload omits ice_servers.
+    return [{ urls: 'stun:stun.l.google.com:19302' }]
+  }
+
   function createPeerConnection(iceServers = []) {
     closePeerConnection({ keepLocal: true })
     pc = new RTCPeerConnection({
-      iceServers: Array.isArray(iceServers) ? iceServers : [],
+      iceServers: resolveIceServers(iceServers),
     })
     connectionState.value = pc.connectionState || 'new'
 
@@ -254,6 +263,11 @@ export function useTelehealthWebRtc() {
     }
 
     pc.onnegotiationneeded = () => {
+      // 1:1 telehealth: only the impolite peer (clinician) offers.
+      // Polite peer (client/guest) only answers — avoids glare.
+      if (polite) {
+        return
+      }
       void renegotiate()
     }
 
@@ -271,21 +285,20 @@ export function useTelehealthWebRtc() {
     return pc
   }
 
-  async function renegotiate() {
-    if (!pc || !sendSignal) {
-      return
+  async function createAndSendOffer() {
+    if (!pc || !sendSignal || polite) {
+      return false
     }
-    // Wait until stable so we never stack a second local offer.
     if (makingOffer || pc.signalingState !== 'stable') {
       renegotiateQueued = true
 
-      return
+      return false
     }
     makingOffer = true
     try {
       const offer = await pc.createOffer()
       if (!pc || pc.signalingState !== 'stable') {
-        return
+        return false
       }
       await pc.setLocalDescription(offer)
       sendSignal({
@@ -294,16 +307,21 @@ export function useTelehealthWebRtc() {
         fromParticipantId: selfParticipantId,
         toParticipantId: remoteParticipantId,
       })
+
+      return true
     } catch {
-      // ignore glare / closed PC
+      return false
     } finally {
       makingOffer = false
       if (renegotiateQueued && pc?.signalingState === 'stable') {
         renegotiateQueued = false
         void renegotiate()
       }
-      // If still negotiating, keep renegotiateQueued for answer/offer handlers.
     }
+  }
+
+  async function renegotiate() {
+    await createAndSendOffer()
   }
 
   function applyScreenShareToPeer() {
@@ -326,7 +344,11 @@ export function useTelehealthWebRtc() {
       return
     }
     screenSender = pc.addTrack(displayTrack, screenStream.value)
-    void renegotiate()
+    // Only the clinician (impolite) drives offers; guest screen share
+    // relies on a peer_ready-style renegotiation from the clinician.
+    if (!polite) {
+      void renegotiate()
+    }
   }
 
   function preparePeer({
@@ -350,8 +372,6 @@ export function useTelehealthWebRtc() {
     publishSignal,
     isPolite = false,
   }) {
-    // Only prepare the PC. Offers come from onnegotiationneeded so we
-    // do not race a second createOffer (causes "answer in state stable").
     preparePeer({
       iceServers,
       selfId,
@@ -359,6 +379,10 @@ export function useTelehealthWebRtc() {
       publishSignal,
       isPolite,
     })
+    // Clinician: send offer immediately. Client: wait for remote offer.
+    if (!polite) {
+      await createAndSendOffer()
+    }
   }
 
   async function handleSignal(payload) {
@@ -417,27 +441,24 @@ export function useTelehealthWebRtc() {
     }
 
     if (type === 'offer') {
-      const offerCollision = makingOffer
-        || pc.signalingState !== 'stable'
-      ignoreOffer = !polite && offerCollision
-      if (ignoreOffer) {
+      // Clinician never accepts remote offers (sole offerer).
+      if (!polite) {
         return
       }
-      // Perfect negotiation: polite peer rolls back local offer on glare.
-      if (offerCollision && polite) {
-        await Promise.all([
-          pc.setLocalDescription({ type: 'rollback' }),
-          pc.setRemoteDescription({
-            type: 'offer',
-            sdp: payload.sdp,
-          }),
-        ])
-      } else {
-        await pc.setRemoteDescription({
-          type: 'offer',
-          sdp: payload.sdp,
-        })
+      if (Number.isFinite(fromId)) {
+        remoteParticipantId = fromId
       }
+      if (pc.signalingState !== 'stable') {
+        try {
+          await pc.setLocalDescription({ type: 'rollback' })
+        } catch {
+          // ignore if rollback unsupported / unnecessary
+        }
+      }
+      await pc.setRemoteDescription({
+        type: 'offer',
+        sdp: payload.sdp,
+      })
       await flushPendingIceCandidates()
       const answer = await pc.createAnswer()
       await pc.setLocalDescription(answer)
@@ -447,10 +468,6 @@ export function useTelehealthWebRtc() {
         fromParticipantId: selfParticipantId,
         toParticipantId: fromId || remoteParticipantId,
       })
-      if (renegotiateQueued && pc.signalingState === 'stable') {
-        renegotiateQueued = false
-        void renegotiate()
-      }
 
       return
     }
@@ -653,6 +670,7 @@ export function useTelehealthWebRtc() {
     stopScreenShare,
     setRemoteScreenSharing,
     createPeerConnection,
+    closePeerConnection,
     applyScreenShareToPeer,
     cleanup,
   }

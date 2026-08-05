@@ -110,22 +110,36 @@ function isParticipantInCallStatus(status) {
   )
 }
 
+function isParticipantLeft(status) {
+  const token = String(status ?? '').toUpperCase()
+
+  return token === telehealthParticipantStatuses.left || token === 'LEFT'
+}
+
 function findRemoteParticipant(session, selfId, selfRole) {
+  const selfNum = Number(selfId)
   const list = (session?.participants ?? []).filter(
-    p => p.id != null && p.id !== selfId,
+    p => p.id != null && Number(p.id) !== selfNum,
   )
-  // Only peers already in the call — waiting-room clients are not on
-  // the signaling channel yet, so an early offer would be lost.
-  const active = list.filter(p => isParticipantInCallStatus(p.status))
+  // Clinician: only offer to admitted clients (not waiting-room).
   if (selfRole === telehealthRoles.clinician) {
+    const active = list.filter(p => isParticipantInCallStatus(p.status))
+
     return active.find(p => isClientLikeRole(p.role))
       || active[0]
       || null
   }
 
-  return active.find(p => p.role === telehealthRoles.clinician)
-    || active[0]
-    || null
+  // Client/guest: clinician may not use ADMITTED — still connect to them.
+  const clinicianPeer = list.find(
+    p => p.role === telehealthRoles.clinician && !isParticipantLeft(p.status),
+  )
+  if (clinicianPeer) {
+    return clinicianPeer
+  }
+  const active = list.filter(p => isParticipantInCallStatus(p.status))
+
+  return active[0] || null
 }
 
 function isParticipantAdmitted(participant) {
@@ -753,6 +767,8 @@ function createTelehealthSessionState() {
         await webrtc.getLocalMedia({ audio: true, video: true })
       }
       connectStompAndCall()
+      scheduleGuestWebRtcRetries()
+      scheduleClinicianOfferRetries()
       await loadChat()
       if (!isGuest.value) {
         await loadFiles()
@@ -808,45 +824,46 @@ function createTelehealthSessionState() {
       if (isWebRtcConnected()) {
         return
       }
-      // Stuck after a simultaneous-join race — rebuild the PC.
       if (shouldRecoverWebRtc()) {
         shouldForce = true
       } else {
         return
       }
     }
-    if (shouldForce) {
-      webrtc.closePeerConnection({ keepLocal: true })
+    try {
+      if (shouldForce) {
+        webrtc.closePeerConnection({ keepLocal: true })
+        webrtcStarted = false
+      }
+      webrtcStarted = true
+      const isClinicianPeer = role.value === telehealthRoles.clinician
+      webrtc.startCall({
+        iceServers: session.value?.iceServers ?? [],
+        selfId: selfParticipantId.value,
+        remoteId: remote.id,
+        publishSignal: body => stomp?.sendSignal(body),
+        // Client/guest is polite (answers only). Clinician offers.
+        isPolite: !isClinicianPeer,
+      }).then(() => {
+        if (isClinicianPeer) {
+          return
+        }
+        // Tell clinician we are on /signal and ready for an offer.
+        announcePeerReady(remote.id)
+        ;[1000, 2500, 5000].forEach(delayMs => {
+          window.setTimeout(() => {
+            if (phase.value !== 'in_call' || isWebRtcConnected()) {
+              return
+            }
+            announcePeerReady(remote.id)
+          }, delayMs)
+        })
+      }).catch(() => {
+        webrtcStarted = false
+      })
+    } catch {
       webrtcStarted = false
     }
-    webrtcStarted = true
-    const polite = role.value !== telehealthRoles.clinician
-    webrtc.startCall({
-      iceServers: session.value?.iceServers ?? [],
-      selfId: selfParticipantId.value,
-      remoteId: remote.id,
-      publishSignal: body => stomp?.sendSignal(body),
-      isPolite: polite,
-    }).then(() => {
-      // Client announces it can receive offers (clinician may have
-      // offered while this peer was still in the waiting room).
-      if (!polite) {
-        return
-      }
-      announcePeerReady(remote.id)
-      // Retry once — peer_ready is often missed if both click Join together.
-      window.setTimeout(() => {
-        if (
-          phase.value === 'in_call'
-          && !isWebRtcConnected()
-          && role.value !== telehealthRoles.clinician
-        ) {
-          announcePeerReady(remote.id)
-        }
-      }, 1500)
-    }).catch(() => {
-      webrtcStarted = false
-    })
   }
 
   async function onPeerReadySignal() {
@@ -859,9 +876,52 @@ function createTelehealthSessionState() {
     try {
       await refreshSession()
     } catch {
-      // Still attempt a renegotiation with current session snapshot.
+      // use current session snapshot
     }
+    // Always rebuild + offer when guest announces ready.
     tryStartWebRtc({ force: true })
+    // If still not connected, offer again shortly.
+    window.setTimeout(() => {
+      if (phase.value === 'in_call' && !isWebRtcConnected()) {
+        tryStartWebRtc({ force: true })
+      }
+    }, 2000)
+  }
+
+  function scheduleGuestWebRtcRetries() {
+    if (role.value === telehealthRoles.clinician) {
+      return
+    }
+    ;[500, 1500, 3000].forEach(delayMs => {
+      window.setTimeout(() => {
+        if (phase.value !== 'in_call' || isWebRtcConnected()) {
+          return
+        }
+        tryStartWebRtc({ force: !webrtcStarted ? false : delayMs >= 1500 })
+      }, delayMs)
+    })
+  }
+
+  function scheduleClinicianOfferRetries() {
+    if (role.value !== telehealthRoles.clinician) {
+      return
+    }
+    ;[2000, 5000, 8000].forEach(delayMs => {
+      window.setTimeout(() => {
+        if (phase.value !== 'in_call' || isWebRtcConnected()) {
+          return
+        }
+        const remote = findRemoteParticipant(
+          session.value,
+          selfParticipantId.value,
+          role.value,
+        )
+        if (!remote?.id) {
+          return
+        }
+        tryStartWebRtc({ force: true })
+      }, delayMs)
+    })
   }
 
   function connectStompAndCall() {
@@ -1144,21 +1204,9 @@ function createTelehealthSessionState() {
         participantId,
       )
       applySession(next)
-      // Peer may still be connecting STOMP — start now and retry if idle.
-      tryStartWebRtc()
-      window.setTimeout(() => {
-        if (phase.value !== 'in_call' || isWebRtcConnected()) {
-          return
-        }
-        if (!webrtcStarted) {
-          tryStartWebRtc()
-
-          return
-        }
-        if (shouldRecoverWebRtc()) {
-          tryStartWebRtc({ force: true })
-        }
-      }, 1200)
+      // Do not offer WebRTC yet — guest is still on waiting STOMP (no
+      // /signal). Guest sends peer_ready after ensureInCallMedia; that
+      // triggers the clinician offer.
     } catch (err) {
       setError(err, 'Could not admit participant')
       throw err
