@@ -8,7 +8,8 @@
     <div
       class="clinical-resource-document-upload__dropzone"
       :class="{
-        'clinical-resource-document-upload__dropzone--error': Boolean(error),
+        'clinical-resource-document-upload__dropzone--error':
+          Boolean(displayError),
         'clinical-resource-document-upload__dropzone--drag': dragActive,
       }"
       :data-testid="testId"
@@ -55,8 +56,8 @@
         @change="onFileInput"
       />
     </div>
-    <div v-if="error" class="form-field__error">
-      {{ error }}
+    <div v-if="displayError" class="form-field__error">
+      {{ displayError }}
     </div>
   </div>
 </template>
@@ -64,7 +65,12 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { clinicalResourceDocumentExtensions } from 'components/constants.js'
+import {
+  clinicalResourceDocumentExtensions,
+  clinicalResourceDocumentMimeTypes,
+} from 'components/constants.js'
+import { isClinicalResourceDocumentFileAllowed } from
+  'src/utils/clinical-resource-validation.js'
 
 const props = defineProps({
   modelValue: {
@@ -98,11 +104,18 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const fileInputRef = ref(null)
 const dragActive = ref(false)
+const localError = ref('')
 
-const acceptAttr = clinicalResourceDocumentExtensions.join(',')
+const acceptAttr = [
+  ...clinicalResourceDocumentExtensions,
+  ...clinicalResourceDocumentMimeTypes,
+].join(',')
+
 const fileName = computed(() =>
   props.modelValue?.name || props.existingFileName || '',
 )
+
+const displayError = computed(() => props.error || localError.value)
 
 function onBrowseClick() {
   if (props.readonly) {
@@ -127,6 +140,16 @@ function onDragLeave() {
   dragActive.value = false
 }
 
+function applyFile(file) {
+  if (!isClinicalResourceDocumentFileAllowed(file)) {
+    localError.value = t('clinicalResourceDocumentTypeInvalid')
+
+    return
+  }
+  localError.value = ''
+  emit('update:modelValue', file)
+}
+
 function onDrop(event) {
   dragActive.value = false
   if (props.readonly) {
@@ -134,14 +157,14 @@ function onDrop(event) {
   }
   const file = event.dataTransfer?.files?.[0]
   if (file) {
-    emit('update:modelValue', file)
+    applyFile(file)
   }
 }
 
 function onFileInput(event) {
   const file = event.target?.files?.[0]
   if (file) {
-    emit('update:modelValue', file)
+    applyFile(file)
   }
   if (event.target) {
     event.target.value = ''
@@ -149,6 +172,7 @@ function onFileInput(event) {
 }
 
 function onRemove() {
+  localError.value = ''
   emit('update:modelValue', null)
 }
 </script>

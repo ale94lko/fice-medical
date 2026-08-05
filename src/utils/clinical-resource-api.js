@@ -1,5 +1,9 @@
 import { apiInstance } from 'boot/axios'
-import { apiPaths, clinicalResourceTypeValues } from 'components/constants.js'
+import {
+  apiPaths,
+  clinicalResourceStatusValues,
+  clinicalResourceTypeValues,
+} from 'components/constants.js'
 import {
   buildClinicalResourceRequest,
   normalizeClinicalResourceFromApi,
@@ -146,6 +150,28 @@ export async function listPinnedClinicalResources(t) {
     .filter(Boolean)
 }
 
+/** Active pinned only — inactive/archived must not consume pin slots. */
+export function countActivePinnedClinicalResources(items = []) {
+  return items.filter(item =>
+    item
+    && item.pinned !== false
+    && String(item.status ?? '').toUpperCase()
+      === clinicalResourceStatusValues.active,
+  ).length
+}
+
+/**
+ * Unpin so the subtenant pin slot is freed (e.g. before deactivate/archive).
+ * No-op when the resource is not pinned.
+ */
+export async function releasePinnedSlot(resource) {
+  if (!resource?.id || !resource.pinned) {
+    return resource
+  }
+
+  return unpinClinicalResource(resource.id)
+}
+
 export async function fetchClinicalResourceById(id, t) {
   const response = await apiInstance.get(apiPaths.clinicalResourceById(id))
   const raw = unwrapData(response.data)
@@ -229,11 +255,14 @@ export async function uploadClinicalResourceDocument(id, file) {
 
 export async function downloadClinicalResourceDocument(
   id,
-  { preview = false } = {},
+  { preview = false, onDownloadProgress } = {},
 ) {
   const response = await apiInstance.get(
     apiPaths.clinicalResourceDocumentDownload(id, preview),
-    { responseType: 'blob' },
+    {
+      responseType: 'blob',
+      onDownloadProgress,
+    },
   )
 
   return {

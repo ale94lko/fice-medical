@@ -148,7 +148,7 @@ export const clinicalResourceTestIds = {
     id,
     'btn-deactivate',
   ),
-  rowDelete: id => toTestId('clinical-resource-list-row', id, 'btn-delete'),
+  rowArchive: id => toTestId('clinical-resource-list-row', id, 'btn-archive'),
   rowMore: id => toTestId('clinical-resource-list-row', id, 'btn-more'),
   rowFavorite: id => toTestId('clinical-resource-list-row', id, 'btn-favorite'),
   rowPin: id => toTestId('clinical-resource-list-row', id, 'btn-pin'),

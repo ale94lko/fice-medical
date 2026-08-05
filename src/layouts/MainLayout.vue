@@ -103,27 +103,6 @@
               {{ t('calendar') }}
             </q-tooltip>
           </q-item>
-          <q-item
-            v-if="showClinicalResourcesMenu"
-            clickable
-            v-ripple
-            :to="{ name: 'ClinicalResourcesList' }"
-            :data-testid="layoutTestIds.navClinicalResources"
-            :active="isClinicalResourcesActive"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="menu_book" />
-            </q-item-section>
-            <q-item-section>{{ t('navClinicalResources') }}</q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('navClinicalResources') }}
-            </q-tooltip>
-          </q-item>
           <q-expansion-item
             v-if="accordionMenu && showClientMenu"
             v-model="clientMenuExpanded"
@@ -620,6 +599,27 @@
               :offset="[8, 0]"
               class="app-drawer-tooltip">
               {{ t('administration') }}
+            </q-tooltip>
+          </q-item>
+          <q-item
+            v-if="showClinicalResourcesMenu"
+            clickable
+            v-ripple
+            :to="{ name: 'ClinicalResourcesList' }"
+            :data-testid="layoutTestIds.navClinicalResources"
+            :active="isClinicalResourcesActive"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="menu_book" />
+            </q-item-section>
+            <q-item-section>{{ t('navClinicalResources') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navClinicalResources') }}
             </q-tooltip>
           </q-item>
         </q-list>

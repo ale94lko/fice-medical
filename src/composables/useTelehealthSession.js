@@ -477,19 +477,33 @@ function createTelehealthSessionState() {
       || next.status === telehealthSessionStatuses.ready
       || next.status === telehealthSessionStatuses.scheduled
     ) {
-      // Clinicians skip waiting room UI once they entered the meet.
-      if (
-        role.value === telehealthRoles.clinician
-        && (phase.value === 'in_call' || mediaStarted)
-      ) {
-        return
-      }
-      if (phase.value === 'lobby') {
-        return
-      }
-      phase.value = 'waiting'
-      stopElapsedTicker()
+      applyPreCallPhase()
     }
+  }
+
+  function applyPreCallPhase() {
+    // Clinicians never use the waiting-room screen — they join the meet
+    // UI directly and admit clients from the in-call side panel.
+    if (role.value === telehealthRoles.clinician) {
+      if (phase.value === 'lobby' || phase.value === 'ended') {
+        return
+      }
+      if (phase.value !== 'waiting') {
+        return
+      }
+      phase.value = 'in_call'
+      startElapsedTicker()
+      if (!mediaStarted) {
+        void ensureInCallMedia()
+      }
+
+      return
+    }
+    if (phase.value === 'lobby') {
+      return
+    }
+    phase.value = 'waiting'
+    stopElapsedTicker()
   }
 
   function resolveSelfParticipant(sess = session.value) {
@@ -673,6 +687,10 @@ function createTelehealthSessionState() {
         // Already started or not permitted — still enter meet UI.
         await refreshSession().catch(() => {})
       }
+    }
+    // Never leave the clinician on the legacy waiting-room phase.
+    if (phase.value === 'waiting' || phase.value === 'lobby') {
+      phase.value = 'in_call'
     }
     // Clients in waiting are admitted from the in-call UI.
     await ensureInCallMedia()

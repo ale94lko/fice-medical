@@ -1,6 +1,7 @@
 import {
   clinicalResourceFieldKeys as fk,
   clinicalResourceStatusValues,
+  clinicalResourceTitleMaxChars,
   clinicalResourceTypeValues,
 } from 'components/constants.js'
 import { adminTableStatusVariants } from 'src/constants/admin-table.js'
@@ -10,6 +11,33 @@ import { resolveClinicalResourceCategoryChipColors } from
 
 function trim(value) {
   return String(value ?? '').trim()
+}
+
+export function formatClinicalResourceTitleDisplay(
+  title,
+  maxChars = clinicalResourceTitleMaxChars,
+) {
+  const full = trim(title)
+  if (!full) {
+    return {
+      display: '—',
+      full: '',
+      truncated: false,
+    }
+  }
+  if (full.length <= maxChars) {
+    return {
+      display: full,
+      full,
+      truncated: false,
+    }
+  }
+
+  return {
+    display: `${full.slice(0, maxChars)}...`,
+    full,
+    truncated: true,
+  }
 }
 
 function resolveStatusVariant(status) {
@@ -66,12 +94,15 @@ export function mapClinicalResourceListItem(item, t) {
     ?? item.categoryName,
   )
   const title = trim(item.title)
+  const titleDisplay = formatClinicalResourceTitleDisplay(title)
   const contentPreview = trim(item.content)
   const url = trim(item.url)
 
   return {
     id: item.id,
     [fk.title]: title,
+    titleDisplay: titleDisplay.display,
+    titleTruncated: titleDisplay.truncated,
     [fk.category]: category,
     categoryChip: resolveClinicalResourceCategoryChipColors(category),
     [fk.type]: type,
@@ -94,4 +125,111 @@ export function mapClinicalResourceListItem(item, t) {
       ? contentPreview.slice(0, 120)
       : url,
   }
+}
+
+function clinicalResourcePriorityRank(row) {
+  const pinned = Boolean(row?.[fk.pinned])
+  const favorite = Boolean(row?.[fk.favorite])
+  const status = String(row?.[fk.status] ?? '').toUpperCase()
+
+  // 1) pinned + favorite
+  if (pinned && favorite) {
+    return 0
+  }
+  // 2) pinned
+  if (pinned) {
+    return 1
+  }
+  // 3) favorite
+  if (favorite) {
+    return 2
+  }
+  // 4) active
+  if (status === clinicalResourceStatusValues.active) {
+    return 3
+  }
+  // 5) inactive (and any other non-active status last)
+  if (status === clinicalResourceStatusValues.inactive) {
+    return 4
+  }
+
+  return 5
+}
+
+function resolveClinicalResourceSortValue(row, sortBy) {
+  const key = String(sortBy ?? '').trim()
+  if (!key || !row) {
+    return ''
+  }
+  if (key === 'title') {
+    return String(row[fk.title] ?? '').toLowerCase()
+  }
+  if (key === 'category') {
+    return String(row[fk.category] ?? '').toLowerCase()
+  }
+  if (key === 'type') {
+    return String(row.typeLabel ?? row[fk.type] ?? '').toLowerCase()
+  }
+  if (key === 'status') {
+    return String(row.statusLabel ?? row[fk.status] ?? '').toLowerCase()
+  }
+  if (key === 'updatedAt') {
+    return String(row.updatedAtRaw ?? '')
+  }
+  if (key === 'pinned') {
+    return row[fk.pinned] ? 1 : 0
+  }
+  if (key === 'favorite') {
+    return row[fk.favorite] ? 1 : 0
+  }
+
+  return String(row[key] ?? '').toLowerCase()
+}
+
+function compareSortValues(a, b) {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a - b
+  }
+  const left = String(a ?? '')
+  const right = String(b ?? '')
+
+  return left.localeCompare(right, undefined, {
+    numeric: true,
+    sensitivity: 'base',
+  })
+}
+
+/**
+ * Priority:
+ * 1) pinned + favorite
+ * 2) pinned
+ * 3) favorite
+ * 4) active
+ * 5) inactive
+ * Within each group, apply the active column sort.
+ */
+export function sortClinicalResourceRows(
+  rows,
+  sortBy = 'title',
+  descending = false,
+) {
+  const list = Array.isArray(rows) ? [...rows] : []
+  const dir = descending ? -1 : 1
+
+  return list.sort((a, b) => {
+    const rankDiff = clinicalResourcePriorityRank(a)
+      - clinicalResourcePriorityRank(b)
+    if (rankDiff !== 0) {
+      return rankDiff
+    }
+    const cmp = compareSortValues(
+      resolveClinicalResourceSortValue(a, sortBy),
+      resolveClinicalResourceSortValue(b, sortBy),
+    )
+    if (cmp !== 0) {
+      return cmp * dir
+    }
+
+    return Number(a?.id ?? 0) - Number(b?.id ?? 0)
+  })
 }

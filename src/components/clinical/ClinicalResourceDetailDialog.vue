@@ -50,6 +50,7 @@
           color="primary"
           class="app-btn-primary"
           :loading="downloading"
+          :disable="previewing"
           :label="t('clinicalResourceDownloadDocument')"
           @click="onDownload"
         />
@@ -59,6 +60,7 @@
           color="primary"
           class="app-btn-outline"
           :loading="previewing"
+          :disable="downloading"
           :label="t('clinicalResourcePreviewDocument')"
           @click="onPreview"
         />
@@ -72,12 +74,10 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
-import { quasarNotifyTypes } from 'components/constants.js'
-import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
-  clinicalResourceApiErrorMessage,
-  downloadClinicalResourceDocument,
-} from 'src/utils/clinical-resource-api.js'
+  downloadClinicalResourceDocumentFile,
+  previewClinicalResourceDocument,
+} from 'src/utils/clinical-resource-document-actions.js'
 import { clinicalResourceTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -115,74 +115,29 @@ function onClose() {
   open.value = false
 }
 
-function triggerBlobDownload(blob, fileName) {
-  const url = URL.createObjectURL(blob)
-  const anchor = document.createElement('a')
-  anchor.href = url
-  anchor.download = fileName || 'document'
-  anchor.click()
-  URL.revokeObjectURL(url)
-}
-
-function openBlobPreview(blob) {
-  const url = URL.createObjectURL(blob)
-  window.open(url, '_blank', 'noopener,noreferrer')
-  setTimeout(() => URL.revokeObjectURL(url), 60_000)
-}
-
-async function fetchDocument(preview) {
-  const id = props.resource?.id
-  if (!id) {
-    return null
-  }
-
-  return downloadClinicalResourceDocument(id, { preview })
-}
-
 async function onDownload() {
+  if (!props.resource?.id || downloading.value || previewing.value) {
+    return
+  }
   downloading.value = true
   try {
-    const result = await fetchDocument(false)
-    if (!result?.blob) {
-      return
-    }
-    triggerBlobDownload(
-      result.blob,
-      result.fileName || props.resource?.documentFileName || 'document',
-    )
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: clinicalResourceApiErrorMessage(
-          error,
-          t('clinicalResourceDownloadError'),
-        ),
-      })
-    }
+    await downloadClinicalResourceDocumentFile(props.resource.id, {
+      t,
+      $q,
+      fileName: props.resource?.documentFileName || '',
+    })
   } finally {
     downloading.value = false
   }
 }
 
 async function onPreview() {
+  if (!props.resource?.id || downloading.value || previewing.value) {
+    return
+  }
   previewing.value = true
   try {
-    const result = await fetchDocument(true)
-    if (!result?.blob) {
-      return
-    }
-    openBlobPreview(result.blob)
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: clinicalResourceApiErrorMessage(
-          error,
-          t('clinicalResourcePreviewError'),
-        ),
-      })
-    }
+    await previewClinicalResourceDocument(props.resource.id, { t, $q })
   } finally {
     previewing.value = false
   }

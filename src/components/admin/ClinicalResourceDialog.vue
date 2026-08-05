@@ -122,6 +122,7 @@
               :label="t('clinicalResourceKeywordsLabel')"
               :placeholder="t('clinicalResourceKeywordsPlaceholder')"
               :hint="t('clinicalResourceKeywordsHint')"
+              :suggestions="tagSuggestions"
               :readonly="readonly"
               :test-id="clinicalResourceDialogTestIds.field('keywords')"
             />
@@ -163,6 +164,7 @@
               :label="t('clinicalResourceKeywordsLabel')"
               :placeholder="t('clinicalResourceKeywordsPlaceholder')"
               :hint="t('clinicalResourceKeywordsHint')"
+              :suggestions="tagSuggestions"
               :readonly="readonly"
               :test-id="clinicalResourceDialogTestIds.field('keywords')"
             />
@@ -236,6 +238,8 @@ const props = defineProps({
   },
   resource: { type: Object, default: null },
   saving: { type: Boolean, default: false },
+  /** Known tags to seed the keywords autocomplete. */
+  tagSuggestions: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['update:modelValue', 'save', 'cancel'])

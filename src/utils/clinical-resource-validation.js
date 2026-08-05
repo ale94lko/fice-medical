@@ -1,4 +1,6 @@
 import {
+  clinicalResourceDocumentExtensions,
+  clinicalResourceDocumentMimeTypes,
   clinicalResourceTypeValues,
 } from 'components/constants.js'
 
@@ -18,6 +20,20 @@ function isValidHttpUrl(value) {
   } catch {
     return false
   }
+}
+
+export function isClinicalResourceDocumentFileAllowed(file) {
+  if (!file) {
+    return false
+  }
+  const type = String(file.type ?? '').toLowerCase()
+  const name = String(file.name ?? '').toLowerCase()
+  const extOk = clinicalResourceDocumentExtensions.some(ext =>
+    name.endsWith(ext),
+  )
+  const mimeOk = !type || clinicalResourceDocumentMimeTypes.includes(type)
+
+  return extOk || mimeOk
 }
 
 export function validateClinicalResourceForm(form, t, { isEdit = false } = {}) {
@@ -53,6 +69,11 @@ export function validateClinicalResourceForm(form, t, { isEdit = false } = {}) {
     }
     if (!isEdit && !hasDocumentFile && !hasStoredFile) {
       errors.documentFile = t('clinicalResourceDocumentRequired')
+    } else if (
+      hasDocumentFile
+      && !isClinicalResourceDocumentFileAllowed(form.documentFile)
+    ) {
+      errors.documentFile = t('clinicalResourceDocumentTypeInvalid')
     }
   }
 

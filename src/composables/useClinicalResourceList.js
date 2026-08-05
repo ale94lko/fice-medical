@@ -1,6 +1,5 @@
 import { ref } from 'vue'
 import {
-  clinicalResourceStatusValues,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -14,6 +13,8 @@ import {
   unpinClinicalResource,
   updateClinicalResourceStatus,
 } from 'src/utils/clinical-resource-api.js'
+import { sortClinicalResourceRows } from
+  'src/utils/clinical-resource-list-normalize.js'
 
 export function useClinicalResourceListState() {
   const loading = ref(false)
@@ -40,8 +41,18 @@ export function buildClinicalResourceListParams(state) {
     page: state.tablePagination.value.page,
     limit: state.tablePagination.value.rowsPerPage,
     q: state.searchQuery.value,
-    status: clinicalResourceStatusValues.active,
+    // Omit status so ACTIVE + INACTIVE are returned (archived excluded
+    // by API default). Client-side sort groups: pinned+favorite → pinned
+    // → favorite → active → inactive.
   }
+}
+
+export function applyClinicalResourceListSort(state) {
+  state.rows.value = sortClinicalResourceRows(
+    state.rows.value,
+    state.tablePagination.value.sortBy,
+    state.tablePagination.value.descending,
+  )
 }
 
 export async function loadClinicalResourceRows(state, t) {
@@ -52,6 +63,7 @@ export async function loadClinicalResourceRows(state, t) {
       t,
     )
     state.rows.value = result.items
+    applyClinicalResourceListSort(state)
     const total = result.pagination?.total
     if (total != null && Number.isFinite(Number(total))) {
       state.tablePagination.value = {

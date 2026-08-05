@@ -1071,6 +1071,9 @@ export const clinicalResourceStatusValues = {
 
 export const clinicalResourcePinnedMax = 5
 
+/** Max visible characters for resource title in list tables. */
+export const clinicalResourceTitleMaxChars = 50
+
 export const clinicalResourcePinRoleNames = {
   tenantAdmin: 'TENANT_ADMIN',
   superAdmin: 'SUPER_ADMIN',
@@ -1102,6 +1105,19 @@ export const clinicalResourceListColumnKeys = {
 
 export const clinicalResourceDocumentExtensions = [
   '.pdf', '.doc', '.docx', '.txt', '.rtf',
+  '.png', '.jpg', '.jpeg',
+]
+
+export const clinicalResourceDocumentMimeTypes = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'text/plain',
+  'application/rtf',
+  'text/rtf',
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
 ]
 
 export const apiPaths = {

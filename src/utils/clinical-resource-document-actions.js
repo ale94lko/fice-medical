@@ -11,22 +11,42 @@ export function openClinicalResourceBlobPreview(blob) {
   setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
-export async function previewClinicalResourceDocument(
+export function triggerClinicalResourceBlobDownload(blob, fileName) {
+  const url = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  anchor.download = fileName || 'document'
+  anchor.click()
+  URL.revokeObjectURL(url)
+}
+
+async function transferClinicalResourceDocument(
   resourceId,
-  { t, $q, fallbackKey = 'clinicalResourcePreviewError' } = {},
+  {
+    preview = false,
+    t,
+    $q,
+    fallbackKey = 'clinicalResourceDownloadError',
+  } = {},
 ) {
   const id = Number(resourceId)
   if (!Number.isFinite(id) || id <= 0) {
-    return false
+    return null
+  }
+
+  let dismissDownloading = null
+  if ($q && t) {
+    dismissDownloading = $q.notify({
+      timeout: 0,
+      spinner: true,
+      position: 'top',
+      color: 'primary',
+      message: t('clinicalResourceDownloading'),
+    })
   }
 
   try {
-    const result = await downloadClinicalResourceDocument(id, { preview: true })
-    if (result?.blob) {
-      openClinicalResourceBlobPreview(result.blob)
-
-      return true
-    }
+    return await downloadClinicalResourceDocument(id, { preview })
   } catch (error) {
     if ($q && t && !isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -34,6 +54,56 @@ export async function previewClinicalResourceDocument(
         message: clinicalResourceApiErrorMessage(error, t(fallbackKey)),
       })
     }
+
+    return null
+  } finally {
+    if (typeof dismissDownloading === 'function') {
+      dismissDownloading()
+    }
+  }
+}
+
+export async function previewClinicalResourceDocument(
+  resourceId,
+  { t, $q, fallbackKey = 'clinicalResourcePreviewError' } = {},
+) {
+  const result = await transferClinicalResourceDocument(resourceId, {
+    preview: true,
+    t,
+    $q,
+    fallbackKey,
+  })
+  if (result?.blob) {
+    openClinicalResourceBlobPreview(result.blob)
+
+    return true
+  }
+
+  return false
+}
+
+export async function downloadClinicalResourceDocumentFile(
+  resourceId,
+  {
+    t,
+    $q,
+    fileName = '',
+    fallbackKey = 'clinicalResourceDownloadError',
+  } = {},
+) {
+  const result = await transferClinicalResourceDocument(resourceId, {
+    preview: false,
+    t,
+    $q,
+    fallbackKey,
+  })
+  if (result?.blob) {
+    triggerClinicalResourceBlobDownload(
+      result.blob,
+      fileName || result.fileName || 'document',
+    )
+
+    return true
   }
 
   return false

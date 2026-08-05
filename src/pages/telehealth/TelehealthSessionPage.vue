@@ -44,31 +44,6 @@
       @back="goCalendar"
     />
 
-    <TelehealthWaitingRoomClinician
-      v-else-if="phase === 'waiting' && isClinician"
-      :local-stream="webrtc.localStream.value"
-      :camera-enabled="webrtc.videoEnabled.value"
-      :mic-enabled="webrtc.audioEnabled.value"
-      :speaker-enabled="webrtc.speakerEnabled.value"
-      :waiting-participants="waitingParticipants"
-      :client-invite-url="clientMeetInviteUrl"
-      v-model:invite-email="inviteEmail"
-      v-model:use-custom-invite-email="useCustomInviteEmail"
-      :invite-loading="inviteLoading"
-      :can-admit="canAdmitTelehealth"
-      :can-start="canStartTelehealth"
-      :loading="loading"
-      :error="error"
-      @admit="onAdmit"
-      @start="onStart"
-      @leave="onLeave"
-      @copy-invite="onCopyInvite"
-      @resend-invite="onResendInvite"
-      @toggle-camera="webrtc.toggleVideo()"
-      @toggle-mic="webrtc.toggleAudio()"
-      @toggle-speaker="webrtc.toggleSpeaker()"
-    />
-
     <TelehealthWaitingRoomClient
       v-else-if="phase === 'waiting'"
       :local-stream="webrtc.localStream.value"
@@ -186,8 +161,6 @@ import {
 import { triggerBlobDownload } from 'src/utils/lab-api.js'
 import TelehealthLobby from
   'src/components/telehealth/TelehealthLobby.vue'
-import TelehealthWaitingRoomClinician from
-  'src/components/telehealth/TelehealthWaitingRoomClinician.vue'
 import TelehealthWaitingRoomClient from
   'src/components/telehealth/TelehealthWaitingRoomClient.vue'
 import TelehealthInCall from
@@ -226,7 +199,6 @@ const {
   join,
   markReady,
   admit,
-  start,
   finish,
   leave,
   minimizeToRoute,
@@ -418,10 +390,6 @@ async function onLobbyJoin(payload) {
 
 async function onAdmit(participantId) {
   await admit(participantId)
-}
-
-async function onStart() {
-  await start()
 }
 
 async function onFinish() {

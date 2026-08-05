@@ -123,6 +123,7 @@ import { useQuasar } from 'quasar'
 import {
   clinicalResourceFieldKeys as fk,
   clinicalResourcePinnedMax,
+  clinicalResourceStatusValues,
   clinicalResourceTypeValues,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -177,7 +178,11 @@ function resolveItemActionLabel(item) {
 
 async function loadPinned() {
   try {
-    pinned.value = await listPinnedClinicalResources(t)
+    pinned.value = (await listPinnedClinicalResources(t))
+      .filter(item =>
+        String(item.status ?? '').toUpperCase()
+          === clinicalResourceStatusValues.active,
+      )
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       pinned.value = []

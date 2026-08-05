@@ -1412,6 +1412,41 @@
     padding-right: 4px !important;
   }
 
+  &__name-row {
+    gap: 12px;
+    padding-top: 6px;
+    padding-bottom: 2px;
+    align-items: center;
+  }
+
+  &__type-icon {
+    flex: 0 0 auto;
+  }
+
+  &__name-btn {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    min-width: 0;
+  }
+
+  &__name {
+    color: #0f7f79;
+    font-weight: 600;
+    line-height: 1.25rem;
+  }
+
+  &__link {
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+    color: rgba(0, 0, 0, 0.54);
+    word-break: break-word;
+  }
+
   .admin-data-table__actions-cell {
     min-width: 148px;
     width: 148px;

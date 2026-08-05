@@ -39,6 +39,7 @@
       <AdminQTable
         class="table admin-data-table"
         flat
+        binary-state-sort
         row-key="id"
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
@@ -49,22 +50,32 @@
         @request="onTableRequest">
         <template #body-cell-title="scope">
           <q-td :props="scope" class="admin-data-table__primary-cell">
-            <div class="row items-center no-wrap q-gutter-sm">
+            <div class="clinical-resource-list-page__name-row
+              row items-center no-wrap">
               <q-avatar
                 size="28px"
                 :icon="scope.row.typeIcon"
                 color="primary"
                 text-color="white"
+                class="clinical-resource-list-page__type-icon"
               />
               <button
                 type="button"
-                class="admin-data-table__link text-left"
+                class="clinical-resource-list-page__name-btn text-left"
                 :data-testid="clinicalResourceTestIds.rowOpen(scope.row.id)"
                 @click="openResource(scope.row)">
-                <div>{{ scope.row[fk.title] || '—' }}</div>
+                <div class="clinical-resource-list-page__name">
+                  {{ scope.row.titleDisplay || scope.row[fk.title] || '—' }}
+                  <q-tooltip
+                    v-if="scope.row.titleTruncated"
+                    anchor="top middle"
+                    self="bottom middle">
+                    {{ scope.row[fk.title] }}
+                  </q-tooltip>
+                </div>
                 <div
                   v-if="scope.row.subtitle"
-                  class="text-caption text-grey-7">
+                  class="clinical-resource-list-page__link">
                   {{ scope.row.subtitle }}
                 </div>
               </button>
@@ -196,13 +207,13 @@
               flat
               round
               dense
-              icon="delete_outline"
-              color="negative"
+              icon="archive"
+              color="warning"
               class="app-btn-icon-action"
               :size="siteBreakpoints.SM"
-              :title="t('delete')"
-              :aria-label="t('delete')"
-              :data-testid="clinicalResourceTestIds.rowDelete(row.id)"
+              :title="t('clinicalResourceArchive')"
+              :aria-label="t('clinicalResourceArchive')"
+              :data-testid="clinicalResourceTestIds.rowArchive(row.id)"
               @click="confirmArchive(row)"
             />
           </div>
@@ -229,8 +240,20 @@
       :mode="dialogMode"
       :resource="activeResource"
       :saving="dialogSaving"
+      :tag-suggestions="tagSuggestions"
       @save="onDialogSave"
       @cancel="closeDialog"
+    />
+
+    <ModalComponent
+      v-model="archiveConfirmOpen"
+      :title="t('clinicalResourceArchiveConfirmTitle')"
+      :message="archiveConfirmMessage"
+      :confirm-text="t('clinicalResourceArchive')"
+      :cancel-text="t('cancel')"
+      test-id="clinical-resource-archive"
+      @confirm="onArchiveConfirm"
+      @cancel="closeArchiveConfirm"
     />
   </q-page>
 </template>
@@ -269,10 +292,12 @@ import ClinicalResourceDialog from
   'components/admin/ClinicalResourceDialog.vue'
 import ClinicalResourceDetailDialog from
   'components/clinical/ClinicalResourceDetailDialog.vue'
+import ModalComponent from 'components/ModalComponent.vue'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import {
+  applyClinicalResourceListSort,
   archiveClinicalResource,
   favoriteClinicalResource,
   loadClinicalResourceRows,
@@ -293,8 +318,10 @@ import { previewClinicalResourceDocument } from
 import {
   clinicalResourceApiErrorMessage,
   createClinicalResource,
+  countActivePinnedClinicalResources,
   fetchClinicalResourceById,
   listPinnedClinicalResources,
+  releasePinnedSlot,
   updateClinicalResource,
   uploadClinicalResourceDocument,
 } from 'src/utils/clinical-resource-api.js'
@@ -331,6 +358,8 @@ const dialogOpen = ref(false)
 const dialogMode = ref('add')
 const dialogSaving = ref(false)
 const activeResource = ref(null)
+const archiveConfirmOpen = ref(false)
+const pendingArchiveResource = ref(null)
 let searchDebounceTimer = null
 
 const { setFooterPagination, patchFooterPagination, clearFooterPagination } =
@@ -338,13 +367,41 @@ const { setFooterPagination, patchFooterPagination, clearFooterPagination } =
 
 const showGrid = computed(() => $q.screen.width < siteBreakpointsPx.MD)
 
+const archiveConfirmMessage = computed(() => {
+  const title = pendingArchiveResource.value?.[fk.title] || '—'
+
+  return t('clinicalResourceArchiveConfirmMessage', { title })
+})
+
+const tagSuggestions = computed(() => {
+  const seen = new Set()
+  const out = []
+  for (const row of rows.value ?? []) {
+    const keywords = row?.[fk.keywords]
+    if (!Array.isArray(keywords)) {
+      continue
+    }
+    for (const keyword of keywords) {
+      const tag = String(keyword ?? '').trim()
+      const key = tag.toLowerCase()
+      if (!tag || seen.has(key)) {
+        continue
+      }
+      seen.add(key)
+      out.push(tag)
+    }
+  }
+
+  return out
+})
+
 const visibleColumns = computed(() => [
   {
     name: col.title,
     label: t('clinicalResourceNameColumn'),
     align: 'left',
     field: row => row[fk.title],
-    sortable: false,
+    sortable: true,
     headerStyle: 'min-width: 280px',
     style: 'min-width: 280px',
   },
@@ -353,7 +410,7 @@ const visibleColumns = computed(() => [
     label: t('clinicalResourceCategoryLabel'),
     align: 'left',
     field: row => row[fk.category],
-    sortable: false,
+    sortable: true,
     headerStyle: 'min-width: 160px',
     style: 'min-width: 160px',
   },
@@ -362,7 +419,7 @@ const visibleColumns = computed(() => [
     label: t('clinicalResourceTypeLabel'),
     align: 'left',
     field: row => row.typeLabel,
-    sortable: false,
+    sortable: true,
     headerStyle: 'min-width: 140px',
     style: 'min-width: 140px',
     classes: 'admin-data-table__secondary-cell',
@@ -372,7 +429,7 @@ const visibleColumns = computed(() => [
     label: t('status'),
     align: 'left',
     field: row => row.statusLabel,
-    sortable: false,
+    sortable: true,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
   },
@@ -429,10 +486,23 @@ async function reloadList() {
 async function refreshPinnedCount() {
   try {
     const pinned = await listPinnedClinicalResources(t)
-    pinnedCount.value = pinned.length
+    pinnedCount.value = countActivePinnedClinicalResources(pinned)
   } catch {
-    pinnedCount.value = rows.value.filter(row => row[fk.pinned]).length
+    pinnedCount.value = countActivePinnedClinicalResources(rows.value)
   }
+}
+
+async function releasePinSlotForResource(resource) {
+  if (!resource?.id || !resource[fk.pinned]) {
+    return
+  }
+  await runClinicalResourceMutation(
+    () => releasePinnedSlot({
+      id: resource.id,
+      pinned: true,
+    }),
+    { t, $q, fallbackKey: 'clinicalResourcePinError' },
+  )
 }
 
 function scheduleReload() {
@@ -456,9 +526,20 @@ function resetSearch() {
 }
 
 function onTableRequest(payload) {
-  tablePagination.value = {
+  const pagination = payload?.pagination ?? {}
+  const next = {
     ...tablePagination.value,
-    ...payload.pagination,
+    ...pagination,
+  }
+  const sortChanged = next.sortBy !== tablePagination.value.sortBy
+    || next.descending !== tablePagination.value.descending
+  const pageChanged = next.page !== tablePagination.value.page
+    || next.rowsPerPage !== tablePagination.value.rowsPerPage
+  tablePagination.value = next
+  if (sortChanged && !pageChanged) {
+    applyClinicalResourceListSort(state)
+
+    return
   }
   void reloadList()
 }
@@ -556,6 +637,7 @@ function closeDialog() {
 async function onDialogSave(form) {
   dialogSaving.value = true
   try {
+    const wasPinned = Boolean(activeResource.value?.[fk.pinned])
     if (dialogMode.value === 'add') {
       await createClinicalResource(form)
       $q.notify({
@@ -569,6 +651,17 @@ async function onDialogSave(form) {
         && form.documentFile
       ) {
         await uploadClinicalResourceDocument(form.id, form.documentFile)
+      }
+      if (
+        wasPinned
+        && form.status
+        && form.status !== clinicalResourceStatusValues.active
+      ) {
+        await releasePinSlotForResource({
+          id: form.id,
+          [fk.pinned]: true,
+          status: form.status,
+        })
       }
       $q.notify({
         type: quasarNotifyTypes.positive,
@@ -604,6 +697,7 @@ async function toggleFavorite(row) {
   })
   if (updated) {
     row[fk.favorite] = updated.favorite
+    applyClinicalResourceListSort(state)
   }
 }
 
@@ -627,36 +721,73 @@ async function toggleResourceStatus(row) {
   const nextStatus = row.status === clinicalResourceStatusValues.active
     ? clinicalResourceStatusValues.inactive
     : clinicalResourceStatusValues.active
+  const deactivating = nextStatus !== clinicalResourceStatusValues.active
+  const wasPinned = Boolean(row[fk.pinned])
+
+  // Free the pin slot before leaving ACTIVE so another active resource
+  // can be pinned immediately.
+  if (deactivating && wasPinned) {
+    await releasePinSlotForResource(row)
+  }
+
   const updated = await runClinicalResourceMutation(
     () => updateClinicalResourceStatus(row.id, nextStatus),
     { t, $q, fallbackKey: 'clinicalResourceStatusError' },
   )
   if (updated) {
+    if (deactivating && updated.pinned) {
+      await releasePinSlotForResource({
+        ...updated,
+        [fk.pinned]: true,
+        status: nextStatus,
+      })
+    }
+    await refreshPinnedCount()
     void reloadList()
   }
 }
 
 function confirmArchive(row) {
-  $q.dialog({
-    title: t('clinicalResourceArchiveConfirmTitle'),
-    message: t('clinicalResourceArchiveConfirmMessage', { title: row.title }),
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    void archiveRow(row)
-  })
+  pendingArchiveResource.value = row
+  archiveConfirmOpen.value = true
+}
+
+function closeArchiveConfirm() {
+  archiveConfirmOpen.value = false
+  pendingArchiveResource.value = null
+}
+
+async function onArchiveConfirm() {
+  const row = pendingArchiveResource.value
+  closeArchiveConfirm()
+  if (!row?.id) {
+    return
+  }
+  await archiveRow(row)
 }
 
 async function archiveRow(row) {
+  const wasPinned = Boolean(row[fk.pinned])
+  if (wasPinned) {
+    await releasePinSlotForResource(row)
+  }
   const updated = await runClinicalResourceMutation(
     () => archiveClinicalResource(row.id),
     { t, $q, fallbackKey: 'clinicalResourceArchiveError' },
   )
   if (updated) {
+    if (updated.pinned) {
+      await releasePinSlotForResource({
+        ...updated,
+        [fk.pinned]: true,
+        status: clinicalResourceStatusValues.archived,
+      })
+    }
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('clinicalResourceArchiveSuccess'),
     })
+    await refreshPinnedCount()
     void reloadList()
   }
 }
