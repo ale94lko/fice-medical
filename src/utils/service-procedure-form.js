@@ -8,6 +8,15 @@ function trim(value) {
   return String(value ?? '').trim()
 }
 
+/** Keep number inputs as strings for TextInput modelValue. */
+function toOptionalInputString(value) {
+  if (value == null || value === '') {
+    return ''
+  }
+
+  return String(value)
+}
+
 function parseOptionalPositiveInt(value) {
   if (value == null || value === '') {
     return null
@@ -49,12 +58,12 @@ export function createEmptyServiceProcedureForm() {
     category: '',
     description: '',
     status: serviceProcedureStatusValues.active,
-    minDurationMin: null,
-    maxDurationMin: null,
+    minDurationMin: '',
+    maxDurationMin: '',
     requiresAppointment: false,
     cptCode: '',
     hcpcsCode: '',
-    defaultFee: null,
+    defaultFee: '',
     authorizationRequirement: authorizationRequirementValues.unknown,
   }
 }
@@ -71,18 +80,24 @@ export function normalizeServiceProcedureFromApi(raw = {}) {
     status: status === serviceProcedureStatusValues.inactive
       ? serviceProcedureStatusValues.inactive
       : serviceProcedureStatusValues.active,
-    minDurationMin: parseOptionalPositiveInt(
-      raw.min_duration_min ?? raw.minDurationMin,
+    minDurationMin: toOptionalInputString(
+      parseOptionalPositiveInt(
+        raw.min_duration_min ?? raw.minDurationMin,
+      ),
     ),
-    maxDurationMin: parseOptionalPositiveInt(
-      raw.max_duration_min ?? raw.maxDurationMin,
+    maxDurationMin: toOptionalInputString(
+      parseOptionalPositiveInt(
+        raw.max_duration_min ?? raw.maxDurationMin,
+      ),
     ),
     requiresAppointment: Boolean(
       raw.requires_appointment ?? raw.requiresAppointment,
     ),
     cptCode: trim(raw.cpt_code ?? raw.cptCode),
     hcpcsCode: trim(raw.hcpcs_code ?? raw.hcpcsCode),
-    defaultFee: parseOptionalFee(raw.default_fee ?? raw.defaultFee),
+    defaultFee: toOptionalInputString(
+      parseOptionalFee(raw.default_fee ?? raw.defaultFee),
+    ),
     authorizationRequirement: parseAuthorizationRequirement(
       raw.authorization_requirement ?? raw.authorizationRequirement,
     ),
@@ -112,9 +127,16 @@ export function buildServiceProcedureRequest(form = {}) {
 }
 
 export function cloneServiceProcedureForm(form) {
-  return {
+  const base = {
     ...createEmptyServiceProcedureForm(),
     ...form,
+  }
+
+  return {
+    ...base,
+    minDurationMin: toOptionalInputString(base.minDurationMin),
+    maxDurationMin: toOptionalInputString(base.maxDurationMin),
+    defaultFee: toOptionalInputString(base.defaultFee),
   }
 }
 

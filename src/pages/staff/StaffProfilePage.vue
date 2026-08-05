@@ -1,135 +1,109 @@
 <template>
-  <q-page class="admin-page staff-profile-page">
-    <AppLoadingOverlay scope="content" :showing="loading" />
+  <q-page
+    class="admin-page client-overview-page client-overview-alt-page
+      staff-profile-page">
+    <AppLoadingOverlay
+      scope="content"
+      :showing="loading"
+      :surface-opacity="0.5"
+    />
 
-    <AdminListPageHeader
-      :title="profileTitle"
-      :subtitle="profileSubtitle">
-      <template #actions>
-        <GenerateDocumentAction
-          :document-type="documentTypes.staffProfile"
-          :context="{ staffId: route.params.id }"
-          :label="t('generateDocumentAction')"
-          button-class="app-btn-primary q-mr-sm"
-          :outline="false"
-        />
-        <q-btn
-          v-if="canEditStaff"
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="edit_note"
-          :label="t('edit')"
-          @click="goEdit"
-        />
-        <q-btn
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          :label="t('close')"
-          @click="goBack"
-        />
-      </template>
-    </AdminListPageHeader>
+    <StaffProfileHeader
+      v-if="profile"
+      class="client-overview-page__header"
+      :staff-id="route.params.id"
+      :header="profile"
+      :can-edit="canEditStaff"
+      :loading="loading"
+      @edit="goEdit"
+      @close="goBack"
+    />
+    <ClientOverviewHeaderSkeleton
+      v-else
+      class="client-overview-page__header"
+    />
 
-    <q-card flat bordered class="q-mt-md">
-      <q-card-section class="q-pa-lg">
-        <div class="row q-col-gutter-lg">
-          <div class="col-12 col-md-6">
-            <p class="text-caption text-grey-7 q-mb-xs">
-              {{ t('staffListColStaffNo') }}
-            </p>
-            <p class="text-body1 q-mb-md">
-              {{ staffNo || '—' }}
-            </p>
-            <p class="text-caption text-grey-7 q-mb-xs">
-              {{ t('email') }}
-            </p>
-            <p class="text-body1 q-mb-md">
-              {{ email || '—' }}
-            </p>
-            <p class="text-caption text-grey-7 q-mb-xs">
-              {{ t('staffListColPosition') }}
-            </p>
-            <p class="text-body1 q-mb-md">
-              {{ position || '—' }}
-            </p>
-          </div>
-          <div class="col-12 col-md-6">
-            <p class="text-caption text-grey-7 q-mb-xs">
-              {{ t('status') }}
-            </p>
-            <AdminTableStatusCell
-              v-if="statusLabel"
-              :label="statusLabel"
-              :variant="statusVariant"
-            />
-            <p v-else class="text-body1">—</p>
-            <p class="text-caption text-grey-7 q-mb-xs q-mt-md">
-              {{ t('staffListColHireDate') }}
-            </p>
-            <p class="text-body1 q-mb-md">
-              {{ hireDate || '—' }}
-            </p>
-            <p class="text-caption text-grey-7 q-mb-xs">
-              {{ t('staffListColClinician') }}
-            </p>
-            <p class="text-body1">
-              {{
-                isClinician
-                  ? t('staffListClinicianYes')
-                  : '—'
-              }}
-            </p>
-          </div>
+    <div class="client-overview-page__main client-overview-alt-page__main">
+      <StaffProfileTabs
+        v-if="profile"
+        v-model="activeTab"
+        :show-clinical="Boolean(profile.sections.clinical)"
+      />
+
+      <div
+        class="client-overview-page__body
+          client-overview-alt-page__body
+          staff-profile-page__body">
+        <div
+          class="client-overview-alt-page__content
+            staff-profile-page__content">
+          <StaffProfileSection
+            v-if="activeSection"
+            :icon="activeSection.icon"
+            :title="activeSection.title"
+            :fields="activeSection.fields"
+          />
         </div>
-      </q-card-section>
-    </q-card>
+      </div>
+    </div>
   </q-page>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import AdminListPageHeader from
-  'components/admin-table/AdminListPageHeader.vue'
-import AdminTableStatusCell from
-  'components/admin-table/AdminTableStatusCell.vue'
+import { useQuasar } from 'quasar'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
-import GenerateDocumentAction from
-  'components/documents/GenerateDocumentAction.vue'
+import ClientOverviewHeaderSkeleton from
+  'components/client-overview/ClientOverviewHeaderSkeleton.vue'
+import StaffProfileHeader from
+  'components/staff/StaffProfileHeader.vue'
+import StaffProfileSection from
+  'components/staff/StaffProfileSection.vue'
+import StaffProfileTabs from 'components/staff/StaffProfileTabs.vue'
+import { quasarNotifyTypes, staffEntryPoints } from
+  'components/constants.js'
 import { useStaffPermissions } from 'src/composables/useStaffPermissions.js'
-import { documentTypes } from 'src/utils/document-generation-constants.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { fetchStaffById } from 'src/utils/staff-api.js'
-import { mapStaffListItem } from 'src/utils/staff-list-normalize.js'
-import { staffFieldKeys as fk } from 'src/utils/staff-list-columns.js'
+import { createEmptyStaffForm } from 'src/utils/staff-form.js'
+import {
+  buildStaffProfileView,
+  staffProfileTabKeys,
+} from 'src/utils/staff-profile-view.js'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const $q = useQuasar()
 const { canEditStaff } = useStaffPermissions()
 
 const loading = ref(false)
-const record = ref(null)
+const profile = ref(null)
+const activeTab = ref(staffProfileTabKeys.basic)
 
-const profileTitle = computed(() =>
-  record.value?.[fk.name] ?? t('staffProfile'),
+const activeSection = computed(() => {
+  const sections = profile.value?.sections
+  if (!sections) {
+    return null
+  }
+  const section = sections[activeTab.value]
+  if (section) {
+    return section
+  }
+
+  return sections[staffProfileTabKeys.basic] ?? null
+})
+
+watch(
+  () => profile.value?.sections?.clinical,
+  clinical => {
+    if (!clinical && activeTab.value === staffProfileTabKeys.clinical) {
+      activeTab.value = staffProfileTabKeys.basic
+    }
+  },
 )
-
-const profileSubtitle = computed(() =>
-  record.value?.[fk.staffNo] ?? '',
-)
-
-const staffNo = computed(() => record.value?.[fk.staffNo] ?? '')
-const email = computed(() => record.value?.[fk.email] ?? '')
-const position = computed(() => record.value?.[fk.position] ?? '')
-const hireDate = computed(() => record.value?.[fk.hireDate] ?? '')
-const statusLabel = computed(() => record.value?.[fk.status] ?? '')
-const statusVariant = computed(() => record.value?.statusVariant ?? 'other')
-const isClinician = computed(() => Boolean(record.value?.[fk.isClinician]))
 
 function goBack() {
   router.push('/staff')
@@ -146,19 +120,24 @@ onMounted(async() => {
   loading.value = true
   try {
     const data = await fetchStaffById(route.params.id)
-    record.value = mapStaffListItem({
-      id: data.id,
-      // eslint-disable-next-line camelcase -- API list item shape
-      staff_no: data.code ?? data.staff_no,
-      name: data.name,
-      email: data.email,
-      position: data.employment?.position,
-      status: data.employment?.status,
-      // eslint-disable-next-line camelcase -- API list item shape
-      hire_date: data.employment?.hire,
-      // eslint-disable-next-line camelcase -- API list item shape
-      is_clinician: Boolean(data.clinician ?? data.clinical_profile),
+    const form = createEmptyStaffForm(
+      staffEntryPoints.addStaff,
+      data,
+    )
+    profile.value = buildStaffProfileView(form, {
+      id: data?.id ?? route.params.id,
+      staffNo: data?.code ?? data?.staff_no ?? data?.staffNo,
+      name: data?.name,
     }, t)
+    activeTab.value = staffProfileTabKeys.basic
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('staffProfileLoadError'),
+      })
+    }
+    profile.value = null
   } finally {
     loading.value = false
   }

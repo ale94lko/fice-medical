@@ -190,8 +190,7 @@ export default {
   subtenantDeleteError: 'Could not delete subtenant. Please try again.',
   serviceProcedureListTitle: 'Services / Procedures',
   serviceProcedureListSubtitle:
-    'Configure organization services for appointments, referrals, '
-    + 'labs, authorizations, billing, and claims.',
+    'Configure organization services - procedures',
   serviceProcedureListAdd: 'Add Service',
   serviceProcedureListEmpty: 'No services or procedures found.',
   serviceProcedureListError:
@@ -536,6 +535,13 @@ export default {
   editClinician: 'Edit Clinician',
   editClinicianBreadcrumb: 'Edit Clinician',
   staffProfile: 'Staff Profile',
+  staffProfileLoadError:
+    'Could not load the staff profile. Please try again.',
+  staffProfileNotClinician: 'Non-clinical staff',
+  staffProfileSystemAccessEnabled: 'System access enabled',
+  staffProfilePhotoPlaceholder: 'Staff profile photo',
+  staffProfileCopyStaffNo: 'Copy staff number',
+  staffProfileCopiedStaffNo: 'Staff number copied',
   tabStaffBasicInformation: 'Basic Information',
   tabStaffContactInformation: 'Contact Information',
   tabStaffEmployment: 'Employment',

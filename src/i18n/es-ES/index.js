@@ -203,8 +203,7 @@ export default {
     'No se pudo eliminar el subtenant. Inténtelo de nuevo.',
   serviceProcedureListTitle: 'Servicios / Procedimientos',
   serviceProcedureListSubtitle:
-    'Configure los servicios de la organización para citas, '
-    + 'referrals, laboratorios, autorizaciones, facturación y claims.',
+    'Configure los servicios - procedimientos de la organización',
   serviceProcedureListAdd: 'Añadir servicio',
   serviceProcedureListEmpty:
     'No se encontraron servicios ni procedimientos.',
@@ -567,6 +566,13 @@ export default {
   editClinician: 'Editar clínico',
   editClinicianBreadcrumb: 'Editar clínico',
   staffProfile: 'Perfil del personal',
+  staffProfileLoadError:
+    'No se pudo cargar el perfil del personal. Inténtelo de nuevo.',
+  staffProfileNotClinician: 'Personal no clínico',
+  staffProfileSystemAccessEnabled: 'Acceso al sistema habilitado',
+  staffProfilePhotoPlaceholder: 'Foto de perfil del personal',
+  staffProfileCopyStaffNo: 'Copiar número de personal',
+  staffProfileCopiedStaffNo: 'Número de personal copiado',
   tabStaffBasicInformation: 'Información básica',
   tabStaffContactInformation: 'Información de contacto',
   tabStaffEmployment: 'Empleo',

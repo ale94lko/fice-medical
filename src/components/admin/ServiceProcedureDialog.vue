@@ -23,7 +23,6 @@
         <SubsectionHeading
           icon="medical_services"
           :title="t('serviceProcedureSectionGeneral')"
-          :step="1"
         />
         <div class="row q-col-gutter-md q-mt-md">
           <div class="col-12 col-md-6">
@@ -80,7 +79,6 @@
           <SubsectionHeading
             icon="schedule"
             :title="t('serviceProcedureSectionOperational')"
-            :step="2"
           />
           <div class="row q-col-gutter-md q-mt-md">
             <div class="col-12 col-md-6">
@@ -125,7 +123,6 @@
           <SubsectionHeading
             icon="payments"
             :title="t('serviceProcedureSectionBilling')"
-            :step="3"
           />
           <div class="row q-col-gutter-md q-mt-md">
             <div class="col-12 col-md-4">
@@ -170,7 +167,6 @@
           <SubsectionHeading
             icon="verified_user"
             :title="t('serviceProcedureSectionAuthorization')"
-            :step="4"
           />
           <p class="text-body2 text-grey-7 q-mb-md">
             {{ t('serviceProcedureAuthorizationHint') }}
