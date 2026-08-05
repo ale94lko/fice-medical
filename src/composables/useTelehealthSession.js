@@ -37,8 +37,10 @@ import {
   cacheGuestAppointmentSummary,
   formatTelehealthElapsedLabel,
   isTelehealthTerminalStatus,
+  mapParticipantsFromApi,
   normalizeTelehealthChatMessage,
   normalizeTelehealthFile,
+  normalizeTelehealthParticipant,
   normalizeTelehealthSession,
   resolveTelehealthDurationSeconds,
   resolveTelehealthElapsedSeconds,
@@ -48,8 +50,18 @@ import { useTelehealthWebRtc } from 'src/composables/useTelehealthWebRtc.js'
 
 function findSelfParticipant(session, role, displayName) {
   const list = session?.participants ?? []
+  const selfId = toSessionSelfId(session)
+  if (selfId != null) {
+    const byId = list.find(p => p.id === selfId)
+    if (byId) {
+      return byId
+    }
+  }
   const roleToken = String(role ?? '').toUpperCase()
-  const byRole = list.filter(p => p.role === roleToken)
+  const matchRoles = isClientLikeRole(roleToken)
+    ? [telehealthRoles.client, telehealthRoles.guest, 'PATIENT']
+    : [roleToken]
+  const byRole = list.filter(p => matchRoles.includes(p.role))
   if (byRole.length === 1) {
     return byRole[0]
   }
@@ -63,7 +75,39 @@ function findSelfParticipant(session, role, displayName) {
     }
   }
 
-  return byRole[0] || list[0] || null
+  // Never fall back to an unrelated participant (e.g. clinician).
+  return byRole[0] || null
+}
+
+function toSessionSelfId(session) {
+  const raw = session?.selfParticipantId
+  if (raw == null || raw === '') {
+    return null
+  }
+  const n = Number(raw)
+
+  return Number.isFinite(n) ? n : null
+}
+
+function isClientLikeRole(role) {
+  const token = String(role ?? '').toUpperCase()
+
+  return (
+    token === telehealthRoles.client
+    || token === telehealthRoles.guest
+    || token === 'PATIENT'
+  )
+}
+
+function isParticipantInCallStatus(status) {
+  const token = String(status ?? '').toUpperCase()
+
+  return (
+    token === telehealthParticipantStatuses.admitted
+    || token === telehealthParticipantStatuses.inSession
+    || token === 'IN_CALL'
+    || token === 'CONNECTED'
+  )
 }
 
 function findRemoteParticipant(session, selfId, selfRole) {
@@ -72,12 +116,9 @@ function findRemoteParticipant(session, selfId, selfRole) {
   )
   // Only peers already in the call — waiting-room clients are not on
   // the signaling channel yet, so an early offer would be lost.
-  const active = list.filter(p =>
-    p.status === telehealthParticipantStatuses.admitted
-    || p.status === telehealthParticipantStatuses.inSession,
-  )
+  const active = list.filter(p => isParticipantInCallStatus(p.status))
   if (selfRole === telehealthRoles.clinician) {
-    return active.find(p => p.role === telehealthRoles.client)
+    return active.find(p => isClientLikeRole(p.role))
       || active[0]
       || null
   }
@@ -88,12 +129,63 @@ function findRemoteParticipant(session, selfId, selfRole) {
 }
 
 function isParticipantAdmitted(participant) {
-  const token = String(participant?.status ?? '').toUpperCase()
+  return isParticipantInCallStatus(participant?.status)
+}
+
+function isParticipantWaitingStatus(status) {
+  const token = String(status ?? '').toUpperCase()
 
   return (
-    token === telehealthParticipantStatuses.admitted
-    || token === telehealthParticipantStatuses.inSession
+    token === telehealthParticipantStatuses.waiting
+    || token === 'READY'
+    || token === 'IN_WAITING_ROOM'
+    || token === 'WAITING_ROOM'
   )
+}
+
+function mergeParticipants(current = [], incoming = []) {
+  const byId = new Map()
+  for (const participant of current) {
+    if (participant?.id != null) {
+      byId.set(participant.id, participant)
+    }
+  }
+  for (const participant of incoming) {
+    if (participant?.id == null) {
+      continue
+    }
+    byId.set(participant.id, {
+      ...(byId.get(participant.id) || {}),
+      ...participant,
+    })
+  }
+
+  return [...byId.values()]
+}
+
+function participantsFromWaitingPayload(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return []
+  }
+  const body = payload.data && typeof payload.data === 'object'
+    ? payload.data
+    : payload
+  const list = body.participants
+    ?? body.participant_list
+    ?? body.waiting_participants
+    ?? body.waitingParticipants
+  if (Array.isArray(list)) {
+    return mapParticipantsFromApi(list)
+  }
+  const single = body.participant
+    || (
+      body.id != null && (body.role || body.status)
+        ? body
+        : null
+    )
+  const normalized = normalizeTelehealthParticipant(single)
+
+  return normalized ? [normalized] : []
 }
 
 function findParticipantById(session, participantId) {
@@ -139,9 +231,7 @@ function createTelehealthSessionState() {
   const status = computed(() => session.value?.status || '')
   const participants = computed(() => session.value?.participants ?? [])
   const waitingParticipants = computed(() =>
-    participants.value.filter(
-      p => p.status === telehealthParticipantStatuses.waiting,
-    ),
+    participants.value.filter(p => isParticipantWaitingStatus(p.status)),
   )
   const isGuest = computed(() => Boolean(guestAuth.value?.guestKey))
   const isClinician = computed(() => role.value === telehealthRoles.clinician)
@@ -189,6 +279,18 @@ function createTelehealthSessionState() {
     }
     const syncPhase = options.syncPhase !== false
     const prev = session.value || {}
+    const nextParticipants = Array.isArray(next.participants)
+      ? next.participants
+      : null
+    // Prefer API list when present; merge so admit status updates win by id.
+    // Do not keep stale WAITING forever when API sends a real empty list.
+    const mergedParticipants = nextParticipants == null
+      ? (prev.participants ?? [])
+      : (
+        nextParticipants.length
+          ? mergeParticipants(prev.participants, nextParticipants)
+          : nextParticipants
+      )
     session.value = {
       ...next,
       meetingToken: next.meetingToken || prev.meetingToken || null,
@@ -219,6 +321,7 @@ function createTelehealthSessionState() {
         next.appointmentSummary
         || prev.appointmentSummary
         || null,
+      participants: mergedParticipants,
     }
     // Anchor local fallback to server start so staff/guest clocks match.
     syncCallClockFromSession(session.value)
@@ -256,8 +359,8 @@ function createTelehealthSessionState() {
       // First visit: wait for admit. After admit, re-enter if meet is live.
       if (
         role.value !== telehealthRoles.clinician
-        && !isSelfAdmitted(next)
-        && !canClientReenterMeet(next)
+        && !isSelfAdmitted(session.value)
+        && !canClientReenterMeet(session.value)
       ) {
         if (phase.value !== 'lobby') {
           phase.value = 'waiting'
@@ -265,14 +368,21 @@ function createTelehealthSessionState() {
 
         return
       }
-      if (
-        role.value !== telehealthRoles.clinician
-        && (isSelfAdmitted(next) || canClientReenterMeet(next))
-      ) {
+      const clientEntering = role.value !== telehealthRoles.clinician
+        && (
+          isSelfAdmitted(session.value)
+          || canClientReenterMeet(session.value)
+        )
+      if (clientEntering) {
         clientAdmittedOnce = true
       }
+      const wasWaiting = phase.value === 'waiting'
       phase.value = 'in_call'
       startElapsedTicker()
+      // Admit must start media/STOMP — phase alone is not enough.
+      if (clientEntering && wasWaiting && !mediaStarted) {
+        void ensureInCallMedia()
+      }
     } else if (
       next.status === telehealthSessionStatuses.waitingRoom
       || next.status === telehealthSessionStatuses.ready
@@ -293,11 +403,23 @@ function createTelehealthSessionState() {
     }
   }
 
-  function isSelfAdmitted(sess = session.value) {
-    const self = findParticipantById(sess, selfParticipantId.value)
-      || findSelfParticipant(sess, role.value, displayName.value)
+  function resolveSelfParticipant(sess = session.value) {
+    if (selfParticipantId.value != null) {
+      const byId = findParticipantById(sess, selfParticipantId.value)
+      if (byId) {
+        return byId
+      }
+    }
 
-    return isParticipantAdmitted(self)
+    return findSelfParticipant(
+      sess,
+      role.value,
+      displayName.value,
+    )
+  }
+
+  function isSelfAdmitted(sess = session.value) {
+    return isParticipantAdmitted(resolveSelfParticipant(sess))
   }
 
   function hasActiveMeetPresence(sess, selfId) {
@@ -516,12 +638,38 @@ function createTelehealthSessionState() {
     pollTimer = setInterval(() => {
       refreshSession()
         .then(next => {
-          if (shouldClientEnterCall(next)) {
-            ensureInCallMedia()
+          // Client: enter call after admit. Clinician: keep waiting list fresh.
+          tryEnterCallAfterAdmitCheck(next)
+          if (
+            role.value === telehealthRoles.clinician
+            && phase.value === 'in_call'
+          ) {
+            tryStartWebRtc()
           }
         })
         .catch(() => {})
-    }, 5000)
+    }, 2000)
+  }
+
+  function applyWaitingPayload(payload) {
+    const incoming = participantsFromWaitingPayload(payload)
+    if (!incoming.length || !session.value) {
+      return
+    }
+    session.value = {
+      ...session.value,
+      participants: mergeParticipants(
+        session.value.participants,
+        incoming,
+      ),
+    }
+  }
+
+  function onClinicianWaitingEvent(payload) {
+    applyWaitingPayload(payload)
+    refreshSession()
+      .then(() => tryStartWebRtc())
+      .catch(() => {})
   }
 
   function teardownStomp() {
@@ -591,9 +739,15 @@ function createTelehealthSessionState() {
     mediaStarted = true
     rememberClientAdmitted()
     markCallClock()
-    stopPolling()
     phase.value = 'in_call'
     startHeartbeat()
+    // Clinician must keep polling — waiting-room STOMP can be missed when
+    // the client joins after the clinician is already in_call.
+    if (role.value === telehealthRoles.clinician) {
+      startPolling()
+    } else {
+      stopPolling()
+    }
     try {
       if (!webrtc.localStream.value) {
         await webrtc.getLocalMedia({ audio: true, video: true })
@@ -609,6 +763,34 @@ function createTelehealthSessionState() {
     }
   }
 
+  function isWebRtcConnected() {
+    const state = String(webrtc.connectionState.value || '')
+
+    return state === 'connected'
+  }
+
+  function shouldRecoverWebRtc() {
+    const state = String(webrtc.connectionState.value || '')
+
+    return (
+      state === 'failed'
+      || state === 'disconnected'
+      || state === 'closed'
+    )
+  }
+
+  function announcePeerReady(remoteId) {
+    if (!remoteId || !stomp?.isConnected?.()) {
+      return
+    }
+    stomp.sendSignal({
+      type: 'peer_ready',
+      fromParticipantId: selfParticipantId.value,
+      toParticipantId: remoteId,
+      role: role.value,
+    })
+  }
+
   function tryStartWebRtc({ force = false } = {}) {
     if (!stomp?.isConnected?.() || !selfParticipantId.value) {
       return
@@ -621,11 +803,21 @@ function createTelehealthSessionState() {
     if (!remote?.id) {
       return
     }
-    if (webrtcStarted && !force) {
-      return
+    let shouldForce = force
+    if (webrtcStarted && !shouldForce) {
+      if (isWebRtcConnected()) {
+        return
+      }
+      // Stuck after a simultaneous-join race — rebuild the PC.
+      if (shouldRecoverWebRtc()) {
+        shouldForce = true
+      } else {
+        return
+      }
     }
-    if (force) {
+    if (shouldForce) {
       webrtc.closePeerConnection({ keepLocal: true })
+      webrtcStarted = false
     }
     webrtcStarted = true
     const polite = role.value !== telehealthRoles.clinician
@@ -641,24 +833,33 @@ function createTelehealthSessionState() {
       if (!polite) {
         return
       }
-      stomp?.sendSignal({
-        type: 'peer_ready',
-        fromParticipantId: selfParticipantId.value,
-        toParticipantId: remote.id,
-        role: role.value,
-      })
+      announcePeerReady(remote.id)
+      // Retry once — peer_ready is often missed if both click Join together.
+      window.setTimeout(() => {
+        if (
+          phase.value === 'in_call'
+          && !isWebRtcConnected()
+          && role.value !== telehealthRoles.clinician
+        ) {
+          announcePeerReady(remote.id)
+        }
+      }, 1500)
     }).catch(() => {
       webrtcStarted = false
     })
   }
 
-  function onPeerReadySignal() {
+  async function onPeerReadySignal() {
     if (role.value !== telehealthRoles.clinician) {
       return
     }
-    const state = String(webrtc.connectionState.value || '')
-    if (state === 'connected') {
+    if (isWebRtcConnected()) {
       return
+    }
+    try {
+      await refreshSession()
+    } catch {
+      // Still attempt a renegotiation with current session snapshot.
     }
     tryStartWebRtc({ force: true })
   }
@@ -673,7 +874,7 @@ function createTelehealthSessionState() {
       onSignal: payload => {
         const type = String(payload?.type ?? '').toLowerCase()
         if (type === 'peer_ready' || type === 'webrtc_ready') {
-          onPeerReadySignal()
+          void onPeerReadySignal()
 
           return
         }
@@ -694,7 +895,12 @@ function createTelehealthSessionState() {
         }
         webrtc.handleSignal(payload)
       },
-      onWaiting: () => {
+      onWaiting: payload => {
+        if (role.value === telehealthRoles.clinician) {
+          onClinicianWaitingEvent(payload)
+
+          return
+        }
         refreshSession()
           .then(() => tryStartWebRtc())
           .catch(() => {})
@@ -742,23 +948,38 @@ function createTelehealthSessionState() {
     stomp.connect()
   }
 
+  function tryEnterCallAfterAdmitCheck(sess) {
+    if (!shouldClientEnterCall(sess || session.value)) {
+      return false
+    }
+    void ensureInCallMedia()
+
+    return true
+  }
+
   function connectWaitingStomp(sessionId) {
     teardownStomp()
     stomp = createTelehealthStompClient(stompOptions({
       sessionId,
-      onWaiting: () => {
+      onWaiting: payload => {
+        applyWaitingPayload(payload)
+        if (tryEnterCallAfterAdmitCheck(session.value)) {
+          return
+        }
         refreshSession()
           .then(next => {
-            if (shouldClientEnterCall(next)) {
-              return ensureInCallMedia()
-            }
-
-            return null
+            tryEnterCallAfterAdmitCheck(next)
           })
           .catch(() => {})
       },
       onConnect: () => {
         stompConnected.value = true
+        // Catch admits that happened while STOMP was connecting.
+        refreshSession()
+          .then(next => {
+            tryEnterCallAfterAdmitCheck(next)
+          })
+          .catch(() => {})
       },
       onDisconnect: () => {
         stompConnected.value = false
@@ -855,11 +1076,18 @@ function createTelehealthSessionState() {
       if (!selfParticipantId.value) {
         const self = findSelfParticipant(
           joined,
-          telehealthRoles.client,
+          telehealthRoles.guest,
           displayName.value,
         )
+          || findSelfParticipant(
+            joined,
+            telehealthRoles.client,
+            displayName.value,
+          )
         selfParticipantId.value = self?.id ?? null
       }
+      // Guest join uses CLIENT role in app state; API peer may be GUEST.
+      role.value = telehealthRoles.client
       applySession(joined)
       await enterClientAfterJoin(
         previewStream,
@@ -916,7 +1144,21 @@ function createTelehealthSessionState() {
         participantId,
       )
       applySession(next)
+      // Peer may still be connecting STOMP — start now and retry if idle.
       tryStartWebRtc()
+      window.setTimeout(() => {
+        if (phase.value !== 'in_call' || isWebRtcConnected()) {
+          return
+        }
+        if (!webrtcStarted) {
+          tryStartWebRtc()
+
+          return
+        }
+        if (shouldRecoverWebRtc()) {
+          tryStartWebRtc({ force: true })
+        }
+      }, 1200)
     } catch (err) {
       setError(err, 'Could not admit participant')
       throw err

@@ -40,6 +40,8 @@ export function useTelehealthWebRtc() {
   let renegotiateQueued = false
   let ignoreOffer = false
   let polite = false
+  /** ICE before remote description — common when both join at once. */
+  let pendingIceCandidates = []
   /** Remote MediaStream id announced with screen_share_start. */
   let remoteScreenStreamId = null
   /** track.id → inbound MediaStream.id (from ontrack). */
@@ -367,6 +369,21 @@ export function useTelehealthWebRtc() {
     }
   }
 
+  async function flushPendingIceCandidates() {
+    if (!pc?.remoteDescription || !pendingIceCandidates.length) {
+      return
+    }
+    const queued = pendingIceCandidates
+    pendingIceCandidates = []
+    for (const candidate of queued) {
+      try {
+        await pc.addIceCandidate(candidate)
+      } catch {
+        // ignore stale candidates after glare / restart
+      }
+    }
+  }
+
   async function handleSignalInner(payload) {
     if (!payload || typeof payload !== 'object' || !pc) {
       return
@@ -406,10 +423,22 @@ export function useTelehealthWebRtc() {
       if (ignoreOffer) {
         return
       }
-      await pc.setRemoteDescription({
-        type: 'offer',
-        sdp: payload.sdp,
-      })
+      // Perfect negotiation: polite peer rolls back local offer on glare.
+      if (offerCollision && polite) {
+        await Promise.all([
+          pc.setLocalDescription({ type: 'rollback' }),
+          pc.setRemoteDescription({
+            type: 'offer',
+            sdp: payload.sdp,
+          }),
+        ])
+      } else {
+        await pc.setRemoteDescription({
+          type: 'offer',
+          sdp: payload.sdp,
+        })
+      }
+      await flushPendingIceCandidates()
       const answer = await pc.createAnswer()
       await pc.setLocalDescription(answer)
       sendSignal?.({
@@ -435,6 +464,7 @@ export function useTelehealthWebRtc() {
         type: 'answer',
         sdp: payload.sdp,
       })
+      await flushPendingIceCandidates()
       if (renegotiateQueued && pc.signalingState === 'stable') {
         renegotiateQueued = false
         void renegotiate()
@@ -444,6 +474,11 @@ export function useTelehealthWebRtc() {
     }
 
     if (type === 'ice-candidate' && payload.candidate) {
+      if (!pc.remoteDescription) {
+        pendingIceCandidates.push(payload.candidate)
+
+        return
+      }
       try {
         await pc.addIceCandidate(payload.candidate)
       } catch {
@@ -582,6 +617,7 @@ export function useTelehealthWebRtc() {
     makingOffer = false
     renegotiateQueued = false
     ignoreOffer = false
+    pendingIceCandidates = []
   }
 
   function cleanup() {
