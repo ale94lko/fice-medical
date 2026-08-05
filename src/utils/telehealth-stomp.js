@@ -168,7 +168,7 @@ export function createTelehealthStompClient({
     }
   }
 
-  function publish(destination, body) {
+  function publish(destination, body, { mapKeys = true } = {}) {
     if (!client?.connected) {
       return false
     }
@@ -179,9 +179,14 @@ export function createTelehealthStompClient({
 
       return false
     }
-    const payload = body != null && typeof body === 'object'
-      ? deepMapRequestKeysToSnakeCase(body)
-      : body
+    let payload = body
+    if (
+      mapKeys
+      && body != null
+      && typeof body === 'object'
+    ) {
+      payload = deepMapRequestKeysToSnakeCase(body)
+    }
     client.publish({
       destination,
       body: JSON.stringify(payload ?? {}),
@@ -189,6 +194,39 @@ export function createTelehealthStompClient({
     })
 
     return true
+  }
+
+  /**
+   * WebRTC signal: top-level snake_case, but keep RTCIceCandidateInit
+   * keys in camelCase (sdpMid / sdpMLineIndex) or browsers drop ICE.
+   */
+  function publishSignal(body = {}) {
+    const raw = body && typeof body === 'object' ? body : {}
+    const candidate = raw.candidate
+    const mapped = deepMapRequestKeysToSnakeCase(raw)
+    const isCandidateObject = Boolean(
+      candidate
+      && typeof candidate === 'object'
+      && !Array.isArray(candidate),
+    )
+    if (isCandidateObject) {
+      mapped.candidate = {
+        candidate: String(candidate.candidate ?? ''),
+        sdpMid: candidate.sdpMid ?? candidate.sdp_mid ?? null,
+        sdpMLineIndex:
+          candidate.sdpMLineIndex
+          ?? candidate.sdp_m_line_index
+          ?? null,
+        usernameFragment:
+          candidate.usernameFragment
+          ?? candidate.username_fragment
+          ?? undefined,
+      }
+    }
+
+    return publish(`/app/telehealth/${id}/signal`, mapped, {
+      mapKeys: false,
+    })
   }
 
   function connect() {
@@ -298,7 +336,7 @@ export function createTelehealthStompClient({
     connect,
     disconnect,
     isConnected: () => Boolean(client?.connected),
-    sendSignal: payload => publish(`/app/telehealth/${id}/signal`, payload),
+    sendSignal: publishSignal,
     sendWaiting: payload => publish(`/app/telehealth/${id}/waiting`, payload),
     sendChat: payload => publish(`/app/telehealth/${id}/chat`, payload),
   }

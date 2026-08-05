@@ -393,6 +393,40 @@ export function useTelehealthWebRtc() {
     }
   }
 
+  function normalizeIceCandidateInit(raw) {
+    if (raw == null) {
+      return null
+    }
+    if (typeof raw === 'string') {
+      return { candidate: raw }
+    }
+    if (typeof raw !== 'object') {
+      return null
+    }
+    const line = String(raw.candidate ?? '').trim()
+    if (!line) {
+      return null
+    }
+    const mid = raw.sdpMid ?? raw.sdp_mid
+    const mLine = raw.sdpMLineIndex ?? raw.sdp_m_line_index
+    const ufrag = raw.usernameFragment ?? raw.username_fragment
+    const init = { candidate: line }
+    if (mid != null && mid !== '') {
+      init.sdpMid = String(mid)
+    }
+    if (mLine != null && mLine !== '') {
+      const n = Number(mLine)
+      if (Number.isFinite(n)) {
+        init.sdpMLineIndex = n
+      }
+    }
+    if (ufrag != null && ufrag !== '') {
+      init.usernameFragment = String(ufrag)
+    }
+
+    return init
+  }
+
   async function flushPendingIceCandidates() {
     if (!pc?.remoteDescription || !pendingIceCandidates.length) {
       return
@@ -413,6 +447,7 @@ export function useTelehealthWebRtc() {
       return
     }
     const type = String(payload.type ?? '').toLowerCase()
+      .replace(/_/g, '-')
     const fromId = Number(
       payload.from_participant_id ?? payload.fromParticipantId,
     )
@@ -490,14 +525,18 @@ export function useTelehealthWebRtc() {
       return
     }
 
-    if (type === 'ice-candidate' && payload.candidate) {
+    if (type === 'ice-candidate') {
+      const init = normalizeIceCandidateInit(payload.candidate)
+      if (!init) {
+        return
+      }
       if (!pc.remoteDescription) {
-        pendingIceCandidates.push(payload.candidate)
+        pendingIceCandidates.push(init)
 
         return
       }
       try {
-        await pc.addIceCandidate(payload.candidate)
+        await pc.addIceCandidate(init)
       } catch {
         if (!ignoreOffer) {
           // swallow races during glare
