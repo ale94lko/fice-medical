@@ -1074,6 +1074,9 @@ export const clinicalResourcePinnedMax = 5
 /** Max visible characters for resource title in list tables. */
 export const clinicalResourceTitleMaxChars = 50
 
+/** Max visible characters for resource URL in list tables. */
+export const clinicalResourceUrlMaxChars = 60
+
 export const clinicalResourcePinRoleNames = {
   tenantAdmin: 'TENANT_ADMIN',
   superAdmin: 'SUPER_ADMIN',

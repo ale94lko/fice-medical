@@ -112,6 +112,8 @@
                 :error-message="errors.url"
                 :placeholder="t('clinicalResourceUrlPlaceholder')"
                 :test-id="clinicalResourceDialogTestIds.field('url')"
+                @blur="onUrlBlur"
+                @update:model-value="onUrlInput"
               />
             </AddClientLabeledField>
           </div>
@@ -225,7 +227,7 @@ import {
   cloneClinicalResourceForm,
   createEmptyClinicalResourceForm,
 } from 'src/utils/clinical-resource-form.js'
-import { validateClinicalResourceForm } from
+import { validateClinicalResourceForm, getClinicalResourceUrlError } from
   'src/utils/clinical-resource-validation.js'
 import { clinicalResourceDialogTestIds } from 'src/test-ids/index.js'
 
@@ -307,6 +309,41 @@ function syncLocalFromProps() {
     local.value = createEmptyClinicalResourceForm()
   }
   errors.value = {}
+}
+
+function clearFieldError(field) {
+  if (!errors.value?.[field]) {
+    return
+  }
+  const next = { ...errors.value }
+  delete next[field]
+  errors.value = next
+}
+
+function onUrlBlur() {
+  if (readonly.value || !isExternalLink.value) {
+    return
+  }
+  const message = getClinicalResourceUrlError(local.value.url, t)
+  if (message) {
+    errors.value = { ...errors.value, url: message }
+
+    return
+  }
+  clearFieldError('url')
+}
+
+function onUrlInput() {
+  if (!errors.value.url) {
+    return
+  }
+  const message = getClinicalResourceUrlError(local.value.url, t)
+  if (message) {
+    errors.value = { ...errors.value, url: message }
+
+    return
+  }
+  clearFieldError('url')
 }
 
 function onCancel() {

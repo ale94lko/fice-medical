@@ -77,6 +77,12 @@
                   v-if="scope.row.subtitle"
                   class="clinical-resource-list-page__link">
                   {{ scope.row.subtitle }}
+                  <q-tooltip
+                    v-if="scope.row.subtitleTruncated"
+                    anchor="top middle"
+                    self="bottom middle">
+                    {{ scope.row.subtitleFull || scope.row[fk.url] }}
+                  </q-tooltip>
                 </div>
               </button>
             </div>

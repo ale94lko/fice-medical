@@ -3,6 +3,7 @@ import {
   clinicalResourceStatusValues,
   clinicalResourceTitleMaxChars,
   clinicalResourceTypeValues,
+  clinicalResourceUrlMaxChars,
 } from 'components/constants.js'
 import { adminTableStatusVariants } from 'src/constants/admin-table.js'
 import { formatUserCreatedAt } from 'src/utils/user-list-display.js'
@@ -97,6 +98,21 @@ export function mapClinicalResourceListItem(item, t) {
   const titleDisplay = formatClinicalResourceTitleDisplay(title)
   const contentPreview = trim(item.content)
   const url = trim(item.url)
+  const urlDisplay = formatClinicalResourceTitleDisplay(
+    url,
+    clinicalResourceUrlMaxChars,
+  )
+  const isDocument = type === clinicalResourceTypeValues.document
+  let subtitle = ''
+  let subtitleFull = ''
+  let subtitleTruncated = false
+  if (isDocument) {
+    subtitle = contentPreview.slice(0, 120)
+  } else if (url) {
+    subtitle = urlDisplay.display
+    subtitleFull = urlDisplay.full
+    subtitleTruncated = urlDisplay.truncated
+  }
 
   return {
     id: item.id,
@@ -121,9 +137,9 @@ export function mapClinicalResourceListItem(item, t) {
     updatedAtRaw,
     storedFileId: item.stored_file_id ?? item.storedFileId ?? null,
     document: item.document ?? null,
-    subtitle: type === clinicalResourceTypeValues.document
-      ? contentPreview.slice(0, 120)
-      : url,
+    subtitle,
+    subtitleFull,
+    subtitleTruncated,
   }
 }
 

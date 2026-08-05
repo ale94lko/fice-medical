@@ -2669,7 +2669,7 @@ export default {
   clinicalResourceUrlLabel: 'URL',
   clinicalResourceUrlPlaceholder: 'https://ejemplo.com/recurso',
   clinicalResourceUrlRequired: 'La URL es obligatoria.',
-  clinicalResourceUrlInvalid: 'Introduzca una URL http o https válida.',
+  clinicalResourceUrlInvalid: 'Introduzca una URL válida.',
   clinicalResourceDocumentLabel: 'Archivo de recurso',
   clinicalResourceDocumentUploadHint:
     'Arrastre un archivo aquí o haga clic para buscar',
