@@ -1155,14 +1155,14 @@ export const apiPaths = {
   subtenantById: id => `/subtenants/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
-  serviceProceduresList: '/services-procedures/v1',
-  serviceProcedureById: id => `/services-procedures/v1/${encodeURIComponent(
+  serviceProceduresList: '/service-procedures/v1',
+  serviceProcedureById: id => `/service-procedures/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
-  serviceProcedureStatus: id => `/services-procedures/v1/${encodeURIComponent(
+  serviceProcedureStatus: id => `/service-procedures/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/status`,
-  tenantServiceProceduresList: '/tenant/services-procedures/v1',
+  tenantServiceProceduresList: '/tenant/service-procedures/v1',
   tenantRolesByTenantId: tenantId => `/roles/v1/tenant/${
     encodeURIComponent(String(tenantId ?? '').trim())
   }`,
