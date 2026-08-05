@@ -95,6 +95,7 @@ const dragging = ref(false)
 let dragOffset = { x: 0, y: 0 }
 
 const previewStream = computed(() => {
+  void webrtc.remoteMediaGeneration.value
   const remote = webrtc.remoteStream.value
   if (remote && typeof remote.getTracks === 'function') {
     const live = remote.getTracks().some(

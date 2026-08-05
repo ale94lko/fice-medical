@@ -7,12 +7,19 @@ import { loadEnv } from 'vite'
 
 function devApiProxyOptions(target) {
   const normalized = target.replace(/\/$/, '')
-
-  return {
+  const options = {
     target: normalized,
     changeOrigin: true,
     secure: true,
   }
+  // ngrok free shows an interstitial HTML (200, no CORS) unless skipped.
+  if (/ngrok(-free)?\.(dev|app|io)/i.test(normalized)) {
+    options.headers = {
+      'ngrok-skip-browser-warning': 'true',
+    }
+  }
+
+  return options
 }
 
 function devApiProxy(target) {

@@ -73,6 +73,7 @@
       :remote-stream="webrtc.remoteStream.value"
       :local-screen-stream="webrtc.screenStream.value"
       :remote-screen-stream="webrtc.remoteScreenStream.value"
+      :remote-media-generation="webrtc.remoteMediaGeneration.value"
       :audio-enabled="webrtc.audioEnabled.value"
       :video-enabled="webrtc.videoEnabled.value"
       :speaker-enabled="webrtc.speakerEnabled.value"

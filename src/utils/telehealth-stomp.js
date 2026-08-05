@@ -33,7 +33,8 @@ function resolveSubtenantCode() {
  */
 function sockJsUrl() {
   const path = apiPaths.telehealthSockJs
-  // Dev: relative URL so Quasar proxy handles SockJS (no CORS).
+  // Dev: always same-origin `/telehealth` (Quasar proxy → API_PROXY_TARGET).
+  // Avoids browser CORS against ngrok/localhost:8080 for SockJS /info.
   if (import.meta.env.DEV) {
     return path
   }
@@ -51,12 +52,19 @@ function sockJsUrl() {
   return `${window.location.origin}${path}`
 }
 
-// SockJS XHR uses withCredentials; off — auth is STOMP CONNECT.
+// SockJS XHR: no cookies (auth is STOMP CONNECT headers).
+// Always send ngrok-skip-browser-warning — free ngrok returns HTML 200
+// without CORS if omitted; harmless on non-ngrok hosts.
+const SOCKJS_XHR_OPTS = {
+  noCredentials: true,
+  headers: { 'ngrok-skip-browser-warning': 'true' },
+}
+
 const SOCKJS_OPTIONS = {
   transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
   transportOptions: {
-    'xhr-streaming': { noCredentials: true },
-    'xhr-polling': { noCredentials: true },
+    'xhr-streaming': SOCKJS_XHR_OPTS,
+    'xhr-polling': SOCKJS_XHR_OPTS,
   },
 }
 

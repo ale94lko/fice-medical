@@ -1199,6 +1199,24 @@
   font-size: 11px;
   color: rgba(255, 255, 255, 0.55);
   margin-bottom: 2px;
+  gap: 6px;
+}
+
+.telehealth-chat-item__author {
+  min-width: 0;
+}
+
+.telehealth-chat-item__time {
+  flex: 0 0 auto;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.telehealth-chat-list__anchor {
+  width: 100%;
+  height: 1px;
+  flex: 0 0 auto;
 }
 
 .telehealth-files-list {

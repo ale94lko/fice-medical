@@ -304,7 +304,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import TelehealthChatPanel from './TelehealthChatPanel.vue'
 import TelehealthFilesPanel from './TelehealthFilesPanel.vue'
@@ -317,6 +317,8 @@ const props = defineProps({
   remoteStream: { type: Object, default: null },
   localScreenStream: { type: Object, default: null },
   remoteScreenStream: { type: Object, default: null },
+  /** Increments when remote tracks change (shallowRef-safe). */
+  remoteMediaGeneration: { type: Number, default: 0 },
   audioEnabled: { type: Boolean, default: true },
   videoEnabled: { type: Boolean, default: true },
   speakerEnabled: { type: Boolean, default: true },
@@ -431,16 +433,40 @@ watch(
   },
 )
 
-function bindVideo(el, stream) {
+function bindVideo(el, stream, { remote = false } = {}) {
   if (!el) {
     return
   }
   if (el.srcObject !== stream) {
     el.srcObject = stream || null
   }
+  if (!stream) {
+    return
+  }
+  // Autoplay with audio is often blocked — start muted, play, then unmute.
+  const wantSound = remote && props.speakerEnabled
+  const run = async() => {
+    try {
+      if (wantSound) {
+        el.muted = true
+      }
+      await el.play()
+      if (wantSound) {
+        el.muted = false
+      } else if (remote) {
+        el.muted = true
+      }
+    } catch {
+      // Autoplay blocked until a user gesture; tile still shows frames
+      // once the browser allows playback.
+    }
+  }
+  void run()
 }
 
 function syncRemoteMediaFlag(stream) {
+  // Depend on generation so track attach always re-evaluates.
+  void props.remoteMediaGeneration
   if (!stream || typeof stream.getTracks !== 'function') {
     hasRemoteMedia.value = false
 
@@ -476,10 +502,12 @@ watch(
 )
 
 watch(
-  () => props.remoteStream,
-  stream => {
-    bindVideo(remoteVideoRef.value, stream)
+  () => [props.remoteStream, props.remoteMediaGeneration],
+  async() => {
+    const stream = props.remoteStream
     bindRemoteTrackWatchers(stream)
+    await nextTick()
+    bindVideo(remoteVideoRef.value, stream, { remote: true })
   },
   { immediate: true },
 )
@@ -491,7 +519,9 @@ watch(
 )
 
 watch(localVideoRef, el => bindVideo(el, props.localStream))
-watch(remoteVideoRef, el => bindVideo(el, props.remoteStream))
+watch(remoteVideoRef, el => {
+  bindVideo(el, props.remoteStream, { remote: true })
+})
 watch(screenVideoRef, el => bindVideo(el, screenStageStream.value))
 
 watch(
@@ -499,6 +529,9 @@ watch(
   enabled => {
     if (remoteVideoRef.value) {
       remoteVideoRef.value.muted = !enabled
+      if (enabled && remoteVideoRef.value.srcObject) {
+        void remoteVideoRef.value.play().catch(() => {})
+      }
     }
   },
 )

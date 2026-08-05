@@ -859,17 +859,24 @@ function createTelehealthSessionState() {
 
   function isWebRtcConnected() {
     const state = String(webrtc.connectionState.value || '')
+    const ice = String(webrtc.iceConnectionState.value || '')
 
     return state === 'connected'
+      || ice === 'connected'
+      || ice === 'completed'
   }
 
   function shouldRecoverWebRtc() {
     const state = String(webrtc.connectionState.value || '')
+    const ice = String(webrtc.iceConnectionState.value || '')
 
     return (
       state === 'failed'
       || state === 'disconnected'
       || state === 'closed'
+      || ice === 'failed'
+      || ice === 'disconnected'
+      || ice === 'closed'
     )
   }
 
@@ -885,7 +892,7 @@ function createTelehealthSessionState() {
     })
   }
 
-  function tryStartWebRtc({ force = false } = {}) {
+  function tryStartWebRtc({ force = false, offer = false } = {}) {
     if (!stomp?.isConnected?.() || !selfParticipantId.value) {
       return
     }
@@ -897,6 +904,7 @@ function createTelehealthSessionState() {
     if (!remote?.id) {
       return
     }
+    const isClinicianPeer = role.value === telehealthRoles.clinician
     let shouldForce = force
     if (webrtcStarted && !shouldForce) {
       if (isWebRtcConnected()) {
@@ -904,7 +912,12 @@ function createTelehealthSessionState() {
       }
       if (shouldRecoverWebRtc()) {
         shouldForce = true
-      } else {
+      } else if (isClinicianPeer && offer && webrtc.hasPeerConnection?.()) {
+        // PC already up — just (re)send offer for peer_ready / retries.
+        void webrtc.createAndSendOffer()
+
+        return
+      } else if (!offer) {
         return
       }
     }
@@ -914,14 +927,18 @@ function createTelehealthSessionState() {
         webrtcStarted = false
       }
       webrtcStarted = true
-      const isClinicianPeer = role.value === telehealthRoles.clinician
+      // Clinician prepares PC immediately but must NOT offer until the
+      // guest is on /signal (peer_ready). Otherwise the offer is lost.
+      const offerImmediately = isClinicianPeer
+        ? Boolean(offer)
+        : false
       webrtc.startCall({
         iceServers: session.value?.iceServers ?? [],
         selfId: selfParticipantId.value,
         remoteId: remote.id,
         publishSignal: body => stomp?.sendSignal(body),
-        // Client/guest is polite (answers only). Clinician offers.
         isPolite: !isClinicianPeer,
+        offerImmediately,
       }).then(() => {
         if (isClinicianPeer) {
           return
@@ -956,12 +973,17 @@ function createTelehealthSessionState() {
     } catch {
       // use current session snapshot
     }
-    // Always rebuild + offer when guest announces ready.
-    tryStartWebRtc({ force: true })
-    // If still not connected, offer again shortly.
+    // Soft offer on existing PC; force only when ICE/PC is broken.
+    tryStartWebRtc({
+      force: shouldRecoverWebRtc(),
+      offer: true,
+    })
     window.setTimeout(() => {
       if (phase.value === 'in_call' && !isWebRtcConnected()) {
-        tryStartWebRtc({ force: true })
+        tryStartWebRtc({
+          force: shouldRecoverWebRtc(),
+          offer: true,
+        })
       }
     }, 2000)
   }
@@ -970,12 +992,16 @@ function createTelehealthSessionState() {
     if (role.value === telehealthRoles.clinician) {
       return
     }
-    ;[500, 1500, 3000].forEach(delayMs => {
+    ;[500, 2000, 4000].forEach(delayMs => {
       window.setTimeout(() => {
         if (phase.value !== 'in_call' || isWebRtcConnected()) {
           return
         }
-        tryStartWebRtc({ force: !webrtcStarted ? false : delayMs >= 1500 })
+        // Only force-rebuild when ICE/PC actually failed — never while
+        // still "connecting" (that tears down a valid in-flight answer).
+        tryStartWebRtc({
+          force: webrtcStarted && shouldRecoverWebRtc(),
+        })
       }, delayMs)
     })
   }
@@ -984,7 +1010,7 @@ function createTelehealthSessionState() {
     if (role.value !== telehealthRoles.clinician) {
       return
     }
-    ;[2000, 5000, 8000].forEach(delayMs => {
+    ;[3000, 6000, 10000].forEach(delayMs => {
       window.setTimeout(() => {
         if (phase.value !== 'in_call' || isWebRtcConnected()) {
           return
@@ -997,9 +1023,30 @@ function createTelehealthSessionState() {
         if (!remote?.id) {
           return
         }
-        tryStartWebRtc({ force: true })
+        tryStartWebRtc({
+          force: shouldRecoverWebRtc(),
+          offer: true,
+        })
       }, delayMs)
     })
+  }
+
+  function normalizeIncomingSignal(payload) {
+    if (!payload || typeof payload !== 'object') {
+      return null
+    }
+    const nested = payload.data
+    if (
+      nested
+      && typeof nested === 'object'
+      && !Array.isArray(nested)
+      && payload.type == null
+      && nested.type != null
+    ) {
+      return nested
+    }
+
+    return payload
   }
 
   function connectStompAndCall() {
@@ -1010,28 +1057,31 @@ function createTelehealthSessionState() {
     teardownStomp()
     stomp = createTelehealthStompClient(stompOptions({
       onSignal: payload => {
-        const type = String(payload?.type ?? '').toLowerCase()
-        if (type === 'peer_ready' || type === 'webrtc_ready') {
+        const msg = normalizeIncomingSignal(payload)
+        const type = String(msg?.type ?? '')
+          .toLowerCase()
+          .replace(/_/g, '-')
+        if (type === 'peer-ready' || type === 'webrtc-ready') {
           void onPeerReadySignal()
 
           return
         }
-        if (type === 'screen_share_start') {
+        if (type === 'screen-share-start') {
           webrtc.setRemoteScreenSharing(
             true,
-            payload?.streamId ?? payload?.stream_id ?? null,
+            msg?.streamId ?? msg?.stream_id ?? null,
           )
           refreshSession().catch(() => {})
 
           return
         }
-        if (type === 'screen_share_stop') {
+        if (type === 'screen-share-stop') {
           webrtc.setRemoteScreenSharing(false)
           refreshSession().catch(() => {})
 
           return
         }
-        webrtc.handleSignal(payload)
+        webrtc.handleSignal(msg)
       },
       onWaiting: payload => {
         if (role.value === telehealthRoles.clinician) {

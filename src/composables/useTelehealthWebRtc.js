@@ -15,6 +15,49 @@ function stopStream(stream) {
   stream.getTracks().forEach(stopTrack)
 }
 
+/** Clear a stream ref without stopping inbound (remote) tracks. */
+function detachStream(streamRef) {
+  streamRef.value = null
+}
+
+function unwrapSignalPayload(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    return null
+  }
+  const nested = raw.data
+  if (
+    nested
+    && typeof nested === 'object'
+    && !Array.isArray(nested)
+    && raw.type == null
+    && (nested.type != null || nested.sdp != null || nested.candidate != null)
+  ) {
+    return nested
+  }
+
+  return raw
+}
+
+function resolveSdp(payload) {
+  if (!payload || typeof payload !== 'object') {
+    return ''
+  }
+
+  return String(
+    payload.sdp
+    ?? payload.session_description
+    ?? payload.sessionDescription
+    ?? payload.description
+    ?? '',
+  ).trim()
+}
+
+function normalizeSignalType(rawType) {
+  return String(rawType ?? '')
+    .toLowerCase()
+    .replace(/_/g, '-')
+}
+
 /**
  * WebRTC peer connection for a 1:1 telehealth call.
  * Signaling payloads must be published by the caller (no PHI logging).
@@ -25,11 +68,14 @@ export function useTelehealthWebRtc() {
   const remoteScreenStream = shallowRef(null)
   const screenStream = shallowRef(null)
   const connectionState = ref('new')
+  const iceConnectionState = ref('new')
   const audioEnabled = ref(true)
   const videoEnabled = ref(true)
   const speakerEnabled = ref(true)
   const isScreenSharing = ref(false)
   const isRemoteScreenSharing = ref(false)
+  /** Bumps when remote tracks change — drives UI safely. */
+  const remoteMediaGeneration = ref(0)
 
   let pc = null
   let selfParticipantId = null
@@ -40,20 +86,33 @@ export function useTelehealthWebRtc() {
   let renegotiateQueued = false
   let ignoreOffer = false
   let polite = false
+  /** Clinician must not offer until peer_ready (or an explicit offer). */
+  let offerArmed = false
   /** ICE before remote description — common when both join at once. */
   let pendingIceCandidates = []
+  /** Offers/answers/ICE that arrived before PC existed. */
+  let pendingSignals = []
   /** Remote MediaStream id announced with screen_share_start. */
   let remoteScreenStreamId = null
   /** track.id → inbound MediaStream.id (from ontrack). */
   const remoteTrackStreamIds = new Map()
 
-  function publishStream(targetRef, stream) {
+  function bumpRemoteMedia() {
+    remoteMediaGeneration.value += 1
+  }
+
+  function publishStream(targetRef, stream, { bump = false } = {}) {
+    // New MediaStream identity so Vue shallowRef consumers update.
     targetRef.value = new MediaStream(stream.getTracks())
+    if (bump) {
+      bumpRemoteMedia()
+    }
   }
 
   function ensureRemoteStream() {
     if (!remoteStream.value) {
       remoteStream.value = new MediaStream()
+      bumpRemoteMedia()
     }
 
     return remoteStream.value
@@ -62,22 +121,15 @@ export function useTelehealthWebRtc() {
   function ensureRemoteScreenStream() {
     if (!remoteScreenStream.value) {
       remoteScreenStream.value = new MediaStream()
+      bumpRemoteMedia()
     }
 
     return remoteScreenStream.value
   }
 
   function clearRemoteScreenStream() {
-    if (remoteScreenStream.value) {
-      remoteScreenStream.value.getTracks().forEach(track => {
-        try {
-          remoteScreenStream.value.removeTrack(track)
-        } catch {
-          // ignore
-        }
-      })
-    }
-    remoteScreenStream.value = null
+    detachStream(remoteScreenStream)
+    bumpRemoteMedia()
   }
 
   function remoteHasCameraVideo() {
@@ -121,7 +173,7 @@ export function useTelehealthWebRtc() {
     if (remoteStream.value?.getTracks?.().some(t => t.id === track.id)) {
       try {
         remoteStream.value.removeTrack(track)
-        publishStream(remoteStream, remoteStream.value)
+        publishStream(remoteStream, remoteStream.value, { bump: true })
       } catch {
         // ignore
       }
@@ -130,7 +182,7 @@ export function useTelehealthWebRtc() {
     if (!stream.getTracks().some(t => t.id === track.id)) {
       stream.addTrack(track)
     }
-    publishStream(remoteScreenStream, stream)
+    publishStream(remoteScreenStream, stream, { bump: true })
     isRemoteScreenSharing.value = true
   }
 
@@ -162,6 +214,7 @@ export function useTelehealthWebRtc() {
         if (!isScreenSharing.value && !remoteScreenStreamId) {
           isRemoteScreenSharing.value = false
         }
+        bumpRemoteMedia()
       })
 
       return
@@ -170,9 +223,10 @@ export function useTelehealthWebRtc() {
     if (!stream.getTracks().some(t => t.id === track.id)) {
       stream.addTrack(track)
     }
-    publishStream(remoteStream, stream)
+    publishStream(remoteStream, stream, { bump: true })
     track.addEventListener('ended', () => {
       remoteTrackStreamIds.delete(track.id)
+      bumpRemoteMedia()
     })
   }
 
@@ -239,12 +293,24 @@ export function useTelehealthWebRtc() {
     return [{ urls: 'stun:stun.l.google.com:19302' }]
   }
 
+  function flushPendingSignals() {
+    if (!pendingSignals.length || !pc) {
+      return
+    }
+    const queued = pendingSignals
+    pendingSignals = []
+    queued.forEach(msg => {
+      void handleSignal(msg)
+    })
+  }
+
   function createPeerConnection(iceServers = []) {
     closePeerConnection({ keepLocal: true })
     pc = new RTCPeerConnection({
       iceServers: resolveIceServers(iceServers),
     })
     connectionState.value = pc.connectionState || 'new'
+    iceConnectionState.value = pc.iceConnectionState || 'new'
 
     pc.onicecandidate = event => {
       if (!event.candidate || !sendSignal) {
@@ -259,13 +325,13 @@ export function useTelehealthWebRtc() {
     }
 
     pc.ontrack = event => {
-      attachRemoteTrack(event.track, event.streams?.[0])
+      attachRemoteTrack(event.track, event.streams?.[0] ?? null)
     }
 
     pc.onnegotiationneeded = () => {
-      // 1:1 telehealth: only the impolite peer (clinician) offers.
-      // Polite peer (client/guest) only answers — avoids glare.
-      if (polite) {
+      // 1:1 telehealth: only the impolite peer (clinician) offers, and
+      // only after offerArmed (peer_ready / explicit offer).
+      if (polite || !offerArmed) {
         return
       }
       void renegotiate()
@@ -275,12 +341,17 @@ export function useTelehealthWebRtc() {
       connectionState.value = pc?.connectionState || 'closed'
     }
 
+    pc.oniceconnectionstatechange = () => {
+      iceConnectionState.value = pc?.iceConnectionState || 'closed'
+    }
+
     if (localStream.value) {
       localStream.value.getTracks().forEach(track => {
         pc.addTrack(track, localStream.value)
       })
     }
     applyScreenShareToPeer()
+    flushPendingSignals()
 
     return pc
   }
@@ -289,6 +360,7 @@ export function useTelehealthWebRtc() {
     if (!pc || !sendSignal || polite) {
       return false
     }
+    offerArmed = true
     if (makingOffer || pc.signalingState !== 'stable') {
       renegotiateQueued = true
 
@@ -296,8 +368,13 @@ export function useTelehealthWebRtc() {
     }
     makingOffer = true
     try {
-      const offer = await pc.createOffer()
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+      })
       if (!pc || pc.signalingState !== 'stable') {
+        renegotiateQueued = true
+
         return false
       }
       await pc.setLocalDescription(offer)
@@ -365,12 +442,18 @@ export function useTelehealthWebRtc() {
     createPeerConnection(iceServers)
   }
 
+  /**
+   * @param {object} options
+   * @param {boolean} [options.offerImmediately] — clinician should wait for
+   *   peer_ready before the first offer (default: !isPolite).
+   */
   async function startCall({
     iceServers,
     selfId,
     remoteId,
     publishSignal,
     isPolite = false,
+    offerImmediately,
   }) {
     preparePeer({
       iceServers,
@@ -379,15 +462,28 @@ export function useTelehealthWebRtc() {
       publishSignal,
       isPolite,
     })
-    // Clinician: send offer immediately. Client: wait for remote offer.
-    if (!polite) {
+    const shouldOffer = offerImmediately == null
+      ? !polite
+      : Boolean(offerImmediately)
+    // addTrack fires negotiationneeded — keep disarmed until we mean to offer.
+    offerArmed = false
+    if (shouldOffer) {
       await createAndSendOffer()
     }
   }
 
   async function handleSignal(payload) {
+    const msg = unwrapSignalPayload(payload)
+    if (!msg) {
+      return
+    }
+    if (!pc) {
+      pendingSignals.push(msg)
+
+      return
+    }
     try {
-      await handleSignalInner(payload)
+      await handleSignalInner(msg)
     } catch {
       // Swallow SDP races (duplicate answer, glare, closed PC).
     }
@@ -446,8 +542,7 @@ export function useTelehealthWebRtc() {
     if (!payload || typeof payload !== 'object' || !pc) {
       return
     }
-    const type = String(payload.type ?? '').toLowerCase()
-      .replace(/_/g, '-')
+    const type = normalizeSignalType(payload.type)
     const fromId = Number(
       payload.from_participant_id ?? payload.fromParticipantId,
     )
@@ -483,16 +578,28 @@ export function useTelehealthWebRtc() {
       if (Number.isFinite(fromId)) {
         remoteParticipantId = fromId
       }
-      if (pc.signalingState !== 'stable') {
+      const sdp = resolveSdp(payload)
+      if (!sdp) {
+        return
+      }
+      const offerCollision = makingOffer
+        || pc.signalingState !== 'stable'
+      if (offerCollision) {
+        if (!polite) {
+          ignoreOffer = true
+
+          return
+        }
         try {
           await pc.setLocalDescription({ type: 'rollback' })
         } catch {
           // ignore if rollback unsupported / unnecessary
         }
       }
+      ignoreOffer = false
       await pc.setRemoteDescription({
         type: 'offer',
-        sdp: payload.sdp,
+        sdp,
       })
       await flushPendingIceCandidates()
       const answer = await pc.createAnswer()
@@ -512,9 +619,13 @@ export function useTelehealthWebRtc() {
       if (pc.signalingState !== 'have-local-offer') {
         return
       }
+      const sdp = resolveSdp(payload)
+      if (!sdp) {
+        return
+      }
       await pc.setRemoteDescription({
         type: 'answer',
-        sdp: payload.sdp,
+        sdp,
       })
       await flushPendingIceCandidates()
       if (renegotiateQueued && pc.signalingState === 'stable') {
@@ -526,7 +637,9 @@ export function useTelehealthWebRtc() {
     }
 
     if (type === 'ice-candidate') {
-      const init = normalizeIceCandidateInit(payload.candidate)
+      const init = normalizeIceCandidateInit(
+        payload.candidate ?? payload.ice_candidate ?? payload.iceCandidate,
+      )
       if (!init) {
         return
       }
@@ -647,20 +760,20 @@ export function useTelehealthWebRtc() {
         pc.ontrack = null
         pc.onnegotiationneeded = null
         pc.onconnectionstatechange = null
+        pc.oniceconnectionstatechange = null
         pc.close()
       } catch {
         // ignore
       }
       pc = null
     }
-    if (remoteStream.value) {
-      stopStream(remoteStream.value)
-      remoteStream.value = null
-    }
+    // Do not stop() inbound remote tracks — only detach UI refs.
+    detachStream(remoteStream)
     clearRemoteScreenStream()
     isRemoteScreenSharing.value = false
     remoteScreenStreamId = null
     remoteTrackStreamIds.clear()
+    bumpRemoteMedia()
     if (!keepLocal) {
       stopStream(localStream.value)
       localStream.value = null
@@ -670,10 +783,13 @@ export function useTelehealthWebRtc() {
     screenSender = null
     isScreenSharing.value = false
     connectionState.value = 'closed'
+    iceConnectionState.value = 'closed'
     makingOffer = false
     renegotiateQueued = false
     ignoreOffer = false
+    offerArmed = false
     pendingIceCandidates = []
+    pendingSignals = []
   }
 
   function cleanup() {
@@ -683,12 +799,18 @@ export function useTelehealthWebRtc() {
     remoteParticipantId = null
   }
 
+  function hasPeerConnection() {
+    return Boolean(pc)
+  }
+
   return {
     localStream,
     remoteStream,
     remoteScreenStream,
     screenStream,
     connectionState,
+    iceConnectionState,
+    remoteMediaGeneration,
     audioEnabled,
     videoEnabled,
     speakerEnabled,
@@ -698,6 +820,7 @@ export function useTelehealthWebRtc() {
     adoptLocalStream,
     preparePeer,
     startCall,
+    createAndSendOffer,
     handleSignal,
     setAudioEnabled,
     setVideoEnabled,
@@ -711,6 +834,7 @@ export function useTelehealthWebRtc() {
     createPeerConnection,
     closePeerConnection,
     applyScreenShareToPeer,
+    hasPeerConnection,
     cleanup,
   }
 }
