@@ -1,1 +1,0 @@
-import{Au as e,Fu as t,St as n,Zu as r,sd as i,td as a}from"./index-N_duekuA.js";import{r as o,t as s}from"./QLayout-C0Bw67Je.js";var c={};function l(n,c){let l=a(`router-view`);return r(),e(s,{view:`hHh Lpr lff`},{default:i(()=>[t(o,null,{default:i(()=>[t(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};
