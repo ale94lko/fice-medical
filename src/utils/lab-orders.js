@@ -340,7 +340,7 @@ export function filterLabs(list, filters = {}) {
   })
 }
 
-export function validateLabOrder(lab, { requireComplete = false } = {}) {
+export function validateLabOrder(lab) {
   const errors = {}
   if (!String(lab?.testName ?? '').trim()) {
     errors.testName = true
@@ -351,34 +351,10 @@ export function validateLabOrder(lab, { requireComplete = false } = {}) {
   if (!lab?.orderingClinicianId) {
     errors.orderingClinicianId = true
   }
-  if (!lab?.status) {
-    errors.status = true
-  }
   if (!String(lab?.orderedDate ?? '').trim()) {
     errors.orderedDate = true
   } else if (isUsDateAfterToday(lab.orderedDate)) {
     errors.orderedDate = 'labDateNotFuture'
-  }
-  if (
-    String(lab?.collectedDate ?? '').trim()
-    && isUsDateAfterToday(lab.collectedDate)
-  ) {
-    errors.collectedDate = 'labDateNotFuture'
-  }
-  if (
-    String(lab?.resultDate ?? '').trim()
-    && isUsDateAfterToday(lab.resultDate)
-  ) {
-    errors.resultDate = 'labDateNotFuture'
-  }
-  if (
-    String(lab?.reviewedDate ?? '').trim()
-    && isUsDateAfterToday(lab.reviewedDate)
-  ) {
-    errors.reviewedDate = 'labDateNotFuture'
-  }
-  if (requireComplete && lab?.status === labStatuses.draft) {
-    errors.status = true
   }
   const summary = String(lab?.resultSummary ?? '')
   if (summary.length > labMaxResultSummaryLength) {
@@ -386,6 +362,164 @@ export function validateLabOrder(lab, { requireComplete = false } = {}) {
   }
 
   return errors
+}
+
+export function validateLabCollect(lab) {
+  const errors = {}
+  if (!String(lab?.specimenType ?? '').trim()) {
+    errors.specimenType = true
+  }
+  if (!String(lab?.collectedDate ?? '').trim()) {
+    errors.collectedDate = true
+  } else if (isUsDateAfterToday(lab.collectedDate)) {
+    errors.collectedDate = 'labDateNotFuture'
+  }
+
+  return errors
+}
+
+export function validateLabResults(lab) {
+  const errors = {}
+  if (!String(lab?.resultDate ?? '').trim()) {
+    errors.resultDate = true
+  } else if (isUsDateAfterToday(lab.resultDate)) {
+    errors.resultDate = 'labDateNotFuture'
+  }
+  const summary = String(lab?.resultSummary ?? '')
+  if (summary.length > labMaxResultSummaryLength) {
+    errors.resultSummary = true
+  }
+
+  return errors
+}
+
+export function validateLabReview(lab) {
+  const errors = {}
+  if (!String(lab?.reviewedBy ?? '').trim()) {
+    errors.reviewedBy = true
+  }
+  if (!String(lab?.reviewedDate ?? '').trim()) {
+    errors.reviewedDate = true
+  } else if (isUsDateAfterToday(lab.reviewedDate)) {
+    errors.reviewedDate = 'labDateNotFuture'
+  }
+
+  return errors
+}
+
+/** Validate fields editable via PATCH for the current status. */
+export function validateLabPatch(lab, status) {
+  const token = String(status ?? lab?.status ?? '')
+    .trim()
+    .toUpperCase()
+  if (token === labStatuses.ordered) {
+    return validateLabOrder(lab)
+  }
+  if (token === labStatuses.collected) {
+    return validateLabCollect(lab)
+  }
+  if (token === labStatuses.resulted) {
+    return validateLabResults(lab)
+  }
+
+  return {}
+}
+
+export function labStatusToken(status) {
+  return String(status ?? '').trim().toUpperCase()
+}
+
+export function isLabCancelled(status) {
+  return labStatusToken(status) === labStatuses.cancelled
+}
+
+export function isLabTerminal(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.reviewed || token === labStatuses.cancelled
+}
+
+export function canEditLabOrderFields(status) {
+  return labStatusToken(status) === labStatuses.ordered
+}
+
+export function canShowLabSpecimen(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.ordered
+    || token === labStatuses.collected
+    || token === labStatuses.resulted
+    || token === labStatuses.reviewed
+}
+
+export function canEditLabSpecimen(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.ordered || token === labStatuses.collected
+}
+
+export function canShowLabResults(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.collected
+    || token === labStatuses.resulted
+    || token === labStatuses.reviewed
+}
+
+export function canEditLabResults(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.collected || token === labStatuses.resulted
+}
+
+export function canShowLabComponents(status) {
+  return canShowLabResults(status)
+}
+
+export function canEditLabComponents(status) {
+  return canEditLabResults(status)
+}
+
+export function canShowLabReview(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.resulted || token === labStatuses.reviewed
+}
+
+export function canEditLabReview(status) {
+  return labStatusToken(status) === labStatuses.resulted
+}
+
+export function canAdvanceLabToCollect(status) {
+  return labStatusToken(status) === labStatuses.ordered
+}
+
+export function canAdvanceLabToResults(status) {
+  return labStatusToken(status) === labStatuses.collected
+}
+
+export function canAdvanceLabToReview(status) {
+  return labStatusToken(status) === labStatuses.resulted
+}
+
+export function canCancelLab(status) {
+  const token = labStatusToken(status)
+
+  return Boolean(token) && token !== labStatuses.cancelled
+}
+
+export function nextLabTransitionAction(status) {
+  if (canAdvanceLabToCollect(status)) {
+    return 'collect'
+  }
+  if (canAdvanceLabToResults(status)) {
+    return 'results'
+  }
+  if (canAdvanceLabToReview(status)) {
+    return 'review'
+  }
+
+  return null
 }
 
 export function validateLabComponent(component) {

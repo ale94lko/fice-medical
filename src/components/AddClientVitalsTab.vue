@@ -15,6 +15,9 @@
           <h2 class="vitals-title">
             {{ t('vitalsHistoryTitle') }}
           </h2>
+          <p class="vitals-subtitle text-body2">
+            {{ t('vitalsHistorySubtitle') }}
+          </p>
         </div>
         <div class="col-auto">
           <q-btn

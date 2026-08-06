@@ -621,7 +621,6 @@ export const screeningMeasurementDirections = {
 }
 
 export const labStatuses = {
-  draft: 'DRAFT',
   ordered: 'ORDERED',
   collected: 'COLLECTED',
   resulted: 'RESULTED',
@@ -1424,9 +1423,18 @@ export const apiPaths = {
   clientLabById: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
-  clientLabDraft: (clientId, labId) => `/client/v1/${
+  clientLabCollect: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
-  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/draft`,
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/collect`,
+  clientLabResults: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/results`,
+  clientLabReview: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/review`,
+  clientLabCancel: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/cancel`,
   clientLabFiles: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}/files`,
@@ -1457,9 +1465,18 @@ export const apiPaths = {
   patientLabById: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
-  patientLabDraft: (clientId, labId) => `/client/v1/${
+  patientLabCollect: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
-  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/draft`,
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/collect`,
+  patientLabResults: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/results`,
+  patientLabReview: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/review`,
+  patientLabCancel: (clientId, labId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/labs/${encodeURIComponent(String(labId ?? '').trim())}/cancel`,
   patientLabAttachment: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}/files`,

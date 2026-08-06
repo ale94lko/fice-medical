@@ -20,6 +20,7 @@
             :data-testid="clinicalResourceTestIds.listSearch"
             :disable="loading"
             :placeholder="t('clinicalResourceListSearchPlaceholder')"
+            :aria-label="t('clinicalResourceListSearchPlaceholder')"
             @update:model-value="onSearchInput"
             @clear="resetSearch">
             <template #prepend>

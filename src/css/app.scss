@@ -1376,29 +1376,20 @@
     margin-bottom: 0;
   }
 
+  .admin-list-page__actions {
+    margin-top: 0;
+  }
+
   .admin-list-page__center {
-    flex: 1 1 auto;
-    min-width: 0;
-    max-width: none;
+    max-width: 280px;
     margin-left: 12px;
     margin-right: 12px;
     display: flex;
     align-items: flex-end;
   }
 
-  &__toolbar {
-    flex: 1 1 auto;
-    min-width: 0;
-    width: 100%;
-    flex-wrap: nowrap;
-    gap: 8px;
-  }
-
   &__search {
-    flex: 1 1 360px;
-    max-width: 480px;
-    min-width: 200px;
-    width: auto;
+    width: 100%;
   }
 
   &__toggle-cell {
@@ -1467,13 +1458,8 @@
       align-items: flex-end;
     }
 
-    &__toolbar {
-      flex-wrap: wrap;
-    }
-
     &__search {
-      flex: 1 1 100%;
-      max-width: none;
+      width: 100%;
     }
   }
 }
@@ -1929,7 +1915,7 @@ input:-webkit-autofill {
 }
 
 .icon-hide {
-  right: 10px;
+  left: 10px;
   bottom: 15px;
 }
 
@@ -3922,6 +3908,11 @@ input:-webkit-autofill {
 }
 
 .clinical-notes-subtitle {
+  margin: 4px 0 0;
+  color: $text-muted;
+}
+
+.vitals-subtitle {
   margin: 4px 0 0;
   color: $text-muted;
 }
