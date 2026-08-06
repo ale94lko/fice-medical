@@ -1,7 +1,11 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import {
-  labToApiPayload,
+  labToCollectApiPayload,
+  labToOrderApiPayload,
+  labToPatchApiPayload,
+  labToResultsApiPayload,
+  labToReviewApiPayload,
   mapClientLabsListFromApi,
   normalizeLabDetail,
   normalizeLabFile,
@@ -13,6 +17,10 @@ function unwrapData(body) {
   }
 
   return body
+}
+
+function resolveLabFromResponse(data) {
+  return normalizeLabDetail(data?.lab ?? data)
 }
 
 export async function listPatientLabs(patientId) {
@@ -29,11 +37,12 @@ export async function fetchPatientLab(patientId, labId) {
   )
   const data = unwrapData(response.data)
 
-  return normalizeLabDetail(data?.lab ?? data)
+  return resolveLabFromResponse(data)
 }
 
+/** Create lab order (status → ORDERED via endpoint). */
 export async function createPatientLab(patientId, payload) {
-  const body = labToApiPayload(payload, { draft: false })
+  const body = labToOrderApiPayload(payload)
   const response = await apiInstance.post(
     apiPaths.patientLabs(patientId),
     body,
@@ -43,29 +52,68 @@ export async function createPatientLab(patientId, payload) {
   return {
     labId: data?.lab_id ?? data?.labId ?? data?.id,
     status: data?.status,
+    lab: data?.lab ? resolveLabFromResponse(data) : null,
   }
 }
 
-export async function savePatientLabDraft(patientId, labId, payload) {
-  const body = labToApiPayload(payload, { draft: true })
-  const response = await apiInstance.put(
-    apiPaths.patientLabDraft(patientId, labId),
-    body,
-  )
-  const data = unwrapData(response.data)
-
-  return normalizeLabDetail(data?.lab ?? data)
-}
-
+/** PATCH fields allowed for the lab's current status (no status field). */
 export async function updatePatientLab(patientId, labId, payload) {
-  const body = labToApiPayload(payload)
-  const response = await apiInstance.put(
+  const body = labToPatchApiPayload(payload, payload?.status)
+  const response = await apiInstance.patch(
     apiPaths.patientLabById(patientId, labId),
     body,
   )
   const data = unwrapData(response.data)
 
-  return normalizeLabDetail(data?.lab ?? data)
+  return resolveLabFromResponse(data)
+}
+
+/** ORDERED → COLLECTED */
+export async function collectPatientLab(patientId, labId, payload) {
+  const body = labToCollectApiPayload(payload)
+  const response = await apiInstance.post(
+    apiPaths.patientLabCollect(patientId, labId),
+    body,
+  )
+  const data = unwrapData(response.data)
+
+  return resolveLabFromResponse(data)
+}
+
+/** COLLECTED → RESULTED */
+export async function enterLabResults(patientId, labId, payload) {
+  const body = labToResultsApiPayload(payload)
+  const response = await apiInstance.post(
+    apiPaths.patientLabResults(patientId, labId),
+    body,
+  )
+  const data = unwrapData(response.data)
+
+  return resolveLabFromResponse(data)
+}
+
+/** RESULTED → REVIEWED */
+export async function reviewPatientLab(patientId, labId, payload) {
+  const body = labToReviewApiPayload(payload)
+  const response = await apiInstance.post(
+    apiPaths.patientLabReview(patientId, labId),
+    body,
+  )
+  const data = unwrapData(response.data)
+
+  return resolveLabFromResponse(data)
+}
+
+/** Any non-cancelled → CANCELLED */
+export async function cancelPatientLab(patientId, labId) {
+  const response = await apiInstance.post(
+    apiPaths.patientLabCancel(patientId, labId),
+  )
+  const data = unwrapData(response.data)
+
+  return data?.lab || data?.status
+    ? resolveLabFromResponse(data)
+    : null
 }
 
 export async function deletePatientLab(patientId, labId) {

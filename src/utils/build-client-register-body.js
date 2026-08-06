@@ -19,7 +19,7 @@ import {
   buildMedicalHistoryForRegister,
   buildVitalsForRegister,
 } from 'src/utils/build-client-register-clinical.js'
-import { labToApiPayload } from 'src/utils/lab-normalize.js'
+import { labToOrderApiPayload } from 'src/utils/lab-normalize.js'
 import { buildFollowUpsForRegister } from 'src/utils/client-follow-ups.js'
 import {
   resolveClinicianIdsForApi,
@@ -255,7 +255,7 @@ function buildLabsForRegister(form) {
 
   return labs
     .filter(lab => !lab?.deletedAt)
-    .map(lab => labToApiPayload(lab))
+    .map(lab => labToOrderApiPayload(lab))
     .filter(payload => trim(payload?.lab_name).length > 0)
 }
 

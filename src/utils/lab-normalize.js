@@ -160,7 +160,7 @@ export function normalizeLabSummary(raw) {
     resultDate: String(
       isoDateToUsDateString(l.result_date ?? l.resultDate ?? ''),
     ).trim() || null,
-    status: toLabApiEnum(l.status) || labStatuses.draft,
+    status: toLabApiEnum(l.status) || labStatuses.ordered,
     priority: toLabApiEnum(l.priority),
     abnormalResult: parseOptionalBool(pickAbnormalResultRaw(l)),
     abnormalResultManual: resolveAbnormalResultManual(l),
@@ -236,37 +236,92 @@ function mapComponentToApiPayload(component) {
   return payload
 }
 
-export function labToApiPayload(lab, { draft = false } = {}) {
+function omitNullish(body) {
+  return Object.fromEntries(
+    Object.entries(body).filter(([, value]) => value !== undefined),
+  )
+}
+
+/** ORDER create / register: order fields only (no status). */
+export function labToOrderApiPayload(lab) {
   /* eslint-disable camelcase -- API snake_case */
-  const status = draft
-    ? labStatuses.draft
-    : (toLabApiEnum(lab.status) || labStatuses.ordered)
-  const body = {
+  const payload = omitNullish({
     lab_name: trimOrNull(lab.testName),
     category: toLabApiEnum(lab.category),
     ordering_clinician_id: lab.orderingClinicianId,
-    status,
     ordered_date: usDateToIso(lab.orderedDate) || null,
-    priority: toLabApiEnum(lab.priority),
-    specimen_type: lab.specimenType,
-    collected_date: usDateToIso(lab.collectedDate) || null,
-    collection_location: lab.collectionLocation,
-    result_date: usDateToIso(lab.resultDate) || null,
-    abnormal_result: resolveAbnormalResult(lab),
-    abnormal_result_manual: lab.abnormalResultManual,
-    reviewed_by: lab.reviewedBy,
-    reviewed_date: usDateToIso(lab.reviewedDate) || null,
-    result_summary: lab.resultSummary,
-    components: (lab.components ?? [])
-      .filter(c => !c.deletedAt)
-      .map(mapComponentToApiPayload),
-  }
-  const id = parseLabApiEntityId(lab.id)
+    priority: toLabApiEnum(lab.priority) || undefined,
+  })
+  /* eslint-enable camelcase */
+  const id = parseLabApiEntityId(lab?.id ?? lab?.lab_id ?? lab?.labId)
   if (id != null) {
-    body.id = id
+    payload.id = id
   }
 
-  return body
+  return payload
+}
+
+/** COLLECT transition body. */
+export function labToCollectApiPayload(lab) {
+  /* eslint-disable camelcase -- API snake_case */
+  return omitNullish({
+    specimen_type: trimOrNull(lab.specimenType),
+    collected_date: usDateToIso(lab.collectedDate) || null,
+    collection_location: trimOrNull(lab.collectionLocation) || undefined,
+  })
+  /* eslint-enable camelcase */
+}
+
+/** RESULTS transition body. */
+export function labToResultsApiPayload(lab) {
+  /* eslint-disable camelcase -- API snake_case */
+  const components = (lab.components ?? [])
+    .filter(c => !c.deletedAt)
+    .map(mapComponentToApiPayload)
+  return omitNullish({
+    result_date: usDateToIso(lab.resultDate) || null,
+    abnormal_result: resolveAbnormalResult(lab),
+    result_summary: trimOrNull(lab.resultSummary) || undefined,
+    components: components.length ? components : undefined,
+  })
+  /* eslint-enable camelcase */
+}
+
+/** REVIEW transition body. */
+export function labToReviewApiPayload(lab) {
+  /* eslint-disable camelcase -- API snake_case */
+  return {
+    reviewed_by: lab.reviewedBy,
+    reviewed_date: usDateToIso(lab.reviewedDate) || null,
+  }
+  /* eslint-enable camelcase */
+}
+
+/**
+ * PATCH body for current status — only fields allowed at that stage.
+ * Never includes status (inferred by backend endpoints).
+ */
+export function labToPatchApiPayload(lab, status) {
+  const token = toLabApiEnum(status) || toLabApiEnum(lab?.status)
+  if (token === labStatuses.ordered) {
+    return labToOrderApiPayload(lab)
+  }
+  if (token === labStatuses.collected) {
+    return labToCollectApiPayload(lab)
+  }
+  if (token === labStatuses.resulted) {
+    return labToResultsApiPayload(lab)
+  }
+
+  return {}
+}
+
+/**
+ * @deprecated Prefer stage-specific builders. Keeps register/update
+ * compatibility: order-only payload without status.
+ */
+export function labToApiPayload(lab) {
+  return labToOrderApiPayload(lab)
 }
 
 /**

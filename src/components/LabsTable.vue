@@ -114,17 +114,40 @@
             @click="emit('view', row)"
           />
           <q-btn
-            v-if="canEdit"
+            v-if="canEdit && canCollectRow(row)"
             flat
             round
             dense
             class="app-btn-icon-action"
-            :icon="adminTableActionIcons.edit"
-            :data-testid="tid.rowEdit(row.id)"
+            icon="science"
             :size="siteBreakpoints.SM"
-            :title="t('edit')"
-            :aria-label="t('edit')"
-            @click="emit('edit', row)"
+            :title="t('labActionCollect')"
+            :aria-label="t('labActionCollect')"
+            @click="emit('collect', row)"
+          />
+          <q-btn
+            v-if="canEdit && canResultsRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="assignment_turned_in"
+            :size="siteBreakpoints.SM"
+            :title="t('labActionEnterResults')"
+            :aria-label="t('labActionEnterResults')"
+            @click="emit('results', row)"
+          />
+          <q-btn
+            v-if="canEdit && canReviewRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="rate_review"
+            :size="siteBreakpoints.SM"
+            :title="t('labActionReview')"
+            :aria-label="t('labActionReview')"
+            @click="emit('review', row)"
           />
           <q-btn
             flat
@@ -137,6 +160,18 @@
             :title="t('labActionDownload')"
             :aria-label="t('labActionDownload')"
             @click="emit('download', row)"
+          />
+          <q-btn
+            v-if="canEdit && canCancelRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="cancel"
+            :size="siteBreakpoints.SM"
+            :title="t('labCancelLab')"
+            :aria-label="t('labCancelLab')"
+            @click="emit('cancel-lab', row)"
           />
         </div>
       </template>
@@ -164,6 +199,10 @@ import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
 import {
+  canAdvanceLabToCollect,
+  canAdvanceLabToResults,
+  canAdvanceLabToReview,
+  canCancelLab,
   labResultStatusValues,
   resolveLabResultStatus,
 } from 'src/utils/lab-orders.js'
@@ -187,13 +226,36 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['view', 'edit', 'download'])
+const emit = defineEmits([
+  'view',
+  'download',
+  'collect',
+  'results',
+  'review',
+  'cancel-lab',
+])
 
 const { t } = useI18n()
 
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.rows ?? [])
+
+function canCollectRow(row) {
+  return canAdvanceLabToCollect(row?.status)
+}
+
+function canResultsRow(row) {
+  return canAdvanceLabToResults(row?.status)
+}
+
+function canReviewRow(row) {
+  return canAdvanceLabToReview(row?.status)
+}
+
+function canCancelRow(row) {
+  return canCancelLab(row?.status)
+}
 
 const columns = computed(() => [
   {
@@ -447,11 +509,6 @@ function resultStatusIcon(row) {
   color: #475569;
 }
 
-.lab-status-badge--draft {
-  background: #f1f5f9;
-  color: $text-muted;
-}
-
 .lab-status-badge--ordered {
   background: #e0f2fe;
   color: #0369a1;
@@ -470,6 +527,11 @@ function resultStatusIcon(row) {
 .lab-status-badge--reviewed {
   background: #dbeafe;
   color: #1d4ed8;
+}
+
+.lab-status-badge--cancelled {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .lab-result-status-badge--pending {

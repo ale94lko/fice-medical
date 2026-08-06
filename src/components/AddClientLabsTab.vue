@@ -26,7 +26,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
-            :disable="loading"
+            :disable="loading || saving"
             :data-testid="tid.btn('add')"
             :label="t('labAdd')"
             @click="openAdd"
@@ -50,8 +50,11 @@
           :can-delete="canDelete"
           :empty-label="t('labListEmpty')"
           @view="openView"
-          @edit="openEdit"
           @download="onRowDownload"
+          @collect="row => openTransition(row, 'collect')"
+          @results="row => openTransition(row, 'results')"
+          @review="row => openTransition(row, 'review')"
+          @cancel-lab="onCancelLabFromTable"
         />
       </AdminTablePanel>
     </template>
@@ -59,13 +62,26 @@
     <LabOrderDialog
       v-model="dialogOpen"
       :mode="dialogMode"
+      :intent="dialogIntent"
       :lab="activeLab"
+      :saving="saving"
       :clinician-options="resolvedClinicianOptions"
-      @save="onSave"
+      @save="onDialogSave"
       @cancel="dialogOpen = false"
       @upload-attachment="onUploadAttachment"
       @download-attachment="onDownloadAttachment"
       @remove-attachment="onRemoveAttachment"
+    />
+
+    <ModalComponent
+      v-model="cancelDialogOpen"
+      test-id="lab-cancel"
+      :title="t('labCancelTitle')"
+      :message="t('labCancelMessage')"
+      :confirm-text="t('labCancelLab')"
+      :cancel-text="t('cancel')"
+      @confirm="confirmCancelLab"
+      @cancel="cancelDialogOpen = false"
     />
   </div>
 </template>
@@ -78,12 +94,22 @@ import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import LabOrderDialog from 'components/LabOrderDialog.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import LabsTable from 'components/LabsTable.vue'
-import { quasarNotifyTypes } from 'components/constants.js'
+import ModalComponent from 'components/ModalComponent.vue'
 import {
+  labStatuses,
+  quasarNotifyTypes,
+} from 'components/constants.js'
+import {
+  cancelPatientLab,
+  collectPatientLab,
+  createPatientLab,
   deleteLabFile,
   downloadLabFile,
+  enterLabResults,
   fetchPatientLab,
+  reviewPatientLab,
   triggerBlobDownload,
+  updatePatientLab,
   uploadLabFile,
 } from 'src/utils/lab-api.js'
 import {
@@ -126,10 +152,16 @@ const { t } = useI18n()
 const $q = useQuasar()
 
 const loading = ref(false)
+const saving = ref(false)
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
+const dialogIntent = ref(null)
 const activeLab = ref(null)
+
+const cancelDialogOpen = ref(false)
+const pendingCancelLab = ref(null)
+
 const hasPatientId = computed(() => {
   const id = String(props.patientId ?? '').trim()
 
@@ -146,19 +178,37 @@ function labRowHasDetail(row) {
   return Array.isArray(row?.components)
 }
 
-function openAdd() {
-  dialogMode.value = 'add'
-  activeLab.value = createEmptyLabOrder()
-  dialogOpen.value = true
-}
-
 function labIdLooksServerNumeric(id) {
   const s = String(id ?? '').trim()
 
   return s !== '' && Number.isFinite(Number(s))
 }
 
+function upsertLabInList(lab) {
+  const copy = cloneLab(lab)
+  const id = String(copy.id ?? '').trim()
+  if (!id) {
+    return
+  }
+  const idx = labs.value.findIndex(item => String(item.id) === id)
+  if (idx >= 0) {
+    const next = [...labs.value]
+    next[idx] = copy
+    labs.value = next
+  } else {
+    labs.value = [...labs.value, copy]
+  }
+}
+
+function openAdd() {
+  dialogMode.value = 'add'
+  dialogIntent.value = null
+  activeLab.value = createEmptyLabOrder()
+  dialogOpen.value = true
+}
+
 async function openView(row) {
+  dialogIntent.value = null
   if (labIdLooksServerNumeric(row.id) && !labRowHasDetail(row)) {
     await loadLabDetail(row.id, 'view')
 
@@ -169,7 +219,17 @@ async function openView(row) {
   dialogOpen.value = true
 }
 
-async function openEdit(row) {
+async function openTransition(row, intent) {
+  if (!hasPatientId.value) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('labSaveClientFirst'),
+      position: 'top',
+    })
+
+    return
+  }
+  dialogIntent.value = intent
   if (labIdLooksServerNumeric(row.id) && !labRowHasDetail(row)) {
     await loadLabDetail(row.id, 'edit')
 
@@ -199,28 +259,190 @@ async function loadLabDetail(labId, mode) {
   }
 }
 
-function onSave(lab) {
-  const copy = cloneLab(lab)
-  const id = String(copy.id ?? '').trim()
-  if (!id) {
-    copy.id = nextLocalId('lab')
-    labs.value = [...labs.value, copy]
-  } else {
-    const idx = labs.value.findIndex(item => String(item.id) === id)
-    if (idx >= 0) {
-      const next = [...labs.value]
-      next[idx] = copy
-      labs.value = next
-    } else {
-      labs.value = [...labs.value, copy]
+function successMessageForAction(action) {
+  if (action === 'order') {
+    return t('labOrderedSuccess')
+  }
+  if (action === 'collect') {
+    return t('labCollectedSuccess')
+  }
+  if (action === 'results') {
+    return t('labResultedSuccess')
+  }
+  if (action === 'review') {
+    return t('labReviewedSuccess')
+  }
+  if (action === 'cancel') {
+    return t('labCancelledSuccess')
+  }
+
+  return t('labSaved')
+}
+
+function pendingFilesFromMeta(meta = {}) {
+  return Array.isArray(meta?.pendingFiles)
+    ? meta.pendingFiles.filter(file => file instanceof File)
+    : []
+}
+
+async function uploadPendingLabFiles(labId, pendingFiles) {
+  if (!pendingFiles.length || !labId) {
+    return null
+  }
+  for (const file of pendingFiles) {
+    await uploadLabFile(patientId.value, labId, file)
+  }
+
+  return fetchPatientLab(patientId.value, labId)
+}
+
+async function createOrderedLab(copy, pendingFiles) {
+  const created = await createPatientLab(patientId.value, copy)
+  const newId = created.labId ?? copy.id
+  let saved = created.lab
+    || await fetchPatientLab(patientId.value, newId)
+  if (!saved?.id && newId) {
+    saved = {
+      ...copy,
+      id: String(newId),
+      status: created.status || labStatuses.ordered,
     }
   }
-  dialogOpen.value = false
-  $q.notify({
-    type: quasarNotifyTypes.positive,
-    message: t('labSaved'),
-    position: 'top',
-  })
+  const withFiles = await uploadPendingLabFiles(newId, pendingFiles)
+
+  return withFiles || saved
+}
+
+async function persistLabAction(action, copy) {
+  if (action === 'patch') {
+    return updatePatientLab(patientId.value, copy.id, copy)
+  }
+  if (action === 'collect') {
+    return collectPatientLab(patientId.value, copy.id, copy)
+  }
+  if (action === 'results') {
+    return enterLabResults(patientId.value, copy.id, copy)
+  }
+  if (action === 'review') {
+    return reviewPatientLab(patientId.value, copy.id, copy)
+  }
+  if (action === 'cancel') {
+    const saved = await cancelPatientLab(patientId.value, copy.id)
+
+    return saved || {
+      ...copy,
+      status: labStatuses.cancelled,
+    }
+  }
+
+  return null
+}
+
+async function onDialogSave(lab, meta = {}) {
+  const action = String(meta?.action ?? 'patch').trim()
+  const pendingFiles = pendingFilesFromMeta(meta)
+  const copy = cloneLab(lab)
+
+  if (!hasPatientId.value) {
+    if (action === 'order') {
+      copy.id = copy.id || nextLocalId('lab')
+      copy.status = labStatuses.ordered
+      upsertLabInList(copy)
+      dialogOpen.value = false
+      $q.notify({
+        type: quasarNotifyTypes.positive,
+        message: successMessageForAction(action),
+        position: 'top',
+      })
+
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('labSaveClientFirst'),
+      position: 'top',
+    })
+
+    return
+  }
+
+  saving.value = true
+  try {
+    const saved = action === 'order'
+      ? await createOrderedLab(copy, pendingFiles)
+      : await persistLabAction(action, copy)
+
+    if (saved) {
+      upsertLabInList(saved)
+    }
+    dialogOpen.value = false
+    dialogIntent.value = null
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: successMessageForAction(action),
+      position: 'top',
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('labSaveError'),
+        position: 'top',
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+function onCancelLabFromTable(row) {
+  pendingCancelLab.value = cloneLab(row)
+  cancelDialogOpen.value = true
+}
+
+async function confirmCancelLab() {
+  const row = pendingCancelLab.value
+  pendingCancelLab.value = null
+  cancelDialogOpen.value = false
+  if (!row?.id) {
+    return
+  }
+  if (!hasPatientId.value) {
+    upsertLabInList({
+      ...row,
+      status: labStatuses.cancelled,
+    })
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('labCancelledSuccess'),
+      position: 'top',
+    })
+
+    return
+  }
+  saving.value = true
+  try {
+    const saved = await cancelPatientLab(patientId.value, row.id)
+    upsertLabInList(saved || {
+      ...row,
+      status: labStatuses.cancelled,
+    })
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('labCancelledSuccess'),
+      position: 'top',
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('labSaveError'),
+        position: 'top',
+      })
+    }
+  } finally {
+    saving.value = false
+  }
 }
 
 async function onRowDownload(row) {
@@ -274,7 +496,7 @@ async function onUploadAttachment(file) {
     return
   }
 
-  if (!activeLab.value?.id) {
+  if (!activeLab.value?.id || !labIdLooksServerNumeric(activeLab.value.id)) {
     $q.notify({
       type: quasarNotifyTypes.warning,
       message: t('labSaveBeforeAttachment'),

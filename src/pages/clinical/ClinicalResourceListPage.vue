@@ -8,25 +8,23 @@
       :title="t('clinicalResourceListTitle')"
       :subtitle="t('clinicalResourceListSubtitle')">
       <template #center>
-        <div
-          class="clinical-resource-list-page__toolbar row items-center no-wrap">
-          <q-input
-            :model-value="searchQuery"
-            outlined
-            clearable
-            hide-bottom-space
-            class="admin-list-page__search-input
-              clinical-resource-list-page__search"
-            :data-testid="clinicalResourceTestIds.listSearch"
-            :disable="loading"
-            :placeholder="t('clinicalResourceListSearchPlaceholder')"
-            @update:model-value="onSearchInput"
-            @clear="resetSearch">
-            <template #prepend>
-              <q-icon name="search" size="18px" />
-            </template>
-          </q-input>
-        </div>
+        <q-input
+          :model-value="searchQuery"
+          outlined
+          clearable
+          hide-bottom-space
+          class="admin-list-page__search-input
+            clinical-resource-list-page__search"
+          :data-testid="clinicalResourceTestIds.listSearch"
+          :disable="loading"
+          :placeholder="t('clinicalResourceListSearchPlaceholder')"
+          :aria-label="t('clinicalResourceListSearchPlaceholder')"
+          @update:model-value="onSearchInput"
+          @clear="resetSearch">
+          <template #prepend>
+            <q-icon name="search" size="18px" />
+          </template>
+        </q-input>
       </template>
       <template #actions>
         <AdminListPageActions :actions="pageActions" />

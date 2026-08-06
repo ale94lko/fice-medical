@@ -208,12 +208,14 @@ function onDrop(event) {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   padding: 10px 14px;
   border: 1px dashed $border-subtle;
   border-radius: $radius-md;
   background: $surface;
   cursor: pointer;
+  text-align: center;
   transition: border-color 0.15s ease, background 0.15s ease;
 
   &:hover {
@@ -248,6 +250,7 @@ function onDrop(event) {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
 }
 
