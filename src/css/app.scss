@@ -2953,6 +2953,40 @@ input:-webkit-autofill {
   margin-bottom: 0;
 }
 
+.accordion-header__badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.accordion-section--boxed,
+.accordion-section--boxed-collapsed {
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  background: $surface;
+  box-shadow: $shadow-sm;
+
+  > .accordion-header {
+    max-width: none;
+    margin: 0;
+  }
+
+  > .accordion-panel {
+    margin-top: 12px;
+  }
+}
+
 .accordion-chevron {
   flex-shrink: 0;
 

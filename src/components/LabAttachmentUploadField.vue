@@ -1,15 +1,17 @@
 <template>
   <div
-    class="insurance-card-upload lab-attachment-upload"
-    :class="{ 'insurance-card-upload--readonly': readonly }">
-    <p class="insurance-card-upload__label text-weight-medium">
-      {{ label || t('labAttachmentsTitle') }}
+    class="lab-attachment-upload"
+    :class="{ 'lab-attachment-upload--readonly': readonly }">
+    <p
+      v-if="label"
+      class="lab-attachment-upload__label text-weight-medium">
+      {{ label }}
     </p>
     <div
-      class="insurance-card-upload__dropzone"
+      class="lab-attachment-upload__dropzone"
       :class="{
-        'insurance-card-upload__dropzone--error': Boolean(displayError),
-        'insurance-card-upload__dropzone--drag': dragActive,
+        'lab-attachment-upload__dropzone--error': Boolean(displayError),
+        'lab-attachment-upload__dropzone--drag': dragActive,
       }"
       :data-testid="testId"
       @dragenter.prevent="onDragEnter"
@@ -17,35 +19,51 @@
       @dragleave.prevent="onDragLeave"
       @drop.prevent="onDrop"
       @click="onBrowseClick">
-      <q-icon name="cloud_upload" size="32px" color="primary" />
-      <p class="insurance-card-upload__hint text-body2 q-mb-none">
-        {{
-          readonly
-            ? t('labAttachmentsReadonlyHint')
-            : t('labAttachmentsHint')
-        }}
-      </p>
-      <p
-        v-if="!readonly"
-        class="insurance-card-upload__formats text-caption text-grey-7">
-        {{ t('labAttachmentsFormats') }}
-      </p>
+      <q-icon
+        name="cloud_upload"
+        size="22px"
+        color="primary"
+        class="lab-attachment-upload__icon"
+      />
+      <div class="lab-attachment-upload__copy">
+        <p class="lab-attachment-upload__hint text-body2 q-mb-none">
+          {{
+            readonly
+              ? t('labAttachmentsReadonlyHint')
+              : t('labAttachmentsHint')
+          }}
+        </p>
+        <p
+          v-if="!readonly"
+          class="lab-attachment-upload__formats text-caption
+            text-grey-7 q-mb-none">
+          {{ t('labAttachmentsFormats') }}
+        </p>
+      </div>
       <input
         ref="fileInputRef"
         type="file"
-        class="insurance-card-upload__input"
+        class="lab-attachment-upload__input"
         :accept="acceptAttr"
         multiple
         @change="onFileInput"
       />
     </div>
-    <ul v-if="attachments.length" class="lab-attachment-upload__list q-mt-sm">
+    <ul v-if="attachments.length" class="lab-attachment-upload__list">
       <li
         v-for="file in attachments"
         :key="file.id"
-        class="lab-attachment-upload__item row items-center">
-        <q-icon name="attach_file" size="18px" class="q-mr-sm" />
-        <span class="col text-body2">{{ file.name }}</span>
+        class="lab-attachment-upload__item row items-center no-wrap">
+        <q-icon
+          name="attach_file"
+          size="18px"
+          class="lab-attachment-upload__file-icon"
+        />
+        <span
+          class="lab-attachment-upload__name col text-body2"
+          :title="file.name">
+          {{ file.name }}
+        </span>
         <q-btn
           v-if="!readonly"
           flat
@@ -179,14 +197,99 @@ function onDrop(event) {
 </script>
 
 <style lang="scss" scoped>
+@import 'src/css/quasar.variables';
+
+.lab-attachment-upload__label {
+  margin: 0 0 8px;
+  color: $text-strong;
+}
+
+.lab-attachment-upload__dropzone {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px dashed $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: $primary;
+    background: rgba($primary, 0.03);
+  }
+
+  &--drag {
+    border-color: $primary;
+    background: rgba($primary, 0.06);
+  }
+
+  &--error {
+    border-color: $negative;
+  }
+}
+
+.lab-attachment-upload--readonly .lab-attachment-upload__dropzone {
+  cursor: default;
+
+  &:hover {
+    border-color: $border-subtle;
+    background: $surface;
+  }
+}
+
+.lab-attachment-upload__icon {
+  flex-shrink: 0;
+}
+
+.lab-attachment-upload__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lab-attachment-upload__hint {
+  color: $text-strong;
+  line-height: 1.35;
+}
+
+.lab-attachment-upload__formats {
+  line-height: 1.3;
+}
+
+.lab-attachment-upload__input {
+  display: none;
+}
+
 .lab-attachment-upload__list {
-  margin: 0;
+  margin: 8px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .lab-attachment-upload__item {
-  padding: 6px 0;
+  gap: 4px;
+  min-width: 0;
+  padding: 4px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.lab-attachment-upload__file-icon {
+  flex-shrink: 0;
+  color: $text-muted;
+}
+
+.lab-attachment-upload__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

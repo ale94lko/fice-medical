@@ -5,9 +5,14 @@ import {
   labFlags,
   labMaxComponentNotesLength,
   labMaxResultSummaryLength,
+  labPriorities,
   labStatuses,
 } from 'components/constants.js'
-import { todayDateUs } from 'src/utils/client-form.js'
+import {
+  todayDateUs,
+  parseUsDateString,
+  startOfDay,
+} from 'src/utils/client-form.js'
 
 export const LAB_TEST_OPTIONS = [
   {
@@ -76,12 +81,12 @@ export function createEmptyLabOrder() {
     orderingClinicianName: null,
     status: labStatuses.ordered,
     orderedDate: todayDateUs(),
-    priority: null,
+    priority: labPriorities.routine,
     specimenType: null,
     collectedDate: null,
     collectionLocation: null,
     resultDate: null,
-    abnormalResult: false,
+    abnormalResult: null,
     abnormalResultManual: null,
     reviewedBy: null,
     reviewedDate: null,
@@ -105,7 +110,7 @@ export function createEmptyLabComponent() {
     referenceRangeUnit: null,
     flag: null,
     resultDate: todayDateUs(),
-    resultTime: null,
+    resultTime: nowTimeHms(),
     notes: '',
     abnormalIndicator: null,
     deletedAt: null,
@@ -114,6 +119,48 @@ export function createEmptyLabComponent() {
 
 export function nextLocalId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+}
+
+/** Current local time as HH:mm:ss (e.g. 23:00:58). */
+export function nowTimeHms(date = new Date()) {
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+
+  return `${hours}:${minutes}:${seconds}`
+}
+
+/**
+ * Formats digit input into HH:mm:ss (e.g. 230058 → 23:00:58).
+ * Returns null for empty / invalid input.
+ */
+export function formatLabResultTimeInput(value) {
+  const raw = String(value ?? '').replace(/_/g, '').trim()
+  if (!raw || raw === '::') {
+    return null
+  }
+  const digits = raw.replace(/\D/g, '').slice(0, 6)
+  if (!digits) {
+    return null
+  }
+  const padded = digits.padEnd(6, '0')
+  const hours = Number(padded.slice(0, 2))
+  const minutes = Number(padded.slice(2, 4))
+  const seconds = Number(padded.slice(4, 6))
+  if (hours > 23 || minutes > 59 || seconds > 59) {
+    return null
+  }
+
+  return `${padded.slice(0, 2)}:${padded.slice(2, 4)}:${padded.slice(4, 6)}`
+}
+
+function isUsDateAfterToday(usDate) {
+  const parsed = parseUsDateString(usDate)
+  if (!parsed) {
+    return false
+  }
+
+  return parsed.getTime() > startOfDay(new Date()).getTime()
 }
 
 export function isAbnormalFlag(flag) {
@@ -125,17 +172,26 @@ export function isAbnormalFlag(flag) {
   return true
 }
 
+function isPresentNumber(value) {
+  if (value == null || value === '') {
+    return false
+  }
+  const n = Number(value)
+
+  return Number.isFinite(n)
+}
+
 export function suggestFlagFromReference(value, low, high) {
   const num = Number(value)
-  const lowN = Number(low)
-  const highN = Number(high)
   if (
     !Number.isFinite(num)
-    || !Number.isFinite(lowN)
-    || !Number.isFinite(highN)
+    || !isPresentNumber(low)
+    || !isPresentNumber(high)
   ) {
     return null
   }
+  const lowN = Number(low)
+  const highN = Number(high)
   if (num < lowN) {
     const span = highN - lowN
     if (span > 0 && num < lowN - span * 0.25) {
@@ -175,7 +231,38 @@ export function computeLabAbnormalResult(components, manualValue) {
     }
   }
 
-  return false
+  // Unset → null (Pending). false only when user/API says No.
+  return null
+}
+
+export const labResultStatusValues = {
+  pending: 'pending',
+  normal: 'normal',
+  abnormal: 'abnormal',
+}
+
+/**
+ * Result Status for labs list/UI from Abnormal Result? (yes/no/empty).
+ * Pending = null or field missing, Normal = false/No, Abnormal = true/Yes.
+ */
+export function resolveLabResultStatus(lab = {}) {
+  const manual = String(lab.abnormalResultManual ?? '')
+    .trim()
+    .toLowerCase()
+  if (manual === labAbnormalValues.yes) {
+    return labResultStatusValues.abnormal
+  }
+  if (manual === labAbnormalValues.no) {
+    return labResultStatusValues.normal
+  }
+  if (lab.abnormalResult === true) {
+    return labResultStatusValues.abnormal
+  }
+  if (lab.abnormalResult === false) {
+    return labResultStatusValues.normal
+  }
+
+  return labResultStatusValues.pending
 }
 
 export function formatReferenceRange(low, high, unit) {
@@ -269,6 +356,26 @@ export function validateLabOrder(lab, { requireComplete = false } = {}) {
   }
   if (!String(lab?.orderedDate ?? '').trim()) {
     errors.orderedDate = true
+  } else if (isUsDateAfterToday(lab.orderedDate)) {
+    errors.orderedDate = 'labDateNotFuture'
+  }
+  if (
+    String(lab?.collectedDate ?? '').trim()
+    && isUsDateAfterToday(lab.collectedDate)
+  ) {
+    errors.collectedDate = 'labDateNotFuture'
+  }
+  if (
+    String(lab?.resultDate ?? '').trim()
+    && isUsDateAfterToday(lab.resultDate)
+  ) {
+    errors.resultDate = 'labDateNotFuture'
+  }
+  if (
+    String(lab?.reviewedDate ?? '').trim()
+    && isUsDateAfterToday(lab.reviewedDate)
+  ) {
+    errors.reviewedDate = 'labDateNotFuture'
   }
   if (requireComplete && lab?.status === labStatuses.draft) {
     errors.status = true
@@ -291,10 +398,21 @@ export function validateLabComponent(component) {
   }
   if (!String(component?.resultDate ?? '').trim()) {
     errors.resultDate = true
+  } else if (isUsDateAfterToday(component.resultDate)) {
+    errors.resultDate = 'labDateNotFuture'
   }
   const notes = String(component?.notes ?? '')
   if (notes.length > labMaxComponentNotesLength) {
     errors.notes = true
+  }
+  const lowPresent = isPresentNumber(component?.referenceRangeLow)
+  const highPresent = isPresentNumber(component?.referenceRangeHigh)
+  if (lowPresent && highPresent) {
+    const lowN = Number(component.referenceRangeLow)
+    const highN = Number(component.referenceRangeHigh)
+    if (lowN >= highN) {
+      errors.referenceRange = 'labRefRangeLowMustBeLessThanHigh'
+    }
   }
 
   return errors
@@ -310,4 +428,44 @@ export function categoryForTestName(testName) {
   )
 
   return found?.category ?? null
+}
+
+function hasTrimmedValue(value) {
+  return String(value ?? '').trim().length > 0
+}
+
+export function hasLabSpecimenInfo(lab = {}) {
+  return hasTrimmedValue(lab.specimenType)
+    || hasTrimmedValue(lab.collectedDate)
+    || hasTrimmedValue(lab.collectionLocation)
+}
+
+export function hasLabResultsInfo(lab = {}) {
+  return hasTrimmedValue(lab.resultDate)
+    || hasTrimmedValue(lab.abnormalResultManual)
+    || hasTrimmedValue(lab.reviewedBy)
+    || hasTrimmedValue(lab.reviewedDate)
+    || hasTrimmedValue(lab.resultSummary)
+}
+
+/**
+ * Default Ordering Clinician for Add Lab: only the signed-in provider,
+ * and only when they can add labs and appear in clinician options.
+ */
+export function resolveDefaultOrderingClinicianOption(
+  clinicianOptions = [],
+  { staffMember = null, canAddLabs = false } = {},
+) {
+  if (!canAddLabs || !staffMember?.isClinician) {
+    return null
+  }
+  const staffId = Number(staffMember.id)
+  if (!Number.isFinite(staffId) || staffId <= 0) {
+    return null
+  }
+  const options = Array.isArray(clinicianOptions) ? clinicianOptions : []
+
+  return options.find(option =>
+    Number(option?.staffMemberId) === staffId,
+  ) ?? null
 }

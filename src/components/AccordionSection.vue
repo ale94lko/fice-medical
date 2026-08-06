@@ -1,10 +1,16 @@
 <template>
   <section
     class="section"
+    :class="{ 'accordion-section--boxed': boxed }"
     :data-testid="sectionTestId || undefined">
     <div
       class="accordion-header row items-center no-wrap">
       <SectionHeading class="col" :icon="icon" :title="title" />
+      <span
+        v-if="badge"
+        class="accordion-header__badge">
+        {{ badge }}
+      </span>
       <q-btn
         flat
         round
@@ -54,6 +60,20 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  badge: {
+    type: String,
+    default: '',
+  },
+  /** Bordered card around the section (collapsed or expanded). */
+  boxed: {
+    type: Boolean,
+    default: false,
+  },
+  /** Alias of `boxed` for existing callers. */
+  boxedCollapsed: {
+    type: Boolean,
+    default: false,
+  },
   modelValue: {
     type: Boolean,
     default: undefined,
@@ -73,6 +93,7 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 
 const isExpanded = ref(props.modelValue ?? true)
+const boxed = computed(() => props.boxed || props.boxedCollapsed)
 
 watch(
   () => props.modelValue,

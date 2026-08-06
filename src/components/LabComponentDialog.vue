@@ -75,33 +75,44 @@
               />
             </AddClientLabeledField>
           </div>
-          <div class="col-12 col-md-4">
-            <AddClientLabeledField
-              :label="t('labRefRangeLow')"
-              :test-id="tid.field('ref-low')">
-              <q-input
-                v-model.number="local.referenceRangeLow"
-                outlined
-                hide-bottom-space
-                type="number"
-                :data-testid="tid.field('ref-low')"
-                @update:model-value="onRangeChange"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-4">
-            <AddClientLabeledField
-              :label="t('labRefRangeHigh')"
-              :test-id="tid.field('ref-high')">
-              <q-input
-                v-model.number="local.referenceRangeHigh"
-                outlined
-                hide-bottom-space
-                type="number"
-                :data-testid="tid.field('ref-high')"
-                @update:model-value="onRangeChange"
-              />
-            </AddClientLabeledField>
+          <div class="col-12 col-md-8">
+            <div class="row q-col-gutter-md">
+              <div class="col-12 col-md-6">
+                <AddClientLabeledField
+                  :label="t('labRefRangeLow')"
+                  :test-id="tid.field('ref-low')">
+                  <q-input
+                    v-model.number="local.referenceRangeLow"
+                    outlined
+                    hide-bottom-space
+                    type="number"
+                    :error="Boolean(errors.referenceRange)"
+                    :data-testid="tid.field('ref-low')"
+                    @update:model-value="onRangeChange"
+                  />
+                </AddClientLabeledField>
+              </div>
+              <div class="col-12 col-md-6">
+                <AddClientLabeledField
+                  :label="t('labRefRangeHigh')"
+                  :test-id="tid.field('ref-high')">
+                  <q-input
+                    v-model.number="local.referenceRangeHigh"
+                    outlined
+                    hide-bottom-space
+                    type="number"
+                    :error="Boolean(errors.referenceRange)"
+                    :data-testid="tid.field('ref-high')"
+                    @update:model-value="onRangeChange"
+                  />
+                </AddClientLabeledField>
+              </div>
+            </div>
+            <div
+              v-if="errors.referenceRange"
+              class="form-field__error q-mt-xs">
+              {{ errorText('referenceRange') }}
+            </div>
           </div>
           <div class="col-12 col-md-4">
             <AddClientLabeledField
@@ -116,14 +127,18 @@
                 clearable
                 :options="flagOptions"
                 :test-id="tid.field('flag')"
-                @update:model-value="flagTouched = true"
+                @update:model-value="onFlagChange"
               />
             </AddClientLabeledField>
           </div>
           <div class="col-12">
-            <div class="lab-component-dialog__info row items-center">
-              <q-icon name="info" size="18px" class="q-mr-sm" />
-              <span class="text-body2">{{ t('labFlagAutoHint') }}</span>
+            <div class="lab-component-dialog__info text-body2">
+              <q-icon
+                name="info"
+                size="18px"
+                class="lab-component-dialog__info-icon"
+              />
+              <span>{{ t('labFlagAutoHint') }}</span>
             </div>
           </div>
           <div class="col-12 col-md-6">
@@ -133,6 +148,7 @@
               :test-id="tid.field('result-date')">
               <ClientDateField
                 v-model="local.resultDate"
+                :max-today="true"
                 :error="Boolean(errors.resultDate)"
                 :error-message="errorText('resultDate')"
                 :test-id="tid.field('result-date')"
@@ -147,8 +163,10 @@
                 v-model="local.resultTime"
                 outlined
                 hide-bottom-space
+                mask="##:##:##"
                 :placeholder="t('labComponentResultTimePlaceholder')"
                 :data-testid="tid.field('result-time')"
+                @blur="onResultTimeBlur"
               />
             </AddClientLabeledField>
           </div>
@@ -253,6 +271,7 @@ import {
 import {
   LAB_COMPONENT_OPTIONS,
   createEmptyLabComponent,
+  formatLabResultTimeInput,
   formatReferenceRange,
   resolveClinicalKeyForComponent,
   suggestFlagFromReference,
@@ -336,7 +355,8 @@ watch(
         ? { ...createEmptyLabComponent(), ...props.component }
         : createEmptyLabComponent()
       errors.value = {}
-      flagTouched.value = Boolean(props.component?.flag)
+      // Do not lock auto-flag on edit; recalc when value/range change.
+      flagTouched.value = false
       componentFilter.value = ''
     }
   },
@@ -360,29 +380,85 @@ function onComponentSelected(name) {
 }
 
 function onValueChange() {
+  if (hasBothReferenceRanges()) {
+    flagTouched.value = false
+  }
   applySuggestedFlag()
 }
 
+function normalizeRangeValue(value) {
+  if (value === '' || value == null || Number.isNaN(value)) {
+    return null
+  }
+
+  return value
+}
+
+function hasBothReferenceRanges() {
+  const low = local.value.referenceRangeLow
+  const high = local.value.referenceRangeHigh
+
+  return low != null && high != null
+    && low !== '' && high !== ''
+    && Number.isFinite(Number(low))
+    && Number.isFinite(Number(high))
+}
+
 function onRangeChange() {
+  local.value.referenceRangeLow = normalizeRangeValue(
+    local.value.referenceRangeLow,
+  )
+  local.value.referenceRangeHigh = normalizeRangeValue(
+    local.value.referenceRangeHigh,
+  )
+  if (errors.value.referenceRange) {
+    const next = { ...errors.value }
+    delete next.referenceRange
+    errors.value = next
+  }
+  if (hasBothReferenceRanges()) {
+    flagTouched.value = false
+  }
   applySuggestedFlag()
 }
 
 function applySuggestedFlag() {
+  if (!hasBothReferenceRanges()) {
+    // Without Low+High, Flag is manual only — never auto-assign.
+    if (!flagTouched.value) {
+      local.value.flag = null
+    }
+
+    return
+  }
   if (flagTouched.value) {
     return
   }
-  const suggested = suggestFlagFromReference(
+  local.value.flag = suggestFlagFromReference(
     local.value.value,
     local.value.referenceRangeLow,
     local.value.referenceRangeHigh,
   )
-  if (suggested) {
-    local.value.flag = suggested
-  }
+}
+
+function onResultTimeBlur() {
+  local.value.resultTime = formatLabResultTimeInput(local.value.resultTime)
+}
+
+function onFlagChange(value) {
+  flagTouched.value = value != null && value !== ''
 }
 
 function errorText(field) {
-  return errors.value[field] ? t('fieldRequired') : ''
+  const err = errors.value[field]
+  if (!err) {
+    return ''
+  }
+  if (typeof err === 'string') {
+    return t(err)
+  }
+
+  return t('fieldRequired')
 }
 
 function onCancel() {
@@ -418,10 +494,20 @@ async function onSave(another) {
 @import 'src/css/quasar.variables';
 
 .lab-component-dialog__info {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 8px;
   padding: 10px 12px;
   border-radius: $radius-md;
   background: #eff6ff;
   color: #1e3a8a;
+}
+
+.lab-component-dialog__info-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .lab-component-dialog__preview {

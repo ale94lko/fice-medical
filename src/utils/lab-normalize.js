@@ -35,6 +35,39 @@ function parseOptionalBool(value) {
   return null
 }
 
+function pickAbnormalResultRaw(raw = {}) {
+  if (Object.prototype.hasOwnProperty.call(raw, 'abnormal_result')) {
+    return raw.abnormal_result
+  }
+  if (Object.prototype.hasOwnProperty.call(raw, 'abnormalResult')) {
+    return raw.abnormalResult
+  }
+
+  return undefined
+}
+
+function resolveAbnormalResultManual(raw = {}) {
+  const manual = String(
+    raw.abnormal_result_manual ?? raw.abnormalResultManual ?? '',
+  ).trim().toLowerCase()
+  if (
+    manual === labAbnormalValues.yes
+    || manual === labAbnormalValues.no
+  ) {
+    return manual
+  }
+  // Backend: true → Yes, false → No, null/missing → Pending
+  const flag = parseOptionalBool(pickAbnormalResultRaw(raw))
+  if (flag === true) {
+    return labAbnormalValues.yes
+  }
+  if (flag === false) {
+    return labAbnormalValues.no
+  }
+
+  return null
+}
+
 /** API enums: BLOOD_TEST, ORDERED, LOW, CRITICAL_LOW, … */
 export function toLabApiEnum(value) {
   const raw = String(value ?? '').trim()
@@ -128,9 +161,9 @@ export function normalizeLabSummary(raw) {
       isoDateToUsDateString(l.result_date ?? l.resultDate ?? ''),
     ).trim() || null,
     status: toLabApiEnum(l.status) || labStatuses.draft,
-    abnormalResult: parseOptionalBool(
-      l.abnormal_result ?? l.abnormalResult,
-    ),
+    priority: toLabApiEnum(l.priority),
+    abnormalResult: parseOptionalBool(pickAbnormalResultRaw(l)),
+    abnormalResultManual: resolveAbnormalResultManual(l),
     deletedAt: l.deleted_at ?? l.deletedAt ?? null,
   }
 }
@@ -150,16 +183,12 @@ export function normalizeLabDetail(raw) {
     orderingClinicianName: String(
       l.ordering_clinician_name ?? l.orderingClinicianName ?? '',
     ).trim() || null,
-    priority: toLabApiEnum(l.priority),
     specimenType: String(
       l.specimen_type ?? l.specimenType ?? '',
     ).trim() || null,
     collectionLocation: String(
       l.collection_location ?? l.collectionLocation ?? '',
     ).trim() || null,
-    abnormalResultManual: String(
-      l.abnormal_result_manual ?? l.abnormalResultManual ?? '',
-    ).trim().toLowerCase() || null,
     reviewedBy: String(l.reviewed_by ?? l.reviewedBy ?? '').trim() || null,
     reviewedDate: isoDateToUsDateString(
       l.reviewed_date ?? l.reviewedDate ?? '',
@@ -174,10 +203,8 @@ export function normalizeLabDetail(raw) {
 }
 
 function resolveAbnormalResult(lab) {
-  if (typeof lab?.abnormalResult === 'boolean') {
-    return lab.abnormalResult
-  }
-
+  // Prefer Abnormal Result? (yes/no) and component flags — not a stale
+  // abnormalResult boolean left at false from createEmptyLabOrder.
   return computeLabAbnormalResult(
     lab?.components ?? [],
     lab?.abnormalResultManual,
@@ -251,11 +278,14 @@ export function mapClientLabsListFromApi(rawList) {
   return list.map(raw => {
     const detail = normalizeLabDetail(raw)
     const copy = cloneLab(detail)
-    copy.abnormalResult = computeLabAbnormalResult(
-      copy.components ?? [],
-      copy.abnormalResultManual,
-    )
+    // Preserve API true/false. Only infer when null/missing.
+    if (copy.abnormalResult == null) {
+      copy.abnormalResult = computeLabAbnormalResult(
+        copy.components ?? [],
+        copy.abnormalResultManual,
+      )
+    }
 
-    return { ...copy, abnormalResult: copy.abnormalResult }
+    return copy
   })
 }

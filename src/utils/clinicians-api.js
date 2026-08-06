@@ -107,6 +107,9 @@ export function mapClinicianRowToSelectOption(row, catalogOptions = {}) {
     npi: normalized.npi,
     specialty: normalized.specialty,
     staffCode: normalized.staffCode,
+    staffMemberId: normalized.staffMemberId != null
+      ? Number(normalized.staffMemberId)
+      : null,
     photoFileId: normalized.photoFileId,
   }
 }

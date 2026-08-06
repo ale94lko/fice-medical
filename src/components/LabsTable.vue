@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="rows.length"
-    class="admin-data-table__scroll">
+    class="admin-data-table__scroll labs-table">
     <AdminQTable
       class="table admin-data-table admin-data-table--embedded
         admin-data-table--inline-column-settings"
@@ -10,12 +10,25 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :table-row-class-fn="labRowClassFn">
       <template #body-cell-testName="scope">
         <q-td
           :props="scope"
           class="admin-data-table__primary-cell">
-          {{ scope.row.testName || '—' }}
+          <div class="labs-table__name-row row items-center no-wrap">
+            <span
+              v-if="priorityAlertToken(scope.row)"
+              class="labs-priority-badge"
+              :class="`labs-priority-badge--${
+                priorityAlertToken(scope.row)
+              }`">
+              {{ priorityLabel(scope.row.priority) }}
+            </span>
+            <span class="labs-table__name">
+              {{ scope.row.testName || '—' }}
+            </span>
+          </div>
         </q-td>
       </template>
 
@@ -69,14 +82,19 @@
         </q-td>
       </template>
 
-      <template #body-cell-abnormal="scope">
+      <template #body-cell-resultStatus="scope">
         <q-td :props="scope">
           <span
-            class="lab-abnormal-badge"
-            :class="scope.row.abnormalResult
-              ? 'lab-abnormal-badge--yes'
-              : 'lab-abnormal-badge--no'">
-            {{ scope.row.abnormalResult ? t('yes') : t('no') }}
+            class="lab-result-status-badge"
+            :class="`lab-result-status-badge--${
+              resultStatus(scope.row)
+            }`">
+            <q-icon
+              :name="resultStatusIcon(scope.row)"
+              size="14px"
+              class="q-mr-xs"
+            />
+            {{ resultStatusLabel(scope.row) }}
           </span>
         </q-td>
       </template>
@@ -138,10 +156,17 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
-import { siteBreakpoints } from 'components/constants.js'
+import {
+  labPriorities,
+  siteBreakpoints,
+} from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
+import {
+  labResultStatusValues,
+  resolveLabResultStatus,
+} from 'src/utils/lab-orders.js'
 
 const props = defineProps({
   rows: {
@@ -177,8 +202,8 @@ const columns = computed(() => [
     align: 'left',
     field: row => row.testName,
     sortable: false,
-    headerStyle: 'min-width: 160px',
-    style: 'min-width: 160px',
+    headerStyle: 'min-width: 180px',
+    style: 'min-width: 180px',
   },
   {
     name: 'category',
@@ -226,13 +251,13 @@ const columns = computed(() => [
     style: 'min-width: 110px',
   },
   {
-    name: 'abnormal',
-    label: t('labColAbnormal'),
+    name: 'resultStatus',
+    label: t('labColResultStatus'),
     align: 'left',
-    field: row => row.abnormalResult,
+    field: row => resolveLabResultStatus(row),
     sortable: false,
-    headerStyle: 'min-width: 96px',
-    style: 'min-width: 96px',
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
   },
   {
     name: 'actions',
@@ -265,14 +290,119 @@ function categoryLabel(category) {
 
   return category || '—'
 }
+
+function priorityToken(priority) {
+  return String(priority ?? '').trim().toUpperCase()
+}
+
+function priorityAlertToken(row) {
+  const token = priorityToken(row?.priority)
+  if (token === labPriorities.stat) {
+    return 'stat'
+  }
+  if (token === labPriorities.urgent) {
+    return 'urgent'
+  }
+
+  return ''
+}
+
+function priorityLabel(priority) {
+  const key = labI18nKey('labPriority', priority)
+  const translated = t(key)
+  if (translated !== key) {
+    return translated
+  }
+
+  return priority || ''
+}
+
+function labRowClassFn(row) {
+  const alert = priorityAlertToken(row)
+  if (!alert) {
+    return ''
+  }
+
+  return `labs-table__row labs-table__row--${alert}`
+}
+
+function resultStatus(row) {
+  return resolveLabResultStatus(row)
+}
+
+function resultStatusLabel(row) {
+  const status = resultStatus(row)
+  const suffix = status.charAt(0).toUpperCase() + status.slice(1)
+  const key = `labResultStatus${suffix}`
+  const translated = t(key)
+
+  return translated !== key ? translated : status
+}
+
+function resultStatusIcon(row) {
+  const status = resultStatus(row)
+  if (status === labResultStatusValues.normal) {
+    return 'check_circle'
+  }
+  if (status === labResultStatusValues.abnormal) {
+    return 'error'
+  }
+
+  return 'schedule'
+}
 </script>
 
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
 
+.labs-table {
+  :deep(.labs-table__row--stat > td:first-child) {
+    box-shadow: inset 4px 0 0 #dc2626;
+  }
+
+  :deep(.labs-table__row--urgent > td:first-child) {
+    box-shadow: inset 4px 0 0 #ea580c;
+  }
+}
+
+.labs-table__name-row {
+  gap: 8px;
+  min-width: 0;
+}
+
+.labs-table__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labs-priority-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.labs-priority-badge--stat {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.labs-priority-badge--urgent {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
 .lab-category-badge,
 .lab-status-badge,
-.lab-abnormal-badge {
+.lab-result-status-badge {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
@@ -307,6 +437,16 @@ function categoryLabel(category) {
   color: #9d174d;
 }
 
+.lab-category-badge--genetic {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.lab-category-badge--other {
+  background: #f1f5f9;
+  color: #475569;
+}
+
 .lab-status-badge--draft {
   background: #f1f5f9;
   color: $text-muted;
@@ -332,13 +472,18 @@ function categoryLabel(category) {
   color: #1d4ed8;
 }
 
-.lab-abnormal-badge--yes {
-  background: #fee2e2;
-  color: #b91c1c;
+.lab-result-status-badge--pending {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
-.lab-abnormal-badge--no {
+.lab-result-status-badge--normal {
   background: #dcfce7;
   color: #166534;
+}
+
+.lab-result-status-badge--abnormal {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 </style>

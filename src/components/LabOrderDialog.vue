@@ -137,12 +137,17 @@
           </div>
         </div>
 
-        <div class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
+        <div class="insurance-dialog__card-section q-mt-lg
+          lab-order-dialog__accordion">
+          <AccordionSection
+            v-model="specimenExpanded"
+            boxed
             icon="biotech"
             :title="t('labSectionSpecimen')"
-          />
-          <div class="row q-col-gutter-md q-mt-md">
+            :badge="specimenBadge"
+            section-test-id="lab-section-specimen"
+            toggle-test-id="lab-section-specimen-toggle">
+            <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('labSpecimenType')"
@@ -157,6 +162,7 @@
                 :readonly="readonly"
                 :options="specimenOptions"
                 :test-id="tid.field('specimen')"
+                @update:model-value="onSpecimenTypeChange"
               />
             </AddClientLabeledField>
           </div>
@@ -167,6 +173,9 @@
               <ClientDateField
                 v-model="local.collectedDate"
                 :readonly="readonly"
+                :max-today="true"
+                :error="Boolean(errors.collectedDate)"
+                :error-message="errorText('collectedDate')"
                 :test-id="tid.field('collected-date')"
               />
             </AddClientLabeledField>
@@ -184,15 +193,21 @@
               />
             </AddClientLabeledField>
           </div>
-          </div>
+            </div>
+          </AccordionSection>
         </div>
 
-        <div class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
+        <div class="insurance-dialog__card-section q-mt-lg
+          lab-order-dialog__accordion">
+          <AccordionSection
+            v-model="resultsExpanded"
+            boxed
             icon="assignment_turned_in"
             :title="t('labSectionResults')"
-          />
-          <div class="row q-col-gutter-md q-mt-md">
+            :badge="resultsBadge"
+            section-test-id="lab-section-results"
+            toggle-test-id="lab-section-results-toggle">
+            <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('labResultDate')"
@@ -200,6 +215,9 @@
               <ClientDateField
                 v-model="local.resultDate"
                 :readonly="readonly"
+                :max-today="true"
+                :error="Boolean(errors.resultDate)"
+                :error-message="errorText('resultDate')"
                 :test-id="tid.field('result-date')"
               />
             </AddClientLabeledField>
@@ -231,6 +249,7 @@
                 :readonly="readonly"
                 :options="clinicianOptions"
                 :test-id="tid.field('reviewed-by')"
+                @update:model-value="onReviewedByChange"
               />
             </AddClientLabeledField>
           </div>
@@ -241,6 +260,9 @@
               <ClientDateField
                 v-model="local.reviewedDate"
                 :readonly="readonly"
+                :max-today="true"
+                :error="Boolean(errors.reviewedDate)"
+                :error-message="errorText('reviewedDate')"
                 :test-id="tid.field('reviewed-date')"
               />
             </AddClientLabeledField>
@@ -262,7 +284,8 @@
               />
             </AddClientLabeledField>
           </div>
-          </div>
+            </div>
+          </AccordionSection>
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
@@ -284,79 +307,18 @@
           />
         </div>
 
-        <div
-          v-if="visibleComponents.length"
-          class="fmh-table-wrap">
-          <table class="fmh-table">
-            <thead>
-              <tr>
-                <th>{{ t('labColComponent') }}</th>
-                <th>{{ t('labComponentValue') }}</th>
-                <th>{{ t('labComponentUnit') }}</th>
-                <th>{{ t('labColReferenceRange') }}</th>
-                <th>{{ t('labComponentFlag') }}</th>
-                <th
-                  v-if="!readonly"
-                  class="fmh-table-actions-col">
-                  {{ t('actions') }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="comp in visibleComponents"
-                :key="comp.id">
-                <td>{{ comp.componentName }}</td>
-                <td>{{ comp.value }}</td>
-                <td>{{ comp.unit || '—' }}</td>
-                <td>
-                  {{
-                    formatReferenceRange(
-                      comp.referenceRangeLow,
-                      comp.referenceRangeHigh,
-                      comp.unit,
-                    )
-                  }}
-                </td>
-                <td>
-                  <span
-                    v-if="comp.flag"
-                    class="lab-order-dialog__flag"
-                    :class="`lab-order-dialog__flag--${String(comp.flag ?? '')
-                      .toLowerCase()}`">
-                    {{ flagLabel(comp.flag) }}
-                  </span>
-                  <span v-else>—</span>
-                </td>
-                <td
-                  v-if="!readonly"
-                  class="fmh-table-actions">
-                  <q-btn
-                    flat
-                    round
-                    size="sm"
-                    class="app-btn-icon-action"
-                    icon="edit"
-                    color="primary"
-                    @click="openComponentDialog(comp)"
-                  />
-                  <q-btn
-                    flat
-                    round
-                    size="sm"
-                    class="app-btn-icon-action"
-                    icon="delete"
-                    color="primary"
-                    @click="removeComponent(comp.id)"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p v-else class="text-body2 text-grey-7 q-mb-none">
-          {{ t('labComponentsEmpty') }}
-        </p>
+        <AdminTablePanel
+          class="lab-components-table-panel admin-table-panel--wide"
+          :show-column-settings="false">
+          <LabComponentsTable
+            :rows="visibleComponents"
+            :can-edit="!readonly"
+            :can-delete="!readonly"
+            :empty-label="t('labComponentsEmpty')"
+            @edit="openComponentDialog"
+            @delete="onDeleteComponent"
+          />
+        </AdminTablePanel>
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
@@ -364,10 +326,8 @@
             icon="attach_file"
             :title="t('labAttachmentsTitle')"
           />
-          <p class="text-body2 text-grey-7 q-mb-md q-mt-md">
-            {{ t('labAttachmentsHint') }}
-          </p>
           <LabAttachmentUploadField
+            class="q-mt-md"
             :attachments="local.files ?? local.attachments"
             :readonly="readonly"
             :test-id="tid.field('attachments')"
@@ -406,6 +366,17 @@
       :edit-mode="Boolean(editingComponent?.id)"
       @save="onComponentSaved"
     />
+
+    <ModalComponent
+      v-model="componentDeleteOpen"
+      test-id="lab-component-delete"
+      :title="t('labComponentDeleteTitle')"
+      :message="t('labComponentDeleteMessage')"
+      :confirm-text="t('delete')"
+      :cancel-text="t('cancel')"
+      @confirm="onConfirmDeleteComponent"
+      @cancel="onCancelDeleteComponent"
+    />
   </q-dialog>
 </template>
 
@@ -414,12 +385,16 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AccordionSection from 'components/AccordionSection.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import SubsectionHeading from './SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import LabAttachmentUploadField from 'components/LabAttachmentUploadField.vue'
 import LabComponentDialog from 'components/LabComponentDialog.vue'
+import LabComponentsTable from 'components/LabComponentsTable.vue'
+import ModalComponent from 'components/ModalComponent.vue'
 import {
   labAbnormalValues,
   labCategories,
@@ -431,17 +406,24 @@ import {
   LAB_TEST_OPTIONS,
   categoryForTestName,
   cloneLab,
+  computeLabAbnormalResult,
   createEmptyLabOrder,
-  formatReferenceRange,
+  hasLabResultsInfo,
+  hasLabSpecimenInfo,
   nextLocalId,
+  resolveDefaultOrderingClinicianOption,
   validateLabOrder,
   visibleComponents as filterVisibleComponents,
 } from 'src/utils/lab-orders.js'
+import { todayDateUs } from 'src/utils/client-form.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
 import {
   useValidationSaveFeedback,
 } from 'src/composables/useValidationSaveFeedback.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   modelValue: {
@@ -474,6 +456,8 @@ const open = defineModel({ type: Boolean, default: false })
 
 const { t } = useI18n()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
+const authStore = useAuthStore()
+const { canAddLabs } = useClientPermissions()
 
 const dialogBodyScrollRef = ref(null)
 const local = ref(createEmptyLabOrder())
@@ -481,8 +465,46 @@ const errors = ref({})
 const testFilter = ref('')
 const componentDialogOpen = ref(false)
 const editingComponent = ref(null)
+const componentDeleteOpen = ref(false)
+const pendingDeleteComponentId = ref(null)
+const specimenExpanded = ref(false)
+const resultsExpanded = ref(false)
 
 const readonly = computed(() => props.mode === 'view')
+
+const specimenHasInfo = computed(() => hasLabSpecimenInfo(local.value))
+const resultsHasInfo = computed(() => hasLabResultsInfo(local.value))
+
+const specimenBadge = computed(() =>
+  specimenHasInfo.value ? '' : t('labSpecimenNotCollected'),
+)
+
+const resultsBadge = computed(() =>
+  resultsHasInfo.value ? '' : t('labResultsEmpty'),
+)
+
+function syncOptionalSectionExpanded() {
+  specimenExpanded.value = specimenHasInfo.value
+  resultsExpanded.value = resultsHasInfo.value
+}
+
+function applyDefaultOrderingClinician() {
+  if (props.mode !== 'add' || local.value.orderingClinicianId) {
+    return
+  }
+  const option = resolveDefaultOrderingClinicianOption(
+    props.clinicianOptions,
+    {
+      staffMember: authStore.userInfo?.staffMember ?? null,
+      canAddLabs: canAddLabs.value,
+    },
+  )
+  if (!option) {
+    return
+  }
+  local.value.orderingClinicianId = option.value
+  local.value.orderingClinicianName = option.label
+}
 
 const dialogTitle = computed(() => {
   if (props.mode === 'view') {
@@ -560,20 +582,38 @@ watch(
       local.value = props.lab
         ? cloneLab(props.lab)
         : createEmptyLabOrder()
-      if (
-        props.mode === 'add'
-        && !local.value.orderingClinicianId
-        && props.clinicianOptions.length
-      ) {
-        local.value.orderingClinicianId = props.clinicianOptions[0].value
-        local.value.orderingClinicianName = props.clinicianOptions[0].label
+      if (props.mode === 'add') {
+        local.value.orderedDate = todayDateUs()
       }
+      applyDefaultOrderingClinician()
+      syncOptionalSectionExpanded()
       errors.value = {}
       testFilter.value = ''
     }
   },
   { immediate: true },
 )
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (open.value) {
+      applyDefaultOrderingClinician()
+    }
+  },
+)
+
+watch(specimenHasInfo, hasInfo => {
+  if (!hasInfo) {
+    specimenExpanded.value = false
+  }
+})
+
+watch(resultsHasInfo, hasInfo => {
+  if (!hasInfo) {
+    resultsExpanded.value = false
+  }
+})
 
 function onTestFilter(val, update) {
   testFilter.value = val
@@ -587,20 +627,39 @@ function onTestSelected(name) {
   }
 }
 
+function onSpecimenTypeChange(value) {
+  if (readonly.value) {
+    return
+  }
+  if (String(value ?? '').trim()) {
+    local.value.collectedDate = todayDateUs()
+  }
+}
+
+function onReviewedByChange(value) {
+  if (readonly.value) {
+    return
+  }
+  if (String(value ?? '').trim()) {
+    local.value.reviewedDate = todayDateUs()
+  }
+}
+
 function onClinicianChange(id) {
   const found = props.clinicianOptions.find(item => item.value === id)
   local.value.orderingClinicianName = found?.label ?? null
 }
 
-function flagLabel(flag) {
-  const key = labI18nKey('labFlag', flag)
-  const translated = t(key)
-
-  return translated !== key ? translated : flag
-}
-
 function errorText(field) {
-  return errors.value[field] ? t('fieldRequired') : ''
+  const err = errors.value[field]
+  if (!err) {
+    return ''
+  }
+  if (typeof err === 'string') {
+    return t(err)
+  }
+
+  return t('fieldRequired')
 }
 
 function onCancel() {
@@ -615,7 +674,12 @@ async function emitSave() {
 
     return
   }
-  emit('save', cloneLab(local.value))
+  const copy = cloneLab(local.value)
+  copy.abnormalResult = computeLabAbnormalResult(
+    copy.components ?? [],
+    copy.abnormalResultManual,
+  )
+  emit('save', copy)
 }
 
 function openComponentDialog(component = null) {
@@ -651,6 +715,27 @@ function removeComponent(componentId) {
   })
 }
 
+function onDeleteComponent(row) {
+  pendingDeleteComponentId.value = row?.id ?? row ?? null
+  if (!pendingDeleteComponentId.value) {
+    return
+  }
+  componentDeleteOpen.value = true
+}
+
+function onConfirmDeleteComponent() {
+  const id = pendingDeleteComponentId.value
+  pendingDeleteComponentId.value = null
+  if (id) {
+    removeComponent(id)
+  }
+}
+
+function onCancelDeleteComponent() {
+  pendingDeleteComponentId.value = null
+  componentDeleteOpen.value = false
+}
+
 function onAttachmentUpload(file) {
   emit('upload-attachment', file)
 }
@@ -665,29 +750,13 @@ function onAttachmentDownload(attachmentId) {
 </script>
 
 <style lang="scss" scoped>
-.lab-order-dialog__flag {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-
-  &--normal {
-    background: #dcfce7;
-    color: #166534;
-  }
-
-  &--high,
-  &--critical_high,
-  &--abnormal {
-    background: #fee2e2;
-    color: #b91c1c;
-  }
-
-  &--low,
-  &--critical_low {
-    background: #fef3c7;
-    color: #b45309;
+.lab-order-dialog__accordion {
+  :deep(.accordion-header),
+  :deep(.accordion-panel .section-hint),
+  :deep(.fields.accordion-body) {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 </style>
