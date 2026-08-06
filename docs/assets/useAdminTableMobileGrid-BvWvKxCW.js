@@ -1,0 +1,1 @@
+import{Pl as e,Vt as t,ad as n}from"./index-ILMY1eCp.js";function r(){let r=t();return{showGrid:n(()=>r.screen.width<=e.XXS)}}export{r as t};
