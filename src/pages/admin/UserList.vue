@@ -12,7 +12,7 @@
       :subtitle="t('userListSubtitle')">
       <template #center>
         <div
-          class="user-list-page__toolbar row items-center no-wrap">
+          class="user-list-page__toolbar row items-center">
           <q-input
             :model-value="searchQuery"
             outlined
@@ -236,7 +236,6 @@ import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
   siteBreakpoints,
-  siteBreakpointsPx,
   userFieldKeys,
   userListColumnKeys,
   userStatusValues,
@@ -258,6 +257,8 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import UserDialog from 'components/UserDialog.vue'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { useUserPermissions } from 'src/composables/useUserPermissions.js'
@@ -736,7 +737,7 @@ watch(
   },
 )
 
-const showGrid = computed(() => $q.screen.width <= siteBreakpointsPx.XXS)
+const { showGrid } = useAdminTableMobileGrid()
 </script>
 
 <style lang="scss" scoped>

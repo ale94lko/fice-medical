@@ -292,7 +292,6 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
-  siteBreakpointsPx,
   staffStatuses,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -322,6 +321,8 @@ import { adminTableTestIds } from 'src/test-ids/index.js'
 import { staffListTestIds } from 'src/test-ids/index.js'
 import { useStaffListColumnPreferences } from
   'src/composables/useStaffListColumnPreferences.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useStaffListSearch } from
   'src/composables/useStaffListSearch.js'
 import { useAppFooterPagination } from
@@ -483,7 +484,7 @@ const showEmptyActions = computed(() =>
   && !activeSummaryFilter.value,
 )
 
-const showGrid = computed(() => $q.screen.width <= siteBreakpointsPx.XXS)
+const { showGrid } = useAdminTableMobileGrid()
 
 const allColumns = computed(() => [
   {

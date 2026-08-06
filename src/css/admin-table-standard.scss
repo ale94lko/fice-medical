@@ -34,11 +34,23 @@
     flex-direction: column;
   }
 
+  .admin-table-panel__table-wrap:has(.q-table--grid) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .admin-data-table {
     flex: 1 1 auto;
     min-height: 180px;
     max-height: none;
     height: 0;
+
+    &.q-table--grid {
+      height: auto;
+      min-height: 0;
+      flex: 0 0 auto;
+    }
   }
 
   &__heading {
@@ -184,6 +196,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  min-height: 0;
   background: $surface;
   border: 1px solid $table-border;
   border-radius: $table-radius;
@@ -265,6 +278,8 @@
 
   &.q-table--grid {
     max-height: none;
+    min-height: 0;
+    height: auto;
     display: block;
     overflow: visible;
 
@@ -272,11 +287,11 @@
       flex: none;
       min-height: auto;
       overflow: visible;
-      padding-bottom: 8px;
+      padding-bottom: 12px;
     }
 
     .q-table__grid-content {
-      padding-bottom: 4px;
+      padding-bottom: 8px;
     }
   }
 
@@ -406,14 +421,74 @@
     }
   }
 
+  .admin-table-grid-item {
+    font-family: $typography-font-family;
+  }
+
   .admin-table-grid-card {
     border-radius: $radius-md;
     background: $surface;
+    font-family: $typography-font-family;
+    overflow: hidden;
+
+    &__list {
+      padding: 10px 12px 4px;
+    }
+
+    &__field {
+      min-height: 0;
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+
+    &__label {
+      margin-bottom: 2px;
+      font-family: $typography-font-family;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: normal;
+      text-transform: none;
+      color: $text-muted;
+    }
+
+    &__value {
+      font-family: $typography-font-family;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.35;
+      color: $text-strong;
+      min-width: 0;
+
+      .q-td {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        position: static !important;
+        right: auto !important;
+      }
+    }
+
+    &__text {
+      display: block;
+      word-break: break-word;
+      color: $text-strong;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
   }
 
   .admin-table-grid-actions {
     flex-wrap: wrap;
     gap: 4px;
+    padding: 8px 10px 10px;
     border-top: 1px solid $table-border;
   }
 
@@ -442,6 +517,11 @@
     -webkit-overflow-scrolling: touch;
     padding-bottom: 8px;
     margin-bottom: 2px;
+
+    &:has(.q-table--grid) {
+      overflow-x: hidden;
+      overflow-y: visible;
+    }
 
     .admin-data-table {
       overflow: visible;
@@ -1124,9 +1204,33 @@
 
   .staff-list-page .admin-list-page__center,
   .client-list-page .admin-list-page__center,
-  .user-list-page .admin-list-page__center {
+  .user-list-page .admin-list-page__center,
+  .subtenant-list-page .admin-list-page__center,
+  .service-procedure-list-page .admin-list-page__center,
+  .screening-template-list-page .admin-list-page__center,
+  .clinical-resource-list-page .admin-list-page__center {
     max-width: none !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+  }
+
+  .user-list-page__toolbar,
+  .clinical-resource-list-page__toolbar,
+  .screening-template-list-page__toolbar,
+  .service-procedure-list-page__toolbar {
+    flex-wrap: wrap !important;
+  }
+
+  .user-list-page__search,
+  .user-list-page__filter,
+  .clinical-resource-list-page__search,
+  .screening-template-list-page__search,
+  .screening-template-list-page__filter,
+  .service-procedure-list-page__search,
+  .service-procedure-list-page__filter {
+    flex: 1 1 100%;
+    max-width: none !important;
+    width: 100%;
+    min-width: 0;
   }
 }

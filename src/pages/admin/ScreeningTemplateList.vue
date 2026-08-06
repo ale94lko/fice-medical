@@ -10,7 +10,7 @@
       <template #center>
         <div
           class="screening-template-list-page__toolbar
-            row items-center no-wrap">
+            row items-center">
           <q-input
             v-model="searchQuery"
             outlined
@@ -214,7 +214,6 @@ import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
   screeningTemplateStatusValues as statusValues,
-  siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageActions from
@@ -244,6 +243,8 @@ import {
   updateScreeningTemplate,
   updateScreeningTemplateStatus,
 } from 'src/utils/screening-template-api.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { screeningTemplateListTestIds } from 'src/test-ids/index.js'
@@ -283,7 +284,7 @@ const tablePagination = ref({
   rowsPerPage: 20,
 })
 
-const showGrid = computed(() => $q.screen.width < siteBreakpointsPx.MD)
+const { showGrid } = useAdminTableMobileGrid()
 
 const statusFilterOptions = computed(() =>
   buildScreeningTemplateStatusOptions(t),

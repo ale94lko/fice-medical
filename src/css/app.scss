@@ -452,6 +452,12 @@
   overflow: hidden;
 }
 
+.app-layout .q-page-container:has(.admin-list-page) > .q-page {
+  flex: 1 1 auto;
+  min-height: 0 !important;
+  max-height: 100%;
+}
+
 .app-layout .q-page-container:has(.dashboard-page) {
   flex: 1 1 auto;
   min-height: 0;
@@ -1800,6 +1806,7 @@ input:-webkit-autofill {
 
   &.q-table--grid {
     max-height: none;
+    min-height: 0;
   }
 
   &.table {

@@ -13,7 +13,7 @@
       <template #center>
         <div
           class="service-procedure-list-page__toolbar
-            row items-center no-wrap">
+            row items-center">
           <q-input
             :model-value="searchQuery"
             outlined
@@ -176,7 +176,6 @@ import {
   serviceProcedureFieldKeys as fk,
   serviceProcedureListColumnKeys as col,
   serviceProcedureStatusValues,
-  siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageActions from
@@ -193,6 +192,8 @@ import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ServiceProcedureDialog from
   'components/admin/ServiceProcedureDialog.vue'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import {
@@ -238,7 +239,7 @@ const tablePagination = ref({
   rowsNumber: 0,
 })
 
-const showGrid = computed(() => $q.screen.width < siteBreakpointsPx.MD)
+const { showGrid } = useAdminTableMobileGrid()
 
 const categoryFilterOptions = computed(() =>
   buildServiceProcedureCategoryOptions(t),

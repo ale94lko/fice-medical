@@ -9,7 +9,7 @@
       :subtitle="t('clinicalResourceListSubtitle')">
       <template #center>
         <div
-          class="clinical-resource-list-page__toolbar row items-center no-wrap">
+          class="clinical-resource-list-page__toolbar row items-center">
           <q-input
             :model-value="searchQuery"
             outlined
@@ -284,7 +284,6 @@ import {
   clinicalResourceTypeValues,
   quasarNotifyTypes,
   siteBreakpoints,
-  siteBreakpointsPx,
 } from 'components/constants.js'
 import AdminListPageActions from
   'components/admin-table/AdminListPageActions.vue'
@@ -301,6 +300,8 @@ import ClinicalResourceDetailDialog from
   'components/clinical/ClinicalResourceDetailDialog.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import {
@@ -372,7 +373,7 @@ let searchDebounceTimer = null
 const { setFooterPagination, patchFooterPagination, clearFooterPagination } =
   useAppFooterPagination()
 
-const showGrid = computed(() => $q.screen.width < siteBreakpointsPx.MD)
+const { showGrid } = useAdminTableMobileGrid()
 
 const archiveConfirmMessage = computed(() => {
   const title = pendingArchiveResource.value?.[fk.title] || '—'

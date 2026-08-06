@@ -132,7 +132,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
-  siteBreakpointsPx,
   subtenantFieldKeys,
   subtenantListColumnKeys,
 } from 'components/constants.js'
@@ -150,6 +149,8 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import SubtenantDialog from 'components/admin/SubtenantDialog.vue'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { useSubtenantPermissions } from
@@ -197,7 +198,7 @@ const tablePagination = ref({
   rowsNumber: 0,
 })
 
-const showGrid = computed(() => $q.screen.width < siteBreakpointsPx.MD)
+const { showGrid } = useAdminTableMobileGrid()
 
 const visibleColumns = computed(() => [
   {

@@ -282,7 +282,6 @@ import {
   clientFieldKeys,
   clientListColumnKeys,
   quasarNotifyTypes,
-  siteBreakpointsPx,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageActions from
@@ -317,6 +316,8 @@ import {
   useClientListColumnPreferences,
 } from 'src/composables/useClientListColumnPreferences.js'
 import { apiColumnKeyToFrontend } from 'src/utils/client-list-columns.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { useClientListSearch } from
   'src/composables/useClientListSearch.js'
 import { useAppFooterPagination } from
@@ -719,7 +720,7 @@ watch(
   },
 )
 
-const showGrid = computed(() => $q.screen.width <= siteBreakpointsPx.XXS)
+const { showGrid } = useAdminTableMobileGrid()
 
 const addClient = () => {
   router.push('/clients/add')
