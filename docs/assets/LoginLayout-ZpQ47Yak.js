@@ -1,0 +1,1 @@
+import{Md as e,Od as t,Rd as n,dt as r,fd as i,sd as a}from"./index-BOgXuXNg.js";import{r as o,t as s}from"./QLayout-CEVzOjSR.js";var c={};function l(r,c){let l=e(`router-view`);return t(),a(s,{view:`hHh Lpr lff`},{default:n(()=>[i(o,null,{default:n(()=>[i(l)]),_:1})]),_:1})}var u=r(c,[[`render`,l]]);export{u as default};

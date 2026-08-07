@@ -231,6 +231,7 @@ import {
   applyRoleSelectionToPermissions,
   fetchTenantRoleOptions,
   mergeRolePermissionsIntoSelection,
+  samePermissionIds,
 } from 'src/utils/tenant-roles-api.js'
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
@@ -495,12 +496,17 @@ watch(
       return
     }
 
-    local.value.permissions = applyRoleSelectionToPermissions({
+    const nextPermissions = applyRoleSelectionToPermissions({
       previousRoleIds: previousRoles ?? [],
       nextRoleIds: nextRoles ?? [],
       currentPermissionIds: local.value.permissions ?? [],
       roleOptions: roleOptions.value,
     })
+    if (samePermissionIds(local.value.permissions, nextPermissions)) {
+      return
+    }
+
+    local.value.permissions = nextPermissions
   },
 )
 

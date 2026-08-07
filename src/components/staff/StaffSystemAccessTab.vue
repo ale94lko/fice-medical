@@ -152,6 +152,7 @@ import {
   applyRoleSelectionToPermissions,
   fetchTenantRoleOptions,
   mergeRolePermissionsIntoSelection,
+  samePermissionIds,
 } from 'src/utils/tenant-roles-api.js'
 import { fetchTenantPermissionTreeNodes } from
   'src/utils/tenant-permissions-api.js'
@@ -318,8 +319,8 @@ function ensureSystemUserDefaults() {
     next.changePasswordRequired = true
     changed = true
   }
-  if (isAddMode.value) {
-    next.password = next.password ?? ''
+  if (isAddMode.value && typeof next.password !== 'string') {
+    next.password = ''
     changed = true
   }
 
@@ -353,9 +354,11 @@ async function hydrateUserCatalogs() {
     })
   }
 
-  systemUser.value = {
-    ...systemUser.value,
-    permissions,
+  if (!samePermissionIds(systemUser.value.permissions, permissions)) {
+    systemUser.value = {
+      ...systemUser.value,
+      permissions,
+    }
   }
 
   await nextTick()
@@ -372,14 +375,19 @@ watch(
       return
     }
 
+    const nextPermissions = applyRoleSelectionToPermissions({
+      previousRoleIds: previousRoles ?? [],
+      nextRoleIds: nextRoles ?? [],
+      currentPermissionIds: systemUser.value.permissions ?? [],
+      roleOptions: roleOptions.value,
+    })
+    if (samePermissionIds(systemUser.value.permissions, nextPermissions)) {
+      return
+    }
+
     systemUser.value = {
       ...systemUser.value,
-      permissions: applyRoleSelectionToPermissions({
-        previousRoleIds: previousRoles ?? [],
-        nextRoleIds: nextRoles ?? [],
-        currentPermissionIds: systemUser.value.permissions ?? [],
-        roleOptions: roleOptions.value,
-      }),
+      permissions: nextPermissions,
     }
   },
 )

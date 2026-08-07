@@ -169,6 +169,20 @@ export function applyRoleSelectionToPermissions({
   return Array.from(permissionSet)
 }
 
+export function samePermissionIds(left = [], right = []) {
+  if (left === right) {
+    return true
+  }
+  if ((left?.length ?? 0) !== (right?.length ?? 0)) {
+    return false
+  }
+  const leftSet = new Set(
+    (left ?? []).map(value => Number(value)).filter(Number.isFinite),
+  )
+
+  return (right ?? []).every(value => leftSet.has(Number(value)))
+}
+
 export function mergeRolePermissionsIntoSelection({
   selectedRoleIds = [],
   currentPermissionIds = [],
