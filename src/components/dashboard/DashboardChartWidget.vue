@@ -29,8 +29,15 @@
               height: `${point.heightPct}%`,
               background: point.color,
             }"
-            :title="`${point.label}: ${point.count}`"
-          />
+          >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ point.label }}: {{ point.count }}
+            </q-tooltip>
+          </div>
           <p class="dashboard-chart__label q-mb-none">
             {{ point.shortLabel }}
           </p>

@@ -8,18 +8,12 @@
     <q-card class="family-medical-history-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="statusChangeInfo"
         @close="onCancel">
         {{ t('staffChangeStatusTitle') }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{
-            t('staffChangeStatusMessage', {
-              count: selectedCount,
-            })
-          }}
-        </p>
         <AddClientLabeledField
           :label="t('status')"
           required>
@@ -93,6 +87,12 @@ const open = computed({
 })
 
 const statusOptions = computed(() => staffStatusOptions(t))
+
+const statusChangeInfo = computed(() =>
+  t('staffChangeStatusMessage', {
+    count: props.selectedCount,
+  }),
+)
 
 watch(
   () => props.modelValue,

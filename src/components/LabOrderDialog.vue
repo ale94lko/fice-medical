@@ -5,17 +5,16 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="dialogSubtitle"
+        @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section
         ref="dialogBodyScrollRef"
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <div
           v-if="showInfoSection"
           class="insurance-dialog__card-section">

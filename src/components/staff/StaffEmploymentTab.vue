@@ -173,9 +173,16 @@
                     round
                     dense
                     icon="delete"
-                    :title="t('delete')"
                     @click="removeCompensation(row.id)"
-                  />
+                  >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('delete') }}
+          </q-tooltip>
+        </q-btn>
                 </td>
               </tr>
             </tbody>

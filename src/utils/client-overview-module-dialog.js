@@ -148,8 +148,6 @@ function buildGoalSections(goals = [], t) {
       fields: [
         field('status', normalized.status),
         field('carePlanPriority', normalized.priority),
-        field('carePlanGoalBaseline', normalized.baseline),
-        field('carePlanGoalTarget', normalized.target),
         field('carePlanGoalTargetDate', normalized.targetDate),
         field('carePlanGoalSuccessCriteria', normalized.successCriteria),
         field('description', normalized.description),

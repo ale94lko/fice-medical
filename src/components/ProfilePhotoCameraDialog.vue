@@ -7,15 +7,14 @@
     <q-card
       class="insurance-dialog profile-photo-camera-dialog
         app-dialog-card app-dialog-card--sm">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="t('profilePhotoCameraSubtitle')"
+        @close="onCancel">
         {{ t('profilePhotoCameraTitle') }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mb-md">
-          {{ t('profilePhotoCameraSubtitle') }}
-        </p>
-
         <FormSelect
           v-if="showCameraPicker"
           :model-value="selectedCameraId"

@@ -5,15 +5,14 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="t('carePlanGoalSubtitle')"
+        @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('carePlanGoalSubtitle') }}
-        </p>
-
         <div class="insurance-dialog__card-section">
           <SubsectionHeading
             icon="track_changes"
@@ -128,62 +127,6 @@
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
-            icon="show_chart"
-            :title="t('carePlanGoalSectionProgress')"
-          />
-          <p class="text-body2 text-grey-7 q-mb-md">
-            {{ t('carePlanGoalProgressHint') }}
-          </p>
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-4">
-              <AddClientLabeledField
-                :label="t('carePlanGoalBaseline')"
-                :test-id="tid.field('goal-baseline')">
-                <q-input
-                  v-model="local.baseline"
-                  outlined
-                  hide-bottom-space
-                  type="number"
-                  :readonly="readonly"
-                  :placeholder="t('carePlanGoalBaselinePlaceholder')"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-4">
-              <AddClientLabeledField
-                :label="t('carePlanGoalTarget')"
-                :test-id="tid.field('goal-target')">
-                <q-input
-                  v-model="local.target"
-                  outlined
-                  hide-bottom-space
-                  type="number"
-                  :readonly="readonly"
-                  :placeholder="t('carePlanGoalTargetPlaceholder')"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-4">
-              <AddClientLabeledField
-                :label="t('carePlanMeasureDirection')"
-                :test-id="tid.field('goal-direction')">
-                <FormSelect
-                  v-model="local.direction"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  :readonly="readonly"
-                  :options="directionOptions"
-                  :test-id="tid.field('goal-direction')"
-                />
-              </AddClientLabeledField>
-            </div>
-          </div>
-        </div>
-
-        <div class="insurance-dialog__card-section q-mt-lg">
           <div class="row items-center justify-between q-mb-sm">
             <SubsectionHeading
               icon="analytics"
@@ -200,13 +143,20 @@
               @click="openMeasureDialog('add')"
             />
           </div>
-          <MeasureTable
-            :rows="local.outcomeMeasures"
-            :readonly="readonly"
-            @edit="row => openMeasureDialog('edit', row)"
-            @view="row => openMeasureDialog('view', row)"
-            @delete="removeMeasure"
-          />
+          <AdminTablePanel
+            class="care-plan-measures-table-panel admin-table-panel--wide"
+            :show-column-settings="false">
+            <MeasureTable
+              :rows="local.outcomeMeasures"
+              :readonly="readonly"
+              :empty-label="t('carePlanMeasuresEmpty')"
+              @edit="row => openMeasureDialog('edit', row)"
+              @view="row => openMeasureDialog('view', row)"
+              @add-measurement="openAddMeasurementDialog"
+              @measurement-history="openMeasurementHistoryDialog"
+              @delete="removeMeasure"
+            />
+          </AdminTablePanel>
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
@@ -226,13 +176,19 @@
               @click="openInterventionDialog('add')"
             />
           </div>
-          <InterventionTable
-            :rows="local.interventions"
-            :readonly="readonly"
-            @edit="row => openInterventionDialog('edit', row)"
-            @view="row => openInterventionDialog('view', row)"
-            @delete="removeIntervention"
-          />
+          <AdminTablePanel
+            class="care-plan-interventions-table-panel
+              admin-table-panel--wide"
+            :show-column-settings="false">
+            <InterventionTable
+              :rows="local.interventions"
+              :readonly="readonly"
+              :empty-label="t('carePlanInterventionsEmpty')"
+              @edit="row => openInterventionDialog('edit', row)"
+              @view="row => openInterventionDialog('view', row)"
+              @delete="removeIntervention"
+            />
+          </AdminTablePanel>
         </div>
       </q-card-section>
 
@@ -263,6 +219,15 @@
       :mode="measureDialogMode"
       @save="onMeasureSaved"
     />
+    <CarePlanAddMeasurementDialog
+      v-model="measurementDialogOpen"
+      :measure="activeMeasure"
+      @save="onMeasurementSaved"
+    />
+    <CarePlanMeasurementHistoryDialog
+      v-model="historyDialogOpen"
+      :measure="activeMeasure"
+    />
     <CarePlanInterventionDialog
       v-model="interventionDialogOpen"
       :intervention="activeIntervention"
@@ -281,8 +246,13 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import CarePlanOutcomeMeasureDialog from
   'components/CarePlanOutcomeMeasureDialog.vue'
+import CarePlanAddMeasurementDialog from
+  'components/CarePlanAddMeasurementDialog.vue'
+import CarePlanMeasurementHistoryDialog from
+  'components/CarePlanMeasurementHistoryDialog.vue'
 import CarePlanInterventionDialog from
   'components/CarePlanInterventionDialog.vue'
 import MeasureTable from 'components/CarePlanMeasureTable.vue'
@@ -292,9 +262,9 @@ import {
   carePlanGoalStatuses,
   carePlanGoalTitleMaxLength,
   carePlanPriorities,
-  carePlanProgressDirections,
 } from 'components/constants.js'
 import {
+  applyOutcomeMeasureReading,
   createEmptyCarePlanGoal,
   createEmptyIntervention,
   createEmptyOutcomeMeasure,
@@ -303,6 +273,7 @@ import {
 } from 'src/utils/care-plan-orders.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   modelValue: {
@@ -326,6 +297,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save', 'cancel'])
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const open = computed({
   get: () => props.modelValue,
@@ -339,6 +311,8 @@ const errors = reactive({})
 const measureDialogOpen = ref(false)
 const measureDialogMode = ref('add')
 const activeMeasure = ref(null)
+const measurementDialogOpen = ref(false)
+const historyDialogOpen = ref(false)
 
 const interventionDialogOpen = ref(false)
 const interventionDialogMode = ref('add')
@@ -368,17 +342,6 @@ const priorityOptions = computed(() =>
     value,
   })),
 )
-
-const directionOptions = computed(() => [
-  {
-    label: t('carePlanDirectionLower'),
-    value: carePlanProgressDirections.lowerIsBetter,
-  },
-  {
-    label: t('carePlanDirectionHigher'),
-    value: carePlanProgressDirections.higherIsBetter,
-  },
-])
 
 watch(
   () => [props.modelValue, props.goal],
@@ -427,6 +390,47 @@ function openMeasureDialog(mode, row = null) {
     ? { ...row }
     : createEmptyOutcomeMeasure()
   measureDialogOpen.value = true
+}
+
+function openAddMeasurementDialog(row) {
+  activeMeasure.value = row ? { ...row } : null
+  measurementDialogOpen.value = true
+}
+
+function openMeasurementHistoryDialog(row) {
+  activeMeasure.value = row ? { ...row } : null
+  historyDialogOpen.value = true
+}
+
+function resolveRecordedByName() {
+  const profile = authStore.linkedStaffProfile
+  const name = String(profile?.name ?? '').trim()
+  if (name) {
+    return name
+  }
+
+  return String(authStore.userInfo?.email ?? '').trim()
+}
+
+function onMeasurementSaved(reading) {
+  const measureId = reading?.measureId
+  if (!measureId) {
+    return
+  }
+  local.value.outcomeMeasures = (local.value.outcomeMeasures ?? []).map(
+    item => {
+      if (item.id !== measureId) {
+        return item
+      }
+
+      return applyOutcomeMeasureReading(item, {
+        ...reading,
+        recordedByName: resolveRecordedByName(),
+      })
+    },
+  )
+  local.value = refreshGoalProgress(local.value)
+  measurementDialogOpen.value = false
 }
 
 function onMeasureSaved(measure, keepOpen) {

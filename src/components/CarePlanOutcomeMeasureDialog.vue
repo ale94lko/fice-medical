@@ -5,15 +5,14 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="t('carePlanMeasureSubtitle')"
+        @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('carePlanMeasureSubtitle') }}
-        </p>
-
         <div class="insurance-dialog__card-section">
           <SubsectionHeading
             icon="analytics"
@@ -86,14 +85,15 @@
                 required
                 :test-id="tid.field('measure-baseline')">
                 <q-input
-                  v-model="local.baseline"
+                  :model-value="local.baseline"
                   outlined
                   hide-bottom-space
-                  type="number"
+                  inputmode="decimal"
                   :readonly="readonly"
                   :placeholder="t('carePlanMeasureBaselinePlaceholder')"
-                  :error="Boolean(errors.baseline)"
+                  :error="Boolean(errors.baseline || errors.baselineTarget)"
                   :error-message="errors.baseline"
+                  @update:model-value="onBaselineInput"
                 />
               </AddClientLabeledField>
             </div>
@@ -103,41 +103,23 @@
                 required
                 :test-id="tid.field('measure-target')">
                 <q-input
-                  v-model="local.target"
+                  :model-value="local.target"
                   outlined
                   hide-bottom-space
-                  type="number"
+                  inputmode="decimal"
                   :readonly="readonly"
                   :placeholder="t('carePlanMeasureTargetPlaceholder')"
-                  :error="Boolean(errors.target)"
+                  :error="Boolean(errors.target || errors.baselineTarget)"
                   :error-message="errors.target"
+                  @update:model-value="onTargetInput"
                 />
               </AddClientLabeledField>
             </div>
-          </div>
-        </div>
-
-        <div
-          v-if="previewProgress.percent != null"
-          class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
-            icon="show_chart"
-            :title="t('carePlanMeasureProgressPreview')"
-          />
-          <div class="care-plan-measure-preview q-mt-md">
-            <p class="text-body2 q-mb-sm">
-              {{ t('carePlanMeasurePreviewSummary', previewSummary) }}
-            </p>
-            <q-linear-progress
-              :value="previewProgress.percent / 100"
-              color="positive"
-              track-color="grey-3"
-              rounded
-              size="10px"
-            />
-            <p class="text-caption text-positive q-mt-sm q-mb-none">
-              {{ Math.round(previewProgress.percent) }}%
-            </p>
+            <div v-if="errors.baselineTarget" class="col-12">
+              <p class="form-field__error q-mt-xs q-mb-none">
+                {{ errors.baselineTarget }}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -210,21 +192,6 @@
                 />
               </AddClientLabeledField>
             </div>
-            <div v-if="!readonly" class="col-12">
-              <q-checkbox
-                v-model="addCurrentMeasurement"
-                :label="t('carePlanMeasureAddCurrent')"
-              />
-              <q-input
-                v-if="addCurrentMeasurement"
-                v-model="local.currentValue"
-                outlined
-                hide-bottom-space
-                type="number"
-                class="q-mt-sm"
-                :placeholder="t('carePlanMeasureCurrentPlaceholder')"
-              />
-            </div>
           </div>
         </div>
       </q-card-section>
@@ -277,9 +244,6 @@ import {
   CARE_PLAN_MEASURE_OPTIONS,
   createEmptyOutcomeMeasure,
 } from 'src/utils/care-plan-orders.js'
-import { calculateOutcomeMeasureProgress } from
-  'src/utils/care-plan-progress.js'
-import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -309,7 +273,6 @@ const open = computed({
 const readonly = computed(() => props.mode === 'view')
 const local = ref(createEmptyOutcomeMeasure())
 const errors = reactive({})
-const addCurrentMeasurement = ref(false)
 const measureFilter = ref('')
 
 const dialogTitle = computed(() => {
@@ -351,22 +314,6 @@ const measureOptions = computed(() => {
     .map(name => ({ label: name, value: name }))
 })
 
-const previewProgress = computed(() => calculateOutcomeMeasureProgress(
-  local.value.baseline,
-  local.value.currentValue ?? local.value.baseline,
-  local.value.target,
-  local.value.direction,
-))
-
-const previewSummary = computed(() => ({
-  baseline: local.value.baseline ?? '—',
-  target: local.value.target ?? '—',
-  direction: t(carePlanI18nKey(
-    'carePlanDirection',
-    local.value.direction,
-  )),
-}))
-
 watch(
   () => [props.modelValue, props.measure],
   () => {
@@ -375,7 +322,6 @@ watch(
         ...createEmptyOutcomeMeasure(),
         ...(props.measure ?? {}),
       }
-      addCurrentMeasurement.value = local.value.currentValue != null
       Object.keys(errors).forEach(key => delete errors[key])
     }
   },
@@ -388,6 +334,94 @@ function onMeasureFilter(val, update) {
   })
 }
 
+function sanitizeMeasureNumberInput(value) {
+  const raw = String(value ?? '')
+  let result = ''
+  let hasDot = false
+  for (const ch of raw) {
+    if (ch === '-' && result === '') {
+      result = '-'
+      continue
+    }
+    if (ch === '.' && !hasDot) {
+      hasDot = true
+      result += '.'
+      continue
+    }
+    if (/\d/.test(ch)) {
+      result += ch
+    }
+  }
+
+  return result
+}
+
+function onBaselineInput(value) {
+  local.value.baseline = sanitizeMeasureNumberInput(value)
+}
+
+function onTargetInput(value) {
+  local.value.target = sanitizeMeasureNumberInput(value)
+}
+
+function parseMeasureNumber(value) {
+  if (value == null || value === '' || value === '-' || value === '.') {
+    return null
+  }
+  const num = Number(value)
+
+  return Number.isFinite(num) ? num : NaN
+}
+
+function validateBaselineTarget() {
+  const baselineRaw = local.value.baseline
+  const targetRaw = local.value.target
+  const baselineEmpty = baselineRaw == null || baselineRaw === ''
+  const targetEmpty = targetRaw == null || targetRaw === ''
+
+  if (baselineEmpty) {
+    errors.baseline = t('carePlanMeasureBaselineRequired')
+  } else {
+    const baseline = parseMeasureNumber(baselineRaw)
+    if (!Number.isFinite(baseline)) {
+      errors.baseline = t('carePlanMeasureBaselineInvalid')
+    }
+  }
+
+  if (targetEmpty) {
+    errors.target = t('carePlanMeasureTargetRequired')
+  } else {
+    const target = parseMeasureNumber(targetRaw)
+    if (!Number.isFinite(target)) {
+      errors.target = t('carePlanMeasureTargetInvalid')
+    }
+  }
+
+  if (errors.baseline || errors.target) {
+    return
+  }
+
+  const baseline = parseMeasureNumber(baselineRaw)
+  const target = parseMeasureNumber(targetRaw)
+  if (baseline === target) {
+    errors.baselineTarget = t('carePlanMeasureBaselineTargetEqual')
+
+    return
+  }
+
+  const lower = carePlanProgressDirections.lowerIsBetter
+  if (local.value.direction === lower && baseline <= target) {
+    errors.baselineTarget = t('carePlanMeasureBaselineMustBeHigher')
+
+    return
+  }
+
+  const higher = carePlanProgressDirections.higherIsBetter
+  if (local.value.direction === higher && baseline >= target) {
+    errors.baselineTarget = t('carePlanMeasureBaselineMustBeLower')
+  }
+}
+
 function validate() {
   Object.keys(errors).forEach(key => delete errors[key])
   if (!String(local.value.measureName ?? '').trim()) {
@@ -396,12 +430,7 @@ function validate() {
   if (!local.value.direction) {
     errors.direction = t('carePlanMeasureDirectionRequired')
   }
-  if (local.value.baseline == null || local.value.baseline === '') {
-    errors.baseline = t('carePlanMeasureBaselineRequired')
-  }
-  if (local.value.target == null || local.value.target === '') {
-    errors.target = t('carePlanMeasureTargetRequired')
-  }
+  validateBaselineTarget()
 
   return !Object.keys(errors).length
 }
@@ -410,14 +439,13 @@ function onSave(keepOpen) {
   if (!validate()) {
     return
   }
-  const payload = { ...local.value }
-  if (!addCurrentMeasurement.value) {
-    payload.currentValue = null
-  }
-  emit('save', payload, keepOpen)
+  emit('save', {
+    ...local.value,
+    baseline: parseMeasureNumber(local.value.baseline),
+    target: parseMeasureNumber(local.value.target),
+  }, keepOpen)
   if (keepOpen) {
     local.value = createEmptyOutcomeMeasure()
-    addCurrentMeasurement.value = false
 
     return
   }
@@ -429,11 +457,3 @@ function onCancel() {
   open.value = false
 }
 </script>
-
-<style lang="scss" scoped>
-.care-plan-measure-preview {
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: #f0fdf4;
-}
-</style>

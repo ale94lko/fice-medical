@@ -37,9 +37,15 @@
             class="appointment-availability-day-grid__block"
             :class="blockClass(block)"
             :style="blockStyle(block)"
-            :title="blockTitle(block)"
             @click.stop="onBlockClick(block)"
           >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ blockTitle(block) }}
+            </q-tooltip>
             <span
               v-if="isAppointmentBlock(block)"
               class="appointment-availability-day-grid__block-label">

@@ -5,15 +5,14 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="dialogSubtitle"
+        @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <div class="insurance-dialog__card-section">
           <SubsectionHeading
             icon="info"
@@ -531,7 +530,14 @@ function onCancel() {
 
 function openGoalDialog(mode, row = null) {
   goalDialogMode.value = mode
-  activeGoal.value = row ? { ...row } : createEmptyCarePlanGoal()
+  if (row) {
+    activeGoal.value = { ...row }
+  } else {
+    activeGoal.value = {
+      ...createEmptyCarePlanGoal(),
+      targetDate: String(local.value.targetDate ?? '').trim(),
+    }
+  }
   goalDialogOpen.value = true
 }
 

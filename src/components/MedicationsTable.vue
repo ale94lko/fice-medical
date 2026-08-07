@@ -102,10 +102,17 @@
             :icon="adminTableActionIcons.view"
             :data-testid="tid.rowView(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('medicationActionView')"
             :aria-label="t('medicationActionView')"
             @click="emit('view', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('medicationActionView') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit"
             flat
@@ -115,10 +122,17 @@
             :icon="adminTableActionIcons.edit"
             :data-testid="tid.rowEdit(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('edit')"
             :aria-label="t('edit')"
             @click="emit('edit', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit || canDelete"
             flat
@@ -128,9 +142,15 @@
             icon="more_vert"
             :data-testid="tid.rowMore(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('medicationActionMore')"
             :aria-label="t('medicationActionMore')"
           >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('medicationActionMore') }}
+          </q-tooltip>
             <q-menu auto-close>
               <q-list dense style="min-width: 180px">
                 <q-item

@@ -426,6 +426,20 @@
   border: 1px solid $shell-border;
 }
 
+/* Default tooltips: light teal (same as permissions / dialog info). */
+.q-tooltip:not(.app-drawer-tooltip) {
+  max-width: 300px;
+  padding: 8px 12px !important;
+  border-radius: 8px;
+  background: $secondary-2 !important;
+  color: $text-strong !important;
+  border: 1px solid rgba($primary, 0.18);
+  box-shadow: $shadow-sm;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+}
+
 .app-drawer .icon-hide .q-btn {
   border-radius: 50%;
   background: $surface !important;
@@ -1642,7 +1656,8 @@
   }
 }
 
-.app-dialog-toolbar__close {
+.app-dialog-toolbar__close,
+.app-dialog-toolbar__info {
   color: $text-muted !important;
 
   &:hover {

@@ -10,15 +10,12 @@
         app-dialog-card app-dialog-card--sm">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="t('clientProfilePhotoCropSubtitle')"
         @close="onCancel">
         {{ t('clientProfilePhotoCropTitle') }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mb-md">
-          {{ t('clientProfilePhotoCropSubtitle') }}
-        </p>
-
         <div
           v-if="imageReady"
           ref="viewportRef"

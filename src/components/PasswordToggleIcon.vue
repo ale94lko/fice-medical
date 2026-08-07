@@ -3,10 +3,17 @@
     :name="iconName"
     class="cursor-pointer"
     :data-testid="testId || undefined"
-    :title="titleText"
     :aria-label="titleText"
     @click="emit('toggle')"
-  />
+  >
+    <q-tooltip
+      class="app-info-tooltip"
+      anchor="top middle"
+      self="bottom middle"
+      :offset="[0, 6]">
+      {{ titleText }}
+    </q-tooltip>
+  </q-icon>
 </template>
 
 <script setup>

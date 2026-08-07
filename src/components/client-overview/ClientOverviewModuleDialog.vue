@@ -12,6 +12,7 @@
       :data-testid="clientOverviewTestIds.moduleDialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="summaryLabel || ''"
         @close="onClose">
         <div
           v-if="isAllergiesModule"
@@ -21,16 +22,9 @@
             :class="titleIconToneClass">
             <q-icon :name="moduleIcon" size="20px" />
           </div>
-          <div class="client-overview-module-dialog__title-copy">
-            <span class="client-overview-module-dialog__title-text">
-              {{ dialogTitle }}
-            </span>
-            <span
-              v-if="summaryLabel"
-              class="client-overview-module-dialog__title-sub">
-              {{ summaryLabel }}
-            </span>
-          </div>
+          <span class="client-overview-module-dialog__title-text">
+            {{ dialogTitle }}
+          </span>
         </div>
         <template v-else>
           {{ dialogTitle }}
@@ -40,12 +34,6 @@
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md
           client-overview-module-dialog__body">
-        <p
-          v-if="summaryLabel && !isAllergiesModule"
-          class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ summaryLabel }}
-        </p>
-
         <div
           v-if="hasAllergyListContent"
           class="client-overview-module-dialog__allergy-list-wrap">

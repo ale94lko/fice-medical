@@ -133,10 +133,17 @@
               :aria-label="scope.row[fk.pinned]
                 ? t('clinicalResourceUnpin')
                 : t('clinicalResourcePin')"
-              :title="pinActionTitle(scope.row)"
               :data-testid="clinicalResourceTestIds.rowPin(scope.row.id)"
               @click="togglePin(scope.row)"
-            />
+            >
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ pinActionTitle(scope.row) }}
+              </q-tooltip>
+            </q-btn>
             <q-icon
               v-else-if="scope.row[fk.pinned]"
               name="push_pin"
@@ -175,11 +182,18 @@
               :icon="adminTableActionIcons.edit"
               class="app-btn-icon-action"
               :size="siteBreakpoints.SM"
-              :title="t('edit')"
               :aria-label="t('edit')"
               :data-testid="clinicalResourceTestIds.rowEdit(row.id)"
               @click="editResource(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canManageClinicalResources
                 && row.status !== clinicalResourceStatusValues.active"
@@ -190,11 +204,18 @@
               color="positive"
               class="app-btn-icon-action"
               :size="siteBreakpoints.SM"
-              :title="t('clinicalResourceActivate')"
               :aria-label="t('clinicalResourceActivate')"
               :data-testid="clinicalResourceTestIds.rowActivate(row.id)"
               @click="toggleResourceStatus(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('clinicalResourceActivate') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canManageClinicalResources
                 && row.status === clinicalResourceStatusValues.active"
@@ -205,11 +226,18 @@
               color="warning"
               class="app-btn-icon-action"
               :size="siteBreakpoints.SM"
-              :title="t('clinicalResourceDeactivate')"
               :aria-label="t('clinicalResourceDeactivate')"
               :data-testid="clinicalResourceTestIds.rowDeactivate(row.id)"
               @click="toggleResourceStatus(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('clinicalResourceDeactivate') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canManageClinicalResources"
               flat
@@ -219,11 +247,18 @@
               color="warning"
               class="app-btn-icon-action"
               :size="siteBreakpoints.SM"
-              :title="t('clinicalResourceArchive')"
               :aria-label="t('clinicalResourceArchive')"
               :data-testid="clinicalResourceTestIds.rowArchive(row.id)"
               @click="confirmArchive(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('clinicalResourceArchive') }}
+          </q-tooltip>
+        </q-btn>
           </div>
         </template>
 

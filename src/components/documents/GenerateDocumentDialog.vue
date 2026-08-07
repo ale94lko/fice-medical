@@ -8,16 +8,13 @@
     <q-card class="insurance-dialog app-dialog-card generate-document-dialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="t('generateDocumentDialogSubtitle')"
         @close="onCancel">
         {{ t('generateDocumentDialogTitle') }}
       </AppDialogHeader>
 
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('generateDocumentDialogSubtitle') }}
-        </p>
-
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <AddClientLabeledField

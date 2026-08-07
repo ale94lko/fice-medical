@@ -8,6 +8,7 @@
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="dialogSubtitle"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -15,12 +16,6 @@
       <q-card-section
         ref="dialogBodyScrollRef"
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p
-          v-if="dialogSubtitle"
-          class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <div v-if="showPlacesSearch" class="insurance-dialog__card-section">
           <PharmacyPlacesSearchField
             :reset-key="open"

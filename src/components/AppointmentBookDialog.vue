@@ -7,6 +7,7 @@
     <q-card class="insurance-dialog app-dialog-card appointment-book-dialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="dialogSubtitle"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -14,12 +15,6 @@
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm
           appointment-book-dialog__body">
-        <p
-          v-if="dialogSubtitle"
-          class="text-body2 text-grey-7 q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <template v-if="mode === 'book'">
           <SubsectionHeading
             icon="event"

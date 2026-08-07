@@ -7,19 +7,16 @@
     <q-card
       class="insurance-dialog screening-template-dialog app-dialog-card"
       :data-testid="screeningTemplateDialogTestIds.dialog">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="dialogSubtitle"
+        @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md
           screening-template-dialog__body">
-        <p
-          v-if="dialogSubtitle"
-          class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <ScreeningTemplatePreview
           v-if="viewMode === 'preview'"
           :template="local"

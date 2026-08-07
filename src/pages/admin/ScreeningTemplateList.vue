@@ -101,11 +101,18 @@
               size="sm"
               icon="visibility"
               class="app-btn-icon-action"
-              :title="t('view')"
               :aria-label="t('view')"
               :data-testid="screeningTemplateListTestIds.rowView(row.id)"
               @click="viewRow(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('view') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canViewScreeningTemplates"
               flat
@@ -114,11 +121,18 @@
               size="sm"
               icon="preview"
               class="app-btn-icon-action"
-              :title="t('screeningTemplatePreview')"
               :aria-label="t('screeningTemplatePreview')"
               :data-testid="screeningTemplateListTestIds.rowPreview(row.id)"
               @click="openPreview(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('screeningTemplatePreview') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canEditScreeningTemplates && !isArchived(row)"
               flat
@@ -127,11 +141,18 @@
               size="sm"
               icon="edit"
               class="app-btn-icon-action"
-              :title="t('edit')"
               :aria-label="t('edit')"
               :data-testid="screeningTemplateListTestIds.rowEdit(row.id)"
               @click="editRow(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canManageScreeningTemplates && !isActive(row)
                 && !isArchived(row)"
@@ -142,11 +163,18 @@
               icon="check_circle"
               color="positive"
               class="app-btn-icon-action"
-              :title="t('screeningTemplateActivate')"
               :aria-label="t('screeningTemplateActivate')"
               :data-testid="screeningTemplateListTestIds.rowActivate(row.id)"
               @click="setStatus(row, statusValues.active)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('screeningTemplateActivate') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canManageScreeningTemplates && isActive(row)"
               flat
@@ -156,11 +184,18 @@
               icon="block"
               color="warning"
               class="app-btn-icon-action"
-              :title="t('screeningTemplateDeactivate')"
               :aria-label="t('screeningTemplateDeactivate')"
               :data-testid="screeningTemplateListTestIds.rowDeactivate(row.id)"
               @click="setStatus(row, statusValues.inactive)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('screeningTemplateDeactivate') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canManageScreeningTemplates && !isArchived(row)"
               flat
@@ -170,11 +205,18 @@
               icon="delete_outline"
               color="negative"
               class="app-btn-icon-action"
-              :title="t('screeningTemplateDelete')"
               :aria-label="t('screeningTemplateDelete')"
               :data-testid="screeningTemplateListTestIds.rowDelete(row.id)"
               @click="confirmDelete(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('screeningTemplateDelete') }}
+          </q-tooltip>
+        </q-btn>
           </div>
         </template>
 

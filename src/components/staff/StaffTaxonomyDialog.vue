@@ -5,15 +5,14 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="family-medical-history-dialog app-dialog-card">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="t('staffTaxonomyAddSubtitle')"
+        @close="onCancel">
         {{ t('staffTaxonomyAddTitle') }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('staffTaxonomyAddSubtitle') }}
-        </p>
-
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <AddClientLabeledField

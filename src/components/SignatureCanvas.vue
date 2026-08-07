@@ -7,9 +7,11 @@
       <q-btn
         v-if="!readonly"
         no-caps
-        outline
-        color="grey-7"
-        class="app-btn-outline"
+        :outline="hasStroke"
+        :flat="!hasStroke"
+        :color="hasStroke ? 'primary' : 'grey-5'"
+        class="app-btn-outline signature-canvas__clear"
+        :class="{ 'signature-canvas__clear--idle': !hasStroke }"
         icon="restart_alt"
         :disable="!hasStroke"
         :label="t('carePlanSignatureClear')"
@@ -19,7 +21,10 @@
     <div
       ref="padRef"
       class="signature-canvas__pad"
-      :class="{ 'signature-canvas__pad--readonly': readonly }">
+      :class="{
+        'signature-canvas__pad--readonly': readonly,
+        'signature-canvas__pad--empty': !hasStroke && !readonly,
+      }">
       <canvas
         ref="canvasRef"
         class="signature-canvas__surface"
@@ -33,7 +38,7 @@
       />
       <p
         v-if="!hasStroke && !readonly"
-        class="signature-canvas__placeholder text-body2 text-grey-5">
+        class="signature-canvas__placeholder text-body2">
         {{ t('carePlanSignaturePlaceholder') }}
       </p>
     </div>
@@ -276,6 +281,20 @@ defineExpose({
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
 
+.signature-canvas__clear {
+  transition: opacity 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, background-color 0.15s ease;
+
+  &--idle,
+  &.disabled,
+  &[disabled] {
+    opacity: 0.38;
+    color: $text-muted !important;
+    border-color: transparent !important;
+    background: transparent !important;
+  }
+}
+
 .signature-canvas__pad {
   position: relative;
   border: 1px solid $border-subtle;
@@ -284,10 +303,26 @@ defineExpose({
   min-height: 160px;
   height: 160px;
   touch-action: none;
+  transition: border-color 0.15s ease, background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.signature-canvas__pad--empty {
+  border: 1.5px dashed rgba($primary, 0.45);
+  background: rgba($primary, 0.03);
+  box-shadow: inset 0 0 0 1px rgba($primary, 0.04);
+
+  &:hover {
+    border-color: $primary;
+    background: rgba($primary, 0.06);
+  }
 }
 
 .signature-canvas__pad--readonly {
-  background: #f8fafc;
+  border-style: solid;
+  border-color: $border-subtle;
+  background: #f1f5f9;
+  box-shadow: none;
 }
 
 .signature-canvas__surface {
@@ -299,6 +334,7 @@ defineExpose({
   height: 100%;
   cursor: crosshair;
   touch-action: none;
+  background: transparent;
 }
 
 .signature-canvas__pad--readonly .signature-canvas__surface {
@@ -308,11 +344,14 @@ defineExpose({
 .signature-canvas__placeholder {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
   margin: 0;
+  color: $primary;
+  font-weight: 500;
+  opacity: 0.72;
 }
 </style>

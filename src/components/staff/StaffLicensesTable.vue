@@ -68,8 +68,16 @@
           name="attach_file"
           size="18px"
           color="primary"
-          :title="t('staffLicenseAttachmentLabel')"
-        />
+          :aria-label="t('staffLicenseAttachmentLabel')"
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('staffLicenseAttachmentLabel') }}
+          </q-tooltip>
+        </q-icon>
         <span v-else class="text-grey-7">—</span>
       </q-td>
     </template>
@@ -84,10 +92,17 @@
           class="app-btn-icon-action"
           :icon="adminTableActionIcons.edit"
           :size="siteBreakpoints.SM"
-          :title="t('edit')"
           :aria-label="t('edit')"
           @click="emit('edit', row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
         <q-btn
           v-if="canDelete"
           flat
@@ -96,10 +111,17 @@
           class="app-btn-icon-action"
           icon="delete"
           :size="siteBreakpoints.SM"
-          :title="t('delete')"
           :aria-label="t('delete')"
           @click="emit('delete', row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('delete') }}
+          </q-tooltip>
+        </q-btn>
         <span
           v-if="!canEdit && !canDelete"
           class="text-grey-6">

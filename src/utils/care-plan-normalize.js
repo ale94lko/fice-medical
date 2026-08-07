@@ -64,6 +64,28 @@ export function normalizeOutcomeMeasure(raw) {
     sourceType: row.source_type ?? row.sourceType
       ?? carePlanOutcomeSourceTypes.manual,
     notes: trim(row.notes),
+    measuredDate: isoDateToUsDateString(
+      row.measured_date ?? row.measuredDate ?? '',
+    ) ?? '',
+    measurementNotes: trim(
+      row.measurement_notes ?? row.measurementNotes ?? '',
+    ),
+    recordedByName: trim(
+      row.recorded_by_name ?? row.recordedByName ?? '',
+    ),
+    measurements: Array.isArray(row.measurements)
+      ? row.measurements.map(item => ({
+        id: parseOptionalNumber(item.id) ?? item.id,
+        value: parseOptionalNumber(item.value ?? item.current_value),
+        measuredDate: isoDateToUsDateString(
+          item.measured_date ?? item.measuredDate ?? '',
+        ) ?? '',
+        notes: trim(item.notes),
+        recordedByName: trim(
+          item.recorded_by_name ?? item.recordedByName ?? '',
+        ),
+      }))
+      : [],
     progress: normalizeProgress(row.progress),
   }
 }
@@ -103,9 +125,6 @@ export function normalizeCarePlanGoal(raw) {
     successCriteria: trim(row.success_criteria ?? row.successCriteria),
     status: row.status ?? carePlanGoalStatuses.inProgress,
     priority: trim(row.priority) || 'medium',
-    baseline: parseOptionalNumber(row.baseline),
-    target: parseOptionalNumber(row.target),
-    direction: row.direction ?? carePlanProgressDirections.lowerIsBetter,
     targetDate: isoDateToUsDateString(row.target_date ?? row.targetDate) ?? '',
     outcomeMeasures: measures,
     interventions,
@@ -190,9 +209,6 @@ export function carePlanGoalToApiPayload(goal) {
     success_criteria: trim(goal.successCriteria) || null,
     status: goal.status ?? carePlanGoalStatuses.inProgress,
     priority: trim(goal.priority) || null,
-    baseline: parseOptionalNumber(goal.baseline),
-    target: parseOptionalNumber(goal.target),
-    direction: goal.direction ?? carePlanProgressDirections.lowerIsBetter,
     target_date: dateToApi(goal.targetDate),
   }
 }
@@ -209,6 +225,8 @@ export function outcomeMeasureToApiPayload(measure) {
     frequency: trim(measure.frequency) || null,
     source_type: measure.sourceType ?? carePlanOutcomeSourceTypes.manual,
     notes: trim(measure.notes) || null,
+    measured_date: dateToApi(measure.measuredDate),
+    measurement_notes: trim(measure.measurementNotes) || null,
   }
 }
 

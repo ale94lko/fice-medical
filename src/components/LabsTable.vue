@@ -109,10 +109,17 @@
             :icon="adminTableActionIcons.view"
             :data-testid="tid.rowView(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('labActionView')"
             :aria-label="t('labActionView')"
             @click="emit('view', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionView') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit && canCollectRow(row)"
             flat
@@ -121,10 +128,17 @@
             class="app-btn-icon-action"
             icon="science"
             :size="siteBreakpoints.SM"
-            :title="t('labActionCollect')"
             :aria-label="t('labActionCollect')"
             @click="emit('collect', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionCollect') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit && canResultsRow(row)"
             flat
@@ -133,10 +147,17 @@
             class="app-btn-icon-action"
             icon="assignment_turned_in"
             :size="siteBreakpoints.SM"
-            :title="t('labActionEnterResults')"
             :aria-label="t('labActionEnterResults')"
             @click="emit('results', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionEnterResults') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit && canReviewRow(row)"
             flat
@@ -145,10 +166,17 @@
             class="app-btn-icon-action"
             icon="rate_review"
             :size="siteBreakpoints.SM"
-            :title="t('labActionReview')"
             :aria-label="t('labActionReview')"
             @click="emit('review', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionReview') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             flat
             round
@@ -157,10 +185,17 @@
             icon="download"
             :data-testid="tid.rowDownload(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('labActionDownload')"
             :aria-label="t('labActionDownload')"
             @click="emit('download', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionDownload') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit && canCancelRow(row)"
             flat
@@ -169,10 +204,17 @@
             class="app-btn-icon-action"
             icon="cancel"
             :size="siteBreakpoints.SM"
-            :title="t('labCancelLab')"
             :aria-label="t('labCancelLab')"
             @click="emit('cancel-lab', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labCancelLab') }}
+          </q-tooltip>
+        </q-btn>
         </div>
       </template>
     </AdminQTable>

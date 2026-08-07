@@ -59,10 +59,15 @@
           size="18px"
           class="lab-attachment-upload__file-icon"
         />
-        <span
-          class="lab-attachment-upload__name col text-body2"
-          :title="file.name">
+        <span class="lab-attachment-upload__name col text-body2">
           {{ file.name }}
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ file.name }}
+          </q-tooltip>
         </span>
         <q-btn
           v-if="!readonly"

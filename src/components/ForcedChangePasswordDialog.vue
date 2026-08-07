@@ -16,12 +16,27 @@
           aria-hidden="true">
           <q-icon name="lock_reset" size="26px" />
         </div>
-        <h2 class="forced-change-password-dialog__title">
-          {{ t('forcedChangePasswordTitle') }}
-        </h2>
-        <p class="forced-change-password-dialog__subtitle">
-          {{ dialogSubtitle }}
-        </p>
+        <div class="forced-change-password-dialog__title-row row
+          items-center justify-center no-wrap">
+          <h2 class="forced-change-password-dialog__title q-mb-none">
+            {{ t('forcedChangePasswordTitle') }}
+          </h2>
+          <q-btn
+            flat
+            round
+            dense
+            icon="help_outline"
+            class="app-dialog-toolbar__info q-ml-xs"
+            :aria-label="dialogSubtitle">
+            <q-tooltip
+              class="app-dialog-info-tooltip"
+              anchor="bottom middle"
+              self="top middle"
+              :offset="[0, 8]">
+              {{ dialogSubtitle }}
+            </q-tooltip>
+          </q-btn>
+        </div>
       </q-card-section>
 
       <q-card-section class="forced-change-password-dialog__body">

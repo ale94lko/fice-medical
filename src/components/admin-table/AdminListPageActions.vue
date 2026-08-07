@@ -33,7 +33,14 @@
       class="app-btn-outline admin-list-page__actions-menu-btn"
       :data-testid="menuTestId"
       :aria-label="t('moreActions')"
-      :title="t('moreActions')">
+      >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('moreActions') }}
+          </q-tooltip>
       <q-menu
         anchor="bottom right"
         self="top right"

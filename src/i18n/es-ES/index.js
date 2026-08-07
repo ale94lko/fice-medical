@@ -1245,7 +1245,7 @@ export default {
   labPaginationSummary: 'Mostrando {from} a {to} de {total} resultados',
   carePlansTitle: 'Planes de cuidado',
   carePlansSubtitle:
-    'Ver y gestionar los planes de cuidado de este paciente.',
+    'Ver y gestionar los planes de cuidado de este cliente.',
   carePlanAdd: 'Añadir plan de cuidado',
   carePlanSaveClientFirst:
     'Guarde primero el cliente para crear y gestionar planes de cuidado.',
@@ -1262,7 +1262,7 @@ export default {
   carePlanPaginationSummary:
     'Mostrando {from} a {to} de {total} resultados',
   carePlanAddTitle: 'Añadir plan de cuidado',
-  carePlanAddSubtitle: 'Cree un nuevo plan de cuidado para este paciente.',
+  carePlanAddSubtitle: 'Cree un nuevo plan de cuidado para este cliente.',
   carePlanEditTitle: 'Editar plan de cuidado',
   carePlanViewTitle: 'Ver plan de cuidado',
   carePlanViewSubtitle: 'Detalles y progreso del plan de cuidado.',
@@ -1276,7 +1276,7 @@ export default {
   carePlanNameRequired: 'El nombre del plan es obligatorio.',
   carePlanStartDate: 'Fecha de inicio',
   carePlanStartDateRequired: 'La fecha de inicio es obligatoria.',
-  carePlanTargetDate: 'Fecha objetivo',
+  carePlanTargetDate: 'Fecha objetivo de finalización',
   carePlanTargetDateInvalid:
     'La fecha objetivo debe ser igual o posterior a la de inicio.',
   carePlanClinician: 'Clínico',
@@ -1419,7 +1419,6 @@ export default {
   carePlanGoalViewTitle: 'Ver objetivo',
   carePlanGoalSubtitle: 'Defina un objetivo para este plan de cuidado.',
   carePlanGoalSectionInfo: 'Información del objetivo',
-  carePlanGoalSectionProgress: 'Progreso',
   carePlanGoalSectionMeasures: 'Medidas de resultado',
   carePlanGoalSectionInterventions: 'Intervenciones',
   carePlanGoalTitle: 'Título del objetivo',
@@ -1433,12 +1432,6 @@ export default {
     'Describa cómo se considerará logrado este objetivo',
   carePlanGoalInfoBanner:
     'Tras guardar, podrá añadir intervenciones y medidas de resultado.',
-  carePlanGoalProgressHint:
-    'Defina cómo se medirá el progreso de este objetivo.',
-  carePlanGoalBaseline: 'Línea base',
-  carePlanGoalBaselinePlaceholder: 'Punto inicial (p. ej., GAD-7 = 14)',
-  carePlanGoalTarget: 'Meta',
-  carePlanGoalTargetPlaceholder: 'Valor meta (p. ej., GAD-7 < 8)',
   carePlanSaveGoal: 'Guardar objetivo',
   carePlanDirectionLower: 'Menor es mejor',
   carePlanDirectionHigher: 'Mayor es mejor',
@@ -1450,6 +1443,7 @@ export default {
   carePlanMeasureColName: 'Medida',
   carePlanMeasureColBaseline: 'Línea base',
   carePlanMeasureColTarget: 'Meta',
+  carePlanMeasureColCurrentValue: 'Valor actual',
   carePlanMeasureColDirection: 'Dirección',
   carePlanMeasureAddTitle: 'Añadir medida de resultado',
   carePlanMeasureEditTitle: 'Editar medida de resultado',
@@ -1458,18 +1452,26 @@ export default {
     'Defina cómo se medirá el progreso de este objetivo.',
   carePlanMeasureSectionInfo: 'Información de la medida',
   carePlanMeasureSectionDetails: 'Detalles de la medida',
-  carePlanMeasureProgressPreview: 'Vista previa del progreso',
   carePlanMeasureName: 'Medida',
   carePlanMeasureNamePlaceholder: 'Buscar o seleccionar medida',
   carePlanMeasureNameRequired: 'La medida es obligatoria.',
   carePlanMeasureDirection: 'Dirección',
   carePlanMeasureDirectionRequired: 'La dirección es obligatoria.',
   carePlanMeasureBaseline: 'Línea base',
-  carePlanMeasureBaselinePlaceholder: 'p. ej., puntuación GAD-7',
+  carePlanMeasureBaselinePlaceholder: 'p. ej., 10',
   carePlanMeasureBaselineRequired: 'La línea base es obligatoria.',
+  carePlanMeasureBaselineInvalid:
+    'La línea base debe ser un número válido.',
+  carePlanMeasureBaselineMustBeHigher:
+    'Si menor es mejor, la línea base debe ser mayor que la meta.',
+  carePlanMeasureBaselineMustBeLower:
+    'Si mayor es mejor, la línea base debe ser menor que la meta.',
+  carePlanMeasureBaselineTargetEqual:
+    'La línea base y la meta no pueden ser iguales.',
   carePlanMeasureTarget: 'Meta',
-  carePlanMeasureTargetPlaceholder: 'p. ej., puntuación GAD-7',
+  carePlanMeasureTargetPlaceholder: 'p. ej., 5',
   carePlanMeasureTargetRequired: 'La meta es obligatoria.',
+  carePlanMeasureTargetInvalid: 'La meta debe ser un número válido.',
   carePlanMeasureDescriptionPlaceholder:
     'Introduzca descripción de la medida',
   carePlanMeasureUnit: 'Unidad',
@@ -1479,10 +1481,43 @@ export default {
   carePlanSourceManual: 'Manual',
   carePlanMeasureNotesPlaceholder:
     'Notas sobre esta medida de resultado',
-  carePlanMeasureAddCurrent: 'Añadir medición actual',
   carePlanMeasureCurrentPlaceholder: 'Introduzca valor actual',
-  carePlanMeasurePreviewSummary:
-    'Base: {baseline}, Meta: {target}, Dirección: {direction}',
+  carePlanAddMeasurement: 'Añadir medición',
+  carePlanAddMeasurementTitle: 'Añadir medición',
+  carePlanAddMeasurementSubtitle:
+    'Registre una nueva medición para esta medida de resultado.',
+  carePlanAddMeasurementTooltip:
+    'Registre una nueva medición para actualizar el progreso de este objetivo.',
+  carePlanAddMeasurementBanner:
+    'La nueva medición se usará para calcular el progreso hacia el objetivo.',
+  carePlanOutcomeMeasureLabel: 'Medida de resultado',
+  carePlanPreviousMeasurement: 'Medición anterior',
+  carePlanMeasurementValue: 'Valor',
+  carePlanMeasurementCurrentValue: 'Valor actual',
+  carePlanMeasuredDate: 'Fecha de medición',
+  carePlanMeasurementValueRequired: 'El valor actual es obligatorio.',
+  carePlanMeasuredDateRequired: 'La fecha de medición es obligatoria.',
+  carePlanMeasurementNotesPlaceholder:
+    'Añada notas sobre esta medición...',
+  carePlanSaveMeasurement: 'Guardar medición',
+  carePlanMeasurementHistory: 'Historial de mediciones',
+  carePlanMeasurementHistoryTitle: 'Historial de mediciones',
+  carePlanMeasurementHistorySubtitle:
+    'Consulte el historial de mediciones de esta medida '
+    + 'de resultado y el progreso en el tiempo.',
+  carePlanMeasurementHistoryTooltip:
+    'Ver historial de mediciones y progreso en el tiempo.',
+  carePlanMeasurementHistoryBanner:
+    'El progreso se calcula con la medición más reciente.',
+  carePlanMeasurementHistoryEmpty:
+    'Aún no hay mediciones registradas para esta medida de resultado.',
+  carePlanProgressOverview: 'Resumen de progreso',
+  carePlanMeasurementCurrent: 'Actual',
+  carePlanRecordedBy: 'Registrado por',
+  carePlanHistoryProgressBaseline: 'Línea base ({percent}%)',
+  carePlanHistoryProgressOnTrack: 'En camino ({percent}%)',
+  carePlanHistoryProgressInProgress: 'En progreso ({percent}%)',
+  carePlanHistoryProgressAchieved: 'Logrado ({percent}%)',
   carePlanMeasureSaveAnother: 'Guardar y añadir otra',
   carePlanSaveMeasure: 'Guardar medida',
   carePlanAddIntervention: 'Añadir intervención',

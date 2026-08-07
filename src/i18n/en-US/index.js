@@ -1192,7 +1192,7 @@ export default {
   labSaveBeforeAttachment: 'Save the lab first before uploading attachments.',
   labPaginationSummary: 'Showing {from} to {to} of {total} results',
   carePlansTitle: 'Care Plans',
-  carePlansSubtitle: 'View and manage care plans for this patient.',
+  carePlansSubtitle: 'View and manage care plans for this client.',
   carePlanAdd: 'Add Care Plan',
   carePlanSaveClientFirst:
     'Save the client first to create and manage care plans.',
@@ -1206,7 +1206,7 @@ export default {
   carePlanMeasurementSaved: 'Measurement recorded successfully.',
   carePlanPaginationSummary: 'Showing {from} to {to} of {total} results',
   carePlanAddTitle: 'Add Care Plan',
-  carePlanAddSubtitle: 'Create a new care plan for this patient.',
+  carePlanAddSubtitle: 'Create a new care plan for this client.',
   carePlanEditTitle: 'Edit Care Plan',
   carePlanViewTitle: 'View Care Plan',
   carePlanViewSubtitle: 'Care plan details and progress.',
@@ -1220,7 +1220,7 @@ export default {
   carePlanNameRequired: 'Care plan name is required.',
   carePlanStartDate: 'Start Date',
   carePlanStartDateRequired: 'Start date is required.',
-  carePlanTargetDate: 'Target Date',
+  carePlanTargetDate: 'Target Completion Date',
   carePlanTargetDateInvalid:
     'Target date must be on or after the start date.',
   carePlanClinician: 'Clinician',
@@ -1358,7 +1358,6 @@ export default {
   carePlanGoalViewTitle: 'View Goal',
   carePlanGoalSubtitle: 'Define a goal for this care plan.',
   carePlanGoalSectionInfo: 'Goal Information',
-  carePlanGoalSectionProgress: 'Progress',
   carePlanGoalSectionMeasures: 'Outcome Measurement',
   carePlanGoalSectionInterventions: 'Interventions',
   carePlanGoalTitle: 'Goal Title',
@@ -1372,12 +1371,6 @@ export default {
     'Describe how this goal will be considered achieved',
   carePlanGoalInfoBanner:
     'After saving this goal, you can add interventions and outcome measures.',
-  carePlanGoalProgressHint:
-    'Define how progress for this goal will be measured.',
-  carePlanGoalBaseline: 'Baseline',
-  carePlanGoalBaselinePlaceholder: 'Starting point (e.g., GAD-7 score = 14)',
-  carePlanGoalTarget: 'Target',
-  carePlanGoalTargetPlaceholder: 'Target value (e.g., GAD-7 score < 8)',
   carePlanSaveGoal: 'Save Goal',
   carePlanDirectionLower: 'Lower is better',
   carePlanDirectionHigher: 'Higher is better',
@@ -1389,6 +1382,7 @@ export default {
   carePlanMeasureColName: 'Measure',
   carePlanMeasureColBaseline: 'Baseline',
   carePlanMeasureColTarget: 'Target',
+  carePlanMeasureColCurrentValue: 'Current Value',
   carePlanMeasureColDirection: 'Direction',
   carePlanMeasureAddTitle: 'Add Outcome Measure',
   carePlanMeasureEditTitle: 'Edit Outcome Measure',
@@ -1397,18 +1391,25 @@ export default {
     'Define how progress for this goal will be measured.',
   carePlanMeasureSectionInfo: 'Measurement Information',
   carePlanMeasureSectionDetails: 'Measurement Details',
-  carePlanMeasureProgressPreview: 'Progress Preview',
   carePlanMeasureName: 'Measure',
   carePlanMeasureNamePlaceholder: 'Search or select a measure',
   carePlanMeasureNameRequired: 'Measure is required.',
   carePlanMeasureDirection: 'Direction',
   carePlanMeasureDirectionRequired: 'Direction is required.',
   carePlanMeasureBaseline: 'Baseline',
-  carePlanMeasureBaselinePlaceholder: 'e.g., GAD-7 score',
+  carePlanMeasureBaselinePlaceholder: 'e.g., 10',
   carePlanMeasureBaselineRequired: 'Baseline is required.',
+  carePlanMeasureBaselineInvalid: 'Baseline must be a valid number.',
+  carePlanMeasureBaselineMustBeHigher:
+    'When Lower is better, Baseline must be greater than Target.',
+  carePlanMeasureBaselineMustBeLower:
+    'When Higher is better, Baseline must be less than Target.',
+  carePlanMeasureBaselineTargetEqual:
+    'Baseline and Target cannot be the same.',
   carePlanMeasureTarget: 'Target',
-  carePlanMeasureTargetPlaceholder: 'e.g., GAD-7 score',
+  carePlanMeasureTargetPlaceholder: 'e.g., 5',
   carePlanMeasureTargetRequired: 'Target is required.',
+  carePlanMeasureTargetInvalid: 'Target must be a valid number.',
   carePlanMeasureDescriptionPlaceholder:
     'Enter a description for this outcome measure',
   carePlanMeasureUnit: 'Unit',
@@ -1418,10 +1419,43 @@ export default {
   carePlanSourceManual: 'Manual',
   carePlanMeasureNotesPlaceholder:
     'Add any notes about this outcome measure',
-  carePlanMeasureAddCurrent: 'Add current measurement',
   carePlanMeasureCurrentPlaceholder: 'Enter current value',
-  carePlanMeasurePreviewSummary:
-    'Baseline: {baseline}, Target: {target}, Direction: {direction}',
+  carePlanAddMeasurement: 'Add measurement',
+  carePlanAddMeasurementTitle: 'Add Measurement',
+  carePlanAddMeasurementSubtitle:
+    'Record a new measurement for this outcome measure.',
+  carePlanAddMeasurementTooltip:
+    'Record a new measurement to update the progress of this goal.',
+  carePlanAddMeasurementBanner:
+    'New measurement will be used to calculate progress toward the goal.',
+  carePlanOutcomeMeasureLabel: 'Outcome Measure',
+  carePlanPreviousMeasurement: 'Previous Measurement',
+  carePlanMeasurementValue: 'Value',
+  carePlanMeasurementCurrentValue: 'Current Value',
+  carePlanMeasuredDate: 'Measured Date',
+  carePlanMeasurementValueRequired: 'Current value is required.',
+  carePlanMeasuredDateRequired: 'Measured date is required.',
+  carePlanMeasurementNotesPlaceholder:
+    'Add notes about this measurement...',
+  carePlanSaveMeasurement: 'Save Measurement',
+  carePlanMeasurementHistory: 'Measurement History',
+  carePlanMeasurementHistoryTitle: 'Measurement History',
+  carePlanMeasurementHistorySubtitle:
+    'View the history of recorded measurements for this '
+    + 'outcome measure and track progress over time.',
+  carePlanMeasurementHistoryTooltip:
+    'View measurement history and progress over time.',
+  carePlanMeasurementHistoryBanner:
+    'Progress is calculated based on the most recent measurement.',
+  carePlanMeasurementHistoryEmpty:
+    'No measurements recorded yet for this outcome measure.',
+  carePlanProgressOverview: 'Progress Overview',
+  carePlanMeasurementCurrent: 'Current',
+  carePlanRecordedBy: 'Recorded By',
+  carePlanHistoryProgressBaseline: 'Baseline ({percent}%)',
+  carePlanHistoryProgressOnTrack: 'On Track ({percent}%)',
+  carePlanHistoryProgressInProgress: 'In Progress ({percent}%)',
+  carePlanHistoryProgressAchieved: 'Achieved ({percent}%)',
   carePlanMeasureSaveAnother: 'Save & Add Another',
   carePlanSaveMeasure: 'Save Outcome Measure',
   carePlanAddIntervention: 'Add Intervention',

@@ -98,10 +98,17 @@
           :icon="adminTableActionIcons.view"
           :data-testid="tid.rowView(row.id)"
           :size="siteBreakpoints.SM"
-          :title="t('referralActionView')"
           :aria-label="t('referralActionView')"
           @click="emit('view', row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('referralActionView') }}
+          </q-tooltip>
+        </q-btn>
         <q-btn
           v-if="canEditRow(row)"
           flat
@@ -111,10 +118,17 @@
           :icon="adminTableActionIcons.edit"
           :data-testid="tid.rowEdit(row.id)"
           :size="siteBreakpoints.SM"
-          :title="t('edit')"
           :aria-label="t('edit')"
           @click="emit('edit', row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
         <q-btn
           v-if="canScheduleRow(row)"
           flat
@@ -124,10 +138,17 @@
           icon="event"
           :data-testid="tid.rowSchedule(row.id)"
           :size="siteBreakpoints.SM"
-          :title="t('referralActionSchedule')"
           :aria-label="t('referralActionSchedule')"
           @click="emit('schedule', row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('referralActionSchedule') }}
+          </q-tooltip>
+        </q-btn>
         <q-btn
           v-if="canDeleteRow()"
           flat
@@ -137,10 +158,17 @@
           icon="delete"
           :data-testid="tid.rowDelete(row.id)"
           :size="siteBreakpoints.SM"
-          :title="t('delete')"
           :aria-label="t('delete')"
           @click="emit('delete', row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('delete') }}
+          </q-tooltip>
+        </q-btn>
       </div>
     </template>
   </AdminQTable>

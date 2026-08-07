@@ -141,10 +141,17 @@
               class="app-btn-icon-action"
               :data-testid="userListTestIds.rowEdit(row.id)"
               :size="siteBreakpoints.SM"
-              :title="t('edit')"
               :aria-label="t('edit')"
               @click="editRow(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canEditUser"
               flat
@@ -154,10 +161,17 @@
               class="app-btn-icon-action"
               :data-testid="userListTestIds.rowPassword(row.id)"
               :size="siteBreakpoints.SM"
-              :title="t('userListResetPasswordAction')"
               :aria-label="t('userListResetPasswordAction')"
               @click="editRow(row)"
-            />
+            >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('userListResetPasswordAction') }}
+          </q-tooltip>
+        </q-btn>
             <q-btn
               v-if="canDeleteUser"
               flat
@@ -167,8 +181,14 @@
               class="app-btn-icon-action"
               :data-testid="userListTestIds.rowMore(row.id)"
               :size="siteBreakpoints.SM"
-              :title="t('moreActions')"
               :aria-label="t('moreActions')">
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('moreActions') }}
+          </q-tooltip>
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense>
                   <q-item

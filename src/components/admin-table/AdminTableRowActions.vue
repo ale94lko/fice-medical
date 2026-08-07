@@ -9,10 +9,16 @@
       class="app-btn-icon-action"
       :data-testid="viewTestId"
       :size="siteBreakpoints.SM"
-      :title="t('view')"
       :aria-label="t('view')"
-      @click="emit('view')"
-    />
+      @click="emit('view')">
+      <q-tooltip
+        class="app-info-tooltip"
+        anchor="top middle"
+        self="bottom middle"
+        :offset="[0, 6]">
+        {{ t('view') }}
+      </q-tooltip>
+    </q-btn>
     <q-btn
       v-if="showEdit"
       flat
@@ -22,10 +28,16 @@
       class="app-btn-icon-action"
       :data-testid="editTestId"
       :size="siteBreakpoints.SM"
-      :title="t('edit')"
       :aria-label="t('edit')"
-      @click="emit('edit')"
-    />
+      @click="emit('edit')">
+      <q-tooltip
+        class="app-info-tooltip"
+        anchor="top middle"
+        self="bottom middle"
+        :offset="[0, 6]">
+        {{ t('edit') }}
+      </q-tooltip>
+    </q-btn>
     <q-btn
       v-if="showChangeStatus"
       flat
@@ -35,10 +47,16 @@
       class="app-btn-icon-action"
       :data-testid="changeStatusTestId"
       :size="siteBreakpoints.SM"
-      :title="t('changeStatus')"
       :aria-label="t('changeStatus')"
-      @click="emit('change-status')"
-    />
+      @click="emit('change-status')">
+      <q-tooltip
+        class="app-info-tooltip"
+        anchor="top middle"
+        self="bottom middle"
+        :offset="[0, 6]">
+        {{ t('changeStatus') }}
+      </q-tooltip>
+    </q-btn>
     <q-btn
       v-if="showMore"
       flat
@@ -48,8 +66,14 @@
       class="app-btn-icon-action"
       :data-testid="moreTestId"
       :size="siteBreakpoints.SM"
-      :title="t('moreActions')"
       :aria-label="t('moreActions')">
+      <q-tooltip
+        class="app-info-tooltip"
+        anchor="top middle"
+        self="bottom middle"
+        :offset="[0, 6]">
+        {{ t('moreActions') }}
+      </q-tooltip>
       <q-menu anchor="bottom right" self="top right">
         <q-list dense>
           <slot name="more" />

@@ -26,7 +26,6 @@
           color="primary"
           class="app-btn-outline"
           :data-testid="cancelTestId"
-          :title="cancelText"
           :label="cancelText"
           @click="onCancel"
         />
@@ -36,7 +35,6 @@
           class="primary-action"
           color="primary"
           :data-testid="confirmTestId"
-          :title="confirmText"
           :label="confirmText"
           @click="onConfirm"
         />

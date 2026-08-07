@@ -72,10 +72,17 @@
             :icon="adminTableActionIcons.view"
             :data-testid="tid.insuranceRowView(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('insuranceActionView')"
             :aria-label="t('insuranceActionView')"
             @click="emit('view', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('insuranceActionView') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit"
             flat
@@ -85,10 +92,17 @@
             :icon="adminTableActionIcons.edit"
             :data-testid="tid.insuranceRowEdit(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('edit')"
             :aria-label="t('edit')"
             @click="emit('edit', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEdit && canDeactivate(row)"
             flat
@@ -98,10 +112,17 @@
             icon="toggle_off"
             :data-testid="tid.insuranceRowDeactivate(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('insuranceActionDeactivate')"
             :aria-label="t('insuranceActionDeactivate')"
             @click="emit('deactivate', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('insuranceActionDeactivate') }}
+          </q-tooltip>
+        </q-btn>
         </div>
       </template>
     </AdminQTable>

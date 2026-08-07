@@ -70,10 +70,17 @@
             :icon="adminTableActionIcons.view"
             :data-testid="tid.rowView(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('carePlanActionView')"
             :aria-label="t('carePlanActionView')"
             @click="emit('view', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('carePlanActionView') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEditRow(row)"
             flat
@@ -83,10 +90,17 @@
             :icon="adminTableActionIcons.edit"
             :data-testid="tid.rowEdit(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('edit')"
             :aria-label="t('edit')"
             @click="emit('edit', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canSignRow(row)"
             flat
@@ -96,10 +110,17 @@
             icon="draw"
             :data-testid="tid.rowSign(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('carePlanActionSign')"
             :aria-label="t('carePlanActionSign')"
             @click="emit('sign', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('carePlanActionSign') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canChangeStatus(row)"
             flat
@@ -109,10 +130,17 @@
             icon="check_circle"
             :data-testid="tid.rowComplete(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('carePlanActionMarkCompleted')"
             :aria-label="t('carePlanActionMarkCompleted')"
             @click="emit('status', row, 'COMPLETED')"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('carePlanActionMarkCompleted') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canChangeStatus(row)"
             flat
@@ -122,10 +150,17 @@
             icon="archive"
             :data-testid="tid.rowArchive(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('carePlanActionArchive')"
             :aria-label="t('carePlanActionArchive')"
             @click="emit('status', row, 'ARCHIVED')"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('carePlanActionArchive') }}
+          </q-tooltip>
+        </q-btn>
         </div>
       </template>
     </AdminQTable>

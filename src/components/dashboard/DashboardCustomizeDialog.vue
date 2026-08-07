@@ -5,15 +5,14 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="app-dialog-card dashboard-customize-dialog">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="t('dashboardCustomizeHint')"
+        @close="onCancel">
         {{ t('dashboardCustomizeTitle') }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('dashboardCustomizeHint') }}
-        </p>
-
         <TransitionGroup
           name="dashboard-customize-list"
           tag="div"

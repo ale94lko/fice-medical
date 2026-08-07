@@ -19,10 +19,17 @@
         icon="settings"
         class="admin-table-panel__column-settings app-btn-icon-action"
         :data-testid="columnSettingsTestId"
-        :title="t('adminTableColumnSettingsTitle')"
         :aria-label="t('adminTableColumnSettingsTitle')"
         @click="emit('open-column-settings')"
-      />
+      >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('adminTableColumnSettingsTitle') }}
+          </q-tooltip>
+        </q-btn>
       <slot />
     </div>
   </div>

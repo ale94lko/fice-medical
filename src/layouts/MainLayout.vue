@@ -631,9 +631,16 @@
           dense
           flat
           icon="chevron_left"
-          :title="t('collapseMenu')"
           :aria-label="t('collapseMenu')"
-          @click="collapseDrawerToMini" />
+          @click="collapseDrawerToMini" >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('collapseMenu') }}
+          </q-tooltip>
+        </q-btn>
       </div>
       <div
         v-else-if="showDrawerExpandControl"
@@ -642,9 +649,16 @@
           dense
           flat
           icon="chevron_right"
-          :title="t('expandMenu')"
           :aria-label="t('expandMenu')"
-          @click="expandDrawer" />
+          @click="expandDrawer" >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('expandMenu') }}
+          </q-tooltip>
+        </q-btn>
       </div>
       </div>
     </q-drawer>

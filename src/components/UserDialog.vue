@@ -7,6 +7,7 @@
     <q-card class="user-dialog app-dialog-card user-dialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="mode === 'add' ? t('userDialogAddSubtitle') : ''"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -14,11 +15,6 @@
       <q-card-section
         ref="dialogBodyRef"
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p
-          v-if="mode === 'add'"
-          class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('userDialogAddSubtitle') }}
-        </p>
         <q-form
           ref="formRef"
           greedy

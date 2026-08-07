@@ -7,17 +7,14 @@
     <q-card
       class="insurance-dialog subtenant-dialog app-dialog-card"
       :data-testid="subtenantDialogTestIds.dialog">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="dialogSubtitle"
+        @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p
-          v-if="dialogSubtitle"
-          class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <AddClientLabeledField

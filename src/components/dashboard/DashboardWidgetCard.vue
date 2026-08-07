@@ -19,10 +19,16 @@
       @dragstart.stop.prevent>
       <span
         class="dashboard-widget-card__handle"
-        :title="t('dashboardDragHandle')"
         :data-testid="dashboardTestIds.cardDrag(widgetId)"
-        aria-hidden="true">
+        :aria-label="t('dashboardDragHandle')">
         <q-icon name="drag_indicator" size="20px" />
+        <q-tooltip
+          class="app-info-tooltip"
+          anchor="top middle"
+          self="bottom middle"
+          :offset="[0, 6]">
+          {{ t('dashboardDragHandle') }}
+        </q-tooltip>
       </span>
 
       <FormSelect

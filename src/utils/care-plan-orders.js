@@ -40,8 +40,96 @@ export function createEmptyOutcomeMeasure() {
     frequency: '',
     sourceType: carePlanOutcomeSourceTypes.manual,
     notes: '',
+    measuredDate: '',
+    measurementNotes: '',
+    recordedByName: '',
+    measurements: [],
     progress: { status: 'NOT_MEASURED', percent: null },
   }
+}
+
+export function applyOutcomeMeasureReading(measure, reading = {}) {
+  const history = [...(measure?.measurements ?? [])]
+  const previousValue = measure?.currentValue
+  if (previousValue != null && previousValue !== '') {
+    history.push({
+      id: nextCarePlanLocalId('reading'),
+      value: previousValue,
+      measuredDate: measure?.measuredDate || '',
+      notes: measure?.measurementNotes || '',
+      recordedByName: measure?.recordedByName || '',
+    })
+  }
+
+  return {
+    ...measure,
+    measurements: history,
+    currentValue: reading.currentValue ?? null,
+    measuredDate: String(reading.measuredDate ?? '').trim(),
+    measurementNotes: String(reading.notes ?? '').trim(),
+    recordedByName: String(reading.recordedByName ?? '').trim(),
+  }
+}
+
+/**
+ * History rows for Measurement History dialog (newest first).
+ * Includes current reading plus archived measurements.
+ */
+export function buildOutcomeMeasureHistoryRows(measure = {}) {
+  const rows = []
+  const currentValue = measure.currentValue
+  if (currentValue != null && currentValue !== '') {
+    rows.push({
+      id: `${measure.id || 'measure'}-current`,
+      measuredDate: measure.measuredDate || '',
+      value: currentValue,
+      notes: measure.measurementNotes || '',
+      recordedByName: measure.recordedByName || '',
+      isCurrent: true,
+      progress: calculateOutcomeMeasureProgress(
+        measure.baseline,
+        currentValue,
+        measure.target,
+        measure.direction,
+      ),
+    })
+  }
+  const archived = [...(measure.measurements ?? [])].reverse()
+  for (const item of archived) {
+    rows.push({
+      id: item.id || nextCarePlanLocalId('reading'),
+      measuredDate: item.measuredDate || '',
+      value: item.value,
+      notes: item.notes || '',
+      recordedByName: item.recordedByName || '',
+      isCurrent: false,
+      progress: calculateOutcomeMeasureProgress(
+        measure.baseline,
+        item.value,
+        measure.target,
+        measure.direction,
+      ),
+    })
+  }
+
+  return rows
+}
+
+export function measurementProgressTone(percent) {
+  if (percent == null) {
+    return 'none'
+  }
+  if (percent <= 0) {
+    return 'baseline'
+  }
+  if (percent >= 100) {
+    return 'achieved'
+  }
+  if (percent >= 50) {
+    return 'onTrack'
+  }
+
+  return 'inProgress'
 }
 
 export function createEmptyIntervention() {
@@ -64,9 +152,6 @@ export function createEmptyCarePlanGoal() {
     successCriteria: '',
     status: carePlanGoalStatuses.inProgress,
     priority: carePlanPriorities.medium,
-    baseline: null,
-    target: null,
-    direction: carePlanProgressDirections.lowerIsBetter,
     targetDate: '',
     outcomeMeasures: [],
     interventions: [],

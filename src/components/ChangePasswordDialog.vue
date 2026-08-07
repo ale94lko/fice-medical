@@ -13,12 +13,27 @@
           aria-hidden="true">
           <q-icon name="lock_reset" size="26px" />
         </div>
-        <h2 class="change-password-dialog__title">
-          {{ t('changePasswordTitle') }}
-        </h2>
-        <p class="change-password-dialog__subtitle">
-          {{ t('changePasswordSubtitle') }}
-        </p>
+        <div class="change-password-dialog__title-row row items-center
+          justify-center no-wrap">
+          <h2 class="change-password-dialog__title q-mb-none">
+            {{ t('changePasswordTitle') }}
+          </h2>
+          <q-btn
+            flat
+            round
+            dense
+            icon="help_outline"
+            class="app-dialog-toolbar__info q-ml-xs"
+            :aria-label="t('changePasswordSubtitle')">
+            <q-tooltip
+              class="app-dialog-info-tooltip"
+              anchor="bottom middle"
+              self="top middle"
+              :offset="[0, 8]">
+              {{ t('changePasswordSubtitle') }}
+            </q-tooltip>
+          </q-btn>
+        </div>
       </q-card-section>
 
       <q-card-section class="change-password-dialog__body">

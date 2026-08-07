@@ -33,7 +33,11 @@
               >
                 <template #append>
                   <q-icon name="info_outline" class="cursor-pointer">
-                    <q-tooltip>
+                    <q-tooltip
+                      class="app-info-tooltip"
+                      anchor="top middle"
+                      self="bottom middle"
+                      :offset="[0, 6]">
                       {{ t('fmhRelationshipTooltip') }}
                     </q-tooltip>
                   </q-icon>

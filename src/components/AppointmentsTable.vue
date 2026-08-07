@@ -90,10 +90,17 @@
           :icon="action.icon"
           :data-testid="action.testId"
           :size="siteBreakpoints.SM"
-          :title="t(action.labelKey)"
           :aria-label="t(action.labelKey)"
           @click="emit(action.event, row)"
-        />
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t(action.labelKey) }}
+          </q-tooltip>
+        </q-btn>
       </div>
     </template>
   </AdminQTable>

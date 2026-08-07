@@ -13,6 +13,7 @@ import {
   isTemporaryCarePlanId,
   refreshCarePlanProgress,
 } from 'src/utils/care-plan-orders.js'
+import { usDateToIso } from 'src/utils/client-form.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -192,11 +193,23 @@ export async function updateOutcomeMeasureCurrentValue(
   goalId,
   measureId,
   currentValue,
+  extras = {},
 ) {
+  /* eslint-disable camelcase -- API snake_case */
   const body = {
-    // eslint-disable-next-line camelcase
     current_value: parseOptionalNumber(currentValue),
   }
+  const measuredDateIso = usDateToIso(extras.measuredDate)
+    || String(extras.measuredDateIso ?? '').trim()
+    || null
+  if (measuredDateIso) {
+    body.measured_date = measuredDateIso
+  }
+  const notes = String(extras.notes ?? '').trim()
+  if (notes) {
+    body.notes = notes
+  }
+  /* eslint-enable camelcase */
   const response = await apiInstance.patch(
     apiPaths.clientCarePlanMeasureCurrentValue(
       clientId,

@@ -5,17 +5,19 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card referral-dialog">
-      <AppDialogHeader :close-label="t('close')" @close="onCancel">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="referralHeaderInfo"
+        @close="onCancel">
         {{ dialogTitle }}
+        <span
+          v-if="referralNumberLabel"
+          class="text-body2 text-grey-7 q-ml-sm">
+          {{ referralNumberLabel }}
+        </span>
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p
-          v-if="dialogSubtitle"
-          class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ dialogSubtitle }}
-        </p>
-
         <div class="referral-dialog__section">
           <SubsectionHeading
             :step="1"
@@ -508,10 +510,15 @@ const dialogTitle = computed(() => {
   return t('referralAddTitle')
 })
 
-const dialogSubtitle = computed(() => {
+const referralHeaderInfo = computed(() => {
   if (props.mode === 'add') {
     return t('referralAddSubtitle')
   }
+
+  return ''
+})
+
+const referralNumberLabel = computed(() => {
   if (props.mode === 'view' && local.value.referralNumber) {
     return local.value.referralNumber
   }

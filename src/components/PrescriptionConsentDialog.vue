@@ -8,15 +8,12 @@
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
+        :info="t('medicationConsentSubtitle')"
         @close="onCancel">
         {{ t('medicationConsentTitle') }}
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-          {{ t('medicationConsentSubtitle') }}
-        </p>
-
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <FormToggle

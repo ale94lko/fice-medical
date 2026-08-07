@@ -6,28 +6,17 @@
     transition-hide="scale">
     <q-card
       class="appointment-detail-dialog insurance-dialog app-dialog-card">
-      <header class="appointment-detail-dialog__header">
-        <div class="appointment-detail-dialog__header-icon">
-          <q-icon name="event" size="22px" />
+      <AppDialogHeader
+        :close-label="t('close')"
+        :info="t('appointmentDetailSubtitle')"
+        @close="onClose">
+        <div class="row items-center no-wrap">
+          <div class="appointment-detail-dialog__header-icon q-mr-sm">
+            <q-icon name="event" size="22px" />
+          </div>
+          <span>{{ t('appointmentDetailTitle') }}</span>
         </div>
-        <div class="appointment-detail-dialog__header-copy">
-          <h2 class="appointment-detail-dialog__title">
-            {{ t('appointmentDetailTitle') }}
-          </h2>
-          <p class="appointment-detail-dialog__subtitle">
-            {{ t('appointmentDetailSubtitle') }}
-          </p>
-        </div>
-        <q-btn
-          flat
-          round
-          dense
-          icon="close"
-          class="appointment-detail-dialog__close"
-          :aria-label="t('close')"
-          @click="onClose"
-        />
-      </header>
+      </AppDialogHeader>
 
       <q-card-section
         class="app-dialog-card__body appointment-detail-dialog__body
@@ -115,9 +104,16 @@
                   size="sm"
                   icon="content_copy"
                   :aria-label="t('telehealthCopyClientLink')"
-                  :title="t('telehealthCopyClientLink')"
                   @click="onCopyInvite"
-                />
+                >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('telehealthCopyClientLink') }}
+          </q-tooltip>
+        </q-btn>
               </div>
             </div>
           </div>
@@ -363,6 +359,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { copyToClipboard, useQuasar } from 'quasar'
+import AppDialogHeader from 'components/AppDialogHeader.vue'
 import {
   appointmentStatuses,
   telehealthRoles,

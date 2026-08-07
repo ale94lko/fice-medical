@@ -57,10 +57,17 @@
             :icon="adminTableActionIcons.view"
             :data-testid="tid.rowView(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('clinicalNoteActionView')"
             :aria-label="t('clinicalNoteActionView')"
             @click="emit('view', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('clinicalNoteActionView') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canDownloadRow(row)"
             flat
@@ -70,10 +77,17 @@
             icon="download"
             :data-testid="tid.rowDownload(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('clinicalNoteActionDownload')"
             :aria-label="t('clinicalNoteActionDownload')"
             @click="emit('download', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('clinicalNoteActionDownload') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canEditRow(row)"
             flat
@@ -83,10 +97,17 @@
             :icon="adminTableActionIcons.edit"
             :data-testid="tid.rowEdit(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('edit')"
             :aria-label="t('edit')"
             @click="emit('edit', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('edit') }}
+          </q-tooltip>
+        </q-btn>
           <q-btn
             v-if="canDeleteRow(row)"
             flat
@@ -96,10 +117,17 @@
             icon="delete"
             :data-testid="tid.rowDelete(row.id)"
             :size="siteBreakpoints.SM"
-            :title="t('delete')"
             :aria-label="t('delete')"
             @click="emit('delete', row)"
-          />
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('delete') }}
+          </q-tooltip>
+        </q-btn>
         </div>
       </template>
     </AdminQTable>
