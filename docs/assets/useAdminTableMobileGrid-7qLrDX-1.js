@@ -1,0 +1,1 @@
+import{At as e,Pl as t,ad as n}from"./index-Bo2vH1x4.js";function r(){let r=e();return{showGrid:n(()=>r.screen.width<=t.XXS)}}export{r as t};
