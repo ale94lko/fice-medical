@@ -1,1 +1,0 @@
-import{Cd as e}from"./index-BbT5lbKS.js";var t=null;function n(){if(!t)return!1;try{return!!t()}catch{return!1}}function r(n){t=n,e(()=>{t===n&&(t=null)})}export{r as n,n as t};

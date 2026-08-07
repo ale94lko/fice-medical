@@ -1,0 +1,1 @@
+function e(e){return String(e??``).trim().length>=2}export{e as t};
