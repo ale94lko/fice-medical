@@ -537,6 +537,14 @@
               {{ t('screeningTemplateListTitle') }}
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
+              v-if="showClinicalAudit"
+              icon="history"
+              to="/administration/clinical-audit"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminClinicalAudit">
+              {{ t('clinicalAuditListTitle') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
               v-if="showAdminGeneral"
               icon="tune">
               {{ t('administrationGeneral') }}
@@ -585,6 +593,14 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminScreeningTemplates">
                 {{ t('screeningTemplateListTitle') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showClinicalAudit"
+                icon="history"
+                to="/administration/clinical-audit"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminClinicalAudit">
+                {{ t('clinicalAuditListTitle') }}
               </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showAdminGeneral"
@@ -803,6 +819,7 @@ const {
   showAdminUsers,
   showServicesProcedures,
   showScreeningTemplates,
+  showClinicalAudit,
   showClinicalResourcesMenu,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')

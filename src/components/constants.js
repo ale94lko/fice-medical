@@ -846,6 +846,7 @@ export const permissionNames = {
   editTenantData: 'EDIT_TENANT_DATA',
   viewAuditLog: 'VIEW_AUDIT_LOG',
   editAuditLog: 'EDIT_AUDIT_LOG',
+  viewClinicalAudit: 'VIEW_CLINICAL_AUDIT',
   viewActiveTokens: 'VIEW_ACTIVE_TOKENS',
   editActiveTokens: 'EDIT_ACTIVE_TOKENS',
   viewPasswordHistory: 'VIEW_PASSWORD_HISTORY',
@@ -1152,6 +1153,10 @@ export const apiPaths = {
   )}`,
   subtenantsList: '/subtenants/v1',
   subtenantById: id => `/subtenants/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  clinicalAuditList: '/clinical-audit/v1',
+  clinicalAuditById: id => `/clinical-audit/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
   serviceProceduresList: '/service-procedures/v1',

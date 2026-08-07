@@ -1365,6 +1365,32 @@
   }
 }
 
+
+.clinical-audit-list-page {
+  .admin-list-page__header {
+    margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
+  }
+
+  .admin-list-page__title {
+    font-size: 1.375rem;
+    line-height: 1.65rem;
+  }
+
+  .admin-list-page__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .admin-list-page__actions {
+    margin-top: 0;
+  }
+}
+
 .clinical-resource-list-page {
   .admin-list-page__header {
     margin-bottom: 8px;

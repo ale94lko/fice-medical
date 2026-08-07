@@ -74,7 +74,9 @@
         class="fmh-list-card q-pa-md q-mb-md">
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('staffCompensationRateType')">
+            <AddClientLabeledField
+              :label="t('staffCompensationRateType')"
+              required>
               <FormSelect
                 v-model="employment.compensationDraft.rateType"
                 outlined
@@ -83,19 +85,31 @@
                 map-options
                 clearable
                 :options="rateTypeOptions"
+                :error="Boolean(draftErrors.rateType)"
+                :error-message="draftErrors.rateType"
+                @update:model-value="clearDraftError('rateType')"
               />
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('staffCompensationRate')">
+            <AddClientLabeledField
+              :label="t('staffCompensationRate')"
+              required>
               <q-input
-                v-model.number="employment.compensationDraft.rate"
+                :model-value="employment.compensationDraft.rate"
                 outlined
                 hide-bottom-space
-                type="number"
-                min="0"
-                step="0.01"
-              />
+                inputmode="decimal"
+                :placeholder="t('staffCompensationRatePlaceholder')"
+                :error="Boolean(draftErrors.rate)"
+                :error-message="draftErrors.rate"
+                @update:model-value="onRateInput"
+                @blur="onRateBlur"
+              >
+                <template #prepend>
+                  <span class="text-grey-7 text-body2">$</span>
+                </template>
+              </q-input>
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
@@ -130,88 +144,35 @@
         </div>
       </div>
 
-      <div class="add-client-form__fmh-list-card">
-        <div
-          v-if="employment.compensation.length"
-          class="add-client-form__fmh-table-wrap">
-          <table class="add-client-form__fmh-table">
-            <thead>
-              <tr>
-                <th>{{ t('staffCompensationRateType') }}</th>
-                <th>{{ t('staffCompensationRate') }}</th>
-                <th>{{ t('staffCompensationEffectiveFrom') }}</th>
-                <th>{{ t('staffCompensationEffectiveTo') }}</th>
-                <th>{{ t('staffCompensationCurrent') }}</th>
-                <th
-                  v-if="!readonly"
-                  class="add-client-form__fmh-table-actions-col">
-                  {{ t('actions') }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="row in employment.compensation"
-                :key="row.id">
-                <td>{{ rateTypeLabel(row.rateType) }}</td>
-                <td>{{ formatRate(row.rate) }}</td>
-                <td>{{ row.effectiveFrom || '—' }}</td>
-                <td>{{ row.effectiveTo || '—' }}</td>
-                <td>
-                  <q-badge
-                    v-if="row.isCurrent"
-                    color="positive"
-                    :label="t('staffCompensationCurrentBadge')"
-                  />
-                  <span v-else>—</span>
-                </td>
-                <td
-                  v-if="!readonly"
-                  class="add-client-form__fmh-table-actions">
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    icon="delete"
-                    @click="removeCompensation(row.id)"
-                  >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('delete') }}
-          </q-tooltip>
-        </q-btn>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div
-          v-else
-          class="admin-data-table__empty full-width row flex-center
-            text-grey-7 q-gutter-sm q-pa-lg">
-          <q-icon name="inbox" size="md" />
-          <span>{{ t('staffCompensationEmpty') }}</span>
-        </div>
+      <div class="fmh-list-card">
+        <StaffCompensationTable
+          :rates="employment.compensation"
+          :empty-label="t('staffCompensationEmpty')"
+          :can-delete="!readonly"
+          @delete="removeCompensation"
+        />
       </div>
     </AccordionSection>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AccordionSection from 'components/AccordionSection.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
+import StaffCompensationTable from
+  'components/staff/StaffCompensationTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import {
   createEmptyStaffCompensation,
+  formatStaffCompensationRateAmount,
+  isValidStaffCompensationRate,
   nextStaffCompensationId,
+  sanitizeStaffCompensationRateInput,
 } from 'src/utils/staff-form.js'
 import { staffStatusOptions } from 'src/utils/staff-status.js'
 
@@ -239,6 +200,11 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const $q = useQuasar()
 
+const draftErrors = ref({
+  rateType: '',
+  rate: '',
+})
+
 const employment = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
@@ -252,35 +218,99 @@ const rateTypeOptions = computed(() => [
   { label: t('staffCompensationPerVisit'), value: 'per_visit' },
 ])
 
-function rateTypeLabel(value) {
-  return rateTypeOptions.value.find(opt => opt.value === value)?.label
-    ?? value
-    ?? '—'
+function clearDraftError(field) {
+  if (!draftErrors.value[field]) {
+    return
+  }
+  draftErrors.value = {
+    ...draftErrors.value,
+    [field]: '',
+  }
 }
 
-function formatRate(value) {
-  if (value == null || value === '') {
-    return '—'
+function clearDraftErrors() {
+  draftErrors.value = {
+    rateType: '',
+    rate: '',
+  }
+}
+
+function patchCompensationDraft(partial) {
+  employment.value = {
+    ...employment.value,
+    compensationDraft: {
+      ...employment.value.compensationDraft,
+      ...partial,
+    },
+  }
+}
+
+function rateErrorForValue(value, { requireValue = false } = {}) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return requireValue ? t('fieldRequired') : ''
+  }
+  if (!isValidStaffCompensationRate(raw)) {
+    return t('staffCompensationRateInvalid')
   }
 
-  return Number(value).toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  })
+  return ''
+}
+
+function onRateInput(value) {
+  const sanitized = sanitizeStaffCompensationRateInput(value)
+  patchCompensationDraft({ rate: sanitized })
+  draftErrors.value = {
+    ...draftErrors.value,
+    rate: rateErrorForValue(sanitized),
+  }
+}
+
+function onRateBlur() {
+  const raw = employment.value.compensationDraft?.rate
+  if (!String(raw ?? '').trim()) {
+    return
+  }
+  const amount = formatStaffCompensationRateAmount(raw)
+  if (!amount || !isValidStaffCompensationRate(amount)) {
+    draftErrors.value = {
+      ...draftErrors.value,
+      rate: rateErrorForValue(raw, { requireValue: true }),
+    }
+    return
+  }
+  patchCompensationDraft({ rate: amount })
+  draftErrors.value = {
+    ...draftErrors.value,
+    rate: '',
+  }
+}
+
+function validateCompensationDraft(draft) {
+  const nextErrors = {
+    rateType: '',
+    rate: '',
+  }
+  if (!String(draft.rateType ?? '').trim()) {
+    nextErrors.rateType = t('fieldRequired')
+  }
+  nextErrors.rate = rateErrorForValue(draft.rate, { requireValue: true })
+
+  draftErrors.value = nextErrors
+
+  return !nextErrors.rateType && !nextErrors.rate
 }
 
 function addCompensationRate() {
   const draft = employment.value.compensationDraft ?? {}
-  const missingRate = !String(draft.rateType ?? '').trim()
-    || draft.rate == null
-    || draft.rate === ''
-  if (missingRate) {
+  if (!validateCompensationDraft(draft)) {
     $q.notify({
       type: quasarNotifyTypes.negative,
       message: t('staffCompensationDraftRequired'),
     })
     return
   }
+  const rate = formatStaffCompensationRateAmount(draft.rate)
   const compensation = (employment.value.compensation ?? []).map(row => ({
     ...row,
     isCurrent: false,
@@ -288,11 +318,12 @@ function addCompensationRate() {
   compensation.unshift({
     id: nextStaffCompensationId(),
     rateType: draft.rateType,
-    rate: draft.rate,
+    rate,
     effectiveFrom: draft.effectiveFrom ?? '',
     effectiveTo: draft.effectiveTo ?? '',
     isCurrent: true,
   })
+  clearDraftErrors()
   employment.value = {
     ...employment.value,
     compensation,

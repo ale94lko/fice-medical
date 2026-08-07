@@ -16,6 +16,8 @@ const WIDGET_STATUSES = new Set(['READY', 'COMING_SOON'])
 const ITEM_COLUMN_PRIORITY = [
   'client_name',
   'client_number',
+  'entity_name',
+  'changed_by_name',
   'name',
   'title',
   'label',
@@ -46,6 +48,8 @@ const ITEM_COLUMN_PRIORITY = [
 const HIDDEN_ITEM_KEYS = new Set([
   'id',
   'client_id',
+  'entity_id',
+  'changed_by',
   'appointment_id',
   'lab_id',
   'referral_id',

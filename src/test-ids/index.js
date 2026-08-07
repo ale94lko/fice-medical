@@ -41,6 +41,7 @@ export const layoutTestIds = {
   navAdminSubtenants: 'layout-nav-admin-subtenants',
   navAdminServices: 'layout-nav-admin-services',
   navAdminScreeningTemplates: 'layout-nav-admin-screening-templates',
+  navAdminClinicalAudit: 'layout-nav-admin-clinical-audit',
   navClinicalResources: 'layout-nav-clinical-resources',
 }
 

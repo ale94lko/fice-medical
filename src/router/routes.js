@@ -125,6 +125,14 @@ const routes = [
         },
       },
       {
+        path: 'administration/clinical-audit',
+        name: 'AdminClinicalAuditList',
+        component: () => import('pages/admin/ClinicalAuditListPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.viewClinicalAudit,
+        },
+      },
+      {
         path: 'administration/users/add',
         name: 'AdminUsersAdd',
         component: () => import('pages/admin/UserList.vue'),

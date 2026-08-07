@@ -140,6 +140,65 @@ export function createEmptyStaffCompensation() {
   }
 }
 
+/** Money-like rate: digits + optional decimals (max 2). */
+export function sanitizeStaffCompensationRateInput(value) {
+  let s = String(value ?? '').replace(/[^\d.]/g, '')
+  const parts = s.split('.')
+  if (parts.length > 2) {
+    s = `${parts[0]}.${parts.slice(1).join('')}`
+  }
+  if (s.includes('.')) {
+    const [whole, frac = ''] = s.split('.')
+    s = `${whole.slice(0, 8)}.${frac.slice(0, 2)}`
+  } else {
+    s = s.slice(0, 8)
+  }
+
+  return s
+}
+
+export function parseStaffCompensationRate(value) {
+  const s = String(value ?? '').trim()
+  if (!s || s === '.') {
+    return null
+  }
+  if (!/^\d+(\.\d{1,2})?$/.test(s)) {
+    return NaN
+  }
+  const n = Number(s)
+  if (!Number.isFinite(n)) {
+    return NaN
+  }
+
+  return Math.round(n * 100) / 100
+}
+
+export function isValidStaffCompensationRate(value) {
+  const n = parseStaffCompensationRate(value)
+
+  return Number.isFinite(n) && n > 0
+}
+
+/** Always two decimals, e.g. 55 → "55.00". */
+export function formatStaffCompensationRateAmount(value) {
+  const n = parseStaffCompensationRate(value)
+  if (!Number.isFinite(n)) {
+    return ''
+  }
+
+  return n.toFixed(2)
+}
+
+/** Display with currency, e.g. "$55.00". */
+export function formatStaffCompensationRateDisplay(value) {
+  const amount = formatStaffCompensationRateAmount(value)
+  if (!amount) {
+    return '—'
+  }
+
+  return `$${amount}`
+}
+
 export function createEmptyStaffEmployment() {
   return {
     status: 'active',

@@ -13,7 +13,7 @@
     :rules="rules"
     :lazy-rules="'ondemand'"
     :mask="dateMask"
-    :placeholder="datePlaceholder"
+    :placeholder="resolvedPlaceholder"
     @update:model-value="onInput"
     @blur="onBlur">
     <template v-if="!readonly" #append>
@@ -65,12 +65,19 @@ const props = defineProps({
   minYear: { type: Number, default: null },
   closeLabel: { type: String, default: 'Close' },
   testId: { type: String, default: '' },
+  placeholder: { type: String, default: '' },
 })
 
 const emit = defineEmits(['update:modelValue'])
 
 const { dateMask, datePlaceholder, datePickerMask } = useAppDateTime()
 const datePopupRef = ref(null)
+
+const resolvedPlaceholder = computed(() => {
+  const custom = String(props.placeholder ?? '').trim()
+
+  return custom || datePlaceholder.value
+})
 
 const resolvedMinYear = computed(() => {
   if (props.minYear != null && Number.isFinite(props.minYear)) {
