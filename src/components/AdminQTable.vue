@@ -37,8 +37,6 @@
 
 <script setup>
 import { computed, useAttrs, useSlots } from 'vue'
-import { useQuasar } from 'quasar'
-import { siteBreakpointsPx } from 'components/constants.js'
 import AdminTableGridItem from './AdminTableGridItem.vue'
 
 defineOptions({
@@ -47,12 +45,12 @@ defineOptions({
 
 const props = defineProps({
   /**
-   * When omitted, card/grid mode turns on automatically on mobile.
-   * Pass an explicit boolean to override (list pages).
+   * Card/grid mode. List pages pass useAdminTableMobileGrid().showGrid.
+   * Default false so embedded tables stay rows on all breakpoints.
    */
   grid: {
-    default: undefined,
-    validator: value => value === undefined || typeof value === 'boolean',
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -60,7 +58,6 @@ const RESERVED_SLOTS = ['row-actions', 'body-cell-actions', 'item']
 
 const slots = useSlots()
 const attrs = useAttrs()
-const $q = useQuasar()
 
 const hasRowActions = computed(() => Boolean(slots['row-actions']))
 
@@ -72,13 +69,7 @@ const passthroughSlotNames = computed(() =>
   Object.keys(slots).filter(name => !RESERVED_SLOTS.includes(name)),
 )
 
-const resolvedGrid = computed(() => {
-  if (typeof props.grid === 'boolean') {
-    return props.grid
-  }
-
-  return $q.screen.width <= siteBreakpointsPx.XXS
-})
+const resolvedGrid = computed(() => props.grid)
 
 function gridCardClass(row) {
   const fn = attrs.cardClassFn

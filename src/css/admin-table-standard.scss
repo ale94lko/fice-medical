@@ -34,23 +34,11 @@
     flex-direction: column;
   }
 
-  .admin-table-panel__table-wrap:has(.q-table--grid) {
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
   .admin-data-table {
     flex: 1 1 auto;
     min-height: 180px;
     max-height: none;
     height: 0;
-
-    &.q-table--grid {
-      height: auto;
-      min-height: 0;
-      flex: 0 0 auto;
-    }
   }
 
   &__heading {
@@ -196,7 +184,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 0;
   background: $surface;
   border: 1px solid $table-border;
   border-radius: $table-radius;
@@ -278,8 +265,6 @@
 
   &.q-table--grid {
     max-height: none;
-    min-height: 0;
-    height: auto;
     display: block;
     overflow: visible;
 
@@ -287,11 +272,11 @@
       flex: none;
       min-height: auto;
       overflow: visible;
-      padding-bottom: 12px;
+      padding-bottom: 8px;
     }
 
     .q-table__grid-content {
-      padding-bottom: 8px;
+      padding-bottom: 4px;
     }
   }
 
@@ -517,11 +502,6 @@
     -webkit-overflow-scrolling: touch;
     padding-bottom: 8px;
     margin-bottom: 2px;
-
-    &:has(.q-table--grid) {
-      overflow-x: hidden;
-      overflow-y: visible;
-    }
 
     .admin-data-table {
       overflow: visible;
@@ -1232,5 +1212,44 @@
     max-width: none !important;
     width: 100%;
     min-width: 0;
+  }
+}
+
+/* Phone: card/grid mode — keep height overrides off desktop table flex. */
+@media (max-width: 500px) {
+  .admin-list-page {
+    .admin-table-panel {
+      min-height: 0;
+    }
+
+    .admin-table-panel__table-wrap:has(.q-table--grid) {
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-data-table.q-table--grid {
+      height: auto;
+      min-height: 0;
+      flex: 0 0 auto;
+      max-height: none;
+      overflow: visible;
+
+      .q-table__middle {
+        flex: none;
+        min-height: auto;
+        overflow: visible;
+        padding-bottom: 12px;
+      }
+
+      .q-table__grid-content {
+        padding-bottom: 8px;
+      }
+    }
+  }
+
+  .admin-data-table__scroll:has(.q-table--grid) {
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 }
