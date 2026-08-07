@@ -118,7 +118,6 @@ import { resolvePermissionModuleIcon } from
   'src/utils/permission-tree-utils.js'
 import {
   collectLeafValues,
-  getBranchCheckState,
   toggleBranchSelection,
   toggleLeafSelection,
 } from 'src/utils/tree-selection.js'
@@ -162,13 +161,24 @@ const selectedSet = computed(
   () => new Set((props.modelValue ?? []).map(value => String(value))),
 )
 
+const leafValuesByModuleId = computed(() => {
+  const map = Object.create(null)
+  for (const module of props.nodes ?? []) {
+    map[module.id] = collectLeafValues(module)
+  }
+
+  return map
+})
+
 watch(
   () => props.nodes,
   nodes => {
     const next = { ...expandedByModuleId.value }
     for (const module of nodes ?? []) {
+      // Collapse by default so role→permission sync does not
+      // re-render every leaf checkbox at once (freezes the page).
       if (next[module.id] == null) {
-        next[module.id] = true
+        next[module.id] = false
       }
     }
     expandedByModuleId.value = next
@@ -177,7 +187,7 @@ watch(
 )
 
 function isExpanded(moduleId) {
-  return expandedByModuleId.value[moduleId] !== false
+  return expandedByModuleId.value[moduleId] === true
 }
 
 function toggleModuleExpanded(moduleId) {
@@ -191,18 +201,43 @@ function moduleIcon(module) {
   return resolvePermissionModuleIcon(module?.moduleKey, module?.label)
 }
 
+function leafValuesFor(module) {
+  return leafValuesByModuleId.value[module.id]
+    ?? collectLeafValues(module)
+}
+
 function leafCount(module) {
-  return collectLeafValues(module).length
+  return leafValuesFor(module).length
 }
 
 function selectedCount(module) {
-  return collectLeafValues(module).filter(
-    value => selectedSet.value.has(String(value)),
+  const selected = selectedSet.value
+
+  return leafValuesFor(module).filter(
+    value => selected.has(String(value)),
   ).length
 }
 
 function moduleCheckValue(module) {
-  return getBranchCheckState(module, selectedSet.value)
+  const leafValues = leafValuesFor(module)
+  if (!leafValues.length) {
+    return 'unchecked'
+  }
+  const selected = selectedSet.value
+  let count = 0
+  for (const value of leafValues) {
+    if (selected.has(String(value))) {
+      count += 1
+    }
+  }
+  if (count === 0) {
+    return 'unchecked'
+  }
+  if (count === leafValues.length) {
+    return 'checked'
+  }
+
+  return 'indeterminate'
 }
 
 function isPermissionSelected(permission) {
@@ -230,13 +265,29 @@ function permissionDescription(permission) {
   return ''
 }
 
+function samePermissionSelection(nextValues) {
+  const current = props.modelValue ?? []
+  if (current.length !== nextValues.length) {
+    return false
+  }
+  const currentSet = selectedSet.value
+
+  return nextValues.every(value => currentSet.has(String(value)))
+}
+
+function emitSelection(nextValues) {
+  if (samePermissionSelection(nextValues)) {
+    return
+  }
+  emit('update:modelValue', nextValues)
+}
+
 function onModuleToggle(module, value) {
   if (props.readonly) {
     return
   }
 
-  emit(
-    'update:modelValue',
+  emitSelection(
     toggleBranchSelection(
       module,
       props.modelValue ?? [],
@@ -250,8 +301,7 @@ function onPermissionToggle(permission, checked) {
     return
   }
 
-  emit(
-    'update:modelValue',
+  emitSelection(
     toggleLeafSelection(
       String(permission.value),
       props.modelValue ?? [],
