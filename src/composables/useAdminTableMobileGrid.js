@@ -1,17 +1,13 @@
-import { computed } from 'vue'
-import { useQuasar } from 'quasar'
-import { siteBreakpointsPx } from 'components/constants.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 
 /**
  * Shared mobile grid (card) mode for AdminQTable list pages.
- * Matches Client / Staff list phone breakpoint.
+ * Uses the app `.vp-mobile` viewport (≤ 499px).
  */
 export function useAdminTableMobileGrid() {
-  const $q = useQuasar()
+  const { isMobile } = useViewportLayout()
 
-  const showGrid = computed(
-    () => $q.screen.width <= siteBreakpointsPx.XXS,
-  )
-
-  return { showGrid }
+  return {
+    showGrid: isMobile,
+  }
 }

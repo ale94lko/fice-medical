@@ -1141,7 +1141,9 @@
   }
 }
 
-@media (max-width: 1023px) {
+/* Responsive via body.vp-mobile / body.vp-tablet (viewport-layout.scss) */
+body.vp-mobile,
+body.vp-tablet {
   .admin-list-page {
     &.admin-page {
       padding: 12px 12px 0;
@@ -1215,8 +1217,8 @@
   }
 }
 
-/* Phone: card/grid mode — keep height overrides off desktop table flex. */
-@media (max-width: 500px) {
+/* Phone only: card/grid scroll — keep off tablet/desktop table flex */
+body.vp-mobile {
   .admin-list-page {
     .admin-table-panel {
       min-height: 0;

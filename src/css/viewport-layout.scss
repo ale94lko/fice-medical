@@ -1,0 +1,53 @@
+// Viewport layout classes (set on body + #q-app by useViewportLayout).
+//
+// Breakpoints (see src/constants/viewport-layout.js):
+//   .vp-mobile  — width <= 499px
+//   .vp-tablet  — width 500px–1023px
+//   .vp-desktop — width >= 1024px
+//
+// Prefixed `vp-` so they never clash with Quasar Platform's body.mobile /
+// body.desktop classes.
+//
+// Prefer these over @media when changing responsive UI so laptop styles
+// are not accidentally affected by mobile-only fixes.
+//
+// Global SCSS example:
+//   body.vp-mobile .my-block { ... }
+//   body.vp-tablet .my-block { ... }
+//   body.vp-mobile,
+//   body.vp-tablet {
+//     .my-block { ... } // phone + tablet
+//   }
+//
+// Vue scoped SFC example:
+//   :global(body.vp-mobile) {
+//     .my-local { ... }
+//   }
+//
+// Optional: bind on a component root with useViewportLayout():
+//   <div class="my-widget" :class="viewportClassList">
+
+@mixin viewport-mobile {
+  body.vp-mobile & {
+    @content;
+  }
+}
+
+@mixin viewport-tablet {
+  body.vp-tablet & {
+    @content;
+  }
+}
+
+@mixin viewport-desktop {
+  body.vp-desktop & {
+    @content;
+  }
+}
+
+@mixin viewport-mobile-or-tablet {
+  body.vp-mobile &,
+  body.vp-tablet & {
+    @content;
+  }
+}

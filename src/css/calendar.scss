@@ -774,7 +774,9 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   }
 }
 
-@media (max-width: 1023px) {
+/* Responsive via body.vp-mobile / body.vp-tablet (viewport-layout.scss) */
+body.vp-mobile,
+body.vp-tablet {
   .calendar-page__header {
     flex-direction: column;
   }
@@ -800,7 +802,9 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     max-width: none;
     width: 100%;
   }
+}
 
+body.vp-tablet {
   .calendar-toolbar {
     flex-direction: row;
     flex-wrap: nowrap;
@@ -835,7 +839,7 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   }
 }
 
-@media (max-width: 599px) {
+body.vp-mobile {
   .calendar-toolbar {
     flex-direction: column;
     flex-wrap: wrap;
@@ -848,6 +852,7 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 
     &__title {
       flex: 1 1 auto;
+      font-size: 1rem;
     }
 
     &__actions {

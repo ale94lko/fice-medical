@@ -1,0 +1,60 @@
+---
+description: Clases .vp-mobile / .vp-tablet / .vp-desktop para estilos responsive aislados
+globs: src/**/*.{vue,scss,css,js}
+alwaysApply: false
+---
+
+# Viewport layout — clases `.vp-mobile` / `.vp-tablet` / `.vp-desktop`
+
+Al arreglar UI responsive, **no uses solo `@media`** si el cambio puede romper laptop.
+Usa las clases que aplica `useViewportLayout({ syncDocument: true })` en `body` y `#q-app`.
+
+**Importante:** el prefijo `vp-` evita chocar con las clases de plataforma de Quasar
+(`body.mobile` / `body.desktop`).
+
+## Breakpoints
+
+| Clase | Ancho |
+|-------|--------|
+| `.vp-mobile` | ≤ 499px |
+| `.vp-tablet` | 500–1023px |
+| `.vp-desktop` | ≥ 1024px |
+
+Fuente: `src/constants/viewport-layout.js`
+
+## CSS (preferido)
+
+```scss
+/* Solo mobile — no afecta tablet/desktop */
+body.vp-mobile {
+  .admin-list-page__title {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile + tablet */
+body.vp-mobile,
+body.vp-tablet {
+  .admin-list-page__title-row {
+    flex-wrap: wrap;
+  }
+}
+```
+
+Mixins en `src/css/viewport-layout.scss`: `@include viewport-mobile`, `viewport-tablet`, `viewport-desktop`, `viewport-mobile-or-tablet`.
+
+## Vue (opcional en el root del componente)
+
+```js
+const { viewportClassList, isMobile, isTablet } = useViewportLayout()
+```
+
+```vue
+<div class="my-widget" :class="viewportClassList">
+```
+
+## Evitar
+
+- Usar `body.mobile` / `body.desktop` para layout por ancho (son de Quasar Platform).
+- Meter reglas de mobile dentro de `@media` genéricos que también cambien el layout desktop sin querer.
+- Duplicar umbrales mágicos (`500`, `1023`); reutilizar el composable / constantes.

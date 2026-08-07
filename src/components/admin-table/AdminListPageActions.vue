@@ -75,10 +75,9 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useQuasar } from 'quasar'
-import { siteBreakpointsPx } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { adminTableTestIds } from 'src/test-ids/index.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 
 const props = defineProps({
   actions: {
@@ -92,11 +91,10 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
-const $q = useQuasar()
+const { isDesktop } = useViewportLayout()
 
-const useCompactMenu = computed(
-  () => $q.screen.width < siteBreakpointsPx.MD,
-)
+// Compact ⋮ menu on mobile + tablet; full buttons on desktop/laptop.
+const useCompactMenu = computed(() => !isDesktop.value)
 
 const visibleActions = computed(() =>
   (Array.isArray(props.actions) ? props.actions : []).filter(

@@ -690,13 +690,11 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useQuasar } from 'quasar'
 import { useAuthStore } from 'stores/auth-store.js'
 import {
   drawerMobileMaxPx,
   drawerMiniWidthPx,
   drawerWidthPx,
-  siteBreakpointsPx,
 } from 'components/constants.js'
 import { useI18n } from 'vue-i18n'
 import ModalComponent from 'components/ModalComponent.vue'
@@ -711,13 +709,18 @@ import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
 
 // Composables
-const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const {
+  windowWidth,
+  isMobile: mobileView,
+  isTablet: tabletView,
+} = useViewportLayout()
 
 const activeContentKey = computed(() =>
   `${route.fullPath}::${authStore.activeSubtenantId ?? 0}`,
@@ -757,23 +760,6 @@ const providerMenu = ref(false)
 const humanResourcesMenu = ref(false)
 const administrationMenu = ref(false)
 
-// Computed
-const windowWidth = computed(() => {
-  const quasarWidth = $q.screen.width
-  if (typeof window === 'undefined') {
-    return quasarWidth
-  }
-
-  return Math.max(quasarWidth, window.innerWidth)
-})
-
-const mobileView = computed(
-  () => windowWidth.value <= drawerMobileMaxPx,
-)
-const tabletView = computed(
-  () => windowWidth.value > drawerMobileMaxPx
-    && windowWidth.value < siteBreakpointsPx.MD,
-)
 const drawerUsesMiniLayout = computed(
   () => !mobileView.value && !sidebarExpanded.value,
 )
