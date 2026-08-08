@@ -17,9 +17,17 @@ export const STAFF_LIST_SUMMARY_FILTERS = {
 
 /* eslint-enable camelcase */
 
+function normalizeEmploymentStatus(value) {
+  if (Array.isArray(value)) {
+    return value[0] ?? ''
+  }
+
+  return value == null ? '' : String(value)
+}
+
 export function createEmptyStaffListFilters() {
   return {
-    employmentStatuses: [],
+    employmentStatus: '',
     positions: [],
     staffType: staffStaffTypes.all,
     credentialStatus: '',
@@ -33,7 +41,8 @@ export function countActiveStaffListFilters(filters) {
     return 0
   }
   let count = 0
-  if (filters.employmentStatuses?.length) {
+  if (normalizeEmploymentStatus(filters.employmentStatus
+    ?? filters.employmentStatuses)) {
     count += 1
   }
   if (filters.positions?.length) {
@@ -87,11 +96,11 @@ export function buildStaffListQueryParams({
     params.credential_status = summaryParams.credential_status
   }
 
-  if (
-    Array.isArray(panel.employmentStatuses)
-    && panel.employmentStatuses.length
-  ) {
-    params.status = panel.employmentStatuses.join(',')
+  const employmentStatus = normalizeEmploymentStatus(
+    panel.employmentStatus ?? panel.employmentStatuses,
+  )
+  if (employmentStatus) {
+    params.status = employmentStatus
   }
   if (Array.isArray(panel.positions) && panel.positions.length) {
     params.position = panel.positions.join(',')
@@ -118,11 +127,13 @@ export function buildStaffListQueryParams({
 
 export function staffListFiltersToApiPayload(filters) {
   if (!filters) {
-    return {}
+    return createEmptyStaffListFilters()
   }
 
   return {
-    employmentStatuses: [...(filters.employmentStatuses ?? [])],
+    employmentStatus: normalizeEmploymentStatus(
+      filters.employmentStatus ?? filters.employmentStatuses,
+    ),
     positions: [...(filters.positions ?? [])],
     staffType: filters.staffType ?? staffStaffTypes.all,
     credentialStatus: filters.credentialStatus ?? '',

@@ -107,12 +107,7 @@
                 />
               </AddClientLabeledField>
               <p
-                v-if="!placeOptions.length"
-                class="text-caption text-grey-7 q-mt-xs">
-                {{ t('appointmentPlacesEmpty') }}
-              </p>
-              <p
-                v-else-if="selectedPlaceIsTelemedicine"
+                v-if="selectedPlaceIsTelemedicine"
                 class="text-caption text-grey-7 q-mt-xs">
                 {{ t('appointmentTelemedicineBookHint') }}
               </p>
@@ -218,6 +213,15 @@
             </p>
           </div>
         </div>
+
+        <AppointmentRecurrenceSection
+          v-if="mode === 'book'"
+          v-model="draft"
+          class="q-mt-lg"
+          :start-date-label="summaryDate"
+          :start-day-key="selectedDayKey"
+          :end-date-error="errors.endOnDate"
+        />
 
         <div
           v-if="summaryVisible"
@@ -346,12 +350,6 @@
             />
           </AddClientLabeledField>
         </div>
-
-        <AppointmentRecurrenceSection
-          v-if="mode === 'book'"
-          v-model="draft"
-          class="q-mt-md"
-        />
       </q-card-section>
 
       <q-card-actions align="right" class="app-dialog-card__actions">
@@ -382,6 +380,7 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AppointmentAvailabilityPicker from
@@ -405,6 +404,7 @@ import {
   useAppointmentBooking,
 } from 'src/composables/useAppointmentBooking.js'
 import { useSiteStore } from 'src/stores/site-store.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 import {
   formatFeeLabel,
   isDurationWithinServiceRange,
@@ -425,6 +425,7 @@ import {
 import {
   formatUtcDateLong,
   formatUtcTimeRange,
+  usDateStringToLocalDayKey,
   usDateStringToUtcStartIso,
 } from 'src/utils/appointment-datetime.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
@@ -451,6 +452,8 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const siteStore = useSiteStore()
+const authStore = useAuthStore()
+const { linkedStaffProfile } = storeToRefs(authStore)
 
 const open = computed({
   get: () => props.modelValue,
@@ -692,7 +695,7 @@ function createDraft() {
     recurrence: {
       frequency: appointmentRecurrenceFrequencyValues.weekly,
       intervalCount: 1,
-      daysOfWeek: [1, 3, 5],
+      daysOfWeek: [],
       endType: appointmentRecurrenceEndTypeValues.afterCount,
       endAfterCount: 10,
       endOnDate: '',
@@ -1088,6 +1091,34 @@ async function loadFormOptions() {
       placeOptions.value,
     )
   }
+  applyDefaultLinkedClinician()
+}
+
+function resolveLinkedClinicianId(options = clinicianOptions.value) {
+  const profile = linkedStaffProfile.value
+  if (!profile?.isClinician || profile.id == null) {
+    return null
+  }
+  const id = Number(profile.id)
+  if (!Number.isFinite(id)) {
+    return null
+  }
+  if (!options.some(option => Number(option.value) === id)) {
+    return null
+  }
+
+  return id
+}
+
+function applyDefaultLinkedClinician() {
+  if (props.mode !== 'book' || draft.value.clinicianId != null) {
+    return
+  }
+  const linkedId = resolveLinkedClinicianId()
+  if (linkedId == null) {
+    return
+  }
+  draft.value.clinicianId = linkedId
 }
 
 function addService(serviceId) {
@@ -1177,6 +1208,16 @@ function tryApplyBookingHint() {
   applyBookingHint(props.bookingHint)
 }
 
+function isRecurrenceEndDateAfterStart(endDateUs, startDayKey) {
+  const endDayKey = usDateStringToLocalDayKey(endDateUs)
+  const start = String(startDayKey ?? '').trim()
+  if (!endDayKey || !start) {
+    return false
+  }
+
+  return endDayKey > start
+}
+
 function validateDraft() {
   const next = {}
   if (showClientPicker.value && !draft.value.clientId) {
@@ -1198,6 +1239,25 @@ function validateDraft() {
     next.notes = t('appointmentNotesMaxLength', {
       max: appointmentNotesMaxLength,
     })
+  }
+  if (
+    props.mode === 'book'
+    && draft.value.repeatAppointment
+    && draft.value.recurrence.endType
+      === appointmentRecurrenceEndTypeValues.onDate
+  ) {
+    const endDate = String(draft.value.recurrence.endOnDate ?? '').trim()
+    if (!endDate) {
+      next.endOnDate = t('appointmentRecurrenceEndDateRequired')
+    } else if (
+      selectedDayKey.value
+      && !isRecurrenceEndDateAfterStart(
+        endDate,
+        selectedDayKey.value,
+      )
+    ) {
+      next.endOnDate = t('appointmentRecurrenceEndDateAfterStart')
+    }
   }
   errors.value = next
 

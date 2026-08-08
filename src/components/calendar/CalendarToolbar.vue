@@ -30,9 +30,9 @@
           v-if="canBookAppointment"
           no-caps
           no-wrap
-          outline
+          unelevated
           color="primary"
-          class="app-btn-outline calendar-toolbar__action-btn"
+          class="app-btn-primary calendar-toolbar__action-btn"
           icon="add"
           :label="t('appointmentAddButton')"
           :data-testid="calendarTestIds.btnAddAppointment"

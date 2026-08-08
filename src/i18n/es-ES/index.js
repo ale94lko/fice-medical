@@ -354,10 +354,15 @@ export default {
   users: 'Usuarios',
   userListSubtitle:
     'Gestione usuarios, roles y accesos del tenant.',
-  userListSearchPlaceholder:
-    'Buscar por nombre, correo o rol…',
+  userListSearchPlaceholder: 'Buscar usuarios...',
+  userListFilterRole: 'Rol',
+  userListFilterStatus: 'Estado',
   userListFilterAllRoles: 'Todos los roles',
   userListFilterAllStatuses: 'Todos los estados',
+  userListFiltersTitle: 'Filtrar usuarios',
+  userListFiltersClear: 'Limpiar filtros',
+  userListFiltersApply: 'Aplicar filtros',
+  userListFiltersActive: 'Filtros ({count})',
   userListColUser: 'Usuario',
   userListLastLoginToday: 'Hoy, {time}',
   userListLastLoginYesterday: 'Ayer, {time}',
@@ -519,22 +524,21 @@ export default {
   calendarPageTitle: 'Calendario',
   calendarPageSubtitle:
     'Consulte citas y actividad programada.',
+  calendarSidebarCollapse: 'Ocultar panel',
+  calendarSidebarExpand: 'Mostrar panel',
   calendarToday: 'Hoy',
   calendarViewMonth: 'Mes',
   calendarViewWeek: 'Semana',
   calendarViewDay: 'Día',
   calendarViewAgenda: 'Agenda',
   calendarSourcesTitle: 'Calendarios',
-  calendarSourceMyAppointments: 'Mis citas',
-  calendarSourceMyAppointmentsHint:
-    'Citas vinculadas a su perfil de clinician.',
   calendarSourceClinicianAppointments: 'Citas de clinicians',
   calendarSourceClinicianAppointmentsHint:
     'Muestra citas de los clinicians seleccionados.',
   calendarSourceFollowUps: 'Seguimientos',
   calendarSourceTasks: 'Tareas',
   calendarSourceComingSoon: 'Próximamente',
-  calendarCliniciansTitle: 'Clinicians',
+  calendarCliniciansTitle: 'Calendarios',
   calendarCliniciansEmpty: 'No hay clinicians disponibles.',
   calendarMoreEvents: '+{count} más',
   calendarAgendaEmpty: 'No hay eventos en este rango.',
@@ -1942,7 +1946,6 @@ export default {
   appointmentTelemedicineBookHint:
     'Esta visita se marca como telemedicina. Tras reservar se crea el '
     + 'enlace de la reunión y se avisa al cliente por email/SMS.',
-  appointmentPlacesEmpty: 'No hay lugares de atención disponibles.',
   appointmentTotalDurationTitle:
     'Duración de la cita (servicios seleccionados)',
   appointmentSuggestedFeeTotal: 'Tarifa sugerida (total)',
@@ -2002,17 +2005,54 @@ export default {
     + 'y está fuera del horario habitual de consulta.',
   appointmentBookSeriesSuccess: '{count} citas reservadas correctamente.',
   appointmentRepeatLabel: 'Repetir cita',
+  appointmentRepeatSubtitle:
+    'Defina con qué frecuencia debe repetirse esta cita.',
   appointmentRecurrenceFrequency: 'Frecuencia',
+  appointmentRecurrenceFrequencyHint:
+    'Con qué frecuencia se repite la cita',
   appointmentRecurrenceInterval: 'Repetir cada',
+  appointmentRecurrenceIntervalHintDaily: 'Repetir cada X día(s)',
+  appointmentRecurrenceIntervalHintWeekly: 'Repetir cada X semana(s)',
+  appointmentRecurrenceIntervalHintMonthly: 'Repetir cada X mes(es)',
+  appointmentRecurrenceUnitDays: 'día(s)',
+  appointmentRecurrenceUnitWeeks: 'semana(s)',
+  appointmentRecurrenceUnitMonths: 'mes(es)',
   appointmentRecurrenceDays: 'Días de la semana',
+  appointmentRecurrenceDaysSelected:
+    '{count} días seleccionados',
+  appointmentRecurrenceDaysPresetNone: 'Ninguno',
+  appointmentRecurrenceDaysPresetAll: 'Todos',
+  appointmentRecurrenceDaysPresetWeekdays: 'Lun–Vie',
+  appointmentRecurrenceDaysPresetWeekend: 'Sáb–Dom',
+  appointmentRecurrenceDaysPresetCustom: 'Personalizado',
   appointmentRecurrenceEnds: 'Finaliza',
+  appointmentRecurrenceEndsHint: 'Cuándo terminará la repetición.',
   appointmentRecurrenceCount: 'Número de citas',
+  appointmentRecurrenceCountHint:
+    'Número total de citas a programar.',
   appointmentRecurrenceEndDate: 'Fecha de fin',
+  appointmentRecurrenceEndDateRequired: 'La fecha de fin es obligatoria.',
+  appointmentRecurrenceEndDateAfterStart:
+    'La fecha de fin debe ser posterior a la fecha de la cita.',
   appointmentRecurrenceDaily: 'Diaria',
   appointmentRecurrenceWeekly: 'Semanal',
   appointmentRecurrenceMonthly: 'Mensual',
-  appointmentRecurrenceAfterCount: 'Tras número de citas',
-  appointmentRecurrenceOnDate: 'En fecha específica',
+  appointmentRecurrenceAfterCount: 'Tras cantidad',
+  appointmentRecurrenceOnDate: 'En fecha',
+  appointmentRecurrencePreviewLabel: 'Vista previa',
+  appointmentRecurrencePreviewSelectedDate: 'la fecha seleccionada',
+  appointmentRecurrencePreviewNoDays: 'ningún día',
+  appointmentRecurrencePreviewDayPair: '{first} y {second}',
+  appointmentRecurrencePreviewDayList: '{list} y {last}',
+  appointmentRecurrencePreviewWeekly:
+    '{preview}: se programarán {count} cita(s) los {days},'
+    + ' a partir de {startDate}.',
+  appointmentRecurrencePreviewDaily:
+    '{preview}: se programarán {count} cita(s) a diario,'
+    + ' a partir de {startDate}.',
+  appointmentRecurrencePreviewMonthly:
+    '{preview}: se programarán {count} cita(s) mensualmente,'
+    + ' a partir de {startDate}.',
   placeOfServiceOffice: 'Consultorio',
   placeOfServiceTelehealth: 'Telemedicina',
   placeOfServiceHome: 'Domicilio',

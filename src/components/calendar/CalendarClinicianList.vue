@@ -1,13 +1,17 @@
 <template>
-  <div class="calendar-clinician-list">
-    <p class="calendar-clinician-list__title text-subtitle2 q-mb-sm">
+  <div
+    class="calendar-clinician-list"
+    :class="{ 'calendar-clinician-list--compact': compact }">
+    <p
+      v-if="!compact"
+      class="calendar-clinician-list__title text-subtitle2 q-mb-sm">
       {{ t('calendarCliniciansTitle') }}
     </p>
 
     <q-inner-loading :showing="loading" />
 
     <p
-      v-if="!loading && !clinicians.length"
+      v-if="!compact && !loading && !clinicians.length"
       class="text-caption text-grey-7 q-mb-none">
       {{ t('calendarCliniciansEmpty') }}
     </p>
@@ -21,10 +25,23 @@
         :model-value="isEnabled(clinician.value)"
         dense
         class="calendar-clinician-list__checkbox"
+        :aria-label="clinician.label"
         :data-testid="calendarTestIds.clinicianToggle(clinician.value)"
         @update:model-value="emit('toggle', clinician.value, $event)"
       />
-      <span class="calendar-clinician-list__label">{{ clinician.label }}</span>
+      <span
+        v-if="!compact"
+        class="calendar-clinician-list__label">
+        {{ clinician.label }}
+      </span>
+      <q-tooltip
+        v-if="compact"
+        class="app-info-tooltip"
+        anchor="center right"
+        self="center left"
+        :offset="[8, 0]">
+        {{ clinician.label }}
+      </q-tooltip>
     </label>
   </div>
 </template>
@@ -37,6 +54,7 @@ const props = defineProps({
   clinicians: { type: Array, default: () => [] },
   enabledIds: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['toggle'])

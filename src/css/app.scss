@@ -1587,27 +1587,6 @@
   color: $text-muted;
 }
 
-.staff-filters-dialog {
-  &__chip-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  &__chip {
-    border: 1px solid $border-subtle;
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-size: 0.8125rem;
-
-    &--selected {
-      border-color: $primary;
-      background: rgba($primary, 0.08);
-      color: $primary;
-    }
-  }
-}
-
 @mixin app-standard-button-height {
   box-sizing: border-box;
   min-height: $app-button-height !important;

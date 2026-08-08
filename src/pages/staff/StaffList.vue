@@ -178,32 +178,68 @@
         </template>
 
         <template #row-actions="{ row }">
-          <AdminTableRowActions
-            :show-view="canViewStaff"
-            :show-edit="canEditStaff"
-            :show-change-status="false"
-            :show-more="canEditStaff"
-            :view-test-id="staffListTestIds.rowView(row.id)"
-            :edit-test-id="staffListTestIds.rowEdit(row.id)"
-            :more-test-id="staffListTestIds.rowMore(row.id)"
-            @view="viewRow(row)"
-            @edit="editRow(row)">
-            <template #more>
-              <q-item
-                v-if="canEditStaff"
-                v-close-popup
-                clickable
-                :data-testid="staffListTestIds.rowDeactivate(row.id)"
-                @click="openDeactivate(row)">
-                <q-item-section avatar>
-                  <q-icon name="person_off" size="18px" />
-                </q-item-section>
-                <q-item-section>
-                  {{ t('staffListDeactivate') }}
-                </q-item-section>
-              </q-item>
-            </template>
-          </AdminTableRowActions>
+          <div class="admin-table-row-actions">
+            <q-btn
+              v-if="canViewStaff"
+              flat
+              round
+              dense
+              :icon="adminTableActionIcons.view"
+              class="app-btn-icon-action"
+              :data-testid="staffListTestIds.rowView(row.id)"
+              :size="siteBreakpoints.SM"
+              :aria-label="t('view')"
+              @click="viewRow(row)"
+            >
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('view') }}
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="canEditStaff"
+              flat
+              round
+              dense
+              :icon="adminTableActionIcons.edit"
+              class="app-btn-icon-action"
+              :data-testid="staffListTestIds.rowEdit(row.id)"
+              :size="siteBreakpoints.SM"
+              :aria-label="t('edit')"
+              @click="editRow(row)"
+            >
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('edit') }}
+              </q-tooltip>
+            </q-btn>
+            <q-btn
+              v-if="canEditStaff"
+              flat
+              round
+              dense
+              icon="person_off"
+              class="app-btn-icon-action"
+              :data-testid="staffListTestIds.rowDeactivate(row.id)"
+              :size="siteBreakpoints.SM"
+              :aria-label="t('staffListDeactivate')"
+              @click="openDeactivate(row)"
+            >
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('staffListDeactivate') }}
+              </q-tooltip>
+            </q-btn>
+          </div>
         </template>
 
         <template #no-data>
@@ -254,7 +290,7 @@
       @reset="onResetColumnPreferences"
     />
 
-    <StaffFiltersDialog
+    <StaffFiltersDrawer
       v-model="filtersOpen"
       :filters="panelFilters"
       :position-options="positionOptions"
@@ -292,8 +328,10 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import {
   quasarNotifyTypes,
+  siteBreakpoints,
   staffStatuses,
 } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageActions from
   'components/admin-table/AdminListPageActions.vue'
@@ -304,8 +342,6 @@ import AdminTableColumnSettingsDialog from
 import AdminTableColumnSettingsHeader from
   'components/admin-table/AdminTableColumnSettingsHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AdminTableRowActions from
-  'components/admin-table/AdminTableRowActions.vue'
 import AdminTableSearchHighlight from
   'components/admin-table/AdminTableSearchHighlight.vue'
 import AdminTableStatusCell from
@@ -314,7 +350,7 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import StaffListSummaryCards from 'components/StaffListSummaryCards.vue'
-import StaffFiltersDialog from 'components/staff/StaffFiltersDialog.vue'
+import StaffFiltersDrawer from 'components/staff/StaffFiltersDrawer.vue'
 import StaffChangeStatusDialog from
   'components/staff/StaffChangeStatusDialog.vue'
 import { adminTableTestIds } from 'src/test-ids/index.js'

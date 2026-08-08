@@ -67,8 +67,6 @@ export function useAppointmentCalendar() {
     return filterCalendarDisplayEvents(inRange, {
       enabledSourceIds: sources.enabledSourceIds.value,
       enabledClinicianIds: sources.enabledClinicianIds.value,
-      mySourceId: calendarSourceIds.myAppointments,
-      clinicianSourceId: calendarSourceIds.clinicianAppointments,
       restrictByClinicianSelection: canSelectClinicianSources.value,
     })
   })
@@ -126,9 +124,11 @@ export function useAppointmentCalendar() {
     /* eslint-enable camelcase */
     const merged = new Map()
     const enabledClinicians = sources.enabledClinicianIds.value
-    const myAppointmentsEnabled = sources.isSourceEnabled(
-      calendarSourceIds.myAppointments,
-    )
+    const mapOptions = {
+      sourceId: calendarSourceIds.clinicianAppointments,
+      timeZone: timeZone.value,
+      myClinicianId: sources.myClinicianId.value,
+    }
 
     try {
       if (canSelectClinicianSources.value) {
@@ -138,22 +138,16 @@ export function useAppointmentCalendar() {
             /* eslint-disable-next-line camelcase */
             clinician_ids: enabledClinicians.join(','),
           })
-          const sourceId = myAppointmentsEnabled
-            ? calendarSourceIds.myAppointments
-            : calendarSourceIds.clinicianAppointments
-
-          mapAppointmentsToCalendarEvents(appointments, {
-            sourceId,
-            timeZone: timeZone.value,
-          }).forEach(event => {
-            merged.set(event.id, event)
-          })
+          mapAppointmentsToCalendarEvents(appointments, mapOptions)
+            .forEach(event => {
+              merged.set(event.id, event)
+            })
         }
-      } else if (myAppointmentsEnabled) {
+      } else {
         const appointments = await listCalendarAppointments(params)
         mapAppointmentsToCalendarEvents(appointments, {
+          ...mapOptions,
           sourceId: calendarSourceIds.myAppointments,
-          timeZone: timeZone.value,
         }).forEach(event => {
           merged.set(event.id, event)
         })

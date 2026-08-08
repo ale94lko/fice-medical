@@ -68,7 +68,8 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     display: flex;
   }
 
-  &__sidebar {
+  &__sidebar-wrap {
+    position: relative;
     flex: 0 0 280px;
     min-width: 260px;
     max-width: 300px;
@@ -76,6 +77,63 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    padding: 8px 8px 16px;
+    background: $surface;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-sm;
+    transition:
+      flex-basis 0.2s ease,
+      min-width 0.2s ease,
+      max-width 0.2s ease;
+  }
+
+  &__sidebar-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    margin: 0 0 8px;
+  }
+
+  &__sidebar-toggle {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: $radius-md;
+    background: $surface !important;
+    border: 1px solid $border-subtle;
+    box-shadow: $shadow-sm;
+    color: $text-muted;
+  }
+
+  &__sidebar-wrap--collapsed {
+    flex: 0 0 60px;
+    min-width: 60px;
+    max-width: 60px;
+    padding: 8px;
+    align-items: stretch;
+  }
+
+  &__sidebar-wrap--collapsed &__sidebar-toolbar {
+    margin-bottom: 8px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  &__sidebar-wrap--collapsed &__sidebar {
+    overflow: auto;
+  }
+
+  &__sidebar {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
   }
 
   &__main {
@@ -152,11 +210,6 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 }
 
 .calendar-sidebar {
-  background: $surface;
-  border: 1px solid $border-subtle;
-  border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  padding: 16px;
   flex: 1 1 auto;
   height: 100%;
   min-height: 0;
@@ -215,6 +268,19 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   &__checkbox.q-checkbox .q-checkbox__inner--truthy .q-checkbox__bg {
     background: var(--calendar-clinician-color) !important;
     border-color: var(--calendar-clinician-color) !important;
+  }
+
+  &--compact {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &--compact &__row {
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 6px;
+    padding: 0;
   }
 }
 
@@ -328,14 +394,14 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   }
 
   &__event {
-    border: 1px solid rgba($text-strong, 0.14);
+    border: 1px solid rgba($text-strong, 0.35);
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 1px 6px;
     text-align: left;
     font-family: $typography-font-family;
     font-size: 0.75rem;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.15;
     cursor: pointer;
     overflow: hidden;
     white-space: nowrap;
@@ -550,9 +616,14 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 
 .calendar-event {
   position: absolute;
-  border: 1px solid rgba($text-strong, 0.14);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  box-sizing: border-box;
+  border: 1px solid rgba($text-strong, 0.35);
   border-radius: 6px;
-  padding: 4px 6px;
+  padding: 1px 6px;
   text-align: left;
   overflow: hidden;
   cursor: pointer;
@@ -561,21 +632,32 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   font-family: $typography-font-family;
   font-size: 0.75rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.1;
+  margin: 0;
+  box-shadow: 0 1px 2px rgba($text-strong, 0.1);
+
+  &--fits {
+    align-items: center;
+    text-align: center;
+  }
 
   &--overlap-layer {
-    box-shadow: 0 1px 2px rgba($text-strong, 0.08);
+    box-shadow:
+      0 0 0 1px rgba($white, 0.85),
+      0 2px 6px rgba($text-strong, 0.18);
   }
 
   &--overlap-front {
-    box-shadow: 0 2px 6px rgba($text-strong, 0.12);
+    box-shadow:
+      0 0 0 1px rgba($white, 0.95),
+      0 4px 12px rgba($text-strong, 0.24);
   }
 
   &__time {
     display: none;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -583,12 +665,30 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
 
   &__label {
     display: block;
+    max-width: 100%;
     font-size: inherit;
     font-weight: inherit;
-    line-height: inherit;
+    line-height: 1.1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  &--fits &__time,
+  &--fits &__label {
+    text-align: center;
+  }
+}
+
+@container (max-height: 22px) {
+  .calendar-event {
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1;
+  }
+
+  .calendar-event__label {
+    line-height: 1;
   }
 }
 
@@ -794,13 +894,11 @@ body.vp-tablet {
   }
 
   .calendar-page__body {
-    flex-direction: column;
+    flex-direction: row;
   }
 
-  .calendar-page__sidebar {
-    flex: 0 0 auto;
-    max-width: none;
-    width: 100%;
+  .calendar-page__sidebar-wrap {
+    display: none;
   }
 }
 

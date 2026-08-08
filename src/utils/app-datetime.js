@@ -502,7 +502,11 @@ function incompleteDisplayDatePrefix(result, format) {
 }
 
 function sanitizeDisplayDateByFormat(value, format, options = {}) {
-  const { maxToday = false, minYear: minYearOpt } = options
+  const {
+    maxToday = false,
+    minYear: minYearOpt,
+    minDate: minDateOpt = null,
+  } = options
   const digits = String(value ?? '').replace(/\D/g, '').slice(0, 8)
   if (!digits.length) {
     return ''
@@ -533,8 +537,27 @@ function sanitizeDisplayDateByFormat(value, format, options = {}) {
   if (maxToday && parsed.getTime() > startOfDay(new Date()).getTime()) {
     return formatDisplayDate(startOfDay(new Date()), { date_format: format })
   }
+  const minBound = resolveSanitizeMinDate(minDateOpt, format)
+  if (minBound && parsed.getTime() < minBound.getTime()) {
+    return formatDisplayDate(minBound, { date_format: format })
+  }
 
   return result
+}
+
+function resolveSanitizeMinDate(minDateOpt, format) {
+  if (!minDateOpt) {
+    return null
+  }
+  if (minDateOpt instanceof Date && !Number.isNaN(minDateOpt.getTime())) {
+    return startOfDay(minDateOpt)
+  }
+  const parsed = parseDisplayDate(String(minDateOpt), { date_format: format })
+  if (!parsed) {
+    return null
+  }
+
+  return startOfDay(parsed)
 }
 
 export function startOfDay(date) {

@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import { calendarSourceIds } from 'src/constants/calendar.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
 import {
@@ -7,26 +8,29 @@ import {
 } from 'src/utils/calendar-clinician-colors.js'
 import { useCalendarPermissions } from
   'src/composables/useCalendarPermissions.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 export function useCalendarEventSources() {
   const { t } = useI18n()
+  const authStore = useAuthStore()
+  const { linkedStaffProfile } = storeToRefs(authStore)
   const { canSelectClinicianSources } = useCalendarPermissions()
   const cliniciansLoading = ref(false)
   const clinicianOptions = ref([])
-  const enabledSourceIds = ref([
-    calendarSourceIds.myAppointments,
-  ])
+  const enabledSourceIds = ref([])
   const enabledClinicianIds = ref([])
 
+  const myClinicianId = computed(() => {
+    const profile = linkedStaffProfile.value
+    if (!profile?.isClinician || profile.id == null) {
+      return null
+    }
+    const id = Number(profile.id)
+
+    return Number.isFinite(id) ? id : null
+  })
+
   const sourceDefinitions = computed(() => [
-    {
-      id: calendarSourceIds.myAppointments,
-      label: t('calendarSourceMyAppointments'),
-      description: t('calendarSourceMyAppointmentsHint'),
-      icon: 'event',
-      available: true,
-      toggleColor: 'positive',
-    },
     {
       id: calendarSourceIds.followUps,
       label: t('calendarSourceFollowUps'),
@@ -50,7 +54,10 @@ export function useCalendarEventSources() {
   const clinicians = computed(() =>
     clinicianOptions.value.map(option => ({
       ...option,
-      checkboxColor: getClinicianCheckboxColor(option.value),
+      checkboxColor: getClinicianCheckboxColor(
+        option.value,
+        myClinicianId.value,
+      ),
     })),
   )
 
@@ -110,6 +117,7 @@ export function useCalendarEventSources() {
   }
 
   return {
+    myClinicianId,
     sourceDefinitions,
     activeSourceDefinitions,
     enabledSourceIds,

@@ -338,10 +338,15 @@ export default {
     'Could not update service status. Please try again.',
   users: 'Users',
   userListSubtitle: 'Manage tenant users, roles, and access.',
-  userListSearchPlaceholder:
-    'Search by name, email or role…',
+  userListSearchPlaceholder: 'Search users...',
+  userListFilterRole: 'Role',
+  userListFilterStatus: 'Status',
   userListFilterAllRoles: 'All roles',
   userListFilterAllStatuses: 'All statuses',
+  userListFiltersTitle: 'Filter users',
+  userListFiltersClear: 'Clear filters',
+  userListFiltersApply: 'Apply filters',
+  userListFiltersActive: 'Filters ({count})',
   userListColUser: 'User',
   userListLastLoginToday: 'Today, {time}',
   userListLastLoginYesterday: 'Yesterday, {time}',
@@ -490,22 +495,21 @@ export default {
   calendarPageTitle: 'Calendar',
   calendarPageSubtitle:
     'View appointments and schedule activity.',
+  calendarSidebarCollapse: 'Collapse sidebar',
+  calendarSidebarExpand: 'Expand sidebar',
   calendarToday: 'Today',
   calendarViewMonth: 'Month',
   calendarViewWeek: 'Week',
   calendarViewDay: 'Day',
   calendarViewAgenda: 'Agenda',
   calendarSourcesTitle: 'Calendars',
-  calendarSourceMyAppointments: 'My appointments',
-  calendarSourceMyAppointmentsHint:
-    'Appointments linked to your clinician profile.',
   calendarSourceClinicianAppointments: 'Clinician appointments',
   calendarSourceClinicianAppointmentsHint:
     'Show appointments for selected clinicians.',
   calendarSourceFollowUps: 'Follow-ups',
   calendarSourceTasks: 'Tasks',
   calendarSourceComingSoon: 'Coming soon',
-  calendarCliniciansTitle: 'Clinicians',
+  calendarCliniciansTitle: 'Calendars',
   calendarCliniciansEmpty: 'No clinicians available.',
   calendarMoreEvents: '+{count} more',
   calendarAgendaEmpty: 'No events in this range.',
@@ -1873,7 +1877,6 @@ export default {
   appointmentTelemedicineBookHint:
     'This visit is marked as telemedicine. After booking, the '
     + 'meet link is created and the client is notified by email/SMS.',
-  appointmentPlacesEmpty: 'No places of service available.',
   appointmentTotalDurationTitle:
     'Appointment Duration (from selected services)',
   appointmentSuggestedFeeTotal: 'Suggested Fee (Total)',
@@ -1931,17 +1934,54 @@ export default {
     'This time overlaps a break or lunch block and is outside office hours.',
   appointmentBookSeriesSuccess: '{count} appointments booked successfully.',
   appointmentRepeatLabel: 'Repeat appointment',
+  appointmentRepeatSubtitle:
+    'Set how often this appointment should repeat.',
   appointmentRecurrenceFrequency: 'Frequency',
+  appointmentRecurrenceFrequencyHint:
+    'How often the appointment repeats',
   appointmentRecurrenceInterval: 'Repeat every',
+  appointmentRecurrenceIntervalHintDaily: 'Repeat every X day(s)',
+  appointmentRecurrenceIntervalHintWeekly: 'Repeat every X week(s)',
+  appointmentRecurrenceIntervalHintMonthly: 'Repeat every X month(s)',
+  appointmentRecurrenceUnitDays: 'day(s)',
+  appointmentRecurrenceUnitWeeks: 'week(s)',
+  appointmentRecurrenceUnitMonths: 'month(s)',
   appointmentRecurrenceDays: 'Days of week',
+  appointmentRecurrenceDaysSelected:
+    '{count} days selected',
+  appointmentRecurrenceDaysPresetNone: 'None',
+  appointmentRecurrenceDaysPresetAll: 'All',
+  appointmentRecurrenceDaysPresetWeekdays: 'Mon–Fri',
+  appointmentRecurrenceDaysPresetWeekend: 'Sat–Sun',
+  appointmentRecurrenceDaysPresetCustom: 'Custom',
   appointmentRecurrenceEnds: 'Ends',
+  appointmentRecurrenceEndsHint: 'When the repetition will end.',
   appointmentRecurrenceCount: 'Number of appointments',
+  appointmentRecurrenceCountHint:
+    'Total number of appointments to schedule.',
   appointmentRecurrenceEndDate: 'End date',
+  appointmentRecurrenceEndDateRequired: 'End date is required.',
+  appointmentRecurrenceEndDateAfterStart:
+    'End date must be after the selected appointment date.',
   appointmentRecurrenceDaily: 'Daily',
   appointmentRecurrenceWeekly: 'Weekly',
   appointmentRecurrenceMonthly: 'Monthly',
-  appointmentRecurrenceAfterCount: 'After number of appointments',
-  appointmentRecurrenceOnDate: 'On specific date',
+  appointmentRecurrenceAfterCount: 'After count',
+  appointmentRecurrenceOnDate: 'On date',
+  appointmentRecurrencePreviewLabel: 'Preview',
+  appointmentRecurrencePreviewSelectedDate: 'the selected date',
+  appointmentRecurrencePreviewNoDays: 'no days',
+  appointmentRecurrencePreviewDayPair: '{first} and {second}',
+  appointmentRecurrencePreviewDayList: '{list} and {last}',
+  appointmentRecurrencePreviewWeekly:
+    '{preview}: {count} appointment(s) will be scheduled on {days},'
+    + ' starting from {startDate}.',
+  appointmentRecurrencePreviewDaily:
+    '{preview}: {count} appointment(s) will be scheduled daily,'
+    + ' starting from {startDate}.',
+  appointmentRecurrencePreviewMonthly:
+    '{preview}: {count} appointment(s) will be scheduled monthly,'
+    + ' starting from {startDate}.',
   placeOfServiceOffice: 'Office',
   placeOfServiceTelehealth: 'Telehealth',
   placeOfServiceHome: 'Home',

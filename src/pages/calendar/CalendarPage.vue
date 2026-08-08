@@ -29,25 +29,64 @@
         </div>
       </header>
 
-      <div class="calendar-page__body row no-wrap">
-        <CalendarSidebar
-          class="calendar-page__sidebar"
-          :sidebar-month-key="sidebarMonthKey"
-          :focus-day-key="focusDayKey"
-          :time-zone="timeZone"
-          :event-day-keys="eventDayKeys"
-          :sources="activeSourceDefinitions"
-          :enabled-source-ids="enabledSourceIds"
-          :enabled-clinician-ids="enabledClinicianIds"
-          :clinicians="clinicians"
-          :clinicians-loading="cliniciansLoading"
-          :can-select-clinicians="canSelectClinicianSources"
-          @select-day="onSidebarSelectDay"
-          @prev-month="shiftSidebarMonth(-1)"
-          @next-month="shiftSidebarMonth(1)"
-          @toggle-source="onToggleSource"
-          @toggle-clinician="onToggleClinician"
-        />
+      <div
+        class="calendar-page__body row no-wrap"
+        :class="{
+          'calendar-page__body--sidebar-collapsed': sidebarCollapsed,
+        }">
+        <div
+          class="calendar-page__sidebar-wrap"
+          :class="{
+            'calendar-page__sidebar-wrap--collapsed': sidebarCollapsed,
+          }">
+          <div class="calendar-page__sidebar-toolbar">
+            <q-btn
+              flat
+              dense
+              size="lg"
+              class="calendar-page__sidebar-toggle"
+              :icon="sidebarCollapsed
+                ? 'chevron_right'
+                : 'chevron_left'"
+              :aria-label="sidebarCollapsed
+                ? t('calendarSidebarExpand')
+                : t('calendarSidebarCollapse')"
+              :data-testid="calendarTestIds.sidebarToggle"
+              @click="toggleSidebarCollapsed"
+            >
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="bottom middle"
+                self="top middle"
+                :offset="[0, 6]">
+                {{
+                  sidebarCollapsed
+                    ? t('calendarSidebarExpand')
+                    : t('calendarSidebarCollapse')
+                }}
+              </q-tooltip>
+            </q-btn>
+          </div>
+          <CalendarSidebar
+            class="calendar-page__sidebar"
+            :collapsed="sidebarCollapsed"
+            :sidebar-month-key="sidebarMonthKey"
+            :focus-day-key="focusDayKey"
+            :time-zone="timeZone"
+            :event-day-keys="eventDayKeys"
+            :sources="activeSourceDefinitions"
+            :enabled-source-ids="enabledSourceIds"
+            :enabled-clinician-ids="enabledClinicianIds"
+            :clinicians="clinicians"
+            :clinicians-loading="cliniciansLoading"
+            :can-select-clinicians="canSelectClinicianSources"
+            @select-day="onSidebarSelectDay"
+            @prev-month="shiftSidebarMonth(-1)"
+            @next-month="shiftSidebarMonth(1)"
+            @toggle-source="onToggleSource"
+            @toggle-clinician="onToggleClinician"
+          />
+        </div>
 
         <section class="calendar-page__main col">
           <q-banner
@@ -118,7 +157,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
@@ -152,6 +191,34 @@ const { canSelectClinicianSources, canBookAppointment } =
 const bookDialogOpen = ref(false)
 const bookSaving = ref(false)
 const bookHint = ref(null)
+
+const SIDEBAR_COLLAPSED_KEY =
+  'fice-medical.calendar.sidebar-collapsed'
+
+function readSidebarCollapsed() {
+  try {
+    return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+const sidebarCollapsed = ref(readSidebarCollapsed())
+
+function toggleSidebarCollapsed() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
+}
+
+watch(sidebarCollapsed, value => {
+  try {
+    localStorage.setItem(
+      SIDEBAR_COLLAPSED_KEY,
+      value ? '1' : '0',
+    )
+  } catch {
+    // Ignore persistence failures (private mode, etc.).
+  }
+})
 
 const {
   timeZone,

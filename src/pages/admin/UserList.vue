@@ -11,8 +11,7 @@
       :title="t('users')"
       :subtitle="t('userListSubtitle')">
       <template #center>
-        <div
-          class="user-list-page__toolbar row items-center">
+        <div class="user-list-page__toolbar row items-center">
           <q-input
             :model-value="searchQuery"
             outlined
@@ -29,34 +28,6 @@
               <q-icon name="search" size="18px" />
             </template>
           </q-input>
-          <q-select
-            v-model="roleFilter"
-            outlined
-            hide-bottom-space
-            emit-value
-            map-options
-            class="user-list-page__filter"
-            :disable="loading"
-            :options="roleFilterOptions"
-            :data-testid="userListTestIds.roleFilter">
-            <template #prepend>
-              <q-icon name="filter_alt" size="18px" />
-            </template>
-          </q-select>
-          <q-select
-            v-model="statusFilter"
-            outlined
-            hide-bottom-space
-            emit-value
-            map-options
-            class="user-list-page__filter"
-            :disable="loading"
-            :options="statusFilterOptions"
-            :data-testid="userListTestIds.statusFilter">
-            <template #prepend>
-              <q-icon name="radio_button_checked" size="18px" />
-            </template>
-          </q-select>
         </div>
       </template>
       <template #actions>
@@ -144,14 +115,14 @@
               :aria-label="t('edit')"
               @click="editRow(row)"
             >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('edit') }}
-          </q-tooltip>
-        </q-btn>
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('edit') }}
+              </q-tooltip>
+            </q-btn>
             <q-btn
               v-if="canEditUser"
               flat
@@ -164,42 +135,34 @@
               :aria-label="t('userListResetPasswordAction')"
               @click="editRow(row)"
             >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('userListResetPasswordAction') }}
-          </q-tooltip>
-        </q-btn>
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('userListResetPasswordAction') }}
+              </q-tooltip>
+            </q-btn>
             <q-btn
               v-if="canDeleteUser"
               flat
               round
               dense
-              icon="more_vert"
+              icon="delete_outline"
+              color="negative"
               class="app-btn-icon-action"
-              :data-testid="userListTestIds.rowMore(row.id)"
+              :data-testid="userListTestIds.rowDelete(row.id)"
               :size="siteBreakpoints.SM"
-              :aria-label="t('moreActions')">
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('moreActions') }}
-          </q-tooltip>
-              <q-menu anchor="bottom right" self="top right">
-                <q-list dense>
-                  <q-item
-                    v-close-popup
-                    clickable
-                    :data-testid="userListTestIds.rowDelete(row.id)"
-                    @click="confirmDelete(row)">
-                    <q-item-section>{{ t('delete') }}</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+              :aria-label="t('delete')"
+              @click="confirmDelete(row)"
+            >
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('delete') }}
+              </q-tooltip>
             </q-btn>
           </div>
         </template>
@@ -230,6 +193,12 @@
       @cancel="closeDialog"
     />
 
+    <UserListFiltersDrawer
+      v-model="filtersOpen"
+      :filters="appliedFilters"
+      @apply="onApplyFilters"
+    />
+
     <ModalComponent
       v-model="deleteConfirmOpen"
       :title="t('userDeleteTitle')"
@@ -258,7 +227,6 @@ import {
   siteBreakpoints,
   userFieldKeys,
   userListColumnKeys,
-  userStatusValues,
 } from 'components/constants.js'
 import { useAdminStore } from 'stores/admin-store.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -277,6 +245,8 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import UserDialog from 'components/UserDialog.vue'
+import UserListFiltersDrawer from
+  'components/admin/UserListFiltersDrawer.vue'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
@@ -287,7 +257,11 @@ import {
   USER_LIST_SEARCH_MIN_LENGTH,
   isUserListServerSearchQuery,
 } from 'src/utils/user-list-search.js'
-import { fetchTenantRoleOptions } from 'src/utils/tenant-roles-api.js'
+import {
+  cloneUserListFilters,
+  countActiveUserListFilters,
+  createEmptyUserListFilters,
+} from 'src/utils/user-list-filters.js'
 import { useAuthStore } from 'stores/auth-store.js'
 import { cloneUser } from 'src/utils/user-orders.js'
 import { userListTestIds } from 'src/test-ids/index.js'
@@ -308,9 +282,8 @@ const {
 } = useUserPermissions()
 
 const loading = ref(false)
-const roleFilter = ref(null)
-const statusFilter = ref(null)
-const roleFilterOptions = ref([])
+const filtersOpen = ref(false)
+const appliedFilters = ref(createEmptyUserListFilters())
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
 const dialogSaving = ref(false)
@@ -340,21 +313,18 @@ const highlightQuery = computed(() =>
 )
 const rows = computed(() => sourceRows.value)
 
-const statusFilterOptions = computed(() => [
-  { label: t('userListFilterAllStatuses'), value: null },
-  {
-    label: t('userStatusActive'),
-    value: userStatusValues.active,
-  },
-  {
-    label: t('userStatusInactive'),
-    value: userStatusValues.inactive,
-  },
-  {
-    label: t('userStatusPending'),
-    value: userStatusValues.pending,
-  },
-])
+const activeFilterCount = computed(() =>
+  countActiveUserListFilters(appliedFilters.value),
+)
+
+const filtersButtonLabel = computed(() => {
+  const count = activeFilterCount.value
+  if (count > 0) {
+    return t('userListFiltersActive', { count })
+  }
+
+  return t('filters')
+})
 
 const visibleColumns = computed(() => [
   {
@@ -451,42 +421,18 @@ function tablePaginationFromStore(paginationPayload) {
   }
 }
 
-async function loadRoleFilterOptions() {
-  const tenantId = authStore.tenantId
-  if (!tenantId) {
-    roleFilterOptions.value = [
-      { label: t('userListFilterAllRoles'), value: null },
-    ]
-    return
-  }
-
-  try {
-    const options = await fetchTenantRoleOptions(tenantId)
-    roleFilterOptions.value = [
-      { label: t('userListFilterAllRoles'), value: null },
-      ...options.map(option => ({
-        label: option.label ?? option.name,
-        value: String(option.value ?? option.id),
-      })),
-    ]
-  } catch {
-    roleFilterOptions.value = [
-      { label: t('userListFilterAllRoles'), value: null },
-    ]
-  }
-}
-
 async function loadUsers(paginationPayload) {
   loading.value = true
   try {
+    const filters = appliedFilters.value
     await adminStore.getUserList({
       page: paginationPayload.page,
       limit: paginationPayload.rowsPerPage,
       q: isUserListServerSearchQuery(trimmedQuery.value)
         ? trimmedQuery.value
         : null,
-      status: statusFilter.value,
-      role: roleFilter.value,
+      status: filters.status,
+      role: filters.role,
     }, t)
     tablePagination.value = tablePaginationFromStore(paginationPayload)
   } catch (error) {
@@ -530,24 +476,14 @@ function resetSearchQuery() {
   scheduleSearchReload()
 }
 
-function onFilterChange() {
-  tablePagination.value = { ...tablePagination.value, page: 1 }
+function onApplyFilters(nextFilters) {
+  appliedFilters.value = cloneUserListFilters(nextFilters)
+  tablePagination.value = {
+    ...tablePagination.value,
+    page: 1,
+  }
   loadUsers(tablePagination.value)
 }
-
-watch(roleFilter, (next, previous) => {
-  if (next === previous) {
-    return
-  }
-  onFilterChange()
-})
-
-watch(statusFilter, (next, previous) => {
-  if (next === previous) {
-    return
-  }
-  onFilterChange()
-})
 
 function onTableRequest(props) {
   const { pagination } = props
@@ -618,6 +554,18 @@ const pageActions = computed(() => [
     disable: loading.value,
     visible: canAddUser.value,
     onClick: openAddDialog,
+  },
+  {
+    key: 'filters',
+    label: filtersButtonLabel.value,
+    icon: 'filter_alt',
+    variant: 'outline',
+    testId: userListTestIds.filters,
+    disable: loading.value,
+    className: 'admin-list-page__filters-btn',
+    onClick: () => {
+      filtersOpen.value = true
+    },
   },
 ])
 
@@ -729,7 +677,6 @@ onMounted(async() => {
     onPageChange,
     onRowsPerPageChange,
   })
-  await loadRoleFilterOptions()
   await loadUsers(tablePagination.value)
   maybeOpenAddFromRoute()
 })
@@ -743,6 +690,7 @@ onBeforeUnmount(() => {
     clearTimeout(debounceTimer)
   }
   clearFooterPagination()
+  filtersOpen.value = false
 })
 
 watch(

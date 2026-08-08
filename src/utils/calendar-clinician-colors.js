@@ -1,10 +1,13 @@
 /**
- * Calendar clinician colors — green ($positive) is reserved for "my" events.
+ * Calendar clinician colors — green ($positive) is reserved for the
+ * clinician linked to the signed-in account.
  */
 export const calendarMyEventColors = {
   backgroundColor: '#dcfce7',
   color: '#15803d',
 }
+
+export const calendarMyCheckboxColor = '#16a34a'
 
 const clinicianColorPalette = [
   { backgroundColor: '#e0f2fe', color: '#0369a1' },
@@ -37,19 +40,40 @@ function paletteIndexForClinicianId(clinicianId) {
   return Math.abs(id) % clinicianColorPalette.length
 }
 
+export function isMyCalendarClinician(clinicianId, myClinicianId) {
+  if (myClinicianId == null || clinicianId == null) {
+    return false
+  }
+
+  return Number(clinicianId) === Number(myClinicianId)
+}
+
 export function getClinicianCalendarColors(clinicianId) {
   return clinicianColorPalette[paletteIndexForClinicianId(clinicianId)]
 }
 
-export function getClinicianCheckboxColor(clinicianId) {
+export function getClinicianCheckboxColor(clinicianId, myClinicianId = null) {
+  if (isMyCalendarClinician(clinicianId, myClinicianId)) {
+    return calendarMyCheckboxColor
+  }
+
   return clinicianCheckboxColors[paletteIndexForClinicianId(clinicianId)]
 }
 
-export function buildCalendarEventColorStyle(sourceId, clinicianId, options) {
-  const mySourceId = options?.mySourceId
-  if (sourceId === mySourceId) {
-    return { ...calendarMyEventColors }
-  }
+export function buildCalendarEventColorStyle(
+  _sourceId,
+  clinicianId,
+  options = {},
+) {
+  const colors = isMyCalendarClinician(
+    clinicianId,
+    options.myClinicianId,
+  )
+    ? calendarMyEventColors
+    : getClinicianCalendarColors(clinicianId)
 
-  return { ...getClinicianCalendarColors(clinicianId) }
+  return {
+    ...colors,
+    borderColor: colors.color,
+  }
 }

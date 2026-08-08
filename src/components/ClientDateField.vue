@@ -62,6 +62,7 @@ const props = defineProps({
   errorMessage: { type: String, default: '' },
   rules: { type: Array, default: () => [] },
   maxToday: { type: Boolean, default: false },
+  minDate: { type: String, default: '' },
   minYear: { type: Number, default: null },
   closeLabel: { type: String, default: 'Close' },
   testId: { type: String, default: '' },
@@ -90,6 +91,16 @@ const resolvedMinYear = computed(() => {
   return 1900
 })
 
+const resolvedMinDate = computed(() => {
+  const raw = String(props.minDate ?? '').trim()
+  if (!raw) {
+    return null
+  }
+  const parsed = parseUsDateString(raw)
+
+  return parsed ? startOfDay(parsed) : null
+})
+
 const datePickerValue = computed(() => {
   const d = parseUsDateString(props.modelValue)
   if (!d) {
@@ -100,21 +111,31 @@ const datePickerValue = computed(() => {
 })
 
 function dateOptions(dateStr) {
-  if (!props.maxToday) {
-    return true
-  }
   const parsed = parseUsDateString(dateStr)
   if (!parsed) {
     return true
   }
+  if (
+    props.maxToday
+    && parsed.getTime() > startOfDay(new Date()).getTime()
+  ) {
+    return false
+  }
+  if (
+    resolvedMinDate.value
+    && parsed.getTime() < resolvedMinDate.value.getTime()
+  ) {
+    return false
+  }
 
-  return parsed.getTime() <= startOfDay(new Date()).getTime()
+  return true
 }
 
 function sanitizeOptions() {
   return {
     maxToday: props.maxToday,
     minYear: resolvedMinYear.value,
+    minDate: props.minDate || null,
   }
 }
 

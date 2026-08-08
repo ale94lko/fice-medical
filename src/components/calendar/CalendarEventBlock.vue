@@ -1,5 +1,6 @@
 <template>
   <button
+    ref="rootRef"
     type="button"
     class="calendar-event"
     :class="[
@@ -8,6 +9,7 @@
         'calendar-event--overlap-layer': overlapLayout?.layer,
         'calendar-event--overlap-front': overlapLayout?.depthRank === 0
           && (overlapLayout?.clusterSize ?? 0) > 1,
+        'calendar-event--fits': labelFits,
       },
     ]"
     :data-testid="calendarTestIds.event(event.id)"
@@ -18,12 +20,16 @@
       class="calendar-event__time">
       {{ event.timeLabel }}
     </span>
-    <span class="calendar-event__label">{{ event.typeLabel }}</span>
+    <span
+      ref="labelRef"
+      class="calendar-event__label">
+      {{ event.typeLabel }}
+    </span>
   </button>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { computeCalendarEventPositionStyle } from
   'src/utils/calendar-events.js'
 import { resolveTenantTimeZone } from 'src/utils/appointment-datetime.js'
@@ -37,6 +43,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['select'])
+
+const labelRef = ref(null)
+const rootRef = ref(null)
+const labelFits = ref(false)
+let resizeObserver = null
 
 const positionStyle = computed(() => {
   if (props.compact) {
@@ -65,4 +76,58 @@ const positionStyle = computed(() => {
     ...(props.event.colorStyle ?? {}),
   }
 })
+
+function measureLabelFit() {
+  const el = labelRef.value
+  const root = rootRef.value
+  if (!el || !root) {
+    labelFits.value = false
+
+    return
+  }
+  const styles = getComputedStyle(root)
+  const padX = (parseFloat(styles.paddingLeft) || 0)
+    + (parseFloat(styles.paddingRight) || 0)
+  const available = root.clientWidth - padX
+  labelFits.value = el.scrollWidth <= available + 1
+}
+
+function scheduleMeasure() {
+  nextTick(() => {
+    measureLabelFit()
+  })
+}
+
+onMounted(() => {
+  scheduleMeasure()
+  if (typeof ResizeObserver === 'undefined') {
+    return
+  }
+  resizeObserver = new ResizeObserver(() => {
+    measureLabelFit()
+  })
+  if (rootRef.value) {
+    resizeObserver.observe(rootRef.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
+})
+
+watch(
+  () => [
+    props.event?.typeLabel,
+    props.event?.timeLabel,
+    props.overlapLayout?.left,
+    props.overlapLayout?.width,
+    props.overlapLayout?.right,
+    positionStyle.value?.width,
+    positionStyle.value?.height,
+  ],
+  () => {
+    scheduleMeasure()
+  },
+)
 </script>

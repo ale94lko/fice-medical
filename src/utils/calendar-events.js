@@ -188,7 +188,7 @@ export function appointmentToCalendarEvent(appointment, options = {}) {
     colorStyle: buildCalendarEventColorStyle(
       sourceId,
       appointment.clinicianId,
-      { mySourceId: calendarSourceIds.myAppointments },
+      { myClinicianId: options.myClinicianId ?? null },
     ),
     appointment,
   }
@@ -247,8 +247,6 @@ export function filterCalendarDisplayEvents(
   {
     enabledSourceIds = [],
     enabledClinicianIds = [],
-    mySourceId,
-    clinicianSourceId,
     restrictByClinicianSelection = false,
   } = {},
 ) {
@@ -256,25 +254,11 @@ export function filterCalendarDisplayEvents(
   const enabledClinicians = new Set(enabledClinicianIds)
 
   return (events ?? []).filter(event => {
-    if (
-      restrictByClinicianSelection
-      && event.kind === 'appointment'
-    ) {
-      const clinicianId = event.appointment?.clinicianId
-      if (clinicianId == null || !enabledClinicians.has(clinicianId)) {
-        return false
+    if (event.kind === 'appointment') {
+      if (!restrictByClinicianSelection) {
+        return true
       }
-    }
-
-    if (event.sourceId === mySourceId) {
-      return enabledSources.has(mySourceId)
-    }
-    if (event.sourceId === clinicianSourceId) {
       const clinicianId = event.appointment?.clinicianId
-
-      if (restrictByClinicianSelection) {
-        return clinicianId != null && enabledClinicians.has(clinicianId)
-      }
 
       return clinicianId != null && enabledClinicians.has(clinicianId)
     }

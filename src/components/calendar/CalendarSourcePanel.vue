@@ -1,30 +1,35 @@
 <template>
-  <div class="calendar-source-panel">
-    <p class="calendar-source-panel__title text-subtitle2 q-mb-sm">
-      {{ t('calendarSourcesTitle') }}
-    </p>
-
-    <div
-      v-for="source in sources"
-      :key="source.id"
-      class="calendar-source-panel__item q-mb-md">
-      <FormToggle
-        :model-value="isEnabled(source.id)"
-        :disable="!source.available"
-        :label="source.label"
-        :color="source.toggleColor || 'primary'"
-        @update:model-value="emit('toggle-source', source.id, $event)"
-      />
-      <p
-        v-if="source.description"
-        class="text-caption text-grey-7 q-mt-xs q-mb-none q-ml-xl">
-        {{ source.description }}
+  <div
+    class="calendar-source-panel"
+    :class="{ 'calendar-source-panel--collapsed': collapsed }">
+    <template v-if="!collapsed && sources.length">
+      <p class="calendar-source-panel__title text-subtitle2 q-mb-sm">
+        {{ t('calendarSourcesTitle') }}
       </p>
-    </div>
+
+      <div
+        v-for="source in sources"
+        :key="source.id"
+        class="calendar-source-panel__item q-mb-md">
+        <FormToggle
+          :model-value="isEnabled(source.id)"
+          :disable="!source.available"
+          :label="source.label"
+          :color="source.toggleColor || 'primary'"
+          @update:model-value="emit('toggle-source', source.id, $event)"
+        />
+        <p
+          v-if="source.description"
+          class="text-caption text-grey-7 q-mt-xs q-mb-none q-ml-xl">
+          {{ source.description }}
+        </p>
+      </div>
+    </template>
 
     <CalendarClinicianList
       v-if="canSelectClinicians"
-      class="q-mt-md"
+      :class="{ 'q-mt-md': !collapsed && sources.length }"
+      :compact="collapsed"
       :clinicians="clinicians"
       :enabled-ids="enabledClinicianIds"
       :loading="cliniciansLoading"
@@ -40,6 +45,7 @@ import CalendarClinicianList from
 import FormToggle from 'components/FormToggle.vue'
 
 const props = defineProps({
+  collapsed: { type: Boolean, default: false },
   sources: { type: Array, default: () => [] },
   enabledSourceIds: { type: Array, default: () => [] },
   enabledClinicianIds: { type: Array, default: () => [] },
