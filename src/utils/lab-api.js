@@ -104,10 +104,13 @@ export async function reviewPatientLab(patientId, labId, payload) {
   return resolveLabFromResponse(data)
 }
 
-/** Any non-cancelled → CANCELLED */
-export async function cancelPatientLab(patientId, labId) {
+/** Any non-cancelled / non-reviewed → CANCELLED */
+export async function cancelPatientLab(patientId, labId, reason = '') {
+  const trimmed = String(reason ?? '').trim()
+  const body = trimmed ? { reason: trimmed } : {}
   const response = await apiInstance.post(
     apiPaths.patientLabCancel(patientId, labId),
+    body,
   )
   const data = unwrapData(response.data)
 

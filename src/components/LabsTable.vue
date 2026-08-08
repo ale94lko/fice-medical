@@ -183,6 +183,7 @@
             dense
             class="app-btn-icon-action"
             icon="download"
+            :disable="!rowHasAttachments(row)"
             :data-testid="tid.rowDownload(row.id)"
             :size="siteBreakpoints.SM"
             :aria-label="t('labActionDownload')"
@@ -193,7 +194,11 @@
             anchor="top middle"
             self="bottom middle"
             :offset="[0, 6]">
-            {{ t('labActionDownload') }}
+            {{
+              rowHasAttachments(row)
+                ? t('labActionDownload')
+                : t('labNoAttachment')
+            }}
           </q-tooltip>
         </q-btn>
           <q-btn
@@ -245,8 +250,10 @@ import {
   canAdvanceLabToResults,
   canAdvanceLabToReview,
   canCancelLab,
+  hasLabAttachments,
   labResultStatusValues,
   resolveLabResultStatus,
+  sortLabsByOrderedDateDesc,
 } from 'src/utils/lab-orders.js'
 
 const props = defineProps({
@@ -281,7 +288,7 @@ const { t } = useI18n()
 
 const tablePagination = { rowsPerPage: 0 }
 
-const rows = computed(() => props.rows ?? [])
+const rows = computed(() => sortLabsByOrderedDateDesc(props.rows ?? []))
 
 function canCollectRow(row) {
   return canAdvanceLabToCollect(row?.status)
@@ -297,6 +304,10 @@ function canReviewRow(row) {
 
 function canCancelRow(row) {
   return canCancelLab(row?.status)
+}
+
+function rowHasAttachments(row) {
+  return hasLabAttachments(row)
 }
 
 const columns = computed(() => [

@@ -94,6 +94,8 @@ export function createEmptyLabOrder() {
     components: [],
     files: [],
     attachments: [],
+    hasAttachments: false,
+    createdAt: new Date().toISOString(),
     deletedAt: null,
   }
 }
@@ -161,6 +163,28 @@ function isUsDateAfterToday(usDate) {
   }
 
   return parsed.getTime() > startOfDay(new Date()).getTime()
+}
+
+/** True when both dates are valid and `dateStr` is strictly before `minStr`. */
+export function isUsDateBefore(dateStr, minStr) {
+  const dateKey = parseUsDateToSortable(dateStr)
+  const minKey = parseUsDateToSortable(minStr)
+  if (!dateKey || !minKey) {
+    return false
+  }
+
+  return dateKey < minKey
+}
+
+function validateDateNotBefore(dateStr, minStr, errorKey) {
+  if (!String(dateStr ?? '').trim() || !String(minStr ?? '').trim()) {
+    return null
+  }
+  if (isUsDateBefore(dateStr, minStr)) {
+    return errorKey
+  }
+
+  return null
 }
 
 export function isAbnormalFlag(flag) {
@@ -305,6 +329,57 @@ export function parseUsDateToSortable(dateStr) {
   return Number(`${m[3]}${m[1].padStart(2, '0')}${m[2].padStart(2, '0')}`)
 }
 
+/** Higher = introduced more recently (for same ordered date). */
+export function labIntroductionSortKey(lab) {
+  const created = lab?.createdAt ?? lab?.created_at ?? lab?.introducedAt
+  if (created != null && created !== '') {
+    if (typeof created === 'number' && Number.isFinite(created)) {
+      return created
+    }
+    const parsed = Date.parse(String(created))
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+  const id = String(lab?.id ?? '').trim()
+  if (id !== '' && Number.isFinite(Number(id))) {
+    return Number(id)
+  }
+  // Local ids: lab-<timestamp>-<random>
+  const localStamp = /-(\d{10,})(?:-|$)/.exec(id)
+  if (localStamp) {
+    return Number(localStamp[1])
+  }
+
+  return 0
+}
+
+/**
+ * Newest ordered date first; same date → last introduced first.
+ */
+export function sortLabsByOrderedDateDesc(list) {
+  const rows = Array.isArray(list) ? [...list] : []
+
+  return rows
+    .map((row, index) => ({ row, index }))
+    .sort((a, b) => {
+      const dateA = parseUsDateToSortable(a.row?.orderedDate)
+      const dateB = parseUsDateToSortable(b.row?.orderedDate)
+      if (dateB !== dateA) {
+        return dateB - dateA
+      }
+      const introA = labIntroductionSortKey(a.row)
+      const introB = labIntroductionSortKey(b.row)
+      if (introB !== introA) {
+        return introB - introA
+      }
+
+      // Stable fallback: later in the list = introduced last.
+      return b.index - a.index
+    })
+    .map(item => item.row)
+}
+
 export function filterLabs(list, filters = {}) {
   const search = String(filters.search ?? '').trim().toLowerCase()
   const status = String(filters.status ?? '').trim().toLowerCase()
@@ -373,6 +448,15 @@ export function validateLabCollect(lab) {
     errors.collectedDate = true
   } else if (isUsDateAfterToday(lab.collectedDate)) {
     errors.collectedDate = 'labDateNotFuture'
+  } else {
+    const beforeOrdered = validateDateNotBefore(
+      lab.collectedDate,
+      lab.orderedDate,
+      'labCollectedBeforeOrdered',
+    )
+    if (beforeOrdered) {
+      errors.collectedDate = beforeOrdered
+    }
   }
 
   return errors
@@ -384,6 +468,17 @@ export function validateLabResults(lab) {
     errors.resultDate = true
   } else if (isUsDateAfterToday(lab.resultDate)) {
     errors.resultDate = 'labDateNotFuture'
+  } else {
+    const minDate = String(lab?.collectedDate ?? '').trim()
+      || String(lab?.orderedDate ?? '').trim()
+    const beforeCollected = validateDateNotBefore(
+      lab.resultDate,
+      minDate,
+      'labResultBeforeCollected',
+    )
+    if (beforeCollected) {
+      errors.resultDate = beforeCollected
+    }
   }
   const summary = String(lab?.resultSummary ?? '')
   if (summary.length > labMaxResultSummaryLength) {
@@ -402,6 +497,18 @@ export function validateLabReview(lab) {
     errors.reviewedDate = true
   } else if (isUsDateAfterToday(lab.reviewedDate)) {
     errors.reviewedDate = 'labDateNotFuture'
+  } else {
+    const minDate = String(lab?.resultDate ?? '').trim()
+      || String(lab?.collectedDate ?? '').trim()
+      || String(lab?.orderedDate ?? '').trim()
+    const beforeResult = validateDateNotBefore(
+      lab.reviewedDate,
+      minDate,
+      'labReviewedBeforeResult',
+    )
+    if (beforeResult) {
+      errors.reviewedDate = beforeResult
+    }
   }
 
   return errors
@@ -505,7 +612,51 @@ export function canAdvanceLabToReview(status) {
 export function canCancelLab(status) {
   const token = labStatusToken(status)
 
-  return Boolean(token) && token !== labStatuses.cancelled
+  return Boolean(token)
+    && token !== labStatuses.cancelled
+    && token !== labStatuses.reviewed
+}
+
+export function hasLabAttachments(lab) {
+  if (lab?.hasAttachments === true) {
+    return true
+  }
+  const files = lab?.files ?? lab?.attachments ?? []
+  if (!Array.isArray(files) || !files.length) {
+    return false
+  }
+
+  return files.some(file => {
+    if (!file || file.deletedAt) {
+      return false
+    }
+
+    return Boolean(file.id || file.rawFile || file.name)
+  })
+}
+
+export function normalizeLabComponentName(name) {
+  return String(name ?? '').trim().toLowerCase()
+}
+
+export function isLabComponentAlreadyAdded(
+  componentName,
+  existingComponents = [],
+  { excludeId = null } = {},
+) {
+  const needle = normalizeLabComponentName(componentName)
+  if (!needle) {
+    return false
+  }
+  const exclude = String(excludeId ?? '').trim()
+
+  return visibleComponents(existingComponents).some(item => {
+    if (exclude && String(item.id ?? '').trim() === exclude) {
+      return false
+    }
+
+    return normalizeLabComponentName(item.componentName) === needle
+  })
 }
 
 export function nextLabTransitionAction(status) {
@@ -522,18 +673,43 @@ export function nextLabTransitionAction(status) {
   return null
 }
 
-export function validateLabComponent(component) {
+export function validateLabComponent(
+  component,
+  {
+    existingComponents = [],
+    excludeId = null,
+    minResultDate = '',
+  } = {},
+) {
   const errors = {}
   if (!String(component?.componentName ?? '').trim()) {
     errors.componentName = true
+  } else if (isLabComponentAlreadyAdded(
+    component.componentName,
+    existingComponents,
+    { excludeId },
+  )) {
+    errors.componentName = 'labComponentDuplicate'
   }
   if (component?.value === '' || component?.value == null) {
     errors.value = true
+  }
+  if (!String(component?.unit ?? '').trim()) {
+    errors.unit = true
   }
   if (!String(component?.resultDate ?? '').trim()) {
     errors.resultDate = true
   } else if (isUsDateAfterToday(component.resultDate)) {
     errors.resultDate = 'labDateNotFuture'
+  } else if (minResultDate) {
+    const beforeMin = validateDateNotBefore(
+      component.resultDate,
+      minResultDate,
+      'labResultBeforeCollected',
+    )
+    if (beforeMin) {
+      errors.resultDate = beforeMin
+    }
   }
   const notes = String(component?.notes ?? '')
   if (notes.length > labMaxComponentNotesLength) {

@@ -172,6 +172,7 @@
                   v-model="local.collectedDate"
                   :readonly="specimenFieldsReadonly"
                   :max-today="true"
+                  :min-date="local.orderedDate || ''"
                   :error="Boolean(errors.collectedDate)"
                   :error-message="errorText('collectedDate')"
                   :test-id="tid.field('collected-date')"
@@ -211,6 +212,7 @@
                   v-model="local.resultDate"
                   :readonly="resultsFieldsReadonly"
                   :max-today="true"
+                  :min-date="resultDateMin"
                   :error="Boolean(errors.resultDate)"
                   :error-message="errorText('resultDate')"
                   :test-id="tid.field('result-date')"
@@ -289,6 +291,7 @@
                   v-model="local.reviewedDate"
                   :readonly="reviewFieldsReadonly"
                   :max-today="true"
+                  :min-date="reviewedDateMin"
                   :error="Boolean(errors.reviewedDate)"
                   :error-message="errorText('reviewedDate')"
                   :test-id="tid.field('reviewed-date')"
@@ -437,6 +440,8 @@
       v-model="componentDialogOpen"
       :component="editingComponent"
       :edit-mode="Boolean(editingComponent?.id)"
+      :existing-components="visibleComponents"
+      :min-result-date="componentResultMinDate"
       @save="onComponentSaved"
     />
 
@@ -451,15 +456,9 @@
       @cancel="onCancelDeleteComponent"
     />
 
-    <ModalComponent
+    <LabCancelDialog
       v-model="labCancelOpen"
-      test-id="lab-cancel"
-      :title="t('labCancelTitle')"
-      :message="t('labCancelMessage')"
-      :confirm-text="t('labCancelLab')"
-      :cancel-text="t('cancel')"
       @confirm="onConfirmCancelLab"
-      @cancel="onDismissCancelLab"
     />
   </q-dialog>
 </template>
@@ -475,6 +474,7 @@ import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import LabAttachmentUploadField from 'components/LabAttachmentUploadField.vue'
+import LabCancelDialog from 'components/LabCancelDialog.vue'
 import LabComponentDialog from 'components/LabComponentDialog.vue'
 import LabComponentsTable from 'components/LabComponentsTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
@@ -505,6 +505,7 @@ import {
   computeLabAbnormalResult,
   createEmptyLabOrder,
   isLabTerminal,
+  isUsDateBefore,
   labStatusToken,
   nextLabTransitionAction,
   nextLocalId,
@@ -847,6 +848,21 @@ const visibleComponents = computed(() =>
   filterVisibleComponents(local.value.components),
 )
 
+const resultDateMin = computed(() =>
+  String(local.value.collectedDate ?? '').trim()
+  || String(local.value.orderedDate ?? '').trim()
+  || '',
+)
+
+const reviewedDateMin = computed(() =>
+  String(local.value.resultDate ?? '').trim()
+  || String(local.value.collectedDate ?? '').trim()
+  || String(local.value.orderedDate ?? '').trim()
+  || '',
+)
+
+const componentResultMinDate = computed(() => resultDateMin.value)
+
 const categoryOptions = computed(() =>
   Object.values(labCategories).map(value => ({
     label: t(labI18nKey('labCategory', value)),
@@ -928,6 +944,38 @@ watch(
     ).filter(item => item?.rawFile instanceof File)
     local.value.files = [...files, ...pendingLocal]
     local.value.attachments = local.value.files
+  },
+)
+
+function clearLabDatesBeforeMin() {
+  const ordered = String(local.value.orderedDate ?? '').trim()
+  if (ordered && isUsDateBefore(local.value.collectedDate, ordered)) {
+    local.value.collectedDate = null
+  }
+  const resultMin = String(local.value.collectedDate ?? '').trim() || ordered
+  if (resultMin && isUsDateBefore(local.value.resultDate, resultMin)) {
+    local.value.resultDate = null
+  }
+  const reviewMin = String(local.value.resultDate ?? '').trim()
+    || String(local.value.collectedDate ?? '').trim()
+    || ordered
+  if (reviewMin && isUsDateBefore(local.value.reviewedDate, reviewMin)) {
+    local.value.reviewedDate = null
+  }
+}
+
+watch(
+  () => [
+    open.value,
+    local.value.orderedDate,
+    local.value.collectedDate,
+    local.value.resultDate,
+  ],
+  () => {
+    if (!open.value) {
+      return
+    }
+    clearLabDatesBeforeMin()
   },
 )
 
@@ -1047,6 +1095,7 @@ function attachmentList() {
 function setAttachmentList(next) {
   local.value.files = next
   local.value.attachments = next
+  local.value.hasAttachments = Array.isArray(next) && next.length > 0
 }
 
 async function emitAction(action) {
@@ -1066,13 +1115,16 @@ function onCancelLabClick() {
   labCancelOpen.value = true
 }
 
-function onConfirmCancelLab() {
+function onConfirmCancelLab(reason) {
+  const cancelReason = String(reason ?? '').trim()
+  if (!cancelReason) {
+    return
+  }
   labCancelOpen.value = false
-  emit('save', buildLabCopy(), { action: 'cancel' })
-}
-
-function onDismissCancelLab() {
-  labCancelOpen.value = false
+  emit('save', buildLabCopy(), {
+    action: 'cancel',
+    cancelReason,
+  })
 }
 
 function openComponentDialog(component = null) {

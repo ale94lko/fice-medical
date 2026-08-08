@@ -110,8 +110,27 @@ const datePickerValue = computed(() => {
   return props.modelValue
 })
 
+function parseCalendarOptionDate(dateStr) {
+  const raw = String(dateStr ?? '').trim()
+  const fromDisplay = parseUsDateString(raw)
+  if (fromDisplay) {
+    return startOfDay(fromDisplay)
+  }
+  // Quasar q-date options may use YYYY/MM/DD regardless of input mask.
+  const isoSlash = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/.exec(raw)
+  if (isoSlash) {
+    return startOfDay(new Date(
+      Number(isoSlash[1]),
+      Number(isoSlash[2]) - 1,
+      Number(isoSlash[3]),
+    ))
+  }
+
+  return null
+}
+
 function dateOptions(dateStr) {
-  const parsed = parseUsDateString(dateStr)
+  const parsed = parseCalendarOptionDate(dateStr)
   if (!parsed) {
     return true
   }

@@ -1193,6 +1193,9 @@ export default {
   labCancelTitle: 'Cancel Lab?',
   labCancelMessage:
     'This lab will be cancelled. This action cannot be undone.',
+  labCancelReasonHint:
+    'For audit purposes, please provide a reason for the cancellation.',
+  labCancelReasonLabel: 'Cancellation reason',
   labActionCollect: 'Collect Lab',
   labActionEnterResults: 'Enter Results',
   labActionReview: 'Review',
@@ -1241,6 +1244,8 @@ export default {
   labComponentValue: 'Value',
   labComponentValuePlaceholder: 'Enter numeric or text value',
   labComponentUnit: 'Unit',
+  labComponentDuplicate:
+    'This component was already added to the list.',
   labComponentFlag: 'Flag',
   labRefRangeLow: 'Reference Range Low',
   labRefRangeHigh: 'Reference Range High',
@@ -1250,6 +1255,12 @@ export default {
   labComponentResultTime: 'Result Time',
   labComponentResultTimePlaceholder: '23:00:58',
   labDateNotFuture: 'Date cannot be in the future.',
+  labCollectedBeforeOrdered:
+    'Collected date must be on or after the ordered date.',
+  labResultBeforeCollected:
+    'Result date must be on or after the collected date.',
+  labReviewedBeforeResult:
+    'Reviewed date must be on or after the result date.',
   labComponentNotes: 'Notes',
   labComponentPreview: 'Component Preview',
   labComponentAdd: 'Add Component',

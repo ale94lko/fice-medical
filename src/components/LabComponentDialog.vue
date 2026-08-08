@@ -61,6 +61,7 @@
           <div class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('labComponentUnit')"
+              required
               :test-id="tid.field('unit')">
               <FormSelect
                 v-model="local.unit"
@@ -70,6 +71,8 @@
                 map-options
                 clearable
                 :options="unitOptions"
+                :error="Boolean(errors.unit)"
+                :error-message="errorText('unit')"
                 :test-id="tid.field('unit')"
               />
             </AddClientLabeledField>
@@ -148,6 +151,7 @@
               <ClientDateField
                 v-model="local.resultDate"
                 :max-today="true"
+                :min-date="minResultDate || ''"
                 :error="Boolean(errors.resultDate)"
                 :error-message="errorText('resultDate')"
                 :test-id="tid.field('result-date')"
@@ -294,6 +298,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  existingComponents: {
+    type: Array,
+    default: () => [],
+  },
+  minResultDate: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['save', 'cancel'])
@@ -323,11 +335,33 @@ const flagOptions = computed(() =>
   })),
 )
 
+const takenComponentNames = computed(() => {
+  const excludeId = String(props.component?.id ?? '').trim()
+
+  return new Set(
+    (props.existingComponents ?? [])
+      .filter(item => {
+        if (!item || item.deletedAt) {
+          return false
+        }
+        if (excludeId && String(item.id ?? '').trim() === excludeId) {
+          return false
+        }
+
+        return Boolean(String(item.componentName ?? '').trim())
+      })
+      .map(item => String(item.componentName).trim().toLowerCase()),
+  )
+})
+
 const componentOptions = computed(() => {
   const needle = componentFilter.value.trim().toLowerCase()
   const base = LAB_COMPONENT_OPTIONS.map(item => ({
     label: item.label,
     value: item.value,
+    disable: takenComponentNames.value.has(
+      String(item.value).trim().toLowerCase(),
+    ),
   }))
   if (!needle) {
     return base
@@ -466,7 +500,11 @@ function onCancel() {
 }
 
 async function onSave(another) {
-  errors.value = validateLabComponent(local.value)
+  errors.value = validateLabComponent(local.value, {
+    existingComponents: props.existingComponents,
+    excludeId: props.component?.id,
+    minResultDate: props.minResultDate,
+  })
   if (Object.keys(errors.value).length) {
     await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 

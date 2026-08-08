@@ -1243,6 +1243,9 @@ export default {
   labCancelTitle: '¿Cancelar laboratorio?',
   labCancelMessage:
     'Este laboratorio se cancelará. Esta acción no se puede deshacer.',
+  labCancelReasonHint:
+    'Para auditoría, indique el motivo de la cancelación.',
+  labCancelReasonLabel: 'Motivo de cancelación',
   labActionCollect: 'Recolectar laboratorio',
   labActionEnterResults: 'Ingresar resultados',
   labActionReview: 'Revisar',
@@ -1291,6 +1294,8 @@ export default {
   labComponentValue: 'Valor',
   labComponentValuePlaceholder: 'Valor numérico o texto',
   labComponentUnit: 'Unidad',
+  labComponentDuplicate:
+    'Este componente ya fue añadido a la lista.',
   labComponentFlag: 'Indicador',
   labRefRangeLow: 'Rango bajo',
   labRefRangeHigh: 'Rango alto',
@@ -1300,6 +1305,12 @@ export default {
   labComponentResultTime: 'Hora',
   labComponentResultTimePlaceholder: '23:00:58',
   labDateNotFuture: 'La fecha no puede ser posterior a hoy.',
+  labCollectedBeforeOrdered:
+    'La fecha de recolección debe ser igual o posterior a la fecha de orden.',
+  labResultBeforeCollected:
+    'La fecha de resultado debe ser igual o posterior a la de recolección.',
+  labReviewedBeforeResult:
+    'La fecha de revisión debe ser igual o posterior a la de resultado.',
   labComponentNotes: 'Notas',
   labComponentPreview: 'Vista previa',
   labComponentAdd: 'Agregar componente',

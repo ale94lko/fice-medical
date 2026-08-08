@@ -2,7 +2,11 @@ import {
   labAbnormalValues,
   labStatuses,
 } from 'components/constants.js'
-import { cloneLab, computeLabAbnormalResult } from 'src/utils/lab-orders.js'
+import {
+  cloneLab,
+  computeLabAbnormalResult,
+  sortLabsByOrderedDateDesc,
+} from 'src/utils/lab-orders.js'
 import { isoDateToUsDateString, usDateToIso } from 'src/utils/client-form.js'
 import {
   mapStoredFilesList,
@@ -143,6 +147,12 @@ export function normalizeLabComponent(raw) {
 
 export function normalizeLabSummary(raw) {
   const l = raw ?? {}
+  const filesPreview = l.files ?? l.attachments
+  const hasAttachmentsFlag = parseOptionalBool(
+    l.has_attachments ?? l.hasAttachments,
+  )
+  const hasAttachmentRows = Array.isArray(filesPreview)
+    && filesPreview.some(file => file && !(file.deleted_at ?? file.deletedAt))
 
   return {
     id: String(l.id ?? l.lab_id ?? '').trim(),
@@ -164,19 +174,24 @@ export function normalizeLabSummary(raw) {
     priority: toLabApiEnum(l.priority),
     abnormalResult: parseOptionalBool(pickAbnormalResultRaw(l)),
     abnormalResultManual: resolveAbnormalResultManual(l),
+    hasAttachments: hasAttachmentsFlag === true || hasAttachmentRows,
+    createdAt: String(
+      l.created_at ?? l.createdAt ?? l.introduced_at ?? l.introducedAt ?? '',
+    ).trim() || null,
     deletedAt: l.deleted_at ?? l.deletedAt ?? null,
   }
 }
 
 export function normalizeLabDetail(raw) {
   const l = raw ?? {}
+  const summary = normalizeLabSummary(l)
   const components = (l.components ?? [])
     .map(normalizeLabComponent)
     .filter(c => c.id && !c.deletedAt)
   const files = mapStoredFilesList(l.files ?? l.attachments ?? [])
 
   return {
-    ...normalizeLabSummary(l),
+    ...summary,
     orderingClinicianId: String(
       l.ordering_clinician_id ?? l.orderingClinicianId ?? '',
     ).trim() || null,
@@ -199,6 +214,7 @@ export function normalizeLabDetail(raw) {
     components,
     files,
     attachments: files,
+    hasAttachments: files.length > 0 || Boolean(summary.hasAttachments),
   }
 }
 
@@ -330,7 +346,7 @@ export function labToApiPayload(lab) {
 export function mapClientLabsListFromApi(rawList) {
   const list = Array.isArray(rawList) ? rawList : []
 
-  return list.map(raw => {
+  return sortLabsByOrderedDateDesc(list.map(raw => {
     const detail = normalizeLabDetail(raw)
     const copy = cloneLab(detail)
     // Preserve API true/false. Only infer when null/missing.
@@ -342,5 +358,5 @@ export function mapClientLabsListFromApi(rawList) {
     }
 
     return copy
-  })
+  }))
 }

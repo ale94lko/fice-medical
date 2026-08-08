@@ -73,15 +73,9 @@
       @remove-attachment="onRemoveAttachment"
     />
 
-    <ModalComponent
+    <LabCancelDialog
       v-model="cancelDialogOpen"
-      test-id="lab-cancel"
-      :title="t('labCancelTitle')"
-      :message="t('labCancelMessage')"
-      :confirm-text="t('labCancelLab')"
-      :cancel-text="t('cancel')"
       @confirm="confirmCancelLab"
-      @cancel="cancelDialogOpen = false"
     />
   </div>
 </template>
@@ -94,7 +88,7 @@ import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import LabOrderDialog from 'components/LabOrderDialog.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import LabsTable from 'components/LabsTable.vue'
-import ModalComponent from 'components/ModalComponent.vue'
+import LabCancelDialog from 'components/LabCancelDialog.vue'
 import {
   labStatuses,
   quasarNotifyTypes,
@@ -116,6 +110,7 @@ import {
   cloneLab,
   createEmptyLabOrder,
   nextLocalId,
+  sortLabsByOrderedDateDesc,
 } from 'src/utils/lab-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
@@ -192,11 +187,18 @@ function upsertLabInList(lab) {
   }
   const idx = labs.value.findIndex(item => String(item.id) === id)
   if (idx >= 0) {
+    const prev = labs.value[idx]
+    if (!copy.createdAt && prev?.createdAt) {
+      copy.createdAt = prev.createdAt
+    }
     const next = [...labs.value]
     next[idx] = copy
-    labs.value = next
+    labs.value = sortLabsByOrderedDateDesc(next)
   } else {
-    labs.value = [...labs.value, copy]
+    if (!copy.createdAt) {
+      copy.createdAt = new Date().toISOString()
+    }
+    labs.value = sortLabsByOrderedDateDesc([...labs.value, copy])
   }
 }
 
@@ -313,7 +315,7 @@ async function createOrderedLab(copy, pendingFiles) {
   return withFiles || saved
 }
 
-async function persistLabAction(action, copy) {
+async function persistLabAction(action, copy, meta = {}) {
   if (action === 'patch') {
     return updatePatientLab(patientId.value, copy.id, copy)
   }
@@ -327,11 +329,17 @@ async function persistLabAction(action, copy) {
     return reviewPatientLab(patientId.value, copy.id, copy)
   }
   if (action === 'cancel') {
-    const saved = await cancelPatientLab(patientId.value, copy.id)
+    const reason = String(meta?.cancelReason ?? '').trim()
+    const saved = await cancelPatientLab(
+      patientId.value,
+      copy.id,
+      reason,
+    )
 
     return saved || {
       ...copy,
       status: labStatuses.cancelled,
+      cancellationReason: reason,
     }
   }
 
@@ -357,6 +365,21 @@ async function onDialogSave(lab, meta = {}) {
 
       return
     }
+    if (action === 'cancel') {
+      upsertLabInList({
+        ...copy,
+        status: labStatuses.cancelled,
+        cancellationReason: String(meta?.cancelReason ?? '').trim(),
+      })
+      dialogOpen.value = false
+      $q.notify({
+        type: quasarNotifyTypes.positive,
+        message: t('labCancelledSuccess'),
+        position: 'top',
+      })
+
+      return
+    }
     $q.notify({
       type: quasarNotifyTypes.warning,
       message: t('labSaveClientFirst'),
@@ -370,7 +393,7 @@ async function onDialogSave(lab, meta = {}) {
   try {
     const saved = action === 'order'
       ? await createOrderedLab(copy, pendingFiles)
-      : await persistLabAction(action, copy)
+      : await persistLabAction(action, copy, meta)
 
     if (saved) {
       upsertLabInList(saved)
@@ -400,17 +423,19 @@ function onCancelLabFromTable(row) {
   cancelDialogOpen.value = true
 }
 
-async function confirmCancelLab() {
+async function confirmCancelLab(reason) {
   const row = pendingCancelLab.value
   pendingCancelLab.value = null
   cancelDialogOpen.value = false
-  if (!row?.id) {
+  const cancelReason = String(reason ?? '').trim()
+  if (!row?.id || !cancelReason) {
     return
   }
   if (!hasPatientId.value) {
     upsertLabInList({
       ...row,
       status: labStatuses.cancelled,
+      cancellationReason: cancelReason,
     })
     $q.notify({
       type: quasarNotifyTypes.positive,
@@ -422,10 +447,15 @@ async function confirmCancelLab() {
   }
   saving.value = true
   try {
-    const saved = await cancelPatientLab(patientId.value, row.id)
+    const saved = await cancelPatientLab(
+      patientId.value,
+      row.id,
+      cancelReason,
+    )
     upsertLabInList(saved || {
       ...row,
       status: labStatuses.cancelled,
+      cancellationReason: cancelReason,
     })
     $q.notify({
       type: quasarNotifyTypes.positive,
@@ -519,7 +549,9 @@ async function onUploadAttachment(file) {
       ...activeLab.value,
       files: nextFiles,
       attachments: nextFiles,
+      hasAttachments: true,
     }
+    upsertLabInList(activeLab.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -593,7 +625,9 @@ async function onRemoveAttachment(fileId) {
       ...activeLab.value,
       files: nextFiles,
       attachments: nextFiles,
+      hasAttachments: nextFiles.length > 0,
     })
+    upsertLabInList(activeLab.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
