@@ -30,7 +30,6 @@ const MODULE_TONES = {
   attachments: 'slate',
   consents: 'blue',
   signedForms: 'teal',
-  scannedDocs: 'slate',
 }
 
 const SIDEBAR_TAB_KEYS = new Set([
@@ -83,7 +82,7 @@ function isComingSoonSubTab(parentKey, subTabKey) {
     return true
   }
   if (parentKey === addClientTabKeys.documents) {
-    return true
+    return subTabKey !== 'attachments' && subTabKey !== 'consents'
   }
   if (parentKey === addClientTabKeys.careCoordination) {
     return ['careTeam', 'authorizations', 'tasks'].includes(subTabKey)

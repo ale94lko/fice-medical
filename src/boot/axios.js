@@ -125,6 +125,7 @@ function isPublicAuthUrl(url) {
     || u.includes(apiPaths.oauthForgotPassword)
     || u.includes(apiPaths.oauthResetPassword)
     || u.includes('/meet/v1/public/')
+    || u.includes('/consents/v1/public/')
 }
 
 function getRefreshInFlight() {

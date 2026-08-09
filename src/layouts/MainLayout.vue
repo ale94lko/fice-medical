@@ -537,6 +537,14 @@
               {{ t('screeningTemplateListTitle') }}
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
+              v-if="showConsentTemplates"
+              icon="draw"
+              to="/administration/consent-templates"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminConsentTemplates">
+              {{ t('consentTemplateListTitle') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
               v-if="showClinicalAudit"
               icon="history"
               to="/administration/clinical-audit"
@@ -593,6 +601,14 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminScreeningTemplates">
                 {{ t('screeningTemplateListTitle') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showConsentTemplates"
+                icon="draw"
+                to="/administration/consent-templates"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminConsentTemplates">
+                {{ t('consentTemplateListTitle') }}
               </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showClinicalAudit"
@@ -819,6 +835,7 @@ const {
   showAdminUsers,
   showServicesProcedures,
   showScreeningTemplates,
+  showConsentTemplates,
   showClinicalAudit,
   showClinicalResourcesMenu,
 } = useMainNavPermissions()

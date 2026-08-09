@@ -64,6 +64,96 @@
       @confirm="confirmRemoveOtherContact"
       @cancel="dismissRemoveConfirm"
     />
+
+    <q-dialog
+      v-model="guardianConsentOpen"
+      persistent
+      transition-show="scale"
+      transition-hide="scale"
+      data-testid="guardian-signed-consent-dialog">
+      <q-card class="insurance-dialog app-dialog-card">
+        <AppDialogHeader
+          :close-label="t('close')"
+          @close="dismissGuardianConsentAction">
+          {{ guardianConsentTitle }}
+        </AppDialogHeader>
+        <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+          <p class="text-body2 text-grey-7 q-mb-md">
+            {{ guardianConsentMessage }}
+          </p>
+          <p class="text-body2 text-weight-medium q-mb-sm">
+            {{ t('guardianSignedConsentListTitle') }}
+          </p>
+          <div class="guardian-signed-consent-list">
+            <div
+              v-for="item in guardianConsentItems"
+              :key="item.id"
+              class="guardian-signed-consent-list__row
+                row items-center no-wrap q-col-gutter-sm">
+              <div class="col">
+                <div class="text-body2 text-weight-medium">
+                  {{ item.consentName || t('clientConsentViewTitle') }}
+                </div>
+                <div
+                  v-if="item.signedByName || item.version"
+                  class="text-caption text-grey-7">
+                  <template v-if="item.signedByName">
+                    {{ item.signedByName }}
+                  </template>
+                  <template v-if="item.signedByName && item.version">
+                    ·
+                  </template>
+                  <template v-if="item.version">
+                    v{{ item.version }}
+                  </template>
+                </div>
+              </div>
+              <div class="col-auto">
+                <q-btn
+                  no-caps
+                  outline
+                  dense
+                  color="primary"
+                  class="app-btn-outline"
+                  :disable="guardianConsentBusy || viewingConsentId != null"
+                  :loading="viewingConsentId === item.id"
+                  :label="t('guardianSignedConsentView')"
+                  @click="onViewGuardianConsent(item)"
+                />
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-actions
+          align="right"
+          class="app-dialog-card__actions">
+          <q-btn
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            :label="t('cancel')"
+            :disable="guardianConsentBusy"
+            @click="dismissGuardianConsentAction"
+          />
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            :label="guardianConsentConfirmText"
+            :loading="guardianConsentBusy"
+            :disable="guardianConsentBusy"
+            @click="confirmGuardianConsentAction"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <ClientConsentViewDialog
+      v-model="viewConsentOpen"
+      :consent="viewConsent"
+    />
     </fieldset>
   </div>
 </template>
@@ -71,10 +161,14 @@
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import {
   countOtherContactSubTabErrors,
   countSelfContactSubTabErrors,
 } from 'src/utils/add-client-form-validation.js'
+import AppDialogHeader from 'components/AppDialogHeader.vue'
+import ClientConsentViewDialog from
+  'components/ClientConsentViewDialog.vue'
 import ContactSelfPanel from './ContactSelfPanel.vue'
 import ContactSaveBusinessRuleBanner from './ContactSaveBusinessRuleBanner.vue'
 import OtherContactPanel from './OtherContactPanel.vue'
@@ -84,12 +178,26 @@ import {
   clientEmailTypeValues,
   clientPhoneTypeValues,
   clientSuffixOptions,
+  quasarNotifyTypes,
 } from './constants.js'
 import { usStates } from 'src/data/us-geography.js'
 import {
   resolveOtherContactTabLabel,
   syncOtherContactsWithClientAddress,
 } from 'src/utils/client-contact-form.js'
+import {
+  isGuardianOtherContact,
+  listAcceptedGuardianConsents,
+  revokeAcceptedGuardianConsents,
+  wouldLoseGuardianContactType,
+} from 'src/utils/consent-guardian-contact-guard.js'
+import {
+  consentApiErrorMessage,
+  fetchClientConsent,
+} from 'src/utils/consent-api.js'
+import { useConsentPermissions } from
+  'src/composables/useConsentPermissions.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
   addClientTestIds as tid,
 } from 'src/test-ids/index.js'
@@ -101,6 +209,7 @@ import {
 const props = defineProps({
   modelValue: { type: Object, required: true },
   activeSubTab: { type: String, default: CONTACT_SUB_TAB_SELF },
+  clientId: { type: [String, Number], default: null },
   rules: { type: Object, default: () => ({}) },
   prefixSelectOptions: { type: Array, default: () => [] },
   suffixSelectOptions: { type: Array, default: () => [] },
@@ -124,16 +233,30 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const $q = useQuasar()
+const { canRevoke, canView: canViewConsents } = useConsentPermissions()
 
 const removeConfirmOpen = ref(false)
 const pendingRemoveIndex = ref(-1)
 const pendingRemoveLabel = ref('')
+const guardianConsentOpen = ref(false)
+const guardianConsentBusy = ref(false)
+const pendingGuardianAction = ref(null)
+const viewConsentOpen = ref(false)
+const viewConsent = ref(null)
+const viewingConsentId = ref(null)
 const contactSelfPanelRef = ref(null)
 const otherContactPanelRef = ref(null)
 
 const contact = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
+})
+
+const hasClientId = computed(() => {
+  const id = Number(props.clientId)
+
+  return Number.isFinite(id) && id > 0
 })
 
 const activeOtherIndex = computed(() =>
@@ -215,13 +338,143 @@ const removeConfirmMessage = computed(() =>
   t('removeOtherContactMessage', { name: pendingRemoveLabel.value }),
 )
 
-function updateOtherContact(index, patch) {
+const guardianConsentTitle = computed(() => {
+  if (pendingGuardianAction.value?.type === 'demote') {
+    return t('guardianSignedConsentDemoteTitle')
+  }
+
+  return t('guardianSignedConsentRemoveTitle')
+})
+
+const guardianConsentMessage = computed(() => {
+  const count = pendingGuardianAction.value?.consentCount ?? 0
+  if (pendingGuardianAction.value?.type === 'demote') {
+    return t('guardianSignedConsentDemoteMessage', { count })
+  }
+
+  return t('guardianSignedConsentRemoveMessage', {
+    name: pendingGuardianAction.value?.label || '',
+    count,
+  })
+})
+
+const guardianConsentConfirmText = computed(() => {
+  if (pendingGuardianAction.value?.type === 'demote') {
+    return t('guardianSignedConsentDemoteConfirm')
+  }
+
+  return t('guardianSignedConsentRemoveConfirm')
+})
+
+const guardianConsentItems = computed(
+  () => pendingGuardianAction.value?.consents ?? [],
+)
+
+function applyOtherContactPatch(index, patch) {
   const rows = contact.value.otherContacts ?? []
   const current = rows[index]
   if (!current) {
     return
   }
   Object.assign(current, patch)
+}
+
+function notifyConsentError(error, fallbackKey) {
+  if (isAuthSessionEndUIError(error)) {
+    return
+  }
+  $q.notify({
+    type: quasarNotifyTypes.negative,
+    message: consentApiErrorMessage(error, t(fallbackKey)),
+  })
+}
+
+async function loadAcceptedGuardianConsents() {
+  if (!hasClientId.value) {
+    return []
+  }
+
+  return listAcceptedGuardianConsents(props.clientId)
+}
+
+async function openGuardianConsentGuard(action) {
+  if (!canRevoke.value) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('guardianSignedConsentNoRevokePermission'),
+    })
+
+    return false
+  }
+  pendingGuardianAction.value = action
+  guardianConsentOpen.value = true
+
+  return true
+}
+
+async function onViewGuardianConsent(item) {
+  if (!item?.id || !hasClientId.value) {
+    return
+  }
+  if (!canViewConsents.value) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('clientConsentsNoPermission'),
+    })
+
+    return
+  }
+  viewingConsentId.value = item.id
+  try {
+    viewConsent.value = await fetchClientConsent(props.clientId, item.id)
+    viewConsentOpen.value = true
+  } catch (error) {
+    notifyConsentError(error, 'clientConsentLoadError')
+  } finally {
+    viewingConsentId.value = null
+  }
+}
+
+async function updateOtherContact(index, patch) {
+  const rows = contact.value.otherContacts ?? []
+  const current = rows[index]
+  if (!current || !patch || typeof patch !== 'object') {
+    return
+  }
+  if (wouldLoseGuardianContactType(
+    current.contactType,
+    patch.contactType,
+  )) {
+    try {
+      const consents = await loadAcceptedGuardianConsents()
+      if (consents.length > 0) {
+        await openGuardianConsentGuard({
+          type: 'demote',
+          index,
+          patch: { ...patch },
+          consentCount: consents.length,
+          consents,
+          label: resolveOtherContactTabLabel(
+            current,
+            index,
+            t,
+            {
+              contactTypeOptions: contactTypeOptions.value,
+              relationshipTypeOptions: relationshipTypeOptions.value,
+            },
+            rows,
+          ),
+        })
+
+        return
+      }
+    } catch (error) {
+      notifyConsentError(error, 'guardianSignedConsentCheckError')
+
+      return
+    }
+  }
+  applyOtherContactPatch(index, patch)
 }
 
 function onSetResponsibleForPayments(payload) {
@@ -232,7 +485,7 @@ function onSetPreferredPointOfContact(payload) {
   emit('preferred-point-of-contact-change', payload)
 }
 
-function requestRemoveOtherContactById(contactId) {
+async function requestRemoveOtherContactById(contactId) {
   const index = (contact.value.otherContacts ?? []).findIndex(
     row => row.id === contactId,
   )
@@ -240,8 +493,7 @@ function requestRemoveOtherContactById(contactId) {
     return
   }
   const oc = contact.value.otherContacts[index]
-  pendingRemoveIndex.value = index
-  pendingRemoveLabel.value = resolveOtherContactTabLabel(
+  const label = resolveOtherContactTabLabel(
     oc,
     index,
     t,
@@ -251,6 +503,28 @@ function requestRemoveOtherContactById(contactId) {
     },
     contact.value.otherContacts,
   )
+  if (isGuardianOtherContact(oc) && hasClientId.value) {
+    try {
+      const consents = await loadAcceptedGuardianConsents()
+      if (consents.length > 0) {
+        await openGuardianConsentGuard({
+          type: 'remove',
+          index,
+          consentCount: consents.length,
+          consents,
+          label,
+        })
+
+        return
+      }
+    } catch (error) {
+      notifyConsentError(error, 'guardianSignedConsentCheckError')
+
+      return
+    }
+  }
+  pendingRemoveIndex.value = index
+  pendingRemoveLabel.value = label
   removeConfirmOpen.value = true
 }
 
@@ -266,6 +540,44 @@ function dismissRemoveConfirm() {
   pendingRemoveIndex.value = -1
   pendingRemoveLabel.value = ''
   removeConfirmOpen.value = false
+}
+
+function dismissGuardianConsentAction() {
+  pendingGuardianAction.value = null
+  guardianConsentOpen.value = false
+  guardianConsentBusy.value = false
+  viewConsentOpen.value = false
+  viewConsent.value = null
+  viewingConsentId.value = null
+}
+
+async function confirmGuardianConsentAction() {
+  const action = pendingGuardianAction.value
+  if (!action || guardianConsentBusy.value) {
+    return
+  }
+  guardianConsentBusy.value = true
+  try {
+    await revokeAcceptedGuardianConsents(
+      props.clientId,
+      t('guardianSignedConsentRevocationReason'),
+    )
+    if (action.type === 'remove') {
+      emit('remove-other-contact', action.index)
+    } else if (action.type === 'demote' && action.patch) {
+      applyOtherContactPatch(action.index, action.patch)
+    }
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('guardianSignedConsentRevokeSuccess', {
+        count: action.consentCount,
+      }),
+    })
+    dismissGuardianConsentAction()
+  } catch (error) {
+    notifyConsentError(error, 'guardianSignedConsentRevokeError')
+    guardianConsentBusy.value = false
+  }
 }
 
 function isOtherContactMissingContactMethod(contactId) {
@@ -377,10 +689,25 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+@import 'src/css/quasar.variables';
+
 .add-client-contact-tab {
   width: 100%;
   max-width: 720px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.guardian-signed-consent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guardian-signed-consent-list__row {
+  padding: 10px 12px;
+  border: 1px solid $border-subtle;
+  border-radius: 8px;
+  background: $surface;
 }
 </style>

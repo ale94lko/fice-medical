@@ -71,6 +71,14 @@ export async function uploadStoredFile(file, category, opts = {}) {
   return normalizeStoredFile(unwrapData(response.data))
 }
 
+export async function fetchStoredFile(fileId) {
+  const response = await apiInstance.get(
+    apiPaths.storedFileById(parseStoredFileId(fileId)),
+  )
+
+  return normalizeStoredFile(unwrapData(response.data))
+}
+
 export async function fetchStoredFileBlob(fileId, preview = true) {
   const id = parseStoredFileId(fileId)
   const response = await apiInstance.get(
@@ -140,6 +148,49 @@ export async function listStoredFiles(params = {}) {
   }
 }
 
+/**
+ * Aggregated client chart files (cross-module).
+ * GET /client/v1/{clientId}/files
+ */
+export async function listClientFiles(clientId, params = {}) {
+  const id = Number(clientId)
+  if (!Number.isFinite(id) || id <= 0) {
+    throw new Error('Invalid client id')
+  }
+
+  const queryParams = {}
+  if (params.category) {
+    queryParams.category = String(params.category)
+  }
+  if (params.entityType) {
+    // eslint-disable-next-line camelcase -- query param for API
+    queryParams.entity_type = String(params.entityType)
+  }
+  if (params.entityId != null) {
+    // eslint-disable-next-line camelcase -- query param for API
+    queryParams.entity_id = Number(params.entityId)
+  }
+  if (params.page != null) {
+    queryParams.page = Number(params.page)
+  }
+  if (params.limit != null) {
+    queryParams.limit = Number(params.limit)
+  }
+
+  const response = await apiInstance.get(apiPaths.clientFiles(id), {
+    params: queryParams,
+  })
+  const root = unwrapListRoot(response.data)
+  const pagination = extractEnvelopeListPagination(root)
+    ?? root?.pagination
+    ?? null
+
+  return {
+    items: mapStoredFilesList(root?.items ?? []),
+    pagination,
+  }
+}
+
 export async function resolveStoredFileImageSrc(fileId) {
   const id = Number(fileId)
   if (!Number.isFinite(id) || id <= 0) {
@@ -168,8 +219,10 @@ export function triggerBlobDownload(blob, fileName) {
 
 export const filesApi = {
   upload: uploadStoredFile,
+  get: fetchStoredFile,
   blob: fetchStoredFileBlob,
   download: downloadStoredFile,
   delete: deleteStoredFile,
   list: listStoredFiles,
+  listClient: listClientFiles,
 }

@@ -24,6 +24,7 @@
       :class="{
         'signature-canvas__pad--readonly': readonly,
         'signature-canvas__pad--empty': !hasStroke && !readonly,
+        'signature-canvas__pad--tall': size === 'tall',
       }">
       <canvas
         ref="canvasRef"
@@ -67,6 +68,12 @@ const props = defineProps({
   hint: {
     type: String,
     default: '',
+  },
+  /** `default` (160px) or `tall` (220px) for tablet consent signing. */
+  size: {
+    type: String,
+    default: 'default',
+    validator: value => ['default', 'tall'].includes(value),
   },
 })
 
@@ -305,6 +312,11 @@ defineExpose({
   touch-action: none;
   transition: border-color 0.15s ease, background 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+.signature-canvas__pad--tall {
+  min-height: 220px;
+  height: 220px;
 }
 
 .signature-canvas__pad--empty {

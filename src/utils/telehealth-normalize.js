@@ -552,6 +552,13 @@ export function normalizeStoredFileMeta(raw) {
       raw.content_type ?? raw.contentType ?? raw.mime_type,
     ),
     sizeBytes: toNumberOrNull(raw.size_bytes ?? raw.sizeBytes ?? raw.size),
+    uploadedBy: toNumberOrNull(raw.uploaded_by ?? raw.uploadedBy),
+    uploadedByName: trimStr(
+      raw.uploaded_by_name
+      ?? raw.uploadedByName
+      ?? raw.uploader_name
+      ?? raw.uploaderName,
+    ) || null,
   }
 }
 
@@ -569,6 +576,7 @@ export function normalizeTelehealthFile(raw) {
   if (id == null) {
     return null
   }
+  const fileMeta = normalizeStoredFileMeta(raw.file ?? raw.stored_file)
 
   return {
     id,
@@ -576,10 +584,17 @@ export function normalizeTelehealthFile(raw) {
     storedFileId: toNumberOrNull(
       raw.stored_file_id ?? raw.storedFileId,
     ),
-    uploadedBy: toNumberOrNull(raw.uploaded_by ?? raw.uploadedBy),
+    uploadedBy: toNumberOrNull(raw.uploaded_by ?? raw.uploadedBy)
+      ?? fileMeta?.uploadedBy
+      ?? null,
+    uploadedByName: trimStr(
+      raw.uploaded_by_name
+      ?? raw.uploadedByName
+      ?? fileMeta?.uploadedByName,
+    ) || null,
     category: trimStr(raw.category) || 'CLINICAL_DOCUMENT',
     createdAt: trimStr(raw.created_at ?? raw.createdAt),
-    file: normalizeStoredFileMeta(raw.file ?? raw.stored_file),
+    file: fileMeta,
   }
 }
 

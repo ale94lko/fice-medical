@@ -212,6 +212,73 @@ export const addClientCareCoordinationSubTabKeys = {
   followUps: 'followUps',
 }
 
+export const addClientDocumentsSubTabKeys = {
+  attachments: 'attachments',
+  consents: 'consents',
+  signedForms: 'signedForms',
+}
+
+/** entity_type values used with stored_file (Source column). */
+export const storedFileEntityTypes = {
+  lab: 'LAB',
+  referral: 'REFERRAL',
+  insuranceProfile: 'INSURANCE_PROFILE',
+  insurance: 'INSURANCE',
+  telehealthSession: 'TELEHEALTH_SESSION',
+  client: 'CLIENT',
+  carePlan: 'CARE_PLAN',
+  clinicalNote: 'CLINICAL_NOTE',
+  screening: 'SCREENING',
+  appointment: 'APPOINTMENT',
+  followUp: 'FOLLOW_UP',
+  staffMember: 'STAFF_MEMBER',
+}
+
+export const consentTypeValues = {
+  treatment: 'TREATMENT',
+  telehealth: 'TELEHEALTH',
+  releaseOfInformation: 'RELEASE_OF_INFORMATION',
+  privacy: 'PRIVACY',
+  communication: 'COMMUNICATION',
+  financial: 'FINANCIAL',
+  other: 'OTHER',
+}
+
+export const consentVersionStatusValues = {
+  draft: 'DRAFT',
+  published: 'PUBLISHED',
+  archived: 'ARCHIVED',
+}
+
+export const consentStatusValues = {
+  pendingSignature: 'PENDING_SIGNATURE',
+  accepted: 'ACCEPTED',
+  declined: 'DECLINED',
+  revoked: 'REVOKED',
+  expired: 'EXPIRED',
+  cancelled: 'CANCELLED',
+}
+
+export const consentSignerTypeValues = {
+  client: 'CLIENT',
+  guardian: 'GUARDIAN',
+  authorizedRepresentative: 'AUTHORIZED_REPRESENTATIVE',
+}
+
+export const consentSignatureMethodValues = {
+  inPerson: 'IN_PERSON',
+  clientPortal: 'CLIENT_PORTAL',
+  secureLink: 'SECURE_LINK',
+  other: 'OTHER',
+}
+
+export const consentNameMaxLength = 200
+export const consentDescriptionMaxLength = 1000
+export const consentRevocationReasonMaxLength = 500
+export const consentRelationshipMaxLength = 120
+export const consentSignerNameMaxLength = 200
+
+
 export const clientAgeUnitValues = {
   years: 'years',
   months: 'months',
@@ -894,10 +961,22 @@ export const permissionNames = {
   editSubtenants: 'EDIT_SUBTENANTS',
   generateDocuments: 'GENERATE_DOCUMENTS',
   viewFiles: 'VIEW_FILES',
+  uploadFiles: 'UPLOAD_FILES',
+  deleteFiles: 'DELETE_FILES',
   manageScreeningTemplates: 'MANAGE_SCREENING_TEMPLATES',
   viewClinicalResources: 'VIEW_CLINICAL_RESOURCES',
   manageClinicalResources: 'MANAGE_CLINICAL_RESOURCES',
   viewReferenceData: 'VIEW_REFERENCE_DATA',
+  consentView: 'CONSENT_VIEW',
+  consentCreate: 'CONSENT_CREATE',
+  consentEdit: 'CONSENT_EDIT',
+  consentPublish: 'CONSENT_PUBLISH',
+  consentAssign: 'CONSENT_ASSIGN',
+  consentSign: 'CONSENT_SIGN',
+  consentRevoke: 'CONSENT_REVOKE',
+  consentDelete: 'CONSENT_DELETE',
+  consentDownload: 'CONSENT_DOWNLOAD',
+  consentAuditView: 'CONSENT_AUDIT_VIEW',
 }
 
 export const clientPermissionNames = {
@@ -931,6 +1010,19 @@ export const clientPermissionNames = {
   editScreenings: 'EDIT_SCREENINGS',
   viewTenantData: permissionNames.viewTenantData,
   editTenantData: permissionNames.editTenantData,
+  viewFiles: permissionNames.viewFiles,
+  uploadFiles: permissionNames.uploadFiles,
+  deleteFiles: permissionNames.deleteFiles,
+  consentView: permissionNames.consentView,
+  consentCreate: permissionNames.consentCreate,
+  consentEdit: permissionNames.consentEdit,
+  consentPublish: permissionNames.consentPublish,
+  consentAssign: permissionNames.consentAssign,
+  consentSign: permissionNames.consentSign,
+  consentRevoke: permissionNames.consentRevoke,
+  consentDelete: permissionNames.consentDelete,
+  consentDownload: permissionNames.consentDownload,
+  consentAuditView: permissionNames.consentAuditView,
   viewFollowUps: 'VIEW_FOLLOW_UPS',
   addFollowUps: 'ADD_FOLLOW_UPS',
   editFollowUps: 'EDIT_FOLLOW_UPS',
@@ -1475,6 +1567,51 @@ export const apiPaths = {
   storedFilePreview: id => `/files/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/preview`,
+  clientFiles: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/files`,
+  consentTemplates: '/consents/v1/templates',
+  consentTemplateById: id => `/consents/v1/templates/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  consentTemplateVersions: id => `/consents/v1/templates/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/versions`,
+  consentVersionById: (templateId, versionId) => `/consents/v1/templates/${
+    encodeURIComponent(String(templateId ?? '').trim())
+  }/versions/${encodeURIComponent(String(versionId ?? '').trim())}`,
+  consentVersionPublish: (templateId, versionId) => `/consents/v1/templates/${
+    encodeURIComponent(String(templateId ?? '').trim())
+  }/versions/${encodeURIComponent(String(versionId ?? '').trim())}/publish`,
+  clientConsents: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/consents`,
+  clientConsentById: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())}`,
+  clientConsentSign: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())}/sign`,
+  clientConsentDecline: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())}/decline`,
+  clientConsentRevoke: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())}/revoke`,
+  clientConsentCancel: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())}/cancel`,
+  clientConsentSecureLink: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())
+  }/secure-link`,
+  clientConsentDocumentDownload: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())
+  }/document/download`,
+  consentPublicPreview: '/consents/v1/public/preview',
+  consentPublicSign: '/consents/v1/public/sign',
+  consentPublicDecline: '/consents/v1/public/decline',
   documentsTypes: '/documents/v1/types',
   documentsGenerate: '/documents/v1/generate',
   patientLabs: clientId => `/client/v1/${encodeURIComponent(

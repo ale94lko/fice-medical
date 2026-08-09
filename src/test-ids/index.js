@@ -41,6 +41,7 @@ export const layoutTestIds = {
   navAdminSubtenants: 'layout-nav-admin-subtenants',
   navAdminServices: 'layout-nav-admin-services',
   navAdminScreeningTemplates: 'layout-nav-admin-screening-templates',
+  navAdminConsentTemplates: 'layout-nav-admin-consent-templates',
   navAdminClinicalAudit: 'layout-nav-admin-clinical-audit',
   navClinicalResources: 'layout-nav-clinical-resources',
 }
@@ -563,3 +564,13 @@ export function otherContactEmailAddTestId(contactId, index) {
 export function otherContactEmailRemoveTestId(contactId, index) {
   return toTestId('other-contact', contactId, 'email', index, 'btn-remove')
 }
+
+export { clientAttachmentsTestIds } from
+  'src/test-ids/client-attachments.js'
+
+export {
+  consentTemplateListTestIds,
+  consentTemplateDialogTestIds,
+  consentVersionDialogTestIds,
+  clientConsentsTestIds,
+} from 'src/test-ids/consents.js'

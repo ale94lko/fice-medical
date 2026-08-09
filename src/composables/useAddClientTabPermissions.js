@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import {
   addClientCareCoordinationSubTabKeys,
   addClientClinicalSubTabKeys,
+  addClientDocumentsSubTabKeys,
   addClientTabKeys,
   clientPermissionNames,
 } from 'components/constants.js'
@@ -46,6 +47,15 @@ const SUB_TAB_VIEW = {
   [addClientCareCoordinationSubTabKeys.followUps]: [
     clientPermissionNames.viewFollowUps,
   ],
+  [addClientDocumentsSubTabKeys.attachments]: [
+    clientPermissionNames.viewFiles,
+  ],
+  [addClientDocumentsSubTabKeys.consents]: [
+    clientPermissionNames.consentView,
+  ],
+  [addClientDocumentsSubTabKeys.signedForms]: [
+    clientPermissionNames.viewTenantData,
+  ],
 }
 
 const SUB_TAB_EDIT = {
@@ -89,6 +99,16 @@ const SUB_TAB_EDIT = {
   [addClientCareCoordinationSubTabKeys.followUps]: [
     clientPermissionNames.editFollowUps,
     clientPermissionNames.addFollowUps,
+  ],
+  [addClientDocumentsSubTabKeys.attachments]: [
+    clientPermissionNames.uploadFiles,
+    clientPermissionNames.deleteFiles,
+  ],
+  [addClientDocumentsSubTabKeys.consents]: [
+    clientPermissionNames.consentAssign,
+    clientPermissionNames.consentSign,
+    clientPermissionNames.consentEdit,
+    clientPermissionNames.consentRevoke,
   ],
 }
 
@@ -175,11 +195,10 @@ export function canViewMainTab(modules, tabKey, isCreate) {
       )
     case addClientTabKeys.clinical:
     case addClientTabKeys.careCoordination:
+    case addClientTabKeys.documents:
       return filterSubTabs(modules, tabKey).length > 0
     case addClientTabKeys.financials:
       return hasPermission(modules, 'VIEW_TENANTS_BILLING')
-    case addClientTabKeys.documents:
-      return hasPermission(modules, clientPermissionNames.viewTenantData)
     default:
       return false
   }
@@ -189,11 +208,6 @@ export function filterSubTabs(modules, parentKey) {
   const tabs = ADD_CLIENT_SUB_TABS[parentKey] ?? []
   if (parentKey === addClientTabKeys.financials) {
     return hasPermission(modules, 'VIEW_TENANTS_BILLING') ? tabs : []
-  }
-  if (parentKey === addClientTabKeys.documents) {
-    return hasPermission(modules, clientPermissionNames.viewTenantData)
-      ? tabs
-      : []
   }
 
   return tabs.filter(tab => canViewSubTab(modules, tab.key))

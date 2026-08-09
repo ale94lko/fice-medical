@@ -476,10 +476,19 @@ export function buildClientOverviewModuleSummaries(
     billing: comingSoonSummary(t),
     claims: comingSoonSummary(t),
     payments: comingSoonSummary(t),
-    attachments: comingSoonSummary(t),
-    consents: comingSoonSummary(t),
+    attachments: moduleSummary(
+      0,
+      [],
+      t('clientAttachmentsSubtitle'),
+      t('clientAttachmentsEmpty'),
+    ),
+    consents: moduleSummary(
+      0,
+      [],
+      t('clientConsentsSubtitle'),
+      t('clientConsentsEmpty'),
+    ),
     signedForms: comingSoonSummary(t),
-    scannedDocs: comingSoonSummary(t),
     appointmentsRaw: rawSummaries.appointmentsRaw,
   }, form, rawClient, t)
 }

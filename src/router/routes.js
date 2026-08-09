@@ -125,6 +125,14 @@ const routes = [
         },
       },
       {
+        path: 'administration/consent-templates',
+        name: 'AdminConsentTemplatesList',
+        component: () => import('pages/admin/ConsentTemplateListPage.vue'),
+        meta: {
+          requiresPermission: permissionNames.consentView,
+        },
+      },
+      {
         path: 'administration/clinical-audit',
         name: 'AdminClinicalAuditList',
         component: () => import('pages/admin/ClinicalAuditListPage.vue'),
@@ -222,6 +230,12 @@ const routes = [
     path: '/meet',
     name: 'TelehealthMeet',
     component: () => import('pages/telehealth/TelehealthMeetPage.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/consent-sign',
+    name: 'ConsentSign',
+    component: () => import('pages/consent/ConsentSignPage.vue'),
     meta: { requiresAuth: false },
   },
   {

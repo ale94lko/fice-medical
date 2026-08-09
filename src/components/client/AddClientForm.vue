@@ -719,6 +719,7 @@
             ref="addClientContactTabRef"
             v-model="form[contactSectionKey]"
             :active-sub-tab="activeContactSubTab"
+            :client-id="props.clientId"
             :readonly="contactReadonly"
             :can-view="canViewContactTab"
             :rules="contactRules"
@@ -924,7 +925,24 @@
               :key="subTab.key"
               :name="subTab.key"
               class="q-pa-none">
-              <div class="text-body1 text-grey-7 q-py-xl text-center">
+              <AddClientAttachmentsTab
+                v-if="subTab.key === DOCUMENTS_ATTACHMENTS_SUB_TAB"
+                :client-id="props.clientId"
+                :can-view="canViewAttachmentsTab"
+                :can-upload="canUploadAttachments"
+                :can-delete="canDeleteAttachments"
+                @navigate-source="onAttachmentNavigateSource"
+              />
+              <AddClientConsentsTab
+                v-else-if="subTab.key === DOCUMENTS_CONSENTS_SUB_TAB"
+                :client-id="props.clientId"
+                :client-display-name="patientFullName"
+                :contact-section="form[contactSectionKey]"
+                :can-view="canViewConsentsTab"
+              />
+              <div
+                v-else
+                class="text-body1 text-grey-7 q-py-xl text-center">
                 {{ t('tabComingSoon') }}
               </div>
             </q-tab-panel>
@@ -1051,6 +1069,8 @@ import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
 import AddClientReferralsTab from '../AddClientReferralsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
+import AddClientAttachmentsTab from '../AddClientAttachmentsTab.vue'
+import AddClientConsentsTab from '../AddClientConsentsTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
 import AppLoadingOverlay from '../AppLoadingOverlay.vue'
 import BannerComponent from '../BannerComponent.vue'
@@ -1073,6 +1093,7 @@ import {
   clientFormSections,
   clientMaxAge,
   clientNameMaxLength,
+  clientPermissionNames,
   quasarNotifyTypes,
   referralIntakeSourceDetailsMaxLength,
   referralOrganizationMaxLength,
@@ -1110,12 +1131,16 @@ import {
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
   CARE_COORDINATION_REFERRALS_SUB_TAB,
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
+  DOCUMENTS_ATTACHMENTS_SUB_TAB,
+  DOCUMENTS_CONSENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useAddClientTabPermissions } from
   'src/composables/useAddClientTabPermissions.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
+import { hasPermission } from 'src/utils/auth-permissions.js'
 import { useClientProgressiveMatch }
   from 'src/composables/useClientProgressiveMatch.js'
 import { emitClientDuplicateAudit } from 'src/utils/client-duplicate-audit.js'
@@ -1203,8 +1228,17 @@ const canViewLabsTab = canViewSubTabFor(CLINICAL_LABS_SUB_TAB)
 const canViewFollowUpsTab = canViewSubTabFor(
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
 )
+const canViewAttachmentsTab = canViewSubTabFor(DOCUMENTS_ATTACHMENTS_SUB_TAB)
+const canViewConsentsTab = canViewSubTabFor(DOCUMENTS_CONSENTS_SUB_TAB)
 const canDeleteLabsTab = canDeleteLabs
 
+const authStore = useAuthStore()
+const canUploadAttachments = computed(() =>
+  hasPermission(authStore.permissions, clientPermissionNames.uploadFiles),
+)
+const canDeleteAttachments = computed(() =>
+  hasPermission(authStore.permissions, clientPermissionNames.deleteFiles),
+)
 const duplicateBannerInHeader = inject(
   'addClientDuplicateBannerInHeader',
   false,
@@ -1426,30 +1460,6 @@ function tabIndexInVisibleOrder(tab) {
   return visibleTabOrder.value.indexOf(tab)
 }
 
-function canGoNextFiltered() {
-  const idx = tabIndexInVisibleOrder(activeTab.value)
-
-  return idx >= 0 && idx < visibleTabOrder.value.length - 1
-}
-
-function canGoPreviousFiltered() {
-  return tabIndexInVisibleOrder(activeTab.value) > 0
-}
-
-function goNextTabFiltered() {
-  const idx = tabIndexInVisibleOrder(activeTab.value)
-  if (idx >= 0 && idx < visibleTabOrder.value.length - 1) {
-    activeTab.value = visibleTabOrder.value[idx + 1]
-  }
-}
-
-function goPreviousTabFiltered() {
-  const idx = tabIndexInVisibleOrder(activeTab.value)
-  if (idx > 0) {
-    activeTab.value = visibleTabOrder.value[idx - 1]
-  }
-}
-
 function ensureActiveTabVisible() {
   const order = visibleTabOrder.value
   if (!order.length) {
@@ -1518,6 +1528,116 @@ const {
   () => form.value[contactSectionKey],
   contactCatalogOptions,
 )
+
+function navigableSubTabKeysFor(tab) {
+  if (tab === addClientTabKeys.contact) {
+    return contactSubTabs.value
+      .filter(item => (
+        item.key !== CONTACT_SUB_TAB_ADD && !item.disabled
+      ))
+      .map(item => item.key)
+  }
+
+  return filterSubTabsFor(tab).map(item => item.key)
+}
+
+function activeSubTabKeyFor(tab) {
+  if (tab === addClientTabKeys.contact) {
+    return activeContactSubTab.value
+  }
+
+  return activeSubTab.value
+}
+
+function setActiveSubTabKey(tab, subKey) {
+  if (tab === addClientTabKeys.contact) {
+    activeContactSubTab.value = subKey
+
+    return
+  }
+  activeSubTab.value = subKey
+}
+
+function canAdvanceWithinSubTabs() {
+  const tab = activeTab.value
+  const subs = navigableSubTabKeysFor(tab)
+  if (!subs.length) {
+    return false
+  }
+  const subIdx = subs.indexOf(activeSubTabKeyFor(tab))
+
+  return subIdx >= 0 && subIdx < subs.length - 1
+}
+
+function canGoBackWithinSubTabs() {
+  const tab = activeTab.value
+  const subs = navigableSubTabKeysFor(tab)
+  if (!subs.length) {
+    return false
+  }
+  const subIdx = subs.indexOf(activeSubTabKeyFor(tab))
+
+  return subIdx > 0
+}
+
+function canGoNextFiltered() {
+  if (canAdvanceWithinSubTabs()) {
+    return true
+  }
+  const idx = tabIndexInVisibleOrder(activeTab.value)
+
+  return idx >= 0 && idx < visibleTabOrder.value.length - 1
+}
+
+function canGoPreviousFiltered() {
+  if (canGoBackWithinSubTabs()) {
+    return true
+  }
+
+  return tabIndexInVisibleOrder(activeTab.value) > 0
+}
+
+function goNextTabFiltered() {
+  const tab = activeTab.value
+  const subs = navigableSubTabKeysFor(tab)
+  const subIdx = subs.indexOf(activeSubTabKeyFor(tab))
+  if (subs.length && subIdx >= 0 && subIdx < subs.length - 1) {
+    setActiveSubTabKey(tab, subs[subIdx + 1])
+
+    return
+  }
+  const idx = tabIndexInVisibleOrder(tab)
+  if (idx < 0 || idx >= visibleTabOrder.value.length - 1) {
+    return
+  }
+  const nextTab = visibleTabOrder.value[idx + 1]
+  activeTab.value = nextTab
+  const nextSubs = navigableSubTabKeysFor(nextTab)
+  if (nextSubs.length) {
+    setActiveSubTabKey(nextTab, nextSubs[0])
+  }
+}
+
+function goPreviousTabFiltered() {
+  const tab = activeTab.value
+  const subs = navigableSubTabKeysFor(tab)
+  const subIdx = subs.indexOf(activeSubTabKeyFor(tab))
+  if (subs.length && subIdx > 0) {
+    setActiveSubTabKey(tab, subs[subIdx - 1])
+
+    return
+  }
+  const idx = tabIndexInVisibleOrder(tab)
+  if (idx <= 0) {
+    return
+  }
+  const prevTab = visibleTabOrder.value[idx - 1]
+  activeTab.value = prevTab
+  const prevSubs = navigableSubTabKeysFor(prevTab)
+  if (prevSubs.length) {
+    setActiveSubTabKey(prevTab, prevSubs[prevSubs.length - 1])
+  }
+}
 
 watch(activeTab, async(tab, prev) => {
   if (tab === addClientTabKeys.contact && prev !== tab) {
@@ -2047,6 +2167,11 @@ async function onNextFiltered() {
     document.activeElement.blur()
   }
   await nextTick()
+  if (canAdvanceWithinSubTabs()) {
+    goNextTabFiltered()
+
+    return
+  }
   const ok = await validateCurrentTabAndUnlock()
   if (!ok) {
     return
@@ -2065,6 +2190,16 @@ function onReferralSchedule() {
     message: t('referralScheduleRedirect'),
     position: 'top',
   })
+}
+
+function onAttachmentNavigateSource({ tab, subTab }) {
+  if (!tab) {
+    return
+  }
+  activeTab.value = tab
+  if (subTab) {
+    activeSubTab.value = subTab
+  }
 }
 
 function onReferralCreateFollowUp(draft) {

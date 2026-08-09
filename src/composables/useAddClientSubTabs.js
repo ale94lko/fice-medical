@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue'
 import {
   addClientClinicalSubTabKeys,
   addClientCareCoordinationSubTabKeys,
+  addClientDocumentsSubTabKeys,
   addClientTabKeys,
 } from 'components/constants.js'
 
@@ -32,6 +33,12 @@ export const CARE_COORDINATION_FOLLOW_UPS_SUB_TAB =
 
 export const CARE_COORDINATION_APPOINTMENTS_SUB_TAB =
   addClientCareCoordinationSubTabKeys.appointments
+
+export const DOCUMENTS_ATTACHMENTS_SUB_TAB =
+  addClientDocumentsSubTabKeys.attachments
+
+export const DOCUMENTS_CONSENTS_SUB_TAB =
+  addClientDocumentsSubTabKeys.consents
 
 export const ADD_CLIENT_MAIN_TABS = [
   {
@@ -169,24 +176,19 @@ export const ADD_CLIENT_SUB_TABS = {
   ],
   [addClientTabKeys.documents]: [
     {
-      key: 'attachments',
+      key: addClientDocumentsSubTabKeys.attachments,
       icon: 'attach_file',
       labelKey: 'subTabAttachments',
     },
     {
-      key: 'consents',
+      key: addClientDocumentsSubTabKeys.consents,
       icon: 'draw',
       labelKey: 'subTabConsents',
     },
     {
-      key: 'signedForms',
+      key: addClientDocumentsSubTabKeys.signedForms,
       icon: 'fact_check',
       labelKey: 'subTabSignedForms',
-    },
-    {
-      key: 'scannedDocs',
-      icon: 'document_scanner',
-      labelKey: 'subTabScannedDocs',
     },
   ],
 }
