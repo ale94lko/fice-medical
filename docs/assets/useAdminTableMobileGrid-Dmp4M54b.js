@@ -1,1 +1,0 @@
-import{n as e}from"./index-KXrbJASe.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
