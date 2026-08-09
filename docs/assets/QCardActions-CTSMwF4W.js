@@ -1,1 +1,0 @@
-import{Yu as e,ld as t,lu as n,uu as r,yd as i,yu as a}from"./index-C7JipYpy.js";var o=e({name:`QCardActions`,props:{...n,vertical:Boolean},setup(e,{slots:n}){let o=r(e),s=t(()=>`q-card__actions ${o.value} q-card__actions--${e.vertical===!0?`vert column`:`horiz row`}`);return()=>i(`div`,{class:s.value},a(n.default))}});export{o as t};
