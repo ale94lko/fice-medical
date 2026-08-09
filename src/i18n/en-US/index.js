@@ -657,6 +657,11 @@ export default {
   staffSupervisorHint:
     'Select the clinician who supervises this clinician. Leave blank '
     + 'if supervision is not required.',
+  staffSupervisorRequired:
+    'Supervisor is required when there is no active, unexpired license.',
+  staffSupervisorRequiredHint:
+    'A supervisor is required because this clinician has no active, '
+    + 'unexpired license.',
   staffFormSaveSuccess: 'Staff member saved successfully.',
   staffFormSaveError: 'Could not save staff member.',
   staffErrorDuplicateEmail: 'A staff member with this email already exists.',
@@ -1273,10 +1278,15 @@ export default {
   labAttachmentsTitle: 'Attachments',
   labAttachmentsHint: 'Drag and drop files here or click to browse',
   labAttachmentsReadonlyHint: 'Attached documents',
-  labAttachmentsFormats: 'PDF, JPG, PNG (max 10 MB)',
-  labAttachmentTypeError: 'Only PDF, JPG, and PNG files are allowed.',
-  labAttachmentSizeError: 'File exceeds the maximum size of 10 MB.',
+  labAttachmentsFormats:
+    'PDF, JPG, PNG, GIF, WEBP, TXT, CSV (max 25 MB)',
+  labAttachmentTypeError:
+    'File type not allowed. Use PDF, JPG, PNG, GIF, WEBP, TXT, or CSV.',
+  labAttachmentSizeError: 'File exceeds the maximum size of 25 MB.',
   labNoAttachment: 'This lab has no attachments to download.',
+  labDownloadSelectTitle: 'Download attachment',
+  labDownloadSelectMessage:
+    'This lab has multiple attachments. Choose which file to download.',
   labDownloadError: 'Could not download the attachment.',
   labUploadError: 'Could not upload the attachment.',
   labDeleteAttachmentError: 'Could not remove the attachment.',
@@ -1485,6 +1495,8 @@ export default {
   carePlanMeasureName: 'Measure',
   carePlanMeasureNamePlaceholder: 'Search or select a measure',
   carePlanMeasureNameRequired: 'Measure is required.',
+  carePlanMeasureDuplicate:
+    'This measure was already added to the goal.',
   carePlanMeasureDirection: 'Direction',
   carePlanMeasureDirectionRequired: 'Direction is required.',
   carePlanMeasureBaseline: 'Baseline',
@@ -1504,7 +1516,7 @@ export default {
   carePlanMeasureDescriptionPlaceholder:
     'Enter a description for this outcome measure',
   carePlanMeasureUnit: 'Unit',
-  carePlanMeasureUnitPlaceholder: 'e.g., score, mmHg, %, lbs',
+  carePlanMeasureUnitPlaceholder: 'Select a unit',
   carePlanMeasureFrequency: 'Frequency',
   carePlanMeasureSource: 'Source',
   carePlanSourceManual: 'Manual',
@@ -1520,11 +1532,11 @@ export default {
   carePlanAddMeasurementBanner:
     'New measurement will be used to calculate progress toward the goal.',
   carePlanOutcomeMeasureLabel: 'Outcome Measure',
-  carePlanPreviousMeasurement: 'Previous Measurement',
+  carePlanPreviousMeasurement: 'Last Measurement',
   carePlanMeasurementValue: 'Value',
-  carePlanMeasurementCurrentValue: 'Current Value',
+  carePlanMeasurementCurrentValue: 'New Value',
   carePlanMeasuredDate: 'Measured Date',
-  carePlanMeasurementValueRequired: 'Current value is required.',
+  carePlanMeasurementValueRequired: 'New value is required.',
   carePlanMeasuredDateRequired: 'Measured date is required.',
   carePlanMeasurementNotesPlaceholder:
     'Add notes about this measurement...',

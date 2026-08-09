@@ -36,7 +36,7 @@ function normalizeProgress(raw) {
 
 function normalizeClinicianRef(raw) {
   if (!raw) {
-    return { id: null, name: '' }
+    return { id: null, name: '', supervisorDisplayName: '' }
   }
   const id = parseOptionalNumber(raw.id ?? raw.clinician_id)
   const name = formatClinicianDisplayLabel(raw)
@@ -44,6 +44,13 @@ function normalizeClinicianRef(raw) {
   return {
     id,
     name,
+    supervisorDisplayName: trim(
+      raw.supervisor_display_name
+      ?? raw.supervisorDisplayName
+      ?? raw.supervisor?.display_name
+      ?? raw.supervisor?.displayName
+      ?? '',
+    ),
   }
 }
 
@@ -73,6 +80,9 @@ export function normalizeOutcomeMeasure(raw) {
     recordedByName: trim(
       row.recorded_by_name ?? row.recordedByName ?? '',
     ),
+    recordedById: parseOptionalNumber(
+      row.recorded_by_id ?? row.recordedById,
+    ),
     measurements: Array.isArray(row.measurements)
       ? row.measurements.map(item => ({
         id: parseOptionalNumber(item.id) ?? item.id,
@@ -83,6 +93,9 @@ export function normalizeOutcomeMeasure(raw) {
         notes: trim(item.notes),
         recordedByName: trim(
           item.recorded_by_name ?? item.recordedByName ?? '',
+        ),
+        recordedById: parseOptionalNumber(
+          item.recorded_by_id ?? item.recordedById,
         ),
       }))
       : [],

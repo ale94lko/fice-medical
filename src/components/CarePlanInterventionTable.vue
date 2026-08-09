@@ -113,6 +113,7 @@ import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { resolveClinicianOptionLabel } from 'src/utils/care-plan-orders.js'
 
 const props = defineProps({
   rows: {
@@ -126,6 +127,10 @@ const props = defineProps({
   emptyLabel: {
     type: String,
     default: '',
+  },
+  clinicianOptions: {
+    type: Array,
+    default: () => [],
   },
 })
 
@@ -178,8 +183,18 @@ const columns = computed(() => [
 ])
 
 function clinicianLabel(row) {
-  return row.responsibleClinicianName
-    || row.responsible_clinician_name
-    || '—'
+  const stored = String(
+    row?.responsibleClinicianName
+    ?? row?.responsible_clinician_name
+    ?? '',
+  ).trim()
+  if (stored) {
+    return stored
+  }
+
+  return resolveClinicianOptionLabel(
+    props.clinicianOptions,
+    row?.responsibleClinicianId ?? row?.responsible_clinician_id,
+  ) || '—'
 }
 </script>

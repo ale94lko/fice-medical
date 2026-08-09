@@ -8,6 +8,10 @@ import {
 import { todayDateUs } from 'src/utils/client-form.js'
 import { calculateOutcomeMeasureProgress } from
   'src/utils/care-plan-progress.js'
+import {
+  clinicianAvatarStyle,
+  clinicianInitialsFromPersonName,
+} from 'src/utils/clinician-display.js'
 
 let localIdCounter = 0
 
@@ -43,9 +47,31 @@ export function createEmptyOutcomeMeasure() {
     measuredDate: '',
     measurementNotes: '',
     recordedByName: '',
+    recordedById: null,
     measurements: [],
     progress: { status: 'NOT_MEASURED', percent: null },
   }
+}
+
+export function buildRecordedByClinicianEntries({
+  recordedByName = '',
+  recordedById = null,
+} = {}) {
+  const name = String(recordedByName ?? '').trim()
+  if (!name) {
+    return []
+  }
+  const id = recordedById != null && String(recordedById).trim() !== ''
+    ? recordedById
+    : name
+
+  return [{
+    id,
+    name,
+    personName: name,
+    initials: clinicianInitialsFromPersonName(name),
+    avatarStyle: clinicianAvatarStyle(id),
+  }]
 }
 
 export function applyOutcomeMeasureReading(measure, reading = {}) {
@@ -58,6 +84,7 @@ export function applyOutcomeMeasureReading(measure, reading = {}) {
       measuredDate: measure?.measuredDate || '',
       notes: measure?.measurementNotes || '',
       recordedByName: measure?.recordedByName || '',
+      recordedById: measure?.recordedById ?? null,
     })
   }
 
@@ -68,6 +95,7 @@ export function applyOutcomeMeasureReading(measure, reading = {}) {
     measuredDate: String(reading.measuredDate ?? '').trim(),
     measurementNotes: String(reading.notes ?? '').trim(),
     recordedByName: String(reading.recordedByName ?? '').trim(),
+    recordedById: reading.recordedById ?? null,
   }
 }
 
@@ -79,12 +107,19 @@ export function buildOutcomeMeasureHistoryRows(measure = {}) {
   const rows = []
   const currentValue = measure.currentValue
   if (currentValue != null && currentValue !== '') {
+    const recordedByName = measure.recordedByName || ''
+    const recordedById = measure.recordedById ?? null
     rows.push({
       id: `${measure.id || 'measure'}-current`,
       measuredDate: measure.measuredDate || '',
       value: currentValue,
       notes: measure.measurementNotes || '',
-      recordedByName: measure.recordedByName || '',
+      recordedByName,
+      recordedById,
+      recordedByEntries: buildRecordedByClinicianEntries({
+        recordedByName,
+        recordedById,
+      }),
       isCurrent: true,
       progress: calculateOutcomeMeasureProgress(
         measure.baseline,
@@ -96,12 +131,19 @@ export function buildOutcomeMeasureHistoryRows(measure = {}) {
   }
   const archived = [...(measure.measurements ?? [])].reverse()
   for (const item of archived) {
+    const recordedByName = item.recordedByName || ''
+    const recordedById = item.recordedById ?? null
     rows.push({
       id: item.id || nextCarePlanLocalId('reading'),
       measuredDate: item.measuredDate || '',
       value: item.value,
       notes: item.notes || '',
-      recordedByName: item.recordedByName || '',
+      recordedByName,
+      recordedById,
+      recordedByEntries: buildRecordedByClinicianEntries({
+        recordedByName,
+        recordedById,
+      }),
       isCurrent: false,
       progress: calculateOutcomeMeasureProgress(
         measure.baseline,
@@ -142,6 +184,43 @@ export function createEmptyIntervention() {
     responsibleClinicianName: '',
     notes: '',
   }
+}
+
+/**
+ * Default Responsible Clinician: logged-in provider when present in options.
+ */
+export function resolveDefaultResponsibleClinicianOption(
+  clinicianOptions = [],
+  { staffMember = null } = {},
+) {
+  if (!staffMember?.isClinician) {
+    return null
+  }
+  const staffId = Number(staffMember.id)
+  if (!Number.isFinite(staffId) || staffId <= 0) {
+    return null
+  }
+  const options = Array.isArray(clinicianOptions) ? clinicianOptions : []
+
+  return options.find(option =>
+    Number(option?.staffMemberId) === staffId,
+  ) ?? options.find(option => Number(option?.value) === staffId)
+    ?? null
+}
+
+export function resolveClinicianOptionLabel(
+  clinicianOptions = [],
+  clinicianId,
+) {
+  const id = String(clinicianId ?? '').trim()
+  if (!id) {
+    return ''
+  }
+  const found = (clinicianOptions ?? []).find(
+    option => String(option?.value ?? '').trim() === id,
+  )
+
+  return String(found?.label ?? found?.name ?? '').trim()
 }
 
 export function createEmptyCarePlanGoal() {
@@ -250,3 +329,42 @@ export const CARE_PLAN_MEASURE_OPTIONS = [
   'Blood Pressure',
   'A1C',
 ]
+
+/** Units for outcome measures (select list, same UX as lab component Unit). */
+export const CARE_PLAN_MEASURE_UNIT_OPTIONS = [
+  'score',
+  'mmHg',
+  '%',
+  'lbs',
+  'kg',
+  'kg/m²',
+  'mg/dL',
+  'count',
+]
+
+export function normalizeOutcomeMeasureName(name) {
+  return String(name ?? '').trim().toLowerCase()
+}
+
+export function isOutcomeMeasureAlreadyAdded(
+  measureName,
+  existingMeasures = [],
+  { excludeId = null } = {},
+) {
+  const needle = normalizeOutcomeMeasureName(measureName)
+  if (!needle) {
+    return false
+  }
+  const exclude = String(excludeId ?? '').trim()
+
+  return (existingMeasures ?? []).some(item => {
+    if (!item || item.deletedAt) {
+      return false
+    }
+    if (exclude && String(item.id ?? '').trim() === exclude) {
+      return false
+    }
+
+    return normalizeOutcomeMeasureName(item.measureName) === needle
+  })
+}

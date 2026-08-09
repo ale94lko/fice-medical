@@ -529,6 +529,9 @@ import {
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
+import { resolveDefaultResponsibleClinicianOption } from
+  'src/utils/care-plan-orders.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   modelValue: {
@@ -568,6 +571,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const localDraft = ref(createEmptyVitalsDraft())
@@ -580,6 +584,45 @@ const open = computed({
 })
 
 const editMode = computed(() => Boolean(props.entry?.id))
+
+function applyDefaultRecordedBy() {
+  if (editMode.value || localDraft.value.recordedBy) {
+    return
+  }
+  const option = resolveDefaultResponsibleClinicianOption(
+    props.clinicianOptions,
+    { staffMember: authStore.userInfo?.staffMember ?? null },
+  )
+  if (!option) {
+    return
+  }
+  localDraft.value.recordedBy = option.value
+}
+
+watch(
+  () => [props.modelValue, props.entry],
+  ([isOpen]) => {
+    if (!isOpen) {
+      return
+    }
+    localDraft.value = props.entry
+      ? draftFromVitalsEntry(props.entry)
+      : createEmptyVitalsDraft()
+    applyDefaultRecordedBy()
+    fieldErrors.value = {}
+  },
+  { immediate: true },
+)
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applyDefaultRecordedBy()
+  },
+)
 
 const dialogTitle = computed(() =>
   editMode.value
@@ -704,20 +747,6 @@ const timePickerValue = computed({
     localDraft.value.recordedTime = val
   },
 })
-
-watch(
-  () => [props.modelValue, props.entry],
-  ([isOpen]) => {
-    if (!isOpen) {
-      return
-    }
-    localDraft.value = props.entry
-      ? draftFromVitalsEntry(props.entry)
-      : createEmptyVitalsDraft()
-    fieldErrors.value = {}
-  },
-  { immediate: true },
-)
 
 function painDotClass(modifier) {
   return [

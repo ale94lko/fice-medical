@@ -87,6 +87,7 @@
                 :error="Boolean(errors.responsibleClinicianId)"
                 :error-message="errors.responsibleClinicianId"
                 :test-id="tid.field('intervention-clinician')"
+                @update:model-value="onClinicianChange"
               />
             </AddClientLabeledField>
           </div>
@@ -149,8 +150,11 @@ import {
 import {
   CARE_PLAN_FREQUENCY_OPTIONS,
   createEmptyIntervention,
+  resolveClinicianOptionLabel,
+  resolveDefaultResponsibleClinicianOption,
 } from 'src/utils/care-plan-orders.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   modelValue: {
@@ -174,6 +178,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save', 'cancel'])
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const open = computed({
   get: () => props.modelValue,
@@ -199,18 +204,63 @@ const frequencyOptions = computed(() =>
   CARE_PLAN_FREQUENCY_OPTIONS.map(value => ({ label: value, value })),
 )
 
+function applyDefaultResponsibleClinician() {
+  if (props.mode !== 'add' || local.value.responsibleClinicianId) {
+    return
+  }
+  const option = resolveDefaultResponsibleClinicianOption(
+    props.clinicianOptions,
+    { staffMember: authStore.userInfo?.staffMember ?? null },
+  )
+  if (!option) {
+    return
+  }
+  local.value.responsibleClinicianId = option.value
+  local.value.responsibleClinicianName = option.label || option.name || ''
+}
+
+function onClinicianChange(id) {
+  local.value.responsibleClinicianName = resolveClinicianOptionLabel(
+    props.clinicianOptions,
+    id,
+  )
+}
+
 watch(
-  () => [props.modelValue, props.intervention],
+  () => [props.modelValue, props.intervention, props.mode],
   () => {
     if (props.modelValue) {
       local.value = {
         ...createEmptyIntervention(),
         ...(props.intervention ?? {}),
       }
+      applyDefaultResponsibleClinician()
+      if (
+        local.value.responsibleClinicianId
+        && !String(local.value.responsibleClinicianName ?? '').trim()
+      ) {
+        onClinicianChange(local.value.responsibleClinicianId)
+      }
       Object.keys(errors).forEach(key => delete errors[key])
     }
   },
   { immediate: true },
+)
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applyDefaultResponsibleClinician()
+    if (
+      local.value.responsibleClinicianId
+      && !String(local.value.responsibleClinicianName ?? '').trim()
+    ) {
+      onClinicianChange(local.value.responsibleClinicianId)
+    }
+  },
 )
 
 function validate() {
@@ -232,7 +282,16 @@ function onSave() {
   if (!validate()) {
     return
   }
-  emit('save', { ...local.value })
+  const clinicianName = String(local.value.responsibleClinicianName ?? '')
+    .trim()
+    || resolveClinicianOptionLabel(
+      props.clinicianOptions,
+      local.value.responsibleClinicianId,
+    )
+  emit('save', {
+    ...local.value,
+    responsibleClinicianName: clinicianName,
+  })
   open.value = false
 }
 

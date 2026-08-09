@@ -193,8 +193,7 @@ function buildClinicalFields(clinical = {}, t) {
   const taxonomies = (clinical.taxonomies ?? [])
     .map(row => formatTaxonomyItem(row, t))
     .filter(Boolean)
-
-  return [
+  const fields = [
     field('npi', t('staffNpiLabel'), clinical.npi),
     field('credential', t('staffCredentialLabel'), clinical.credential),
     field(
@@ -217,6 +216,16 @@ function buildClinicalFields(clinical = {}, t) {
       value: taxonomies.length ? taxonomies.join('; ') : '—',
     },
   ]
+  const supervisorName = trim(clinical.supervisorDisplayName)
+  if (supervisorName || clinical.supervisorId != null) {
+    fields.push(field(
+      'supervisor',
+      t('staffSupervisorLabel'),
+      supervisorName || String(clinical.supervisorId),
+    ))
+  }
+
+  return fields
 }
 
 function buildSystemAccessFields(systemUser = {}, t) {

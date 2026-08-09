@@ -3,6 +3,8 @@ import {
   getPasswordPolicyViolation,
   passwordPolicyMessageKey,
 } from 'src/utils/password-validation.js'
+import { isClinicianSupervisorRequired } from
+  'src/utils/clinician-supervisor.js'
 
 export function resolveStaffApiErrorMessage(error, t) {
   const data = error?.response?.data
@@ -123,6 +125,12 @@ function validateClinicalFields(clinical, t, errors) {
   const primaryCode = String(primary?.code ?? '').trim()
   if (!primaryCode) {
     errors.taxonomies = t('staffPrimaryTaxonomyRequired')
+  }
+  if (
+    isClinicianSupervisorRequired(clinical)
+    && (clinical.supervisorId == null || clinical.supervisorId === '')
+  ) {
+    errors.supervisorId = t('staffSupervisorRequired')
   }
 }
 

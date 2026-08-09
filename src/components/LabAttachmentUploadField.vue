@@ -1,7 +1,10 @@
 <template>
   <div
     class="lab-attachment-upload"
-    :class="{ 'lab-attachment-upload--readonly': readonly }">
+    :class="{
+      'lab-attachment-upload--readonly': readonly,
+      'lab-attachment-upload--error': Boolean(displayError),
+    }">
     <p
       v-if="label"
       class="lab-attachment-upload__label text-weight-medium">
@@ -22,7 +25,7 @@
       <q-icon
         name="cloud_upload"
         size="22px"
-        color="primary"
+        :color="displayError ? 'negative' : 'primary'"
         class="lab-attachment-upload__icon"
       />
       <div class="lab-attachment-upload__copy">
@@ -91,7 +94,10 @@
         />
       </li>
     </ul>
-    <div v-if="displayError" class="form-field__error">
+    <div
+      v-if="displayError"
+      class="form-field__error lab-attachment-upload__error"
+      role="alert">
       {{ displayError }}
     </div>
   </div>
@@ -101,6 +107,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
+  labAttachmentExtensions,
   labAttachmentMimeTypes,
   labMaxAttachmentBytes,
 } from 'components/constants.js'
@@ -136,32 +143,59 @@ const fileInputRef = ref(null)
 const dragActive = ref(false)
 const localError = ref('')
 
-const acceptAttr = computed(() => labAttachmentMimeTypes.join(','))
+const acceptAttr = computed(() => [
+  ...labAttachmentExtensions.map(ext => `.${ext}`),
+  ...labAttachmentMimeTypes,
+].join(','))
 
 const displayError = computed(() => props.error || localError.value)
 
-function validateFile(file) {
-  if (!labAttachmentMimeTypes.includes(file.type)) {
-    localError.value = t('labAttachmentTypeError')
+function fileExtension(fileName) {
+  const name = String(fileName ?? '').trim().toLowerCase()
+  const dot = name.lastIndexOf('.')
+  if (dot < 0 || dot === name.length - 1) {
+    return ''
+  }
 
-    return false
+  return name.slice(dot + 1)
+}
+
+function isAllowedLabAttachment(file) {
+  const type = String(file?.type ?? '').trim().toLowerCase()
+  const ext = fileExtension(file?.name)
+  const extOk = Boolean(ext)
+    && labAttachmentExtensions.includes(ext)
+  const mimeOk = Boolean(type)
+    && labAttachmentMimeTypes.includes(type)
+
+  return extOk || mimeOk
+}
+
+function validateFile(file) {
+  if (!file) {
+    return t('labAttachmentTypeError')
+  }
+  if (!isAllowedLabAttachment(file)) {
+    return t('labAttachmentTypeError')
   }
   if (file.size > labMaxAttachmentBytes) {
-    localError.value = t('labAttachmentSizeError')
-
-    return false
+    return t('labAttachmentSizeError')
   }
-  localError.value = ''
 
-  return true
+  return ''
 }
 
 function processFiles(fileList) {
+  let lastError = ''
   for (const file of fileList) {
-    if (validateFile(file)) {
-      emit('upload', file)
+    const message = validateFile(file)
+    if (message) {
+      lastError = message
+      continue
     }
+    emit('upload', file)
   }
+  localError.value = lastError
 }
 
 function onBrowseClick() {
@@ -234,7 +268,13 @@ function onDrop(event) {
   }
 
   &--error {
-    border-color: $negative;
+    border: 1px solid $negative;
+    background: rgba($negative, 0.06);
+
+    &:hover {
+      border-color: $negative;
+      background: rgba($negative, 0.08);
+    }
   }
 }
 
@@ -245,6 +285,12 @@ function onDrop(event) {
     border-color: $border-subtle;
     background: $surface;
   }
+}
+
+.lab-attachment-upload--readonly
+  .lab-attachment-upload__dropzone--error:hover {
+  border-color: $negative;
+  background: rgba($negative, 0.06);
 }
 
 .lab-attachment-upload__icon {
@@ -299,5 +345,9 @@ function onDrop(event) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.lab-attachment-upload__error {
+  margin-top: 6px;
 }
 </style>

@@ -20,7 +20,6 @@
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <div class="referral-dialog__section">
           <SubsectionHeading
-            :step="1"
             icon="info"
             :title="t('referralSectionInformation')"
           />
@@ -97,7 +96,6 @@
           v-if="isIncoming"
           class="referral-dialog__section q-mt-lg">
           <SubsectionHeading
-            :step="2"
             icon="call_received"
             :title="t('referralSectionSourceIncoming')"
           />
@@ -200,7 +198,6 @@
           v-if="isOutgoing"
           class="referral-dialog__section q-mt-lg">
           <SubsectionHeading
-            :step="2"
             icon="call_made"
             :title="t('referralSectionDestinationOutgoing')"
           />
@@ -265,7 +262,6 @@
 
         <div class="referral-dialog__section q-mt-lg">
           <SubsectionHeading
-            :step="3"
             icon="medical_services"
             :title="t('referralSectionClinicalContext')"
           />
@@ -316,7 +312,6 @@
 
         <div class="referral-dialog__section q-mt-lg">
           <SubsectionHeading
-            :step="4"
             icon="groups"
             :title="t('referralSectionCoordination')"
           />
@@ -350,7 +345,6 @@
 
         <div class="referral-dialog__section q-mt-lg">
           <SubsectionHeading
-            :step="5"
             icon="attach_file"
             :title="t('referralSectionDocumentsOptional')"
           />

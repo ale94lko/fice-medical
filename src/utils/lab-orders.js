@@ -753,9 +753,16 @@ export function hasLabSpecimenInfo(lab = {}) {
 export function hasLabResultsInfo(lab = {}) {
   return hasTrimmedValue(lab.resultDate)
     || hasTrimmedValue(lab.abnormalResultManual)
-    || hasTrimmedValue(lab.reviewedBy)
-    || hasTrimmedValue(lab.reviewedDate)
     || hasTrimmedValue(lab.resultSummary)
+}
+
+export function hasLabReviewInfo(lab = {}) {
+  return hasTrimmedValue(lab.reviewedBy)
+    || hasTrimmedValue(lab.reviewedDate)
+}
+
+export function hasLabComponentsInfo(lab = {}) {
+  return visibleComponents(lab?.components).length > 0
 }
 
 /**

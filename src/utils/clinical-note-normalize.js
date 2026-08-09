@@ -75,6 +75,13 @@ function resolveClinicalNoteClinicianEntries(
     initials: clinicianInitialsFromPersonName(
       personName || label,
     ),
+    supervisorDisplayName: trim(
+      clinician?.supervisor_display_name
+      ?? clinician?.supervisorDisplayName
+      ?? clinician?.supervisor?.display_name
+      ?? clinician?.supervisor?.displayName
+      ?? '',
+    ),
   }]
 }
 

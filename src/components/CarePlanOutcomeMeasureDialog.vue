@@ -133,12 +133,17 @@
               <AddClientLabeledField
                 :label="t('carePlanMeasureUnit')"
                 :test-id="tid.field('measure-unit')">
-                <q-input
+                <FormSelect
                   v-model="local.unit"
                   outlined
                   hide-bottom-space
+                  emit-value
+                  map-options
+                  clearable
                   :readonly="readonly"
+                  :options="unitOptions"
                   :placeholder="t('carePlanMeasureUnitPlaceholder')"
+                  :test-id="tid.field('measure-unit')"
                 />
               </AddClientLabeledField>
             </div>
@@ -169,7 +174,7 @@
                   hide-bottom-space
                   emit-value
                   map-options
-                  :readonly="readonly"
+                  :readonly="true"
                   :options="sourceOptions"
                   :test-id="tid.field('measure-source')"
                 />
@@ -242,7 +247,9 @@ import {
 import {
   CARE_PLAN_FREQUENCY_OPTIONS,
   CARE_PLAN_MEASURE_OPTIONS,
+  CARE_PLAN_MEASURE_UNIT_OPTIONS,
   createEmptyOutcomeMeasure,
+  isOutcomeMeasureAlreadyAdded,
 } from 'src/utils/care-plan-orders.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
@@ -258,6 +265,10 @@ const props = defineProps({
   mode: {
     type: String,
     default: 'add',
+  },
+  existingMeasures: {
+    type: Array,
+    default: () => [],
   },
 })
 
@@ -290,6 +301,22 @@ const frequencyOptions = computed(() =>
   CARE_PLAN_FREQUENCY_OPTIONS.map(value => ({ label: value, value })),
 )
 
+const unitOptions = computed(() => {
+  const base = CARE_PLAN_MEASURE_UNIT_OPTIONS.map(value => ({
+    label: value,
+    value,
+  }))
+  const current = String(local.value.unit ?? '').trim()
+  if (
+    current
+    && !CARE_PLAN_MEASURE_UNIT_OPTIONS.includes(current)
+  ) {
+    return [{ label: current, value: current }, ...base]
+  }
+
+  return base
+})
+
 const directionOptions = computed(() => [
   {
     label: t('carePlanDirectionLower'),
@@ -306,12 +333,35 @@ const sourceOptions = computed(() => [{
   value: carePlanOutcomeSourceTypes.manual,
 }])
 
+const takenMeasureNames = computed(() => {
+  const excludeId = String(props.measure?.id ?? '').trim()
+
+  return new Set(
+    (props.existingMeasures ?? [])
+      .filter(item => {
+        if (!item || item.deletedAt) {
+          return false
+        }
+        if (excludeId && String(item.id ?? '').trim() === excludeId) {
+          return false
+        }
+
+        return Boolean(String(item.measureName ?? '').trim())
+      })
+      .map(item => String(item.measureName).trim().toLowerCase()),
+  )
+})
+
 const measureOptions = computed(() => {
   const needle = measureFilter.value.trim().toLowerCase()
 
   return CARE_PLAN_MEASURE_OPTIONS
     .filter(name => !needle || name.toLowerCase().includes(needle))
-    .map(name => ({ label: name, value: name }))
+    .map(name => ({
+      label: name,
+      value: name,
+      disable: takenMeasureNames.value.has(name.toLowerCase()),
+    }))
 })
 
 watch(
@@ -321,8 +371,11 @@ watch(
       local.value = {
         ...createEmptyOutcomeMeasure(),
         ...(props.measure ?? {}),
+        // Source is manual-only for now.
+        sourceType: carePlanOutcomeSourceTypes.manual,
       }
       Object.keys(errors).forEach(key => delete errors[key])
+      measureFilter.value = ''
     }
   },
   { immediate: true },
@@ -426,6 +479,12 @@ function validate() {
   Object.keys(errors).forEach(key => delete errors[key])
   if (!String(local.value.measureName ?? '').trim()) {
     errors.measureName = t('carePlanMeasureNameRequired')
+  } else if (isOutcomeMeasureAlreadyAdded(
+    local.value.measureName,
+    props.existingMeasures,
+    { excludeId: props.measure?.id },
+  )) {
+    errors.measureName = t('carePlanMeasureDuplicate')
   }
   if (!local.value.direction) {
     errors.direction = t('carePlanMeasureDirectionRequired')
@@ -441,11 +500,14 @@ function onSave(keepOpen) {
   }
   emit('save', {
     ...local.value,
+    sourceType: carePlanOutcomeSourceTypes.manual,
     baseline: parseMeasureNumber(local.value.baseline),
     target: parseMeasureNumber(local.value.target),
   }, keepOpen)
   if (keepOpen) {
     local.value = createEmptyOutcomeMeasure()
+    Object.keys(errors).forEach(key => delete errors[key])
+    measureFilter.value = ''
 
     return
   }

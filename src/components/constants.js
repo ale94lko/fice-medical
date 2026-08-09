@@ -408,6 +408,18 @@ export const clientProfilePhotoOutputQuality = 0.92
 
 export const labMaxAttachmentBytes = storedFileMaxBytes
 
+/** Extensions allowed for lab attachments (aligned with mime filter). */
+export const labAttachmentExtensions = [
+  'pdf',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'webp',
+  'txt',
+  'csv',
+]
+
 export const labAttachmentMimeTypes = storedFileMimeTypes.filter(type =>
   type.startsWith('application/pdf')
   || type.startsWith('image/')
@@ -761,6 +773,7 @@ export const carePlanPriorities = {
 
 export const carePlanNameMaxLength = 255
 export const carePlanProblemMaxLength = 255
+export const carePlanProblemListDisplayMaxLength = 100
 export const carePlanDescriptionMaxLength = 500
 export const carePlanGoalTitleMaxLength = 255
 export const carePlanInterventionNotesMaxLength = 300

@@ -75,8 +75,12 @@
               <span class="care-plan-measurement-summary__label">
                 {{ t('carePlanMeasurementValue') }}
               </span>
-              <span class="care-plan-measurement-summary__value
-                care-plan-measurement-summary__value--accent">
+              <span
+                class="care-plan-measurement-summary__value
+                  care-plan-measurement-summary__value--last"
+                :class="`care-plan-measurement-summary__value--${
+                  lastMeasurementTone
+                }`">
                 {{ formatWithUnit(measure?.currentValue) }}
               </span>
             </div>
@@ -184,6 +188,9 @@ import ClientDateField from 'components/ClientDateField.vue'
 import { carePlanMeasureNotesMaxLength } from 'components/constants.js'
 import { todayDateUs } from 'src/utils/client-form.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
+import { measurementProgressTone } from 'src/utils/care-plan-orders.js'
+import { calculateOutcomeMeasureProgress } from
+  'src/utils/care-plan-progress.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -236,6 +243,20 @@ const hasPreviousMeasurement = computed(() => {
   const value = props.measure?.currentValue
 
   return value != null && value !== ''
+})
+
+const lastMeasurementTone = computed(() => {
+  if (!hasPreviousMeasurement.value) {
+    return 'none'
+  }
+  const progress = calculateOutcomeMeasureProgress(
+    props.measure?.baseline,
+    props.measure?.currentValue,
+    props.measure?.target,
+    props.measure?.direction,
+  )
+
+  return measurementProgressTone(progress?.percent)
 })
 
 watch(
@@ -351,6 +372,32 @@ function onCancel() {
     &--accent {
       font-weight: 600;
       color: $primary;
+    }
+
+    &--last {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    &--none {
+      color: $text-strong;
+    }
+
+    &--baseline {
+      color: #64748b;
+    }
+
+    &--inProgress {
+      color: #d97706;
+    }
+
+    &--onTrack {
+      color: #ca8a04;
+    }
+
+    &--achieved {
+      color: #166534;
     }
   }
 }

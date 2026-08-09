@@ -190,6 +190,7 @@
                   :error="Boolean(errors.prescriberId)"
                   :error-message="errors.prescriberId"
                   :test-id="tid.field('prescriber')"
+                  @update:model-value="onPrescriberChange"
                 />
               </AddClientLabeledField>
             </div>
@@ -448,6 +449,11 @@ import { medicationTestIds as tid } from 'src/test-ids/index.js'
 import {
   useValidationSaveFeedback,
 } from 'src/composables/useValidationSaveFeedback.js'
+import {
+  resolveClinicianOptionLabel,
+  resolveDefaultResponsibleClinicianOption,
+} from 'src/utils/care-plan-orders.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const medicationTextMaxLength = 500
 
@@ -499,6 +505,7 @@ const emit = defineEmits(['save', 'cancel', 'add-pharmacy'])
 const open = defineModel({ type: Boolean, default: false })
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 
 const dialogBodyScrollRef = ref(null)
@@ -509,6 +516,28 @@ const medicationOptions = ref([])
 const medicationSearchLoading = ref(false)
 
 const readonly = computed(() => props.mode === 'view')
+
+function applyDefaultPrescriber() {
+  if (props.mode !== 'add' || local.value.prescriberId) {
+    return
+  }
+  const option = resolveDefaultResponsibleClinicianOption(
+    props.clinicianOptions,
+    { staffMember: authStore.userInfo?.staffMember ?? null },
+  )
+  if (!option) {
+    return
+  }
+  local.value.prescriberId = option.value
+  local.value.prescriberName = option.label || option.name || ''
+}
+
+function onPrescriberChange(id) {
+  local.value.prescriberName = resolveClinicianOptionLabel(
+    props.clinicianOptions,
+    id,
+  )
+}
 
 const dialogTitle = computed(() => {
   if (props.mode === 'view') {
@@ -588,11 +617,34 @@ watch(
       return
     }
     local.value = buildLocalForm(props.medication)
+    applyDefaultPrescriber()
+    if (
+      local.value.prescriberId
+      && !String(local.value.prescriberName ?? '').trim()
+    ) {
+      onPrescriberChange(local.value.prescriberId)
+    }
     errors.value = {}
     addAnother.value = false
     medicationOptions.value = currentMedicationOptions()
   },
   { immediate: true },
+)
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applyDefaultPrescriber()
+    if (
+      local.value.prescriberId
+      && !String(local.value.prescriberName ?? '').trim()
+    ) {
+      onPrescriberChange(local.value.prescriberId)
+    }
+  },
 )
 
 function mapMedicationOptions(list) {

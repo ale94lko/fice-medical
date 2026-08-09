@@ -565,7 +565,7 @@ function clearInvalidEndDate() {
 
 .appointment-recurrence-section__days-preset {
   flex: 0 0 auto;
-  width: min(160px, 100%);
+  width: min(125px, 100%);
 }
 
 .appointment-recurrence-section__days {

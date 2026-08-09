@@ -112,23 +112,17 @@
           :key="`phone-${index}`"
           class="row q-col-gutter-sm q-col-gutter-md contact-method-row">
           <div class="col-12 col-md-6">
-            <AddClientLabeledField
+            <FormInput
+              :ref="el => setPhoneInputRef(el, index)"
+              :model-value="phone.number"
+              :external-label="true"
               :label="t('phoneNumber')"
-              :test-id="contactFieldTestId(`phone-${index}-number`)">
-              <q-input
-                :ref="el => setPhoneInputRef(el, index)"
-                outlined
-                hide-bottom-space
-                lazy-rules="ondemand"
-                class="full-width"
-                :data-testid="contactFieldTestId(`phone-${index}-number`)"
-                :model-value="phone.number"
-                :placeholder="t('phoneNumberPlaceholder')"
-                :rules="phoneNumberRules(index)"
-                maxlength="14"
-                @update:model-value="val => onPhoneInput(index, val)"
-              />
-            </AddClientLabeledField>
+              :placeholder="t('phoneNumberPlaceholder')"
+              :rules="phoneNumberRules(index)"
+              maxlength="14"
+              :test-id="contactFieldTestId(`phone-${index}-number`)"
+              @update:model-value="val => onPhoneInput(index, val)"
+            />
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -336,6 +330,8 @@ import {
   createEmptyEmail,
   createEmptyPhone,
   formatPhoneUs,
+  isCompletePhoneNumber,
+  isValidPhoneChars,
 } from 'src/utils/client-contact-form.js'
 import {
   hasConsent,
@@ -370,11 +366,23 @@ const {
   emailAddressRules: buildEmailAddressRules,
 } = useContactMethodDuplicateRules(t)
 
+function phoneBaseRules() {
+  const fromProps = props.rules?.phoneNumber
+  if (Array.isArray(fromProps) && fromProps.length) {
+    return fromProps
+  }
+
+  return [
+    val => isValidPhoneChars(val) || t('phoneInvalid'),
+    val => isCompletePhoneNumber(val) || t('clientPhoneIncomplete'),
+  ]
+}
+
 function phoneNumberRules(index) {
   return buildPhoneNumberRules(
     contact.value.phones,
     index,
-    props.rules?.phoneNumber ?? [],
+    phoneBaseRules(),
   )
 }
 
@@ -511,18 +519,29 @@ function applyAddressDetails(details) {
 }
 
 function onPhoneInput(index, val) {
-  contact.value.phones[index].number = formatPhoneUs(val)
+  const phones = (contact.value.phones ?? []).map((phone, i) =>
+    i === index
+      ? { ...phone, number: formatPhoneUs(val) }
+      : phone,
+  )
+  contact.value = { ...contact.value, phones }
 }
 
 function addPhone() {
   if (!canAddPhone(contact.value.phones.length - 1)) {
     return
   }
-  contact.value.phones.push(createEmptyPhone())
+  contact.value = {
+    ...contact.value,
+    phones: [...(contact.value.phones ?? []), createEmptyPhone()],
+  }
 }
 
 function removePhone(index) {
-  contact.value.phones.splice(index, 1)
+  contact.value = {
+    ...contact.value,
+    phones: (contact.value.phones ?? []).filter((_, i) => i !== index),
+  }
 }
 
 function addEmail() {

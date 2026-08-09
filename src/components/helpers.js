@@ -432,6 +432,13 @@ export function resolveClientListClinicianEntries(client) {
         initials: clinicianInitialsFromPersonName(
           personName || name,
         ),
+        supervisorDisplayName: String(
+          item.supervisor_display_name
+          ?? item.supervisorDisplayName
+          ?? item.supervisor?.display_name
+          ?? item.supervisor?.displayName
+          ?? '',
+        ).trim(),
       }
     })
     .filter(Boolean)

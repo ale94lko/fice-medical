@@ -109,16 +109,21 @@
     <AccordionSection
       icon="supervisor_account"
       :title="t('staffClinicalSupervisionTitle')">
-      <AddClientLabeledField :label="t('staffSupervisorLabel')">
+      <AddClientLabeledField
+        :label="t('staffSupervisorLabel')"
+        :required="supervisorRequired">
         <ClinicianFormSelect
-          v-model="clinical.supervisorId"
+          :model-value="clinical.supervisorId"
           clearable
           :readonly="readonly"
-          :options="supervisorOptions"
+          :options="resolvedSupervisorOptions"
           :placeholder="t('staffSupervisorPlaceholder')"
+          :error="Boolean(fieldErrors.supervisorId)"
+          :error-message="fieldErrors.supervisorId"
+          @update:model-value="onSupervisorChange"
         />
         <template #hint>
-          {{ t('staffSupervisorHint') }}
+          {{ supervisorHint }}
         </template>
       </AddClientLabeledField>
     </AccordionSection>
@@ -160,6 +165,10 @@ import {
   createEmptyStaffLicense,
   nextStaffLicenseId,
 } from 'src/utils/staff-form.js'
+import {
+  buildSupervisorSelectOptions,
+  isClinicianSupervisorRequired,
+} from 'src/utils/clinician-supervisor.js'
 
 const props = defineProps({
   modelValue: {
@@ -209,6 +218,36 @@ const clinical = computed({
 const npiFieldDisabled = computed(() =>
   props.readonly || props.npiReadonly,
 )
+
+const supervisorRequired = computed(() =>
+  isClinicianSupervisorRequired(clinical.value),
+)
+
+const supervisorHint = computed(() =>
+  supervisorRequired.value
+    ? t('staffSupervisorRequiredHint')
+    : t('staffSupervisorHint'),
+)
+
+const resolvedSupervisorOptions = computed(() =>
+  buildSupervisorSelectOptions({
+    options: props.supervisorOptions,
+    excludeClinicianId: clinical.value?.clinicianId ?? null,
+    supervisorId: clinical.value?.supervisorId ?? null,
+    supervisorDisplayName: clinical.value?.supervisorDisplayName ?? '',
+  }),
+)
+
+function onSupervisorChange(id) {
+  const option = resolvedSupervisorOptions.value.find(
+    row => String(row?.value) === String(id ?? ''),
+  )
+  clinical.value = {
+    ...clinical.value,
+    supervisorId: id ?? null,
+    supervisorDisplayName: option?.label || option?.name || '',
+  }
+}
 
 function onTaxonomiesUpdate(taxonomies) {
   clinical.value = {

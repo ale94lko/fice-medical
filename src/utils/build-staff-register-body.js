@@ -1,6 +1,7 @@
 /* eslint-disable camelcase -- API payload field names */
 import { normalizePhoneDigits } from 'src/utils/client-contact-form.js'
 import { displayDateToApi } from 'src/utils/app-datetime.js'
+import { mapSupervisorIdForApi } from 'src/utils/clinician-supervisor.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -135,7 +136,7 @@ function mapClinicalProfile(clinical) {
         row.attachment_file_id ?? row.attachmentFileId ?? null,
       is_primary: Boolean(row.is_primary ?? row.isPrimary),
     })),
-    supervisor_id: clinical.supervisorId ?? null,
+    supervisor_id: mapSupervisorIdForApi(clinical.supervisorId),
   }
 }
 

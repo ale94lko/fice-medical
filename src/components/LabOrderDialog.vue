@@ -180,17 +180,15 @@
               </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
-              <AddClientLabeledField
+              <AddressSearchField
+                :model-value="local.collectionLocation || ''"
                 :label="t('labCollectionLocation')"
-                :test-id="tid.field('collection-location')">
-                <q-input
-                  v-model="local.collectionLocation"
-                  outlined
-                  hide-bottom-space
-                  :readonly="specimenFieldsReadonly"
-                  :data-testid="tid.field('collection-location')"
-                />
-              </AddClientLabeledField>
+                :readonly="specimenFieldsReadonly"
+                :test-id="tid.field('collection-location')"
+                test-id-prefix="lab-collection-location-places"
+                @update:model-value="onCollectionLocationInput"
+                @select="onCollectionLocationSelect"
+              />
             </div>
           </div>
         </div>
@@ -468,6 +466,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AddressSearchField from 'components/AddressSearchField.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import SubsectionHeading from './SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
@@ -504,6 +503,11 @@ import {
   cloneLab,
   computeLabAbnormalResult,
   createEmptyLabOrder,
+  hasLabAttachments,
+  hasLabComponentsInfo,
+  hasLabResultsInfo,
+  hasLabReviewInfo,
+  hasLabSpecimenInfo,
   isLabTerminal,
   isUsDateBefore,
   labStatusToken,
@@ -618,8 +622,14 @@ const showSpecimenSection = computed(() => {
   if (isTransitionMode.value) {
     return false
   }
+  if (isAddMode.value) {
+    return false
+  }
+  if (isViewMode.value) {
+    return hasLabSpecimenInfo(local.value)
+  }
 
-  return !isAddMode.value && canShowLabSpecimen(currentStatus.value)
+  return canShowLabSpecimen(currentStatus.value)
 })
 
 const showResultsSection = computed(() => {
@@ -628,6 +638,9 @@ const showResultsSection = computed(() => {
   }
   if (isTransitionMode.value) {
     return false
+  }
+  if (isViewMode.value) {
+    return hasLabResultsInfo(local.value)
   }
 
   return canShowLabResults(currentStatus.value)
@@ -640,6 +653,9 @@ const showReviewSection = computed(() => {
   if (isTransitionMode.value) {
     return false
   }
+  if (isViewMode.value) {
+    return hasLabReviewInfo(local.value)
+  }
 
   return canShowLabReview(currentStatus.value)
 })
@@ -651,15 +667,22 @@ const showComponentsSection = computed(() => {
   if (isTransitionMode.value) {
     return false
   }
+  if (isViewMode.value) {
+    return hasLabComponentsInfo(local.value)
+  }
 
   return canShowLabComponents(currentStatus.value)
 })
 
-const showAttachmentsSection = computed(() =>
-  !isTransitionMode.value
-  || transitionIntent.value === 'collect'
-  || transitionIntent.value === 'results',
-)
+const showAttachmentsSection = computed(() => {
+  if (isViewMode.value) {
+    return hasLabAttachments(local.value)
+  }
+
+  return !isTransitionMode.value
+    || transitionIntent.value === 'collect'
+    || transitionIntent.value === 'results'
+})
 
 const orderFieldsReadonly = computed(() =>
   isViewMode.value || !canEditLabOrderFields(currentStatus.value),
@@ -903,32 +926,46 @@ const testOptions = computed(() => {
 })
 
 watch(
-  () => [
-    open.value,
-    props.mode,
-    props.intent,
-    String(props.lab?.id ?? ''),
+  [
+    () => open.value,
+    () => props.mode,
+    () => props.intent,
+    () => String(props.lab?.id ?? ''),
   ],
-  () => {
-    if (open.value) {
-      local.value = props.lab
-        ? cloneLab(props.lab)
-        : createEmptyLabOrder()
-      if (props.mode === 'add') {
-        local.value.orderedDate = todayDateUs()
-      }
-      if (String(props.intent ?? '').trim() === 'results') {
-        local.value.resultDate = todayDateUs()
-      }
-      if (String(props.intent ?? '').trim() === 'review') {
-        local.value.reviewedDate = todayDateUs()
-      }
-      applyDefaultOrderingClinician()
-      applyDefaultReviewedBy()
-      errors.value = {}
-      testFilter.value = ''
-      labCancelOpen.value = false
+  ([isOpen], previous) => {
+    if (!isOpen) {
+      return
     }
+    // Only hydrate when the dialog opens or identity/mode/intent changes.
+    // Avoid resetting local edits when props.lab is replaced (e.g. files).
+    const wasOpen = Array.isArray(previous) ? previous[0] : false
+    const prevMode = Array.isArray(previous) ? previous[1] : undefined
+    const prevIntent = Array.isArray(previous) ? previous[2] : undefined
+    const prevLabId = Array.isArray(previous) ? previous[3] : undefined
+    const shouldHydrate = !wasOpen
+      || prevMode !== props.mode
+      || prevIntent !== props.intent
+      || prevLabId !== String(props.lab?.id ?? '')
+    if (!shouldHydrate && wasOpen) {
+      return
+    }
+    local.value = props.lab
+      ? cloneLab(props.lab)
+      : createEmptyLabOrder()
+    if (props.mode === 'add') {
+      local.value.orderedDate = todayDateUs()
+    }
+    if (String(props.intent ?? '').trim() === 'results') {
+      local.value.resultDate = todayDateUs()
+    }
+    if (String(props.intent ?? '').trim() === 'review') {
+      local.value.reviewedDate = todayDateUs()
+    }
+    applyDefaultOrderingClinician()
+    applyDefaultReviewedBy()
+    errors.value = {}
+    testFilter.value = ''
+    labCancelOpen.value = false
   },
   { immediate: true },
 )
@@ -942,8 +979,17 @@ watch(
     const pendingLocal = (
       local.value.files ?? local.value.attachments ?? []
     ).filter(item => item?.rawFile instanceof File)
-    local.value.files = [...files, ...pendingLocal]
+    const serverIds = new Set(
+      files
+        .map(item => (item?.id != null ? String(item.id) : ''))
+        .filter(Boolean),
+    )
+    const pendingKept = pendingLocal.filter(
+      item => !item?.id || !serverIds.has(String(item.id)),
+    )
+    local.value.files = [...files, ...pendingKept]
     local.value.attachments = local.value.files
+    local.value.hasAttachments = local.value.files.length > 0
   },
 )
 
@@ -965,11 +1011,11 @@ function clearLabDatesBeforeMin() {
 }
 
 watch(
-  () => [
-    open.value,
-    local.value.orderedDate,
-    local.value.collectedDate,
-    local.value.resultDate,
+  [
+    () => open.value,
+    () => local.value.orderedDate,
+    () => local.value.collectedDate,
+    () => local.value.resultDate,
   ],
   () => {
     if (!open.value) {
@@ -1007,6 +1053,27 @@ function onSpecimenTypeChange(value) {
   }
   if (String(value ?? '').trim()) {
     local.value.collectedDate = todayDateUs()
+  }
+}
+
+function onCollectionLocationInput(value) {
+  const next = String(value ?? '').trim()
+  local.value.collectionLocation = next || null
+}
+
+function onCollectionLocationSelect(details) {
+  if (!details) {
+    return
+  }
+  const formatted = String(details.formattedAddress ?? '').trim()
+  if (formatted) {
+    local.value.collectionLocation = formatted
+
+    return
+  }
+  const line = String(details.addressLine1 ?? '').trim()
+  if (line) {
+    local.value.collectionLocation = line
   }
 }
 

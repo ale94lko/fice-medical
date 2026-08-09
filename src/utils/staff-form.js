@@ -2,6 +2,8 @@ import { staffEntryPoints, userStatusValues } from 'components/constants.js'
 import { apiDateToDisplay } from 'src/utils/app-datetime.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
 import { mapUserStatusFromApi } from 'src/utils/user-register-payload.js'
+import { resolveClinicianSupervisorFromApi } from
+  'src/utils/clinician-supervisor.js'
 
 export function createEmptyStaffAddress() {
   return {
@@ -347,7 +349,9 @@ export function createEmptyStaffClinical() {
     primarySpecialty: '',
     taxonomies: [],
     licenses: [],
+    clinicianId: null,
     supervisorId: null,
+    supervisorDisplayName: '',
   }
 }
 
@@ -376,6 +380,7 @@ export function createEmptyStaffForm(
     ? staffEntryPoints.addClinician
     : entryPoint
   const employment = resolveApiEmployment(apiData)
+  const supervisor = resolveClinicianSupervisorFromApi(clinical)
 
   return {
     entryPoint: resolvedEntryPoint,
@@ -431,7 +436,9 @@ export function createEmptyStaffForm(
         clinical.primary_specialty ?? clinical.specialty ?? '',
       taxonomies: resolveClinicalTaxonomies(clinical),
       licenses: (clinical.licenses ?? []).map(normalizeStaffLicenseRow),
-      supervisorId: clinical.supervisor_id ?? clinical.supervisorId ?? null,
+      clinicianId: clinical.id ?? clinical.clinician_id ?? null,
+      supervisorId: supervisor.supervisorId,
+      supervisorDisplayName: supervisor.supervisorDisplayName,
     },
   }
 }

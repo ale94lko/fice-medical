@@ -305,6 +305,9 @@ import {
   normalizeClinicalNoteTime,
 } from 'src/utils/clinical-note-datetime.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
+import { resolveDefaultResponsibleClinicianOption } from
+  'src/utils/care-plan-orders.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   modelValue: {
@@ -345,6 +348,7 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const open = computed({
   get: () => props.modelValue,
@@ -358,6 +362,49 @@ const signConfirmOpen = ref(false)
 
 const readonly = computed(() =>
   props.mode === 'view' || local.value.isSigned,
+)
+
+function applyDefaultClinician() {
+  if (props.mode !== 'add' || local.value.clinicianId) {
+    return
+  }
+  const option = resolveDefaultResponsibleClinicianOption(
+    props.clinicianOptions,
+    { staffMember: authStore.userInfo?.staffMember ?? null },
+  )
+  if (!option) {
+    return
+  }
+  local.value.clinicianId = option.value
+}
+
+watch(
+  () => [props.modelValue, props.note, props.mode],
+  async([visible, note]) => {
+    if (!visible) {
+      return
+    }
+    local.value = note
+      ? prepareClinicalNoteForSave(note)
+      : createEmptyClinicalNote()
+    applyDefaultClinician()
+    Object.keys(errors).forEach(key => {
+      delete errors[key]
+    })
+    await nextTick()
+    signatureCanvasRef.value?.resize?.()
+  },
+  { immediate: true },
+)
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applyDefaultClinician()
+  },
 )
 
 const dialogTitle = computed(() => {
@@ -391,24 +438,6 @@ const timePickerValue = computed({
     local.value.noteTime = value
   },
 })
-
-watch(
-  () => [props.modelValue, props.note],
-  async([visible, note]) => {
-    if (!visible) {
-      return
-    }
-    local.value = note
-      ? prepareClinicalNoteForSave(note)
-      : createEmptyClinicalNote()
-    Object.keys(errors).forEach(key => {
-      delete errors[key]
-    })
-    await nextTick()
-    signatureCanvasRef.value?.resize?.()
-  },
-  { immediate: true },
-)
 
 function formatSignedDate(value) {
   const raw = String(value ?? '').trim()

@@ -77,6 +77,13 @@
       v-model="cancelDialogOpen"
       @confirm="confirmCancelLab"
     />
+
+    <LabAttachmentDownloadDialog
+      v-model="downloadDialogOpen"
+      :files="downloadFiles"
+      :downloading-id="downloadBusyId"
+      @download="onDownloadFileFromPicker"
+    />
   </div>
 </template>
 
@@ -89,6 +96,8 @@ import LabOrderDialog from 'components/LabOrderDialog.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import LabsTable from 'components/LabsTable.vue'
 import LabCancelDialog from 'components/LabCancelDialog.vue'
+import LabAttachmentDownloadDialog from
+  'components/LabAttachmentDownloadDialog.vue'
 import {
   labStatuses,
   quasarNotifyTypes,
@@ -156,6 +165,11 @@ const activeLab = ref(null)
 
 const cancelDialogOpen = ref(false)
 const pendingCancelLab = ref(null)
+
+const downloadDialogOpen = ref(false)
+const downloadFiles = ref([])
+const downloadLabId = ref('')
+const downloadBusyId = ref('')
 
 const hasPatientId = computed(() => {
   const id = String(props.patientId ?? '').trim()
@@ -475,6 +489,15 @@ async function confirmCancelLab(reason) {
   }
 }
 
+async function downloadLabAttachment(labId, attachmentId) {
+  const { blob, fileName } = await downloadLabFile(
+    patientId.value,
+    labId,
+    attachmentId,
+  )
+  triggerBlobDownload(blob, fileName)
+}
+
 async function onRowDownload(row) {
   if (!hasPatientId.value) {
     $q.notify({
@@ -488,8 +511,9 @@ async function onRowDownload(row) {
 
   try {
     const detail = await fetchPatientLab(patientId.value, row.id)
-    const attachment = detail.files?.[0] ?? detail.attachments?.[0]
-    if (!attachment?.id) {
+    const files = (detail.files ?? detail.attachments ?? [])
+      .filter(file => file?.id != null)
+    if (!files.length) {
       $q.notify({
         type: quasarNotifyTypes.warning,
         message: t('labNoAttachment'),
@@ -498,12 +522,14 @@ async function onRowDownload(row) {
 
       return
     }
-    const { blob, fileName } = await downloadLabFile(
-      patientId.value,
-      row.id,
-      attachment.id,
-    )
-    triggerBlobDownload(blob, fileName)
+    if (files.length === 1) {
+      await downloadLabAttachment(row.id, files[0].id)
+
+      return
+    }
+    downloadLabId.value = String(row.id)
+    downloadFiles.value = files
+    downloadDialogOpen.value = true
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -512,6 +538,28 @@ async function onRowDownload(row) {
         position: 'top',
       })
     }
+  }
+}
+
+async function onDownloadFileFromPicker(file) {
+  const labId = downloadLabId.value
+  const attachmentId = file?.id
+  if (!labId || attachmentId == null) {
+    return
+  }
+  downloadBusyId.value = String(attachmentId)
+  try {
+    await downloadLabAttachment(labId, attachmentId)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('labDownloadError'),
+        position: 'top',
+      })
+    }
+  } finally {
+    downloadBusyId.value = ''
   }
 }
 
@@ -544,13 +592,14 @@ async function onUploadAttachment(file) {
     const currentFiles = activeLab.value.files
       ?? activeLab.value.attachments
       ?? []
-    const nextFiles = [...currentFiles, uploaded]
-    activeLab.value = {
-      ...activeLab.value,
-      files: nextFiles,
-      attachments: nextFiles,
-      hasAttachments: true,
-    }
+    const already = currentFiles.some(
+      item => item?.id != null && String(item.id) === String(uploaded?.id),
+    )
+    const nextFiles = already ? currentFiles : [...currentFiles, uploaded]
+    // Mutate in place so LabOrderDialog does not re-hydrate and wipe edits.
+    activeLab.value.files = nextFiles
+    activeLab.value.attachments = nextFiles
+    activeLab.value.hasAttachments = nextFiles.length > 0
     upsertLabInList(activeLab.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
@@ -621,12 +670,9 @@ async function onRemoveAttachment(fileId) {
     const nextFiles = currentFiles.filter(
       item => String(item.id) !== String(fileId),
     )
-    activeLab.value = cloneLab({
-      ...activeLab.value,
-      files: nextFiles,
-      attachments: nextFiles,
-      hasAttachments: nextFiles.length > 0,
-    })
+    activeLab.value.files = nextFiles
+    activeLab.value.attachments = nextFiles
+    activeLab.value.hasAttachments = nextFiles.length > 0
     upsertLabInList(activeLab.value)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {

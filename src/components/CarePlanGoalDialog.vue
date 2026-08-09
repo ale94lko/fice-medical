@@ -183,6 +183,7 @@
             <InterventionTable
               :rows="local.interventions"
               :readonly="readonly"
+              :clinician-options="clinicianOptions"
               :empty-label="t('carePlanInterventionsEmpty')"
               @edit="row => openInterventionDialog('edit', row)"
               @view="row => openInterventionDialog('view', row)"
@@ -217,6 +218,7 @@
       v-model="measureDialogOpen"
       :measure="activeMeasure"
       :mode="measureDialogMode"
+      :existing-measures="local.outcomeMeasures"
       @save="onMeasureSaved"
     />
     <CarePlanAddMeasurementDialog
@@ -402,14 +404,16 @@ function openMeasurementHistoryDialog(row) {
   historyDialogOpen.value = true
 }
 
-function resolveRecordedByName() {
+function resolveRecordedBy() {
   const profile = authStore.linkedStaffProfile
   const name = String(profile?.name ?? '').trim()
-  if (name) {
-    return name
-  }
+    || String(authStore.userInfo?.email ?? '').trim()
+  const id = profile?.id ?? authStore.userInfo?.id ?? null
 
-  return String(authStore.userInfo?.email ?? '').trim()
+  return {
+    recordedByName: name,
+    recordedById: id,
+  }
 }
 
 function onMeasurementSaved(reading) {
@@ -417,6 +421,7 @@ function onMeasurementSaved(reading) {
   if (!measureId) {
     return
   }
+  const recordedBy = resolveRecordedBy()
   local.value.outcomeMeasures = (local.value.outcomeMeasures ?? []).map(
     item => {
       if (item.id !== measureId) {
@@ -425,7 +430,7 @@ function onMeasurementSaved(reading) {
 
       return applyOutcomeMeasureReading(item, {
         ...reading,
-        recordedByName: resolveRecordedByName(),
+        ...recordedBy,
       })
     },
   )

@@ -25,8 +25,16 @@
         <q-td
           :props="scope"
           class="admin-data-table__secondary-cell">
-          <span class="care-plans-table__ellipsis">
-            {{ scope.row.problem || '—' }}
+          <span>
+            {{ formatProblemDisplay(scope.row.problem) }}
+            <q-tooltip
+              v-if="isProblemTruncated(scope.row.problem)"
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ scope.row.problem }}
+            </q-tooltip>
           </span>
         </q-td>
       </template>
@@ -182,7 +190,11 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import CarePlanProgressCell from 'components/CarePlanProgressCell.vue'
-import { carePlanStatuses, siteBreakpoints } from 'components/constants.js'
+import {
+  carePlanProblemListDisplayMaxLength,
+  carePlanStatuses,
+  siteBreakpoints,
+} from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
@@ -269,6 +281,27 @@ const columns = computed(() => [
     style: 'min-width: 180px',
   },
 ])
+
+function problemText(problem) {
+  return String(problem ?? '').trim()
+}
+
+function isProblemTruncated(problem) {
+  return problemText(problem).length
+    > carePlanProblemListDisplayMaxLength
+}
+
+function formatProblemDisplay(problem) {
+  const text = problemText(problem)
+  if (!text) {
+    return '—'
+  }
+  if (!isProblemTruncated(text)) {
+    return text
+  }
+
+  return `${text.slice(0, carePlanProblemListDisplayMaxLength)}...`
+}
 
 function statusLabel(status) {
   const key = carePlanI18nKey('carePlanStatus', status)

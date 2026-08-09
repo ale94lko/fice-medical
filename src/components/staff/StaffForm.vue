@@ -525,7 +525,7 @@ function focusTabForField(field) {
     'username',
     'roleId',
   ]
-  const clinicalFields = ['npi', 'taxonomies']
+  const clinicalFields = ['npi', 'taxonomies', 'supervisorId']
   if (basicFields.includes(field)) {
     activeTab.value = 'basic'
   } else if (systemAccessFields.includes(field)) {

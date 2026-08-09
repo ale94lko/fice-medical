@@ -199,10 +199,12 @@
                 </q-td>
               </template>
               <template #body-cell-recordedBy="scope">
-                <q-td
-                  :props="scope"
-                  class="admin-data-table__secondary-cell">
-                  {{ scope.row.recordedByName || '—' }}
+                <q-td :props="scope">
+                  <AdminTableClinicianAvatars
+                    v-if="scope.row.recordedByEntries?.length"
+                    :entries="scope.row.recordedByEntries"
+                  />
+                  <span v-else>—</span>
                 </q-td>
               </template>
               <template #body-cell-notes="scope">
@@ -244,6 +246,8 @@ import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
 import AdminQTable from 'components/AdminQTable.vue'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import {
@@ -465,11 +469,11 @@ const columns = computed(() => [
   {
     name: 'recordedBy',
     label: t('carePlanRecordedBy'),
-    align: 'left',
+    align: 'center',
     field: row => row.recordedByName,
-    sortable: true,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
+    sortable: false,
+    headerStyle: 'min-width: 72px; width: 72px',
+    style: 'min-width: 72px; width: 72px',
   },
   {
     name: 'notes',

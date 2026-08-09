@@ -109,6 +109,7 @@
             class="appointment-availability-picker__overlapping-block q-mb-sm">
             <FormToggle
               v-if="showOverlappingToggle"
+              class="appointment-availability-picker__overlapping-toggle"
               :model-value="allowOverScheduleBlocks"
               :label="t('appointmentOverlapping')"
               :disable="readonly"
@@ -119,7 +120,7 @@
             <p
               v-if="scheduleBlockOverlapWarning"
               class="appointment-availability-picker__overlap-warning
-                text-body2 text-warning q-mb-none q-mt-none">
+                text-body2 text-warning q-mb-none">
               {{ scheduleBlockOverlapWarning }}
             </p>
           </div>
@@ -542,14 +543,26 @@ function onEndTimeSpinnerChange(value) {
 
   &__overlapping-block {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-flow: row wrap;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 8px;
     width: 100%;
     border: 1px solid $border-subtle;
     border-radius: 8px;
     background: #fff;
     padding: 8px 12px;
+  }
+
+  &__overlapping-toggle {
+    flex: 0 0 auto;
+  }
+
+  &__overlap-warning {
+    flex: 0 1 auto;
+    margin: 0;
+    white-space: nowrap;
+    max-width: 100%;
   }
 }
 </style>

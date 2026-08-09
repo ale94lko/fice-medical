@@ -11,6 +11,8 @@ import {
   fetchCatalogsByNames,
   mapCatalogItemsToSelectOptions,
 } from 'src/utils/catalogs.js'
+import { resolveClinicianSupervisorFromApi } from
+  'src/utils/clinician-supervisor.js'
 
 const DEFAULT_PAGE_SIZE = 100
 const DEFAULT_CLINICIAN_STATUS = 'ACTIVE'
@@ -61,6 +63,7 @@ export function normalizeClinicianFromApi(raw = {}) {
   const personal = staffMember.personal_information
     ?? staffMember.personalInformation
     ?? null
+  const supervisor = resolveClinicianSupervisorFromApi(raw)
 
   return {
     id: raw.id ?? null,
@@ -77,6 +80,9 @@ export function normalizeClinicianFromApi(raw = {}) {
       ?? personal?.photoFileId
       ?? null,
     status: trim(raw.status ?? staffMember.status).toUpperCase(),
+    supervisorId: supervisor.supervisorId,
+    supervisorDisplayName: supervisor.supervisorDisplayName,
+    supervisor: supervisor.supervisor,
   }
 }
 
@@ -111,6 +117,8 @@ export function mapClinicianRowToSelectOption(row, catalogOptions = {}) {
       ? Number(normalized.staffMemberId)
       : null,
     photoFileId: normalized.photoFileId,
+    supervisorId: normalized.supervisorId,
+    supervisorDisplayName: normalized.supervisorDisplayName,
   }
 }
 

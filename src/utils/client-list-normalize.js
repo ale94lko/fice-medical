@@ -59,6 +59,13 @@ function resolveListViewClinicianEntries(clinicians) {
         personName: name,
         specialty: String(item.specialty ?? '').trim(),
         initials: String(item.initials ?? '').trim(),
+        supervisorDisplayName: String(
+          item.supervisor_display_name
+          ?? item.supervisorDisplayName
+          ?? item.supervisor?.display_name
+          ?? item.supervisor?.displayName
+          ?? '',
+        ).trim(),
       }
     })
     .filter(Boolean)

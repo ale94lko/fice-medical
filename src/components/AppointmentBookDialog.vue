@@ -417,6 +417,8 @@ import {
   listClientReferrals,
 } from 'src/utils/appointment-api.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
+import { buildSupervisorSelectOptions } from
+  'src/utils/clinician-supervisor.js'
 import {
   isTelemedicinePlaceOfService,
   listActivePlacesOfService,
@@ -465,7 +467,6 @@ const errors = ref({})
 const serviceCatalog = ref([])
 const serviceLines = ref([])
 const clinicianOptions = ref([])
-const supervisorOptions = ref([])
 const placeOptions = ref([])
 const filteredClientOptions = ref([])
 const clientSearchLoading = ref(false)
@@ -628,12 +629,31 @@ const summaryClinician = computed(() => {
   return match?.name ?? match?.label ?? '—'
 })
 
-const summarySupervisor = computed(() => {
-  const match = supervisorOptions.value.find(
-    opt => opt.value === draft.value.supervisorId,
+const supervisorOptions = computed(() => {
+  const selected = clinicianOptions.value.find(
+    opt => Number(opt.value) === Number(draft.value.supervisorId),
   )
 
-  return match?.label ?? ''
+  return buildSupervisorSelectOptions({
+    options: clinicianOptions.value,
+    excludeClinicianId: draft.value.clinicianId,
+    supervisorId: draft.value.supervisorId,
+    supervisorDisplayName: selected?.label
+      || selected?.name
+      || selected?.supervisorDisplayName
+      || '',
+  }).map(option => ({
+    ...option,
+    value: Number(option.value),
+  })).filter(option => Number.isFinite(option.value))
+})
+
+const summarySupervisor = computed(() => {
+  const match = supervisorOptions.value.find(
+    opt => Number(opt.value) === Number(draft.value.supervisorId),
+  )
+
+  return match?.label ?? match?.name ?? ''
 })
 
 const selectedPlaceOption = computed(() =>
@@ -1075,10 +1095,12 @@ async function loadFormOptions() {
       .map(option => ({
         ...option,
         value: Number(option.value),
+        supervisorId: option.supervisorId != null
+          ? Number(option.supervisorId)
+          : null,
       }))
       .filter(option => Number.isFinite(option.value))
     : []
-  supervisorOptions.value = clinicianOptions.value
   placeOptions.value = placesResult.status === 'fulfilled'
     ? placesResult.value
     : []
@@ -1092,6 +1114,7 @@ async function loadFormOptions() {
     )
   }
   applyDefaultLinkedClinician()
+  applySupervisorFromSelectedClinician()
 }
 
 function resolveLinkedClinicianId(options = clinicianOptions.value) {
@@ -1119,6 +1142,28 @@ function applyDefaultLinkedClinician() {
     return
   }
   draft.value.clinicianId = linkedId
+  applySupervisorFromSelectedClinician()
+}
+
+function applySupervisorFromSelectedClinician() {
+  const clinicianId = draft.value.clinicianId
+  if (clinicianId == null) {
+    return
+  }
+  if (Number(draft.value.supervisorId) === Number(clinicianId)) {
+    draft.value.supervisorId = null
+  }
+  const option = clinicianOptions.value.find(
+    row => Number(row.value) === Number(clinicianId),
+  )
+  const supervisorId = option?.supervisorId
+  if (supervisorId == null || !Number.isFinite(Number(supervisorId))) {
+    return
+  }
+  if (Number(supervisorId) === Number(clinicianId)) {
+    return
+  }
+  draft.value.supervisorId = Number(supervisorId)
 }
 
 function addService(serviceId) {
@@ -1387,6 +1432,7 @@ watch(
     if (next === prev) {
       return
     }
+    applySupervisorFromSelectedClinician()
     clearSelectedWindow()
     await onSchedulingInputsChanged()
   },

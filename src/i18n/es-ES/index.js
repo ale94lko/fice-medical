@@ -688,6 +688,12 @@ export default {
   staffSupervisorHint:
     'Seleccione el clínico que supervisa a este clínico. Deje en blanco '
     + 'si no se requiere supervisión.',
+  staffSupervisorRequired:
+    'El supervisor es obligatorio si no hay una licencia activa '
+    + 'y vigente.',
+  staffSupervisorRequiredHint:
+    'Se requiere un supervisor porque este clínico no tiene una '
+    + 'licencia activa y vigente.',
   staffFormSaveSuccess: 'Personal guardado correctamente.',
   staffFormSaveError: 'No se pudo guardar el personal.',
   staffErrorDuplicateEmail:
@@ -1324,10 +1330,15 @@ export default {
   labAttachmentsTitle: 'Adjuntos',
   labAttachmentsHint: 'Arrastre archivos aquí o haga clic para buscar',
   labAttachmentsReadonlyHint: 'Documentos adjuntos',
-  labAttachmentsFormats: 'PDF, JPG, PNG (máx. 10 MB)',
-  labAttachmentTypeError: 'Solo se permiten PDF, JPG y PNG.',
-  labAttachmentSizeError: 'El archivo supera el tamaño máximo de 10 MB.',
+  labAttachmentsFormats:
+    'PDF, JPG, PNG, GIF, WEBP, TXT, CSV (máx. 25 MB)',
+  labAttachmentTypeError:
+    'Tipo de archivo no permitido. Use PDF, JPG, PNG, GIF, WEBP, TXT o CSV.',
+  labAttachmentSizeError: 'El archivo supera el tamaño máximo de 25 MB.',
   labNoAttachment: 'Este laboratorio no tiene adjuntos.',
+  labDownloadSelectTitle: 'Descargar adjunto',
+  labDownloadSelectMessage:
+    'Este laboratorio tiene varios adjuntos. Elija qué archivo descargar.',
   labDownloadError: 'No se pudo descargar el adjunto.',
   labUploadError: 'No se pudo subir el adjunto.',
   labDeleteAttachmentError: 'No se pudo eliminar el adjunto.',
@@ -1546,6 +1557,8 @@ export default {
   carePlanMeasureName: 'Medida',
   carePlanMeasureNamePlaceholder: 'Buscar o seleccionar medida',
   carePlanMeasureNameRequired: 'La medida es obligatoria.',
+  carePlanMeasureDuplicate:
+    'Esta medida ya fue añadida al objetivo.',
   carePlanMeasureDirection: 'Dirección',
   carePlanMeasureDirectionRequired: 'La dirección es obligatoria.',
   carePlanMeasureBaseline: 'Línea base',
@@ -1566,7 +1579,7 @@ export default {
   carePlanMeasureDescriptionPlaceholder:
     'Introduzca descripción de la medida',
   carePlanMeasureUnit: 'Unidad',
-  carePlanMeasureUnitPlaceholder: 'p. ej., puntos, mmHg, %, lbs',
+  carePlanMeasureUnitPlaceholder: 'Seleccione una unidad',
   carePlanMeasureFrequency: 'Frecuencia',
   carePlanMeasureSource: 'Origen',
   carePlanSourceManual: 'Manual',
@@ -1582,11 +1595,11 @@ export default {
   carePlanAddMeasurementBanner:
     'La nueva medición se usará para calcular el progreso hacia el objetivo.',
   carePlanOutcomeMeasureLabel: 'Medida de resultado',
-  carePlanPreviousMeasurement: 'Medición anterior',
+  carePlanPreviousMeasurement: 'Última medición',
   carePlanMeasurementValue: 'Valor',
-  carePlanMeasurementCurrentValue: 'Valor actual',
+  carePlanMeasurementCurrentValue: 'Nuevo valor',
   carePlanMeasuredDate: 'Fecha de medición',
-  carePlanMeasurementValueRequired: 'El valor actual es obligatorio.',
+  carePlanMeasurementValueRequired: 'El nuevo valor es obligatorio.',
   carePlanMeasuredDateRequired: 'La fecha de medición es obligatoria.',
   carePlanMeasurementNotesPlaceholder:
     'Añada notas sobre esta medición...',

@@ -95,6 +95,7 @@
                   :error="Boolean(errors.clinicianId)"
                   :error-message="errors.clinicianId"
                   :test-id="tid.field('clinician')"
+                  @update:model-value="onClinicianChange"
                 />
               </AddClientLabeledField>
             </div>
@@ -331,10 +332,13 @@ import {
   createEmptyCarePlanGoal,
   nextCarePlanLocalId,
   refreshCarePlanProgress,
+  resolveClinicianOptionLabel,
+  resolveDefaultResponsibleClinicianOption,
 } from 'src/utils/care-plan-orders.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   modelValue: {
@@ -376,6 +380,7 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const open = computed({
   get: () => props.modelValue,
@@ -447,11 +452,40 @@ const measureRows = computed(() => {
   return rows
 })
 
+function applyDefaultClinician() {
+  if (props.mode !== 'add' || local.value.clinicianId) {
+    return
+  }
+  const option = resolveDefaultResponsibleClinicianOption(
+    props.clinicianOptions,
+    { staffMember: authStore.userInfo?.staffMember ?? null },
+  )
+  if (!option) {
+    return
+  }
+  local.value.clinicianId = option.value
+  local.value.clinicianName = option.label || option.name || ''
+}
+
+function onClinicianChange(id) {
+  local.value.clinicianName = resolveClinicianOptionLabel(
+    props.clinicianOptions,
+    id,
+  )
+}
+
 watch(
-  () => [props.modelValue, props.plan],
+  () => [props.modelValue, props.plan, props.mode],
   () => {
     if (props.modelValue) {
       local.value = cloneCarePlan(props.plan ?? createEmptyCarePlan())
+      applyDefaultClinician()
+      if (
+        local.value.clinicianId
+        && !String(local.value.clinicianName ?? '').trim()
+      ) {
+        onClinicianChange(local.value.clinicianId)
+      }
       Object.keys(errors).forEach(key => delete errors[key])
       void nextTick(() => {
         signatureCanvasRef.value?.resize?.()
@@ -459,6 +493,22 @@ watch(
     }
   },
   { immediate: true },
+)
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applyDefaultClinician()
+    if (
+      local.value.clinicianId
+      && !String(local.value.clinicianName ?? '').trim()
+    ) {
+      onClinicianChange(local.value.clinicianId)
+    }
+  },
 )
 
 function formatSignedDate(value) {
@@ -519,7 +569,15 @@ async function onSave(activate) {
 
     return
   }
-  const payload = refreshCarePlanProgress({ ...local.value })
+  const clinicianName = String(local.value.clinicianName ?? '').trim()
+    || resolveClinicianOptionLabel(
+      props.clinicianOptions,
+      local.value.clinicianId,
+    )
+  const payload = refreshCarePlanProgress({
+    ...local.value,
+    clinicianName,
+  })
   emit('save', { plan: payload, activate })
 }
 

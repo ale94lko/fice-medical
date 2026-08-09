@@ -278,23 +278,17 @@
           class="row q-col-gutter-sm q-col-gutter-md
             contact-method-row">
           <div class="col-12 col-md-6">
-            <AddClientLabeledField
+            <FormInput
+              :ref="el => setPhoneInputRef(el, index)"
+              :model-value="phone.number"
+              :external-label="true"
               :label="t('phoneNumber')"
-              :test-id="ocField(`phone-${index}-number`)">
-              <q-input
-                :ref="el => setPhoneInputRef(el, index)"
-                outlined
-                hide-bottom-space
-                lazy-rules="ondemand"
-                class="full-width"
-                :data-testid="ocField(`phone-${index}-number`)"
-                :model-value="phone.number"
-                :rules="phoneNumberRules(index)"
-                :placeholder="t('phoneNumberPlaceholder')"
-                maxlength="14"
-                @update:model-value="val => onPhoneInput(index, val)"
-              />
-            </AddClientLabeledField>
+              :placeholder="t('phoneNumberPlaceholder')"
+              :rules="phoneNumberRules(index)"
+              maxlength="14"
+              :test-id="ocField(`phone-${index}-number`)"
+              @update:model-value="val => onPhoneInput(index, val)"
+            />
           </div>
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -468,6 +462,8 @@ import {
   createEmptyEmail,
   createEmptyPhone,
   formatPhoneUs,
+  isCompletePhoneNumber,
+  isValidPhoneChars,
 } from 'src/utils/client-contact-form.js'
 import { useContactMethodDuplicateRules }
   from 'src/composables/useContactMethodDuplicateRules.js'
@@ -552,7 +548,12 @@ function phoneNumberRules(index) {
   return buildPhoneNumberRules(
     props.contact.phones,
     index,
-    props.rules?.phoneNumber ?? [],
+    props.rules?.phoneNumber?.length
+      ? props.rules.phoneNumber
+      : [
+        val => isValidPhoneChars(val) || t('phoneInvalid'),
+        val => isCompletePhoneNumber(val) || t('clientPhoneIncomplete'),
+      ],
   )
 }
 
