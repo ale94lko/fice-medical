@@ -266,7 +266,8 @@ export const consentSignerTypeValues = {
 }
 
 export const consentSignatureMethodValues = {
-  inPerson: 'IN_PERSON',
+  inPersonDigital: 'IN_PERSON_DIGITAL',
+  inPersonPaper: 'IN_PERSON_PAPER',
   clientPortal: 'CLIENT_PORTAL',
   secureLink: 'SECURE_LINK',
   other: 'OTHER',
@@ -474,6 +475,24 @@ export const clientProfilePhotoOutputMime = 'image/jpeg'
 export const clientProfilePhotoOutputQuality = 0.92
 
 export const labMaxAttachmentBytes = storedFileMaxBytes
+
+/** Paper consent scan: PDF or image (signed form upload). */
+export const consentPaperScanExtensions = [
+  'pdf',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'webp',
+]
+
+export const consentPaperScanMimeTypes = [
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+]
 
 /** Extensions allowed for lab attachments (aligned with mime filter). */
 export const labAttachmentExtensions = [
@@ -1609,6 +1628,10 @@ export const apiPaths = {
     encodeURIComponent(String(clientId ?? '').trim())
   }/consents/${encodeURIComponent(String(consentId ?? '').trim())
   }/document/download`,
+  clientConsentDocumentPrint: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())
+  }/document/print`,
   consentPublicPreview: '/consents/v1/public/preview',
   consentPublicSign: '/consents/v1/public/sign',
   consentPublicDecline: '/consents/v1/public/decline',

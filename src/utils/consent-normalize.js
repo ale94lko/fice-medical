@@ -196,7 +196,8 @@ export function buildConsentVersionBody(form = {}) {
 }
 
 export function buildConsentSignBody(form = {}) {
-  return {
+  const method = resolveConsentSignatureMethod(form.signatureMethod)
+  const body = {
     /* eslint-disable-next-line camelcase -- API body */
     signer_name: trim(form.signerName),
     /* eslint-disable-next-line camelcase -- API body */
@@ -205,11 +206,30 @@ export function buildConsentSignBody(form = {}) {
     /* eslint-disable-next-line camelcase -- API body */
     relationship_to_client: trim(form.relationshipToClient) || null,
     /* eslint-disable-next-line camelcase -- API body */
-    signature_method: trim(form.signatureMethod)
-      || consentSignatureMethodValues.inPerson,
-    /* eslint-disable-next-line camelcase -- API body */
-    signature_artifact: String(form.signatureArtifact ?? ''),
+    signature_method: method,
   }
+  if (method === consentSignatureMethodValues.inPersonPaper) {
+    const fileId = parseOptionalNumber(form.signatureFileId)
+    if (fileId != null) {
+      /* eslint-disable-next-line camelcase -- API body */
+      body.signature_file_id = fileId
+    }
+
+    return body
+  }
+  /* eslint-disable-next-line camelcase -- API body */
+  body.signature_artifact = String(form.signatureArtifact ?? '')
+
+  return body
+}
+
+export function resolveConsentSignatureMethod(method) {
+  const token = trim(method).toUpperCase()
+  if (!token || token === 'IN_PERSON') {
+    return consentSignatureMethodValues.inPersonDigital
+  }
+
+  return token
 }
 
 export function buildConsentRevokeBody(reason) {

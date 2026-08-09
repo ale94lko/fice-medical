@@ -13,6 +13,10 @@ import {
   normalizeConsentTemplate,
   normalizeConsentVersion,
 } from 'src/utils/consent-normalize.js'
+import {
+  buildClientConsentDocumentFileName,
+  extractDownloadFileName,
+} from 'src/utils/http-headers.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -31,11 +35,8 @@ function unwrapList(body) {
   return data?.items ?? data?.content ?? []
 }
 
-function extractFileName(headers, fallback = 'consent.pdf') {
-  const raw = headers?.['content-disposition'] ?? ''
-  const match = /filename="?([^"]+)"?/i.exec(raw)
-
-  return match?.[1] ?? fallback
+function extractFileName(response, fallback = 'consent.pdf') {
+  return extractDownloadFileName(response, fallback)
 }
 
 export function consentApiErrorMessage(error, fallback = 'Request failed') {
@@ -333,14 +334,41 @@ export async function declineConsentPublic(form) {
   return unwrapData(response.data)
 }
 
-export async function downloadClientConsentDocument(clientId, consentId) {
+export async function downloadClientConsentDocument(
+  clientId,
+  consentId,
+  { version } = {},
+) {
   const response = await apiInstance.get(
     apiPaths.clientConsentDocumentDownload(clientId, consentId),
     { responseType: 'blob' },
   )
+  const fallback = buildClientConsentDocumentFileName(
+    { id: consentId, version },
+  )
 
   return {
     blob: response.data,
-    fileName: extractFileName(response.headers),
+    fileName: extractFileName(response, fallback),
+  }
+}
+
+export async function printClientConsentDocument(
+  clientId,
+  consentId,
+  { version } = {},
+) {
+  const response = await apiInstance.get(
+    apiPaths.clientConsentDocumentPrint(clientId, consentId),
+    { responseType: 'blob' },
+  )
+  const fallback = buildClientConsentDocumentFileName(
+    { id: consentId, version },
+    { print: true },
+  )
+
+  return {
+    blob: response.data,
+    fileName: extractFileName(response, fallback),
   }
 }

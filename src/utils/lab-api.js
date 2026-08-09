@@ -10,6 +10,8 @@ import {
   normalizeLabDetail,
   normalizeLabFile,
 } from 'src/utils/lab-normalize.js'
+import { extractDownloadFileName } from
+  'src/utils/http-headers.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -146,7 +148,7 @@ export async function downloadLabFile(clientId, labId, fileId) {
 
   return {
     blob: response.data,
-    fileName: extractFileName(response.headers),
+    fileName: extractFileName(response),
   }
 }
 
@@ -162,11 +164,8 @@ export async function deleteLabFile(clientId, labId, fileId) {
 /** @deprecated use deleteLabFile */
 export const deleteLabAttachment = deleteLabFile
 
-function extractFileName(headers) {
-  const raw = headers?.['content-disposition'] ?? ''
-  const match = /filename="?([^"]+)"?/i.exec(raw)
-
-  return match?.[1] ?? 'lab-attachment'
+function extractFileName(response) {
+  return extractDownloadFileName(response, 'lab-attachment')
 }
 
 export function triggerBlobDownload(blob, fileName) {

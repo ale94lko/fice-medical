@@ -69,6 +69,7 @@
           @sign="onSign"
           @decline="onDecline"
           @cancel="onCancelConsent"
+          @print="onPrint"
           @download="onDownload"
           @revoke="onRevokeRequest"
         />
@@ -128,7 +129,11 @@ import ClientConsentViewDialog from
   'components/ClientConsentViewDialog.vue'
 import ClientConsentsTable from 'components/ClientConsentsTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
-import { quasarNotifyTypes } from 'components/constants.js'
+import {
+  consentSignatureMethodValues,
+  quasarNotifyTypes,
+  storedFileCategories,
+} from 'components/constants.js'
 import { useConsentPermissions } from
   'src/composables/useConsentPermissions.js'
 import { clientConsentsTestIds as tid } from 'src/test-ids/index.js'
@@ -141,10 +146,14 @@ import {
   downloadClientConsentDocument,
   fetchClientConsent,
   listClientConsents,
+  printClientConsentDocument,
   revokeClientConsent,
   signClientConsent,
 } from 'src/utils/consent-api.js'
-import { triggerBlobDownload } from 'src/utils/stored-file-api.js'
+import {
+  triggerBlobDownload,
+  uploadStoredFile,
+} from 'src/utils/stored-file-api.js'
 
 const props = defineProps({
   clientId: {
@@ -348,10 +357,29 @@ async function onSignSubmit(payload) {
   }
   signing.value = true
   try {
+    let signPayload = { ...payload }
+    if (
+      payload.signatureMethod
+        === consentSignatureMethodValues.inPersonPaper
+      && payload.paperFile
+    ) {
+      const uploaded = await uploadStoredFile(
+        payload.paperFile,
+        storedFileCategories.consentForm,
+        { clientId: props.clientId },
+      )
+      signPayload = {
+        signerName: payload.signerName,
+        signerType: payload.signerType,
+        relationshipToClient: payload.relationshipToClient,
+        signatureMethod: consentSignatureMethodValues.inPersonPaper,
+        signatureFileId: uploaded.id,
+      }
+    }
     await signClientConsent(
       props.clientId,
       activeConsent.value.id,
-      payload,
+      signPayload,
     )
     signOpen.value = false
     $q.notify({
@@ -403,13 +431,36 @@ async function onDownload(item) {
     const { blob, fileName } = await downloadClientConsentDocument(
       props.clientId,
       item.id,
+      { version: item.version },
     )
-    triggerBlobDownload(
-      blob,
-      fileName || `${item.consentName || 'consent'}.pdf`,
-    )
+    triggerBlobDownload(blob, fileName)
   } catch (error) {
     notifyError(error, 'clientConsentDownloadError')
+  }
+}
+
+async function onPrint(item) {
+  let dismissPrinting = null
+  try {
+    dismissPrinting = $q.notify({
+      timeout: 0,
+      spinner: true,
+      position: 'top',
+      color: 'primary',
+      message: t('clientConsentPrinting'),
+    })
+    const { blob, fileName } = await printClientConsentDocument(
+      props.clientId,
+      item.id,
+      { version: item.version },
+    )
+    triggerBlobDownload(blob, fileName)
+  } catch (error) {
+    notifyError(error, 'clientConsentPrintError')
+  } finally {
+    if (typeof dismissPrinting === 'function') {
+      dismissPrinting()
+    }
   }
 }
 

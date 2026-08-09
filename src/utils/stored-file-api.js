@@ -5,6 +5,8 @@ import {
   mapStoredFilesList,
   normalizeStoredFile,
 } from 'src/utils/stored-file-normalize.js'
+import { extractDownloadFileName } from
+  'src/utils/http-headers.js'
 
 function unwrapListRoot(body) {
   const root = body?.data ?? body
@@ -38,11 +40,8 @@ function parseStoredFileId(fileId) {
   return id
 }
 
-function extractFileName(headers, fallback = 'download') {
-  const raw = headers?.['content-disposition'] ?? ''
-  const match = /filename="?([^"]+)"?/i.exec(raw)
-
-  return match?.[1] ?? fallback
+function extractFileName(response, fallback = 'download') {
+  return extractDownloadFileName(response, fallback)
 }
 
 export async function uploadStoredFile(file, category, opts = {}) {
@@ -102,7 +101,7 @@ export async function downloadStoredFile(fileId, { preview = false } = {}) {
 
   return {
     blob: response.data,
-    fileName: extractFileName(response.headers),
+    fileName: extractFileName(response),
   }
 }
 

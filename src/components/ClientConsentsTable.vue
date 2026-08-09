@@ -141,6 +141,25 @@
             </q-tooltip>
           </q-btn>
           <q-btn
+            v-if="canPrintRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="print"
+            :size="siteBreakpoints.SM"
+            :data-testid="tid.btnPrint(row.id)"
+            :aria-label="t('clientConsentPrint')"
+            @click="emit('print', row)">
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('clientConsentPrintTooltip') }}
+            </q-tooltip>
+          </q-btn>
+          <q-btn
             v-if="canDownloadRow(row)"
             flat
             round
@@ -247,6 +266,7 @@ const emit = defineEmits([
   'sign',
   'decline',
   'cancel',
+  'print',
   'download',
   'revoke',
 ])
@@ -361,6 +381,15 @@ function canCancelRow(row) {
 function canDownloadRow(row) {
   return props.canDownload
     && row.status === consentStatusValues.accepted
+}
+
+function canPrintRow(row) {
+  if (!props.canSign && !props.canDownload) {
+    return false
+  }
+
+  return row.status === consentStatusValues.pendingSignature
+    || row.status === consentStatusValues.accepted
 }
 
 function canRevokeRow(row) {

@@ -2250,7 +2250,8 @@ export default {
   consentSignerTypeGuardian: 'Guardian',
   consentSignerTypeAuthorizedRepresentative:
     'Authorized representative',
-  consentSignatureMethodInPerson: 'In person',
+  consentSignatureMethodInPersonDigital: 'In person (digital)',
+  consentSignatureMethodInPersonPaper: 'In person (paper)',
   consentSignatureMethodClientPortal: 'Client portal',
   consentSignatureMethodSecureLink: 'Secure link',
   consentSignatureMethodOther: 'Other',
@@ -2283,7 +2284,7 @@ export default {
   clientConsentSignatureMethod: 'Signature method',
   clientConsentSignMethodUnavailable:
     'This signature method is not available yet. '
-    + 'Choose In person or Secure link.',
+    + 'Choose In person (digital), In person (paper) or Secure link.',
   clientConsentGuardianContactRequired:
     'Add a Guardian contact with name and relationship in Contact '
     + 'before requesting a guardian signature.',
@@ -2293,6 +2294,21 @@ export default {
   clientConsentSignerType: 'Signer type',
   clientConsentRelationship: 'Relationship to client',
   clientConsentSignatureHint: 'Sign below using touch or stylus.',
+  clientConsentPaperScan: 'Scanned signed consent',
+  clientConsentPaperScanPlaceholder: 'Upload PDF or image',
+  clientConsentPaperScanHint:
+    'Upload the printed consent after it was signed by hand.',
+  clientConsentPaperDropHint:
+    'Drag and drop files here or click to browse',
+  clientConsentPaperFormats:
+    'PDF, JPG, PNG, GIF, WEBP (max 25 MB)',
+  clientConsentPaperTypeError:
+    'Use a PDF or image file (JPG, PNG, GIF, WEBP).',
+  clientConsentPaperSizeError:
+    'File exceeds the maximum size of 25 MB.',
+  clientConsentPrint: 'Print',
+  clientConsentPrinting: 'Preparing printable PDF…',
+  clientConsentPrintError: 'Could not open printable consent PDF.',
   clientConsentSignConfirm: 'Confirm signature',
   clientConsentSignSuccess: 'Consent signed.',
   clientConsentSignError: 'Could not sign consent.',
@@ -2352,6 +2368,7 @@ export default {
   clientConsentRevokeError: 'Could not revoke consent.',
   clientConsentDownload: 'Download',
   clientConsentDownloadError: 'Could not download consent document.',
+  clientConsentPrintTooltip: 'Print blank signature form',
   clientConsentActionError: 'Could not update consent.',
   clientConsentSignedMeta: 'Signed {date} by {name}',
   clientConsentRevokedMeta: 'Revoked {date}: {reason}',

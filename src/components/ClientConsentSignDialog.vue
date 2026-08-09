@@ -99,6 +99,23 @@
               </FormField>
             </div>
             <div
+              v-if="isInPersonPaper"
+              class="col-12 col-sm-6
+                client-consent-sign-dialog__print-col">
+              <q-btn
+                no-caps
+                outline
+                color="primary"
+                class="app-btn-outline"
+                icon="print"
+                :label="t('clientConsentPrint')"
+                :loading="printing"
+                :disable="busy || !canPrintPaper"
+                :data-testid="tid.btnPrintPaper"
+                @click="onPrintPaper"
+              />
+            </div>
+            <div
               v-if="needsRelationship"
               class="col-12 col-sm-6">
               <FormField
@@ -113,12 +130,26 @@
                 />
               </FormField>
             </div>
-            <div class="col-12">
+            <div
+              v-if="isInPersonDigital"
+              class="col-12">
               <SignatureCanvas
                 v-model="signatureArtifact"
                 size="tall"
                 :hint="t('clientConsentSignatureHint')"
               />
+            </div>
+            <div
+              v-else-if="isInPersonPaper"
+              class="col-12">
+              <FormField
+                required
+                :label="t('clientConsentPaperScan')">
+                <ConsentPaperScanUploadField
+                  v-model="paperFile"
+                  :test-id="tid.paperScanUpload"
+                />
+              </FormField>
             </div>
           </div>
         </div>
@@ -212,6 +243,8 @@ import { computed, ref, watch } from 'vue'
 import { copyToClipboard, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import ConsentPaperScanUploadField from
+  'components/ConsentPaperScanUploadField.vue'
 import FormField from 'components/FormField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
@@ -227,6 +260,7 @@ import { clientConsentsTestIds as tid, modalTestIds } from
   'src/test-ids/index.js'
 import {
   consentApiErrorMessage,
+  printClientConsentDocument,
   sendClientConsentSecureLink,
 } from 'src/utils/consent-api.js'
 import {
@@ -239,6 +273,7 @@ import { resolveConsentSecureLinkEmail } from
 import { resolveGuardianSignerFromContact } from
   'src/utils/consent-signer-contact.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { triggerBlobDownload } from 'src/utils/stored-file-api.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -262,9 +297,11 @@ const open = computed({
 const step = ref('method')
 const signerName = ref('')
 const signerType = ref(consentSignerTypeValues.client)
-const signatureMethod = ref(consentSignatureMethodValues.inPerson)
+const signatureMethod = ref(consentSignatureMethodValues.inPersonDigital)
 const relationshipToClient = ref('')
 const signatureArtifact = ref('')
+const paperFile = ref(null)
+const printing = ref(false)
 const secureLinkEmail = ref('')
 const sendingLink = ref(false)
 const secureLinkResult = ref(null)
@@ -305,8 +342,18 @@ const guardianContactMissing = computed(
   () => isGuardianSigner.value && !guardianSignerDefaults.value,
 )
 
-const isInPerson = computed(
-  () => signatureMethod.value === consentSignatureMethodValues.inPerson,
+const isInPersonDigital = computed(
+  () => signatureMethod.value
+    === consentSignatureMethodValues.inPersonDigital,
+)
+
+const isInPersonPaper = computed(
+  () => signatureMethod.value
+    === consentSignatureMethodValues.inPersonPaper,
+)
+
+const isInPersonSign = computed(
+  () => isInPersonDigital.value || isInPersonPaper.value,
 )
 
 const isSecureLink = computed(
@@ -314,7 +361,7 @@ const isSecureLink = computed(
 )
 
 const methodUnavailable = computed(
-  () => !isInPerson.value && !isSecureLink.value,
+  () => !isInPersonSign.value && !isSecureLink.value,
 )
 
 const secureLinkBlocked = computed(
@@ -328,7 +375,7 @@ const canGoNext = computed(() => {
   if (guardianContactMissing.value) {
     return false
   }
-  if (isInPerson.value) {
+  if (isInPersonSign.value) {
     return true
   }
   if (isSecureLink.value) {
@@ -346,6 +393,9 @@ const canSubmitInPerson = computed(() => {
     && !String(relationshipToClient.value ?? '').trim()) {
     return false
   }
+  if (isInPersonPaper.value) {
+    return Boolean(paperFile.value)
+  }
   if (!String(signatureArtifact.value ?? '').trim()) {
     return false
   }
@@ -353,7 +403,19 @@ const canSubmitInPerson = computed(() => {
   return true
 })
 
-const busy = computed(() => props.saving || sendingLink.value)
+const canPrintPaper = computed(() => {
+  const clientId = Number(props.clientId)
+  const consentId = Number(props.consent?.id)
+
+  return Number.isFinite(clientId)
+    && clientId > 0
+    && Number.isFinite(consentId)
+    && consentId > 0
+})
+
+const busy = computed(
+  () => props.saving || sendingLink.value || printing.value,
+)
 
 const methodPrimaryLabel = computed(() => {
   if (isSecureLink.value) {
@@ -447,9 +509,11 @@ function resetForm() {
   step.value = 'method'
   signerType.value = signerOptions.value[0]?.value
     || consentSignerTypeValues.client
-  signatureMethod.value = consentSignatureMethodValues.inPerson
+  signatureMethod.value = consentSignatureMethodValues.inPersonDigital
   relationshipToClient.value = ''
   signatureArtifact.value = ''
+  paperFile.value = null
+  printing.value = false
   sendingLink.value = false
   secureLinkResult.value = null
   signerName.value = ''
@@ -511,7 +575,7 @@ function onMethodPrimary() {
   if (!canGoNext.value) {
     return
   }
-  if (isInPerson.value) {
+  if (isInPersonSign.value) {
     if (!applySignerDefaults()) {
       return
     }
@@ -528,15 +592,58 @@ function onConfirmInPerson() {
   if (!canSubmitInPerson.value) {
     return
   }
-  emit('submit', {
+  const payload = {
     signerName: String(signerName.value).trim(),
     signerType: signerType.value,
     relationshipToClient: needsRelationship.value
       ? String(relationshipToClient.value).trim()
       : null,
-    signatureMethod: consentSignatureMethodValues.inPerson,
-    signatureArtifact: signatureArtifact.value,
-  })
+    signatureMethod: signatureMethod.value,
+  }
+  if (isInPersonPaper.value) {
+    payload.paperFile = paperFile.value
+  } else {
+    payload.signatureArtifact = signatureArtifact.value
+  }
+  emit('submit', payload)
+}
+
+async function onPrintPaper() {
+  if (!canPrintPaper.value || printing.value) {
+    return
+  }
+  printing.value = true
+  let dismissPrinting = null
+  try {
+    dismissPrinting = $q.notify({
+      timeout: 0,
+      spinner: true,
+      position: 'top',
+      color: 'primary',
+      message: t('clientConsentPrinting'),
+    })
+    const { blob, fileName } = await printClientConsentDocument(
+      props.clientId,
+      props.consent.id,
+      { version: props.consent.version },
+    )
+    triggerBlobDownload(blob, fileName)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: consentApiErrorMessage(
+          error,
+          t('clientConsentPrintError'),
+        ),
+      })
+    }
+  } finally {
+    if (typeof dismissPrinting === 'function') {
+      dismissPrinting()
+    }
+    printing.value = false
+  }
 }
 
 async function onSendSecureLink() {
@@ -657,6 +764,12 @@ async function onCopyLink() {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid $border-subtle;
+}
+
+.client-consent-sign-dialog__print-col {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .client-consent-sign-dialog__actions {

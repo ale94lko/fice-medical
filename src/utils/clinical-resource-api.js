@@ -10,6 +10,8 @@ import {
 } from 'src/utils/clinical-resource-form.js'
 import { mapClinicalResourceListItem } from
   'src/utils/clinical-resource-list-normalize.js'
+import { extractDownloadFileName } from
+  'src/utils/http-headers.js'
 
 function unwrapListRoot(body) {
   const root = body?.data ?? body
@@ -66,11 +68,8 @@ function normalizePagination(pagination) {
   }
 }
 
-function extractFileName(headers, fallback = 'download') {
-  const raw = headers?.['content-disposition'] ?? ''
-  const match = /filename="?([^"]+)"?/i.exec(raw)
-
-  return match?.[1] ?? fallback
+function extractFileName(response, fallback = 'download') {
+  return extractDownloadFileName(response, fallback)
 }
 
 export function clinicalResourceApiErrorMessage(
@@ -267,7 +266,7 @@ export async function downloadClinicalResourceDocument(
 
   return {
     blob: response.data,
-    fileName: extractFileName(response.headers),
+    fileName: extractFileName(response),
   }
 }
 

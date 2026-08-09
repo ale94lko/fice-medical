@@ -2330,7 +2330,8 @@ export default {
   consentSignerTypeGuardian: 'Tutor',
   consentSignerTypeAuthorizedRepresentative:
     'Representante autorizado',
-  consentSignatureMethodInPerson: 'En persona',
+  consentSignatureMethodInPersonDigital: 'En persona (digital)',
+  consentSignatureMethodInPersonPaper: 'En persona (papel)',
   consentSignatureMethodClientPortal: 'Portal del cliente',
   consentSignatureMethodSecureLink: 'Enlace seguro',
   consentSignatureMethodOther: 'Otro',
@@ -2363,7 +2364,7 @@ export default {
   clientConsentSignatureMethod: 'Método de firma',
   clientConsentSignMethodUnavailable:
     'Este método de firma aún no está disponible. '
-    + 'Elija En persona o Enlace seguro.',
+    + 'Elija En persona (digital), En persona (papel) o Enlace seguro.',
   clientConsentGuardianContactRequired:
     'Agregue un contacto Guardian con nombre y relación en Contacto '
     + 'antes de solicitar la firma del tutor.',
@@ -2373,6 +2374,22 @@ export default {
   clientConsentSignerType: 'Tipo de firmante',
   clientConsentRelationship: 'Relación con el cliente',
   clientConsentSignatureHint: 'Firme abajo con el dedo o el stylus.',
+  clientConsentPaperScan: 'Consentimiento firmado escaneado',
+  clientConsentPaperScanPlaceholder: 'Subir PDF o imagen',
+  clientConsentPaperScanHint:
+    'Suba el consentimiento impreso después de firmarlo a mano.',
+  clientConsentPaperDropHint:
+    'Arrastre y suelte archivos aquí o haga clic para explorar',
+  clientConsentPaperFormats:
+    'PDF, JPG, PNG, GIF, WEBP (máx. 25 MB)',
+  clientConsentPaperTypeError:
+    'Use un PDF o imagen (JPG, PNG, GIF, WEBP).',
+  clientConsentPaperSizeError:
+    'El archivo supera el tamaño máximo de 25 MB.',
+  clientConsentPrint: 'Imprimir',
+  clientConsentPrinting: 'Preparando PDF imprimible…',
+  clientConsentPrintError:
+    'No se pudo abrir el PDF imprimible del consentimiento.',
   clientConsentSignConfirm: 'Confirmar firma',
   clientConsentSignSuccess: 'Consentimiento firmado.',
   clientConsentSignError: 'No se pudo firmar el consentimiento.',
@@ -2437,6 +2454,7 @@ export default {
   clientConsentDownload: 'Descargar',
   clientConsentDownloadError:
     'No se pudo descargar el documento de consentimiento.',
+  clientConsentPrintTooltip: 'Imprimir formulario de firma en blanco',
   clientConsentActionError: 'No se pudo actualizar el consentimiento.',
   clientConsentSignedMeta: 'Firmado {date} por {name}',
   clientConsentRevokedMeta: 'Revocado {date}: {reason}',
