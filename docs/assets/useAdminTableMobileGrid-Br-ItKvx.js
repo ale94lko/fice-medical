@@ -1,0 +1,1 @@
+import{n as e}from"./index-E27SrkLd.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
