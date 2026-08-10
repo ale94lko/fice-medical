@@ -1,6 +1,9 @@
 <template>
   <template v-if="canGenerateDocuments">
-    <slot name="trigger" :open="openDialog">
+    <slot
+      name="trigger"
+      :open="openFromTrigger"
+      :has-options="hasOptions">
       <q-btn
         no-caps
         :outline="outline"
@@ -11,15 +14,42 @@
         color="primary"
         :class="buttonClass"
         :icon="icon"
+        :icon-right="hasOptions ? 'arrow_drop_down' : undefined"
         :label="label || t('generateDocumentAction')"
-        :data-testid="documentGenerationTestIds.trigger(documentType)"
-        @click="openDialog"
-      />
+        :data-testid="documentGenerationTestIds.trigger(
+          activeDocumentType || documentType,
+        )"
+        @click="onTriggerClick">
+        <q-menu
+          v-if="hasOptions"
+          auto-close
+          anchor="bottom right"
+          self="top right">
+          <q-list
+            dense
+            class="generate-document-action__menu-list">
+            <q-item
+              v-for="option in resolvedOptions"
+              :key="option.documentType"
+              v-close-popup
+              clickable
+              :data-testid="documentGenerationTestIds.menuItem(
+                option.documentType,
+              )"
+              @click="openDialog(option.documentType)">
+              <q-item-section>
+                {{ option.label }}
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-btn>
     </slot>
 
     <GenerateDocumentDialog
+      v-if="activeDocumentType"
       v-model="dialogOpen"
-      :document-type="documentType"
+      :document-type="activeDocumentType"
       :context="context"
       @generated="emit('generated', $event)"
     />
@@ -27,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GenerateDocumentDialog from
   'components/documents/GenerateDocumentDialog.vue'
@@ -35,10 +65,19 @@ import { useDocumentGenerationPermissions } from
   'src/composables/useDocumentGenerationPermissions.js'
 import { documentGenerationTestIds } from 'src/test-ids/index.js'
 
-defineProps({
+const props = defineProps({
   documentType: {
     type: String,
-    required: true,
+    default: '',
+  },
+  /**
+   * When set, the trigger opens a menu of document types instead of
+   * generating a single type immediately.
+   * [{ documentType, label?, labelKey? }]
+   */
+  options: {
+    type: Array,
+    default: null,
   },
   context: {
     type: Object,
@@ -76,13 +115,88 @@ defineProps({
 
 const emit = defineEmits(['generated'])
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const { canGenerateDocuments } = useDocumentGenerationPermissions()
 const dialogOpen = ref(false)
+const activeDocumentType = ref(
+  String(props.documentType ?? '').trim()
+  || String(props.options?.[0]?.documentType ?? '').trim(),
+)
 
-function openDialog() {
+const hasOptions = computed(
+  () => Array.isArray(props.options) && props.options.length > 0,
+)
+
+const resolvedOptions = computed(() => {
+  if (!hasOptions.value) {
+    return []
+  }
+
+  return props.options
+    .map(option => {
+      const documentType = String(option?.documentType ?? '').trim()
+      if (!documentType) {
+        return null
+      }
+      const labelKey = String(option?.labelKey ?? '').trim()
+      const explicitLabel = String(option?.label ?? '').trim()
+      let label = explicitLabel
+      if (!label && labelKey && te(labelKey)) {
+        label = t(labelKey)
+      }
+      if (!label) {
+        label = documentType
+      }
+
+      return { documentType, label }
+    })
+    .filter(Boolean)
+})
+
+watch(
+  () => props.documentType,
+  value => {
+    const next = String(value ?? '').trim()
+    if (next && !dialogOpen.value) {
+      activeDocumentType.value = next
+    }
+  },
+)
+
+function openDialog(documentType) {
+  const next = String(documentType ?? props.documentType ?? '').trim()
+  if (!next) {
+    return
+  }
+  activeDocumentType.value = next
   dialogOpen.value = true
+}
+
+function onTriggerClick(event) {
+  if (hasOptions.value) {
+    return
+  }
+  event?.preventDefault?.()
+  openDialog(props.documentType)
+}
+
+function openFromTrigger(documentType) {
+  if (documentType) {
+    openDialog(documentType)
+
+    return
+  }
+  if (hasOptions.value) {
+    return
+  }
+  openDialog(props.documentType)
 }
 
 defineExpose({ openDialog })
 </script>
+
+<style lang="scss" scoped>
+.generate-document-action__menu-list {
+  min-width: 180px;
+}
+</style>

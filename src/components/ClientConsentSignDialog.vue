@@ -87,7 +87,9 @@
         />
         <div class="client-consent-sign-dialog__form">
           <div class="row q-col-gutter-md">
-            <div class="col-12 col-sm-6">
+            <div
+              class="col-12"
+              :class="isInPersonPaper ? 'col-sm' : 'col-sm-6'">
               <FormField required :label="t('clientConsentSignerName')">
                 <TextInput
                   v-model="signerName"
@@ -99,8 +101,24 @@
               </FormField>
             </div>
             <div
+              v-if="needsRelationship"
+              class="col-12"
+              :class="isInPersonPaper ? 'col-sm' : 'col-sm-6'">
+              <FormField
+                required
+                :label="t('clientConsentRelationship')">
+                <TextInput
+                  v-model="relationshipToClient"
+                  outlined
+                  dense
+                  hide-bottom-space
+                  :maxlength="consentRelationshipMaxLength"
+                />
+              </FormField>
+            </div>
+            <div
               v-if="isInPersonPaper"
-              class="col-12 col-sm-6
+              class="col-12 col-sm-auto
                 client-consent-sign-dialog__print-col">
               <q-btn
                 no-caps
@@ -114,21 +132,6 @@
                 :data-testid="tid.btnPrintPaper"
                 @click="onPrintPaper"
               />
-            </div>
-            <div
-              v-if="needsRelationship"
-              class="col-12 col-sm-6">
-              <FormField
-                required
-                :label="t('clientConsentRelationship')">
-                <TextInput
-                  v-model="relationshipToClient"
-                  outlined
-                  dense
-                  hide-bottom-space
-                  :maxlength="consentRelationshipMaxLength"
-                />
-              </FormField>
             </div>
             <div
               v-if="isInPersonDigital"

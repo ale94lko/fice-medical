@@ -53,6 +53,26 @@
               {{ entryType(entry) }}
             </div>
           </div>
+          <q-btn
+            v-if="entryValue(entry)"
+            flat
+            dense
+            round
+            size="xs"
+            icon="content_copy"
+            class="admin-contact-overflow__tip-copy
+              app-btn-icon-action"
+            :aria-label="t('adminContactCopy')"
+            @click.stop="copyEntry(entry)"
+          >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('adminContactCopy') }}
+            </q-tooltip>
+          </q-btn>
         </div>
       </div>
     </AdminTableHoverCard>
@@ -61,6 +81,9 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useQuasar, copyToClipboard } from 'quasar'
+import { quasarNotifyTypes } from 'components/constants.js'
 import AdminTableHoverCard from
   'components/admin-table/AdminTableHoverCard.vue'
 
@@ -91,6 +114,9 @@ const props = defineProps({
     default: false,
   },
 })
+
+const { t } = useI18n()
+const $q = useQuasar()
 
 const firstEntry = computed(() => props.entries[0] ?? null)
 const extraEntries = computed(() => props.entries.slice(1))
@@ -124,5 +150,22 @@ function entryKey(entry, index) {
   const value = entryValue(entry)
 
   return value || `contact-${index}`
+}
+
+function copyEntry(entry) {
+  const text = entryValue(entry)
+  if (!text) {
+    return
+  }
+
+  copyToClipboard(text)
+    .then(() => {
+      $q.notify({
+        type: quasarNotifyTypes.positive,
+        message: t('adminContactCopied'),
+        position: 'top',
+      })
+    })
+    .catch(() => {})
 }
 </script>

@@ -29,21 +29,50 @@
       </q-td>
     </template>
 
-    <template #body-cell-appointmentNumber="scope">
-      <q-td
-        :props="scope"
-        class="admin-data-table__secondary-cell">
-        {{ scope.row.appointmentNumber || '—' }}
-      </q-td>
-    </template>
-
     <template #body-cell-appointmentType="scope">
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
         <span class="appointments-table__ellipsis">
-          {{ scope.row.servicesLabel || scope.row.appointmentTypeName || '—' }}
+          {{ truncatedServicesLabel(scope.row) }}
+          <q-tooltip
+            v-if="servicesTooltip(scope.row)"
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ servicesTooltip(scope.row) }}
+          </q-tooltip>
         </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-serviceCode="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <div
+          v-if="serviceCodeEntries(scope.row).length"
+          class="appointments-table__service-codes">
+          <span
+            v-for="entry in serviceCodeEntries(scope.row)"
+            :key="entry.key"
+            class="appointments-table__service-code-pill"
+            :class="`appointments-table__service-code-pill--${
+              entry.tone
+            }`">
+            {{ entry.displayCode }}
+            <q-tooltip
+              v-if="entry.name"
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ entry.name }}
+            </q-tooltip>
+          </span>
+        </div>
+        <span v-else>—</span>
       </q-td>
     </template>
 
@@ -129,6 +158,7 @@ import {
   appointmentCanCancel,
   appointmentCanCheckIn,
   appointmentCanComplete,
+  appointmentCanDelete,
   appointmentCanEdit,
   appointmentCanNoShow,
   appointmentCanReschedule,
@@ -137,9 +167,14 @@ import {
   formatUtcDateLong,
   formatUtcTimeRange,
 } from 'src/utils/appointment-datetime.js'
+import { formatServiceProcedureCode } from
+  'src/utils/appointment-normalize.js'
 import { clinicianInitialsFromPersonName } from
   'src/utils/clinician-display.js'
+import { resolveRoleBadgeTone } from 'src/utils/user-list-display.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
+
+const APPOINTMENT_SERVICE_LABEL_MAX = 60
 
 const props = defineProps({
   rows: {
@@ -160,6 +195,7 @@ const emit = defineEmits([
   'view',
   'edit',
   'cancel',
+  'delete',
   'reschedule',
   'check-in',
   'complete',
@@ -181,15 +217,6 @@ const columns = computed(() => [
     style: 'min-width: 130px',
   },
   {
-    name: 'appointmentNumber',
-    label: t('appointmentColNumber'),
-    align: 'left',
-    field: row => row.appointmentNumber,
-    sortable: false,
-    headerStyle: 'min-width: 100px',
-    style: 'min-width: 100px',
-  },
-  {
     name: 'appointmentType',
     label: t('appointmentColServices'),
     align: 'left',
@@ -197,6 +224,15 @@ const columns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
+  },
+  {
+    name: 'serviceCode',
+    label: t('appointmentColServiceCode'),
+    align: 'left',
+    field: row => row.servicesCodesLabel,
+    sortable: false,
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
   },
   {
     name: 'clinician',
@@ -233,8 +269,8 @@ const columns = computed(() => [
     field: row => row.appointmentId,
     sortable: false,
     required: true,
-    headerStyle: 'min-width: 200px; width: 200px',
-    style: 'min-width: 200px; width: 200px',
+    headerStyle: 'min-width: 236px; width: 236px',
+    style: 'min-width: 236px; width: 236px',
   },
 ])
 
@@ -244,6 +280,59 @@ function formatDate(iso) {
 
 function formatTimeRange(start, end) {
   return formatUtcTimeRange(start, end)
+}
+
+function truncateWithEllipsis(value, max = APPOINTMENT_SERVICE_LABEL_MAX) {
+  const text = String(value ?? '').trim()
+  if (!text) {
+    return ''
+  }
+  if (text.length <= max) {
+    return text
+  }
+
+  return `${text.slice(0, max)}...`
+}
+
+function fullServicesLabel(row) {
+  return String(
+    row?.servicesLabel || row?.appointmentTypeName || '',
+  ).trim()
+}
+
+function truncatedServicesLabel(row) {
+  return truncateWithEllipsis(fullServicesLabel(row)) || '—'
+}
+
+function servicesTooltip(row) {
+  const full = fullServicesLabel(row)
+  if (!full || full.length <= APPOINTMENT_SERVICE_LABEL_MAX) {
+    return ''
+  }
+
+  return full
+}
+
+function serviceCodeEntries(row) {
+  const lines = Array.isArray(row?.serviceProcedures)
+    ? row.serviceProcedures
+    : []
+  const entries = []
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index]
+    const code = formatServiceProcedureCode(line)
+    if (!code) {
+      continue
+    }
+    entries.push({
+      key: `${line?.id || code}-${index}`,
+      displayCode: truncateWithEllipsis(code),
+      name: String(line?.name ?? '').trim(),
+      tone: resolveRoleBadgeTone(code, index),
+    })
+  }
+
+  return entries
 }
 
 function statusLabel(status) {
@@ -309,6 +398,7 @@ function actionsFor(row) {
     view: p.canView !== false,
     edit: p.canBook && appointmentCanEdit(status),
     cancel: p.canCancel && appointmentCanCancel(status),
+    delete: p.canDelete && appointmentCanDelete(row),
     reschedule: p.canReschedule && appointmentCanReschedule(status),
     checkIn: p.canManage && appointmentCanCheckIn(status),
     complete: p.canManage && appointmentCanComplete(status),
@@ -347,6 +437,13 @@ function actionButtons(row) {
       labelKey: 'appointmentActionCancel',
       event: 'cancel',
       testId: tid.rowCancel(id),
+    },
+    {
+      key: 'delete',
+      icon: 'delete_outline',
+      labelKey: 'appointmentActionDelete',
+      event: 'delete',
+      testId: tid.rowDelete(id),
     },
     {
       key: 'checkIn',

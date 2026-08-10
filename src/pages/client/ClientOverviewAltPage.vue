@@ -27,12 +27,18 @@
       <ClientOverviewAltTabs
         v-model="activeTab"
         :insurance-alert="hasInsuranceAlert"
+        :allergies-severity-modifier="allergiesSeverityModifier"
       />
 
       <div class="client-overview-page__body client-overview-alt-page__body">
         <div class="client-overview-alt-page__content">
+          <ClientOverviewAltAppointments
+            v-if="activeTab === addClientTabKeys.appointments"
+            :client-id="clientId"
+            :appointments="clientAppointments"
+          />
           <ClientOverviewAltBasicInfo
-            v-if="activeTab === addClientTabKeys.basic"
+            v-else-if="activeTab === addClientTabKeys.basic"
             :basic-info="basicInfo"
           />
           <ClientOverviewAltContact
@@ -80,13 +86,6 @@
             @open-record="onOpenModuleRecord"
           />
         </div>
-
-        <ClientOverviewAltSidebar
-          class="client-overview-page__sidebar
-            client-overview-alt-page__sidebar"
-          :activity-items="activityItems"
-          @view-all-activity="goToEdit(addClientTabKeys.careCoordination)"
-        />
       </div>
     </div>
   </q-page>
@@ -96,8 +95,11 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { addClientTabKeys } from 'components/constants.js'
+import { addClientTabKeys, clientFormSections } from
+  'components/constants.js'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import ClientOverviewAltAppointments from
+  'components/client-overview/ClientOverviewAltAppointments.vue'
 import ClientOverviewAltHeader from
   'components/client-overview/ClientOverviewAltHeader.vue'
 import ClientOverviewHeaderSkeleton from
@@ -114,8 +116,6 @@ import ClientOverviewAltInsurance from
   'components/client-overview/ClientOverviewAltInsurance.vue'
 import ClientOverviewAltModulesTab from
   'components/client-overview/ClientOverviewAltModulesTab.vue'
-import ClientOverviewAltSidebar from
-  'components/client-overview/ClientOverviewAltSidebar.vue'
 import { useClientOverview } from 'src/composables/useClientOverview.js'
 import { buildClientOverviewAltBasicInfo } from
   'src/utils/client-overview-alt-basic-info.js'
@@ -123,25 +123,44 @@ import { buildClientOverviewAltContact } from
   'src/utils/client-overview-alt-contact.js'
 import { buildClientOverviewAltInsurance } from
   'src/utils/client-overview-alt-insurance.js'
+import {
+  highestAllergySeverity,
+  severityTabModifier,
+} from 'src/utils/client-allergies.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const siteStore = useSiteStore()
 
 const clientId = computed(() => route.params.id)
-const activeTab = ref(addClientTabKeys.basic)
+const activeTab = ref(addClientTabKeys.appointments)
 
 const {
   loading,
   header,
   missingItems,
-  activityItems,
   moduleCards,
   form,
   rawClient,
   summaries,
 } = useClientOverview(clientId)
+
+const clientAppointments = computed(() => {
+  const id = String(clientId.value ?? '').trim()
+  if (!id) {
+    return []
+  }
+  const fromStore = siteStore.clientListSourceById[id]?.appointments
+  if (Array.isArray(fromStore)) {
+    return fromStore
+  }
+  const fromSummaries = summaries.value?.appointmentsRaw
+
+  return Array.isArray(fromSummaries) ? fromSummaries : []
+})
 
 const basicInfo = computed(() => {
   if (!header.value) {
@@ -175,6 +194,15 @@ const insuranceInfo = computed(() => {
 const allergyDetail = computed(() =>
   summaries.value?.allergies?.dialogDetail ?? null,
 )
+
+const allergiesSeverityModifier = computed(() => {
+  const entries = form.value?.[clientFormSections.allergies]?.entries
+  if (form.value?.[clientFormSections.allergies]?.noKnownAllergies) {
+    return ''
+  }
+
+  return severityTabModifier(highestAllergySeverity(entries))
+})
 
 const hasInsuranceAlert = computed(() =>
   (missingItems.value ?? []).includes(t('clientOverviewMissingInsurance')),

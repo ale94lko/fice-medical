@@ -27,21 +27,41 @@
           </div>
 
           <div class="client-overview-header__profile-body">
-            <h2 class="client-overview-header__name
-              client-overview-alt-header__name">
-              {{ header.fullName }}
-            </h2>
+            <div class="client-overview-alt-header__name-row">
+              <h2 class="client-overview-header__name
+                client-overview-alt-header__name">
+                {{ header.fullName }}
+              </h2>
+              <q-btn
+                v-if="header.fullName"
+                flat
+                dense
+                round
+                size="sm"
+                icon="content_copy"
+                class="client-overview-header__copy-btn
+                  client-overview-alt-header__name-copy"
+                :aria-label="t('clientOverviewCopyClientName')"
+                :data-testid="clientOverviewAltTestIds.copyName"
+                @click="copyClientName"
+              />
+            </div>
 
             <div
               class="client-overview-header__meta-row
-                client-overview-header__meta-row--client-actions">
+                client-overview-header__meta-row--client-actions
+                client-overview-alt-header__meta-row">
               <div
                 class="client-overview-header__meta-cell
-                  client-overview-header__meta-cell--client-number">
-                <span class="client-overview-header__meta-label">
+                  client-overview-header__meta-cell--client-number
+                  client-overview-alt-header__meta-cell--client-number">
+                <span class="client-overview-header__meta-label
+                  client-overview-alt-header__meta-label">
+                  <q-icon name="badge" size="16px" />
                   {{ t('clientNumber') }}
                 </span>
-                <div class="client-overview-header__meta-value-row">
+                <div class="client-overview-header__meta-value-row
+                  client-overview-alt-header__client-number-row">
                   <span
                     v-if="header.clientNumber"
                     class="client-overview-header__client-number-badge">
@@ -64,6 +84,26 @@
                     class="client-overview-header__meta-value">
                     —
                   </strong>
+                  <button
+                    v-if="missingItems.length"
+                    type="button"
+                    class="client-overview-alt-header__missing-alert-btn
+                      client-overview-alt-header__missing-alert-btn--inline"
+                    :data-testid="clientOverviewAltTestIds.reviewMissing"
+                    :aria-label="t('clientOverviewMissingInformation', {
+                      count: missingItems.length,
+                    })"
+                    @click="emit('review-missing')">
+                    <q-icon
+                      name="warning_amber"
+                      size="22px"
+                    />
+                    <q-tooltip anchor="bottom middle" self="top middle">
+                      {{ t('clientOverviewMissingInformation', {
+                        count: missingItems.length,
+                      }) }}
+                    </q-tooltip>
+                  </button>
                 </div>
               </div>
 
@@ -74,29 +114,84 @@
 
               <div
                 class="client-overview-header__meta-cell
-                  client-overview-header__meta-cell--dob">
-                <span class="client-overview-header__meta-label">
-                  {{ t('clientOverviewDobAge') }}
-                </span>
+                  client-overview-header__meta-cell--dob
+                  client-overview-alt-header__meta-cell--dob">
+                <div class="client-overview-alt-header__meta-label-row">
+                  <span class="client-overview-header__meta-label
+                    client-overview-alt-header__meta-label">
+                    <q-icon name="cake" size="16px" />
+                    {{ t('clientOverviewDobAge') }}
+                  </span>
+                  <q-btn
+                    v-if="header.dobAgeLine"
+                    flat
+                    dense
+                    round
+                    size="xs"
+                    icon="content_copy"
+                    class="client-overview-header__copy-btn"
+                    :aria-label="t('clientOverviewCopyDobAge')"
+                    :data-testid="clientOverviewAltTestIds.copyDob"
+                    @click="copyDobAge">
+                    <q-tooltip
+                      class="app-info-tooltip"
+                      anchor="top middle"
+                      self="bottom middle"
+                      :offset="[0, 6]">
+                      {{ t('copy') }}
+                    </q-tooltip>
+                  </q-btn>
+                </div>
                 <strong class="client-overview-header__meta-value">
                   {{ header.dobAgeLine }}
                 </strong>
               </div>
 
               <div
-                class="client-overview-header__meta-divider
-                  client-overview-header__meta-divider--compact"
+                class="client-overview-header__meta-divider"
                 aria-hidden="true"
               />
 
               <div
                 class="client-overview-header__meta-cell
-                  client-overview-header__meta-cell--sex">
-                <span class="client-overview-header__meta-label">
-                  {{ t('clientOverviewSex') }}
-                </span>
-                <strong class="client-overview-header__meta-value">
-                  {{ header.gender }}
+                  client-overview-alt-header__meta-cell--phone">
+                <div class="client-overview-alt-header__meta-label-row">
+                  <span class="client-overview-header__meta-label
+                    client-overview-alt-header__meta-label">
+                    <q-icon name="phone" size="16px" />
+                    {{ t('phone') }}
+                  </span>
+                  <q-btn
+                    v-if="header.phone"
+                    flat
+                    dense
+                    round
+                    size="xs"
+                    icon="content_copy"
+                    class="client-overview-header__copy-btn"
+                    :aria-label="t('clientOverviewCopyPhone')"
+                    :data-testid="clientOverviewAltTestIds.copyPhone"
+                    @click="copyPhone">
+                    <q-tooltip
+                      class="app-info-tooltip"
+                      anchor="top middle"
+                      self="bottom middle"
+                      :offset="[0, 6]">
+                      {{ t('copy') }}
+                    </q-tooltip>
+                  </q-btn>
+                </div>
+                <AdminTableContactOverflow
+                  v-if="headerPhones.length"
+                  class="client-overview-alt-header__phones"
+                  :entries="headerPhones"
+                  icon="phone"
+                  variant="header"
+                />
+                <strong
+                  v-else
+                  class="client-overview-header__meta-value">
+                  —
                 </strong>
               </div>
 
@@ -107,28 +202,36 @@
 
               <div
                 class="client-overview-header__meta-cell
-                  client-overview-header__meta-cell--last-visit">
-                <span class="client-overview-header__meta-label">
-                  {{ t('clientOverviewLastVisit') }}
-                </span>
-                <strong class="client-overview-header__meta-value">
-                  {{ header.lastVisit?.date || '—' }}
-                </strong>
-              </div>
-
-              <div
-                class="client-overview-header__meta-divider"
-                aria-hidden="true"
-              />
-
-              <div
-                class="client-overview-header__meta-cell
-                  client-overview-header__meta-cell--next-appt">
-                <span class="client-overview-header__meta-label">
-                  {{ t('clientOverviewNextAppointment') }}
-                </span>
-                <strong class="client-overview-header__meta-value">
-                  {{ header.nextAppointment?.dateTimeLine || '—' }}
+                  client-overview-alt-header__meta-cell--address">
+                <div class="client-overview-alt-header__meta-label-row">
+                  <span class="client-overview-header__meta-label
+                    client-overview-alt-header__meta-label">
+                    <q-icon name="location_on" size="16px" />
+                    {{ t('address') }}
+                  </span>
+                  <q-btn
+                    v-if="header.addressLine"
+                    flat
+                    dense
+                    round
+                    size="xs"
+                    icon="content_copy"
+                    class="client-overview-header__copy-btn"
+                    :aria-label="t('clientOverviewCopyAddress')"
+                    :data-testid="clientOverviewAltTestIds.copyAddress"
+                    @click="copyAddress">
+                    <q-tooltip
+                      class="app-info-tooltip"
+                      anchor="top middle"
+                      self="bottom middle"
+                      :offset="[0, 6]">
+                      {{ t('copy') }}
+                    </q-tooltip>
+                  </q-btn>
+                </div>
+                <strong class="client-overview-header__meta-value
+                  client-overview-alt-header__address-value">
+                  {{ header.addressLine || '—' }}
                 </strong>
               </div>
             </div>
@@ -137,25 +240,6 @@
       </div>
 
       <div class="client-overview-alt-header__actions">
-        <button
-          v-if="missingItems.length"
-          type="button"
-          class="client-overview-alt-header__missing-alert-btn"
-          :data-testid="clientOverviewAltTestIds.reviewMissing"
-          :aria-label="t('clientOverviewMissingInformation', {
-            count: missingItems.length,
-          })"
-          @click="emit('review-missing')">
-          <q-icon
-            name="warning_amber"
-            size="28px"
-          />
-          <q-tooltip anchor="bottom middle" self="top middle">
-            {{ t('clientOverviewMissingInformation', {
-              count: missingItems.length,
-            }) }}
-          </q-tooltip>
-        </button>
         <q-btn
           no-caps
           unelevated
@@ -171,7 +255,8 @@
           v-if="clientId"
           :document-type="documentTypes.clientProfile"
           :context="{ clientId }"
-          :label="t('generateDocumentAction')"
+          :label="t('generateDocumentFaceSheet')"
+          icon="contact_page"
           button-class="app-btn-outline"
           @generated="emit('document-generated')"
         />
@@ -181,9 +266,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
+import AdminTableContactOverflow from
+  'components/admin-table/AdminTableContactOverflow.vue'
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
@@ -214,15 +302,63 @@ const emit = defineEmits(['review-missing', 'edit', 'document-generated'])
 const { t } = useI18n()
 const $q = useQuasar()
 
-function copyClientNumber() {
-  copyToClipboard(props.header.clientNumber)
+const headerPhones = computed(() =>
+  Array.isArray(props.header?.phones) ? props.header.phones : [],
+)
+
+function notifyCopied(messageKey) {
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t(messageKey),
+    position: 'top',
+  })
+}
+
+function copyText(value, successKey) {
+  const text = String(value ?? '').trim()
+  if (!text) {
+    return
+  }
+
+  copyToClipboard(text)
     .then(() => {
-      $q.notify({
-        type: quasarNotifyTypes.positive,
-        message: t('clientOverviewCopiedClientNumber'),
-        position: 'top',
-      })
+      notifyCopied(successKey)
     })
     .catch(() => {})
+}
+
+function copyClientNumber() {
+  copyText(
+    props.header.clientNumber,
+    'clientOverviewCopiedClientNumber',
+  )
+}
+
+function copyClientName() {
+  copyText(
+    props.header.fullName,
+    'clientOverviewCopiedClientName',
+  )
+}
+
+function copyDobAge() {
+  copyText(
+    props.header.dobAgeLine,
+    'clientOverviewCopiedDobAge',
+  )
+}
+
+function copyPhone() {
+  copyText(
+    props.header.phone,
+    'clientOverviewCopiedPhone',
+  )
+}
+
+function copyAddress() {
+  copyText(
+    props.header.addressLine,
+    'clientOverviewCopiedAddress',
+  )
 }
 </script>

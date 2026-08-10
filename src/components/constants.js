@@ -182,6 +182,7 @@ export const userStatusValues = {
 }
 
 export const addClientTabKeys = {
+  appointments: 'appointments',
   basic: 'basic',
   contact: 'contact',
   familyMedicalHistory: 'familyMedicalHistory',
@@ -1311,6 +1312,9 @@ export const apiPaths = {
   clientAppointments: id => `/appointments/v1/clients/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
+  clientAppointmentsSearch: id => `/appointments/v1/clients/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/search`,
   appointmentsList: '/appointments/v1',
   appointmentById: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),

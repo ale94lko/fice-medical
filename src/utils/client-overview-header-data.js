@@ -75,6 +75,28 @@ function resolvePrimaryEmail(contact) {
   return resolveContactEmails(contact)[0]?.value ?? ''
 }
 
+function resolveContactAddressLine(contact) {
+  const line1 = trim(contact?.addressLine1)
+  const line2 = trim(contact?.addressLine2)
+  const city = trim(contact?.city)
+  const state = trim(contact?.state)
+  const zip = trim(contact?.zipCode)
+  const parts = []
+  if (line1) {
+    parts.push(line1)
+  }
+  if (line2) {
+    parts.push(line2)
+  }
+  const cityState = [city, state].filter(Boolean).join(', ')
+  const locality = [cityState, zip].filter(Boolean).join(' ')
+  if (locality) {
+    parts.push(locality)
+  }
+
+  return parts.join(', ')
+}
+
 function resolveClinicianCards(form, rawClient, clinicianOptions = []) {
   const fromApi = resolveClientListClinicianEntries(rawClient ?? {})
   if (fromApi.length) {
@@ -364,6 +386,7 @@ export function buildClientOverviewHeaderData(
     emails: resolveContactEmails(contact),
     phone: resolvePrimaryPhone(contact),
     email: resolvePrimaryEmail(contact),
+    addressLine: resolveContactAddressLine(contact),
     preferredLanguage: resolveCatalogFieldLabel(
       form?.[ck.preferredLanguage],
       preferredLanguageSelectOptions,

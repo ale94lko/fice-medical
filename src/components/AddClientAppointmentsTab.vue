@@ -19,13 +19,50 @@
     </div>
 
     <template v-else>
-      <div class="appointments-header row items-start">
-        <div class="col">
-          <h2 class="appointments-title">
-            {{ t('appointmentsTitle') }}
-          </h2>
-          <p class="appointments-subtitle text-body2">
+      <div
+        class="appointments-header row items-center q-col-gutter-md"
+        :class="{
+          'justify-end': !showTitle && !showSubtitle,
+        }">
+        <div
+          v-if="showTitle || showSubtitle"
+          class="col">
+          <SectionHeading
+            v-if="showTitle"
+            icon="event"
+            :title="t('appointmentsTitle')"
+          />
+          <p
+            v-if="showSubtitle"
+            class="appointments-subtitle text-body2">
             {{ t('appointmentsSubtitle') }}
+          </p>
+        </div>
+        <div class="col-grow appointments-header__search">
+          <q-input
+            :model-value="searchQuery"
+            outlined
+            dense
+            clearable
+            hide-bottom-space
+            class="admin-list-page__search-input
+              appointments-header__search-input"
+            :data-testid="tid.field('search')"
+            :disable="actionSaving"
+            :loading="searchLoading"
+            :placeholder="t('appointmentListSearchPlaceholder')"
+            :aria-label="t('appointmentListSearchPlaceholder')"
+            @update:model-value="setSearchQuery"
+            @clear="resetSearchQuery">
+            <template #prepend>
+              <q-icon name="search" size="18px" />
+            </template>
+          </q-input>
+          <p
+            v-if="searchHint"
+            class="appointments-header__search-hint text-caption
+              text-grey-7 q-mb-none q-mt-xs">
+            {{ searchHint }}
           </p>
         </div>
         <div class="col-auto">
@@ -49,17 +86,28 @@
         :show-column-settings="false">
         <AppointmentsTable
           :rows="appointmentRows"
-          :empty-label="t('appointmentListEmpty')"
+          :empty-label="listEmptyLabel"
           :permissions="tablePermissions"
           @view="openView"
           @edit="openEdit"
           @cancel="confirmCancel"
+          @delete="confirmDelete"
           @reschedule="openReschedule"
           @check-in="onCheckIn"
           @complete="onComplete"
           @no-show="onNoShow"
         />
       </AdminTablePanel>
+      <AdminTablePaginationBar
+        v-if="showSearchPagination"
+        class="q-mt-sm"
+        :page="tablePagination.page"
+        :rows-per-page="tablePagination.rowsPerPage"
+        :rows-number="tablePagination.rowsNumber"
+        :disable="searchLoading || actionSaving"
+        @update:page="onPageChange"
+        @update:rows-per-page="onRowsPerPageChange"
+      />
     </template>
 
     <AppointmentBookDialog
@@ -104,6 +152,16 @@
       test-id="appointment-cancel"
       @confirm="onCancelConfirmed"
     />
+
+    <ModalComponent
+      v-model="deleteDialogOpen"
+      :title="t('appointmentDeleteConfirmTitle')"
+      :message="t('appointmentDeleteConfirmMessage')"
+      :confirm-text="t('appointmentActionDelete')"
+      :cancel-text="t('cancel')"
+      test-id="appointment-delete"
+      @confirm="onDeleteConfirmed"
+    />
   </div>
 </template>
 
@@ -112,19 +170,25 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AdminTablePaginationBar from
+  'components/admin-table/AdminTablePaginationBar.vue'
 import AppointmentBookDialog from 'components/AppointmentBookDialog.vue'
 import AppointmentDetailDialog from 'components/AppointmentDetailDialog.vue'
 import AppointmentEditDialog from 'components/AppointmentEditDialog.vue'
 import AppointmentsTable from 'components/AppointmentsTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
+import SectionHeading from './SectionHeading.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { useClientAppointmentPermissions } from
   'src/composables/useClientAppointmentPermissions.js'
+import { useClientAppointmentSearch } from
+  'src/composables/useClientAppointmentSearch.js'
 import {
   bookAppointment,
   cancelAppointment,
   checkInAppointment,
   completeAppointment,
+  deleteAppointment,
   extractBookingConflicts,
   noShowAppointment,
   patchAppointment,
@@ -146,6 +210,14 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  showSubtitle: {
+    type: Boolean,
+    default: false,
+  },
+  showTitle: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const { t } = useI18n()
@@ -159,6 +231,10 @@ const {
   canManageAppointmentSlots,
 } = useClientAppointmentPermissions()
 
+const canDeleteAppointment = computed(() =>
+  canCancelAppointment.value || canManageAppointmentSlots.value,
+)
+
 const actionSaving = ref(false)
 
 const bookDrawerOpen = ref(false)
@@ -166,6 +242,7 @@ const rescheduleDrawerOpen = ref(false)
 const detailOpen = ref(false)
 const editOpen = ref(false)
 const cancelDialogOpen = ref(false)
+const deleteDialogOpen = ref(false)
 const activeAppointment = ref(null)
 
 const hasClientId = computed(() =>
@@ -174,34 +251,11 @@ const hasClientId = computed(() =>
 
 const clientId = computed(() => String(props.clientId ?? '').trim())
 
-const appointmentsRaw = computed(() =>
-  Array.isArray(props.appointments) ? props.appointments : [],
+const embeddedRows = computed(() =>
+  mapAppointmentsList(
+    Array.isArray(props.appointments) ? props.appointments : [],
+  ),
 )
-
-const appointmentRows = computed(() =>
-  mapAppointmentsList(appointmentsRaw.value),
-)
-
-const tablePermissions = computed(() => ({
-  canView: canViewAppointments.value,
-  canBook: canBookAppointment.value,
-  canCancel: canCancelAppointment.value,
-  canReschedule: canRescheduleAppointment.value,
-  canManage: canManageAppointmentSlots.value,
-}))
-
-async function refreshClientAppointments() {
-  if (!hasClientId.value) {
-    return
-  }
-  try {
-    await siteStore.fetchClientById(clientId.value)
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      notifyError(error)
-    }
-  }
-}
 
 function notifyError(error) {
   $q.notify({
@@ -219,6 +273,68 @@ function notifySuccess(message) {
     type: quasarNotifyTypes.positive,
     message,
   })
+}
+
+const {
+  searchQuery,
+  setSearchQuery,
+  resetSearchQuery,
+  trimmedQuery,
+  isSearchActive,
+  searchLoading,
+  appointmentRows,
+  tablePagination,
+  showSearchPagination,
+  minSearchLength,
+  reloadIfSearching,
+  onPageChange,
+  onRowsPerPageChange,
+} = useClientAppointmentSearch({
+  clientId,
+  embeddedRows,
+  onError: notifyError,
+})
+
+const searchHint = computed(() => {
+  const q = trimmedQuery.value
+  if (!q || isSearchActive.value) {
+    return ''
+  }
+
+  return t('appointmentListSearchMinLength', {
+    min: minSearchLength,
+  })
+})
+
+const listEmptyLabel = computed(() => {
+  if (isSearchActive.value) {
+    return t('appointmentListSearchEmpty')
+  }
+
+  return t('appointmentListEmpty')
+})
+
+const tablePermissions = computed(() => ({
+  canView: canViewAppointments.value,
+  canBook: canBookAppointment.value,
+  canCancel: canCancelAppointment.value,
+  canDelete: canDeleteAppointment.value,
+  canReschedule: canRescheduleAppointment.value,
+  canManage: canManageAppointmentSlots.value,
+}))
+
+async function refreshClientAppointments() {
+  if (!hasClientId.value) {
+    return
+  }
+  try {
+    await siteStore.fetchClientById(clientId.value)
+    await reloadIfSearching()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error)
+    }
+  }
 }
 
 function openBookDrawer() {
@@ -243,6 +359,11 @@ function openReschedule(row) {
 function confirmCancel(row) {
   activeAppointment.value = row
   cancelDialogOpen.value = true
+}
+
+function confirmDelete(row) {
+  activeAppointment.value = row
+  deleteDialogOpen.value = true
 }
 
 async function onBook(body) {
@@ -321,6 +442,25 @@ async function onCancelConfirmed() {
   try {
     await cancelAppointment(activeAppointment.value.appointmentId)
     notifySuccess(t('appointmentCancelSuccess'))
+    await refreshClientAppointments()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error)
+    }
+  } finally {
+    actionSaving.value = false
+  }
+}
+
+async function onDeleteConfirmed() {
+  deleteDialogOpen.value = false
+  if (!activeAppointment.value?.appointmentId) {
+    return
+  }
+  actionSaving.value = true
+  try {
+    await deleteAppointment(activeAppointment.value.appointmentId)
+    notifySuccess(t('appointmentDeleteSuccess'))
     await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {

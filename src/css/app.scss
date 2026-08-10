@@ -3812,6 +3812,24 @@ input:-webkit-autofill {
   padding: 8px 0 8px;
 }
 
+.appointments-header {
+  gap: 16px;
+
+  &__search {
+    min-width: 220px;
+    max-width: 420px;
+  }
+
+  &__search-input {
+    width: 100%;
+  }
+
+  .section-heading {
+    margin: 0;
+    max-width: none;
+  }
+}
+
 .insurance-header {
   gap: 16px;
 }
@@ -3841,10 +3859,6 @@ input:-webkit-autofill {
 }
 
 .referrals-header {
-  gap: 16px;
-}
-
-.appointments-header {
   gap: 16px;
 }
 
@@ -4045,8 +4059,8 @@ input:-webkit-autofill {
 
 .add-client-appointments-tab {
   .admin-data-table__actions-cell {
-    min-width: 200px;
-    width: 200px;
+    min-width: 236px;
+    width: 236px;
     padding-left: 4px !important;
     padding-right: 4px !important;
   }
@@ -4082,6 +4096,50 @@ input:-webkit-autofill {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.appointments-table__service-codes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.appointments-table__service-code-pill {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  max-width: 12rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appointments-table__service-code-pill--primary {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.appointments-table__service-code-pill--info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.appointments-table__service-code-pill--violet {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.appointments-table__service-code-pill--amber {
+  background: #fef3c7;
+  color: #b45309;
 }
 
 .referrals-table__ellipsis {

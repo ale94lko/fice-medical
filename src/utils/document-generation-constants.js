@@ -8,6 +8,14 @@ export const documentTypes = {
   screeningReport: 'SCREENING_REPORT',
 }
 
+/** Client overview Generate document menu (order matters). */
+export const clientOverviewGenerateDocumentOptions = [
+  {
+    documentType: documentTypes.clientProfile,
+    labelKey: 'generateDocumentFaceSheet',
+  },
+]
+
 export const documentEntityTypes = {
   [documentTypes.clientProfile]: 'CLIENT',
   [documentTypes.userProfile]: 'TENANT_USER',

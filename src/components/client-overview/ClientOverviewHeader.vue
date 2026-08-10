@@ -28,6 +28,7 @@
               class="client-overview-header__generate-doc">
               <GenerateDocumentAction
                 :document-type="documentTypes.clientProfile"
+                :options="clientOverviewGenerateDocumentOptions"
                 :context="{ clientId }"
                 dense
                 size="sm"
@@ -394,7 +395,8 @@ import AdminTableContactOverflow from
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
-import { documentTypes } from 'src/utils/document-generation-constants.js'
+import { documentTypes, clientOverviewGenerateDocumentOptions } from
+  'src/utils/document-generation-constants.js'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({

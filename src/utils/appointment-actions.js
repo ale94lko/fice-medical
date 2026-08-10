@@ -42,6 +42,19 @@ export function appointmentCanNoShow(status) {
     || s === appointmentStatuses.checkedIn
 }
 
+/**
+ * Soft UI gate matching backend delete rules:
+ * not checked out, no clinical note, not billed.
+ */
+export function appointmentCanDelete(appointment) {
+  const row = appointment ?? {}
+  if (row.checkedOut || row.hasNote || row.billed) {
+    return false
+  }
+
+  return true
+}
+
 export function appointmentStatusBadgeClass(status) {
   return `appointment-status-badge--${String(status ?? '')
     .toLowerCase()

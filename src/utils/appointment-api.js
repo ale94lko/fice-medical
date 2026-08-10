@@ -1,7 +1,10 @@
 /* eslint-disable camelcase -- API payloads use snake_case */
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
-import { extractEnvelopeList } from 'components/helpers.js'
+import {
+  extractEnvelopeList,
+  extractEnvelopeListPagination,
+} from 'components/helpers.js'
 import {
   mapAppointmentsList,
   mapAvailabilityRangesResponse,
@@ -36,6 +39,18 @@ function unwrapList(body) {
   return extractEnvelopeList(root)
 }
 
+function unwrapPaginatedRoot(body) {
+  const root = body?.data ?? body
+  if (Array.isArray(root)) {
+    return { items: root, pagination: null }
+  }
+  if (root && typeof root === 'object') {
+    return root
+  }
+
+  return { items: [], pagination: null }
+}
+
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
     return body.data
@@ -51,6 +66,62 @@ export async function listClientAppointments(clientId, params = {}) {
   )
 
   return mapAppointmentsList(unwrapList(response.data))
+}
+
+/**
+ * Server search for a client's appointments.
+ * UI page is 1-based; API page is 0-based.
+ */
+export async function searchClientAppointments(clientId, params = {}) {
+  const q = String(params.q ?? '').trim()
+  const page = Number(params.page ?? 1)
+  const limit = Number(params.limit ?? 20)
+  const safePage = Number.isFinite(page) && page >= 1 ? page : 1
+  const safeLimit = Number.isFinite(limit) && limit >= 1 ? limit : 20
+  const apiPage = Math.max(0, safePage - 1)
+
+  const response = await apiInstance.get(
+    apiPaths.clientAppointmentsSearch(clientId),
+    {
+      params: {
+        q,
+        page: apiPage,
+        limit: safeLimit,
+      },
+    },
+  )
+
+  const root = unwrapPaginatedRoot(response.data)
+  const items = mapAppointmentsList(
+    Array.isArray(root.items)
+      ? root.items
+      : unwrapList(response.data),
+  )
+  const pagination = extractEnvelopeListPagination(root)
+    || {
+      page: apiPage,
+      limit: safeLimit,
+      total: items.length,
+      totalPages: 1,
+      offset: apiPage * safeLimit,
+    }
+
+  return {
+    items,
+    pagination: {
+      ...pagination,
+      page: Number.isFinite(Number(pagination.page))
+        ? Number(pagination.page)
+        : apiPage,
+      limit: Number.isFinite(Number(pagination.limit))
+        && Number(pagination.limit) > 0
+        ? Number(pagination.limit)
+        : safeLimit,
+      total: Number.isFinite(Number(pagination.total))
+        ? Number(pagination.total)
+        : items.length,
+    },
+  }
 }
 
 export async function listCalendarAppointments(params = {}) {
@@ -243,6 +314,10 @@ export async function noShowAppointment(appointmentId) {
   )
 
   return normalizeAppointment(unwrapData(response.data))
+}
+
+export async function deleteAppointment(appointmentId) {
+  await apiInstance.delete(apiPaths.appointmentById(appointmentId))
 }
 
 export function extractBookingConflicts(error) {

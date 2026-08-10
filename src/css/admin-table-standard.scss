@@ -1110,6 +1110,11 @@
     text-align: left;
   }
 
+  &__tip-copy {
+    flex-shrink: 0;
+    margin-left: 2px;
+  }
+
   &__tip-value {
     font-size: 0.8125rem;
     font-weight: 700;

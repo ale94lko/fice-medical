@@ -18,6 +18,66 @@ function parseOptionalBool(value) {
   return value === true || value === 'true' || value === 1 || value === '1'
 }
 
+function resolveAppointmentCheckedOut(row = {}) {
+  if (
+    parseOptionalBool(row.checked_out)
+    || parseOptionalBool(row.checkedOut)
+    || parseOptionalBool(row.is_checked_out)
+    || parseOptionalBool(row.isCheckedOut)
+  ) {
+    return true
+  }
+  const checkedOutAt = trim(
+    row.checked_out_at_utc
+    ?? row.checkedOutAtUtc
+    ?? row.checkout_at_utc
+    ?? row.checkoutAtUtc
+    ?? row.checked_out_at
+    ?? row.checkedOutAt,
+  )
+  if (checkedOutAt) {
+    return true
+  }
+  const status = trim(row.status).toUpperCase()
+
+  return status === 'COMPLETED'
+}
+
+function resolveAppointmentHasNote(row = {}) {
+  if (
+    parseOptionalBool(row.has_note)
+    || parseOptionalBool(row.hasNote)
+    || parseOptionalBool(row.has_clinical_note)
+    || parseOptionalBool(row.hasClinicalNote)
+  ) {
+    return true
+  }
+
+  return parseOptionalNumber(
+    row.clinical_note_id
+    ?? row.clinicalNoteId
+    ?? row.note_id
+    ?? row.noteId,
+  ) != null
+}
+
+function resolveAppointmentBilled(row = {}) {
+  if (
+    parseOptionalBool(row.billed)
+    || parseOptionalBool(row.is_billed)
+    || parseOptionalBool(row.isBilled)
+    || parseOptionalBool(row.has_billing)
+    || parseOptionalBool(row.hasBilling)
+  ) {
+    return true
+  }
+  const billingStatus = trim(
+    row.billing_status ?? row.billingStatus,
+  ).toUpperCase()
+
+  return billingStatus === 'BILLED' || billingStatus === 'INVOICED'
+}
+
 function resolvePlaceOfServiceFields(row = {}) {
   const nested = row.place_of_service ?? row.placeOfService
   const nestedObj = nested && typeof nested === 'object' ? nested : null
@@ -163,6 +223,34 @@ export function normalizeServiceProcedureLine(raw) {
   }
 }
 
+/** Prefer CPT, then HCPCS, for a service procedure line. */
+export function formatServiceProcedureCode(line) {
+  const cpt = trim(line?.cptCode)
+  if (cpt) {
+    return cpt
+  }
+
+  return trim(line?.hcpcsCode)
+}
+
+export function buildServicesCodesLabel(serviceProcedures) {
+  if (!Array.isArray(serviceProcedures) || !serviceProcedures.length) {
+    return ''
+  }
+  const codes = []
+  const seen = new Set()
+  for (const line of serviceProcedures) {
+    const code = formatServiceProcedureCode(line)
+    if (!code || seen.has(code)) {
+      continue
+    }
+    seen.add(code)
+    codes.push(code)
+  }
+
+  return codes.join(', ')
+}
+
 export function normalizeAvailabilityWindow(raw) {
   const row = raw ?? {}
 
@@ -221,6 +309,7 @@ function normalizeAvailabilityAppointmentBlock(raw) {
     appointmentNumber: appointment.appointmentNumber,
     clientDisplayName: appointment.clientDisplayName,
     servicesLabel: appointment.servicesLabel,
+    servicesCodesLabel: appointment.servicesCodesLabel,
     serviceProcedures: appointment.serviceProcedures,
     status: appointment.status,
     durationMin: appointment.durationMin,
@@ -243,6 +332,7 @@ export function normalizeAvailabilityCalendarBlock(raw) {
     || (serviceProcedures.length
       ? serviceProcedures.map(line => line.name).filter(Boolean).join(', ')
       : trim(row.appointment_type_name ?? row.appointmentTypeName))
+  const servicesCodesLabel = buildServicesCodesLabel(serviceProcedures)
 
   return {
     startAtUtc: trim(row.start_at_utc ?? row.startAtUtc),
@@ -267,6 +357,7 @@ export function normalizeAvailabilityCalendarBlock(raw) {
       ?? row.patientName,
     ),
     servicesLabel,
+    servicesCodesLabel,
     serviceProcedures,
     status: trim(row.status).toUpperCase(),
     label: trim(row.label ?? row.title),
@@ -296,6 +387,7 @@ export function normalizeAppointment(raw) {
   const servicesLabel = serviceProcedures.length
     ? serviceProcedures.map(line => line.name).filter(Boolean).join(', ')
     : legacyTypeName
+  const servicesCodesLabel = buildServicesCodesLabel(serviceProcedures)
 
   return {
     appointmentId: parseOptionalNumber(
@@ -324,6 +416,7 @@ export function normalizeAppointment(raw) {
     ) || formatClinicianDisplayLabel(row.supervisor),
     serviceProcedures,
     servicesLabel,
+    servicesCodesLabel,
     ...resolvePlaceOfServiceFields(row),
     appointmentTypeId: parseOptionalNumber(
       row.appointment_type_id ?? row.appointmentTypeId,
@@ -349,6 +442,9 @@ export function normalizeAppointment(raw) {
       row.telehealth_session_id ?? row.telehealthSessionId,
     ),
     notes: trim(row.notes) || null,
+    checkedOut: resolveAppointmentCheckedOut(row),
+    hasNote: resolveAppointmentHasNote(row),
+    billed: resolveAppointmentBilled(row),
     referralId: parseOptionalNumber(row.referral_id ?? row.referralId),
     referralNumber: trim(row.referral_number ?? row.referralNumber) || null,
     referralLabel: trim(row.referral_label ?? row.referralLabel) || null,

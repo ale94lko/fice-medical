@@ -11,6 +11,12 @@
       class="client-overview-alt-tabs__tab"
       :class="{
         'client-overview-alt-tabs__tab--active': tab.key === modelValue,
+        [`client-overview-alt-tabs__tab--allergies-${
+          allergiesSeverityModifier
+        }`]: Boolean(
+          tab.key === addClientTabKeys.allergies
+          && allergiesSeverityModifier,
+        ),
       }"
       :aria-selected="tab.key === modelValue"
       :data-testid="clientOverviewAltTestIds.tab(tab.key)"
@@ -35,11 +41,15 @@ import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
 const props = defineProps({
   modelValue: {
     type: String,
-    default: addClientTabKeys.basic,
+    default: addClientTabKeys.appointments,
   },
   insuranceAlert: {
     type: Boolean,
     default: false,
+  },
+  allergiesSeverityModifier: {
+    type: String,
+    default: '',
   },
 })
 
@@ -48,6 +58,11 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 
 const tabs = computed(() => [
+  {
+    key: addClientTabKeys.appointments,
+    label: t('tabAppointments'),
+    icon: 'event',
+  },
   {
     key: addClientTabKeys.basic,
     label: t('tabBasicInfo'),

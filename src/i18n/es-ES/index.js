@@ -45,6 +45,7 @@ export default {
   myProfileLoadError:
     'No se pudo cargar tu perfil. Inténtalo de nuevo.',
   generateDocumentAction: 'Generar documento',
+  generateDocumentFaceSheet: 'Face sheet',
   generateDocumentDialogTitle: 'Generar documento',
   generateDocumentDialogSubtitle:
     'Elige un formato e idioma para el archivo exportado.',
@@ -161,6 +162,8 @@ export default {
     'Tu sesión permanecerá segura hasta que expire.',
   save: 'Guardar',
   copy: 'Copiar',
+  adminContactCopy: 'Copiar',
+  adminContactCopied: 'Copiado al portapapeles',
   confirm: 'Confirmar',
   cancel: 'Cancelar',
   description: 'Descripción',
@@ -864,8 +867,16 @@ export default {
   clientOverviewModulesLoadWarning:
     'No se pudieron cargar algunos resúmenes de módulos.',
   clientOverviewCopyClientNumber: 'Copiar número de cliente',
+  clientOverviewCopyClientName: 'Copiar nombre del cliente',
+  clientOverviewCopyDobAge: 'Copiar fecha de nacimiento / edad',
+  clientOverviewCopyPhone: 'Copiar teléfono',
+  clientOverviewCopyAddress: 'Copiar dirección',
   clientOverviewProfilePhotoPlaceholder: 'Marcador de foto de perfil',
   clientOverviewCopiedClientNumber: 'Número de cliente copiado',
+  clientOverviewCopiedClientName: 'Nombre del cliente copiado',
+  clientOverviewCopiedDobAge: 'Fecha de nacimiento / edad copiada',
+  clientOverviewCopiedPhone: 'Teléfono copiado',
+  clientOverviewCopiedAddress: 'Dirección copiada',
   clientOverviewDobAge: 'F. nac. / Edad',
   clientOverviewSex: 'Sexo',
   clientOverviewSsnLast4: 'SSN/ITIN (últimos 4)',
@@ -1005,6 +1016,7 @@ export default {
   keepEditing: 'Seguir editando',
   tabBasicInformation: 'Información básica',
   tabBasicInfo: 'Info básica',
+  tabAppointments: 'Citas',
   tabContact: 'Contacto',
   tabContactInformation: 'Información de contacto',
   contactSubTabSelf: 'Contacto propio',
@@ -1918,17 +1930,27 @@ export default {
   appointmentNoPermission:
     'No tiene permiso para ver citas.',
   appointmentListEmpty: 'Aún no hay citas programadas.',
+  appointmentListSearchPlaceholder:
+    'Buscar citas…',
+  appointmentListSearchMinLength:
+    'Escriba al menos {min} caracteres para buscar.',
+  appointmentListSearchEmpty:
+    'Ninguna cita coincide con su búsqueda.',
+  appointmentListSearchError:
+    'No se pudieron buscar las citas.',
   appointmentFilterAllStatuses: 'Todos los estados',
   appointmentColDateTime: 'Fecha y hora',
   appointmentColNumber: 'N.º de cita',
   appointmentColType: 'Tipo',
   appointmentColServices: 'Servicios',
+  appointmentColServiceCode: 'Código de servicio',
   appointmentColPlaceOfService: 'Lugar',
   appointmentColClinician: 'Clínico',
   appointmentColCarePlan: 'Plan de cuidado',
   appointmentColReferral: 'Referencia',
   appointmentActionView: 'Ver detalle',
   appointmentActionCancel: 'Cancelar',
+  appointmentActionDelete: 'Eliminar',
   appointmentActionReschedule: 'Reprogramar',
   appointmentActionCheckIn: 'Check-in',
   appointmentActionComplete: 'Completar',
@@ -2141,12 +2163,17 @@ export default {
   appointmentRescheduleSuccess: 'Cita reprogramada correctamente.',
   appointmentEditSuccess: 'Cita actualizada correctamente.',
   appointmentCancelSuccess: 'Cita cancelada correctamente.',
+  appointmentDeleteSuccess: 'Cita eliminada correctamente.',
   appointmentCheckInSuccess: 'Check-in registrado correctamente.',
   appointmentCompleteSuccess: 'Cita marcada como completada.',
   appointmentNoShowSuccess: 'Cita marcada como no asistió.',
   appointmentCancelConfirmTitle: '¿Cancelar cita?',
   appointmentCancelConfirmMessage:
     'Esta cita será cancelada. Esta acción puede no ser reversible.',
+  appointmentDeleteConfirmTitle: '¿Eliminar cita?',
+  appointmentDeleteConfirmMessage:
+    'Esta cita se eliminará de forma permanente. '
+    + 'Esta acción no se puede deshacer.',
   appointmentActionError: 'No se pudo completar la acción de la cita.',
   followUpSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar seguimientos.',
@@ -2664,6 +2691,7 @@ export default {
   closed: 'Cerrado',
   clientAddress: 'Dirección del cliente',
   addressLine1: 'Línea de dirección 1',
+  address: 'Dirección',
   addressLine2: 'Línea de dirección 2',
   addressLine2Optional: 'Línea de dirección 2',
   city: 'Ciudad',
