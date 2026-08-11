@@ -5,6 +5,7 @@ import {
   mapClinicalNotesListFromApi,
   normalizeClinicalNoteDetail,
 } from 'src/utils/clinical-note-normalize.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -50,7 +51,10 @@ export async function createClinicalNote(
   note,
   clinicianOptions = [],
 ) {
-  const body = clinicalNoteToApiPayload(note)
+  const body = attachEncounterId(
+    clinicalNoteToApiPayload(note),
+    clientId,
+  )
   const response = await apiInstance.post(
     apiPaths.clientClinicalNotes(clientId),
     body,

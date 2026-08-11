@@ -15,6 +15,7 @@
           FiCE Medical
         </q-toolbar-title>
         <q-space />
+        <ActiveEncounterHeaderChip />
         <SubtenantToolbar class="q-mr-xs" />
         <ClinicalResourcesQuickPanel
           v-if="showClinicalResourcesMenu"
@@ -738,6 +739,8 @@ import AppFooterPaginationHost from
 import ClinicalResourcesQuickPanel from
   'components/clinical/ClinicalResourcesQuickPanel.vue'
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
+import ActiveEncounterHeaderChip from
+  'components/ActiveEncounterHeaderChip.vue'
 import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'

@@ -12,6 +12,7 @@ import {
 } from 'src/utils/lab-normalize.js'
 import { extractDownloadFileName } from
   'src/utils/http-headers.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -44,7 +45,10 @@ export async function fetchPatientLab(patientId, labId) {
 
 /** Create lab order (status → ORDERED via endpoint). */
 export async function createPatientLab(patientId, payload) {
-  const body = labToOrderApiPayload(payload)
+  const body = attachEncounterId(
+    labToOrderApiPayload(payload),
+    patientId,
+  )
   const response = await apiInstance.post(
     apiPaths.patientLabs(patientId),
     body,

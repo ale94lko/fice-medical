@@ -68,6 +68,7 @@ import AddClientPageHeader from
   '../../components/client/AddClientPageHeader.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { clientPageTestIds } from 'src/test-ids/index.js'
+import { useActiveEncounter } from 'src/composables/useActiveEncounter.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -77,6 +78,8 @@ const activeTabLabel = ref('')
 const profilePhotoFileId = ref(null)
 
 const clientId = computed(() => route.params.id)
+/* Keep active encounter cached so clinical creates send encounter_id. */
+useActiveEncounter(clientId)
 const initialActiveTab = computed(() =>
   String(route.query.tab ?? '').trim(),
 )

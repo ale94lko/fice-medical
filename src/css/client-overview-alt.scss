@@ -1,16 +1,28 @@
 .client-overview-alt-header {
   padding: 12px 16px;
 
-  &__layout {
+  /*
+   * Reset classic overview desktop grid (≥1300px): that layout uses
+   * 3 rows + main { grid-row: 1 / -1 }, which leaves empty space under
+   * the stacked action buttons on this alt header.
+   */
+  .client-overview-header__layout.client-overview-alt-header__layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
+    grid-template-rows: auto;
+    width: 100%;
     column-gap: 16px;
+    row-gap: 0;
+    align-items: center;
   }
 
   .client-overview-header__main {
+    grid-column: auto;
+    grid-row: auto;
     border-right: none;
     padding-right: 0;
+    padding-bottom: 0;
+    border-bottom: none;
   }
 
   .client-overview-header__profile-head {
@@ -68,6 +80,8 @@
       flex: 1 1 0;
       min-width: 0;
       padding-right: 0;
+      // Keep column width when DOB / phone / address are empty.
+      min-height: 2.75rem;
     }
 
     .client-overview-header__meta-value:not(
@@ -136,17 +150,44 @@
 
   &__actions {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
     gap: 8px;
     flex-shrink: 0;
     align-self: center;
+    grid-column: auto;
+    grid-row: auto;
+    width: max-content;
+    max-width: 100%;
+  }
+
+  &__actions-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
 
     .q-btn {
       width: auto;
       flex: 0 0 auto;
+    }
+  }
+
+  &__start-encounter {
+    width: 100%;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-radius: $radius-md;
+    background: #16a34a !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 2px rgba(#16a34a, 0.28);
+
+    &:hover,
+    &:focus {
+      background: #15803d !important;
     }
   }
 
@@ -193,10 +234,44 @@
   }
 }
 
+/* Beat classic overview ≥1300px rules that share .client-overview-header */
+@media (min-width: 1300px) {
+  .client-overview-alt-header {
+    padding: 12px 16px;
+
+    .client-overview-header__layout.client-overview-alt-header__layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-rows: auto;
+      width: 100%;
+      column-gap: 16px;
+      row-gap: 0;
+      align-items: center;
+    }
+
+    .client-overview-header__main {
+      grid-column: auto;
+      grid-row: auto;
+      border-right: none;
+      padding-right: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .client-overview-alt-header__actions {
+      grid-column: auto;
+      grid-row: auto;
+      align-self: center;
+    }
+  }
+}
+
 @media (max-width: 1299px) {
   .client-overview-alt-header {
-    &__layout {
+    .client-overview-header__layout.client-overview-alt-header__layout {
       grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto;
+      row-gap: 0;
     }
 
     .client-overview-header__main {
@@ -206,18 +281,25 @@
 
     &__actions {
       width: 100%;
+      max-width: none;
       padding-top: 12px;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      align-self: stretch;
     }
   }
 }
 
 @media (max-width: 599px) {
   .client-overview-alt-header__actions {
-    justify-content: stretch;
+    width: 100%;
+  }
+
+  .client-overview-alt-header__actions-row {
+    flex-wrap: wrap;
 
     .q-btn {
       width: 100%;
+      flex: 1 1 100%;
     }
   }
 }
@@ -693,4 +775,183 @@
 }
 
 @media (max-width: 1023px) {
+}
+
+@keyframes client-overview-alt-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@mixin client-overview-alt-skeleton-surface {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba($border-subtle, 0.55) 0%,
+    rgba($border-subtle, 0.22) 50%,
+    rgba($border-subtle, 0.55) 100%
+  );
+  background-size: 200% 100%;
+  animation: client-overview-alt-skeleton-shimmer 1.4s ease infinite;
+}
+
+.client-overview-alt-header-skeleton {
+  pointer-events: none;
+
+  &__avatar {
+    @include client-overview-alt-skeleton-surface;
+  }
+
+  &__line {
+    @include client-overview-alt-skeleton-surface;
+
+    &--name {
+      width: min(260px, 55%);
+      height: 26px;
+    }
+
+    &--label {
+      width: 72px;
+      height: 10px;
+      margin-bottom: 8px;
+    }
+
+    &--value {
+      width: 118px;
+      height: 16px;
+    }
+
+    &--value-wide {
+      width: min(180px, 100%);
+    }
+  }
+
+  &__divider {
+    opacity: 0.45;
+  }
+
+  &__btn {
+    @include client-overview-alt-skeleton-surface;
+    height: 36px;
+    border-radius: $radius-md;
+
+    &--primary,
+    &--outline {
+      width: 118px;
+    }
+
+    &--wide {
+      width: 100%;
+      height: 40px;
+    }
+  }
+}
+
+.client-overview-alt-body-skeleton {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 0 24px;
+
+  &__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0 8px;
+  }
+
+  &__tab {
+    @include client-overview-alt-skeleton-surface;
+    width: 108px;
+    height: 36px;
+    border-radius: 999px;
+
+    &--active {
+      width: 128px;
+      opacity: 0.9;
+    }
+  }
+
+  &__panel {
+    background: $white;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-lg;
+    padding: 16px;
+  }
+
+  &__panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  &__panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__btn {
+    @include client-overview-alt-skeleton-surface;
+    width: 150px;
+    height: 36px;
+    border-radius: $radius-md;
+  }
+
+  &__line {
+    @include client-overview-alt-skeleton-surface;
+
+    &--title {
+      width: 160px;
+      height: 22px;
+    }
+
+    &--search {
+      width: min(260px, 42vw);
+      height: 36px;
+      border-radius: $radius-md;
+    }
+
+    &--col {
+      height: 12px;
+      width: 70%;
+    }
+
+    &--cell {
+      height: 14px;
+      width: 78%;
+    }
+  }
+
+  &__table {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__table-head,
+  &__table-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1.1fr 1fr 0.9fr 0.9fr 0.9fr;
+    gap: 12px;
+    align-items: center;
+  }
+
+  &__table-head {
+    padding-bottom: 8px;
+    border-bottom: 1px solid $border-subtle;
+  }
+
+  &__table-row {
+    min-height: 42px;
+  }
 }

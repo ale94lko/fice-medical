@@ -1,7 +1,8 @@
 <template>
-  <div class="add-client-form__fmh-list-card">
-    <div class="add-client-form__fmh-table-wrap">
-      <table class="add-client-form__fmh-table">
+  <div class="fmh-list-card client-overview-module-dialog__table-card">
+    <div
+      class="fmh-table-wrap client-overview-module-dialog__table-scroll">
+      <table class="fmh-table client-overview-module-dialog__table">
         <thead>
           <tr>
             <th
@@ -18,7 +19,9 @@
             <td
               v-for="column in columns"
               :key="`${rowIndex}-${column.key}`">
-              {{ row[column.key] || '—' }}
+              <span :class="cellValueClass(row[column.key])">
+                {{ displayCellValue(row[column.key]) }}
+              </span>
             </td>
           </tr>
         </tbody>
@@ -42,4 +45,19 @@ defineProps({
 })
 
 const { t } = useI18n()
+
+function displayCellValue(value) {
+  const text = String(value ?? '').trim()
+
+  return text || '—'
+}
+
+function cellValueClass(value) {
+  const text = String(value ?? '').trim()
+  if (!text || text === '—') {
+    return 'client-overview-module-dialog__cell-empty'
+  }
+
+  return 'client-overview-module-dialog__cell-value'
+}
 </script>

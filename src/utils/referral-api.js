@@ -8,6 +8,7 @@ import {
   normalizeReferralOption,
   referralToApiPayload,
 } from 'src/utils/referral-normalize.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapList(body) {
   const root = body?.data ?? body
@@ -73,7 +74,10 @@ export async function fetchClientReferral(clientId, referralId) {
 }
 
 export async function createClientReferral(clientId, referral) {
-  const body = referralToApiPayload(referral)
+  const body = attachEncounterId(
+    referralToApiPayload(referral),
+    clientId,
+  )
   const response = await apiInstance.post(
     apiPaths.clientReferrals(clientId),
     body,

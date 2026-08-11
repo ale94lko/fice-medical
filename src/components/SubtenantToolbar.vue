@@ -12,6 +12,7 @@
       :aria-label="t('subtenantSwitcherAria')">
       <SubtenantPillContent
         :name="activeSubtenant.name"
+        :photo-file-id="activeSubtenant.photoFileId"
         show-chevron
       />
       <q-menu
@@ -29,7 +30,20 @@
             active-class="app-subtenant-menu__item--active"
             @click="selectSubtenant(item.id)">
             <q-item-section avatar>
-              <q-icon name="corporate_fare" color="primary" />
+              <StoredFileAvatar
+                v-if="hasPhotoFileId(item.photoFileId)"
+                :file-id="item.photoFileId"
+                spinner-size="14px"
+                class="app-subtenant-menu__logo">
+                <template #placeholder>
+                  <q-icon name="corporate_fare" color="primary" />
+                </template>
+              </StoredFileAvatar>
+              <q-icon
+                v-else
+                name="corporate_fare"
+                color="primary"
+              />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ item.name }}</q-item-label>
@@ -53,7 +67,10 @@
       class="app-subtenant__pill"
       role="status"
       :aria-label="t('subtenantActiveAria', { name: activeSubtenant.name })">
-      <SubtenantPillContent :name="activeSubtenant.name" />
+      <SubtenantPillContent
+        :name="activeSubtenant.name"
+        :photo-file-id="activeSubtenant.photoFileId"
+      />
     </div>
     <ModalComponent
       v-model="switchConfirmOpen"
@@ -75,6 +92,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth-store.js'
 import SubtenantPillContent from 'components/SubtenantPillContent.vue'
+import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import { hasUnsavedChanges } from
   'src/composables/useUnsavedChangesRegistry.js'
@@ -95,6 +113,12 @@ const {
 } = storeToRefs(authStore)
 
 const activeSubtenant = computed(() => authStore.activeSubtenant)
+
+function hasPhotoFileId(photoFileId) {
+  const id = Number(photoFileId)
+
+  return Number.isFinite(id) && id > 0
+}
 
 function applySubtenantSwitch(id) {
   const fallbackRoute = resolveSubtenantSwitchRoute(route.path)

@@ -11,21 +11,34 @@
       :rows="rows"
       :columns="columns"
       :pagination="tablePagination">
-    <template #body-cell-dateTime="scope">
+    <template #body-cell-date="scope">
       <q-td
         :props="scope"
         class="admin-data-table__primary-cell">
-        <div class="appointments-table__datetime">
-          <span class="appointments-table__datetime-date">
-            {{ formatDate(scope.row.startAtUtc) }}
-          </span>
-          <span class="appointments-table__datetime-time">
-            {{ formatTimeRange(
-              scope.row.startAtUtc,
-              scope.row.endAtUtc,
-            ) }}
+        <div class="appointments-table__date">
+          <q-icon
+            class="appointments-table__date-icon"
+            name="calendar_today"
+            size="16px"
+            aria-hidden="true"
+          />
+          <span class="appointments-table__date-text">
+            {{ formatDate(scope.row.startAtUtc) || '—' }}
           </span>
         </div>
+      </q-td>
+    </template>
+
+    <template #body-cell-time="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <span class="appointments-table__time">
+          {{ formatTimeRange(
+            scope.row.startAtUtc,
+            scope.row.endAtUtc,
+          ) || '—' }}
+        </span>
       </q-td>
     </template>
 
@@ -208,13 +221,22 @@ const tablePagination = { rowsPerPage: 0 }
 
 const columns = computed(() => [
   {
-    name: 'dateTime',
-    label: t('appointmentColDateTime'),
+    name: 'date',
+    label: t('appointmentColDate'),
     align: 'left',
     field: row => row.startAtUtc,
     sortable: false,
-    headerStyle: 'min-width: 130px',
-    style: 'min-width: 130px',
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
+  },
+  {
+    name: 'time',
+    label: t('appointmentColTime'),
+    align: 'left',
+    field: row => row.startAtUtc,
+    sortable: false,
+    headerStyle: 'min-width: 120px',
+    style: 'min-width: 120px',
   },
   {
     name: 'appointmentType',

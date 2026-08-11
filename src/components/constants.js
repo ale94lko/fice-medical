@@ -997,6 +997,8 @@ export const permissionNames = {
   consentDelete: 'CONSENT_DELETE',
   consentDownload: 'CONSENT_DOWNLOAD',
   consentAuditView: 'CONSENT_AUDIT_VIEW',
+  viewEncounter: 'VIEW_ENCOUNTER',
+  manageEncounter: 'MANAGE_ENCOUNTER',
 }
 
 export const clientPermissionNames = {
@@ -1077,6 +1079,21 @@ export const clientPermissionNames = {
   chatTelehealth: 'CHAT_TELEHEALTH',
   uploadTelehealthFiles: 'UPLOAD_TELEHEALTH_FILES',
   deleteTelehealthFiles: 'DELETE_TELEHEALTH_FILES',
+  viewEncounter: 'VIEW_ENCOUNTER',
+  manageEncounter: 'MANAGE_ENCOUNTER',
+}
+
+export const encounterStatuses = {
+  inProgress: 'IN_PROGRESS',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+}
+
+export const encounterTypes = {
+  walkIn: 'WALK_IN',
+  phone: 'PHONE',
+  telehealth: 'TELEHEALTH',
+  scheduled: 'SCHEDULED',
 }
 
 export const telehealthSessionStatuses = {
@@ -1342,6 +1359,22 @@ export const apiPaths = {
   appointmentNoShow: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/no-show`,
+  encountersCreate: '/encounters/v1',
+  clientEncounters: clientId => `/encounters/v1/clients/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }`,
+  clientActiveEncounter: clientId => `/encounters/v1/clients/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/active`,
+  encounterById: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  encounterComplete: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/complete`,
+  encounterCancel: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/cancel`,
   clinicianWeeklySchedule: id => `/appointments/v1/admin/clinicians/${
     encodeURIComponent(String(id ?? '').trim())
   }/weekly-schedule`,
@@ -1556,6 +1589,12 @@ export const apiPaths = {
   clientLabById: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
+  clientVitals: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/vitals`,
+  clientVitalById: (clientId, vitalId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/vitals/${encodeURIComponent(String(vitalId ?? '').trim())}`,
   clientLabCollect: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}/collect`,
@@ -1647,6 +1686,12 @@ export const apiPaths = {
   patientLabById: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
+  patientVitals: clientId => `/client/v1/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/vitals`,
+  patientVitalById: (clientId, vitalId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/vitals/${encodeURIComponent(String(vitalId ?? '').trim())}`,
   patientLabCollect: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}/collect`,

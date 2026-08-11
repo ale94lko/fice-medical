@@ -5,19 +5,17 @@ import {
   clientInsuranceRelationshipValues,
   clientInsuranceStatusValues,
   clientInsuranceTypeValues,
-  clientVitalsPainLevelValues,
 } from 'components/constants.js'
 import { usDateToIso } from 'src/utils/client-form.js'
 import {
   trimInsuranceField,
   visibleInsuranceProfiles,
 } from 'src/utils/client-insurance.js'
-import { combineRecordedDateTime } from 'src/utils/client-vitals.js'
-
 import {
   resolvePrimaryClinicianIdForApi,
 } from 'src/utils/client-clinicians-form.js'
 import { insuranceCardFileIdForApi } from 'src/utils/insurance-card-file.js'
+import { vitalsEntryToApiPayload } from 'src/utils/vitals-normalize.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -142,65 +140,21 @@ export function buildMedicalHistoryForRegister(form) {
     )
 }
 
-function mapPainLevelToNumber(pain) {
-  const key = String(pain ?? '').trim()
-  if (key === clientVitalsPainLevelValues.mild) {
-    return 2
-  }
-  if (key === clientVitalsPainLevelValues.moderate) {
-    return 5
-  }
-  if (key === clientVitalsPainLevelValues.severe) {
-    return 9
-  }
-
-  return 0
-}
-
-function takenAtUtcFromEntry(entry) {
-  const combined = combineRecordedDateTime(
-    entry.recordedDate,
-    entry.recordedTime,
-  )
-  if (!combined) {
-    return null
-  }
-
-  return combined.toISOString()
-}
-
-function mapVitalsEntry(entry, clinicianId) {
-  return {
-    clinician_id: clinicianId,
-    blood_pressure_systolic: entry.systolic ?? null,
-    blood_pressure_diastolic: entry.diastolic ?? null,
-    heart_rate: entry.heartRate ?? null,
-    temperature: entry.temperature ?? null,
-    oxygen_saturation: entry.oxygenSaturation ?? null,
-    pain_level: mapPainLevelToNumber(entry.painLevel),
-    height: entry.height ?? null,
-    height_unit: 'IN',
-    weight: entry.weight ?? null,
-    weight_unit: 'LB',
-    notes: trim(entry.notes) || null,
-    taken_at_utc: takenAtUtcFromEntry(entry),
-  }
-}
-
+/**
+ * New vitals only (no apiId). Persisted vitals use /vitals API.
+ */
 export function buildVitalsForRegister(form) {
   const section = form?.[clientFormSections.vitals] ?? {}
-  const clinicianId = resolvePrimaryClinicianIdForApi(form)
+  const fallbackClinicianId = resolvePrimaryClinicianIdForApi(form)
 
   return (section.entries ?? [])
-    .map(entry => {
-      const row = mapVitalsEntry(entry, clinicianId)
+    .filter(entry => {
       const apiId = entry?.apiId
-      if (apiId != null && String(apiId).trim()) {
-        const numericId = Number(apiId)
-        row.id = Number.isFinite(numericId) ? numericId : apiId
-      }
 
-      return row
+      return apiId == null || String(apiId).trim() === ''
     })
+    .map(entry => vitalsEntryToApiPayload(entry, {
+      clinicianId: fallbackClinicianId,
+    }))
     .filter(row => row.taken_at_utc != null)
 }

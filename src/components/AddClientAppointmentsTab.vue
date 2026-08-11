@@ -38,7 +38,9 @@
             {{ t('appointmentsSubtitle') }}
           </p>
         </div>
-        <div class="col-grow appointments-header__search">
+        <div
+          v-if="showAppointmentSearch"
+          class="col-grow appointments-header__search">
           <q-input
             :model-value="searchQuery"
             outlined
@@ -196,6 +198,7 @@ import {
 } from 'src/utils/appointment-api.js'
 import { mapAppointmentsList } from 'src/utils/appointment-normalize.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { fetchClientActiveEncounter } from 'src/utils/encounter-api.js'
 import { notifyBookedAppointment } from
   'src/utils/telehealth-appointment-ui.js'
 import { useSiteStore } from 'src/stores/site-store.js'
@@ -219,6 +222,8 @@ const props = defineProps({
     default: true,
   },
 })
+
+const emit = defineEmits(['checked-in'])
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -305,6 +310,10 @@ const searchHint = computed(() => {
     min: minSearchLength,
   })
 })
+
+const showAppointmentSearch = computed(() =>
+  embeddedRows.value.length > 0 || isSearchActive.value,
+)
 
 const listEmptyLabel = computed(() => {
   if (isSearchActive.value) {
@@ -477,6 +486,12 @@ async function onCheckIn(row) {
     await checkInAppointment(row.appointmentId)
     notifySuccess(t('appointmentCheckInSuccess'))
     await refreshClientAppointments()
+    try {
+      await fetchClientActiveEncounter(clientId.value)
+    } catch {
+      // Banner/composable will retry; check-in already succeeded.
+    }
+    emit('checked-in', row)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)

@@ -10,6 +10,7 @@ import {
   medicationToApiPayload,
   pharmacyToApiPayload,
 } from 'src/utils/medication-normalize.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -89,7 +90,7 @@ export async function fetchClientMedication(clientId, medicationId) {
 export async function createClientMedication(clientId, form) {
   const response = await apiInstance.post(
     apiPaths.clientMedications(clientId),
-    medicationToApiPayload(form),
+    attachEncounterId(medicationToApiPayload(form), clientId),
   )
 
   return normalizeClientMedication(unwrapData(response.data))

@@ -28,15 +28,32 @@
         :loading="false">
         <template #body-cell-name="scope">
           <q-td :props="scope" class="admin-data-table__primary-cell">
-            <button
-              v-if="canViewSubtenants"
-              type="button"
-              class="admin-data-table__link"
-              :data-testid="subtenantListTestIds.rowView(scope.row.id)"
-              @click="viewRow(scope.row)">
-              {{ scope.row[fk.name] || '—' }}
-            </button>
-            <span v-else>{{ scope.row[fk.name] || '—' }}</span>
+            <div class="subtenant-list-page__name-cell">
+              <StoredFileAvatar
+                v-if="hasPhotoFileId(scope.row.photoFileId)"
+                :file-id="scope.row.photoFileId"
+                spinner-size="14px"
+                class="subtenant-list-page__logo">
+                <template #placeholder>
+                  <q-icon name="corporate_fare" size="18px" color="primary" />
+                </template>
+              </StoredFileAvatar>
+              <span
+                v-else
+                class="subtenant-list-page__logo-fallback"
+                aria-hidden="true">
+                <q-icon name="corporate_fare" size="18px" color="primary" />
+              </span>
+              <button
+                v-if="canViewSubtenants"
+                type="button"
+                class="admin-data-table__link"
+                :data-testid="subtenantListTestIds.rowView(scope.row.id)"
+                @click="viewRow(scope.row)">
+                {{ scope.row[fk.name] || '—' }}
+              </button>
+              <span v-else>{{ scope.row[fk.name] || '—' }}</span>
+            </div>
           </q-td>
         </template>
 
@@ -148,6 +165,7 @@ import AdminTableStatusCell from
 import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ModalComponent from 'components/ModalComponent.vue'
+import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import SubtenantDialog from 'components/admin/SubtenantDialog.vue'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
@@ -189,6 +207,12 @@ const dialogSaving = ref(false)
 const activeSubtenant = ref(null)
 const deleteConfirmOpen = ref(false)
 const pendingDeleteSubtenant = ref(null)
+
+function hasPhotoFileId(photoFileId) {
+  const id = Number(photoFileId)
+
+  return Number.isFinite(id) && id > 0
+}
 
 const tablePagination = ref({
   sortBy: col.name,
@@ -503,3 +527,33 @@ onBeforeUnmount(() => {
   clearFooterPagination()
 })
 </script>
+
+<style lang="scss" scoped>
+.subtenant-list-page__name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.subtenant-list-page__logo,
+.subtenant-list-page__logo-fallback {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.subtenant-list-page__logo :deep(.stored-file-avatar__image) {
+  border-radius: 50%;
+  object-fit: contain;
+  padding: 3px;
+  background: #fff;
+}
+</style>

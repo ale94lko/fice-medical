@@ -272,6 +272,11 @@ export const clientListTestIds = {
   rowStatus: id => toTestId('client-list-row', id, 'btn-status'),
   rowMore: id => toTestId('client-list-row', id, 'btn-more'),
   rowOverviewAlt: id => toTestId('client-list-row', id, 'btn-overview-alt'),
+  rowOverviewClassic: id => toTestId(
+    'client-list-row',
+    id,
+    'btn-overview-classic',
+  ),
 }
 
 export const staffListTestIds = {
@@ -330,6 +335,18 @@ export const clientOverviewAltTestIds = {
   modulesTab: key => toTestId('client-overview-alt-modules', key),
   sidebar: 'client-overview-alt-sidebar',
   viewAllActivity: 'client-overview-alt-btn-view-all-activity',
+}
+
+export const encounterTestIds = {
+  banner: 'active-encounter-banner',
+  toolbarPill: 'active-encounter-toolbar-pill',
+  toolbarClientName: 'active-encounter-toolbar-client-name',
+  complete: 'active-encounter-btn-complete',
+  cancel: 'active-encounter-btn-cancel',
+  startButton: 'start-encounter-btn',
+  startDialog: 'start-encounter',
+  startSubmit: 'start-encounter-btn-submit',
+  field: name => toTestId('start-encounter-field', name),
 }
 
 export const clientPageTestIds = {

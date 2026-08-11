@@ -205,11 +205,20 @@ export function normalizeLoginSubtenants(raw) {
         ?? code
         ?? '',
       ).trim() || `Subtenant ${id}`
+      const photoRaw = item.photo_file_id
+        ?? item.photoFileId
+        ?? item.photo_stored_file_id
+        ?? item.photoStoredFileId
+      const photoId = Number(photoRaw)
+      const photoFileId = Number.isFinite(photoId) && photoId > 0
+        ? photoId
+        : null
 
       return {
         id,
         name,
         code,
+        photoFileId,
       }
     })
     .filter(Boolean)

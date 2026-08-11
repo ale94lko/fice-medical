@@ -325,7 +325,7 @@ function formatDobAgeLine(form, t) {
   const dob = trim(form?.[ck.dob])
   const age = trim(form?.[ck.age])
   if (!dob && !age) {
-    return '—'
+    return ''
   }
   if (!age) {
     return dob

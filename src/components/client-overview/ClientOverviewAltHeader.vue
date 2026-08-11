@@ -65,7 +65,8 @@
                   <span
                     v-if="header.clientNumber"
                     class="client-overview-header__client-number-badge">
-                    <span class="client-overview-header__client-number-text">
+                    <span
+                      class="client-overview-header__client-number-text">
                       {{ header.clientNumber }}
                     </span>
                     <q-btn
@@ -108,6 +109,7 @@
               </div>
 
               <div
+                v-if="hasDobAge"
                 class="client-overview-header__meta-divider"
                 aria-hidden="true"
               />
@@ -116,38 +118,40 @@
                 class="client-overview-header__meta-cell
                   client-overview-header__meta-cell--dob
                   client-overview-alt-header__meta-cell--dob">
-                <div class="client-overview-alt-header__meta-label-row">
-                  <span class="client-overview-header__meta-label
-                    client-overview-alt-header__meta-label">
-                    <q-icon name="cake" size="16px" />
-                    {{ t('clientOverviewDobAge') }}
-                  </span>
-                  <q-btn
-                    v-if="header.dobAgeLine"
-                    flat
-                    dense
-                    round
-                    size="xs"
-                    icon="content_copy"
-                    class="client-overview-header__copy-btn"
-                    :aria-label="t('clientOverviewCopyDobAge')"
-                    :data-testid="clientOverviewAltTestIds.copyDob"
-                    @click="copyDobAge">
-                    <q-tooltip
-                      class="app-info-tooltip"
-                      anchor="top middle"
-                      self="bottom middle"
-                      :offset="[0, 6]">
-                      {{ t('copy') }}
-                    </q-tooltip>
-                  </q-btn>
-                </div>
-                <strong class="client-overview-header__meta-value">
-                  {{ header.dobAgeLine }}
-                </strong>
+                <template v-if="hasDobAge">
+                  <div class="client-overview-alt-header__meta-label-row">
+                    <span class="client-overview-header__meta-label
+                      client-overview-alt-header__meta-label">
+                      <q-icon name="cake" size="16px" />
+                      {{ t('clientOverviewDobAge') }}
+                    </span>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="xs"
+                      icon="content_copy"
+                      class="client-overview-header__copy-btn"
+                      :aria-label="t('clientOverviewCopyDobAge')"
+                      :data-testid="clientOverviewAltTestIds.copyDob"
+                      @click="copyDobAge">
+                      <q-tooltip
+                        class="app-info-tooltip"
+                        anchor="top middle"
+                        self="bottom middle"
+                        :offset="[0, 6]">
+                        {{ t('copy') }}
+                      </q-tooltip>
+                    </q-btn>
+                  </div>
+                  <strong class="client-overview-header__meta-value">
+                    {{ header.dobAgeLine }}
+                  </strong>
+                </template>
               </div>
 
               <div
+                v-if="hasPhone"
                 class="client-overview-header__meta-divider"
                 aria-hidden="true"
               />
@@ -155,47 +159,43 @@
               <div
                 class="client-overview-header__meta-cell
                   client-overview-alt-header__meta-cell--phone">
-                <div class="client-overview-alt-header__meta-label-row">
-                  <span class="client-overview-header__meta-label
-                    client-overview-alt-header__meta-label">
-                    <q-icon name="phone" size="16px" />
-                    {{ t('phone') }}
-                  </span>
-                  <q-btn
-                    v-if="header.phone"
-                    flat
-                    dense
-                    round
-                    size="xs"
-                    icon="content_copy"
-                    class="client-overview-header__copy-btn"
-                    :aria-label="t('clientOverviewCopyPhone')"
-                    :data-testid="clientOverviewAltTestIds.copyPhone"
-                    @click="copyPhone">
-                    <q-tooltip
-                      class="app-info-tooltip"
-                      anchor="top middle"
-                      self="bottom middle"
-                      :offset="[0, 6]">
-                      {{ t('copy') }}
-                    </q-tooltip>
-                  </q-btn>
-                </div>
-                <AdminTableContactOverflow
-                  v-if="headerPhones.length"
-                  class="client-overview-alt-header__phones"
-                  :entries="headerPhones"
-                  icon="phone"
-                  variant="header"
-                />
-                <strong
-                  v-else
-                  class="client-overview-header__meta-value">
-                  —
-                </strong>
+                <template v-if="hasPhone">
+                  <div class="client-overview-alt-header__meta-label-row">
+                    <span class="client-overview-header__meta-label
+                      client-overview-alt-header__meta-label">
+                      <q-icon name="phone" size="16px" />
+                      {{ t('phone') }}
+                    </span>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="xs"
+                      icon="content_copy"
+                      class="client-overview-header__copy-btn"
+                      :aria-label="t('clientOverviewCopyPhone')"
+                      :data-testid="clientOverviewAltTestIds.copyPhone"
+                      @click="copyPhone">
+                      <q-tooltip
+                        class="app-info-tooltip"
+                        anchor="top middle"
+                        self="bottom middle"
+                        :offset="[0, 6]">
+                        {{ t('copy') }}
+                      </q-tooltip>
+                    </q-btn>
+                  </div>
+                  <AdminTableContactOverflow
+                    class="client-overview-alt-header__phones"
+                    :entries="headerPhones"
+                    icon="phone"
+                    variant="header"
+                  />
+                </template>
               </div>
 
               <div
+                v-if="hasAddress"
                 class="client-overview-header__meta-divider"
                 aria-hidden="true"
               />
@@ -203,36 +203,37 @@
               <div
                 class="client-overview-header__meta-cell
                   client-overview-alt-header__meta-cell--address">
-                <div class="client-overview-alt-header__meta-label-row">
-                  <span class="client-overview-header__meta-label
-                    client-overview-alt-header__meta-label">
-                    <q-icon name="location_on" size="16px" />
-                    {{ t('address') }}
-                  </span>
-                  <q-btn
-                    v-if="header.addressLine"
-                    flat
-                    dense
-                    round
-                    size="xs"
-                    icon="content_copy"
-                    class="client-overview-header__copy-btn"
-                    :aria-label="t('clientOverviewCopyAddress')"
-                    :data-testid="clientOverviewAltTestIds.copyAddress"
-                    @click="copyAddress">
-                    <q-tooltip
-                      class="app-info-tooltip"
-                      anchor="top middle"
-                      self="bottom middle"
-                      :offset="[0, 6]">
-                      {{ t('copy') }}
-                    </q-tooltip>
-                  </q-btn>
-                </div>
-                <strong class="client-overview-header__meta-value
-                  client-overview-alt-header__address-value">
-                  {{ header.addressLine || '—' }}
-                </strong>
+                <template v-if="hasAddress">
+                  <div class="client-overview-alt-header__meta-label-row">
+                    <span class="client-overview-header__meta-label
+                      client-overview-alt-header__meta-label">
+                      <q-icon name="location_on" size="16px" />
+                      {{ t('address') }}
+                    </span>
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      size="xs"
+                      icon="content_copy"
+                      class="client-overview-header__copy-btn"
+                      :aria-label="t('clientOverviewCopyAddress')"
+                      :data-testid="clientOverviewAltTestIds.copyAddress"
+                      @click="copyAddress">
+                      <q-tooltip
+                        class="app-info-tooltip"
+                        anchor="top middle"
+                        self="bottom middle"
+                        :offset="[0, 6]">
+                        {{ t('copy') }}
+                      </q-tooltip>
+                    </q-btn>
+                  </div>
+                  <strong class="client-overview-header__meta-value
+                    client-overview-alt-header__address-value">
+                    {{ header.addressLine }}
+                  </strong>
+                </template>
               </div>
             </div>
           </div>
@@ -240,25 +241,39 @@
       </div>
 
       <div class="client-overview-alt-header__actions">
+        <div class="client-overview-alt-header__actions-row">
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="edit"
+            :data-testid="clientOverviewAltTestIds.edit"
+            :disable="loading"
+            :label="t('editClient')"
+            @click="emit('edit')"
+          />
+          <GenerateDocumentAction
+            v-if="clientId"
+            :document-type="documentTypes.clientProfile"
+            :context="{ clientId }"
+            :label="t('generateDocumentFaceSheet')"
+            icon="contact_page"
+            button-class="app-btn-outline"
+            @generated="emit('document-generated')"
+          />
+        </div>
         <q-btn
+          v-if="showStartEncounter"
           no-caps
           unelevated
-          color="primary"
-          class="app-btn-primary"
-          icon="edit"
-          :data-testid="clientOverviewAltTestIds.edit"
-          :disable="loading"
-          :label="t('editClient')"
-          @click="emit('edit')"
-        />
-        <GenerateDocumentAction
-          v-if="clientId"
-          :document-type="documentTypes.clientProfile"
-          :context="{ clientId }"
-          :label="t('generateDocumentFaceSheet')"
-          icon="contact_page"
-          button-class="app-btn-outline"
-          @generated="emit('document-generated')"
+          class="app-btn-primary client-overview-alt-header__start-encounter"
+          icon="medical_services"
+          :label="t('startEncounterButton')"
+          :disable="loading || startEncounterBusy"
+          :loading="startEncounterBusy"
+          :data-testid="encounterTestIds.startButton"
+          @click="emit('start-encounter')"
         />
       </div>
     </div>
@@ -276,7 +291,10 @@ import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
-import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
+import {
+  clientOverviewAltTestIds,
+  encounterTestIds,
+} from 'src/test-ids/index.js'
 
 const props = defineProps({
   clientId: {
@@ -295,9 +313,22 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showStartEncounter: {
+    type: Boolean,
+    default: false,
+  },
+  startEncounterBusy: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['review-missing', 'edit', 'document-generated'])
+const emit = defineEmits([
+  'review-missing',
+  'edit',
+  'document-generated',
+  'start-encounter',
+])
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -305,6 +336,20 @@ const $q = useQuasar()
 const headerPhones = computed(() =>
   Array.isArray(props.header?.phones) ? props.header.phones : [],
 )
+
+const hasDobAge = computed(() => {
+  const line = String(props.header?.dobAgeLine ?? '').trim()
+
+  return Boolean(line) && line !== '—'
+})
+
+const hasPhone = computed(() => headerPhones.value.length > 0)
+
+const hasAddress = computed(() => {
+  const line = String(props.header?.addressLine ?? '').trim()
+
+  return Boolean(line) && line !== '—'
+})
 
 function notifyCopied(messageKey) {
   $q.notify({

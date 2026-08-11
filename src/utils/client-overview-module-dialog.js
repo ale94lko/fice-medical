@@ -13,11 +13,11 @@ import {
 import { mapClinicalNotesListFromApi } from
   'src/utils/clinical-note-normalize.js'
 import { mapFollowUpFromApi } from 'src/utils/client-follow-ups.js'
-import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { formatClinicianDisplayLabel } from 'src/utils/clinician-display.js'
 import { normalizeLabDetail } from 'src/utils/lab-normalize.js'
 import { normalizeReferralSummary } from 'src/utils/referral-normalize.js'
 import { sortVitalsEntriesDesc } from 'src/utils/client-vitals.js'
+import { normalizeVitalRecord } from 'src/utils/vitals-normalize.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -165,21 +165,9 @@ function resolveVitalsEntries(form, rawClient) {
     return formEntries
   }
 
-  return asArray(rawClient?.vitals).map(entry => ({
-    recordedDate: isoDateToUsDateString(
-      entry.recorded_date ?? entry.recordedDate,
-    ) || trim(entry.recorded_date ?? entry.recordedDate),
-    recordedTime: trim(entry.recorded_time ?? entry.recordedTime),
-    systolic: entry.systolic,
-    diastolic: entry.diastolic,
-    heartRate: entry.heart_rate ?? entry.heartRate,
-    respiratoryRate: entry.respiratory_rate ?? entry.respiratoryRate,
-    temperature: entry.temperature,
-    oxygenSaturation: entry.oxygen_saturation ?? entry.oxygenSaturation,
-    weight: entry.weight,
-    height: entry.height,
-    bmi: entry.bmi,
-  }))
+  return asArray(rawClient?.vitals)
+    .map(entry => normalizeVitalRecord(entry))
+    .filter(Boolean)
 }
 
 function buildAllergyListDetail(rows, extras = {}) {

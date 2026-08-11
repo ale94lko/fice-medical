@@ -464,6 +464,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :disable="saving"
           :data-testid="tid.vitalsBtnCancelEdit"
           :label="t('cancel')"
           @click="onCancel"
@@ -474,6 +475,8 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :disable="saving"
+          :loading="saving"
           :data-testid="tid.vitalsBtnSave"
           :icon="editMode ? 'save' : 'add'"
           :label="saveButtonLabel"
@@ -566,6 +569,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  saving: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
@@ -580,7 +587,12 @@ const dialogBodyScrollRef = ref(null)
 
 const open = computed({
   get: () => props.modelValue,
-  set: val => emit('update:modelValue', val),
+  set: val => {
+    if (!val && props.saving) {
+      return
+    }
+    emit('update:modelValue', val)
+  },
 })
 
 const editMode = computed(() => Boolean(props.entry?.id))
@@ -1027,12 +1039,18 @@ function errorMessage(field) {
 }
 
 function onCancel() {
+  if (props.saving) {
+    return
+  }
   open.value = false
   fieldErrors.value = {}
   localDraft.value = createEmptyVitalsDraft()
 }
 
 async function onSave() {
+  if (props.saving) {
+    return
+  }
   const result = validateVitalsDraft(localDraft.value)
   if (!result.ok) {
     fieldErrors.value = result.errors
@@ -1045,7 +1063,5 @@ async function onSave() {
     id: props.entry?.id ?? null,
     draft: { ...localDraft.value },
   })
-  open.value = false
-  localDraft.value = createEmptyVitalsDraft()
 }
 </script>

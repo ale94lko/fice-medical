@@ -17,6 +17,8 @@ import {
   normalizeVisibleColumnsFromApi,
   preferencesFromColumnConfig,
 } from 'src/utils/client-list-columns.js'
+import { attachEncounterIdToClientClinicalBody } from
+  'src/utils/encounter-api.js'
 import {
   emptyClientListSummary,
   mapClientListSummary,
@@ -321,7 +323,10 @@ export const useSiteStore = defineStore('site', {
       if (!id) {
         throw new Error('Missing client id')
       }
-      const body = buildClientUpdateBody(form)
+      const body = attachEncounterIdToClientClinicalBody(
+        buildClientUpdateBody(form),
+        id,
+      )
       const response = await apiInstance.patch(apiPaths.clientById(id), body)
       const updated = extractClientMutationResponse(response.data)
       await this.getClientList(
@@ -342,7 +347,7 @@ export const useSiteStore = defineStore('site', {
       }
       const response = await apiInstance.patch(
         apiPaths.clientById(id),
-        partialBody,
+        attachEncounterIdToClientClinicalBody(partialBody, id),
       )
       const client = extractClientMutationResponse(response.data)
       const warnings = extractClientWarnings(response.data)

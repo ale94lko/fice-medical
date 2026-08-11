@@ -257,6 +257,14 @@ export default {
   subtenantCodeLabel: 'Código',
   subtenantMainLabel: 'Sucursal principal',
   subtenantStatusActiveLabel: 'Activo',
+  subtenantLogoHint:
+    'Suba el logo de la clínica tal cual (sin recorte). Preferible PNG o SVG.',
+  subtenantLogoUpload: 'Subir logo',
+  subtenantLogoReplace: 'Reemplazar',
+  subtenantLogoInvalidType:
+    'Use una imagen JPEG, PNG, WebP, GIF o SVG.',
+  subtenantLogoTooLarge: 'El archivo del logo es demasiado grande.',
+  subtenantLogoUploadError: 'No se pudo subir el logo.',
   subtenantNameRequired: 'El nombre es obligatorio.',
   subtenantDialogAddTitle: 'Añadir subtenant',
   subtenantDialogEditTitle: 'Editar subtenant',
@@ -849,12 +857,13 @@ export default {
   clientLoadError:
     'No se pudo cargar el cliente. Abra la lista e intente de nuevo.',
   clientOverviewTitle: 'Resumen del cliente',
-  clientOverviewAltTitle: 'Resumen del cliente (Alt)',
+  clientOverviewAltTitle: 'Resumen del cliente (Clásico)',
   clientOverviewAltBanner:
-    'Vista alternativa del cliente para comparar comportamientos. '
-    + 'Misma información que el resumen clásico.',
+    'Diseño clásico del resumen del cliente. '
+    + 'El resumen por defecto está en la URL principal del cliente.',
   clientOverviewAltOpenClassic: 'Abrir resumen clásico',
-  clientOverviewAltListAction: 'Resumen (Alt)',
+  clientOverviewAltListAction: 'Resumen (Clásico)',
+  clientOverviewClassicListAction: 'Resumen clásico',
   clientOverviewAltCreated: 'Creado',
   clientOverviewAltLastUpdated: 'Última actualización',
   clientOverviewAltRecordStatus: 'Estado del registro',
@@ -1940,6 +1949,8 @@ export default {
     'No se pudieron buscar las citas.',
   appointmentFilterAllStatuses: 'Todos los estados',
   appointmentColDateTime: 'Fecha y hora',
+  appointmentColDate: 'Fecha',
+  appointmentColTime: 'Hora',
   appointmentColNumber: 'N.º de cita',
   appointmentColType: 'Tipo',
   appointmentColServices: 'Servicios',
@@ -2175,6 +2186,89 @@ export default {
     'Esta cita se eliminará de forma permanente. '
     + 'Esta acción no se puede deshacer.',
   appointmentActionError: 'No se pudo completar la acción de la cita.',
+  activeEncounterTitle: 'Consulta en curso',
+  activeEncounterMessage:
+    'Hay una consulta {type} abierta. '
+    + 'Complétela o cancele antes de iniciar otra.',
+  activeEncounterMessageWithComplaint:
+    'Hay una consulta {type} abierta — {complaint}. '
+    + 'Complétela o cancele antes de iniciar otra.',
+  activeEncounterComplete: 'Completar consulta',
+  activeEncounterCancel: 'Cancelar consulta',
+  activeEncounterCompleteSuccess: 'Consulta completada.',
+  activeEncounterCancelSuccess: 'Consulta cancelada.',
+  activeEncounterCompleteConfirmTitle: '¿Completar consulta?',
+  activeEncounterCompleteConfirmMessage:
+    'Se cerrará la consulta clínica activa de este cliente.',
+  activeEncounterCancelConfirmTitle: '¿Cancelar consulta?',
+  activeEncounterCancelConfirmMessage:
+    'Se cancelará la consulta clínica activa. '
+    + 'Los datos clínicos ya registrados se conservarán.',
+  activeEncounterConflict:
+    'Este cliente ya tiene una consulta activa. '
+    + 'Complétela o cancele primero.',
+  activeEncounterInvalid:
+    'La consulta no está activa o la solicitud no es válida.',
+  activeEncounterLoadError: 'No se pudo cargar la consulta activa.',
+  activeEncounterActionError: 'No se pudo actualizar la consulta.',
+  activeEncounterToolbarLabel: 'Encounter',
+  activeEncounterToolbarAria: 'Acciones de la consulta activa',
+  activeEncounterToolbarClientFallback: 'Cliente',
+  activeEncounterToolbarClientLoading: 'Cargando cliente…',
+  activeEncounterToolbarMeta: '{type} · En curso',
+  activeEncounterToolbarElapsed: 'Abierta {elapsed}',
+  activeEncounterOtherClientReminder:
+    'Todavía tiene una consulta activa abierta ({elapsed}). '
+    + 'Vuelva a ese cliente cuando pueda.',
+  activeEncounterGoToClient: 'Ir al cliente',
+  activeEncounterAutoCompleteTitle: 'Consulta aún abierta',
+  activeEncounterAutoCompleteMessage:
+    'Esta consulta lleva 2 horas abierta y se completará '
+    + 'automáticamente si no continúa.',
+  activeEncounterAutoCompleteCountdownHint: 'Se completará en',
+  activeEncounterAutoCompleteSeconds: 'seg',
+  activeEncounterAutoCompleteCountdownAria:
+    'Quedan {seconds} segundos antes de completar automáticamente',
+  activeEncounterAutoCompleteNow: 'Completar ahora',
+  activeEncounterContinue: 'Continuar (+30 min)',
+  activeEncounterAutoCompleteFooter:
+    'Los datos clínicos ya registrados se conservarán.',
+  activeEncounterExtended:
+    'Consulta ampliada {minutes} minutos.',
+  activeEncounterAutoCompleteSuccess:
+    'Consulta completada automáticamente.',
+  activeEncounterAutoCompleteViewerNotice:
+    'Hay una consulta abierta desde hace 2 horas. Pida a alguien '
+    + 'con permiso que la complete o la amplíe.',
+  startEncounterButton: 'Iniciar consulta',
+  startEncounterTitle: 'Iniciar consulta',
+  startEncounterHint:
+    'Elija cómo abrir la visita: walk-in, teléfono, telehealth '
+    + 'o desde una cita de hoy.',
+  startEncounterSubmit: 'Iniciar',
+  startEncounterSuccess: 'Consulta iniciada.',
+  startEncounterTodayAppointments: 'Seleccione la cita de hoy',
+  startEncounterAppointmentsLoading: 'Cargando citas de hoy…',
+  startEncounterAppointmentsEmpty:
+    'Este cliente no tiene citas programadas para hoy.',
+  startEncounterAppointmentsError:
+    'No se pudieron cargar las citas de hoy.',
+  encounterTypeLabel: 'Tipo de consulta',
+  encounterTypeWalkIn: 'Walk-in',
+  encounterTypeWalkInHint: 'Consulta presencial sin cita previa',
+  encounterTypePhone: 'Teléfono',
+  encounterTypePhoneHint: 'Consulta telefónica con el cliente',
+  encounterTypeTelehealth: 'Telehealth',
+  encounterTypeTelehealthHint: 'Consulta por video desde cualquier lugar',
+  encounterTypeScheduled: 'Cita',
+  encounterTypeScheduledHint: 'Iniciar desde una visita programada',
+  encounterTypeScheduledHintCount:
+    '{count} cita(s) hoy — seleccione abajo',
+  encounterClinicianLabel: 'Clínico',
+  encounterPlaceOfServiceLabel: 'Código de lugar de servicio',
+  encounterPlaceOfServicePlaceholder: 'p. ej. 11',
+  encounterChiefComplaintLabel: 'Motivo de consulta',
+  encounterNotesLabel: 'Notas',
   followUpSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar seguimientos.',
   followUpNoPermission:
@@ -2990,6 +3084,10 @@ export default {
   vitalsHistoryEmpty: 'Aún no hay signos vitales registrados.',
   vitalsSavedSuccess: 'Signos vitales guardados.',
   vitalsUpdatedSuccess: 'Signos vitales actualizados.',
+  vitalsSaveError: 'No se pudo guardar el registro de signos vitales.',
+  vitalsLoadError: 'No se pudieron cargar los signos vitales.',
+  vitalsDeleteUnavailable:
+    'Los signos vitales guardados no se pueden eliminar desde esta pantalla.',
   vitalsDeleteTitle: 'Eliminar signos vitales',
   vitalsDeleteMessage:
     '¿Seguro que desea eliminar este registro de signos vitales?',

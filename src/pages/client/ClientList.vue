@@ -229,13 +229,13 @@
               <q-item
                 v-close-popup
                 clickable
-                :data-testid="clientListTestIds.rowOverviewAlt(row.id)"
-                @click="openClientOverviewAlt(row)">
+                :data-testid="clientListTestIds.rowOverviewClassic(row.id)"
+                @click="openClientOverviewClassic(row)">
                 <q-item-section avatar>
-                  <q-icon name="science" size="18px" />
+                  <q-icon name="view_agenda" size="18px" />
                 </q-item-section>
                 <q-item-section>
-                  {{ t('clientOverviewAltListAction') }}
+                  {{ t('clientOverviewClassicListAction') }}
                 </q-item-section>
               </q-item>
             </template>
@@ -749,12 +749,15 @@ function openClientOverview(row) {
   router.push({ name: 'ClientOverview', params: { id: String(id) } })
 }
 
-function openClientOverviewAlt(row) {
+function openClientOverviewClassic(row) {
   const id = row?.id
   if (id == null || id === '') {
     return
   }
-  router.push({ name: 'ClientOverviewAlt', params: { id: String(id) } })
+  router.push({
+    name: 'ClientOverviewClassic',
+    params: { id: String(id) },
+  })
 }
 
 function assignClinicians() {

@@ -38,7 +38,8 @@ import {
   nextFamilyMedicalHistoryId,
 } from 'src/utils/client-family-medical-history.js'
 import { nextInsuranceId } from 'src/utils/client-insurance.js'
-import { createEmptyVitalsSection } from 'src/utils/client-vitals.js'
+import { mapClientVitalsSectionFromApi } from
+  'src/utils/vitals-normalize.js'
 import { mapClientLabsListFromApi } from 'src/utils/lab-normalize.js'
 import { mapFollowUpsSectionFromApi } from 'src/utils/client-follow-ups.js'
 import {
@@ -961,7 +962,9 @@ export function mapClientApiToForm(client, options = {}) {
     ),
     [clientFormSections.allergies]: mapAllergiesFromApi(client),
     [clientFormSections.insurance]: mapInsuranceSectionFromApi(client),
-    [clientFormSections.vitals]: createEmptyVitalsSection(),
+    [clientFormSections.vitals]: mapClientVitalsSectionFromApi(
+      client.vitals ?? [],
+    ),
     [clientFormSections.labs]: mapClientLabsListFromApi(
       client.labs
       ?? client.lab_orders

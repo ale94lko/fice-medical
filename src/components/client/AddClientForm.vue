@@ -791,6 +791,7 @@
                 v-else-if="subTab.key === CLINICAL_VITALS_SUB_TAB"
                 ref="vitalsTabRef"
                 v-model="form[clientFormSections.vitals]"
+                :patient-id="props.clientId"
                 :readonly="vitalsReadonly"
                 :can-view="canViewVitalsTab"
                 :clinician-options="assignedClinicianOptions"

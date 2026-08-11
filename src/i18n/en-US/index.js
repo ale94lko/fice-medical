@@ -248,6 +248,14 @@ export default {
   subtenantCodeLabel: 'Code',
   subtenantMainLabel: 'Main branch',
   subtenantStatusActiveLabel: 'Active',
+  subtenantLogoHint:
+    'Upload the clinic logo as-is (no crop). PNG or SVG preferred.',
+  subtenantLogoUpload: 'Upload logo',
+  subtenantLogoReplace: 'Replace',
+  subtenantLogoInvalidType:
+    'Use a JPEG, PNG, WebP, GIF, or SVG image.',
+  subtenantLogoTooLarge: 'Logo file is too large.',
+  subtenantLogoUploadError: 'Could not upload the logo.',
   subtenantNameRequired: 'Name is required.',
   subtenantDialogAddTitle: 'Add Subtenant',
   subtenantDialogEditTitle: 'Edit Subtenant',
@@ -811,12 +819,13 @@ export default {
   clientLoadError:
     'Could not load the client. Open the client list and try again.',
   clientOverviewTitle: 'Client Overview',
-  clientOverviewAltTitle: 'Client Overview (Alt)',
+  clientOverviewAltTitle: 'Client Overview (Classic)',
   clientOverviewAltBanner:
-    'Alternate client view for behavior comparison. '
-    + 'Same data as classic overview.',
+    'Classic client overview layout. '
+    + 'The default overview is available at the main client URL.',
   clientOverviewAltOpenClassic: 'Open classic overview',
-  clientOverviewAltListAction: 'Overview (Alt)',
+  clientOverviewAltListAction: 'Overview (Classic)',
+  clientOverviewClassicListAction: 'Classic overview',
   clientOverviewAltCreated: 'Created',
   clientOverviewAltLastUpdated: 'Last Updated',
   clientOverviewAltRecordStatus: 'Record Status',
@@ -1871,6 +1880,8 @@ export default {
     'Could not search appointments.',
   appointmentFilterAllStatuses: 'All statuses',
   appointmentColDateTime: 'Date & Time',
+  appointmentColDate: 'Date',
+  appointmentColTime: 'Time',
   appointmentColNumber: 'Appt. Number',
   appointmentColType: 'Type',
   appointmentColServices: 'Services',
@@ -2101,6 +2112,88 @@ export default {
     'This appointment will be permanently deleted. '
     + 'This action cannot be undone.',
   appointmentActionError: 'Could not complete the appointment action.',
+  activeEncounterTitle: 'Encounter in progress',
+  activeEncounterMessage:
+    '{type} encounter is open. Complete or cancel before starting another.',
+  activeEncounterMessageWithComplaint:
+    '{type} encounter is open — {complaint}. '
+    + 'Complete or cancel before starting another.',
+  activeEncounterComplete: 'Complete encounter',
+  activeEncounterCancel: 'Cancel encounter',
+  activeEncounterCompleteSuccess: 'Encounter completed.',
+  activeEncounterCancelSuccess: 'Encounter cancelled.',
+  activeEncounterCompleteConfirmTitle: 'Complete encounter?',
+  activeEncounterCompleteConfirmMessage:
+    'This will close the active clinical encounter for this client.',
+  activeEncounterCancelConfirmTitle: 'Cancel encounter?',
+  activeEncounterCancelConfirmMessage:
+    'This will cancel the active clinical encounter. '
+    + 'Clinical data already recorded will remain.',
+  activeEncounterConflict:
+    'This client already has an active encounter. '
+    + 'Complete or cancel it first.',
+  activeEncounterInvalid:
+    'The encounter is not active or the request is invalid.',
+  activeEncounterLoadError: 'Could not load the active encounter.',
+  activeEncounterActionError: 'Could not update the encounter.',
+  activeEncounterToolbarLabel: 'Encounter',
+  activeEncounterToolbarAria: 'Active encounter actions',
+  activeEncounterToolbarClientFallback: 'Client',
+  activeEncounterToolbarClientLoading: 'Loading client…',
+  activeEncounterToolbarMeta: '{type} · In progress',
+  activeEncounterToolbarElapsed: 'Open for {elapsed}',
+  activeEncounterOtherClientReminder:
+    'You still have an active encounter open ({elapsed}). '
+    + 'Return to that client when you can.',
+  activeEncounterGoToClient: 'Go to client',
+  activeEncounterAutoCompleteTitle: 'Encounter still open',
+  activeEncounterAutoCompleteMessage:
+    'This encounter has been open for 2 hours and will be '
+    + 'completed automatically unless you continue.',
+  activeEncounterAutoCompleteCountdownHint: 'Auto-completing in',
+  activeEncounterAutoCompleteSeconds: 'sec',
+  activeEncounterAutoCompleteCountdownAria:
+    '{seconds} seconds remaining before auto-complete',
+  activeEncounterAutoCompleteNow: 'Complete now',
+  activeEncounterContinue: 'Continue (+30 min)',
+  activeEncounterAutoCompleteFooter:
+    'Clinical data already recorded will remain.',
+  activeEncounterExtended:
+    'Encounter extended by {minutes} minutes.',
+  activeEncounterAutoCompleteSuccess:
+    'Encounter completed automatically.',
+  activeEncounterAutoCompleteViewerNotice:
+    'An encounter has been open for 2 hours. Ask someone with '
+    + 'permission to complete or extend it.',
+  startEncounterButton: 'Start encounter',
+  startEncounterTitle: 'Start encounter',
+  startEncounterHint:
+    'Choose how to open the visit: walk-in, phone, telehealth, '
+    + 'or from one of today’s appointments.',
+  startEncounterSubmit: 'Start',
+  startEncounterSuccess: 'Encounter started.',
+  startEncounterTodayAppointments: 'Select today’s appointment',
+  startEncounterAppointmentsLoading: 'Loading today’s appointments…',
+  startEncounterAppointmentsEmpty:
+    'No appointments scheduled for this client today.',
+  startEncounterAppointmentsError:
+    'Could not load today’s appointments.',
+  encounterTypeLabel: 'Encounter type',
+  encounterTypeWalkIn: 'Walk-in',
+  encounterTypeWalkInHint: 'In-person visit without a prior appointment',
+  encounterTypePhone: 'Phone',
+  encounterTypePhoneHint: 'Phone consultation with the client',
+  encounterTypeTelehealth: 'Telehealth',
+  encounterTypeTelehealthHint: 'Video visit from anywhere',
+  encounterTypeScheduled: 'Appointment',
+  encounterTypeScheduledHint: 'Start from a scheduled visit',
+  encounterTypeScheduledHintCount:
+    '{count} appointment(s) today — select below',
+  encounterClinicianLabel: 'Clinician',
+  encounterPlaceOfServiceLabel: 'Place of service code',
+  encounterPlaceOfServicePlaceholder: 'e.g. 11',
+  encounterChiefComplaintLabel: 'Chief complaint',
+  encounterNotesLabel: 'Notes',
   followUpSaveClientFirst:
     'Save the client first to create and manage follow ups.',
   followUpNoPermission:
@@ -2885,6 +2978,10 @@ export default {
   vitalsHistoryEmpty: 'No vitals recorded yet.',
   vitalsSavedSuccess: 'Vitals entry saved.',
   vitalsUpdatedSuccess: 'Vitals entry updated.',
+  vitalsSaveError: 'Could not save the vitals entry.',
+  vitalsLoadError: 'Could not load vitals.',
+  vitalsDeleteUnavailable:
+    'Saved vitals cannot be deleted from this screen.',
   vitalsDeleteTitle: 'Delete Vitals',
   vitalsDeleteMessage:
     'Are you sure you want to delete this vitals entry?',

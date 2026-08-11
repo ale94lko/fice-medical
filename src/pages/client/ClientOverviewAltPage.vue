@@ -15,15 +15,20 @@
       :header="header"
       :missing-items="missingItems"
       :loading="loading"
+      :show-start-encounter="canManageEncounter && !hasActiveEncounter"
+      :start-encounter-busy="actionBusy"
       @review-missing="goToEdit(addClientTabKeys.insurance)"
       @edit="goToEdit()"
+      @start-encounter="startDialogOpen = true"
     />
-    <ClientOverviewHeaderSkeleton
+    <ClientOverviewAltHeaderSkeleton
       v-else
       class="client-overview-page__header"
     />
 
-    <div class="client-overview-page__main client-overview-alt-page__main">
+    <div
+      v-if="header"
+      class="client-overview-page__main client-overview-alt-page__main">
       <ClientOverviewAltTabs
         v-model="activeTab"
         :insurance-alert="hasInsuranceAlert"
@@ -36,6 +41,7 @@
             v-if="activeTab === addClientTabKeys.appointments"
             :client-id="clientId"
             :appointments="clientAppointments"
+            @checked-in="onAppointmentCheckedIn"
           />
           <ClientOverviewAltBasicInfo
             v-else-if="activeTab === addClientTabKeys.basic"
@@ -88,6 +94,14 @@
         </div>
       </div>
     </div>
+    <ClientOverviewAltBodySkeleton v-else />
+
+    <StartEncounterDialog
+      v-model="startDialogOpen"
+      :client-id="clientId"
+      :saving="actionBusy"
+      @submit="onStartEncounter"
+    />
   </q-page>
 </template>
 
@@ -95,15 +109,22 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { addClientTabKeys, clientFormSections } from
-  'components/constants.js'
+import { useQuasar } from 'quasar'
+import {
+  addClientTabKeys,
+  clientFormSections,
+  quasarNotifyTypes,
+} from 'components/constants.js'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import StartEncounterDialog from 'components/StartEncounterDialog.vue'
 import ClientOverviewAltAppointments from
   'components/client-overview/ClientOverviewAltAppointments.vue'
 import ClientOverviewAltHeader from
   'components/client-overview/ClientOverviewAltHeader.vue'
-import ClientOverviewHeaderSkeleton from
-  'components/client-overview/ClientOverviewHeaderSkeleton.vue'
+import ClientOverviewAltHeaderSkeleton from
+  'components/client-overview/ClientOverviewAltHeaderSkeleton.vue'
+import ClientOverviewAltBodySkeleton from
+  'components/client-overview/ClientOverviewAltBodySkeleton.vue'
 import ClientOverviewAltTabs from
   'components/client-overview/ClientOverviewAltTabs.vue'
 import ClientOverviewAltBasicInfo from
@@ -116,6 +137,7 @@ import ClientOverviewAltInsurance from
   'components/client-overview/ClientOverviewAltInsurance.vue'
 import ClientOverviewAltModulesTab from
   'components/client-overview/ClientOverviewAltModulesTab.vue'
+import { useActiveEncounter } from 'src/composables/useActiveEncounter.js'
 import { useClientOverview } from 'src/composables/useClientOverview.js'
 import { buildClientOverviewAltBasicInfo } from
   'src/utils/client-overview-alt-basic-info.js'
@@ -127,16 +149,19 @@ import {
   highestAllergySeverity,
   severityTabModifier,
 } from 'src/utils/client-allergies.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const $q = useQuasar()
 const siteStore = useSiteStore()
 
 const clientId = computed(() => route.params.id)
 const activeTab = ref(addClientTabKeys.appointments)
+const startDialogOpen = ref(false)
 
 const {
   loading,
@@ -147,6 +172,17 @@ const {
   rawClient,
   summaries,
 } = useClientOverview(clientId)
+
+const {
+  hasActiveEncounter,
+  actionBusy,
+  canManageEncounter,
+  refreshActiveEncounter,
+  startEncounter,
+  isEncounterConflictError,
+  isEncounterInvalidError,
+  encounterApiErrorMessage,
+} = useActiveEncounter(clientId)
 
 const clientAppointments = computed(() => {
   const id = String(clientId.value ?? '').trim()
@@ -207,6 +243,48 @@ const allergiesSeverityModifier = computed(() => {
 const hasInsuranceAlert = computed(() =>
   (missingItems.value ?? []).includes(t('clientOverviewMissingInsurance')),
 )
+
+function notifyError(error, fallbackKey = 'activeEncounterActionError') {
+  let message = encounterApiErrorMessage(error, t(fallbackKey))
+  if (isEncounterConflictError(error)) {
+    message = t('activeEncounterConflict')
+  } else if (isEncounterInvalidError(error)) {
+    message = t('activeEncounterInvalid')
+  }
+  $q.notify({
+    type: quasarNotifyTypes.negative,
+    message,
+  })
+}
+
+function notifySuccess(message) {
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message,
+  })
+}
+
+async function onAppointmentCheckedIn() {
+  try {
+    await refreshActiveEncounter()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error, 'activeEncounterLoadError')
+    }
+  }
+}
+
+async function onStartEncounter(payload) {
+  try {
+    await startEncounter(payload)
+    startDialogOpen.value = false
+    notifySuccess(t('startEncounterSuccess'))
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error)
+    }
+  }
+}
 
 function goToEdit(tab = addClientTabKeys.basic, subTab = '') {
   const id = String(clientId.value ?? '').trim()

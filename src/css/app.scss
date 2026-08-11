@@ -118,9 +118,22 @@
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.18);
     color: $shell-text;
+    overflow: hidden;
 
     .q-icon {
       opacity: 0.95;
+    }
+
+    .app-subtenant__logo {
+      width: 100%;
+      height: 100%;
+    }
+
+    .app-subtenant__logo .stored-file-avatar__image {
+      border-radius: 50%;
+      object-fit: contain;
+      padding: 3px;
+      background: rgba(255, 255, 255, 0.92);
     }
   }
 
@@ -149,6 +162,20 @@
 
   .q-item {
     min-height: 48px;
+  }
+
+  .app-subtenant-menu__logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .app-subtenant-menu__logo .stored-file-avatar__image {
+    border-radius: 50%;
+    object-fit: contain;
+    padding: 3px;
+    background: #fff;
   }
 }
 
@@ -357,7 +384,8 @@
 .app-drawer-submenu,
 .user-menu,
 .app-header-user-menu,
-.app-subtenant-menu {
+.app-subtenant-menu,
+.app-active-encounter-menu {
   @include app-light-menu-shell;
 
   .q-item {
@@ -2104,6 +2132,114 @@ input:-webkit-autofill {
 .app-header {
   .app-header-user-menu__trigger {
     margin-left: 4px;
+  }
+}
+
+.app-active-encounter-menu {
+  min-width: 280px;
+  max-width: min(340px, calc(100vw - 24px));
+  padding: 0;
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid $border-subtle;
+    background: rgba($primary, 0.04);
+  }
+
+  &__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(22, 163, 74, 0.12);
+    color: #16a34a;
+    border: 1px solid rgba(22, 163, 74, 0.22);
+  }
+
+  &__header-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__client-name {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: $text-strong;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    max-width: 100%;
+
+    &:hover,
+    &:focus-visible {
+      color: $primary;
+      text-decoration: underline;
+      outline: none;
+    }
+  }
+
+  &__meta {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $primary;
+  }
+
+  &__elapsed {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+    color: $text-muted;
+  }
+
+  &__complaint {
+    margin: 2px 0 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: $text-muted;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__list {
+    padding: 8px 0;
+  }
+
+  &__separator {
+    margin: 4px 0;
+  }
+
+  &__cancel-item {
+    .q-item__section--avatar {
+      color: $negative;
+    }
+  }
+
+  &__cancel-icon,
+  &__cancel-label {
+    color: $negative !important;
   }
 }
 
@@ -4072,21 +4208,29 @@ input:-webkit-autofill {
   }
 }
 
-.appointments-table__datetime {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.appointments-table__date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.appointments-table__datetime-date {
+.appointments-table__date-icon {
+  flex-shrink: 0;
+  color: $primary;
+}
+
+.appointments-table__date-text {
   font-weight: 600;
   font-size: 14px;
   line-height: 1.25;
+  min-width: 0;
 }
 
-.appointments-table__datetime-time {
-  font-size: 0.8125rem;
+.appointments-table__time {
+  font-size: 0.875rem;
   color: $text-muted;
+  white-space: nowrap;
 }
 
 .appointments-table__ellipsis {

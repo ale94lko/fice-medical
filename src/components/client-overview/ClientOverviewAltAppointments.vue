@@ -5,6 +5,7 @@
     <AddClientAppointmentsTab
       :client-id="clientId"
       :appointments="appointments"
+      @checked-in="emit('checked-in')"
     />
   </section>
 </template>
@@ -24,4 +25,6 @@ defineProps({
     default: () => [],
   },
 })
+
+const emit = defineEmits(['checked-in'])
 </script>

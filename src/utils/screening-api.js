@@ -8,6 +8,7 @@ import {
   normalizeScreeningTemplate,
   normalizeScreeningTemplateSummary,
 } from 'src/utils/screening-normalize.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -122,10 +123,10 @@ export async function fetchScreeningTemplateById(templateId) {
 }
 
 export async function createClientScreening(clientId, payload) {
-  const requestBody = {
+  const requestBody = attachEncounterId({
     template_id: Number(payload.templateId) || payload.templateId,
     screening_date: resolveScreeningDateForApi(payload.screeningDate),
-  }
+  }, clientId)
   if (payload.assignedClinicianId != null
     && String(payload.assignedClinicianId).trim() !== '') {
     requestBody.assigned_clinician_id = Number(payload.assignedClinicianId)

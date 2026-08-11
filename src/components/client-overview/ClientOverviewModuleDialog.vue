@@ -14,9 +14,7 @@
         :close-label="t('close')"
         :info="summaryLabel || ''"
         @close="onClose">
-        <div
-          v-if="isAllergiesModule"
-          class="client-overview-module-dialog__title-wrap">
+        <div class="client-overview-module-dialog__title-wrap">
           <div
             class="client-overview-module-dialog__title-icon"
             :class="titleIconToneClass">
@@ -26,9 +24,6 @@
             {{ dialogTitle }}
           </span>
         </div>
-        <template v-else>
-          {{ dialogTitle }}
-        </template>
       </AppDialogHeader>
 
       <q-card-section
@@ -44,9 +39,13 @@
 
         <div
           v-else-if="hasTableContent"
-          class="add-client-form__fmh-list-card">
-          <div class="add-client-form__fmh-table-wrap">
-            <table class="add-client-form__fmh-table">
+          class="fmh-list-card client-overview-module-dialog__table-card">
+          <div
+            class="fmh-table-wrap fmh-table-wrap--wide
+              client-overview-module-dialog__table-scroll">
+            <table
+              class="fmh-table fmh-table--wide
+                client-overview-module-dialog__table">
               <thead>
                 <tr>
                   <th
@@ -74,9 +73,11 @@
                       ]">
                       {{ row[column.key] }}
                     </span>
-                    <template v-else>
-                      {{ row[column.key] || '—' }}
-                    </template>
+                    <span
+                      v-else
+                      :class="cellValueClass(row[column.key])">
+                      {{ displayCellValue(row[column.key]) }}
+                    </span>
                   </td>
                 </tr>
               </tbody>
@@ -153,11 +154,14 @@
           </article>
         </div>
 
-        <p
+        <div
           v-else
-          class="client-overview-module-dialog__empty text-body2 text-grey-7">
-          {{ emptyLabel }}
-        </p>
+          class="client-overview-module-dialog__empty-state">
+          <q-icon name="inbox" size="32px" color="grey-6" />
+          <p class="text-body2 text-grey-7 q-mb-none">
+            {{ emptyLabel }}
+          </p>
+        </div>
       </q-card-section>
 
       <q-card-actions align="right" class="app-dialog-card__actions">
@@ -243,19 +247,35 @@ const hasTableContent = computed(
     && tableRows.value.length > 0,
 )
 
+const hasRecordContent = computed(
+  () => dialogDetail.value?.layout === 'records'
+    && recordItems.value.length > 0,
+)
+
 const isAllergiesModule = computed(
   () => props.module?.tabKey === addClientTabKeys.allergies,
 )
 
+const isWideTable = computed(
+  () => hasTableContent.value && tableColumns.value.length >= 6,
+)
+
 const dialogCardClass = computed(() => {
+  const classes = ['insurance-dialog']
   if (isAllergiesModule.value) {
-    return [
+    classes.push(
       'client-overview-module-dialog--allergies',
       'client-overview-allergies-dialog',
-    ].join(' ')
+    )
+  }
+  if (isWideTable.value) {
+    classes.push('client-overview-module-dialog--wide')
+  }
+  if (hasRecordContent.value) {
+    classes.push('client-overview-module-dialog--records')
   }
 
-  return 'insurance-dialog'
+  return classes.join(' ')
 })
 
 const ALLERGY_DIALOG_MAX_WIDTH = '600px'
@@ -279,18 +299,13 @@ const hasAllergyListContent = computed(
   () => isAllergyListLayout.value && tableRows.value.length > 0,
 )
 
-const moduleIcon = computed(() => props.module?.icon ?? 'medication')
+const moduleIcon = computed(() => props.module?.icon ?? 'folder_open')
 
 const titleIconToneClass = computed(() => {
-  const tone = String(props.module?.tone ?? 'red').trim()
+  const tone = String(props.module?.tone ?? 'slate').trim()
 
   return `client-overview-module-dialog__title-icon--${tone}`
 })
-
-const hasRecordContent = computed(
-  () => dialogDetail.value?.layout === 'records'
-    && recordItems.value.length > 0,
-)
 
 const emptyLabel = computed(
   () => summaryLabel.value || t('clientOverviewModuleEmpty'),
@@ -310,7 +325,7 @@ function sectionTitle(section) {
 function tableHeaderClass(column) {
   if (column.cellType === 'severity') {
     return [
-      'add-client-form__fmh-table-actions-col',
+      'fmh-table-actions-col',
       'client-overview-module-dialog__severity-col',
     ].join(' ')
   }
@@ -321,12 +336,27 @@ function tableHeaderClass(column) {
 function tableCellClass(column) {
   if (column.cellType === 'severity') {
     return [
-      'add-client-form__fmh-table-actions-col',
+      'fmh-table-actions',
       'client-overview-module-dialog__severity-col',
     ].join(' ')
   }
 
   return ''
+}
+
+function displayCellValue(value) {
+  const text = String(value ?? '').trim()
+
+  return text || '—'
+}
+
+function cellValueClass(value) {
+  const text = String(value ?? '').trim()
+  if (!text || text === '—') {
+    return 'client-overview-module-dialog__cell-empty'
+  }
+
+  return 'client-overview-module-dialog__cell-value'
 }
 
 function onClose() {

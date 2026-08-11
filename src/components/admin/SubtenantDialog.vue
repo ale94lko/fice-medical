@@ -15,6 +15,20 @@
       </AppDialogHeader>
 
       <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+        <div class="row q-col-gutter-md q-mb-md">
+          <div class="col-12">
+            <CompanyLogoField
+              :file-id="local.photoFileId"
+              :file-category="companyLogoCategory"
+              :disabled="readonly"
+              :test-id="subtenantDialogTestIds.field('logo')"
+              @update:file-id="local.photoFileId = $event"
+            />
+            <p class="text-body2 text-grey-7 q-mt-sm q-mb-none">
+              {{ t('subtenantLogoHint') }}
+            </p>
+          </div>
+        </div>
         <div class="row q-col-gutter-md">
           <div class="col-12">
             <AddClientLabeledField
@@ -91,9 +105,11 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { subtenantStatusValues } from 'components/constants.js'
+import { subtenantStatusValues, storedFileCategories } from
+  'components/constants.js'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import CompanyLogoField from 'components/CompanyLogoField.vue'
 import FormToggle from 'components/FormToggle.vue'
 import TextInput from 'components/TextInput.vue'
 import {
@@ -118,6 +134,7 @@ const { t } = useI18n()
 
 const local = ref(createEmptySubtenantForm())
 const errors = ref({})
+const companyLogoCategory = storedFileCategories.companyLogo
 
 const open = computed({
   get: () => props.modelValue,

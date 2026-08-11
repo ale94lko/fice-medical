@@ -3,6 +3,19 @@ import {
   subtenantStatusValues,
 } from 'components/constants.js'
 
+function parseOptionalPhotoFileId(item) {
+  const value = item?.photo_file_id
+    ?? item?.photoFileId
+    ?? item?.photo_stored_file_id
+    ?? item?.photoStoredFileId
+  const id = Number(value)
+  if (!Number.isFinite(id) || id <= 0) {
+    return null
+  }
+
+  return id
+}
+
 export function mapSubtenantListItem(item, t) {
   if (!item || item.id == null) {
     return null
@@ -20,5 +33,6 @@ export function mapSubtenantListItem(item, t) {
     [fk.status]: status,
     statusLabel: isActive ? t('active') : t('inactive'),
     statusVariant: isActive ? 'active' : 'inactive',
+    photoFileId: parseOptionalPhotoFileId(item),
   }
 }

@@ -25,5 +25,9 @@ export function buildClientUpdateBody(form) {
     delete body.labs
   }
 
+  if (!Array.isArray(body.vitals) || body.vitals.length === 0) {
+    delete body.vitals
+  }
+
   return body
 }

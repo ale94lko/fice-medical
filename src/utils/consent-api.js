@@ -17,6 +17,7 @@ import {
   buildClientConsentDocumentFileName,
   extractDownloadFileName,
 } from 'src/utils/http-headers.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -202,7 +203,7 @@ export async function fetchClientConsent(clientId, consentId) {
 }
 
 export async function assignClientConsent(clientId, payload = {}) {
-  const body = {}
+  const body = attachEncounterId({}, clientId)
   if (payload.consentVersionId != null) {
     // eslint-disable-next-line camelcase -- API body
     body.consent_version_id = Number(payload.consentVersionId)
@@ -221,7 +222,7 @@ export async function assignClientConsent(clientId, payload = {}) {
 export async function signClientConsent(clientId, consentId, form) {
   const response = await apiInstance.post(
     apiPaths.clientConsentSign(clientId, consentId),
-    buildConsentSignBody(form),
+    attachEncounterId(buildConsentSignBody(form), clientId),
   )
 
   return normalizeClientConsent(unwrapData(response.data))
