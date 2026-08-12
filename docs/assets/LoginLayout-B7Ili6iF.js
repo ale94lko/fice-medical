@@ -1,1 +1,0 @@
-import{Kd as e,Qd as t,mf as n,vf as r,wf as i,yt as a}from"./index-CU-sUsVi.js";import{r as o,t as s}from"./QLayout-DXJwt3cd.js";var c={};function l(a,c){let l=r(`router-view`);return n(),e(s,{view:`hHh Lpr lff`},{default:i(()=>[t(o,null,{default:i(()=>[t(l)]),_:1})]),_:1})}var u=a(c,[[`render`,l]]);export{u as default};
