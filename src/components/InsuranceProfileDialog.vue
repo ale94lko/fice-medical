@@ -295,25 +295,66 @@
           </div>
         </div>
 
-        <div class="row q-col-gutter-md q-mt-md">
+        <div
+          v-if="showStatusBadge"
+          class="row q-col-gutter-md q-mt-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('insuranceStatus')"
-              required
               :test-id="tid.insuranceField('status')">
-              <FormSelect
-                v-model="local.status"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                :readonly="readonly"
-                :options="statusOptions"
-                :error="Boolean(fieldError('status'))"
-                :error-message="errorText('status')"
-                :test-id="tid.insuranceField('status')"
-              />
+              <div class="insurance-status-readonly row items-center">
+                <AdminTableStatusCell
+                  :label="local.status || '—'"
+                  :variant="statusBadgeVariant"
+                />
+              </div>
             </AddClientLabeledField>
+          </div>
+        </div>
+
+        <div
+          v-if="showDeactivationMeta"
+          class="insurance-dialog__card-section q-mt-lg">
+          <SubsectionHeading>
+            {{ t('insuranceDeactivationDetailsTitle') }}
+          </SubsectionHeading>
+          <div class="row q-col-gutter-md q-mt-sm">
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('insuranceDeactivatedReason')">
+                <p class="text-body2 q-mb-none">
+                  {{ deactivationReasonDisplay || '—' }}
+                </p>
+              </AddClientLabeledField>
+            </div>
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('insuranceDeactivatedAt')">
+                <p class="text-body2 q-mb-none">
+                  {{ deactivatedAtDisplay || '—' }}
+                </p>
+              </AddClientLabeledField>
+            </div>
+            <div
+              v-if="local.deactivatedBy"
+              class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('insuranceDeactivatedBy')">
+                <p class="text-body2 q-mb-none">
+                  {{ local.deactivatedBy }}
+                </p>
+              </AddClientLabeledField>
+            </div>
+            <div
+              v-if="local.deactivationNotes"
+              class="col-12">
+              <AddClientLabeledField
+                :label="t('insuranceDeactivatedNotes')">
+                <p class="text-body2 q-mb-none">
+                  {{ local.deactivationNotes }}
+                </p>
+              </AddClientLabeledField>
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -348,7 +389,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AppDialogHeader from './AppDialogHeader.vue'
@@ -357,6 +398,8 @@ import SubsectionHeading from './SubsectionHeading.vue'
 import ClientDateField from './ClientDateField.vue'
 import FormSelect from './FormSelect.vue'
 import InsuranceCardUploadField from './InsuranceCardUploadField.vue'
+import AdminTableStatusCell from
+  './admin-table/AdminTableStatusCell.vue'
 import {
   clientInsuranceGoldenCardMemberIdLength,
   clientInsuranceMaxMemberIdLength,
@@ -369,10 +412,13 @@ import {
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   applyPayerSelection,
-  insurancePriorityOptions,
+  buildInsurancePrioritySelectOptions,
+  firstAvailableInsurancePriority,
   insuranceRelationshipOptions,
-  insuranceStatusOptions,
+  insuranceStatusBadgeVariant,
   insuranceTypeOptions,
+  formatInsuranceDeactivationReason,
+  isInsuranceProfileInactive,
   isSubscriberNameRequired,
   normalizeInsuranceIdentifierFields,
   requiresGoldenCardMemberId,
@@ -391,6 +437,7 @@ import {
 } from 'src/utils/insurance-payers.js'
 import { resolveInsuranceCardAttachment } from
   'src/utils/insurance-card-file.js'
+import { apiDateTimeToDisplay } from 'src/utils/app-datetime.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
 
@@ -442,10 +489,21 @@ const payerOptions = ref([])
 const payerSelection = ref(null)
 const payerSearch = ref('')
 const saving = ref(false)
+/** Avoid clearing subscriber name while hydrating the dialog profile. */
+const skipSubscriberRelationshipSync = ref(false)
 
-const priorityOptions = insurancePriorityOptions
+const priorityExcludeId = computed(() =>
+  props.mode === 'add' ? null : (props.profile?.id ?? local.value?.id),
+)
+
+const priorityOptions = computed(() =>
+  buildInsurancePrioritySelectOptions(
+    props.section,
+    priorityExcludeId.value,
+  ),
+)
+
 const typeOptions = insuranceTypeOptions
-const statusOptions = insuranceStatusOptions
 const relationshipOptions = insuranceRelationshipOptions
 
 const open = computed({
@@ -454,6 +512,32 @@ const open = computed({
 })
 
 const readonly = computed(() => props.mode === 'view')
+
+const showStatusBadge = computed(() =>
+  props.mode === 'view' || props.mode === 'edit',
+)
+
+const statusBadgeVariant = computed(() =>
+  insuranceStatusBadgeVariant(local.value?.status),
+)
+
+const showDeactivationMeta = computed(() =>
+  props.mode === 'view'
+  && isInsuranceProfileInactive(local.value),
+)
+
+const deactivatedAtDisplay = computed(() => {
+  const raw = local.value?.deactivatedAt
+  if (!raw) {
+    return ''
+  }
+
+  return apiDateTimeToDisplay(raw)
+})
+
+const deactivationReasonDisplay = computed(() =>
+  formatInsuranceDeactivationReason(local.value?.deactivationReason),
+)
 
 const dialogTestId = computed(() => {
   if (props.mode === 'view') {
@@ -510,6 +594,7 @@ watch(
     if (!visible) {
       return
     }
+    skipSubscriberRelationshipSync.value = true
     validationErrors.value = {}
     const raw = props.profile ?? {}
     local.value = {
@@ -522,8 +607,16 @@ watch(
       backCardFile: raw.backCardFile ?? null,
     }
     normalizeInsuranceIdentifierFields(local.value)
+    if (props.mode === 'add') {
+      local.value.priority = firstAvailableInsurancePriority(
+        props.section,
+      )
+    }
     syncPayerUiFromProfile()
     syncSubscriberFromRelationship()
+    nextTick(() => {
+      skipSubscriberRelationshipSync.value = false
+    })
   },
 )
 
@@ -555,8 +648,11 @@ function syncPayerUiFromProfile() {
 
 watch(
   () => local.value.relationshipToSubscriber,
-  () => {
-    syncSubscriberFromRelationship()
+  (next, prev) => {
+    if (skipSubscriberRelationshipSync.value) {
+      return
+    }
+    syncSubscriberFromRelationship(prev)
   },
 )
 
@@ -572,12 +668,20 @@ watch(
   },
 )
 
-function syncSubscriberFromRelationship() {
+function syncSubscriberFromRelationship(previousRelationship) {
   if (
     local.value.relationshipToSubscriber
     === clientInsuranceRelationshipValues.self
   ) {
     local.value.subscriberName = props.patientName
+
+    return
+  }
+  if (
+    previousRelationship
+    === clientInsuranceRelationshipValues.self
+  ) {
+    local.value.subscriberName = ''
   }
 }
 

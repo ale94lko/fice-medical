@@ -387,10 +387,22 @@ export const clientInsuranceTypeValues = {
 }
 
 export const clientInsuranceStatusValues = {
-  active: 'Active',
-  inactive: 'Inactive',
-  pendingVerification: 'Pending Verification',
-  expired: 'Expired',
+  ACTIVE: 'Active',
+  FUTURE: 'Future',
+  EXPIRED: 'Expired',
+  INACTIVE: 'Inactive',
+}
+
+/** Catalog codes for insurance deactivate reason (API body `reason`). */
+export const insuranceDeactivationReasonOtherCode = 'OTHER'
+
+/** Fallback labels when catalog is unavailable. */
+export const insuranceDeactivationReasonFallbackLabels = {
+  COVERAGE_TERMINATED: 'Coverage Terminated',
+  CHANGED_INSURANCE: 'Changed Insurance',
+  DUPLICATE_INSURANCE: 'Duplicate Insurance',
+  ENTERED_BY_MISTAKE: 'Entered by Mistake',
+  OTHER: 'Other',
 }
 
 export const clientInsuranceRelationshipValues = {
@@ -643,6 +655,7 @@ export const catalogNames = {
   dosageUnit: 'dosage_unit',
   medicationRoute: 'medication_route',
   medicationFrequency: 'medication_frequency',
+  insuranceDeactivationReason: 'insurance_deactivation_reason',
 }
 
 export const addClientBasicInfoCatalogNames = [
@@ -1595,6 +1608,16 @@ export const apiPaths = {
   clientVitalById: (clientId, vitalId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/vitals/${encodeURIComponent(String(vitalId ?? '').trim())}`,
+  clientInsuranceProfileDeactivate: (clientId, profileId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/insurance-profiles/${encodeURIComponent(
+    String(profileId ?? '').trim(),
+  )}/deactivate`,
+  clientInsuranceProfileReactivate: (clientId, profileId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/insurance-profiles/${encodeURIComponent(
+    String(profileId ?? '').trim(),
+  )}/reactivate`,
   clientLabCollect: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}/collect`,

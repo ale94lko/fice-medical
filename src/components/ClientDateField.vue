@@ -8,6 +8,8 @@
     :model-value="modelValue"
     :label="label || undefined"
     :readonly="readonly"
+    :clearable="showClearable"
+    clear-icon="cancel"
     :error="error"
     :error-message="errorMessage"
     :rules="rules"
@@ -15,6 +17,7 @@
     :mask="dateMask"
     :placeholder="resolvedPlaceholder"
     @update:model-value="onInput"
+    @clear="onClear"
     @blur="onBlur">
     <template v-if="!readonly" #append>
       <q-icon name="event" class="cursor-pointer input-icon">
@@ -24,6 +27,8 @@
           transition-show="scale"
           transition-hide="scale">
           <q-date
+            class="client-date-field__calendar"
+            color="primary"
             :model-value="datePickerValue"
             :mask="datePickerMask"
             :options="dateOptions"
@@ -53,11 +58,13 @@ import {
   startOfDay,
 } from 'src/utils/client-form.js'
 import { useAppDateTime } from 'src/composables/useAppDateTime.js'
+import { hasSelectValue } from 'src/utils/base.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
   label: { type: String, default: '' },
   readonly: { type: Boolean, default: false },
+  clearable: { type: Boolean, default: true },
   error: { type: Boolean, default: false },
   errorMessage: { type: String, default: '' },
   rules: { type: Array, default: () => [] },
@@ -73,6 +80,12 @@ const emit = defineEmits(['update:modelValue'])
 
 const { dateMask, datePlaceholder, datePickerMask } = useAppDateTime()
 const datePopupRef = ref(null)
+
+const showClearable = computed(
+  () => props.clearable
+    && !props.readonly
+    && hasSelectValue(props.modelValue),
+)
 
 const resolvedPlaceholder = computed(() => {
   const custom = String(props.placeholder ?? '').trim()
@@ -165,6 +178,12 @@ function onInput(value) {
   }
 }
 
+function onClear() {
+  if (props.modelValue !== '') {
+    emit('update:modelValue', '')
+  }
+}
+
 function onBlur() {
   const s = String(props.modelValue ?? '').trim()
   if (!s) {
@@ -209,6 +228,17 @@ function onPickerChange(val) {
     padding-top: 0;
     padding-bottom: 0;
     line-height: 1.5;
+  }
+}
+</style>
+
+<!-- Popup is teleported; unscoped class targets the calendar. -->
+<style lang="scss">
+@import 'src/css/quasar.variables';
+
+.client-date-field__calendar {
+  button.q-date__today:not(.bg-primary) {
+    box-shadow: inset 0 0 0 2px $primary;
   }
 }
 </style>

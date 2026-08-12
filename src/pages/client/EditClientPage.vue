@@ -33,6 +33,16 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clientPageTestIds.overview"
+          :disable="saving || initialLoading || !hasClientId"
+          :label="t('editClientOverview')"
+          @click="onOverview"
+        />
+        <q-btn
+          no-caps
+          outline
+          color="primary"
+          class="app-btn-outline"
           :data-testid="clientPageTestIds.close"
           :disable="saving || initialLoading"
           :label="t('close')"
@@ -108,6 +118,11 @@ const pageBusyMessage = computed(() => {
 const canSaveForm = computed(
   () => clientFormRef.value?.canSaveForm ?? true,
 )
+const hasClientId = computed(() => {
+  const id = String(clientId.value ?? '').trim()
+
+  return Boolean(id)
+})
 const clientDisplayName = computed(() =>
   String(clientFormRef.value?.patientFullName ?? '').trim(),
 )
@@ -138,6 +153,14 @@ function onProfilePhotoUpdate(fileId) {
 
 function onSave() {
   clientFormRef.value?.onSave()
+}
+
+function onOverview() {
+  const id = String(clientId.value ?? '').trim()
+  if (!id) {
+    return
+  }
+  router.push({ name: 'ClientOverview', params: { id } })
 }
 
 function onClose() {

@@ -665,7 +665,7 @@ function mapInsuranceCardAttachmentFromApi(fileIdRaw, fileObj) {
   }
 }
 
-function mapInsuranceProfileFromApi(row) {
+export function mapInsuranceProfileFromApi(row) {
   const payerPlan = String(
     row?.payer_plan_name ?? row?.payerPlanName ?? '',
   ).trim()
@@ -715,7 +715,7 @@ function mapInsuranceProfileFromApi(row) {
         clientInsuranceStatusValues,
         row?.insurance_status ?? row?.insuranceStatus,
       )
-      ?? clientInsuranceStatusValues.active,
+      ?? clientInsuranceStatusValues.ACTIVE,
     frontCardFile: mapInsuranceCardAttachmentFromApi(
       row?.front_card_file_id ?? row?.frontCardFileId,
       row?.front_card_file ?? row?.frontCardFile,
@@ -729,8 +729,14 @@ function mapInsuranceProfileFromApi(row) {
     deactivationReason: String(
       row?.deactivation_reason ?? row?.deactivationReason ?? '',
     ).trim(),
+    deactivationNotes: String(
+      row?.deactivation_notes ?? row?.deactivationNotes ?? '',
+    ).trim(),
     deactivatedAt: String(
       row?.deactivated_at ?? row?.deactivatedAt ?? '',
+    ).trim() || null,
+    deactivatedBy: String(
+      row?.deactivated_by ?? row?.deactivatedBy ?? '',
     ).trim() || null,
   }
 }

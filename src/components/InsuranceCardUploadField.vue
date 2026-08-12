@@ -1,7 +1,10 @@
 <template>
   <div
     class="insurance-card-upload"
-    :class="{ 'insurance-card-upload--readonly': readonly }">
+    :class="{
+      'insurance-card-upload--readonly': readonly,
+      'insurance-card-upload--error': Boolean(displayError),
+    }">
     <p class="insurance-card-upload__label text-weight-medium">
       {{ label }}
     </p>
@@ -53,7 +56,11 @@
         <div
           v-else
           class="insurance-card-upload__pdf-preview">
-          <q-icon name="picture_as_pdf" size="40px" color="primary" />
+          <q-icon
+            name="picture_as_pdf"
+            size="40px"
+            :color="displayError ? 'negative' : 'primary'"
+          />
           <p class="text-body2 q-mb-none q-mt-sm">
             {{ fileName || t('insuranceCardNoFile') }}
           </p>
@@ -110,7 +117,11 @@
       @dragover.prevent="onDragOver"
       @dragleave.prevent="onDragLeave"
       @drop.prevent="onDrop">
-      <q-icon name="credit_card" size="32px" color="primary" />
+      <q-icon
+        name="credit_card"
+        size="32px"
+        :color="displayError ? 'negative' : 'primary'"
+      />
       <p class="insurance-card-upload__hint text-body2 q-mb-sm">
         <template v-if="readonly">
           {{ t('insuranceCardNoFile') }}
@@ -161,7 +172,8 @@
 
     <div
       v-if="displayError"
-      class="form-field__error">
+      class="form-field__error"
+      role="alert">
       {{ displayError }}
     </div>
   </div>

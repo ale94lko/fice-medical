@@ -351,6 +351,7 @@ export const encounterTestIds = {
 
 export const clientPageTestIds = {
   save: 'client-page-btn-save',
+  overview: 'client-page-btn-overview',
   close: 'client-page-btn-close',
   breadcrumbClients: 'client-page-breadcrumb-clients',
   profilePhotoCamera: 'client-page-profile-photo-camera',
@@ -419,12 +420,18 @@ export const addClientTestIds = {
   vitalsRowDelete: id => toTestId('add-client-vitals-row', id, 'btn-delete'),
   insuranceField: name => toTestId('add-client-insurance-field', name),
   insuranceBtnAdd: 'add-client-insurance-btn-add',
+  insuranceShowInactive: 'add-client-insurance-show-inactive',
   insuranceRowView: id => toTestId('add-client-insurance-row', id, 'btn-view'),
   insuranceRowEdit: id => toTestId('add-client-insurance-row', id, 'btn-edit'),
   insuranceRowDeactivate: id => toTestId(
     'add-client-insurance-row',
     id,
     'btn-deactivate',
+  ),
+  insuranceRowReactivate: id => toTestId(
+    'add-client-insurance-row',
+    id,
+    'btn-reactivate',
   ),
   insuranceModal: name => toTestId('add-client-insurance-modal', name),
   insuranceModalBtn: name => toTestId(

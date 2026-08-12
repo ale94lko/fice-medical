@@ -124,18 +124,46 @@ export function validateFamilyMedicalHistoryPair(
   return { ok: true }
 }
 
+/**
+ * Validate draft before Add. Empty fields each get their own required key.
+ */
 export function validateFamilyMedicalHistoryForAdd(
   familyRelationship,
   medicalConditions,
 ) {
   const rel = trimFamilyMedicalField(familyRelationship)
   const cond = trimFamilyMedicalField(medicalConditions)
+  let relationship = null
+  let conditions = null
 
-  if (!rel && !cond) {
-    return { ok: false, errorKey: 'fmhBothRequired' }
+  if (!rel) {
+    relationship = 'fmhRelationshipRequired'
+  } else if (rel.length > familyMedicalHistoryMaxRelationshipLength) {
+    relationship = 'fmhRelationshipMax'
   }
 
-  return validateFamilyMedicalHistoryPair(rel, cond)
+  if (!cond) {
+    conditions = 'fmhConditionsRequired'
+  } else if (!isValidMedicalConditions(cond)) {
+    conditions = 'fmhConditionsInvalid'
+  }
+
+  if (relationship || conditions) {
+    return {
+      ok: false,
+      relationship,
+      conditions,
+      errorKey: relationship && conditions
+        ? 'fmhBothRequired'
+        : (relationship || conditions),
+    }
+  }
+
+  return {
+    ok: true,
+    relationship: null,
+    conditions: null,
+  }
 }
 
 export function validateFamilyMedicalHistoryDraftClear(section) {

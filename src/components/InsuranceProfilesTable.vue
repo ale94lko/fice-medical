@@ -59,6 +59,14 @@
             :label="statusLabel(scope.row.status)"
             :variant="statusVariant(scope.row.status)"
           />
+          <q-tooltip
+            v-if="inactiveTooltip(scope.row)"
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ inactiveTooltip(scope.row) }}
+          </q-tooltip>
         </q-td>
       </template>
 
@@ -75,16 +83,16 @@
             :aria-label="t('insuranceActionView')"
             @click="emit('view', row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('insuranceActionView') }}
-          </q-tooltip>
-        </q-btn>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('insuranceActionView') }}
+            </q-tooltip>
+          </q-btn>
           <q-btn
-            v-if="canEdit"
+            v-if="canEdit && canModify(row)"
             flat
             round
             dense
@@ -95,14 +103,14 @@
             :aria-label="t('edit')"
             @click="emit('edit', row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('edit') }}
-          </q-tooltip>
-        </q-btn>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('edit') }}
+            </q-tooltip>
+          </q-btn>
           <q-btn
             v-if="canEdit && canDeactivate(row)"
             flat
@@ -115,14 +123,34 @@
             :aria-label="t('insuranceActionDeactivate')"
             @click="emit('deactivate', row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('insuranceActionDeactivate') }}
-          </q-tooltip>
-        </q-btn>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('insuranceActionDeactivate') }}
+            </q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="canEdit && canReactivate(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="toggle_on"
+            :data-testid="tid.insuranceRowReactivate(row.id)"
+            :size="siteBreakpoints.SM"
+            :aria-label="t('insuranceActionReactivate')"
+            @click="emit('reactivate', row)"
+          >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('insuranceActionReactivate') }}
+            </q-tooltip>
+          </q-btn>
         </div>
       </template>
     </AdminQTable>
@@ -145,11 +173,18 @@ import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import {
   clientInsurancePriorityValues,
-  clientInsuranceStatusValues,
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { apiDateTimeToDisplay } from 'src/utils/app-datetime.js'
+import {
+  canDeactivateInsuranceProfile,
+  canReactivateInsuranceProfile,
+  formatInsuranceDeactivationReason,
+  insuranceStatusBadgeVariant,
+  isInsuranceProfileInactive,
+} from 'src/utils/client-insurance.js'
 
 defineProps({
   profiles: {
@@ -166,7 +201,7 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['view', 'edit', 'deactivate'])
+const emit = defineEmits(['view', 'edit', 'deactivate', 'reactivate'])
 
 const { t } = useI18n()
 
@@ -225,8 +260,8 @@ const columns = computed(() => [
     field: row => row.id,
     sortable: false,
     required: true,
-    headerStyle: 'min-width: 132px',
-    style: 'min-width: 132px',
+    headerStyle: 'min-width: 160px',
+    style: 'min-width: 160px',
   },
 ])
 
@@ -245,33 +280,47 @@ function priorityVariant(priority) {
 }
 
 function statusVariant(status) {
-  if (status === clientInsuranceStatusValues.active) {
-    return 'active'
-  }
-  if (status === clientInsuranceStatusValues.pendingVerification) {
-    return 'pending'
-  }
-  if (status === clientInsuranceStatusValues.expired) {
-    return 'cancelled'
-  }
-
-  return 'inactive'
+  return insuranceStatusBadgeVariant(status)
 }
 
 function statusLabel(status) {
-  if (status === clientInsuranceStatusValues.pendingVerification) {
-    return t('insuranceStatusPendingShort')
-  }
-
   return status || '—'
 }
 
-function canDeactivate(profile) {
-  const s = profile?.status
+function canModify(profile) {
+  return !isInsuranceProfileInactive(profile)
+}
 
-  return (
-    s === clientInsuranceStatusValues.active
-    || s === clientInsuranceStatusValues.pendingVerification
+function canDeactivate(profile) {
+  return canDeactivateInsuranceProfile(profile)
+}
+
+function canReactivate(profile) {
+  return canReactivateInsuranceProfile(profile)
+}
+
+function inactiveTooltip(profile) {
+  if (!isInsuranceProfileInactive(profile)) {
+    return ''
+  }
+  const reason = formatInsuranceDeactivationReason(
+    profile.deactivationReason,
   )
+  const notes = String(profile.deactivationNotes ?? '').trim()
+  const when = profile.deactivatedAt
+    ? apiDateTimeToDisplay(profile.deactivatedAt)
+    : ''
+  const parts = []
+  if (reason) {
+    parts.push(`${t('insuranceDeactivatedReason')}: ${reason}`)
+  }
+  if (notes) {
+    parts.push(`${t('insuranceDeactivatedNotes')}: ${notes}`)
+  }
+  if (when) {
+    parts.push(`${t('insuranceDeactivatedAt')}: ${when}`)
+  }
+
+  return parts.join('\n')
 }
 </script>

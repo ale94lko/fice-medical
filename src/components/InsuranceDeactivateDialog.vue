@@ -17,23 +17,47 @@
         <p class="text-body1 q-mb-md">
           {{ t('insuranceDeactivateMessage') }}
         </p>
-        <template v-if="requireDeactivationReason">
-          <p class="text-body2 q-mb-md">
-            {{ t('insuranceDeactivationReasonHint') }}
-          </p>
-          <AddClientLabeledField
-            required
-            :label="t('insuranceDeactivationReasonLabel')">
-            <q-input
-              v-model="reason"
-              outlined
-              type="textarea"
-              rows="3"
-              counter
-              maxlength="500"
-            />
-          </AddClientLabeledField>
-        </template>
+        <div class="row q-col-gutter-md">
+          <div class="col-12">
+            <AddClientLabeledField
+              required
+              :label="t('insuranceDeactivationReasonLabel')">
+              <FormSelect
+                v-model="reasonCode"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                :options="reasonOptions"
+                :loading="catalogLoading"
+                :placeholder="t('insuranceDeactivationReasonPlaceholder')"
+                :error="Boolean(reasonError)"
+                :error-message="reasonError"
+                :test-id="tid.insuranceField('deactivation-reason')"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12">
+            <AddClientLabeledField
+              :required="notesRequired"
+              :label="notesRequired
+                ? t('insuranceDeactivationNotesRequiredLabel')
+                : t('insuranceDeactivationNotesLabel')">
+              <q-input
+                v-model="notes"
+                outlined
+                type="textarea"
+                rows="3"
+                counter
+                maxlength="500"
+                :placeholder="t('insuranceDeactivationNotesPlaceholder')"
+                :error="Boolean(notesError)"
+                :error-message="notesError"
+                :data-testid="tid.insuranceField('deactivation-notes')"
+              />
+            </AddClientLabeledField>
+          </div>
+        </div>
       </q-card-section>
       <q-card-actions
         align="right"
@@ -43,6 +67,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :disable="submitting"
           :data-testid="modalTestIds.cancel('insurance-deactivate')"
           :label="t('cancel')"
           @click="onCancel"
@@ -52,7 +77,8 @@
           unelevated
           color="primary"
           class="app-btn-primary"
-          :disable="requireDeactivationReason && !hasReason"
+          :loading="submitting"
+          :disable="submitting || !canConfirm"
           :data-testid="modalTestIds.confirm('insurance-deactivate')"
           :label="t('insuranceDeactivateConfirm')"
           @click="onConfirm"
@@ -67,20 +93,27 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import { modalTestIds } from 'src/test-ids/index.js'
+import FormSelect from 'components/FormSelect.vue'
+import {
+  catalogNames,
+  insuranceDeactivationReasonOtherCode,
+} from 'components/constants.js'
+import { addClientTestIds as tid, modalTestIds } from
+  'src/test-ids/index.js'
+import {
+  catalogItemsFromCatalog,
+  fetchCatalogsByNames,
+  mapCatalogItemsToSelectOptions,
+} from 'src/utils/catalogs.js'
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false,
   },
-  /**
-   * When true, show audit reason field and require it to confirm.
-   * Insurance tab sets this only for profiles with persisted apiId.
-   */
-  requireDeactivationReason: {
+  submitting: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 })
 
@@ -88,11 +121,27 @@ const emit = defineEmits(['update:modelValue', 'confirm'])
 
 const { t } = useI18n()
 
-const reason = ref('')
+const reasonCode = ref(null)
+const notes = ref('')
+const reasonError = ref('')
+const notesError = ref('')
+const catalogLoading = ref(false)
+const reasonOptions = ref([])
 
-const hasReason = computed(
-  () => String(reason.value ?? '').trim().length > 0,
+const notesRequired = computed(
+  () => reasonCode.value === insuranceDeactivationReasonOtherCode,
 )
+
+const canConfirm = computed(() => {
+  if (!String(reasonCode.value ?? '').trim()) {
+    return false
+  }
+  if (notesRequired.value && !String(notes.value ?? '').trim()) {
+    return false
+  }
+
+  return true
+})
 
 const open = computed({
   get: () => props.modelValue,
@@ -101,22 +150,67 @@ const open = computed({
 
 watch(
   () => props.modelValue,
-  visible => {
-    if (visible) {
-      reason.value = ''
+  async visible => {
+    if (!visible) {
+      return
     }
+    reasonCode.value = null
+    notes.value = ''
+    reasonError.value = ''
+    notesError.value = ''
+    await loadReasonCatalog()
   },
 )
 
+watch(reasonCode, () => {
+  reasonError.value = ''
+  if (!notesRequired.value) {
+    notesError.value = ''
+  }
+})
+
+async function loadReasonCatalog() {
+  catalogLoading.value = true
+  try {
+    const catalogs = await fetchCatalogsByNames([
+      catalogNames.insuranceDeactivationReason,
+    ])
+    const catalog = catalogs?.[catalogNames.insuranceDeactivationReason]
+    reasonOptions.value = mapCatalogItemsToSelectOptions(
+      catalogItemsFromCatalog(catalog),
+    )
+  } catch {
+    reasonOptions.value = []
+  } finally {
+    catalogLoading.value = false
+  }
+}
+
 function onCancel() {
+  if (props.submitting) {
+    return
+  }
   open.value = false
 }
 
 function onConfirm() {
-  if (props.requireDeactivationReason && !hasReason.value) {
+  reasonError.value = ''
+  notesError.value = ''
+  const reason = String(reasonCode.value ?? '').trim()
+  if (!reason) {
+    reasonError.value = t('insuranceDeactivationReasonRequired')
+
     return
   }
-  emit('confirm', String(reason.value ?? '').trim())
-  open.value = false
+  const notesText = String(notes.value ?? '').trim()
+  if (notesRequired.value && !notesText) {
+    notesError.value = t('insuranceDeactivationNotesRequired')
+
+    return
+  }
+  emit('confirm', {
+    reason,
+    notes: notesText || null,
+  })
 }
 </script>

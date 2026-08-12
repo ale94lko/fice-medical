@@ -179,17 +179,17 @@ async function onSave() {
     localConditions.value,
   )
   if (!result.ok) {
-    if (result.errorKey === 'fmhBothRequired') {
-      relationshipError.value = t(result.errorKey)
-      conditionsError.value = t(result.errorKey)
-    } else if (result.errorKey === 'fmhRelationshipRequired') {
-      relationshipError.value = t(result.errorKey)
-    } else if (result.errorKey === 'fmhConditionsRequired') {
-      conditionsError.value = t(result.errorKey)
-    } else if (result.errorKey === 'fmhRelationshipMax') {
-      relationshipError.value = t(result.errorKey, { max: 25 })
-    } else if (result.errorKey === 'fmhConditionsInvalid') {
-      conditionsError.value = t(result.errorKey, { max: 500 })
+    if (result.relationship) {
+      relationshipError.value = t(
+        result.relationship,
+        result.relationship === 'fmhRelationshipMax' ? { max: 25 } : {},
+      )
+    }
+    if (result.conditions) {
+      conditionsError.value = t(
+        result.conditions,
+        result.conditions === 'fmhConditionsInvalid' ? { max: 500 } : {},
+      )
     }
     await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 

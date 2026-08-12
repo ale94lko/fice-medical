@@ -28,7 +28,8 @@
 }
 
 .app-layout.q-layout:has(.add-client-page),
-.app-layout.q-layout:has(.dashboard-page) {
+.app-layout.q-layout:has(.dashboard-page),
+.app-layout.q-layout:has(.client-overview-page) {
   min-height: 100dvh;
   height: 100dvh;
   max-height: 100dvh;
@@ -3970,6 +3971,24 @@ input:-webkit-autofill {
   gap: 16px;
 }
 
+.insurance-header__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.insurance-show-inactive {
+  gap: 6px;
+}
+
+.insurance-show-inactive__label {
+  color: $text-strong;
+  white-space: nowrap;
+}
+
+.insurance-show-inactive__info {
+  color: $text-muted;
+}
+
 .clinical-notes-header {
   gap: 16px;
 }
@@ -4506,6 +4525,20 @@ input:-webkit-autofill {
   line-height: 1.45;
 }
 
+.fmh-add-actions {
+  margin-top: 4px;
+}
+
+.fmh-add-hint {
+  align-items: center;
+  margin: 0;
+}
+
+.fmh-add-hint__action {
+  color: $primary;
+  font-weight: 700;
+}
+
 .insurance-card-upload__dropzone {
   display: flex;
   flex-direction: column;
@@ -4530,7 +4563,24 @@ input:-webkit-autofill {
   }
 
   &--error {
+    border: 1px solid $negative;
+    background: rgba($negative, 0.06);
+
+    &:hover {
+      border-color: $negative;
+      background: rgba($negative, 0.08);
+    }
+  }
+}
+
+.insurance-card-upload--error {
+  .insurance-card-upload__label {
+    color: $negative;
+  }
+
+  .insurance-card-upload__viewport {
     border-color: $negative;
+    box-shadow: inset 0 0 0 1px rgba($negative, 0.35);
   }
 }
 
@@ -4601,6 +4651,12 @@ input:-webkit-autofill {
     border-color: $border-subtle;
     background: $surface;
   }
+}
+
+.insurance-card-upload--readonly
+  .insurance-card-upload__dropzone--error:hover {
+  border-color: $negative;
+  background: rgba($negative, 0.06);
 }
 .banner {
   position: relative;

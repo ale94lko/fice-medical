@@ -979,6 +979,7 @@ export default {
   editClientWithName: 'Editar cliente — {name}',
   editClientSubtitle:
     'Actualice la información del cliente y guarde los cambios.',
+  editClientOverview: 'Resumen',
   clientProfilePhotoUpload: 'Tomar o subir foto de perfil',
   clientProfilePhotoInvalidType:
     'La foto de perfil debe ser JPG, PNG o WebP.',
@@ -2916,16 +2917,17 @@ export default {
   fmhRelationshipTooltip: 'Seleccione el cliente o un familiar consanguíneo.',
   fmhMedicalConditions: 'Condición(es) médica(s)',
   fmhAdd: 'Agregar',
+  fmhAddHint:
+    'Complete ambos campos y haga clic en {add} para guardar la entrada '
+    + 'del historial familiar.',
   fmhColRelationship: 'Relación familiar',
   fmhColConditions: 'Condiciones con antecedente familiar',
   fmhPersonalEmpty: 'Aún no hay entradas de historial médico personal.',
   fmhFamilyEmpty: 'Aún no hay entradas de historial médico familiar.',
   fmhBothRequired:
     'Seleccione una relación familiar e ingrese al menos una condición médica.',
-  fmhRelationshipRequired:
-    'La relación familiar es obligatoria cuando hay una condición.',
-  fmhConditionsRequired:
-    'La condición médica es obligatoria cuando hay una relación.',
+  fmhRelationshipRequired: 'Seleccione una relación familiar',
+  fmhConditionsRequired: 'Ingrese al menos una condición médica.',
   fmhRelationshipMax: 'Máximo {max} caracteres',
   fmhConditionsInvalid:
     'Solo letras y números, máximo {max} caracteres',
@@ -3108,6 +3110,10 @@ export default {
   insuranceProfilesSubtitle:
     'Administre los perfiles de seguro de este cliente.',
   insuranceAddProfile: 'Agregar perfil de seguro',
+  insuranceShowInactive: 'Mostrar seguros inactivos',
+  insuranceShowInactiveHint:
+    'Al activarlo, los perfiles de seguro inactivos aparecen '
+    + 'al final de la lista. Los perfiles inactivos no se pueden editar.',
   insuranceProfilesEmpty: 'Aún no hay perfiles de seguro registrados.',
   insurancePriorityBillingHint:
     'El orden de prioridad determina la secuencia de facturación del seguro.',
@@ -3117,7 +3123,6 @@ export default {
   insuranceColMemberId: 'ID de miembro',
   insuranceColStatus: 'Estado',
   insuranceActionView: 'Ver detalles',
-  insuranceStatusPendingShort: 'Pendiente',
   insuranceAddTitle: 'Agregar perfil de seguro',
   insuranceAddSubtitle: 'Agregue un nuevo perfil de seguro para este cliente.',
   insuranceEditTitle: 'Editar perfil de seguro',
@@ -3177,18 +3182,41 @@ export default {
   insuranceDeactivateMessage:
     'Este perfil de seguro se marcará como inactivo y ya no estará disponible '
     + 'para nuevas facturaciones, reclamaciones o autorizaciones.',
-  insuranceDeactivationReasonHint:
-    'Para fines de auditoría, indique el motivo de la desactivación.',
   insuranceDeactivationReasonLabel: 'Motivo de desactivación',
+  insuranceDeactivationReasonPlaceholder: 'Seleccionar un motivo',
+  insuranceDeactivationReasonRequired:
+    'Seleccione un motivo de desactivación.',
+  insuranceDeactivationNotesLabel: 'Notas',
+  insuranceDeactivationNotesRequiredLabel: 'Motivo / Notas',
+  insuranceDeactivationNotesPlaceholder: 'Ingrese notas',
+  insuranceDeactivationNotesRequired:
+    'Las notas son obligatorias cuando el motivo es Other.',
   insuranceDeactivateConfirm: 'Desactivar',
-  insuranceActionDeactivate: 'Desactivar perfil de seguro',
+  insuranceActionDeactivate: 'Desactivar seguro',
+  insuranceActionReactivate: 'Reactivar seguro',
+  insuranceReactivateTitle: 'Reactivar perfil de seguro',
+  insuranceReactivateMessage:
+    'Este perfil de seguro se reactivará. El estado se calculará según las '
+    + 'fechas de cobertura (Active, Future, o se rechazará si ya expiró).',
+  insuranceReactivateConfirm: 'Reactivar',
   insuranceAddedSuccess: 'Perfil de seguro agregado.',
   insuranceUpdatedSuccess: 'Perfil de seguro actualizado.',
   insuranceDeactivatedSuccess: 'Perfil de seguro desactivado.',
+  insuranceReactivatedSuccess: 'Perfil de seguro reactivado.',
+  insuranceDeactivateError: 'No se pudo desactivar el perfil de seguro.',
+  insuranceReactivateError: 'No se pudo reactivar el perfil de seguro.',
+  insuranceDeactivationDetailsTitle: 'Detalles de desactivación',
+  insuranceDeactivatedReason: 'Motivo de desactivación',
+  insuranceDeactivatedNotes: 'Notas',
+  insuranceDeactivatedAt: 'Desactivado el',
+  insuranceDeactivatedBy: 'Desactivado por',
   insurancePayerRequired: 'Seleccione o ingrese un pagador / plan.',
   insurancePriorityRequired: 'La prioridad del seguro es obligatoria.',
   insurancePriorityDuplicate:
     'Este paciente ya tiene un seguro activo con esta prioridad.',
+  insuranceMaxActivePriorities:
+    'Primary, Secondary y Tertiary ya están activos. '
+    + 'Desactive uno antes de agregar otro perfil.',
   insuranceMemberIdInvalid:
     'Ingrese 1 a 20 letras o números solamente (sin espacios).',
   insuranceTypeRequired: 'El tipo de seguro es obligatorio.',
@@ -3212,7 +3240,6 @@ export default {
     'El ID Golden Card debe ser exactamente 8 dígitos.',
   insuranceIdentifierInvalid:
     'Use solo letras y números, de 1 a 20 caracteres.',
-  insuranceStatusRequired: 'El estado del seguro es obligatorio.',
 
   navClinicalResources: 'Recursos',
   clinicalResourceListTitle: 'Recursos clínicos',

@@ -940,6 +940,7 @@ export default {
   editClient: 'Edit Client',
   editClientWithName: 'Edit Client — {name}',
   editClientSubtitle: 'Update client information and save your changes.',
+  editClientOverview: 'Overview',
   clientProfilePhotoUpload: 'Upload or take profile photo',
   clientProfilePhotoInvalidType:
     'Profile photo must be a JPG, PNG or WebP image.',
@@ -2818,16 +2819,16 @@ export default {
   fmhRelationshipTooltip: 'Select the client or a blood relative.',
   fmhMedicalConditions: 'Medical Condition(s)',
   fmhAdd: 'Add',
+  fmhAddHint:
+    'Complete both fields and click {add} to save the family history entry.',
   fmhColRelationship: 'Family Relationship',
   fmhColConditions: 'Conditions with a family history',
   fmhPersonalEmpty: 'No personal medical history entries yet.',
   fmhFamilyEmpty: 'No family medical history entries yet.',
   fmhBothRequired:
     'Select a family relationship and enter at least one medical condition.',
-  fmhRelationshipRequired:
-    'Family Relationship is required when a condition is entered.',
-  fmhConditionsRequired:
-    'Medical Condition(s) is required when a relationship is selected.',
+  fmhRelationshipRequired: 'Select a family relationship',
+  fmhConditionsRequired: 'Enter at least one medical condition.',
   fmhRelationshipMax: 'Maximum {max} characters',
   fmhConditionsInvalid:
     'Letters and numbers only, maximum {max} characters',
@@ -3002,6 +3003,10 @@ export default {
   insuranceProfilesSubtitle:
     'Manage insurance profiles for this client.',
   insuranceAddProfile: 'Add Insurance Profile',
+  insuranceShowInactive: 'Show inactive insurance',
+  insuranceShowInactiveHint:
+    'When enabled, inactive insurance profiles appear at the '
+    + 'end of the list. Inactive profiles cannot be edited.',
   insuranceProfilesEmpty: 'No insurance profiles recorded yet.',
   insurancePriorityBillingHint:
     'The order of priority determines the sequence of insurance billing.',
@@ -3011,7 +3016,6 @@ export default {
   insuranceColMemberId: 'Member ID',
   insuranceColStatus: 'Status',
   insuranceActionView: 'View details',
-  insuranceStatusPendingShort: 'Pending',
   insuranceAddTitle: 'Add Insurance Profile',
   insuranceAddSubtitle: 'Add a new insurance profile for this client.',
   insuranceEditTitle: 'Edit Insurance Profile',
@@ -3068,18 +3072,40 @@ export default {
   insuranceDeactivateMessage:
     'This insurance profile will be marked as inactive and will no longer be '
     + 'available for new billing, claims or authorizations.',
-  insuranceDeactivationReasonHint:
-    'For audit purposes, please provide a reason for the deactivation.',
-  insuranceDeactivationReasonLabel: 'Deactivation Reason',
+  insuranceDeactivationReasonLabel: 'Reason for deactivation',
+  insuranceDeactivationReasonPlaceholder: 'Select a reason',
+  insuranceDeactivationReasonRequired: 'Select a deactivation reason.',
+  insuranceDeactivationNotesLabel: 'Notes',
+  insuranceDeactivationNotesRequiredLabel: 'Reason / Notes',
+  insuranceDeactivationNotesPlaceholder: 'Enter notes',
+  insuranceDeactivationNotesRequired:
+    'Notes are required when reason is Other.',
   insuranceDeactivateConfirm: 'Deactivate',
-  insuranceActionDeactivate: 'Deactivate insurance profile',
+  insuranceActionDeactivate: 'Deactivate insurance',
+  insuranceActionReactivate: 'Reactivate insurance',
+  insuranceReactivateTitle: 'Reactivate Insurance Profile',
+  insuranceReactivateMessage:
+    'This insurance profile will be reactivated. Status will be set from the '
+    + 'coverage dates (Active, Future, or rejected if already expired).',
+  insuranceReactivateConfirm: 'Reactivate',
   insuranceAddedSuccess: 'Insurance profile added.',
   insuranceUpdatedSuccess: 'Insurance profile updated.',
   insuranceDeactivatedSuccess: 'Insurance profile deactivated.',
+  insuranceReactivatedSuccess: 'Insurance profile reactivated.',
+  insuranceDeactivateError: 'Could not deactivate the insurance profile.',
+  insuranceReactivateError: 'Could not reactivate the insurance profile.',
+  insuranceDeactivationDetailsTitle: 'Deactivation details',
+  insuranceDeactivatedReason: 'Deactivated reason',
+  insuranceDeactivatedNotes: 'Notes',
+  insuranceDeactivatedAt: 'Deactivated at',
+  insuranceDeactivatedBy: 'Deactivated by',
   insurancePayerRequired: 'Select or enter a payer / plan name.',
   insurancePriorityRequired: 'Insurance priority is required.',
   insurancePriorityDuplicate:
     'This patient already has an active insurance with this priority.',
+  insuranceMaxActivePriorities:
+    'Primary, Secondary and Tertiary are already active. '
+    + 'Deactivate one before adding another profile.',
   insuranceMemberIdInvalid:
     'Enter 1–20 letters or numbers only (no spaces).',
   insuranceTypeRequired: 'Insurance type is required.',
@@ -3100,7 +3126,6 @@ export default {
   insuranceGoldenCardInvalid: 'Golden Card ID must be exactly 8 digits.',
   insuranceIdentifierInvalid:
     'Use letters and numbers only, 1–20 characters.',
-  insuranceStatusRequired: 'Insurance status is required.',
 
   navClinicalResources: 'Resources',
   clinicalResourceListTitle: 'Clinical Resources',

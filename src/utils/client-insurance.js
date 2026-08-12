@@ -9,6 +9,7 @@ import {
   clientInsuranceRelationshipValues,
   clientInsuranceStatusValues,
   clientInsuranceTypeValues,
+  insuranceDeactivationReasonFallbackLabels,
 } from 'components/constants.js'
 import {
   isCompleteUsDateString,
@@ -92,13 +93,15 @@ export function createEmptyInsuranceProfile() {
     medicareMemberId: '',
     goldenCardMemberId: '',
     otherInsuranceId: '',
-    status: clientInsuranceStatusValues.active,
+    status: clientInsuranceStatusValues.ACTIVE,
     frontCardFile: null,
     backCardFile: null,
     deleted: false,
     deletedAt: null,
     deactivationReason: '',
+    deactivationNotes: '',
     deactivatedAt: null,
+    deactivatedBy: null,
   }
 }
 
@@ -131,13 +134,127 @@ export function visibleInsuranceProfiles(section) {
   return (section?.profiles ?? []).filter(profile => !profile.deleted)
 }
 
+export function isInsuranceProfileInactive(profile) {
+  return profile?.status === clientInsuranceStatusValues.INACTIVE
+}
+
+/** Active or future coverage occupies a Primary/Secondary/Tertiary slot. */
+export function occupiesInsurancePriority(profile) {
+  const status = profile?.status
+
+  return (
+    status === clientInsuranceStatusValues.ACTIVE
+    || status === clientInsuranceStatusValues.FUTURE
+  )
+}
+
+export function canDeactivateInsuranceProfile(profile) {
+  if (!profile || isInsuranceProfileInactive(profile)) {
+    return false
+  }
+  const status = profile.status
+
+  return (
+    status === clientInsuranceStatusValues.ACTIVE
+    || status === clientInsuranceStatusValues.FUTURE
+    || status === clientInsuranceStatusValues.EXPIRED
+  )
+}
+
+export function canReactivateInsuranceProfile(profile) {
+  return isInsuranceProfileInactive(profile)
+}
+
+export function insuranceStatusBadgeVariant(status) {
+  if (status === clientInsuranceStatusValues.ACTIVE) {
+    return 'active'
+  }
+  if (status === clientInsuranceStatusValues.FUTURE) {
+    return 'future'
+  }
+  if (status === clientInsuranceStatusValues.EXPIRED) {
+    return 'inactive'
+  }
+  if (status === clientInsuranceStatusValues.INACTIVE) {
+    return 'pending'
+  }
+
+  return 'other'
+}
+
+export function formatInsuranceDeactivationReason(code) {
+  const raw = trimInsuranceField(code)
+  if (!raw) {
+    return ''
+  }
+  const fallback = insuranceDeactivationReasonFallbackLabels[raw]
+  if (fallback) {
+    return fallback
+  }
+
+  return raw
+    .split('_')
+    .map(part => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(' ')
+}
+
+/**
+ * Local status estimate from coverage dates (before API assigns status).
+ */
+export function deriveInsuranceStatusFromDates(profile) {
+  if (isInsuranceProfileInactive(profile)) {
+    return clientInsuranceStatusValues.INACTIVE
+  }
+  const today = startOfDay(new Date()).getTime()
+  const endRaw = trimInsuranceField(profile?.policyExpirationDate)
+  if (endRaw && isCompleteUsDateString(endRaw)) {
+    const end = parseUsDateString(endRaw)
+    if (end && startOfDay(end).getTime() < today) {
+      return clientInsuranceStatusValues.EXPIRED
+    }
+  }
+  const startRaw = trimInsuranceField(profile?.policyEffectiveDate)
+  if (startRaw && isCompleteUsDateString(startRaw)) {
+    const start = parseUsDateString(startRaw)
+    if (start && startOfDay(start).getTime() > today) {
+      return clientInsuranceStatusValues.FUTURE
+    }
+  }
+
+  return clientInsuranceStatusValues.ACTIVE
+}
+
+/**
+ * Profiles for the insurance table: optional inactive rows, always last.
+ */
+export function listInsuranceProfilesForDisplay(
+  section,
+  { showInactive = false } = {},
+) {
+  const visible = visibleInsuranceProfiles(section)
+  const activeOrOther = []
+  const inactive = []
+  visible.forEach(profile => {
+    if (isInsuranceProfileInactive(profile)) {
+      inactive.push(profile)
+    } else {
+      activeOrOther.push(profile)
+    }
+  })
+  if (!showInactive) {
+    return activeOrOther
+  }
+
+  return [...activeOrOther, ...inactive]
+}
+
 export function activeInsuranceProfiles(section, excludeId = null) {
   return visibleInsuranceProfiles(section).filter(profile => {
     if (excludeId && profile.id === excludeId) {
       return false
     }
 
-    return profile.status === clientInsuranceStatusValues.active
+    return occupiesInsurancePriority(profile)
   })
 }
 
@@ -153,6 +270,32 @@ export function isInsurancePriorityTaken(
 
   return activeInsuranceProfiles(section, excludeId).some(
     profile => profile.priority === token,
+  )
+}
+
+export function buildInsurancePrioritySelectOptions(
+  section,
+  excludeId = null,
+) {
+  return Object.values(clientInsurancePriorityValues).map(value => ({
+    label: value,
+    value,
+    disable: isInsurancePriorityTaken(section, value, excludeId),
+  }))
+}
+
+export function firstAvailableInsurancePriority(
+  section,
+  excludeId = null,
+) {
+  return Object.values(clientInsurancePriorityValues).find(
+    value => !isInsurancePriorityTaken(section, value, excludeId),
+  ) ?? null
+}
+
+export function areAllActiveInsurancePrioritiesTaken(section) {
+  return Object.values(clientInsurancePriorityValues).every(
+    value => isInsurancePriorityTaken(section, value),
   )
 }
 
@@ -447,10 +590,6 @@ export function validateInsuranceProfile(
 
   validateInsuranceIdentifiers(errors, profile)
 
-  if (!profile.status) {
-    errors.status = 'insuranceStatusRequired'
-  }
-
   return {
     ok: Object.keys(errors).length === 0,
     errors,
@@ -485,12 +624,37 @@ export function softDeleteInsuranceProfile(profile) {
 }
 
 /**
- * Marks profile inactive for billing; keeps row visible (not soft-deleted).
+ * Marks profile inactive locally (new client / offline); keeps row visible.
+ * @param {{ reason?: string, notes?: string }} detail
  */
-export function deactivateInsuranceProfile(profile, reason) {
-  profile.status = clientInsuranceStatusValues.inactive
-  profile.deactivationReason = trimInsuranceField(reason)
+export function applyLocalInsuranceDeactivation(profile, detail = {}) {
+  profile.status = clientInsuranceStatusValues.INACTIVE
+  profile.deactivationReason = trimInsuranceField(detail.reason)
+  profile.deactivationNotes = trimInsuranceField(detail.notes)
   profile.deactivatedAt = new Date().toISOString()
+  profile.deactivatedBy = null
+}
+
+/**
+ * Clears deactivation locally and restores date-derived status.
+ */
+export function applyLocalInsuranceReactivation(profile) {
+  profile.deactivationReason = ''
+  profile.deactivationNotes = ''
+  profile.deactivatedAt = null
+  profile.deactivatedBy = null
+  profile.status = deriveInsuranceStatusFromDates({
+    ...profile,
+    status: clientInsuranceStatusValues.ACTIVE,
+  })
+}
+
+/** @deprecated Use applyLocalInsuranceDeactivation */
+export function deactivateInsuranceProfile(profile, reason) {
+  applyLocalInsuranceDeactivation(profile, {
+    reason: typeof reason === 'string' ? reason : reason?.reason,
+    notes: typeof reason === 'object' ? reason?.notes : '',
+  })
 }
 
 export const insurancePriorityOptions = Object.values(

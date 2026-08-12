@@ -62,17 +62,35 @@
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12 flex justify-end">
-              <q-btn
-                no-caps
-                unelevated
-                color="primary"
-                class="app-btn-primary"
-                icon="add"
-                :data-testid="tid.fmhBtnAdd"
-                :label="t('fmhAdd')"
-                @click="onAddEntry"
-              />
+            <div class="col-12 row items-center no-wrap
+              fmh-add-actions q-col-gutter-md">
+              <div class="col">
+                <div class="insurance-info-banner fmh-add-hint">
+                  <q-icon name="info" size="20px" />
+                  <i18n-t
+                    keypath="fmhAddHint"
+                    tag="span"
+                    scope="global">
+                    <template #add>
+                      <strong class="fmh-add-hint__action">
+                        {{ t('fmhAdd') }}
+                      </strong>
+                    </template>
+                  </i18n-t>
+                </div>
+              </div>
+              <div class="col-auto">
+                <q-btn
+                  no-caps
+                  unelevated
+                  color="primary"
+                  class="app-btn-primary"
+                  icon="add"
+                  :data-testid="tid.fmhBtnAdd"
+                  :label="t('fmhAdd')"
+                  @click="onAddEntry"
+                />
+              </div>
             </div>
       </div>
     </AccordionSection>
@@ -262,23 +280,24 @@ function clearSaveValidation() {
 function applyDraftValidationErrors(result) {
   draftRelationshipError.value = ''
   draftConditionsError.value = ''
-  if (!result.ok && result.errorKey) {
-    if (result.errorKey === 'fmhBothRequired') {
-      draftRelationshipError.value = t(result.errorKey)
-      draftConditionsError.value = t(result.errorKey)
-    } else if (
-      result.errorKey === 'fmhRelationshipRequired'
-      || result.errorKey === 'fmhRelationshipMax'
-    ) {
-      draftRelationshipError.value = t(
-        result.errorKey,
-        result.errorKey === 'fmhRelationshipMax' ? { max: 25 } : {},
-      )
-    } else {
-      draftConditionsError.value = t(result.errorKey, {
-        max: result.errorKey === 'fmhConditionsInvalid' ? 500 : 25,
-      })
-    }
+  if (result.ok) {
+    return
+  }
+  if (result.relationship) {
+    draftRelationshipError.value = t(
+      result.relationship,
+      result.relationship === 'fmhRelationshipMax'
+        ? { max: familyMedicalHistoryMaxRelationshipLength }
+        : {},
+    )
+  }
+  if (result.conditions) {
+    draftConditionsError.value = t(
+      result.conditions,
+      result.conditions === 'fmhConditionsInvalid'
+        ? { max: familyMedicalHistoryMaxConditionsLength }
+        : {},
+    )
   }
 }
 

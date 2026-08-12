@@ -3,7 +3,6 @@ import {
   clientFormSections,
   clientInsurancePriorityValues,
   clientInsuranceRelationshipValues,
-  clientInsuranceStatusValues,
   clientInsuranceTypeValues,
 } from 'components/constants.js'
 import { usDateToIso } from 'src/utils/client-form.js'
@@ -74,11 +73,8 @@ function mapInsuranceProfile(profile) {
       || null,
     assistance_program_name: null,
     other_insurance_id: trimInsuranceField(profile.otherInsuranceId) || null,
-    insurance_status: catalogKeyFromLabel(
-      clientInsuranceStatusValues,
-      profile.status,
-    ) || 'active',
     deactivation_reason: trimInsuranceField(profile.deactivationReason) || null,
+    deactivation_notes: trimInsuranceField(profile.deactivationNotes) || null,
     front_card_file_id: insuranceCardFileIdForApi(profile.frontCardFile),
     back_card_file_id: insuranceCardFileIdForApi(profile.backCardFile),
   }

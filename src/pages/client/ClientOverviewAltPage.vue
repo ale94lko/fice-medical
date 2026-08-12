@@ -5,96 +5,98 @@
     <AppLoadingOverlay
       scope="content"
       :showing="loading"
-      :surface-opacity="0.5"
     />
 
-    <ClientOverviewAltHeader
-      v-if="header"
-      class="client-overview-page__header"
-      :client-id="clientId"
-      :header="header"
-      :missing-items="missingItems"
-      :loading="loading"
-      :show-start-encounter="canManageEncounter && !hasActiveEncounter"
-      :start-encounter-busy="actionBusy"
-      @review-missing="goToEdit(addClientTabKeys.insurance)"
-      @edit="goToEdit()"
-      @start-encounter="startDialogOpen = true"
-    />
-    <ClientOverviewAltHeaderSkeleton
-      v-else
-      class="client-overview-page__header"
-    />
-
-    <div
-      v-if="header"
-      class="client-overview-page__main client-overview-alt-page__main">
-      <ClientOverviewAltTabs
-        v-model="activeTab"
-        :insurance-alert="hasInsuranceAlert"
-        :allergies-severity-modifier="allergiesSeverityModifier"
+    <template v-if="header">
+      <ClientOverviewAltHeader
+        class="client-overview-page__header"
+        :client-id="clientId"
+        :header="header"
+        :missing-items="missingItems"
+        :loading="loading"
+        :show-start-encounter="canManageEncounter && !hasActiveEncounter"
+        :start-encounter-busy="actionBusy"
+        @review-missing="goToEdit(addClientTabKeys.insurance)"
+        @edit="goToEdit()"
+        @start-encounter="startDialogOpen = true"
       />
 
-      <div class="client-overview-page__body client-overview-alt-page__body">
-        <div class="client-overview-alt-page__content">
-          <ClientOverviewAltAppointments
-            v-if="activeTab === addClientTabKeys.appointments"
-            :client-id="clientId"
-            :appointments="clientAppointments"
-            @checked-in="onAppointmentCheckedIn"
-          />
-          <ClientOverviewAltBasicInfo
-            v-else-if="activeTab === addClientTabKeys.basic"
-            :basic-info="basicInfo"
-          />
-          <ClientOverviewAltContact
-            v-else-if="activeTab === addClientTabKeys.contact"
-            :contact-info="contactInfo"
-          />
-          <ClientOverviewAltAllergies
-            v-else-if="activeTab === addClientTabKeys.allergies"
-            :allergy-detail="allergyDetail"
-          />
-          <ClientOverviewAltInsurance
-            v-else-if="activeTab === addClientTabKeys.insurance"
-            :insurance-info="insuranceInfo"
-          />
-          <ClientOverviewAltModulesTab
-            v-else-if="activeTab === addClientTabKeys.clinical"
-            :tab-key="addClientTabKeys.clinical"
-            :title="t('tabClinical')"
-            icon="medical_services"
-            :module-cards="moduleCards"
-            @open-record="onOpenModuleRecord"
-          />
-          <ClientOverviewAltModulesTab
-            v-else-if="activeTab === addClientTabKeys.careCoordination"
-            :tab-key="addClientTabKeys.careCoordination"
-            :title="t('tabCareCoordination')"
-            icon="groups"
-            :module-cards="moduleCards"
-            @open-record="onOpenModuleRecord"
-          />
-          <ClientOverviewAltModulesTab
-            v-else-if="activeTab === addClientTabKeys.financials"
-            :tab-key="addClientTabKeys.financials"
-            :title="t('tabFinancial')"
-            icon="payments"
-            :module-cards="moduleCards"
-            @open-record="onOpenModuleRecord"
-          />
-          <ClientOverviewAltModulesTab
-            v-else-if="activeTab === addClientTabKeys.documents"
-            :tab-key="addClientTabKeys.documents"
-            :title="t('tabDocuments')"
-            icon="folder"
-            :module-cards="moduleCards"
-            @open-record="onOpenModuleRecord"
-          />
+      <div
+        class="client-overview-page__main client-overview-alt-page__main">
+        <ClientOverviewAltTabs
+          v-model="activeTab"
+          :insurance-alert="hasInsuranceAlert"
+          :allergies-severity-modifier="allergiesSeverityModifier"
+        />
+
+        <div class="client-overview-page__body client-overview-alt-page__body">
+          <div class="client-overview-alt-page__content">
+            <ClientOverviewAltAppointments
+              v-if="activeTab === addClientTabKeys.appointments"
+              :client-id="clientId"
+              :appointments="clientAppointments"
+              @checked-in="onAppointmentCheckedIn"
+            />
+            <ClientOverviewAltBasicInfo
+              v-else-if="activeTab === addClientTabKeys.basic"
+              :basic-info="basicInfo"
+            />
+            <ClientOverviewAltContact
+              v-else-if="activeTab === addClientTabKeys.contact"
+              :contact-info="contactInfo"
+            />
+            <ClientOverviewAltAllergies
+              v-else-if="activeTab === addClientTabKeys.allergies"
+              :allergy-detail="allergyDetail"
+            />
+            <ClientOverviewAltInsurance
+              v-else-if="activeTab === addClientTabKeys.insurance"
+              :insurance-info="insuranceInfo"
+            />
+            <ClientOverviewAltModulesTab
+              v-else-if="activeTab === addClientTabKeys.clinical"
+              :tab-key="addClientTabKeys.clinical"
+              :title="t('tabClinical')"
+              icon="medical_services"
+              :module-cards="moduleCards"
+              @open-record="onOpenModuleRecord"
+            />
+            <ClientOverviewAltModulesTab
+              v-else-if="activeTab === addClientTabKeys.careCoordination"
+              :tab-key="addClientTabKeys.careCoordination"
+              :title="t('tabCareCoordination')"
+              icon="groups"
+              :module-cards="moduleCards"
+              @open-record="onOpenModuleRecord"
+            />
+            <ClientOverviewAltModulesTab
+              v-else-if="activeTab === addClientTabKeys.financials"
+              :tab-key="addClientTabKeys.financials"
+              :title="t('tabFinancial')"
+              icon="payments"
+              :module-cards="moduleCards"
+              @open-record="onOpenModuleRecord"
+            />
+            <ClientOverviewAltModulesTab
+              v-else-if="activeTab === addClientTabKeys.documents"
+              :tab-key="addClientTabKeys.documents"
+              :title="t('tabDocuments')"
+              icon="folder"
+              :module-cards="moduleCards"
+              @open-record="onOpenModuleRecord"
+            />
+          </div>
         </div>
       </div>
+    </template>
+
+    <div
+      v-else
+      class="client-overview-loading-underlay"
+      aria-hidden="true">
+      <div class="client-overview-loading-underlay__header" />
+      <div class="client-overview-loading-underlay__main" />
     </div>
-    <ClientOverviewAltBodySkeleton v-else />
 
     <StartEncounterDialog
       v-model="startDialogOpen"
@@ -121,10 +123,6 @@ import ClientOverviewAltAppointments from
   'components/client-overview/ClientOverviewAltAppointments.vue'
 import ClientOverviewAltHeader from
   'components/client-overview/ClientOverviewAltHeader.vue'
-import ClientOverviewAltHeaderSkeleton from
-  'components/client-overview/ClientOverviewAltHeaderSkeleton.vue'
-import ClientOverviewAltBodySkeleton from
-  'components/client-overview/ClientOverviewAltBodySkeleton.vue'
 import ClientOverviewAltTabs from
   'components/client-overview/ClientOverviewAltTabs.vue'
 import ClientOverviewAltBasicInfo from
