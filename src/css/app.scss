@@ -1647,6 +1647,28 @@
   padding-right: 18px !important;
 }
 
+.app-btn-ai {
+  border-radius: $radius-md;
+  font-weight: 600;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+  background: $ai-accent !important;
+  color: $white !important;
+
+  &:before {
+    box-shadow: none !important;
+  }
+
+  .q-icon {
+    color: $white !important;
+  }
+
+  &:hover:not(.disabled) {
+    background: darken($ai-accent, 6%) !important;
+    color: $white !important;
+  }
+}
+
 .app-btn-icon-action {
   opacity: 0.85;
   transition: opacity 0.15s ease, background-color 0.15s ease;

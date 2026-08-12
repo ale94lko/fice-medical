@@ -98,6 +98,12 @@
       <div class="client-overview-loading-underlay__main" />
     </div>
 
+    <AiAssistantFab
+      :visible="Boolean(header) && canUseClinicalSummary"
+      :disable="loading"
+      :client-id="clientId"
+    />
+
     <StartEncounterDialog
       v-model="startDialogOpen"
       :client-id="clientId"
@@ -118,6 +124,7 @@ import {
   quasarNotifyTypes,
 } from 'components/constants.js'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import AiAssistantFab from 'components/ai/AiAssistantFab.vue'
 import StartEncounterDialog from 'components/StartEncounterDialog.vue'
 import ClientOverviewAltAppointments from
   'components/client-overview/ClientOverviewAltAppointments.vue'
@@ -136,6 +143,7 @@ import ClientOverviewAltInsurance from
 import ClientOverviewAltModulesTab from
   'components/client-overview/ClientOverviewAltModulesTab.vue'
 import { useActiveEncounter } from 'src/composables/useActiveEncounter.js'
+import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientOverview } from 'src/composables/useClientOverview.js'
 import { buildClientOverviewAltBasicInfo } from
   'src/utils/client-overview-alt-basic-info.js'
@@ -160,6 +168,7 @@ const siteStore = useSiteStore()
 const clientId = computed(() => route.params.id)
 const activeTab = ref(addClientTabKeys.appointments)
 const startDialogOpen = ref(false)
+const { canUseClinicalSummary } = useAiPermissions()
 
 const {
   loading,

@@ -2241,7 +2241,7 @@ export default {
   activeEncounterAutoCompleteViewerNotice:
     'Hay una consulta abierta desde hace 2 horas. Pida a alguien '
     + 'con permiso que la complete o la amplíe.',
-  startEncounterButton: 'Iniciar consulta',
+  startEncounterButton: 'Consulta',
   startEncounterTitle: 'Iniciar consulta',
   startEncounterHint:
     'Elija cómo abrir la visita: walk-in, teléfono, telehealth '
@@ -3723,4 +3723,131 @@ export default {
   telehealthGuestLinkInvalid: 'Este enlace de reunión no es válido.',
   telehealthGuestLinkMissingParams:
     'Faltan tenant, subtenant, code o token en el enlace.',
+
+  aiSuggestionFraming:
+    'Sugerencia de IA — requiere revisión clínica',
+  aiSuggestionFramingHint:
+    'Borrador para revisión. No es un diagnóstico ni un tratamiento.',
+  aiDraftForReview: 'Borrador para revisión',
+  aiAlreadyInChart: 'Ya escrito en el expediente',
+  aiProvenanceProvider: 'Proveedor',
+  aiProvenanceModel: 'Modelo',
+  aiProvenancePrompt: 'Versión de prompt',
+  aiProvenanceCreated: 'Creado',
+  aiGenerate: 'Generar',
+  aiGenerating: 'Generando sugerencia de IA…',
+  aiGeneratingHint:
+    'Puede tardar hasta un minuto. No cierre este diálogo.',
+  aiGenerateError: 'No se pudo generar la sugerencia de IA.',
+  aiActionError: 'No se pudo actualizar la sugerencia de IA.',
+  aiEditsSaved: 'Ediciones guardadas.',
+  aiAcceptedSuccess:
+    'Sugerencia aceptada (no escrita en el expediente).',
+  aiCommittedSuccess:
+    'Sugerencia aceptada y escrita en el expediente.',
+  aiRejectedSuccess: 'Sugerencia rechazada.',
+  aiSaveEdits: 'Guardar ediciones',
+  aiAccept: 'Aceptar',
+  aiAcceptAndCommit: 'Aceptar y guardar en expediente',
+  aiReject: 'Rechazar',
+  aiRejectTitle: 'Rechazar sugerencia de IA',
+  aiRejectHint:
+    'Indique un motivo clínico breve para rechazar esta sugerencia.',
+  aiRejectReason: 'Motivo',
+  aiCommitConfirmTitle: '¿Guardar en el expediente clínico?',
+  aiCommitConfirmMessage:
+    'Esto escribirá la sugerencia de IA aceptada en el expediente. '
+    + 'Continúe solo tras revisión clínica.',
+  aiNotDocumentedWarning:
+    'Alergias o medicamentos pueden no estar documentados. '
+    + 'Nunca asuma NKDA ni ausencia de medicamentos.',
+  aiResultSummary: 'Resumen',
+  aiResultHighlights: 'Aspectos destacados (uno por línea)',
+  aiResultRisks: 'Riesgos (uno por línea)',
+  aiResultAllergies: 'Alergias',
+  aiResultMedications: 'Medicamentos',
+  aiResultJson: 'Resultado (JSON)',
+  aiJsonInvalid: 'Introduzca JSON válido.',
+  aiSoapSubjective: 'Subjetivo',
+  aiSoapObjective: 'Objetivo',
+  aiSoapAssessment: 'Valoración (uno por línea)',
+  aiSoapPlan: 'Plan (uno por línea)',
+  aiIcdNotDiagnosis:
+    'No es un diagnóstico — solo candidatos de codificación.',
+  aiIcdEmpty: 'No se devolvieron candidatos ICD-10.',
+  aiCarePlanNotTreatment:
+    'No es tratamiento — borrador para revisión clínica.',
+  aiConfidenceHigh: 'Alta',
+  aiConfidenceMedium: 'Media',
+  aiConfidenceLow: 'Baja',
+  aiStatusPending: 'Pendiente',
+  aiStatusEdited: 'Editada',
+  aiStatusPartiallyAccepted: 'Aceptada parcialmente',
+  aiStatusAccepted: 'Aceptada',
+  aiStatusRejected: 'Rechazada',
+  aiStatusFailed: 'Fallida',
+  aiStatusExpired: 'Expirada',
+  aiGenerateDocumentSummary: 'Resumir documentos con IA',
+  aiGenerateClinicalSummary: 'Resumen clínico con IA',
+  aiGenerateSoapDraft: 'Borrador SOAP con IA',
+  aiGenerateIcd10: 'Sugerir ICD-10 con IA',
+  aiGenerateCarePlan: 'Borrador de care plan con IA',
+  aiBtnDocumentSummary: 'Resumir con IA',
+  aiBtnClinicalSummary: 'IA Assistant',
+  aiBtnSoapDraft: 'Borrador SOAP con IA',
+  aiBtnIcd10: 'Sugerir ICD-10',
+  aiBtnCarePlanDraft: 'Borrador de care plan',
+  aiDocScope: 'Alcance',
+  aiDocScopePackage: 'Paquete de documentos',
+  aiDocScopeSingle: 'Documento individual',
+  aiDocScopeCustom: 'Personalizado',
+  aiDocumentId: 'Documento',
+  aiDocumentIdPlaceholder: 'Seleccione un documento',
+  aiDocumentIdRequired: 'Seleccione un documento.',
+  aiCustomHint: 'Indicación personalizada',
+  aiClinicalScope: 'Alcance',
+  aiClinicalScopeFaceSheet: 'Face sheet',
+  aiClinicalScopeEncounter: 'Último encounter',
+  aiClinicalScopeHistory: 'Historial reciente',
+  aiLastEncounterMissing:
+    'No hay encounter para este cliente.',
+  aiHistoryDays: 'Días de historial',
+  aiEncounter: 'Encuentro',
+  aiEncounterPlaceholder: 'Seleccione un encuentro',
+  aiEncounterOptionalPlaceholder: 'Encuentro opcional',
+  aiEncounterRequired: 'Seleccione un encuentro.',
+  aiClinicalText: 'Texto clínico (opcional)',
+  aiClinicalTextPlaceholder:
+    'Texto libre opcional para orientar la codificación',
+  aiCarePlanMode: 'Modo',
+  aiCarePlanModeNew: 'Nuevo care plan',
+  aiCarePlanModeExtend: 'Extender care plan activo',
+  aiTargetCarePlan: 'Care plan objetivo',
+  aiTargetCarePlanPlaceholder: 'Seleccione el care plan a extender',
+  aiTargetCarePlanRequired: 'Seleccione el care plan a extender.',
+  aiProblemMode: 'Modo de problemas',
+  aiProblemModeSingle: 'Problema único',
+  aiProblemModeMulti: 'Varios problemas',
+  aiFocusProblems: 'Problemas de enfoque',
+  aiFocusProblemsPlaceholder:
+    'Problemas separados por comas (opcional)',
+  aiConfigTitle: 'Configuración de IA',
+  aiConfigSubtitle:
+    'Revise el proveedor de IA y las versiones de prompts. '
+    + 'Las claves API no se muestran aquí.',
+  aiConfigEnabled: 'IA habilitada',
+  aiConfigProvider: 'Proveedor',
+  aiConfigModel: 'Modelo',
+  aiConfigPromptVersions: 'Versiones de prompts',
+  aiConfigPromptVersionsHint:
+    'Desde esta pantalla solo se pueden actualizar las versiones '
+    + 'de prompts.',
+  aiPromptClinicalSoap: 'SOAP clínico',
+  aiPromptIcd10: 'Sugerencia ICD-10',
+  aiPromptDocumentSummary: 'Resumen de documentos',
+  aiPromptClinicalSummary: 'Resumen clínico',
+  aiPromptCarePlan: 'Borrador de care plan',
+  aiConfigLoadError: 'No se pudo cargar la configuración de IA.',
+  aiConfigSaveError: 'No se pudo guardar la configuración de IA.',
+  aiConfigSaved: 'Configuración de IA guardada.',
 }

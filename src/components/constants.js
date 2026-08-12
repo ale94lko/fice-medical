@@ -1012,6 +1012,14 @@ export const permissionNames = {
   consentAuditView: 'CONSENT_AUDIT_VIEW',
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
+  useAiDocumentSummary: 'USE_AI_DOCUMENT_SUMMARY',
+  useAiClinicalSummary: 'USE_AI_CLINICAL_SUMMARY',
+  useAiScribe: 'USE_AI_SCRIBE',
+  useAiCodingAssistant: 'USE_AI_CODING_ASSISTANT',
+  useAiCarePlanDraft: 'USE_AI_CARE_PLAN_DRAFT',
+  useAiMissingInfo: 'USE_AI_MISSING_INFO',
+  manageAiConfig: 'MANAGE_AI_CONFIG',
+  manageAiSuggestion: 'MANAGE_AI_SUGGESTION',
 }
 
 export const clientPermissionNames = {
@@ -1094,7 +1102,57 @@ export const clientPermissionNames = {
   deleteTelehealthFiles: 'DELETE_TELEHEALTH_FILES',
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
+  useAiDocumentSummary: permissionNames.useAiDocumentSummary,
+  useAiClinicalSummary: permissionNames.useAiClinicalSummary,
+  useAiScribe: permissionNames.useAiScribe,
+  useAiCodingAssistant: permissionNames.useAiCodingAssistant,
+  useAiCarePlanDraft: permissionNames.useAiCarePlanDraft,
+  useAiMissingInfo: permissionNames.useAiMissingInfo,
+  manageAiConfig: permissionNames.manageAiConfig,
+  manageAiSuggestion: permissionNames.manageAiSuggestion,
 }
+
+export const aiFeatures = {
+  documentSummary: 'DOCUMENT_SUMMARY',
+  clinicalSummary: 'CLINICAL_SUMMARY',
+  soapDraft: 'SOAP_DRAFT',
+  icd10Suggest: 'ICD10_SUGGEST',
+  carePlanDraft: 'CARE_PLAN_DRAFT',
+}
+
+export const aiSuggestionStatuses = {
+  pending: 'PENDING',
+  edited: 'EDITED',
+  partiallyAccepted: 'PARTIALLY_ACCEPTED',
+  accepted: 'ACCEPTED',
+  rejected: 'REJECTED',
+  failed: 'FAILED',
+  expired: 'EXPIRED',
+}
+
+export const aiDocumentSummaryScopes = {
+  singleDocument: 'SINGLE_DOCUMENT',
+  documentPackage: 'DOCUMENT_PACKAGE',
+  custom: 'CUSTOM',
+}
+
+export const aiClinicalSummaryScopes = {
+  faceSheetLite: 'FACE_SHEET_LITE',
+  currentEncounter: 'CURRENT_ENCOUNTER',
+  recentHistory: 'RECENT_HISTORY',
+}
+
+export const aiCarePlanModes = {
+  new: 'NEW',
+  extendActive: 'EXTEND_ACTIVE',
+}
+
+export const aiCarePlanProblemModes = {
+  single: 'SINGLE',
+  multi: 'MULTI',
+}
+
+export const aiGenerateTimeoutMs = 60000
 
 export const encounterStatuses = {
   inProgress: 'IN_PROGRESS',
@@ -1388,6 +1446,31 @@ export const apiPaths = {
   encounterCancel: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/cancel`,
+  aiConfig: '/ai/v1/config',
+  aiSuggestionById: id => `/ai/v1/suggestions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  aiSuggestionAccept: id => `/ai/v1/suggestions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/accept`,
+  aiSuggestionReject: id => `/ai/v1/suggestions/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/reject`,
+  aiDocumentSummary: clientId => `/ai/v1/clients/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/document-summary`,
+  aiClinicalSummary: clientId => `/ai/v1/clients/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/clinical-summary`,
+  aiSoapDraft: encounterId => `/ai/v1/encounters/${encodeURIComponent(
+    String(encounterId ?? '').trim(),
+  )}/soap-draft`,
+  aiSuggestIcd10: encounterId => `/ai/v1/encounters/${encodeURIComponent(
+    String(encounterId ?? '').trim(),
+  )}/suggest-icd10`,
+  aiCarePlanDraft: clientId => `/ai/v1/clients/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/care-plan-draft`,
   clinicianWeeklySchedule: id => `/appointments/v1/admin/clinicians/${
     encodeURIComponent(String(id ?? '').trim())
   }/weekly-schedule`,

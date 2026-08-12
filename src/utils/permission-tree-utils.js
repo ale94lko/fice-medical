@@ -18,6 +18,7 @@ const ACTION_PREFIXES = [
   'FINISH_',
   'CHAT_',
   'UPLOAD_',
+  'USE_',
 ]
 
 const MODULE_LABELS = {
@@ -31,6 +32,14 @@ const MODULE_LABELS = {
   CARE_PLANS: 'Care Plans',
   CLINICAL_NOTES: 'Clinical Notes',
   CLINICAL_AUDIT: 'Clinical Audit',
+  AI_DOCUMENT_SUMMARY: 'AI Document Summary',
+  AI_CLINICAL_SUMMARY: 'AI Clinical Summary',
+  AI_SCRIBE: 'AI Scribe',
+  AI_CODING_ASSISTANT: 'AI Coding Assistant',
+  AI_CARE_PLAN_DRAFT: 'AI Care Plan Draft',
+  AI_MISSING_INFO: 'AI Missing Info',
+  AI_CONFIG: 'AI Config',
+  AI_SUGGESTION: 'AI Suggestions',
   CLINICIANS: 'Clinicians',
   CONTACT: 'Contact',
   FOLLOW_UPS: 'Follow Ups',

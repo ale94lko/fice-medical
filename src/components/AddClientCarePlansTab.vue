@@ -29,18 +29,32 @@
           </p>
         </div>
         <div class="col-auto">
-          <q-btn
-            v-if="canAddCarePlans"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :disable="saving"
-            :data-testid="tid.btn('add')"
-            :label="t('carePlanAdd')"
-            @click="openAdd"
-          />
+          <div class="row q-gutter-sm items-center">
+            <q-btn
+              v-if="canUseCarePlanDraft"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              icon="auto_awesome"
+              :disable="saving"
+              :data-testid="aiTestIds.featureBtn('care-plan')"
+              :label="t('aiBtnCarePlanDraft')"
+              @click="aiDialogOpen = true"
+            />
+            <q-btn
+              v-if="canAddCarePlans"
+              no-caps
+              unelevated
+              color="primary"
+              class="app-btn-primary"
+              icon="add"
+              :disable="saving"
+              :data-testid="tid.btn('add')"
+              :label="t('carePlanAdd')"
+              @click="openAdd"
+            />
+          </div>
         </div>
       </div>
 
@@ -72,6 +86,14 @@
       @cancel="dialogOpen = false"
       @record-progress="onRecordProgress"
     />
+
+    <AiGenerateDialog
+      v-model="aiDialogOpen"
+      :feature="aiFeatures.carePlanDraft"
+      :client-id="clientId"
+      :care-plan-options="carePlanSelectOptions"
+      @committed="refreshClientCarePlans"
+    />
   </div>
 </template>
 
@@ -80,9 +102,14 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import CarePlanDialog from 'components/CarePlanDialog.vue'
 import CarePlansTable from 'components/CarePlansTable.vue'
-import { quasarNotifyTypes } from 'components/constants.js'
+import {
+  aiFeatures,
+  quasarNotifyTypes,
+} from 'components/constants.js'
+import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientCarePlanPermissions } from
   'src/composables/useClientCarePlanPermissions.js'
 import {
@@ -105,6 +132,7 @@ import {
 } from 'src/utils/care-plan-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
+import { aiTestIds } from 'src/test-ids/ai.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -131,12 +159,14 @@ const {
   canEditCarePlans,
   canSignCarePlans,
 } = useClientCarePlanPermissions()
+const { canUseCarePlanDraft } = useAiPermissions()
 
 const saving = ref(false)
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
 const activePlan = ref(null)
+const aiDialogOpen = ref(false)
 
 const hasClientId = computed(() => {
   const id = String(props.clientId ?? '').trim()
@@ -156,6 +186,13 @@ const carePlansRaw = computed(() =>
 
 const planRows = computed(() =>
   mapCarePlansListFromApi(carePlansRaw.value),
+)
+
+const carePlanSelectOptions = computed(() =>
+  planRows.value.map(row => ({
+    label: row.name || row.problem || String(row.id),
+    value: row.id,
+  })),
 )
 
 function findRawCarePlan(planId) {

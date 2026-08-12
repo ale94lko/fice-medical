@@ -29,18 +29,44 @@
           </p>
         </div>
         <div class="col-auto">
-          <q-btn
-            v-if="canAddClinicalNotes"
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            icon="add"
-            :disable="saving"
-            :data-testid="tid.btn('add')"
-            :label="t('clinicalNoteAdd')"
-            @click="openAdd"
-          />
+          <div class="row q-gutter-sm items-center">
+            <q-btn
+              v-if="canUseScribe"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              icon="auto_awesome"
+              :disable="saving"
+              :data-testid="aiTestIds.featureBtn('soap-draft')"
+              :label="t('aiBtnSoapDraft')"
+              @click="openAiFeature(aiFeatures.soapDraft)"
+            />
+            <q-btn
+              v-if="canUseCodingAssistant"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              icon="auto_awesome"
+              :disable="saving"
+              :data-testid="aiTestIds.featureBtn('icd10')"
+              :label="t('aiBtnIcd10')"
+              @click="openAiFeature(aiFeatures.icd10Suggest)"
+            />
+            <q-btn
+              v-if="canAddClinicalNotes"
+              no-caps
+              unelevated
+              color="primary"
+              class="app-btn-primary"
+              icon="add"
+              :disable="saving"
+              :data-testid="tid.btn('add')"
+              :label="t('clinicalNoteAdd')"
+              @click="openAdd"
+            />
+          </div>
         </div>
       </div>
 
@@ -89,6 +115,13 @@
       test-id="clinical-note-delete"
       @confirm="onDeleteConfirmed"
     />
+
+    <AiGenerateDialog
+      v-model="aiDialogOpen"
+      :feature="aiFeature"
+      :client-id="clientId"
+      @committed="onAiCommitted"
+    />
   </div>
 </template>
 
@@ -97,10 +130,15 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import ClinicalNoteDialog from 'components/ClinicalNoteDialog.vue'
 import ClinicalNotesTable from 'components/ClinicalNotesTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
-import { quasarNotifyTypes } from 'components/constants.js'
+import {
+  aiFeatures,
+  quasarNotifyTypes,
+} from 'components/constants.js'
+import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientClinicalNotePermissions } from
   'src/composables/useClientClinicalNotePermissions.js'
 import { useDocumentGenerationPermissions } from
@@ -126,6 +164,7 @@ import {
 } from 'src/utils/clinical-note-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
+import { aiTestIds } from 'src/test-ids/ai.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -158,6 +197,7 @@ const {
   canSignClinicalNotes,
 } = useClientClinicalNotePermissions()
 const { canGenerateDocuments } = useDocumentGenerationPermissions()
+const { canUseScribe, canUseCodingAssistant } = useAiPermissions()
 
 const saving = ref(false)
 
@@ -168,6 +208,8 @@ const deleteDialogOpen = ref(false)
 const pendingDeleteNote = ref(null)
 const exportDialogOpen = ref(false)
 const exportContext = ref({})
+const aiDialogOpen = ref(false)
+const aiFeature = ref(aiFeatures.soapDraft)
 
 const hasClientId = computed(() =>
   Boolean(String(props.clientId ?? '').trim()),
@@ -187,6 +229,28 @@ const noteRows = computed(() =>
     resolvedClinicianOptions.value,
   ),
 )
+
+function openAiFeature(feature) {
+  aiFeature.value = feature
+  aiDialogOpen.value = true
+}
+
+async function onAiCommitted() {
+  if (!hasClientId.value) {
+    return
+  }
+  try {
+    await siteStore.fetchClientById(clientId.value)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clinicalNoteListError'),
+        position: 'top',
+      })
+    }
+  }
+}
 
 function findRawClinicalNote(noteId) {
   return clinicalNotesRaw.value.find(

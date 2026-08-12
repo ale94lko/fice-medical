@@ -262,19 +262,19 @@
             button-class="app-btn-outline"
             @generated="emit('document-generated')"
           />
+          <q-btn
+            v-if="showStartEncounter"
+            no-caps
+            unelevated
+            class="app-btn-primary client-overview-alt-header__start-encounter"
+            icon="medical_services"
+            :label="t('startEncounterButton')"
+            :disable="loading || startEncounterBusy"
+            :loading="startEncounterBusy"
+            :data-testid="encounterTestIds.startButton"
+            @click="emit('start-encounter')"
+          />
         </div>
-        <q-btn
-          v-if="showStartEncounter"
-          no-caps
-          unelevated
-          class="app-btn-primary client-overview-alt-header__start-encounter"
-          icon="medical_services"
-          :label="t('startEncounterButton')"
-          :disable="loading || startEncounterBusy"
-          :loading="startEncounterBusy"
-          :data-testid="encounterTestIds.startButton"
-          @click="emit('start-encounter')"
-        />
       </div>
     </div>
   </section>

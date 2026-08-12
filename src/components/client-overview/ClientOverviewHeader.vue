@@ -426,7 +426,11 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['review-missing', 'edit', 'document-generated'])
+const emit = defineEmits([
+  'review-missing',
+  'edit',
+  'document-generated',
+])
 
 const { t } = useI18n()
 const $q = useQuasar()

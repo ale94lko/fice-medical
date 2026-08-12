@@ -51,6 +51,12 @@
       :module="selectedModule"
       @open-record="onOpenModuleRecord"
     />
+
+    <AiAssistantFab
+      :visible="Boolean(header) && canUseClinicalSummary"
+      :disable="loading"
+      :client-id="clientId"
+    />
   </q-page>
 </template>
 
@@ -59,6 +65,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { addClientTabKeys } from 'components/constants.js'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import AiAssistantFab from 'components/ai/AiAssistantFab.vue'
 import ClientOverviewHeader from
   'components/client-overview/ClientOverviewHeader.vue'
 import ClientOverviewModules from
@@ -67,6 +74,7 @@ import ClientOverviewSidebar from
   'components/client-overview/ClientOverviewSidebar.vue'
 import ClientOverviewModuleDialog from
   'components/client-overview/ClientOverviewModuleDialog.vue'
+import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientOverview } from 'src/composables/useClientOverview.js'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 
@@ -74,6 +82,7 @@ const route = useRoute()
 const router = useRouter()
 
 const clientId = computed(() => route.params.id)
+const { canUseClinicalSummary } = useAiPermissions()
 
 const {
   loading,

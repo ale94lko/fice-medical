@@ -43,6 +43,7 @@ export const layoutTestIds = {
   navAdminScreeningTemplates: 'layout-nav-admin-screening-templates',
   navAdminConsentTemplates: 'layout-nav-admin-consent-templates',
   navAdminClinicalAudit: 'layout-nav-admin-clinical-audit',
+  navAdminAiConfig: 'layout-nav-admin-ai-config',
   navClinicalResources: 'layout-nav-clinical-resources',
 }
 
@@ -598,6 +599,8 @@ export function otherContactEmailRemoveTestId(contactId, index) {
 
 export { clientAttachmentsTestIds } from
   'src/test-ids/client-attachments.js'
+
+export { aiTestIds } from 'src/test-ids/ai.js'
 
 export {
   consentTemplateListTestIds,
