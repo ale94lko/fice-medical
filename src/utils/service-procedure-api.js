@@ -7,6 +7,10 @@ import {
 } from 'src/utils/service-procedure-form.js'
 import { mapServiceProcedureListItem } from
   'src/utils/service-procedure-list-normalize.js'
+import {
+  buildServiceRequirementRequest,
+  normalizeServiceRequirementConfig,
+} from 'src/utils/encounter-requirements-normalize.js'
 
 function unwrapListRoot(body) {
   const root = body?.data ?? body
@@ -114,4 +118,58 @@ export async function updateServiceProcedureStatus(id, status) {
 
 export async function listActiveServiceProcedures(t) {
   return listServiceProcedures({ activeOnly: true, limit: 500, page: 1 }, t)
+}
+
+export async function listServiceProcedureRequirements(serviceProcedureId) {
+  const response = await apiInstance.get(
+    apiPaths.serviceProcedureRequirements(serviceProcedureId),
+  )
+  const raw = unwrapData(response.data)
+  const items = Array.isArray(raw?.items)
+    ? raw.items
+    : Array.isArray(raw)
+      ? raw
+      : []
+
+  return items.map(item => normalizeServiceRequirementConfig(item))
+}
+
+export async function createServiceProcedureRequirement(
+  serviceProcedureId,
+  form,
+) {
+  const response = await apiInstance.post(
+    apiPaths.serviceProcedureRequirements(serviceProcedureId),
+    buildServiceRequirementRequest(form),
+  )
+
+  return normalizeServiceRequirementConfig(unwrapData(response.data))
+}
+
+export async function updateServiceProcedureRequirement(
+  serviceProcedureId,
+  requirementId,
+  form,
+) {
+  const response = await apiInstance.patch(
+    apiPaths.serviceProcedureRequirementById(
+      serviceProcedureId,
+      requirementId,
+    ),
+    buildServiceRequirementRequest(form),
+  )
+
+  return normalizeServiceRequirementConfig(unwrapData(response.data))
+}
+
+export async function deleteServiceProcedureRequirement(
+  serviceProcedureId,
+  requirementId,
+) {
+  await apiInstance.delete(
+    apiPaths.serviceProcedureRequirementById(
+      serviceProcedureId,
+      requirementId,
+    ),
+  )
 }

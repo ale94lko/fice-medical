@@ -31,8 +31,23 @@ export function appointmentCanCheckIn(status) {
   return String(status ?? '').toUpperCase() === appointmentStatuses.confirmed
 }
 
+export function appointmentCanStartEncounter(status) {
+  const s = String(status ?? '').toUpperCase()
+
+  return s === appointmentStatuses.confirmed
+    || s === appointmentStatuses.checkedIn
+}
+
+export function appointmentCanOpenWorkspace(status) {
+  return String(status ?? '').toUpperCase()
+    === appointmentStatuses.inProgress
+}
+
 export function appointmentCanComplete(status) {
-  return String(status ?? '').toUpperCase() === appointmentStatuses.checkedIn
+  const s = String(status ?? '').toUpperCase()
+
+  return s === appointmentStatuses.checkedIn
+    || s === appointmentStatuses.inProgress
 }
 
 export function appointmentCanNoShow(status) {
@@ -40,6 +55,15 @@ export function appointmentCanNoShow(status) {
 
   return s === appointmentStatuses.confirmed
     || s === appointmentStatuses.checkedIn
+}
+
+export function appointmentCanViewEncounter(appointment) {
+  const row = appointment ?? {}
+  const encounterId = row.encounterId
+    ?? row.encounter_id
+    ?? row.activeEncounterId
+
+  return encounterId != null && String(encounterId).trim() !== ''
 }
 
 /**

@@ -10,7 +10,9 @@
     </div>
 
     <template v-else>
-      <div class="labs-header row items-start">
+      <div
+        v-if="!hideHeader"
+        class="labs-header row items-start">
         <div class="col">
           <h2 class="labs-title">
             {{ t('labsTitle') }}
@@ -36,19 +38,21 @@
 
       <div
         v-if="loading"
-        class="fmh-list-card q-pa-xl flex flex-center q-mt-md">
+        class="fmh-list-card q-pa-xl flex flex-center"
+        :class="{ 'q-mt-md': !hideHeader }">
         <AppBrandLoading inline />
       </div>
 
       <AdminTablePanel
         v-else
-        class="labs-table-panel admin-table-panel--wide q-mt-md"
+        class="labs-table-panel admin-table-panel--wide"
+        :class="{ 'q-mt-md': !hideHeader }"
         :show-column-settings="false">
         <LabsTable
           :rows="labs"
           :can-edit="!readonly"
           :can-delete="canDelete"
-          :empty-label="t('labListEmpty')"
+          :empty-label="resolvedEmptyLabel"
           @view="openView"
           @download="onRowDownload"
           @collect="row => openTransition(row, 'collect')"
@@ -145,7 +149,17 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hideHeader: {
+    type: Boolean,
+    default: false,
+  },
+  emptyLabel: {
+    type: String,
+    default: '',
+  },
 })
+
+const emit = defineEmits(['changed'])
 
 const labs = defineModel({
   type: Array,
@@ -182,6 +196,14 @@ const patientId = computed(() => String(props.patientId ?? '').trim())
 const resolvedClinicianOptions = computed(() =>
   props.clinicianOptions?.length ? props.clinicianOptions : [],
 )
+
+const resolvedEmptyLabel = computed(() =>
+  String(props.emptyLabel || '').trim() || t('labListEmpty'),
+)
+
+function notifyListChanged() {
+  emit('changed')
+}
 
 function labRowHasDetail(row) {
   return Array.isArray(row?.components)
@@ -376,6 +398,7 @@ async function onDialogSave(lab, meta = {}) {
         message: successMessageForAction(action),
         position: 'top',
       })
+      notifyListChanged()
 
       return
     }
@@ -391,6 +414,7 @@ async function onDialogSave(lab, meta = {}) {
         message: t('labCancelledSuccess'),
         position: 'top',
       })
+      notifyListChanged()
 
       return
     }
@@ -419,6 +443,7 @@ async function onDialogSave(lab, meta = {}) {
       message: successMessageForAction(action),
       position: 'top',
     })
+    notifyListChanged()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -456,6 +481,7 @@ async function confirmCancelLab(reason) {
       message: t('labCancelledSuccess'),
       position: 'top',
     })
+    notifyListChanged()
 
     return
   }
@@ -476,6 +502,7 @@ async function confirmCancelLab(reason) {
       message: t('labCancelledSuccess'),
       position: 'top',
     })
+    notifyListChanged()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -684,5 +711,7 @@ async function onRemoveAttachment(fileId) {
     }
   }
 }
+
+defineExpose({ openAdd })
 
 </script>

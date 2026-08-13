@@ -1,0 +1,439 @@
+<template>
+  <section class="encounter-workspace-card">
+    <div class="encounter-workspace-card__head">
+      <div>
+        <h2>{{ t('encounterClinicalCarePlans') }}</h2>
+        <p class="text-body2 text-grey-7 q-mb-none">
+          {{ t('encounterClinicalCarePlansHint') }}
+        </p>
+      </div>
+      <div class="row q-gutter-sm items-center no-wrap">
+        <q-btn
+          v-if="canUseCarePlanDraft"
+          no-caps
+          outline
+          color="primary"
+          class="app-btn-outline"
+          icon="auto_awesome"
+          :disable="saving"
+          :data-testid="aiTestIds.featureBtn('care-plan')"
+          :label="t('aiBtnCarePlanDraft')"
+          @click="aiDialogOpen = true"
+        />
+        <q-btn
+          v-if="canAddCarePlans"
+          no-caps
+          unelevated
+          color="primary"
+          class="app-btn-primary"
+          icon="add"
+          :disable="saving"
+          :data-testid="tid.btn('add')"
+          :label="t('carePlanAdd')"
+          @click="openAdd"
+        />
+        <q-btn
+          no-caps
+          outline
+          color="primary"
+          class="app-btn-outline"
+          :label="t('encounterClinicalAllCarePlans')"
+          :loading="allLoading"
+          data-testid="encounter-clinical-all-care-plans"
+          @click="openAllRecords"
+        />
+      </div>
+    </div>
+
+    <AdminTablePanel
+      class="admin-table-panel--wide"
+      :show-column-settings="false">
+      <CarePlansTable
+        :rows="planRows"
+        :empty-label="t('encounterClinicalCarePlansEmpty')"
+        :can-edit="canEditCarePlans"
+        :can-sign="canSignCarePlans"
+        @view="openView"
+        @edit="openEdit"
+        @sign="openSign"
+        @status="onChangeStatus"
+      />
+    </AdminTablePanel>
+
+    <CarePlanDialog
+      v-model="dialogOpen"
+      :client-id="clientKey"
+      :mode="dialogMode"
+      :plan="activePlan"
+      :clinician-options="resolvedClinicianOptions"
+      :can-sign="canSignCarePlans"
+      :saving="saving"
+      @save="onSave"
+      @cancel="dialogOpen = false"
+      @record-progress="onRecordProgress"
+    />
+
+    <AiGenerateDialog
+      v-model="aiDialogOpen"
+      :feature="aiFeatures.carePlanDraft"
+      :client-id="clientKey"
+      :care-plan-options="carePlanSelectOptions"
+      @committed="emit('changed')"
+    />
+
+    <EncounterClinicalAllRecordsDialog
+      v-model="allOpen"
+      :title="t('encounterClinicalAllCarePlansTitle')"
+      :hint="t('encounterClinicalAllRecordsHint')"
+      :loading="allLoading"
+      :error="allError">
+      <CarePlansTable
+        :rows="allRows"
+        :empty-label="t('encounterClinicalAllRecordsEmpty')"
+        :can-edit="false"
+        :can-sign="false"
+        @view="openViewFromAll"
+      />
+    </EncounterClinicalAllRecordsDialog>
+  </section>
+</template>
+
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
+import CarePlanDialog from 'components/CarePlanDialog.vue'
+import CarePlansTable from 'components/CarePlansTable.vue'
+import EncounterClinicalAllRecordsDialog from
+  'components/encounter/EncounterClinicalAllRecordsDialog.vue'
+import {
+  aiFeatures,
+  quasarNotifyTypes,
+} from 'components/constants.js'
+import { useAiPermissions } from 'src/composables/useAiPermissions.js'
+import { useClientCarePlanPermissions } from
+  'src/composables/useClientCarePlanPermissions.js'
+import {
+  apiErrorMessage,
+  changeCarePlanStatus,
+  createClientCarePlan,
+  fetchClientCarePlan,
+  listClientCarePlans,
+  prepareCarePlanForSave,
+  signClientCarePlan,
+  updateClientCarePlan,
+  updateOutcomeMeasureCurrentValue,
+} from 'src/utils/care-plan-api.js'
+import {
+  mapCarePlansListFromApi,
+  normalizeCarePlanDetail,
+} from 'src/utils/care-plan-normalize.js'
+import {
+  cloneCarePlan,
+  createEmptyCarePlan,
+  isServerNumericId,
+} from 'src/utils/care-plan-orders.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { aiTestIds } from 'src/test-ids/ai.js'
+import { carePlanTestIds as tid } from 'src/test-ids/index.js'
+
+const props = defineProps({
+  clientId: {
+    type: [String, Number],
+    default: null,
+  },
+  carePlans: {
+    type: Array,
+    default: () => [],
+  },
+  clinicianOptions: {
+    type: Array,
+    default: () => [],
+  },
+})
+
+const emit = defineEmits(['changed'])
+
+const { t } = useI18n()
+const $q = useQuasar()
+const {
+  canAddCarePlans,
+  canEditCarePlans,
+  canSignCarePlans,
+} = useClientCarePlanPermissions()
+const { canUseCarePlanDraft } = useAiPermissions()
+
+const saving = ref(false)
+const dialogOpen = ref(false)
+const dialogMode = ref('add')
+const activePlan = ref(null)
+const aiDialogOpen = ref(false)
+const allOpen = ref(false)
+const allLoading = ref(false)
+const allError = ref('')
+const allRows = ref([])
+const allRawById = ref({})
+
+const clientKey = computed(() => String(props.clientId ?? '').trim())
+
+const resolvedClinicianOptions = computed(() =>
+  props.clinicianOptions?.length ? props.clinicianOptions : [],
+)
+
+const carePlansRaw = computed(() =>
+  Array.isArray(props.carePlans) ? props.carePlans : [],
+)
+
+const planRows = computed(() =>
+  mapCarePlansListFromApi(carePlansRaw.value),
+)
+
+const carePlanSelectOptions = computed(() =>
+  planRows.value.map(row => ({
+    label: row.name || row.problem || String(row.id),
+    value: row.id,
+  })),
+)
+
+function findRawCarePlan(planId) {
+  return carePlansRaw.value.find(
+    row => String(row?.id) === String(planId),
+  )
+}
+
+function planDetailFromRecord(planId) {
+  const raw = findRawCarePlan(planId)
+  if (!raw) {
+    return null
+  }
+
+  return normalizeCarePlanDetail(raw)
+}
+
+function openAdd() {
+  dialogMode.value = 'add'
+  activePlan.value = createEmptyCarePlan()
+  dialogOpen.value = true
+}
+
+function openView(row) {
+  if (isServerNumericId(row.id)) {
+    const detail = planDetailFromRecord(row.id)
+    if (detail) {
+      activePlan.value = detail
+      dialogMode.value = 'view'
+      dialogOpen.value = true
+
+      return
+    }
+  }
+  activePlan.value = cloneCarePlan(row)
+  dialogMode.value = 'view'
+  dialogOpen.value = true
+}
+
+function openEdit(row) {
+  if (!canEditCarePlans.value) {
+    return
+  }
+  if (isServerNumericId(row.id)) {
+    const detail = planDetailFromRecord(row.id)
+    if (detail) {
+      activePlan.value = detail
+      dialogMode.value = 'edit'
+      dialogOpen.value = true
+
+      return
+    }
+  }
+  activePlan.value = cloneCarePlan(row)
+  dialogMode.value = 'edit'
+  dialogOpen.value = true
+}
+
+function openSign(row) {
+  if (!canSignCarePlans.value) {
+    return
+  }
+  const detail = planDetailFromRecord(row.id)
+  if (detail) {
+    activePlan.value = detail
+    dialogMode.value = 'edit'
+    dialogOpen.value = true
+
+    return
+  }
+  activePlan.value = cloneCarePlan(row)
+  dialogMode.value = 'edit'
+  dialogOpen.value = true
+}
+
+async function openAllRecords() {
+  if (!clientKey.value) {
+    return
+  }
+  allOpen.value = true
+  allLoading.value = true
+  allError.value = ''
+  try {
+    const result = await listClientCarePlans(clientKey.value, {
+      page: 0,
+      limit: 200,
+    })
+    allRows.value = result.items ?? []
+    const map = {}
+    allRows.value.forEach(row => {
+      if (row?.id != null) {
+        map[String(row.id)] = row
+      }
+    })
+    allRawById.value = map
+  } catch (error) {
+    allRows.value = []
+    allRawById.value = {}
+    if (!isAuthSessionEndUIError(error)) {
+      allError.value = t('encounterClinicalAllRecordsLoadError')
+    }
+  } finally {
+    allLoading.value = false
+  }
+}
+
+async function openViewFromAll(row) {
+  if (!row?.id || !clientKey.value) {
+    return
+  }
+  try {
+    const detail = await fetchClientCarePlan(clientKey.value, row.id)
+    activePlan.value = detail || cloneCarePlan(
+      allRawById.value[String(row.id)] || row,
+    )
+    dialogMode.value = 'view'
+    dialogOpen.value = true
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      openView(row)
+    }
+  }
+}
+
+async function onSave({ plan, activate }) {
+  if (!clientKey.value) {
+    return
+  }
+  saving.value = true
+  try {
+    const payload = prepareCarePlanForSave(plan)
+    let savedId = payload.id
+    if (isServerNumericId(payload.id)) {
+      const saved = await updateClientCarePlan(clientKey.value, payload)
+      savedId = saved.id
+    } else {
+      const saved = await createClientCarePlan(clientKey.value, payload)
+      savedId = saved.id
+    }
+    let successMessage = t('carePlanSaved')
+    if (activate) {
+      if (!payload.signature) {
+        $q.notify({
+          type: quasarNotifyTypes.negative,
+          message: t('carePlanSignatureRequired'),
+          position: 'top',
+        })
+
+        return
+      }
+      if (!canSignCarePlans.value) {
+        $q.notify({
+          type: quasarNotifyTypes.negative,
+          message: t('carePlanNoSignPermission'),
+          position: 'top',
+        })
+
+        return
+      }
+      await signClientCarePlan(
+        clientKey.value,
+        savedId,
+        payload.signature,
+      )
+      successMessage = t('carePlanActivated')
+    }
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: successMessage,
+      position: 'top',
+    })
+    dialogOpen.value = false
+    emit('changed')
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+        position: 'top',
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onChangeStatus(row, status) {
+  if (!canEditCarePlans.value || !clientKey.value) {
+    return
+  }
+  try {
+    await changeCarePlanStatus(clientKey.value, row.id, status)
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('carePlanStatusUpdated'),
+      position: 'top',
+    })
+    emit('changed')
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+        position: 'top',
+      })
+    }
+  }
+}
+
+async function onRecordProgress({ goalId, measureId, currentValue }) {
+  if (!activePlan.value?.id || !clientKey.value) {
+    return
+  }
+  saving.value = true
+  try {
+    const updated = await updateOutcomeMeasureCurrentValue(
+      clientKey.value,
+      activePlan.value.id,
+      goalId,
+      measureId,
+      currentValue,
+    )
+    activePlan.value = updated
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('carePlanMeasurementSaved'),
+      position: 'top',
+    })
+    emit('changed')
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+        position: 'top',
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+</script>

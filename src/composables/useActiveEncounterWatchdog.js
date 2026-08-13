@@ -23,7 +23,7 @@ import {
   ENCOUNTER_REMINDER_MS,
   formatEncounterElapsedLabel,
   loadEncounterWatchState,
-  parseEncounterStartedAtMs,
+  resolveEncounterElapsedAnchorMs,
   resolveRouteClientId,
   saveEncounterWatchState,
 } from 'src/utils/encounter-session-watch.js'
@@ -94,7 +94,8 @@ export function useActiveEncounterWatchdog() {
   function buildSession(entry) {
     const encounter = entry.encounter
     const encounterId = encounter.id
-    const startedAtMs = parseEncounterStartedAtMs(encounter)
+    // Anchor discounts inactive time after reopen (not raw startedAt).
+    const startedAtMs = resolveEncounterElapsedAnchorMs(encounter)
     const stored = loadEncounterWatchState(encounterId)
     const defaultAutoAt = startedAtMs + ENCOUNTER_AUTO_COMPLETE_MS
     const autoCompleteAtMs = Number.isFinite(stored?.autoCompleteAtMs)
@@ -122,9 +123,11 @@ export function useActiveEncounterWatchdog() {
 
       return false
     }
+    const nextStartedAtMs = resolveEncounterElapsedAnchorMs(encounter)
     if (
       !session
       || String(session.encounterId) !== String(encounter.id)
+      || session.startedAtMs !== nextStartedAtMs
     ) {
       clearCountdown()
       session = buildSession(entry)
@@ -253,11 +256,7 @@ export function useActiveEncounterWatchdog() {
     try {
       await completeEncounter(entry.encounter.id, entry.clientId)
       clearCountdown()
-      if (session?.encounterId) {
-        clearEncounterWatchState(session.encounterId)
-      }
-      session = null
-      elapsedLabel.value = ''
+      resetSession()
       $q.notify({
         type: quasarNotifyTypes.positive,
         message: t('activeEncounterAutoCompleteSuccess'),
@@ -271,11 +270,7 @@ export function useActiveEncounterWatchdog() {
       if (isEncounterConflictError(error)
         || isEncounterInvalidError(error)
       ) {
-        if (session?.encounterId) {
-          clearEncounterWatchState(session.encounterId)
-        }
-        session = null
-        elapsedLabel.value = ''
+        resetSession()
 
         return
       }

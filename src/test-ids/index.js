@@ -190,6 +190,16 @@ export const serviceProcedureDialogTestIds = {
   dialog: 'service-procedure-dialog',
   field: name => toTestId('service-procedure-dialog-field', name),
   btn: name => toTestId('service-procedure-dialog-btn', name),
+  requirementRowEdit: id => toTestId(
+    'service-procedure-dialog-req',
+    id,
+    'btn-edit',
+  ),
+  requirementRowDelete: id => toTestId(
+    'service-procedure-dialog-req',
+    id,
+    'btn-delete',
+  ),
 }
 
 export const screeningTemplateListTestIds = {
@@ -333,6 +343,7 @@ export const clientOverviewAltTestIds = {
   allergies: 'client-overview-alt-allergies',
   insurance: 'client-overview-alt-insurance',
   appointments: 'client-overview-alt-appointments',
+  encounters: 'client-overview-alt-encounters',
   modulesTab: key => toTestId('client-overview-alt-modules', key),
   sidebar: 'client-overview-alt-sidebar',
   viewAllActivity: 'client-overview-alt-btn-view-all-activity',
@@ -345,6 +356,7 @@ export const encounterTestIds = {
   complete: 'active-encounter-btn-complete',
   cancel: 'active-encounter-btn-cancel',
   startButton: 'start-encounter-btn',
+  startMenu: 'start-encounter-menu',
   startDialog: 'start-encounter',
   startSubmit: 'start-encounter-btn-submit',
   field: name => toTestId('start-encounter-field', name),
@@ -601,6 +613,9 @@ export { clientAttachmentsTestIds } from
   'src/test-ids/client-attachments.js'
 
 export { aiTestIds } from 'src/test-ids/ai.js'
+
+export { encounterWorkspaceTestIds } from
+  'src/test-ids/encounter-workspace.js'
 
 export {
   consentTemplateListTestIds,

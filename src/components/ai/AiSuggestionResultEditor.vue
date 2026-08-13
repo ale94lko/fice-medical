@@ -240,8 +240,7 @@ const carePlanJson = ref('')
 const genericJson = ref('')
 
 const isSummaryFeature = computed(() =>
-  props.feature === aiFeatures.documentSummary
-  || props.feature === aiFeatures.clinicalSummary,
+  props.feature === aiFeatures.clinicalSummary,
 )
 
 const hasMedications = computed(() =>

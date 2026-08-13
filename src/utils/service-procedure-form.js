@@ -3,6 +3,10 @@ import {
   serviceProcedureCategoryValues,
   serviceProcedureStatusValues,
 } from 'components/constants.js'
+import {
+  formatStaffCompensationRateAmount,
+  parseStaffCompensationRate,
+} from 'src/utils/staff-form.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -27,12 +31,17 @@ function parseOptionalPositiveInt(value) {
 }
 
 function parseOptionalFee(value) {
-  if (value == null || value === '') {
+  const n = parseStaffCompensationRate(value)
+  if (n == null) {
     return null
   }
-  const n = Number(value)
 
   return Number.isFinite(n) && n >= 0 ? n : null
+}
+
+function toFeeInputString(value) {
+  return formatStaffCompensationRateAmount(value)
+    || toOptionalInputString(value)
 }
 
 function parseCategory(value) {
@@ -95,7 +104,7 @@ export function normalizeServiceProcedureFromApi(raw = {}) {
     ),
     cptCode: trim(raw.cpt_code ?? raw.cptCode),
     hcpcsCode: trim(raw.hcpcs_code ?? raw.hcpcsCode),
-    defaultFee: toOptionalInputString(
+    defaultFee: toFeeInputString(
       parseOptionalFee(raw.default_fee ?? raw.defaultFee),
     ),
     authorizationRequirement: parseAuthorizationRequirement(
@@ -136,7 +145,7 @@ export function cloneServiceProcedureForm(form) {
     ...base,
     minDurationMin: toOptionalInputString(base.minDurationMin),
     maxDurationMin: toOptionalInputString(base.maxDurationMin),
-    defaultFee: toOptionalInputString(base.defaultFee),
+    defaultFee: toFeeInputString(base.defaultFee),
   }
 }
 
@@ -149,6 +158,11 @@ export function validateServiceProcedureForm(form, t) {
 
   if (!parseCategory(form.category)) {
     errors.category = t('serviceProcedureCategoryRequired')
+  }
+
+  const allowedAuth = Object.values(authorizationRequirementValues)
+  if (!allowedAuth.includes(trim(form.authorizationRequirement))) {
+    errors.authorizationRequirement = t('serviceProcedureAuthReqRequired')
   }
 
   const minDuration = parseOptionalPositiveInt(form.minDurationMin)

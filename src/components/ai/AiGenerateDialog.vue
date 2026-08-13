@@ -20,51 +20,7 @@
 
         <template v-if="step === 'options'">
           <div class="row q-col-gutter-md">
-            <template v-if="feature === aiFeatures.documentSummary">
-              <div class="col-12 col-md-6">
-                <FormField :label="t('aiDocScope')" required>
-                  <FormSelect
-                    v-model="form.scope"
-                    outlined
-                    emit-value
-                    map-options
-                    :options="documentScopeOptions"
-                    :test-id="aiTestIds.field('doc-scope')"
-                  />
-                </FormField>
-              </div>
-              <div
-                v-if="form.scope === aiDocumentSummaryScopes.singleDocument"
-                class="col-12 col-md-6">
-                <FormField :label="t('aiDocumentId')" required>
-                  <FormSelect
-                    v-model="form.documentId"
-                    outlined
-                    emit-value
-                    map-options
-                    clearable
-                    :options="documentOptions"
-                    :placeholder="t('aiDocumentIdPlaceholder')"
-                    :test-id="aiTestIds.field('document-id')"
-                  />
-                </FormField>
-              </div>
-              <div
-                v-if="form.scope === aiDocumentSummaryScopes.custom"
-                class="col-12">
-                <FormField :label="t('aiCustomHint')">
-                  <q-input
-                    v-model="form.customHint"
-                    type="textarea"
-                    outlined
-                    autogrow
-                    :data-testid="aiTestIds.field('custom-hint')"
-                  />
-                </FormField>
-              </div>
-            </template>
-
-            <template v-else-if="feature === aiFeatures.clinicalSummary">
+            <template v-if="feature === aiFeatures.clinicalSummary">
               <div class="col-12 col-md-6">
                 <FormField :label="t('aiClinicalScope')" required>
                   <FormSelect
@@ -294,7 +250,6 @@ import {
   aiCarePlanModes,
   aiCarePlanProblemModes,
   aiClinicalSummaryScopes,
-  aiDocumentSummaryScopes,
   aiFeatures,
   quasarNotifyTypes,
 } from 'components/constants.js'
@@ -305,7 +260,6 @@ import {
   aiApiErrorMessage,
   generateCarePlanDraft,
   generateClinicalSummary,
-  generateDocumentSummary,
   generateIcd10Suggest,
   generateSoapDraft,
   patchAiSuggestion,
@@ -334,14 +288,6 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
-  documentId: {
-    type: [String, Number],
-    default: null,
-  },
-  documentOptions: {
-    type: Array,
-    default: () => [],
-  },
   carePlanOptions: {
     type: Array,
     default: () => [],
@@ -357,7 +303,6 @@ const emit = defineEmits(['update:modelValue', 'committed', 'accepted'])
 const { t } = useI18n()
 const $q = useQuasar()
 const {
-  canUseDocumentSummary,
   canUseClinicalSummary,
   canUseScribe,
   canUseCodingAssistant,
@@ -378,9 +323,7 @@ const encountersLoading = ref(false)
 const encounterOptions = ref([])
 
 const form = reactive({
-  scope: aiDocumentSummaryScopes.documentPackage,
-  documentId: null,
-  customHint: '',
+  scope: aiClinicalSummaryScopes.faceSheetLite,
   encounterId: null,
   historyDays: 90,
   clinicalText: '',
@@ -389,21 +332,6 @@ const form = reactive({
   problemMode: aiCarePlanProblemModes.single,
   focusProblemsText: '',
 })
-
-const documentScopeOptions = computed(() => [
-  {
-    label: t('aiDocScopePackage'),
-    value: aiDocumentSummaryScopes.documentPackage,
-  },
-  {
-    label: t('aiDocScopeSingle'),
-    value: aiDocumentSummaryScopes.singleDocument,
-  },
-  {
-    label: t('aiDocScopeCustom'),
-    value: aiDocumentSummaryScopes.custom,
-  },
-])
 
 const clinicalScopeOptions = computed(() => [
   {
@@ -450,9 +378,6 @@ const needsEncounter = computed(() =>
 )
 
 const featurePermission = computed(() => {
-  if (props.feature === aiFeatures.documentSummary) {
-    return canUseDocumentSummary.value
-  }
   if (props.feature === aiFeatures.clinicalSummary) {
     return canUseClinicalSummary.value
   }
@@ -477,7 +402,6 @@ const canReview = computed(() =>
 
 const dialogTitle = computed(() => {
   const map = {
-    [aiFeatures.documentSummary]: 'aiGenerateDocumentSummary',
     [aiFeatures.clinicalSummary]: 'aiGenerateClinicalSummary',
     [aiFeatures.soapDraft]: 'aiGenerateSoapDraft',
     [aiFeatures.icd10Suggest]: 'aiGenerateIcd10',
@@ -511,17 +435,13 @@ function resetState() {
   suggestion.value = null
   optionsError.value = ''
   actionSaving.value = false
-  form.documentId = props.documentId ?? null
-  form.customHint = ''
   form.clinicalText = ''
   form.historyDays = 90
   form.mode = aiCarePlanModes.new
   form.targetCarePlanId = null
   form.problemMode = aiCarePlanProblemModes.single
   form.focusProblemsText = ''
-  if (props.feature === aiFeatures.documentSummary) {
-    form.scope = aiDocumentSummaryScopes.documentPackage
-  } else if (props.feature === aiFeatures.clinicalSummary) {
+  if (props.feature === aiFeatures.clinicalSummary) {
     form.scope = aiClinicalSummaryScopes.faceSheetLite
   }
   form.encounterId = props.encounterId
@@ -567,13 +487,6 @@ function formatEncounterLabel(row) {
 
 function validateOptions() {
   optionsError.value = ''
-  if (props.feature === aiFeatures.documentSummary
-    && form.scope === aiDocumentSummaryScopes.singleDocument
-    && form.documentId == null) {
-    optionsError.value = t('aiDocumentIdRequired')
-
-    return false
-  }
   if ((props.feature === aiFeatures.soapDraft
     || props.feature === aiFeatures.icd10Suggest)
     && form.encounterId == null) {
@@ -620,13 +533,6 @@ async function onGenerate() {
 }
 
 async function runGenerate() {
-  if (props.feature === aiFeatures.documentSummary) {
-    return generateDocumentSummary(props.clientId, {
-      scope: form.scope,
-      documentId: form.documentId,
-      customHint: form.customHint,
-    })
-  }
   if (props.feature === aiFeatures.clinicalSummary) {
     return generateClinicalSummary(props.clientId, {
       scope: form.scope,

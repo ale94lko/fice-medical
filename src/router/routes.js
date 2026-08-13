@@ -84,6 +84,19 @@ const routes = [
         },
       },
       {
+        path: 'encounters/:id/workspace',
+        name: 'EncounterWorkspace',
+        component: () => import(
+          'pages/encounter/EncounterWorkspacePage.vue'
+        ),
+        meta: {
+          requiresAnyPermission: [
+            permissionNames.viewEncounter,
+            permissionNames.manageEncounter,
+          ],
+        },
+      },
+      {
         path: 'administration/subtenants/add',
         name: 'AdminSubtenantsAdd',
         component: () => import('pages/admin/SubtenantList.vue'),

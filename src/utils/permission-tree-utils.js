@@ -32,7 +32,6 @@ const MODULE_LABELS = {
   CARE_PLANS: 'Care Plans',
   CLINICAL_NOTES: 'Clinical Notes',
   CLINICAL_AUDIT: 'Clinical Audit',
-  AI_DOCUMENT_SUMMARY: 'AI Document Summary',
   AI_CLINICAL_SUMMARY: 'AI Clinical Summary',
   AI_SCRIBE: 'AI Scribe',
   AI_CODING_ASSISTANT: 'AI Coding Assistant',

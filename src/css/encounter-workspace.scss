@@ -1,0 +1,426 @@
+.encounter-workspace-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 88px;
+  box-sizing: border-box;
+  /* Avoid flex collapse inside .app-content-root */
+  flex: 0 0 auto;
+  height: auto;
+  min-height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.encounter-workspace-page__body {
+  min-width: 0;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.encounter-workspace-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 320px;
+  text-align: center;
+  color: $text-muted;
+}
+
+.encounter-workspace-header {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.5fr) minmax(140px, 1fr)
+    minmax(140px, 1fr) auto auto;
+  gap: 16px;
+  align-items: start;
+  padding: 14px 16px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  background: $surface;
+  box-shadow: $shadow-sm;
+}
+
+.encounter-workspace-header__identity {
+  min-width: 0;
+}
+
+.encounter-workspace-header__avatar {
+  width: 72px;
+  height: 72px;
+}
+
+.encounter-workspace-header__name {
+  margin-bottom: 6px;
+  font-size: 1.375rem;
+}
+
+.encounter-workspace-header__dob-age {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $table-text-secondary;
+  line-height: 1.35;
+}
+
+.encounter-workspace-header__visit,
+.encounter-workspace-header__provider {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.875rem;
+  color: $table-text-secondary;
+  padding-top: 4px;
+}
+
+.encounter-workspace-header__label {
+  display: block;
+  font-size: 0.75rem;
+  color: $text-muted;
+}
+
+.encounter-workspace-header__status-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  padding-top: 4px;
+}
+
+.encounter-workspace-header__status-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 0.75rem;
+  color: $text-muted;
+}
+
+.encounter-workspace-header__status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #f1f5f9;
+  color: $table-text-secondary;
+}
+
+.encounter-workspace-header__status-badge--progress {
+  background: rgba(#16a34a, 0.12);
+  color: #15803d;
+}
+
+.encounter-workspace-header__status-badge--completed {
+  background: rgba($primary, 0.1);
+  color: $primary;
+}
+
+.encounter-workspace-header__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.encounter-workspace-header__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 4px;
+  min-width: 11.5rem;
+
+  > .q-btn {
+    width: 100%;
+  }
+}
+
+.encounter-workspace-header__actions-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex-wrap: nowrap;
+  width: 100%;
+
+  > .q-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+.encounter-allergy-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: $radius-md;
+  background: #fff1f2;
+  border: 1px solid rgba(#dc2626, 0.18);
+}
+
+.encounter-allergy-banner__content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.encounter-allergy-banner__label {
+  color: #b91c1c;
+}
+
+.encounter-allergy-banner__list {
+  color: $table-text-secondary;
+  font-size: 0.875rem;
+}
+
+.encounter-workspace-tabs-row.tabs-row {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  background: transparent;
+}
+
+.encounter-workspace-tabs {
+  width: 100%;
+}
+
+.encounter-workspace-card {
+  padding: 16px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  background: $surface;
+  box-shadow: $shadow-sm;
+
+  h2,
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+
+.encounter-workspace-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.encounter-workspace-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+  gap: 12px;
+}
+
+.encounter-workspace-overview__progress {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 140px;
+  text-align: right;
+}
+
+.encounter-workspace-overview__progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+
+  span {
+    display: block;
+    height: 100%;
+    background: #16a34a;
+  }
+}
+
+.encounter-workspace-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.encounter-workspace-checklist__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+}
+
+.encounter-workspace-checklist__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.encounter-workspace-checklist__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.encounter-workspace-optional {
+  h3 {
+    margin: 0 0 10px;
+    font-size: 0.9375rem;
+  }
+}
+
+.encounter-workspace-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.encounter-workspace-quick-actions__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.encounter-workspace-quick-actions__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+
+.encounter-workspace-quick-actions__icon--purple {
+  background: #faf5ff;
+  color: #9333ea;
+}
+
+.encounter-workspace-quick-actions__icon--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.encounter-workspace-quick-actions__icon--green {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.encounter-workspace-quick-actions__icon--orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.encounter-workspace-quick-actions__label {
+  flex: 1 1 auto;
+  font-weight: 600;
+}
+
+.encounter-workspace-billing__checks {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+  }
+}
+
+.encounter-workspace-visit,
+.encounter-workspace-note,
+.encounter-workspace-follow-up {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.encounter-workspace-clinical {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  background: $surface;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+.encounter-workspace-visit__columns,
+.encounter-workspace-follow-up__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.encounter-workspace-visit__columns .encounter-workspace-card {
+  padding-top: 10px;
+}
+
+.encounter-workspace-visit__columns .encounter-workspace-card__head {
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.encounter-workspace-visit__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.encounter-workspace-visit__list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.encounter-workspace-clinical__subtabs-row {
+  margin: 0;
+  border-radius: 0;
+}
+
+.encounter-workspace-clinical .encounter-workspace-card {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.encounter-clinical-all-records-dialog.insurance-dialog.app-dialog-card {
+  width: 100%;
+  max-width: min(1120px, calc(100vw - 24px));
+}
+
+@media (max-width: 1100px) {
+  .encounter-workspace-header {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .encounter-workspace-overview,
+  .encounter-workspace-visit__columns,
+  .encounter-workspace-follow-up__grid {
+    grid-template-columns: 1fr;
+  }
+}

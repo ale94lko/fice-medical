@@ -6,13 +6,14 @@ import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
   cancelEncounter,
   completeEncounter,
-  createEncounter,
   encounterApiErrorMessage,
   fetchClientActiveEncounter,
   getCachedActiveEncounter,
   isEncounterConflictError,
   isEncounterInvalidError,
   setCachedActiveEncounter,
+  startAppointmentEncounter,
+  startClientEncounter,
   toolbarActiveEncounter,
 } from 'src/utils/encounter-api.js'
 import { isEncounterInProgress } from 'src/utils/encounter-normalize.js'
@@ -65,6 +66,14 @@ export function useActiveEncounter(clientIdRef) {
     ),
   )
 
+  const canStartEncounter = computed(() =>
+    hasAnyPermission(permissions.value, [
+      clientPermissionNames.startEncounter,
+      clientPermissionNames.manageEncounter,
+      clientPermissionNames.manageAppointmentSlots,
+    ]),
+  )
+
   function syncFromCache() {
     const id = clientId.value
     if (!id) {
@@ -103,7 +112,7 @@ export function useActiveEncounter(clientIdRef) {
     }
   }
 
-  async function startEncounter(form) {
+  async function startEncounter(form = {}) {
     if (hasActiveEncounter.value) {
       const err = new Error('Active encounter already exists')
       err.response = { status: 409 }
@@ -112,10 +121,16 @@ export function useActiveEncounter(clientIdRef) {
     actionBusy.value = true
     lastError.value = null
     try {
-      const encounter = await createEncounter({
-        ...form,
-        clientId: clientId.value,
-      })
+      const appointmentId = form.appointmentId ?? form.appointment_id
+      let encounter
+      if (appointmentId != null && String(appointmentId).trim() !== '') {
+        encounter = await startAppointmentEncounter(appointmentId)
+      } else {
+        encounter = await startClientEncounter(clientId.value, {
+          ...form,
+          clientId: clientId.value,
+        })
+      }
       activeEncounter.value = encounter
 
       return encounter
@@ -154,7 +169,7 @@ export function useActiveEncounter(clientIdRef) {
     }
   }
 
-  async function cancelActiveEncounter() {
+  async function cancelActiveEncounter(payload = {}) {
     const encounter = activeEncounter.value
     if (!encounter?.id) {
       return null
@@ -165,6 +180,7 @@ export function useActiveEncounter(clientIdRef) {
       const result = await cancelEncounter(
         encounter.id,
         clientId.value,
+        payload,
       )
       activeEncounter.value = null
 
@@ -221,6 +237,7 @@ export function useActiveEncounter(clientIdRef) {
     lastError,
     canViewEncounter,
     canManageEncounter,
+    canStartEncounter,
     refreshActiveEncounter,
     startEncounter,
     completeActiveEncounter,

@@ -1,4 +1,5 @@
 import { aiFeatures, aiSuggestionStatuses } from 'components/constants.js'
+import { normalizeIcd10CodeKey } from 'src/utils/icd10-api.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -108,9 +109,6 @@ export function normalizeAiConfig(raw = {}) {
       icd10Suggestion: Number(
         prompts.icd10_suggestion ?? prompts.icd10Suggestion ?? 1,
       ) || 1,
-      documentSummary: Number(
-        prompts.document_summary ?? prompts.documentSummary ?? 1,
-      ) || 1,
       clinicalSummary: Number(
         prompts.clinical_summary ?? prompts.clinicalSummary ?? 1,
       ) || 1,
@@ -127,8 +125,6 @@ export function aiConfigPromptsToApi(prompts = {}) {
     clinical_soap: Number(prompts.clinicalSoap) || 1,
     // eslint-disable-next-line camelcase -- API snake_case
     icd10_suggestion: Number(prompts.icd10Suggestion) || 1,
-    // eslint-disable-next-line camelcase -- API snake_case
-    document_summary: Number(prompts.documentSummary) || 1,
     // eslint-disable-next-line camelcase -- API snake_case
     clinical_summary: Number(prompts.clinicalSummary) || 1,
     // eslint-disable-next-line camelcase -- API snake_case
@@ -163,6 +159,7 @@ export function suggestionHasNotDocumentedRisk(result) {
 export function normalizeIcdSuggestions(result) {
   const data = asObject(result)
   const list = asArray(data.suggestions)
+  const seen = new Set()
 
   return list.map((item, index) => {
     const row = asObject(item)
@@ -172,10 +169,21 @@ export function normalizeIcdSuggestions(result) {
       path: `suggestions[${index}]`,
       description: trim(row.description),
       suggestedCode: trim(
-        row.suggested_code ?? row.suggestedCode,
+        row.code_dotted
+        ?? row.codeDotted
+        ?? row.suggested_code
+        ?? row.suggestedCode,
       ),
       confidence: trim(row.confidence).toLowerCase() || 'medium',
       rationale: trim(row.rationale),
     }
+  }).filter((item) => {
+    const key = normalizeIcd10CodeKey(item.suggestedCode)
+    if (!key || seen.has(key)) {
+      return false
+    }
+    seen.add(key)
+
+    return true
   })
 }

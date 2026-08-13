@@ -126,11 +126,11 @@ export default {
   loginPromoHeadline: 'Smart tools for',
   loginPromoHeadlineAccent: 'better care',
   loginPromoDescription:
-    'FICE Medical helps healthcare professionals manage patients, '
+    'FICE Medical helps healthcare professionals manage clients, '
     + 'appointments and medical records in one secure, intuitive platform.',
-  loginPromoFeaturePatientTitle: 'Patient-Centered',
+  loginPromoFeaturePatientTitle: 'Client-Centered',
   loginPromoFeaturePatientDesc:
-    'All patient information in one place, accessible when you need it.',
+    'All client information in one place, accessible when you need it.',
   loginPromoFeatureSecureTitle: 'Secure & Compliant',
   loginPromoFeatureSecureDesc:
     'Your data is protected with industry-leading security and privacy.',
@@ -139,7 +139,7 @@ export default {
     'Powerful reports and analytics to improve outcomes and efficiency.',
   loginPromoFooter:
     'Built for healthcare. Designed for you. More time for what matters '
-    + 'most: your patients.',
+    + 'most: your clients.',
   invalidCredentials: 'Invalid credentials, please try again.',
   sessionExpiredRelogin:
     'Your session has expired, please sign in again',
@@ -297,14 +297,50 @@ export default {
   serviceProcedureCptCodeLabel: 'CPT code',
   serviceProcedureHcpcsCodeLabel: 'HCPCS code',
   serviceProcedureDefaultFeeLabel: 'Default fee',
+  serviceProcedureDefaultFeePlaceholder: '0.00',
   serviceProcedureAuthorizationRequirementLabel:
     'Authorization requirement',
-  serviceProcedureAuthorizationHint:
-    'Informational only. Does not replace insurance verification.',
   serviceProcedureSectionGeneral: 'General information',
-  serviceProcedureSectionOperational: 'Operational settings',
   serviceProcedureSectionBilling: 'Billing',
-  serviceProcedureSectionAuthorization: 'Authorization reference',
+  serviceProcedureSectionRequirements: 'Encounter requirements',
+  serviceProcedureRequirementAdd: 'Add requirement',
+  serviceProcedureRequirementEdit: 'Edit requirement',
+  serviceProcedureRequirementSaveFirst:
+    'Save the service procedure first to configure requirements.',
+  serviceProcedureRequirementEmpty: 'No requirements configured yet.',
+  serviceProcedureRequirementType: 'Type',
+  serviceProcedureRequirementPurpose: 'Purpose',
+  serviceProcedureRequirementSeverity: 'Severity',
+  serviceProcedureRequirementScope: 'Scope',
+  serviceProcedureRequirementOrder: 'Display order',
+  serviceProcedureRequirementRequired: 'Required',
+  serviceProcedureRequirementWaivable: 'Waivable',
+  serviceProcedureRequirementActive: 'Active',
+  serviceProcedureRequirementNameOverride: 'Name override',
+  serviceProcedureRequirementReferenceId: 'Screening template ID',
+  serviceProcedureRequirementReferenceRequired:
+    'A screening template ID is required for this type.',
+  serviceProcedureRequirementTypeVitals: 'Vitals',
+  serviceProcedureRequirementTypeNote: 'Clinical note',
+  serviceProcedureRequirementTypeAssessment: 'Screening',
+  serviceProcedureRequirementTypeForm: 'Form',
+  serviceProcedureRequirementTypeSafety: 'Safety screening',
+  serviceProcedureRequirementTypeMedReview: 'Medication review',
+  serviceProcedureRequirementTypeCarePlan: 'Care plan review',
+  serviceProcedureRequirementTypeDiagnosis: 'Diagnosis',
+  serviceProcedureRequirementPurposeCompletion: 'Encounter completion',
+  serviceProcedureRequirementPurposeBilling: 'Billing readiness',
+  serviceProcedureRequirementSeverityBlocking: 'Blocking',
+  serviceProcedureRequirementSeverityWarning: 'Warning',
+  serviceProcedureRequirementScopeService: 'Service',
+  serviceProcedureRequirementScopeEncounter: 'Encounter',
+  serviceProcedureRequirementLoadError:
+    'Could not load service requirements.',
+  serviceProcedureRequirementSaved: 'Requirement saved.',
+  serviceProcedureRequirementSaveError: 'Could not save requirement.',
+  serviceProcedureRequirementDeleted: 'Requirement deactivated.',
+  serviceProcedureRequirementDeleteError:
+    'Could not deactivate requirement.',
   serviceProcedureCategoryClinicalService: 'Clinical Service',
   serviceProcedureCategoryTherapy: 'Therapy',
   serviceProcedureCategoryEvaluation: 'Evaluation',
@@ -327,6 +363,8 @@ export default {
     'Update service settings. Deactivate instead of deleting.',
   serviceProcedureNameRequired: 'Name is required.',
   serviceProcedureCategoryRequired: 'Category is required.',
+  serviceProcedureAuthReqRequired:
+    'Authorization requirement is required.',
   serviceProcedureDurationInvalid:
     'Duration must be greater than 0 minutes.',
   serviceProcedureDurationRangeInvalid:
@@ -984,6 +1022,7 @@ export default {
   tabBasicInformation: 'Basic Information',
   tabBasicInfo: 'Basic Info',
   tabAppointments: 'Appointments',
+  tabEncounters: 'Encounters',
   tabContact: 'Contact',
   tabContactInformation: 'Contact Information',
   contactSubTabSelf: 'Self Contact',
@@ -1035,7 +1074,7 @@ export default {
   screeningRiskLevelHigh: 'High',
   screeningRiskLevelCritical: 'Critical',
   screeningRiskAlertMessage:
-    'Continue screening and monitor patient closely.',
+    'Continue screening and monitor client closely.',
   screeningViewGuidelines: 'View Guidelines',
   screeningSelectTemplateHint:
     'Select a screening template above to load the form sections.',
@@ -1168,7 +1207,7 @@ export default {
   screeningCancelError: 'Could not cancel the screening.',
   screeningAutosaving: 'Saving…',
   screeningCompletedAtLabel: 'Completed: {date}',
-  screeningPatientMeasurements: 'Patient Measurements',
+  screeningPatientMeasurements: 'Client Measurements',
   screeningWeight: 'Weight',
   screeningHeight: 'Height',
   screeningBmi: 'BMI',
@@ -1387,7 +1426,7 @@ export default {
   carePlanPriorityHigh: 'High',
   clinicalNotesTitle: 'Clinical Notes',
   clinicalNotesSubtitle:
-    'View and manage clinical notes for this patient.',
+    'View and manage clinical notes for this client.',
   clinicalNoteAdd: 'Add Clinical Note',
   clinicalNoteSaveClientFirst:
     'Save the client first to create and manage clinical notes.',
@@ -1410,7 +1449,7 @@ export default {
     'Showing {from} to {to} of {total} results',
   clinicalNoteAddTitle: 'Add Clinical Note',
   clinicalNoteAddSubtitle:
-    'Create a new clinical note for this patient.',
+    'Create a new clinical note for this client.',
   clinicalNoteEditTitle: 'Edit Clinical Note',
   clinicalNoteViewTitle: 'View Clinical Note',
   clinicalNoteViewSubtitle: 'Clinical note details.',
@@ -1424,13 +1463,13 @@ export default {
   clinicalNoteDateNotFuture:
     'Date and time cannot be in the future.',
   clinicalNoteDateBeforeAdmission:
-    'Date and time cannot be before the patient admission date.',
+    'Date and time cannot be before the client admission date.',
   clinicalNoteClinician: 'Clinician',
   clinicalNoteClinicianPlaceholder: 'Select clinician',
   clinicalNoteClinicianRequired: 'Clinician is required.',
   clinicalNoteSubjective: 'Subjective',
   clinicalNoteSubjectivePlaceholder:
-    'Information reported by the patient.',
+    'Information reported by the client.',
   clinicalNoteSubjectiveRequired: 'Subjective is required to sign.',
   clinicalNoteObjective: 'Objective',
   clinicalNoteObjectivePlaceholder:
@@ -1645,10 +1684,10 @@ export default {
   subTabFollowUps: 'Follow Ups',
   referralsTitle: 'Referrals',
   referralsSubtitle:
-    'View and manage referrals for this patient.',
+    'View and manage referrals for this client.',
   referralAdd: 'Add Referral',
   referralAddTitle: 'Add Referral',
-  referralAddSubtitle: 'Create a new referral for this patient.',
+  referralAddSubtitle: 'Create a new referral for this client.',
   referralEditTitle: 'Edit Referral',
   referralViewTitle: 'Referral Details',
   referralSave: 'Save Referral',
@@ -1805,7 +1844,7 @@ export default {
   referralSourceSelfReferred: 'Self-Referred',
   referralInformation: 'Referral Information',
   referralInformationSubtitle:
-    'Tell us how this patient came to our clinic.',
+    'Tell us how this client came to our clinic.',
   referralSource: 'Referral Source',
   referralSourcePlaceholder: 'Select referral source',
   referralSourceRequired: 'Referral source is required.',
@@ -1815,12 +1854,12 @@ export default {
     'Enter additional referral information',
   referralIntakeSelfReferredTitle: 'Self-Referred',
   referralIntakeSelfReferredMessage:
-    'This patient contacted the clinic directly.',
+    'This client contacted the clinic directly.',
   referralIntakeSelfReferredNoRecord:
     'No referral record will be created.',
-  referralIntakeDefaultReason: 'Incoming referral at patient registration',
+  referralIntakeDefaultReason: 'Incoming referral at client registration',
   referralIntakeCreateError:
-    'Patient saved, but the incoming referral could not be created.',
+    'Client saved, but the incoming referral could not be created.',
   referralDateInvalid: 'Enter a valid referral date.',
   appointmentsTitle: 'Appointments',
   appointmentsSubtitle: 'View and manage client appointments.',
@@ -1922,10 +1961,6 @@ export default {
   appointmentServiceCatalogDurationRange: '{min}–{max} min',
   appointmentServicesSelectedCount: '{count} selected',
   appointmentServicesAddAnother: 'Add another service',
-  appointmentServicesCatalogEmpty:
-    'No appointment services available. '
-    + 'Please configure active services that require appointments '
-    + 'in Services / Procedures.',
   appointmentServiceRequired: 'Select at least one service / procedure.',
   appointmentPlaceOfService: 'Place of Service',
   appointmentPlaceOfServicePlaceholder: 'Select place of service',
@@ -2092,6 +2127,7 @@ export default {
   appointmentStatusPending: 'Pending',
   appointmentStatusConfirmed: 'Confirmed',
   appointmentStatusCheckedIn: 'Checked In',
+  appointmentStatusInProgress: 'In Progress',
   appointmentStatusCompleted: 'Completed',
   appointmentStatusCancelled: 'Cancelled',
   appointmentStatusNoShow: 'No Show',
@@ -2169,8 +2205,7 @@ export default {
   startEncounterButton: 'Encounter',
   startEncounterTitle: 'Start encounter',
   startEncounterHint:
-    'Choose how to open the visit: walk-in, phone, telehealth, '
-    + 'or from one of today’s appointments.',
+    'Confirm place of service and optional notes, then start the visit.',
   startEncounterSubmit: 'Start',
   startEncounterSuccess: 'Encounter started.',
   startEncounterTodayAppointments: 'Select today’s appointment',
@@ -2191,6 +2226,9 @@ export default {
   encounterTypeScheduledHintCount:
     '{count} appointment(s) today — select below',
   encounterClinicianLabel: 'Clinician',
+  encounterClinicianLoggedInPlaceholder: 'Logged-in clinician',
+  encounterClinicianRequired:
+    'A logged-in clinician profile is required to start an encounter.',
   encounterPlaceOfServiceLabel: 'Place of service code',
   encounterPlaceOfServicePlaceholder: 'e.g. 11',
   encounterChiefComplaintLabel: 'Chief complaint',
@@ -2721,7 +2759,7 @@ export default {
     'Select one or more ways we should contact this client '
     + '(email and/or mobile SMS for appointment notices).',
   prefCommProviderDidNotAsk: 'Provider did not ask',
-  prefCommPatientDeclined: 'Patient declined to specify',
+  prefCommPatientDeclined: 'Client declined to specify',
   prefCommWorkPhone: 'Work phone',
   prefCommHomePhone: 'Home Phone',
   prefCommMobilePhone: 'Mobile phone',
@@ -2729,10 +2767,10 @@ export default {
   prefCommEmail: 'Email',
   prefCommPointOfContact: 'Point of Contact',
   communicationAuthorizationMethod:
-    'Patient authorizes communications through the selected '
+    'Client authorizes communications through the selected '
     + 'preferred communication method.',
   communicationAuthorizationPointOfContact:
-    'Patient authorizes communication with the selected contact person.',
+    'Client authorizes communication with the selected contact person.',
   communicationAuthorizedOn: 'Authorized on: {date}',
   preferredPointOfContact: 'Preferred Point of Contact',
   prefCommNoContactsAvailable: 'No contacts available',
@@ -2854,13 +2892,13 @@ export default {
   allergyName: 'Allergy',
   noKnownAllergiesLabel: 'No known allergies',
   noKnownAllergiesHint:
-    'Check this if the patient has confirmed they have no known allergies.',
+    'Check this if the client has confirmed they have no known allergies.',
   noKnownAllergiesConfirmedTitle: 'No known allergies confirmed',
   noKnownAllergiesConfirmedSubtitle:
     'Uncheck "No known allergies" to add allergy information',
   noKnownAllergiesRemoveModalTitle: 'Remove existing allergies?',
   noKnownAllergiesRemoveModalMessage:
-    'This patient already has recorded allergies.\n'
+    'This client already has recorded allergies.\n'
     + 'Selecting "No known allergies" will remove all existing allergy '
     + 'records.\n'
     + 'This action cannot be undone.',
@@ -2885,7 +2923,7 @@ export default {
   allergyStartYearInvalid:
     'Enter a valid 4-digit year between {min} and {max}',
   allergyStartYearBeforeBirth:
-    "Start year cannot be earlier than the patient's birth year.",
+    "Start year cannot be earlier than the client's birth year.",
   allergyStartYearAfterCurrent:
     'Start year cannot be later than the current year.',
   allergyDuplicateEntry:
@@ -2975,7 +3013,7 @@ export default {
   vitalsUpdate: 'Update Vitals',
   vitalsHistoryTitle: 'Vitals History',
   vitalsHistorySubtitle:
-    'View and manage vital signs history for this patient.',
+    'View and manage vital signs history for this client.',
   vitalsHistoryEmpty: 'No vitals recorded yet.',
   vitalsSavedSuccess: 'Vitals entry saved.',
   vitalsUpdatedSuccess: 'Vitals entry updated.',
@@ -3102,7 +3140,7 @@ export default {
   insurancePayerRequired: 'Select or enter a payer / plan name.',
   insurancePriorityRequired: 'Insurance priority is required.',
   insurancePriorityDuplicate:
-    'This patient already has an active insurance with this priority.',
+    'This client already has an active insurance with this priority.',
   insuranceMaxActivePriorities:
     'Primary, Secondary and Tertiary are already active. '
     + 'Deactivate one before adding another profile.',
@@ -3338,9 +3376,9 @@ export default {
   medicationConsentGivenBadge: 'Consent Given',
   medicationConsentNotGivenBadge: 'Consent Not Given',
   medicationConsentGivenText:
-    'Patient gives consent to retrieve prescription history.',
+    'Client gives consent to retrieve prescription history.',
   medicationConsentNotGivenText:
-    'Patient has not given consent to retrieve prescription history.',
+    'Client has not given consent to retrieve prescription history.',
   medicationConsentViewDetails: 'View Details',
   medicationConsentSaved: 'Consent saved successfully.',
   medicationConsentSaveError: 'Could not save consent.',
@@ -3409,7 +3447,7 @@ export default {
   pharmacyPlacesSearch: 'Search Pharmacies',
   pharmacyPlacesQuery: 'Search',
   pharmacyPlacesQueryPlaceholder:
-    'Search by name, city, ZIP, state or address',
+    'Name, city, 5-digit ZIP, state, or street address',
   pharmacyPlacesName: 'Pharmacy Name',
   pharmacyPlacesZip: 'ZIP Code',
   pharmacyPlacesCity: 'City',
@@ -3642,24 +3680,14 @@ export default {
   aiStatusRejected: 'Rejected',
   aiStatusFailed: 'Failed',
   aiStatusExpired: 'Expired',
-  aiGenerateDocumentSummary: 'Summarize documents with AI',
   aiGenerateClinicalSummary: 'Clinical summary with AI',
   aiGenerateSoapDraft: 'Draft SOAP with AI',
   aiGenerateIcd10: 'Suggest ICD-10 with AI',
   aiGenerateCarePlan: 'Draft care plan with AI',
-  aiBtnDocumentSummary: 'Summarize with AI',
-  aiBtnClinicalSummary: 'IA Assistant',
+  aiBtnClinicalSummary: 'AI Assistant',
   aiBtnSoapDraft: 'Draft SOAP with AI',
   aiBtnIcd10: 'Suggest ICD-10',
   aiBtnCarePlanDraft: 'Draft care plan',
-  aiDocScope: 'Scope',
-  aiDocScopePackage: 'Document package',
-  aiDocScopeSingle: 'Single document',
-  aiDocScopeCustom: 'Custom',
-  aiDocumentId: 'Document',
-  aiDocumentIdPlaceholder: 'Select a document',
-  aiDocumentIdRequired: 'Select a document.',
-  aiCustomHint: 'Custom hint',
   aiClinicalScope: 'Scope',
   aiClinicalScopeFaceSheet: 'Face sheet',
   aiClinicalScopeEncounter: 'Last encounter',
@@ -3696,10 +3724,235 @@ export default {
     'Only prompt version numbers can be updated from this screen.',
   aiPromptClinicalSoap: 'Clinical SOAP',
   aiPromptIcd10: 'ICD-10 suggestion',
-  aiPromptDocumentSummary: 'Document summary',
   aiPromptClinicalSummary: 'Clinical summary',
   aiPromptCarePlan: 'Care plan draft',
   aiConfigLoadError: 'Could not load AI configuration.',
   aiConfigSaveError: 'Could not save AI configuration.',
   aiConfigSaved: 'AI configuration saved.',
+
+  encounterWorkspaceLoadError: 'Could not load the encounter workspace.',
+  encounterWorkspaceRetry: 'Retry',
+  encounterPatientChart: 'Client Overview',
+  encounterComplete: 'Complete',
+  encounterCancel: 'Cancel',
+  encounterHeaderDob: 'DOB: {dob}',
+  encounterHeaderDobAge: 'DOB: {dob} • {age} yrs',
+  encounterHeaderDobAgeValue: '{dob} ({age} yrs)',
+  encounterHeaderAge: '{age} yrs',
+  encounterHeaderMrn: 'MRN: {mrn}',
+  encounterReopen: 'Reopen Encounter',
+  encounterStartedAt: 'Started at {time}',
+  encounterRenderingClinician: 'Rendering Clinician',
+  encounterLocation: 'Location',
+  encounterModeInPerson: 'In Person',
+  encounterModeTelehealth: 'Telehealth',
+  encounterStatusInProgress: 'In Progress',
+  encounterStatusCompleted: 'Completed',
+  encounterStatusCancelled: 'Cancelled',
+  encountersTitle: 'Encounters',
+  encounterListEmpty: 'No encounters for this client.',
+  encounterListLoadError: 'Could not load encounters.',
+  encounterListNoPermission: 'You do not have permission to view encounters.',
+  encounterColumnStarted: 'Started',
+  encounterColumnType: 'Type',
+  encounterColumnStatus: 'Status',
+  encounterColumnClinician: 'Clinician',
+  encounterColumnComplaint: 'Chief complaint',
+  encounterOpenWorkspace: 'Open encounter',
+  encounterServiceFallback: 'Encounter',
+  encounterAllergiesLabel: 'ALLERGIES',
+  encounterViewAllAllergies: 'View all allergies',
+  encounterTabOverview: 'Overview',
+  encounterTabVisit: 'Visit',
+  encounterTabClinical: 'Clinical',
+  encounterTabNote: 'Note',
+  encounterTabFollowUp: 'Follow Up',
+  encounterCompleteVisitTitle: 'Complete this visit',
+  encounterProgressLabel: '{completed} of {total} complete',
+  encounterRequired: 'Required',
+  encounterChecklistEmpty: 'No completion requirements returned.',
+  encounterOtherClinicalActions: 'Other Clinical Actions',
+  encounterRequirementWaived: 'Waived',
+  encounterRequirementWaive: 'Waive',
+  encounterRequirementWaiveTitle: 'Waive requirement',
+  encounterRequirementWaiveHint:
+    'Provide a reason to waive "{name}".',
+  encounterRequirementWaiveReason: 'Reason',
+  encounterRequirementWaiveConfirm: 'Waive',
+  encounterRequirementWaiveSuccess: 'Requirement waived.',
+  encounterRequirementWaiveError: 'Could not waive the requirement.',
+  encounterMedicationReviewTitle: 'Medication review',
+  encounterMedicationReviewHint:
+    'Confirm medication review for this encounter without '
+    + 'changing prescriptions.',
+  encounterCarePlanReviewTitle: 'Care plan review',
+  encounterCarePlanReviewHint:
+    'Confirm care plan review for this encounter.',
+  encounterReviewNotes: 'Notes',
+  encounterReviewConfirm: 'Mark reviewed',
+  encounterReviewSuccess: 'Review recorded.',
+  encounterReviewError: 'Could not record the review.',
+  encounterQuickActions: 'Quick Actions',
+  encounterQuickAddVitals: 'Add Vitals',
+  encounterQuickMedications: 'Medications',
+  encounterQuickCarePlan: 'Care Plan',
+  encounterQuickFollowUp: 'Follow Up / Next Appointment',
+  encounterQuickDocument: 'Add Document',
+  encounterBillingReadiness: 'Billing readiness',
+  encounterBillingCounts:
+    '{blocking} blocking · {warning} warnings',
+  encounterBillingReady: 'Ready',
+  encounterBillingNotReady: 'Not ready',
+  encounterBillingBilled: 'Billed',
+  encounterVisitInformation: 'Visit Information',
+  encounterIdLabel: 'Encounter ID',
+  encounterDate: 'Date',
+  encounterStartTime: 'Start Time',
+  encounterEndTime: 'End Time',
+  encounterServices: 'Service',
+  encounterServicesEmpty: 'No services on this encounter.',
+  encounterEditServices: 'Edit Services',
+  encounterEditServicesTitle: 'Edit Services',
+  encounterEditServicesHint:
+    'Add or remove service procedures and adjust units for this visit.',
+  encounterAddService: 'Add service',
+  encounterAddServicePlaceholder: 'Search service by name or code',
+  encounterServiceCode: 'Code',
+  encounterServiceUnits: 'Units',
+  encounterServiceUnitsValue: '{count} unit(s)',
+  encounterServicesCatalogError: 'Could not load the service catalog.',
+  encounterServicesSaved: 'Services updated.',
+  encounterServicesSaveError: 'Could not update services.',
+  encounterDiagnoses: 'Diagnoses',
+  encounterDiagnosesEmpty: 'No diagnoses on this encounter.',
+  encounterEditDiagnoses: 'Edit Diagnoses',
+  encounterEditDiagnosesTitle: 'Edit Diagnoses',
+  encounterEditDiagnosesHint:
+    'Search the ICD-10-CM catalog and mark the primary diagnosis.',
+  encounterAddDiagnosis: 'Add diagnosis',
+  encounterDiagnosisSearch: 'ICD-10-CM',
+  encounterDiagnosisSearchPlaceholder: 'Search and add diagnosis...',
+  encounterDiagnosisSearchAdd: 'Search and add another diagnosis...',
+  encounterDiagnosisSearchEmpty: 'No matching ICD-10-CM codes.',
+  encounterDiagnosisCode: 'ICD-10',
+  encounterDiagnosisDescription: 'Description',
+  encounterDiagnosisCodeRequired: 'ICD-10 code is required.',
+  encounterDiagnosisDescriptionRequired: 'Description is required.',
+  encounterDiagnosisAlreadyAdded: 'Already added',
+  encounterDiagnosisDuplicate:
+    'ICD-10 {code} is already in the diagnoses list.',
+  encounterDiagnosisSelectRequired:
+    'Select an ICD-10-CM code before adding.',
+  encounterDiagnosesCatalogError: 'Could not search ICD-10-CM codes.',
+  encounterDiagnosesAiSuggest: 'AI suggestions',
+  encounterDiagnosesAiDialogTitle: 'Suggest ICD-10',
+  encounterDiagnosesAiDialogHint:
+    'Enter clinical notes and generate ICD-10 suggestions to add.',
+  encounterDiagnosesAiClinicalText: 'Clinical text',
+  encounterDiagnosesAiGenerate: 'Generate suggestions',
+  encounterDiagnosesAiRegenerate: 'Regenerate',
+  encounterDiagnosesAiInsert: 'Add selected',
+  encounterDiagnosesAiSuggestions: 'Suggested codes',
+  encounterDiagnosesAiSelectAll: 'Select all',
+  encounterDiagnosesAiDeselectAll: 'Deselect all',
+  encounterDiagnosesAiSelectedCount:
+    '{count} selected',
+  encounterDiagnosesAiAllDuplicates:
+    'All suggested codes are already in the diagnoses list.',
+  encounterDiagnosesAiSkippedDuplicates:
+    '{count} already-added code(s) were skipped.',
+  encounterDiagnosesAiEmpty: 'No ICD-10 suggestions returned.',
+  encounterDiagnosesAiError: 'Could not generate ICD-10 suggestions.',
+  encounterDiagnosesSaved: 'Diagnoses updated.',
+  encounterDiagnosesSaveError: 'Could not update diagnoses.',
+  encounterPrimaryDiagnosis: 'Primary',
+  encounterNotesSection: 'Encounter Notes',
+  encounterNotesEmpty: 'No notes for this encounter',
+  encounterAddNote: 'Add Note',
+  encounterClinicalReuseHint:
+    'Open the client chart module bound to this encounter.',
+  encounterClinicalCount: '{count} record(s)',
+  encounterClinicalVitals: 'Vitals',
+  encounterClinicalVitalsHint:
+    'Vitals recorded for this encounter only.',
+  encounterClinicalVitalsEmpty:
+    'No vitals recorded for this encounter yet.',
+  encounterClinicalAssessments: 'Screenings',
+  encounterClinicalAssessmentsHint:
+    'Screenings recorded for this encounter only.',
+  encounterClinicalAssessmentsEmpty:
+    'No screenings recorded for this encounter yet.',
+  encounterClinicalMedications: 'Medications',
+  encounterClinicalMedicationsHint:
+    'Medications recorded for this encounter only.',
+  encounterClinicalMedicationsEmpty:
+    'No medications recorded for this encounter yet.',
+  encounterClinicalCarePlans: 'Care Plans',
+  encounterClinicalCarePlansHint:
+    'Care plans recorded for this encounter only.',
+  encounterClinicalCarePlansEmpty:
+    'No care plans recorded for this encounter yet.',
+  encounterClinicalLabs: 'Labs',
+  encounterClinicalLabsHint:
+    'Lab orders recorded for this encounter only.',
+  encounterClinicalLabsEmpty:
+    'No lab orders recorded for this encounter yet.',
+  encounterClinicalAllVitals: 'All Vitals',
+  encounterClinicalAllAssessments: 'All Screenings',
+  encounterClinicalAllMedications: 'All Medications',
+  encounterClinicalAllCarePlans: 'All Care Plans',
+  encounterClinicalAllLabs: 'All Labs',
+  encounterClinicalAllVitalsTitle: 'All client vitals',
+  encounterClinicalAllAssessmentsTitle: 'All client screenings',
+  encounterClinicalAllMedicationsTitle: 'All client medications',
+  encounterClinicalAllCarePlansTitle: 'All client care plans',
+  encounterClinicalAllLabsTitle: 'All client labs',
+  encounterClinicalAllRecordsHint:
+    'Full history for this client (all encounters).',
+  encounterClinicalAllRecordsEmpty: 'No records found for this client.',
+  encounterClinicalAllRecordsLoadError:
+    'Could not load the full client history.',
+  encounterOpenInChart: 'Open {module}',
+  encounterProgressNote: 'Progress Note',
+  encounterNoteReuseHint:
+    'Use the clinical notes module to draft and sign SOAP notes.',
+  encounterOpenNotes: 'Open Notes',
+  encounterFollowUpNextAppointment: 'Next Appointment',
+  encounterFollowUpNotScheduled: 'Not Scheduled',
+  encounterFollowUpNextAppointmentHint:
+    'Schedule the next visit for this client.',
+  encounterFollowUpSchedule: 'Schedule Appointment',
+  encounterFollowUps: 'Follow Ups',
+  encounterFollowUpsHint: 'Track post-visit follow-up work.',
+  encounterFollowUpAdd: 'Add Follow Up',
+  encounterFollowUpTotal: '{count} Total',
+  encounterReferrals: 'Referrals',
+  encounterReferralsHint: 'Create or review referrals for this visit.',
+  encounterReferralAdd: 'Add Referral',
+  encounterCompleteSuccess: 'Encounter completed.',
+  encounterCompleteError: 'Could not complete the encounter.',
+  encounterCompleteRequirementsMissing:
+    'Complete the required items before finishing this encounter.',
+  encounterCancelTitle: 'Cancel encounter',
+  encounterCancelHint:
+    'Select a reason. Notes are required when the reason is Other.',
+  encounterCancelReason: 'Reason',
+  encounterCancelReasonPlaceholder: 'Select a reason',
+  encounterCancelNotes: 'Notes',
+  encounterCancelConfirm: 'Cancel Encounter',
+  encounterCancelSuccess: 'Encounter cancelled.',
+  encounterCancelError: 'Could not cancel the encounter.',
+  encounterCancelReasonStartedByMistake: 'Started by mistake',
+  encounterCancelReasonWrongPatient: 'Wrong client',
+  encounterCancelReasonDuplicate: 'Duplicate encounter',
+  encounterCancelReasonPatientLeft: 'Client left',
+  encounterCancelReasonTechnical: 'Technical issue',
+  encounterCancelReasonOther: 'Other',
+  encounterReopenTitle: 'Reopen encounter',
+  encounterReopenHint:
+    'Provide a reason to reopen this completed encounter.',
+  encounterReopenReason: 'Reason',
+  encounterReopenConfirm: 'Reopen',
+  encounterReopenSuccess: 'Encounter reopened.',
+  encounterReopenError: 'Could not reopen the encounter.',
 }

@@ -2,6 +2,7 @@ import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import { normalizeLoginSubtenants } from 'components/helpers.js'
 import { useAuthStore } from 'stores/auth-store.js'
+import { fetchSubtenantById } from 'src/utils/subtenant-api.js'
 
 function unwrapListRoot(body) {
   const root = body?.data ?? body
@@ -13,6 +14,30 @@ function unwrapListRoot(body) {
   }
 
   return root
+}
+
+function patchActiveSubtenantLogo(detail) {
+  const authStore = useAuthStore()
+  const activeId = authStore.activeSubtenantId
+  if (activeId == null || !detail) {
+    return
+  }
+  const photoFileId = detail.photoFileId ?? null
+  const name = String(detail.name ?? '').trim()
+  const code = String(detail.code ?? '').trim()
+  const next = authStore.subtenants.map(item => {
+    if (item.id !== activeId) {
+      return item
+    }
+
+    return {
+      ...item,
+      ...(name ? { name } : {}),
+      ...(code ? { code } : {}),
+      photoFileId,
+    }
+  })
+  authStore.applySubtenants(next, activeId)
 }
 
 /**
@@ -31,4 +56,28 @@ export async function syncAuthSubtenantsFromApi() {
   authStore.applySubtenants(subtenants, authStore.activeSubtenantId)
 
   return subtenants
+}
+
+/**
+ * Refresh clinic logo (and subtenant metadata) on page load.
+ * Prefers the full list; falls back to the active clinic only.
+ */
+export async function refreshClinicLogoOnPageLoad() {
+  const authStore = useAuthStore()
+  if (!authStore.token || authStore.activeSubtenantId == null) {
+    return
+  }
+  try {
+    await syncAuthSubtenantsFromApi()
+
+    return
+  } catch {
+    // List may require admin permission; fall back to active clinic.
+  }
+  try {
+    const detail = await fetchSubtenantById(authStore.activeSubtenantId)
+    patchActiveSubtenantLogo(detail)
+  } catch {
+    // Keep logo from stored session when APIs are unavailable.
+  }
 }

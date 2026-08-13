@@ -262,17 +262,12 @@
             button-class="app-btn-outline"
             @generated="emit('document-generated')"
           />
-          <q-btn
-            v-if="showStartEncounter"
-            no-caps
-            unelevated
-            class="app-btn-primary client-overview-alt-header__start-encounter"
-            icon="medical_services"
-            :label="t('startEncounterButton')"
-            :disable="loading || startEncounterBusy"
-            :loading="startEncounterBusy"
-            :data-testid="encounterTestIds.startButton"
-            @click="emit('start-encounter')"
+          <StartEncounterMenuButton
+            :show="showStartEncounter"
+            :client-id="clientId"
+            :loading="loading"
+            :busy="startEncounterBusy"
+            @select="emit('start-encounter', $event)"
           />
         </div>
       </div>
@@ -290,10 +285,11 @@ import AdminTableContactOverflow from
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
+import StartEncounterMenuButton from
+  'components/StartEncounterMenuButton.vue'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
 import {
   clientOverviewAltTestIds,
-  encounterTestIds,
 } from 'src/test-ids/index.js'
 
 const props = defineProps({

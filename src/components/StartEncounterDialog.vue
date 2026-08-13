@@ -121,17 +121,6 @@
           </div>
 
           <div class="col-12 col-md-6">
-            <FormField required :label="t('encounterClinicianLabel')">
-              <ClinicianFormSelect
-                v-model="draft.clinicianId"
-                :options="clinicianOptions"
-                :loading="loadingCatalogs"
-                :placeholder="t('appointmentClinicianPlaceholder')"
-                :test-id="tid.field('clinician')"
-              />
-            </FormField>
-          </div>
-          <div class="col-12 col-md-6">
             <FormField
               required
               :label="t('appointmentPlaceOfService')">
@@ -145,6 +134,19 @@
                 :loading="loadingCatalogs"
                 :placeholder="t('appointmentPlaceOfServicePlaceholder')"
                 :test-id="tid.field('place-of-service')"
+              />
+            </FormField>
+          </div>
+          <div class="col-12 col-md-6">
+            <FormField :label="t('encounterClinicianLabel')">
+              <q-input
+                outlined
+                dense
+                hide-bottom-space
+                readonly
+                :model-value="loggedInClinicianLabel"
+                :placeholder="t('encounterClinicianLoggedInPlaceholder')"
+                :data-testid="tid.field('clinician')"
               />
             </FormField>
           </div>
@@ -213,7 +215,6 @@ import {
   encounterTypes,
 } from 'components/constants.js'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
-import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import FormField from 'components/FormField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import { useAuthStore } from 'src/stores/auth-store.js'
@@ -242,6 +243,11 @@ const props = defineProps({
   modelValue: { type: Boolean, default: false },
   clientId: { type: [String, Number], default: null },
   saving: { type: Boolean, default: false },
+  presetEncounterType: { type: String, default: null },
+  presetAppointmentId: {
+    type: [String, Number],
+    default: null,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
@@ -330,6 +336,43 @@ const isAppointmentType = computed(
   () => draft.encounterType === encounterTypes.scheduled,
 )
 
+const loggedInClinicianOption = computed(() =>
+  resolveDefaultResponsibleClinicianOption(
+    clinicianOptions.value,
+    { staffMember: linkedStaffProfile.value },
+  ),
+)
+
+const loggedInClinicianLabel = computed(() => {
+  const option = loggedInClinicianOption.value
+  if (option?.label) {
+    return String(option.label).trim()
+  }
+  const staff = linkedStaffProfile.value
+  if (!staff?.isClinician) {
+    return ''
+  }
+  const name = [
+    staff.firstName,
+    staff.lastName,
+  ].map(part => String(part ?? '').trim()).filter(Boolean).join(' ')
+
+  return name || String(staff.displayName ?? '').trim()
+})
+
+const loggedInClinicianId = computed(() => {
+  const option = loggedInClinicianOption.value
+  if (option?.value != null) {
+    return option.value
+  }
+  const staff = linkedStaffProfile.value
+  if (staff?.isClinician && staff.id != null) {
+    return staff.id
+  }
+
+  return null
+})
+
 const selectedPlace = computed(() =>
   placeOptions.value.find(
     opt => Number(opt.value) === Number(draft.placeOfServiceId),
@@ -338,8 +381,7 @@ const selectedPlace = computed(() =>
 
 const canSubmit = computed(() => {
   if (!draft.encounterType
-    || draft.clinicianId == null
-    || String(draft.clinicianId).trim() === ''
+    || loggedInClinicianId.value == null
     || draft.placeOfServiceId == null) {
     return false
   }
@@ -359,18 +401,21 @@ function resetDraft() {
   draft.notes = ''
 }
 
-function applyDefaultLinkedClinician() {
-  if (draft.clinicianId != null) {
-    return
+function applyLoggedInClinician() {
+  draft.clinicianId = loggedInClinicianId.value
+}
+
+function applyPresetSelection() {
+  const type = String(props.presetEncounterType ?? '').trim().toUpperCase()
+  if (type) {
+    draft.encounterType = type
   }
-  const option = resolveDefaultResponsibleClinicianOption(
-    clinicianOptions.value,
-    { staffMember: linkedStaffProfile.value },
-  )
-  if (option?.value == null) {
-    return
+  if (
+    type === encounterTypes.scheduled
+    && props.presetAppointmentId != null
+  ) {
+    draft.appointmentId = props.presetAppointmentId
   }
-  draft.clinicianId = option.value
 }
 
 function resolvePlaceIdForType(type) {
@@ -480,9 +525,7 @@ function selectAppointment(appt) {
   }
   draft.appointmentId = appt.appointmentId
   draft.encounterType = encounterTypes.scheduled
-  if (appt.clinicianId != null) {
-    draft.clinicianId = appt.clinicianId
-  }
+  applyLoggedInClinician()
   const placeId = resolvePlaceIdFromAppointment(appt)
   if (placeId != null) {
     draft.placeOfServiceId = placeId
@@ -561,7 +604,7 @@ async function loadCatalogs() {
     placeOptions.value = placesResult.status === 'fulfilled'
       ? placesResult.value
       : []
-    applyDefaultLinkedClinician()
+    applyLoggedInClinician()
     applyTypePlaceDefaults(draft.encounterType)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
@@ -578,6 +621,7 @@ function onCancel() {
 }
 
 function onSubmit() {
+  applyLoggedInClinician()
   if (!canSubmit.value) {
     return
   }
@@ -589,7 +633,7 @@ function onSubmit() {
   )
   const payload = {
     encounterType: type,
-    clinicianId: draft.clinicianId,
+    clinicianId: loggedInClinicianId.value,
     placeOfServiceCode: placeCode || undefined,
     chiefComplaint: String(draft.chiefComplaint ?? '').trim()
       || undefined,
@@ -606,12 +650,27 @@ function onSubmit() {
 
 watch(() => draft.encounterType, applyTypePlaceDefaults)
 
-watch(open, value => {
+watch(open, async(value) => {
   if (!value) {
     return
   }
   resetDraft()
-  void Promise.all([loadCatalogs(), loadTodayAppointments()])
+  applyPresetSelection()
+  await Promise.all([loadCatalogs(), loadTodayAppointments()])
+  applyLoggedInClinician()
+  if (
+    draft.encounterType === encounterTypes.scheduled
+    && draft.appointmentId != null
+  ) {
+    const appt = todayAppointments.value.find(
+      row => Number(row.appointmentId) === Number(draft.appointmentId),
+    )
+    if (appt) {
+      selectAppointment(appt)
+    }
+  } else {
+    applyTypePlaceDefaults(draft.encounterType)
+  }
 })
 </script>
 

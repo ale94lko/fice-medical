@@ -14,6 +14,7 @@ import {
   refreshCarePlanProgress,
 } from 'src/utils/care-plan-orders.js'
 import { usDateToIso } from 'src/utils/client-form.js'
+import { attachEncounterId } from 'src/utils/encounter-api.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -142,7 +143,7 @@ export async function fetchClientCarePlan(
 }
 
 export async function createClientCarePlan(clientId, plan) {
-  const body = carePlanToApiPayload(plan)
+  const body = attachEncounterId(carePlanToApiPayload(plan), clientId)
   const response = await apiInstance.post(
     apiPaths.clientCarePlans(clientId),
     body,

@@ -14,11 +14,11 @@
         :header="header"
         :missing-items="missingItems"
         :loading="loading"
-        :show-start-encounter="canManageEncounter && !hasActiveEncounter"
+        :show-start-encounter="canStartEncounter && !hasActiveEncounter"
         :start-encounter-busy="actionBusy"
         @review-missing="goToEdit(addClientTabKeys.insurance)"
         @edit="goToEdit()"
-        @start-encounter="startDialogOpen = true"
+        @start-encounter="onStartEncounterSelect"
       />
 
       <div
@@ -37,8 +37,15 @@
               :appointments="clientAppointments"
               @checked-in="onAppointmentCheckedIn"
             />
+            <KeepAlive>
+              <ClientOverviewAltEncounters
+                v-if="activeTab === addClientTabKeys.encounters"
+                :key="String(clientId ?? '')"
+                :client-id="clientId"
+              />
+            </KeepAlive>
             <ClientOverviewAltBasicInfo
-              v-else-if="activeTab === addClientTabKeys.basic"
+              v-if="activeTab === addClientTabKeys.basic"
               :basic-info="basicInfo"
             />
             <ClientOverviewAltContact
@@ -103,13 +110,6 @@
       :disable="loading"
       :client-id="clientId"
     />
-
-    <StartEncounterDialog
-      v-model="startDialogOpen"
-      :client-id="clientId"
-      :saving="actionBusy"
-      @submit="onStartEncounter"
-    />
   </q-page>
 </template>
 
@@ -125,9 +125,10 @@ import {
 } from 'components/constants.js'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import AiAssistantFab from 'components/ai/AiAssistantFab.vue'
-import StartEncounterDialog from 'components/StartEncounterDialog.vue'
 import ClientOverviewAltAppointments from
   'components/client-overview/ClientOverviewAltAppointments.vue'
+import ClientOverviewAltEncounters from
+  'components/client-overview/ClientOverviewAltEncounters.vue'
 import ClientOverviewAltHeader from
   'components/client-overview/ClientOverviewAltHeader.vue'
 import ClientOverviewAltTabs from
@@ -156,6 +157,9 @@ import {
   severityTabModifier,
 } from 'src/utils/client-allergies.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { buildQuickStartEncounterPayload } from
+  'src/utils/start-encounter-quick.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
 
@@ -164,10 +168,10 @@ const router = useRouter()
 const { t } = useI18n()
 const $q = useQuasar()
 const siteStore = useSiteStore()
+const authStore = useAuthStore()
 
 const clientId = computed(() => route.params.id)
 const activeTab = ref(addClientTabKeys.appointments)
-const startDialogOpen = ref(false)
 const { canUseClinicalSummary } = useAiPermissions()
 
 const {
@@ -183,7 +187,7 @@ const {
 const {
   hasActiveEncounter,
   actionBusy,
-  canManageEncounter,
+  canStartEncounter,
   refreshActiveEncounter,
   startEncounter,
   isEncounterConflictError,
@@ -281,11 +285,30 @@ async function onAppointmentCheckedIn() {
   }
 }
 
-async function onStartEncounter(payload) {
+async function onStartEncounterSelect(selection = {}) {
   try {
-    await startEncounter(payload)
-    startDialogOpen.value = false
+    const payload = await buildQuickStartEncounterPayload({
+      encounterType: selection.encounterType,
+      appointmentId: selection.appointmentId,
+      staffMember: authStore.linkedStaffProfile,
+      clinicName: authStore.activeSubtenant?.name,
+    })
+    if (!payload || payload.error) {
+      $q.notify({
+        type: quasarNotifyTypes.warning,
+        message: t(payload?.error || 'activeEncounterActionError'),
+      })
+
+      return
+    }
+    const encounter = await startEncounter(payload)
     notifySuccess(t('startEncounterSuccess'))
+    if (encounter?.id != null) {
+      router.push({
+        name: 'EncounterWorkspace',
+        params: { id: String(encounter.id) },
+      })
+    }
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)

@@ -97,29 +97,6 @@ export async function rejectAiSuggestion(id, reason) {
   return normalizeAiSuggestion(unwrapData(response.data))
 }
 
-export async function generateDocumentSummary(clientId, body = {}) {
-  const payload = {}
-  if (body.scope) {
-    payload.scope = body.scope
-  }
-  if (body.documentId != null) {
-    payload.document_id = Number(body.documentId)
-  }
-  if (Array.isArray(body.documentIds) && body.documentIds.length) {
-    payload.document_ids = body.documentIds.map(Number)
-  }
-  if (body.customHint) {
-    payload.custom_hint = String(body.customHint).trim()
-  }
-  const response = await apiInstance.post(
-    apiPaths.aiDocumentSummary(clientId),
-    payload,
-    generateRequestConfig,
-  )
-
-  return normalizeAiSuggestion(unwrapData(response.data))
-}
-
 export async function generateClinicalSummary(clientId, body = {}) {
   const payload = {}
   if (body.scope) {

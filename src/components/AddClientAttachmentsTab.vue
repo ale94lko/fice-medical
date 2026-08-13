@@ -38,18 +38,6 @@
         <div class="col-auto">
           <div class="row q-gutter-sm items-center">
             <q-btn
-              v-if="canUseDocumentSummary"
-              no-caps
-              outline
-              color="primary"
-              class="app-btn-outline"
-              icon="auto_awesome"
-              :disable="loading || uploading"
-              :data-testid="aiTestIds.featureBtn('document-summary')"
-              :label="t('aiBtnDocumentSummary')"
-              @click="aiDialogOpen = true"
-            />
-            <q-btn
               v-if="canUpload"
               no-caps
               unelevated
@@ -136,13 +124,6 @@
       :cancel-text="t('cancel')"
       @confirm="confirmDelete"
     />
-
-    <AiGenerateDialog
-      v-model="aiDialogOpen"
-      :feature="aiFeatures.documentSummary"
-      :client-id="clientId"
-      :document-options="documentSelectOptions"
-    />
   </div>
 </template>
 
@@ -151,7 +132,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import ClientAttachmentsTable from 'components/ClientAttachmentsTable.vue'
 import ClientAttachmentUploadDialog from
   'components/ClientAttachmentUploadDialog.vue'
@@ -161,12 +141,9 @@ import FormField from 'components/FormField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import {
-  aiFeatures,
   quasarNotifyTypes,
   storedFileEntityTypes,
 } from 'components/constants.js'
-import { useAiPermissions } from 'src/composables/useAiPermissions.js'
-import { aiTestIds } from 'src/test-ids/ai.js'
 import { clientAttachmentsTestIds as tid } from 'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
@@ -207,7 +184,6 @@ const emit = defineEmits(['navigate-source'])
 
 const { t, te } = useI18n()
 const $q = useQuasar()
-const { canUseDocumentSummary } = useAiPermissions()
 
 const loading = ref(false)
 const uploading = ref(false)
@@ -220,17 +196,6 @@ const previewOpen = ref(false)
 const previewFile = ref(null)
 const deleteConfirmOpen = ref(false)
 const pendingDelete = ref(null)
-const aiDialogOpen = ref(false)
-
-const documentSelectOptions = computed(() =>
-  (rows.value || []).map(row => ({
-    label: row.originalFilename
-      || row.fileName
-      || row.name
-      || String(row.id),
-    value: row.id,
-  })),
-)
 
 const tablePagination = ref({
   page: 1,

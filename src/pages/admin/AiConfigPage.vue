@@ -71,18 +71,6 @@
           </FormField>
         </div>
         <div class="col-12 col-md-6">
-          <FormField :label="t('aiPromptDocumentSummary')" spaced>
-            <q-input
-              v-model.number="draft.documentSummary"
-              type="number"
-              outlined
-              dense
-              min="1"
-              :data-testid="aiTestIds.field('prompt-doc')"
-            />
-          </FormField>
-        </div>
-        <div class="col-12 col-md-6">
           <FormField :label="t('aiPromptClinicalSummary')" spaced>
             <q-input
               v-model.number="draft.clinicalSummary"
@@ -152,7 +140,6 @@ const config = ref(null)
 const draft = reactive({
   clinicalSoap: 1,
   icd10Suggestion: 1,
-  documentSummary: 1,
   clinicalSummary: 1,
   carePlanDraft: 1,
 })
@@ -165,7 +152,6 @@ const dirty = computed(() => {
 
   return draft.clinicalSoap !== prompts.clinicalSoap
     || draft.icd10Suggestion !== prompts.icd10Suggestion
-    || draft.documentSummary !== prompts.documentSummary
     || draft.clinicalSummary !== prompts.clinicalSummary
     || draft.carePlanDraft !== prompts.carePlanDraft
 })
@@ -173,7 +159,6 @@ const dirty = computed(() => {
 function applyDraft(prompts) {
   draft.clinicalSoap = prompts.clinicalSoap
   draft.icd10Suggestion = prompts.icd10Suggestion
-  draft.documentSummary = prompts.documentSummary
   draft.clinicalSummary = prompts.clinicalSummary
   draft.carePlanDraft = prompts.carePlanDraft
 }

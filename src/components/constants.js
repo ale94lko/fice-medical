@@ -183,6 +183,7 @@ export const userStatusValues = {
 
 export const addClientTabKeys = {
   appointments: 'appointments',
+  encounters: 'encounters',
   basic: 'basic',
   contact: 'contact',
   familyMedicalHistory: 'familyMedicalHistory',
@@ -307,7 +308,7 @@ export const clientEmailTypeValues = {
 
 export const clientPreferredCommunicationValues = {
   providerDidNotAsk: 'Provider did not ask',
-  patientDeclined: 'Patient declined to specify',
+  patientDeclined: 'Client declined to specify',
   workPhone: 'Work phone',
   homePhone: 'Home Phone',
   mobilePhone: 'Mobile phone',
@@ -1012,7 +1013,8 @@ export const permissionNames = {
   consentAuditView: 'CONSENT_AUDIT_VIEW',
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
-  useAiDocumentSummary: 'USE_AI_DOCUMENT_SUMMARY',
+  startEncounter: 'START_ENCOUNTER',
+  manageServiceRequirements: 'MANAGE_SERVICE_REQUIREMENTS',
   useAiClinicalSummary: 'USE_AI_CLINICAL_SUMMARY',
   useAiScribe: 'USE_AI_SCRIBE',
   useAiCodingAssistant: 'USE_AI_CODING_ASSISTANT',
@@ -1102,7 +1104,8 @@ export const clientPermissionNames = {
   deleteTelehealthFiles: 'DELETE_TELEHEALTH_FILES',
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
-  useAiDocumentSummary: permissionNames.useAiDocumentSummary,
+  startEncounter: permissionNames.startEncounter,
+  manageServiceRequirements: permissionNames.manageServiceRequirements,
   useAiClinicalSummary: permissionNames.useAiClinicalSummary,
   useAiScribe: permissionNames.useAiScribe,
   useAiCodingAssistant: permissionNames.useAiCodingAssistant,
@@ -1113,7 +1116,6 @@ export const clientPermissionNames = {
 }
 
 export const aiFeatures = {
-  documentSummary: 'DOCUMENT_SUMMARY',
   clinicalSummary: 'CLINICAL_SUMMARY',
   soapDraft: 'SOAP_DRAFT',
   icd10Suggest: 'ICD10_SUGGEST',
@@ -1128,12 +1130,6 @@ export const aiSuggestionStatuses = {
   rejected: 'REJECTED',
   failed: 'FAILED',
   expired: 'EXPIRED',
-}
-
-export const aiDocumentSummaryScopes = {
-  singleDocument: 'SINGLE_DOCUMENT',
-  documentPackage: 'DOCUMENT_PACKAGE',
-  custom: 'CUSTOM',
 }
 
 export const aiClinicalSummaryScopes = {
@@ -1158,6 +1154,81 @@ export const encounterStatuses = {
   inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
   cancelled: 'CANCELLED',
+}
+
+export const encounterCancelReasons = {
+  startedByMistake: 'STARTED_BY_MISTAKE',
+  wrongPatient: 'WRONG_PATIENT',
+  duplicateEncounter: 'DUPLICATE_ENCOUNTER',
+  patientLeft: 'PATIENT_LEFT',
+  technicalIssue: 'TECHNICAL_ISSUE',
+  other: 'OTHER',
+}
+
+export const encounterBillingReadinessStatuses = {
+  notReady: 'NOT_READY',
+  ready: 'READY',
+  billed: 'BILLED',
+}
+
+export const encounterWorkspaceTabs = {
+  overview: 'overview',
+  visit: 'visit',
+  clinical: 'clinical',
+  note: 'note',
+  followUp: 'follow-up',
+}
+
+export const encounterClinicalSubTabs = {
+  vitals: 'vitals',
+  assessments: 'assessments',
+  medications: 'medications',
+  carePlans: 'care-plans',
+  labs: 'labs',
+}
+
+export const encounterRequirementPurposes = {
+  encounterCompletion: 'ENCOUNTER_COMPLETION',
+  billingReadiness: 'BILLING_READINESS',
+}
+
+export const encounterRequirementStatuses = {
+  pending: 'PENDING',
+  satisfied: 'SATISFIED',
+  waived: 'WAIVED',
+  inactive: 'INACTIVE',
+}
+
+export const encounterRequirementScopes = {
+  encounter: 'ENCOUNTER',
+  service: 'SERVICE',
+}
+
+export const encounterRequirementSeverities = {
+  blocking: 'BLOCKING',
+  warning: 'WARNING',
+}
+
+export const encounterRequirementTypes = {
+  vitals: 'VITALS',
+  note: 'NOTE',
+  assessment: 'ASSESSMENT',
+  form: 'FORM',
+  safetyAssessment: 'SAFETY_ASSESSMENT',
+  medicationReview: 'MEDICATION_REVIEW',
+  carePlanReview: 'CARE_PLAN_REVIEW',
+  diagnosis: 'DIAGNOSIS',
+  service: 'SERVICE',
+}
+
+export const encounterRequirementActionTypes = {
+  openVitals: 'OPEN_VITALS',
+  openNote: 'OPEN_NOTE',
+  openAssessment: 'OPEN_ASSESSMENT',
+  openForm: 'OPEN_FORM',
+  openSafetyAssessment: 'OPEN_SAFETY_ASSESSMENT',
+  openMedicationReview: 'OPEN_MEDICATION_REVIEW',
+  openCarePlanReview: 'OPEN_CARE_PLAN_REVIEW',
 }
 
 export const encounterTypes = {
@@ -1213,6 +1284,7 @@ export const appointmentStatuses = {
   pending: 'PENDING',
   confirmed: 'CONFIRMED',
   checkedIn: 'CHECKED_IN',
+  inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
   cancelled: 'CANCELLED',
   noShow: 'NO_SHOW',
@@ -1430,22 +1502,59 @@ export const apiPaths = {
   appointmentNoShow: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/no-show`,
+  appointmentEncounterStart: id => `/appointments/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/encounter/start`,
   encountersCreate: '/encounters/v1',
   clientEncounters: clientId => `/encounters/v1/clients/${
     encodeURIComponent(String(clientId ?? '').trim())
   }`,
+  clientEncounterStart: clientId => `/encounters/v1/clients/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/start`,
   clientActiveEncounter: clientId => `/encounters/v1/clients/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/active`,
   encounterById: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
+  encounterWorkspace: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/workspace`,
+  encounterRequirements: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/requirements`,
+  encounterRequirementsRecalculate: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/requirements/recalculate`,
+  encounterRequirementWaive: (id, requirementId) => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/requirements/${encodeURIComponent(String(requirementId ?? '').trim())
+  }/waive`,
+  encounterMedicationReviews: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/medication-reviews`,
+  encounterCarePlanReviews: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/care-plan-reviews`,
   encounterComplete: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/complete`,
   encounterCancel: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/cancel`,
+  encounterReopen: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/reopen`,
+  serviceProcedureRequirements: id => `/service-procedures/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/requirements`,
+  serviceProcedureRequirementById: (id, requirementId) =>
+    `/service-procedures/v1/${
+      encodeURIComponent(String(id ?? '').trim())
+    }/requirements/${
+      encodeURIComponent(String(requirementId ?? '').trim())
+    }`,
   aiConfig: '/ai/v1/config',
   aiSuggestionById: id => `/ai/v1/suggestions/${encodeURIComponent(
     String(id ?? '').trim(),
@@ -1456,9 +1565,6 @@ export const apiPaths = {
   aiSuggestionReject: id => `/ai/v1/suggestions/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/reject`,
-  aiDocumentSummary: clientId => `/ai/v1/clients/${encodeURIComponent(
-    String(clientId ?? '').trim(),
-  )}/document-summary`,
   aiClinicalSummary: clientId => `/ai/v1/clients/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/clinical-summary`,
@@ -1614,6 +1720,10 @@ export const apiPaths = {
   )}/prescription-consent`,
   referenceMedications: '/reference-data/v1/medications',
   referenceMedicationById: id => `/reference-data/v1/medications/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
+  referenceIcd10Cm: '/reference-data/v1/icd10-cm',
+  referenceIcd10CmById: id => `/reference-data/v1/icd10-cm/${
     encodeURIComponent(String(id ?? '').trim())
   }`,
   // Meet REST (JWT staff + public guest). SockJS stays at /telehealth.

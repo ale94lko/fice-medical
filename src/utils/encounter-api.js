@@ -6,6 +6,12 @@ import {
   mapEncountersList,
   normalizeEncounter,
 } from 'src/utils/encounter-normalize.js'
+import { normalizeEncounterWorkspace } from
+  'src/utils/encounter-workspace-normalize.js'
+import {
+  normalizeEncounterRequirementsSnapshot,
+} from 'src/utils/encounter-requirements-normalize.js'
+import { encounterRequirementPurposes } from 'components/constants.js'
 
 const activeEncounterByClientId = new Map()
 
@@ -159,6 +165,8 @@ const CLIENT_CLINICAL_LIST_KEYS = [
   'referrals',
   'screenings',
   'medications',
+  'care_plans',
+  'carePlans',
 ]
 
 /**
@@ -217,6 +225,28 @@ function mapServiceProcedureToApi(row = {}) {
   if (fee != null && fee !== '') {
     payload.suggested_fee = Number(fee)
   }
+  const units = row.units
+  if (units != null && units !== '') {
+    payload.units = Number(units)
+  }
+  const duration = row.durationMinutes ?? row.duration_minutes
+  if (duration != null && duration !== '') {
+    payload.duration_minutes = Number(duration)
+  }
+  const rendering = resolveEncounterId(
+    row.renderingClinicianId ?? row.rendering_clinician_id,
+  )
+  if (rendering != null) {
+    payload.rendering_clinician_id = rendering
+  }
+  const diagnosisIds = row.diagnosisIds ?? row.diagnosis_ids
+  if (Array.isArray(diagnosisIds) && diagnosisIds.length) {
+    payload.diagnosis_ids = diagnosisIds.map(resolveEncounterId)
+  }
+  const diagnosisIndexes = row.diagnosisIndexes ?? row.diagnosis_indexes
+  if (Array.isArray(diagnosisIndexes) && diagnosisIndexes.length) {
+    payload.diagnosis_indexes = diagnosisIndexes.map(Number)
+  }
 
   return payload
 }
@@ -247,11 +277,23 @@ export function encounterCreateToApiPayload(form = {}) {
     ).trim().toUpperCase(),
     telemedicine: Boolean(form.telemedicine),
   }
+  const mode = trimOrNull(
+    form.encounterMode ?? form.encounter_mode,
+  )
+  if (mode) {
+    payload.encounter_mode = mode.toUpperCase()
+  }
   const pos = trimOrNull(
     form.placeOfServiceCode ?? form.place_of_service_code,
   )
   if (pos) {
     payload.place_of_service_code = pos
+  }
+  const location = trimOrNull(
+    form.locationName ?? form.location_name,
+  )
+  if (location) {
+    payload.location_name = location
   }
   const complaint = trimOrNull(
     form.chiefComplaint ?? form.chief_complaint,
@@ -273,6 +315,14 @@ export function encounterCreateToApiPayload(form = {}) {
   if (Array.isArray(procedures) && procedures.length) {
     payload.service_procedures = procedures.map(mapServiceProcedureToApi)
   }
+
+  return payload
+}
+
+export function encounterClientStartToApiPayload(form = {}) {
+  const payload = encounterCreateToApiPayload(form)
+  delete payload.client_id
+  delete payload.appointment_id
 
   return payload
 }
@@ -319,6 +369,119 @@ export async function createEncounter(form) {
   }
 
   return encounter
+}
+
+export async function startClientEncounter(clientId, form = {}) {
+  const response = await apiInstance.post(
+    apiPaths.clientEncounterStart(clientId),
+    encounterClientStartToApiPayload({
+      ...form,
+      clientId,
+    }),
+  )
+  const encounter = normalizeEncounter(unwrapData(response.data))
+  if (encounter?.clientId != null) {
+    setCachedActiveEncounter(encounter.clientId, encounter)
+  }
+
+  return encounter
+}
+
+export async function startAppointmentEncounter(appointmentId) {
+  const response = await apiInstance.post(
+    apiPaths.appointmentEncounterStart(appointmentId),
+  )
+  const encounter = normalizeEncounter(unwrapData(response.data))
+  if (encounter?.clientId != null) {
+    setCachedActiveEncounter(encounter.clientId, encounter)
+  }
+
+  return encounter
+}
+
+export async function fetchEncounterWorkspace(encounterId) {
+  const response = await apiInstance.get(
+    apiPaths.encounterWorkspace(encounterId),
+  )
+  const workspace = normalizeEncounterWorkspace(
+    unwrapData(response.data),
+  )
+  const encounter = workspace.encounter
+  if (encounter?.clientId != null && encounter.isInProgress) {
+    setCachedActiveEncounter(encounter.clientId, encounter)
+  }
+
+  return workspace
+}
+
+export async function fetchEncounterRequirements(
+  encounterId,
+  purpose = encounterRequirementPurposes.encounterCompletion,
+) {
+  const response = await apiInstance.get(
+    apiPaths.encounterRequirements(encounterId),
+    { params: { purpose } },
+  )
+
+  return normalizeEncounterRequirementsSnapshot(
+    unwrapData(response.data),
+  )
+}
+
+export async function recalculateEncounterRequirements(encounterId) {
+  const response = await apiInstance.post(
+    apiPaths.encounterRequirementsRecalculate(encounterId),
+  )
+
+  return normalizeEncounterRequirementsSnapshot(
+    unwrapData(response.data),
+  )
+}
+
+export async function waiveEncounterRequirement(
+  encounterId,
+  requirementId,
+  { reason } = {},
+) {
+  const response = await apiInstance.post(
+    apiPaths.encounterRequirementWaive(encounterId, requirementId),
+    { reason: String(reason ?? '').trim() || undefined },
+  )
+
+  return normalizeEncounterRequirementsSnapshot(
+    unwrapData(response.data),
+  )
+}
+
+export async function createEncounterMedicationReview(
+  encounterId,
+  { noChangesRequired = true, notes = '' } = {},
+) {
+  const response = await apiInstance.post(
+    apiPaths.encounterMedicationReviews(encounterId),
+    {
+      no_changes_required: noChangesRequired === true,
+      notes: String(notes ?? '').trim() || undefined,
+    },
+  )
+
+  return unwrapData(response.data)
+}
+
+export async function createEncounterCarePlanReview(
+  encounterId,
+  { carePlanId, outcome = 'REVIEWED', notes = '' } = {},
+) {
+  const response = await apiInstance.post(
+    apiPaths.encounterCarePlanReviews(encounterId),
+    {
+      care_plan_id: carePlanId,
+      outcome: String(outcome ?? 'REVIEWED').trim().toUpperCase(),
+      notes: String(notes ?? '').trim() || undefined,
+    },
+  )
+
+  return unwrapData(response.data)
 }
 
 export async function listClientEncounters(clientId, params = {}) {
@@ -395,14 +558,44 @@ export async function completeEncounter(encounterId, clientId = null) {
   return encounter
 }
 
-export async function cancelEncounter(encounterId, clientId = null) {
+export async function cancelEncounter(
+  encounterId,
+  clientId = null,
+  payload = {},
+) {
+  const body = {
+    reason: String(payload.reason ?? '').trim().toUpperCase(),
+  }
+  const notes = String(payload.notes ?? '').trim()
+  if (notes) {
+    body.notes = notes
+  }
   const response = await apiInstance.post(
     apiPaths.encounterCancel(encounterId),
+    body,
   )
   const encounter = normalizeEncounter(unwrapData(response.data))
   const key = clientId ?? encounter?.clientId
   if (key != null) {
     setCachedActiveEncounter(key, null)
+  }
+
+  return encounter
+}
+
+export async function reopenEncounter(
+  encounterId,
+  payload = {},
+) {
+  const response = await apiInstance.post(
+    apiPaths.encounterReopen(encounterId),
+    {
+      reason: String(payload.reason ?? '').trim(),
+    },
+  )
+  const encounter = normalizeEncounter(unwrapData(response.data))
+  if (encounter?.clientId != null && encounter.isInProgress) {
+    setCachedActiveEncounter(encounter.clientId, encounter)
   }
 
   return encounter

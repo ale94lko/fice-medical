@@ -132,11 +132,11 @@ export default {
   loginPromoHeadlineAccent: 'mejor atención',
   loginPromoDescription:
     'FICE Medical ayuda a los profesionales de la salud a gestionar '
-    + 'pacientes, citas y registros médicos en una plataforma segura e '
+    + 'clientes, citas y registros médicos en una plataforma segura e '
     + 'intuitiva.',
-  loginPromoFeaturePatientTitle: 'Centrado en el paciente',
+  loginPromoFeaturePatientTitle: 'Centrado en el cliente',
   loginPromoFeaturePatientDesc:
-    'Toda la información del paciente en un solo lugar, accesible cuando '
+    'Toda la información del cliente en un solo lugar, accesible cuando '
     + 'la necesites.',
   loginPromoFeatureSecureTitle: 'Seguro y conforme',
   loginPromoFeatureSecureDesc:
@@ -146,7 +146,7 @@ export default {
     'Informes y analíticas potentes para mejorar resultados y eficiencia.',
   loginPromoFooter:
     'Creado para la salud. Diseñado para ti. Más tiempo para lo que más '
-    + 'importa: tus pacientes.',
+    + 'importa: tus clientes.',
   invalidCredentials: 'Credenciales inválidas, intente de nuevo.',
   sessionExpiredRelogin:
     'La session expiró, por favor inicia session de nuevo',
@@ -311,14 +311,50 @@ export default {
   serviceProcedureCptCodeLabel: 'Código CPT',
   serviceProcedureHcpcsCodeLabel: 'Código HCPCS',
   serviceProcedureDefaultFeeLabel: 'Tarifa predeterminada',
+  serviceProcedureDefaultFeePlaceholder: '0.00',
   serviceProcedureAuthorizationRequirementLabel:
     'Requisito de autorización',
-  serviceProcedureAuthorizationHint:
-    'Solo informativo. No sustituye la verificación con el seguro.',
   serviceProcedureSectionGeneral: 'Información general',
-  serviceProcedureSectionOperational: 'Configuración operativa',
   serviceProcedureSectionBilling: 'Facturación',
-  serviceProcedureSectionAuthorization: 'Referencia de autorización',
+  serviceProcedureSectionRequirements: 'Requisitos del encounter',
+  serviceProcedureRequirementAdd: 'Añadir requisito',
+  serviceProcedureRequirementEdit: 'Editar requisito',
+  serviceProcedureRequirementSaveFirst:
+    'Guarde primero el servicio para configurar requisitos.',
+  serviceProcedureRequirementEmpty: 'Aún no hay requisitos configurados.',
+  serviceProcedureRequirementType: 'Tipo',
+  serviceProcedureRequirementPurpose: 'Propósito',
+  serviceProcedureRequirementSeverity: 'Severidad',
+  serviceProcedureRequirementScope: 'Alcance',
+  serviceProcedureRequirementOrder: 'Orden',
+  serviceProcedureRequirementRequired: 'Obligatorio',
+  serviceProcedureRequirementWaivable: 'Eximible',
+  serviceProcedureRequirementActive: 'Activo',
+  serviceProcedureRequirementNameOverride: 'Nombre alternativo',
+  serviceProcedureRequirementReferenceId: 'ID de plantilla de screening',
+  serviceProcedureRequirementReferenceRequired:
+    'Se requiere un ID de plantilla de screening para este tipo.',
+  serviceProcedureRequirementTypeVitals: 'Vitales',
+  serviceProcedureRequirementTypeNote: 'Nota clínica',
+  serviceProcedureRequirementTypeAssessment: 'Screening',
+  serviceProcedureRequirementTypeForm: 'Formulario',
+  serviceProcedureRequirementTypeSafety: 'Screening de seguridad',
+  serviceProcedureRequirementTypeMedReview: 'Revisión de medicación',
+  serviceProcedureRequirementTypeCarePlan: 'Revisión de care plan',
+  serviceProcedureRequirementTypeDiagnosis: 'Diagnóstico',
+  serviceProcedureRequirementPurposeCompletion: 'Completar encounter',
+  serviceProcedureRequirementPurposeBilling: 'Listo para facturar',
+  serviceProcedureRequirementSeverityBlocking: 'Bloqueante',
+  serviceProcedureRequirementSeverityWarning: 'Advertencia',
+  serviceProcedureRequirementScopeService: 'Servicio',
+  serviceProcedureRequirementScopeEncounter: 'Encounter',
+  serviceProcedureRequirementLoadError:
+    'No se pudieron cargar los requisitos.',
+  serviceProcedureRequirementSaved: 'Requisito guardado.',
+  serviceProcedureRequirementSaveError: 'No se pudo guardar el requisito.',
+  serviceProcedureRequirementDeleted: 'Requisito desactivado.',
+  serviceProcedureRequirementDeleteError:
+    'No se pudo desactivar el requisito.',
   serviceProcedureCategoryClinicalService: 'Servicio clínico',
   serviceProcedureCategoryTherapy: 'Terapia',
   serviceProcedureCategoryEvaluation: 'Evaluación',
@@ -342,6 +378,8 @@ export default {
     'Actualice la configuración. Desactive en lugar de eliminar.',
   serviceProcedureNameRequired: 'El nombre es obligatorio.',
   serviceProcedureCategoryRequired: 'La categoría es obligatoria.',
+  serviceProcedureAuthReqRequired:
+    'El requisito de autorización es obligatorio.',
   serviceProcedureDurationInvalid:
     'La duración debe ser mayor que 0 minutos.',
   serviceProcedureDurationRangeInvalid:
@@ -1027,6 +1065,7 @@ export default {
   tabBasicInformation: 'Información básica',
   tabBasicInfo: 'Info básica',
   tabAppointments: 'Citas',
+  tabEncounters: 'Consultas',
   tabContact: 'Contacto',
   tabContactInformation: 'Información de contacto',
   contactSubTabSelf: 'Contacto propio',
@@ -1080,7 +1119,7 @@ export default {
   screeningRiskLevelHigh: 'Alto',
   screeningRiskLevelCritical: 'Crítico',
   screeningRiskAlertMessage:
-    'Continúe el tamizaje y supervise al paciente de cerca.',
+    'Continúe el tamizaje y supervise al cliente de cerca.',
   screeningViewGuidelines: 'Ver guías',
   screeningSelectTemplateHint:
     'Seleccione una plantilla de tamizaje arriba para cargar las secciones.',
@@ -1218,7 +1257,7 @@ export default {
   screeningCancelError: 'No se pudo cancelar el tamizaje.',
   screeningAutosaving: 'Guardando…',
   screeningCompletedAtLabel: 'Completado: {date}',
-  screeningPatientMeasurements: 'Medidas del paciente',
+  screeningPatientMeasurements: 'Medidas del cliente',
   screeningWeight: 'Peso',
   screeningHeight: 'Talla',
   screeningBmi: 'IMC',
@@ -1446,7 +1485,7 @@ export default {
   carePlanPriorityHigh: 'Alta',
   clinicalNotesTitle: 'Notas clínicas',
   clinicalNotesSubtitle:
-    'Ver y gestionar notas clínicas de este paciente.',
+    'Ver y gestionar notas clínicas de este cliente.',
   clinicalNoteAdd: 'Añadir nota clínica',
   clinicalNoteSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar notas clínicas.',
@@ -1469,7 +1508,7 @@ export default {
     'Mostrando {from} a {to} de {total} resultados',
   clinicalNoteAddTitle: 'Añadir nota clínica',
   clinicalNoteAddSubtitle:
-    'Cree una nueva nota clínica para este paciente.',
+    'Cree una nueva nota clínica para este cliente.',
   clinicalNoteEditTitle: 'Editar nota clínica',
   clinicalNoteViewTitle: 'Ver nota clínica',
   clinicalNoteViewSubtitle: 'Detalle de la nota clínica.',
@@ -1483,13 +1522,13 @@ export default {
   clinicalNoteDateNotFuture:
     'La fecha y hora no pueden ser futuras.',
   clinicalNoteDateBeforeAdmission:
-    'La fecha y hora no pueden ser anteriores a la admisión del paciente.',
+    'La fecha y hora no pueden ser anteriores a la admisión del cliente.',
   clinicalNoteClinician: 'Clínico',
   clinicalNoteClinicianPlaceholder: 'Seleccionar clínico',
   clinicalNoteClinicianRequired: 'El clínico es obligatorio.',
   clinicalNoteSubjective: 'Subjetivo',
   clinicalNoteSubjectivePlaceholder:
-    'Información reportada por el paciente.',
+    'Información reportada por el cliente.',
   clinicalNoteSubjectiveRequired:
     'El subjetivo es obligatorio para firmar.',
   clinicalNoteObjective: 'Objetivo',
@@ -1711,10 +1750,10 @@ export default {
   subTabFollowUps: 'Seguimientos',
   referralsTitle: 'Referencias',
   referralsSubtitle:
-    'Consulte y gestione las referencias de este paciente.',
+    'Consulte y gestione las referencias de este cliente.',
   referralAdd: 'Agregar referencia',
   referralAddTitle: 'Agregar referencia',
-  referralAddSubtitle: 'Cree una nueva referencia para este paciente.',
+  referralAddSubtitle: 'Cree una nueva referencia para este cliente.',
   referralEditTitle: 'Editar referencia',
   referralViewTitle: 'Detalle de la referencia',
   referralSave: 'Guardar referencia',
@@ -1872,7 +1911,7 @@ export default {
   referralSourceSelfReferred: 'Autorreferido',
   referralInformation: 'Información de referencia',
   referralInformationSubtitle:
-    'Indíquenos cómo llegó este paciente a la clínica.',
+    'Indíquenos cómo llegó este cliente a la clínica.',
   referralSource: 'Origen de la referencia',
   referralSourcePlaceholder: 'Seleccionar origen',
   referralSourceRequired: 'El origen de la referencia es obligatorio.',
@@ -1882,13 +1921,13 @@ export default {
     'Ingrese información adicional de la referencia',
   referralIntakeSelfReferredTitle: 'Autorreferido',
   referralIntakeSelfReferredMessage:
-    'Este paciente contactó la clínica directamente.',
+    'Este cliente contactó la clínica directamente.',
   referralIntakeSelfReferredNoRecord:
     'No se creará un registro de referencia.',
   referralIntakeDefaultReason:
-    'Referencia entrante al registrar al paciente',
+    'Referencia entrante al registrar al cliente',
   referralIntakeCreateError:
-    'Paciente guardado, pero no se pudo crear la referencia entrante.',
+    'Cliente guardado, pero no se pudo crear la referencia entrante.',
   referralDateInvalid: 'Ingrese una fecha de referencia válida.',
   appointmentsTitle: 'Citas',
   appointmentsSubtitle: 'Ver y gestionar citas del cliente.',
@@ -1992,10 +2031,6 @@ export default {
   appointmentServiceCatalogDurationRange: '{min}–{max} min',
   appointmentServicesSelectedCount: '{count} seleccionados',
   appointmentServicesAddAnother: 'Añadir otro servicio',
-  appointmentServicesCatalogEmpty:
-    'No hay servicios de cita disponibles. '
-    + 'Configure servicios activos que requieran cita en '
-    + 'Servicios / Procedimientos.',
   appointmentServiceRequired:
     'Seleccione al menos un servicio / procedimiento.',
   appointmentPlaceOfService: 'Lugar de atención',
@@ -2166,6 +2201,7 @@ export default {
   appointmentStatusPending: 'Pendiente',
   appointmentStatusConfirmed: 'Confirmada',
   appointmentStatusCheckedIn: 'Check-in',
+  appointmentStatusInProgress: 'En curso',
   appointmentStatusCompleted: 'Completada',
   appointmentStatusCancelled: 'Cancelada',
   appointmentStatusNoShow: 'No asistió',
@@ -2244,8 +2280,8 @@ export default {
   startEncounterButton: 'Consulta',
   startEncounterTitle: 'Iniciar consulta',
   startEncounterHint:
-    'Elija cómo abrir la visita: walk-in, teléfono, telehealth '
-    + 'o desde una cita de hoy.',
+    'Confirme el lugar de atención y notas opcionales, luego inicie '
+    + 'la visita.',
   startEncounterSubmit: 'Iniciar',
   startEncounterSuccess: 'Consulta iniciada.',
   startEncounterTodayAppointments: 'Seleccione la cita de hoy',
@@ -2266,6 +2302,9 @@ export default {
   encounterTypeScheduledHintCount:
     '{count} cita(s) hoy — seleccione abajo',
   encounterClinicianLabel: 'Clínico',
+  encounterClinicianLoggedInPlaceholder: 'Clínico conectado',
+  encounterClinicianRequired:
+    'Se requiere un perfil de clínico conectado para iniciar la consulta.',
   encounterPlaceOfServiceLabel: 'Código de lugar de servicio',
   encounterPlaceOfServicePlaceholder: 'p. ej. 11',
   encounterChiefComplaintLabel: 'Motivo de consulta',
@@ -2812,7 +2851,7 @@ export default {
     'Seleccione una o más formas de contactar a este cliente '
     + '(email y/o móvil SMS para avisos de citas).',
   prefCommProviderDidNotAsk: 'El proveedor no preguntó',
-  prefCommPatientDeclined: 'El paciente declinó especificar',
+  prefCommPatientDeclined: 'El cliente declinó especificar',
   prefCommWorkPhone: 'Teléfono del trabajo',
   prefCommHomePhone: 'Teléfono de casa',
   prefCommMobilePhone: 'Teléfono móvil',
@@ -2820,10 +2859,10 @@ export default {
   prefCommEmail: 'Correo electrónico',
   prefCommPointOfContact: 'Punto de contacto',
   communicationAuthorizationMethod:
-    'El paciente autoriza comunicaciones a través del método de '
+    'El cliente autoriza comunicaciones a través del método de '
     + 'comunicación preferido seleccionado.',
   communicationAuthorizationPointOfContact:
-    'El paciente autoriza la comunicación con la persona de contacto '
+    'El cliente autoriza la comunicación con la persona de contacto '
     + 'seleccionada.',
   communicationAuthorizedOn: 'Autorizado el: {date}',
   preferredPointOfContact: 'Punto de contacto preferido',
@@ -2954,7 +2993,7 @@ export default {
   allergyName: 'Alergia',
   noKnownAllergiesLabel: 'No se conocen alergias',
   noKnownAllergiesHint:
-    'Marque esta opción si el paciente ha confirmado que no tiene '
+    'Marque esta opción si el cliente ha confirmado que no tiene '
     + 'alergias conocidas.',
   noKnownAllergiesConfirmedTitle: 'Sin alergias conocidas confirmadas',
   noKnownAllergiesConfirmedSubtitle:
@@ -2962,7 +3001,7 @@ export default {
   noKnownAllergiesRemoveModalTitle:
     '¿Eliminar las alergias existentes?',
   noKnownAllergiesRemoveModalMessage:
-    'Este paciente ya tiene alergias registradas.\n'
+    'Este cliente ya tiene alergias registradas.\n'
     + 'Al seleccionar "No se conocen alergias" se eliminarán todos los '
     + 'registros de alergias existentes.\n'
     + 'Esta acción no se puede deshacer.',
@@ -2990,7 +3029,7 @@ export default {
   allergyStartYearInvalid:
     'Ingrese un año válido de 4 dígitos entre {min} y {max}',
   allergyStartYearBeforeBirth:
-    'El año no puede ser anterior al año de nacimiento del paciente.',
+    'El año no puede ser anterior al año de nacimiento del cliente.',
   allergyStartYearAfterCurrent:
     'El año no puede ser posterior al año actual.',
   allergyDuplicateEntry:
@@ -3082,7 +3121,7 @@ export default {
   vitalsUpdate: 'Actualizar signos vitales',
   vitalsHistoryTitle: 'Historial de signos vitales',
   vitalsHistorySubtitle:
-    'Ver y gestionar el historial de signos vitales de este paciente.',
+    'Ver y gestionar el historial de signos vitales de este cliente.',
   vitalsHistoryEmpty: 'Aún no hay signos vitales registrados.',
   vitalsSavedSuccess: 'Signos vitales guardados.',
   vitalsUpdatedSuccess: 'Signos vitales actualizados.',
@@ -3213,7 +3252,7 @@ export default {
   insurancePayerRequired: 'Seleccione o ingrese un pagador / plan.',
   insurancePriorityRequired: 'La prioridad del seguro es obligatoria.',
   insurancePriorityDuplicate:
-    'Este paciente ya tiene un seguro activo con esta prioridad.',
+    'Este cliente ya tiene un seguro activo con esta prioridad.',
   insuranceMaxActivePriorities:
     'Primary, Secondary y Tertiary ya están activos. '
     + 'Desactive uno antes de agregar otro perfil.',
@@ -3381,10 +3420,10 @@ export default {
   medicationsTitle: 'Recetas',
   medicationsSubtitle:
     'Consulte y gestione los medicamentos prescritos o reportados '
-    + 'para este paciente.',
+    + 'para este cliente.',
   medicationAdd: 'Añadir medicamento',
   medicationSaveClientFirst:
-    'Guarde primero al paciente para crear y gestionar medicamentos.',
+    'Guarde primero al cliente para crear y gestionar medicamentos.',
   medicationNoPermission:
     'No tiene permiso para ver medicamentos.',
   medicationListEmpty:
@@ -3398,7 +3437,7 @@ export default {
   medicationDeleteError: 'No se pudo eliminar el medicamento.',
   medicationDeleteTitle: '¿Eliminar medicamento?',
   medicationDeleteMessage:
-    'Este medicamento se eliminará del registro del paciente.',
+    'Este medicamento se eliminará del registro del cliente.',
   medicationStatusUpdated: 'Estado del medicamento actualizado.',
   medicationStatusError:
     'No se pudo actualizar el estado del medicamento.',
@@ -3410,7 +3449,7 @@ export default {
   medicationAddSubtitle: 'Introduzca la información del medicamento.',
   medicationEditTitle: 'Editar medicamento',
   medicationViewTitle: 'Ver medicamento',
-  medicationViewSubtitle: 'Detalles del medicamento de este paciente.',
+  medicationViewSubtitle: 'Detalles del medicamento de este cliente.',
   medicationSave: 'Guardar medicamento',
   medicationSectionInfo: 'Información del medicamento',
   medicationSectionDetails: 'Detalles de la receta',
@@ -3439,14 +3478,14 @@ export default {
   medicationNotes: 'Notas',
   medicationNotesPlaceholder: 'Introduzca notas adicionales',
   medicationPharmacyModePreferred:
-    'Usar la farmacia preferida del paciente',
+    'Usar la farmacia preferida del cliente',
   medicationPharmacyModeSelected: 'Seleccionar otra farmacia',
   medicationPharmacyModeNone: 'Sin farmacia para este medicamento',
   medicationPharmacySearchPlaceholder: 'Seleccionar farmacia',
   medicationAddPharmacy: 'Añadir nueva farmacia',
   medicationSetPreferred:
     'Establecer la farmacia seleccionada como preferida '
-    + 'para este paciente',
+    + 'para este cliente',
   medicationSetPreferredHint:
     'La farmacia preferida se usa de forma predeterminada '
     + 'para nuevas recetas.',
@@ -3455,7 +3494,7 @@ export default {
     'Mantenga este formulario abierto para añadir varios medicamentos.',
   medicationPreferredBadge: 'Preferida',
   medicationNoPreferredPharmacy:
-    'No hay farmacia preferida configurada para este paciente.',
+    'No hay farmacia preferida configurada para este cliente.',
   medicationPreferredPharmacyTitle: 'Farmacia preferida',
   medicationPharmacyViewEdit: 'Ver / Editar',
   medicationConsentCardTitle:
@@ -3463,10 +3502,10 @@ export default {
   medicationConsentGivenBadge: 'Consentimiento otorgado',
   medicationConsentNotGivenBadge: 'Sin consentimiento',
   medicationConsentGivenText:
-    'El paciente da consentimiento para recuperar el historial '
+    'El cliente da consentimiento para recuperar el historial '
     + 'de recetas.',
   medicationConsentNotGivenText:
-    'El paciente no ha dado consentimiento para recuperar el '
+    'El cliente no ha dado consentimiento para recuperar el '
     + 'historial de recetas.',
   medicationConsentViewDetails: 'Ver detalles',
   medicationConsentSaved: 'Consentimiento guardado correctamente.',
@@ -3504,7 +3543,7 @@ export default {
   pharmacySaved: 'Farmacia guardada correctamente.',
   pharmacySaveError: 'No se pudo guardar la farmacia.',
   pharmacyAddTitle: 'Añadir farmacia',
-  pharmacyAddSubtitle: 'Añada una farmacia para que use este paciente.',
+  pharmacyAddSubtitle: 'Añada una farmacia para que use este cliente.',
   pharmacyEditTitle: 'Editar farmacia',
   pharmacyViewTitle: 'Ver farmacia',
   pharmacySave: 'Guardar farmacia',
@@ -3526,7 +3565,7 @@ export default {
   pharmacyNotes: 'Notas',
   pharmacyNotesPlaceholder: 'Introduzca notas adicionales',
   pharmacySetPreferred:
-    'Establecer como farmacia preferida para este paciente',
+    'Establecer como farmacia preferida para este cliente',
   pharmacySetPreferredHint:
     'La farmacia preferida se usa de forma predeterminada para nuevas '
     + 'recetas.',
@@ -3539,7 +3578,7 @@ export default {
   pharmacyPlacesSearch: 'Buscar farmacias',
   pharmacyPlacesQuery: 'Buscar',
   pharmacyPlacesQueryPlaceholder:
-    'Busque por nombre, ciudad, código postal, estado o dirección',
+    'Nombre, ciudad, ZIP de 5 dígitos, estado o dirección',
   pharmacyPlacesName: 'Nombre de la farmacia',
   pharmacyPlacesZip: 'Código postal',
   pharmacyPlacesCity: 'Ciudad',
@@ -3572,9 +3611,9 @@ export default {
   medicationConsentTitle:
     'Consentimiento de historial de recetas',
   medicationConsentSubtitle:
-    'Registre si el paciente dio consentimiento para compartir su '
+    'Registre si el cliente dio consentimiento para compartir su '
     + 'historial de recetas.',
-  medicationConsentLabel: 'El paciente ha dado su consentimiento',
+  medicationConsentLabel: 'El cliente ha dado su consentimiento',
   medicationConsentNotes: 'Notas',
   medicationConsentNotesPlaceholder: 'Introduzca notas adicionales',
   medicationConsentedAt: 'Consentimiento otorgado el {date}',
@@ -3787,24 +3826,14 @@ export default {
   aiStatusRejected: 'Rechazada',
   aiStatusFailed: 'Fallida',
   aiStatusExpired: 'Expirada',
-  aiGenerateDocumentSummary: 'Resumir documentos con IA',
   aiGenerateClinicalSummary: 'Resumen clínico con IA',
   aiGenerateSoapDraft: 'Borrador SOAP con IA',
   aiGenerateIcd10: 'Sugerir ICD-10 con IA',
   aiGenerateCarePlan: 'Borrador de care plan con IA',
-  aiBtnDocumentSummary: 'Resumir con IA',
-  aiBtnClinicalSummary: 'IA Assistant',
+  aiBtnClinicalSummary: 'AI Assistant',
   aiBtnSoapDraft: 'Borrador SOAP con IA',
   aiBtnIcd10: 'Sugerir ICD-10',
   aiBtnCarePlanDraft: 'Borrador de care plan',
-  aiDocScope: 'Alcance',
-  aiDocScopePackage: 'Paquete de documentos',
-  aiDocScopeSingle: 'Documento individual',
-  aiDocScopeCustom: 'Personalizado',
-  aiDocumentId: 'Documento',
-  aiDocumentIdPlaceholder: 'Seleccione un documento',
-  aiDocumentIdRequired: 'Seleccione un documento.',
-  aiCustomHint: 'Indicación personalizada',
   aiClinicalScope: 'Alcance',
   aiClinicalScopeFaceSheet: 'Face sheet',
   aiClinicalScopeEncounter: 'Último encounter',
@@ -3844,10 +3873,242 @@ export default {
     + 'de prompts.',
   aiPromptClinicalSoap: 'SOAP clínico',
   aiPromptIcd10: 'Sugerencia ICD-10',
-  aiPromptDocumentSummary: 'Resumen de documentos',
   aiPromptClinicalSummary: 'Resumen clínico',
   aiPromptCarePlan: 'Borrador de care plan',
   aiConfigLoadError: 'No se pudo cargar la configuración de IA.',
   aiConfigSaveError: 'No se pudo guardar la configuración de IA.',
   aiConfigSaved: 'Configuración de IA guardada.',
+
+  encounterWorkspaceLoadError:
+    'No se pudo cargar el workspace del encounter.',
+  encounterWorkspaceRetry: 'Reintentar',
+  encounterPatientChart: 'Resumen del cliente',
+  encounterComplete: 'Completar',
+  encounterCancel: 'Cancelar',
+  encounterHeaderDob: 'DOB: {dob}',
+  encounterHeaderDobAge: 'DOB: {dob} • {age} yrs',
+  encounterHeaderDobAgeValue: '{dob} ({age} yrs)',
+  encounterHeaderAge: '{age} yrs',
+  encounterHeaderMrn: 'MRN: {mrn}',
+  encounterReopen: 'Reabrir encounter',
+  encounterStartedAt: 'Iniciado a las {time}',
+  encounterRenderingClinician: 'Clínico responsable',
+  encounterLocation: 'Ubicación',
+  encounterModeInPerson: 'Presencial',
+  encounterModeTelehealth: 'Telehealth',
+  encounterStatusInProgress: 'En curso',
+  encounterStatusCompleted: 'Completado',
+  encounterStatusCancelled: 'Cancelado',
+  encountersTitle: 'Consultas',
+  encounterListEmpty: 'No hay consultas para este cliente.',
+  encounterListLoadError: 'No se pudieron cargar las consultas.',
+  encounterListNoPermission:
+    'No tiene permiso para ver las consultas.',
+  encounterColumnStarted: 'Inicio',
+  encounterColumnType: 'Tipo',
+  encounterColumnStatus: 'Estado',
+  encounterColumnClinician: 'Clínico',
+  encounterColumnComplaint: 'Motivo principal',
+  encounterOpenWorkspace: 'Abrir consulta',
+  encounterServiceFallback: 'Encounter',
+  encounterAllergiesLabel: 'ALERGIAS',
+  encounterViewAllAllergies: 'Ver todas las alergias',
+  encounterTabOverview: 'Overview',
+  encounterTabVisit: 'Visit',
+  encounterTabClinical: 'Clinical',
+  encounterTabNote: 'Note',
+  encounterTabFollowUp: 'Follow Up',
+  encounterCompleteVisitTitle: 'Completar esta visita',
+  encounterProgressLabel: '{completed} de {total} completados',
+  encounterRequired: 'Obligatorio',
+  encounterChecklistEmpty:
+    'No hay requisitos de finalización.',
+  encounterOtherClinicalActions: 'Otras acciones clínicas',
+  encounterRequirementWaived: 'Eximido',
+  encounterRequirementWaive: 'Eximir',
+  encounterRequirementWaiveTitle: 'Eximir requisito',
+  encounterRequirementWaiveHint:
+    'Indique un motivo para eximir "{name}".',
+  encounterRequirementWaiveReason: 'Motivo',
+  encounterRequirementWaiveConfirm: 'Eximir',
+  encounterRequirementWaiveSuccess: 'Requisito eximido.',
+  encounterRequirementWaiveError: 'No se pudo eximir el requisito.',
+  encounterMedicationReviewTitle: 'Revisión de medicación',
+  encounterMedicationReviewHint:
+    'Confirme la revisión de medicación de este encounter sin '
+    + 'cambiar las prescripciones.',
+  encounterCarePlanReviewTitle: 'Revisión de care plan',
+  encounterCarePlanReviewHint:
+    'Confirme la revisión del care plan de este encounter.',
+  encounterReviewNotes: 'Notas',
+  encounterReviewConfirm: 'Marcar revisado',
+  encounterReviewSuccess: 'Revisión registrada.',
+  encounterReviewError: 'No se pudo registrar la revisión.',
+  encounterQuickActions: 'Acciones rápidas',
+  encounterQuickAddVitals: 'Añadir vitales',
+  encounterQuickMedications: 'Medicamentos',
+  encounterQuickCarePlan: 'Care Plan',
+  encounterQuickFollowUp: 'Follow Up / próxima cita',
+  encounterQuickDocument: 'Añadir documento',
+  encounterBillingReadiness: 'Listo para facturar',
+  encounterBillingCounts:
+    '{blocking} bloqueantes · {warning} advertencias',
+  encounterBillingReady: 'Listo',
+  encounterBillingNotReady: 'No listo',
+  encounterBillingBilled: 'Facturado',
+  encounterVisitInformation: 'Información de la visita',
+  encounterIdLabel: 'Encounter ID',
+  encounterDate: 'Fecha',
+  encounterStartTime: 'Hora de inicio',
+  encounterEndTime: 'Hora de fin',
+  encounterServices: 'Servicio',
+  encounterServicesEmpty: 'No hay servicios en este encounter.',
+  encounterEditServices: 'Editar servicios',
+  encounterEditServicesTitle: 'Editar servicios',
+  encounterEditServicesHint:
+    'Añada o quite servicios y ajuste las unidades de esta visita.',
+  encounterAddService: 'Añadir servicio',
+  encounterAddServicePlaceholder: 'Buscar servicio por nombre o código',
+  encounterServiceCode: 'Código',
+  encounterServiceUnits: 'Unidades',
+  encounterServiceUnitsValue: '{count} unidad(es)',
+  encounterServicesCatalogError: 'No se pudo cargar el catálogo de servicios.',
+  encounterServicesSaved: 'Servicios actualizados.',
+  encounterServicesSaveError: 'No se pudieron actualizar los servicios.',
+  encounterDiagnoses: 'Diagnósticos',
+  encounterDiagnosesEmpty: 'No hay diagnósticos en este encounter.',
+  encounterEditDiagnoses: 'Editar diagnósticos',
+  encounterEditDiagnosesTitle: 'Editar diagnósticos',
+  encounterEditDiagnosesHint:
+    'Busque en el catálogo ICD-10-CM y marque el diagnóstico primario.',
+  encounterAddDiagnosis: 'Añadir diagnóstico',
+  encounterDiagnosisSearch: 'ICD-10-CM',
+  encounterDiagnosisSearchPlaceholder: 'Buscar y añadir diagnóstico...',
+  encounterDiagnosisSearchAdd: 'Buscar y añadir otro diagnóstico...',
+  encounterDiagnosisSearchEmpty: 'No hay códigos ICD-10-CM coincidentes.',
+  encounterDiagnosisCode: 'ICD-10',
+  encounterDiagnosisDescription: 'Descripción',
+  encounterDiagnosisCodeRequired: 'El código ICD-10 es obligatorio.',
+  encounterDiagnosisDescriptionRequired: 'La descripción es obligatoria.',
+  encounterDiagnosisAlreadyAdded: 'Ya añadido',
+  encounterDiagnosisDuplicate:
+    'El ICD-10 {code} ya está en la lista de diagnósticos.',
+  encounterDiagnosisSelectRequired:
+    'Seleccione un código ICD-10-CM antes de añadir.',
+  encounterDiagnosesCatalogError: 'No se pudo buscar códigos ICD-10-CM.',
+  encounterDiagnosesAiSuggest: 'Sugerencias IA',
+  encounterDiagnosesAiDialogTitle: 'Sugerir ICD-10',
+  encounterDiagnosesAiDialogHint:
+    'Escriba notas clínicas y genere sugerencias ICD-10 para añadir.',
+  encounterDiagnosesAiClinicalText: 'Texto clínico',
+  encounterDiagnosesAiGenerate: 'Generar sugerencias',
+  encounterDiagnosesAiRegenerate: 'Volver a generar',
+  encounterDiagnosesAiInsert: 'Añadir seleccionados',
+  encounterDiagnosesAiSuggestions: 'Códigos sugeridos',
+  encounterDiagnosesAiSelectAll: 'Seleccionar todos',
+  encounterDiagnosesAiDeselectAll: 'Quitar selección',
+  encounterDiagnosesAiSelectedCount:
+    '{count} seleccionados',
+  encounterDiagnosesAiAllDuplicates:
+    'Todos los códigos sugeridos ya están en la lista de diagnósticos.',
+  encounterDiagnosesAiSkippedDuplicates:
+    'Se omitieron {count} código(s) ya añadidos.',
+  encounterDiagnosesAiEmpty: 'No hay sugerencias ICD-10.',
+  encounterDiagnosesAiError: 'No se pudieron generar sugerencias ICD-10.',
+  encounterDiagnosesSaved: 'Diagnósticos actualizados.',
+  encounterDiagnosesSaveError: 'No se pudieron actualizar los diagnósticos.',
+  encounterPrimaryDiagnosis: 'Primario',
+  encounterNotesSection: 'Notas del encounter',
+  encounterNotesEmpty: 'No hay notas para este encounter',
+  encounterAddNote: 'Añadir nota',
+  encounterClinicalReuseHint:
+    'Abra el módulo del chart ligado a este encounter.',
+  encounterClinicalCount: '{count} registro(s)',
+  encounterClinicalVitals: 'Vitales',
+  encounterClinicalVitalsHint:
+    'Solo vitales registrados en este encounter.',
+  encounterClinicalVitalsEmpty:
+    'Aún no hay vitales para este encounter.',
+  encounterClinicalAssessments: 'Screenings',
+  encounterClinicalAssessmentsHint:
+    'Solo screenings registrados en este encounter.',
+  encounterClinicalAssessmentsEmpty:
+    'Aún no hay screenings para este encounter.',
+  encounterClinicalMedications: 'Medicamentos',
+  encounterClinicalMedicationsHint:
+    'Solo medicamentos registrados en este encounter.',
+  encounterClinicalMedicationsEmpty:
+    'Aún no hay medicamentos para este encounter.',
+  encounterClinicalCarePlans: 'Care Plans',
+  encounterClinicalCarePlansHint:
+    'Solo care plans registrados en este encounter.',
+  encounterClinicalCarePlansEmpty:
+    'Aún no hay care plans para este encounter.',
+  encounterClinicalLabs: 'Labs',
+  encounterClinicalLabsHint:
+    'Solo órdenes de lab registradas en este encounter.',
+  encounterClinicalLabsEmpty:
+    'Aún no hay labs para este encounter.',
+  encounterClinicalAllVitals: 'Todos los vitales',
+  encounterClinicalAllAssessments: 'Todos los screenings',
+  encounterClinicalAllMedications: 'Todos los medicamentos',
+  encounterClinicalAllCarePlans: 'Todos los care plans',
+  encounterClinicalAllLabs: 'Todos los labs',
+  encounterClinicalAllVitalsTitle: 'Todos los vitales del cliente',
+  encounterClinicalAllAssessmentsTitle:
+    'Todos los screenings del cliente',
+  encounterClinicalAllMedicationsTitle:
+    'Todos los medicamentos del cliente',
+  encounterClinicalAllCarePlansTitle:
+    'Todos los care plans del cliente',
+  encounterClinicalAllLabsTitle: 'Todos los labs del cliente',
+  encounterClinicalAllRecordsHint:
+    'Historial completo de este cliente (todos los encounters).',
+  encounterClinicalAllRecordsEmpty:
+    'No hay registros para este cliente.',
+  encounterClinicalAllRecordsLoadError:
+    'No se pudo cargar el historial completo del cliente.',
+  encounterOpenInChart: 'Abrir {module}',
+  encounterProgressNote: 'Progress Note',
+  encounterNoteReuseHint:
+    'Use el módulo de notas clínicas para borradores y firma SOAP.',
+  encounterOpenNotes: 'Abrir notas',
+  encounterFollowUpNextAppointment: 'Próxima cita',
+  encounterFollowUpNotScheduled: 'No programada',
+  encounterFollowUpNextAppointmentHint:
+    'Programe la próxima visita de este cliente.',
+  encounterFollowUpSchedule: 'Programar cita',
+  encounterFollowUps: 'Follow Ups',
+  encounterFollowUpsHint: 'Seguimiento posterior a la visita.',
+  encounterFollowUpAdd: 'Añadir Follow Up',
+  encounterFollowUpTotal: '{count} total',
+  encounterReferrals: 'Referrals',
+  encounterReferralsHint: 'Cree o revise referrals de esta visita.',
+  encounterReferralAdd: 'Añadir Referral',
+  encounterCompleteSuccess: 'Encounter completado.',
+  encounterCompleteError: 'No se pudo completar el encounter.',
+  encounterCompleteRequirementsMissing:
+    'Complete los requisitos antes de finalizar este encounter.',
+  encounterCancelTitle: 'Cancelar encounter',
+  encounterCancelHint:
+    'Seleccione un motivo. Las notas son obligatorias si elige Other.',
+  encounterCancelReason: 'Motivo',
+  encounterCancelReasonPlaceholder: 'Seleccione un motivo',
+  encounterCancelNotes: 'Notas',
+  encounterCancelConfirm: 'Cancelar encounter',
+  encounterCancelSuccess: 'Encounter cancelado.',
+  encounterCancelError: 'No se pudo cancelar el encounter.',
+  encounterCancelReasonStartedByMistake: 'Iniciado por error',
+  encounterCancelReasonWrongPatient: 'Cliente incorrecto',
+  encounterCancelReasonDuplicate: 'Encounter duplicado',
+  encounterCancelReasonPatientLeft: 'El cliente se fue',
+  encounterCancelReasonTechnical: 'Problema técnico',
+  encounterCancelReasonOther: 'Otro',
+  encounterReopenTitle: 'Reabrir encounter',
+  encounterReopenHint:
+    'Indique un motivo para reabrir este encounter completado.',
+  encounterReopenReason: 'Motivo',
+  encounterReopenConfirm: 'Reabrir',
+  encounterReopenSuccess: 'Encounter reabierto.',
+  encounterReopenError: 'No se pudo reabrir el encounter.',
 }

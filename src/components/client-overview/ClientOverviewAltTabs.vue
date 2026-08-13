@@ -64,6 +64,11 @@ const tabs = computed(() => [
     icon: 'event',
   },
   {
+    key: addClientTabKeys.encounters,
+    label: t('tabEncounters'),
+    icon: 'local_hospital',
+  },
+  {
     key: addClientTabKeys.basic,
     label: t('tabBasicInfo'),
     icon: 'person',

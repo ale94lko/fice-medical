@@ -17,10 +17,24 @@
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md
           service-procedure-dialog__body">
-        <SubsectionHeading
-          icon="medical_services"
-          :title="t('serviceProcedureSectionGeneral')"
-        />
+        <div class="row items-center justify-between">
+          <SubsectionHeading
+            icon="medical_services"
+            :title="t('serviceProcedureSectionGeneral')"
+          />
+          <div class="row items-center no-wrap q-gutter-md">
+            <FormToggle
+              v-model="statusActive"
+              :disable="readonly"
+              :label="t('serviceProcedureStatusActiveLabel')"
+            />
+            <FormToggle
+              v-model="local.requiresAppointment"
+              :disable="readonly"
+              :label="t('serviceProcedureRequiresAppointmentLabel')"
+            />
+          </div>
+        </div>
         <div class="row q-col-gutter-md q-mt-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
@@ -42,6 +56,10 @@
               required>
               <FormSelect
                 v-model="local.category"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
                 :options="categoryOptions"
                 :readonly="readonly"
                 :error="Boolean(errors.category)"
@@ -50,6 +68,56 @@
               />
             </AddClientLabeledField>
           </div>
+        </div>
+        <div class="row q-col-gutter-md q-mt-md">
+          <div class="col-12 col-md-4">
+            <AddClientLabeledField
+              :label="t('serviceProcedureAuthorizationRequirementLabel')"
+              required>
+              <FormSelect
+                v-model="local.authorizationRequirement"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                :options="authorizationOptions"
+                :readonly="readonly"
+                :error="Boolean(errors.authorizationRequirement)"
+                :error-message="errors.authorizationRequirement"
+                :test-id="serviceProcedureDialogTestIds.field('auth-req')"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-4">
+            <AddClientLabeledField
+              :label="t('serviceProcedureMinDurationLabel')">
+              <TextInput
+                v-model="local.minDurationMin"
+                type="number"
+                :external-label="true"
+                :readonly="readonly"
+                :error="Boolean(errors.minDurationMin)"
+                :error-message="errors.minDurationMin"
+                :test-id="serviceProcedureDialogTestIds.field('min-duration')"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-4">
+            <AddClientLabeledField
+              :label="t('serviceProcedureMaxDurationLabel')">
+              <TextInput
+                v-model="local.maxDurationMin"
+                type="number"
+                :external-label="true"
+                :readonly="readonly"
+                :error="Boolean(errors.maxDurationMin)"
+                :error-message="errors.maxDurationMin"
+                :test-id="serviceProcedureDialogTestIds.field('max-duration')"
+              />
+            </AddClientLabeledField>
+          </div>
+        </div>
+        <div class="row q-col-gutter-md q-mt-md">
           <div class="col-12">
             <AddClientLabeledField
               :label="t('serviceProcedureDescriptionLabel')">
@@ -57,62 +125,12 @@
                 v-model="local.description"
                 type="textarea"
                 autogrow
+                class="service-procedure-dialog__desc"
                 :external-label="true"
                 :readonly="readonly"
                 :test-id="serviceProcedureDialogTestIds.field('description')"
               />
             </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-6">
-            <FormToggle
-              v-model="statusActive"
-              :disable="readonly"
-              :label="t('serviceProcedureStatusActiveLabel')"
-            />
-          </div>
-        </div>
-
-        <div class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
-            icon="schedule"
-            :title="t('serviceProcedureSectionOperational')"
-          />
-          <div class="row q-col-gutter-md q-mt-md">
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('serviceProcedureMinDurationLabel')">
-                <TextInput
-                  v-model="local.minDurationMin"
-                  type="number"
-                  :external-label="true"
-                  :readonly="readonly"
-                  :error="Boolean(errors.minDurationMin)"
-                  :error-message="errors.minDurationMin"
-                  :test-id="serviceProcedureDialogTestIds.field('min-duration')"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('serviceProcedureMaxDurationLabel')">
-                <TextInput
-                  v-model="local.maxDurationMin"
-                  type="number"
-                  :external-label="true"
-                  :readonly="readonly"
-                  :error="Boolean(errors.maxDurationMin)"
-                  :error-message="errors.maxDurationMin"
-                  :test-id="serviceProcedureDialogTestIds.field('max-duration')"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-6">
-              <FormToggle
-                v-model="local.requiresAppointment"
-                :disable="readonly"
-                :label="t('serviceProcedureRequiresAppointmentLabel')"
-              />
-            </div>
           </div>
         </div>
 
@@ -146,42 +164,33 @@
             <div class="col-12 col-md-4">
               <AddClientLabeledField
                 :label="t('serviceProcedureDefaultFeeLabel')">
-                <TextInput
-                  v-model="local.defaultFee"
-                  type="number"
-                  :external-label="true"
+                <q-input
+                  :model-value="local.defaultFee"
+                  outlined
+                  hide-bottom-space
+                  inputmode="decimal"
                   :readonly="readonly"
+                  :placeholder="t('serviceProcedureDefaultFeePlaceholder')"
                   :error="Boolean(errors.defaultFee)"
                   :error-message="errors.defaultFee"
-                  :test-id="serviceProcedureDialogTestIds.field('default-fee')"
-                />
+                  :data-testid="
+                    serviceProcedureDialogTestIds.field('default-fee')"
+                  @update:model-value="onDefaultFeeInput"
+                  @blur="onDefaultFeeBlur">
+                  <template #prepend>
+                    <span class="text-grey-7 text-body2">$</span>
+                  </template>
+                </q-input>
               </AddClientLabeledField>
             </div>
           </div>
         </div>
 
         <div class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
-            icon="verified_user"
-            :title="t('serviceProcedureSectionAuthorization')"
+          <ServiceProcedureRequirementsSection
+            :service-procedure-id="requirementsServiceId"
+            :readonly="readonly"
           />
-          <p class="text-body2 text-grey-7 q-mb-md">
-            {{ t('serviceProcedureAuthorizationHint') }}
-          </p>
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('serviceProcedureAuthorizationRequirementLabel')"
-                required>
-                <FormSelect
-                  v-model="local.authorizationRequirement"
-                  :options="authorizationOptions"
-                  :readonly="readonly"
-                  :test-id="serviceProcedureDialogTestIds.field('auth-req')"
-                />
-              </AddClientLabeledField>
-            </div>
-          </div>
         </div>
       </q-card-section>
 
@@ -221,6 +230,8 @@ import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import TextInput from 'components/TextInput.vue'
+import ServiceProcedureRequirementsSection from
+  'components/admin/ServiceProcedureRequirementsSection.vue'
 import {
   buildAuthorizationRequirementOptions,
   buildServiceProcedureCategoryOptions,
@@ -230,6 +241,10 @@ import {
   createEmptyServiceProcedureForm,
   validateServiceProcedureForm,
 } from 'src/utils/service-procedure-form.js'
+import {
+  formatStaffCompensationRateAmount,
+  sanitizeStaffCompensationRateInput,
+} from 'src/utils/staff-form.js'
 import { serviceProcedureDialogTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -255,6 +270,9 @@ const open = computed({
 })
 
 const readonly = computed(() => props.mode === 'view')
+const requirementsServiceId = computed(() =>
+  local.value?.id ?? props.serviceProcedure?.id ?? null,
+)
 const categoryOptions = computed(() => buildServiceProcedureCategoryOptions(t))
 const authorizationOptions = computed(() =>
   buildAuthorizationRequirementOptions(t),
@@ -319,6 +337,21 @@ function onCancel() {
   open.value = false
 }
 
+function onDefaultFeeInput(value) {
+  local.value.defaultFee = sanitizeStaffCompensationRateInput(value)
+}
+
+function onDefaultFeeBlur() {
+  const raw = local.value.defaultFee
+  if (!String(raw ?? '').trim()) {
+    return
+  }
+  const amount = formatStaffCompensationRateAmount(raw)
+  if (amount) {
+    local.value.defaultFee = amount
+  }
+}
+
 function onSave() {
   const nextErrors = validateServiceProcedureForm(local.value, t)
   errors.value = nextErrors
@@ -334,6 +367,11 @@ function onSave() {
   &__body {
     max-height: min(75vh, 720px);
     overflow-y: auto;
+  }
+
+  &__desc :deep(textarea.q-field__native) {
+    min-height: 40px !important;
+    max-height: 40px;
   }
 }
 </style>

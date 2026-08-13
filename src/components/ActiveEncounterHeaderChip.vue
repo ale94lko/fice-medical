@@ -76,7 +76,7 @@
                 v-close-popup
                 class="app-active-encounter-menu__client-name"
                 :data-testid="tid.toolbarClientName"
-                @click="goToClientOverview">
+                @click="goToWorkspace">
                 {{ clientDisplayName }}
               </button>
               <p class="app-active-encounter-menu__meta">
@@ -143,13 +143,9 @@
       test-id="active-encounter-complete"
       @confirm="onComplete"
     />
-    <ModalComponent
+    <EncounterCancelDialog
       v-model="confirmCancelOpen"
-      :title="t('activeEncounterCancelConfirmTitle')"
-      :message="t('activeEncounterCancelConfirmMessage')"
-      :confirm-text="t('activeEncounterCancel')"
-      :cancel-text="t('cancel')"
-      test-id="active-encounter-cancel"
+      :saving="busy || actionBusy"
       @confirm="onCancel"
     />
     <ActiveEncounterAutoCompleteDialog
@@ -181,6 +177,8 @@ import {
 import ModalComponent from 'components/ModalComponent.vue'
 import ActiveEncounterAutoCompleteDialog from
   'components/ActiveEncounterAutoCompleteDialog.vue'
+import EncounterCancelDialog from
+  'components/encounter/EncounterCancelDialog.vue'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { encounterTestIds as tid } from 'src/test-ids/index.js'
@@ -440,18 +438,14 @@ async function onMenuBeforeShow() {
   }
 }
 
-function goToClientOverview() {
-  const clientId = String(
-    activeEntry.value?.clientId
-    ?? activeEncounter.value?.clientId
-    ?? '',
-  ).trim()
-  if (!clientId) {
+function goToWorkspace() {
+  const encounterId = activeEncounter.value?.id
+  if (encounterId == null) {
     return
   }
   router.push({
-    name: 'ClientOverview',
-    params: { id: clientId },
+    name: 'EncounterWorkspace',
+    params: { id: String(encounterId) },
   })
 }
 
@@ -497,14 +491,18 @@ async function onComplete() {
   }
 }
 
-async function onCancel() {
+async function onCancel(payload = {}) {
   const entry = toolbarActiveEncounter.value
   if (!entry?.encounter?.id || !canManage.value) {
     return
   }
   busy.value = true
   try {
-    await cancelEncounter(entry.encounter.id, entry.clientId)
+    await cancelEncounter(
+      entry.encounter.id,
+      entry.clientId,
+      payload,
+    )
     confirmCancelOpen.value = false
     notifySuccess(t('activeEncounterCancelSuccess'))
   } catch (error) {

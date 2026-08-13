@@ -377,6 +377,9 @@ function statusVariant(status) {
   if (token === appointmentStatuses.checkedIn) {
     return 'completed'
   }
+  if (token === appointmentStatuses.inProgress) {
+    return 'active'
+  }
   if (token === appointmentStatuses.completed) {
     return 'completed'
   }

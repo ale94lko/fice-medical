@@ -21,13 +21,6 @@ export function useAiPermissions() {
     ),
   )
 
-  const canUseDocumentSummary = computed(() =>
-    hasPermission(
-      permissions.value,
-      permissionNames.useAiDocumentSummary,
-    ),
-  )
-
   const canUseClinicalSummary = computed(() =>
     hasPermission(
       permissions.value,
@@ -64,7 +57,6 @@ export function useAiPermissions() {
   return {
     canManageSuggestion,
     canManageConfig,
-    canUseDocumentSummary,
     canUseClinicalSummary,
     canUseScribe,
     canUseCodingAssistant,

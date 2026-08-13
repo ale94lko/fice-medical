@@ -39,9 +39,12 @@ function normalizeServiceProcedure(row = {}) {
 }
 
 function normalizeDiagnosis(row = {}) {
+  const codeDotted = trim(row.code_dotted ?? row.codeDotted)
+  const code = trim(row.icd10_code ?? row.icd10Code)
+
   return {
     id: parseOptionalNumber(row.id),
-    icd10Code: trim(row.icd10_code ?? row.icd10Code),
+    icd10Code: codeDotted || code,
     description: trim(row.description),
     sequenceNo: parseOptionalNumber(
       row.sequence_no ?? row.sequenceNo,
@@ -100,6 +103,12 @@ export function normalizeEncounter(raw) {
     clinicianId: parseOptionalNumber(
       raw.clinician_id ?? raw.clinicianId,
     ),
+    clinicianDisplayName: trim(
+      raw.clinician_display_name
+      ?? raw.clinicianDisplayName
+      ?? raw.clinician_name
+      ?? raw.clinicianName,
+    ),
     appointmentId: parseOptionalNumber(
       raw.appointment_id ?? raw.appointmentId,
     ),
@@ -115,6 +124,9 @@ export function normalizeEncounter(raw) {
       raw.chief_complaint ?? raw.chiefComplaint,
     ),
     notes: trim(raw.notes),
+    encounterNumber: trim(
+      raw.encounter_number ?? raw.encounterNumber,
+    ),
     startedAtUtc: trim(
       raw.started_at_utc
       ?? raw.startedAtUtc
@@ -126,6 +138,12 @@ export function normalizeEncounter(raw) {
       ?? raw.completedAtUtc
       ?? raw.completed_at
       ?? raw.completedAt,
+    ),
+    reopenedAtUtc: trim(
+      raw.reopened_at_utc
+      ?? raw.reopenedAtUtc
+      ?? raw.reopened_at
+      ?? raw.reopenedAt,
     ),
     cancelledAtUtc: trim(
       raw.cancelled_at_utc

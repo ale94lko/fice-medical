@@ -762,6 +762,8 @@ import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
+import { refreshClinicLogoOnPageLoad } from
+  'src/utils/sync-auth-subtenants.js'
 
 // Composables
 const route = useRoute()
@@ -1022,6 +1024,7 @@ onMounted(() => {
     sidebar.value = true
   }
   syncNavMenusFromRoute()
+  void refreshClinicLogoOnPageLoad()
 })
 
 watch(mobileView, (isMobile) => {

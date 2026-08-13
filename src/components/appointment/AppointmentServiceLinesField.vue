@@ -1,75 +1,37 @@
 <template>
   <div class="appointment-service-lines">
     <AddClientLabeledField
-      :label="t('appointmentServicesLabel')"
-      required>
-      <div
-        class="row q-col-gutter-sm items-center
-          appointment-service-lines__search-row">
-        <div class="col">
-          <q-select
-            v-model="pendingServiceId"
-            outlined
-            hide-bottom-space
-            use-input
-            fill-input
-            hide-selected
-            input-debounce="200"
-            emit-value
-            map-options
-            option-label="label"
-            :options="filteredOptions"
-            :disable="readonly || !canAddMore"
-            :placeholder="activeSearchPlaceholder"
-            :data-testid="testIdPrefix + '-search'"
-            @filter="onFilter"
-            @input-value="onSearchInput">
-            <template #prepend>
-              <q-icon name="search" size="18px" />
-            </template>
-            <template #no-option>
-              <q-item>
-                <q-item-section class="text-grey-7">
-                  {{ t('appointmentServicesSearchEmpty') }}
-                </q-item-section>
-              </q-item>
-            </template>
-            <template #option="scope">
-              <q-item v-bind="scope.itemProps">
-                <q-item-section>
-                  <q-item-label>{{ scope.opt.name }}</q-item-label>
-                  <q-item-label caption>
-                    {{ formatOptionCaption(scope.opt) }}
-                  </q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-select>
-        </div>
-        <div class="col-auto">
-          <q-btn
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary appointment-service-lines__add-btn"
-            icon="add"
-            :label="t('appointmentServicesAddButton')"
-            :disable="readonly || !canAddMore || !pendingServiceId"
-            :data-testid="testIdPrefix + '-add'"
-            @click="commitPendingService"
-          />
-        </div>
-      </div>
+      v-if="!hideLabel"
+      :label="resolvedLabel"
+      :required="required">
+      <AppointmentServiceSearchRow
+        v-model="pendingServiceId"
+        :options="filteredOptions"
+        :disable="readonly || !canAddMore"
+        :add-disable="readonly || !canAddMore || !pendingServiceId"
+        :placeholder="activeSearchPlaceholder"
+        :test-id-prefix="testIdPrefix"
+        @filter="onFilter"
+        @input-value="onSearchInput"
+        @add="commitPendingService"
+      />
       <template #hint>
         {{ t('appointmentServicesSelectedCount', { count: lines.length }) }}
       </template>
     </AddClientLabeledField>
 
-    <div
-      v-if="!catalog.length"
-      class="appointment-service-lines__empty q-mt-sm">
-      {{ t('appointmentServicesCatalogEmpty') }}
-    </div>
+    <AppointmentServiceSearchRow
+      v-else-if="!readonly"
+      v-model="pendingServiceId"
+      :options="filteredOptions"
+      :disable="!canAddMore"
+      :add-disable="!canAddMore || !pendingServiceId"
+      :placeholder="activeSearchPlaceholder"
+      :test-id-prefix="testIdPrefix"
+      @filter="onFilter"
+      @input-value="onSearchInput"
+      @add="commitPendingService"
+    />
 
     <div
       v-for="(line, index) in lines"
@@ -152,6 +114,8 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AppointmentServiceSearchRow from
+  'components/appointment/AppointmentServiceSearchRow.vue'
 import { appointmentBookingMaxServices } from 'components/constants.js'
 import {
   formatServiceCatalogOptionLabel,
@@ -162,6 +126,9 @@ const props = defineProps({
   lines: { type: Array, default: () => [] },
   catalog: { type: Array, default: () => [] },
   readonly: { type: Boolean, default: false },
+  hideLabel: { type: Boolean, default: false },
+  required: { type: Boolean, default: true },
+  label: { type: String, default: '' },
   testIdPrefix: { type: String, default: 'appointment-services' },
 })
 
@@ -170,6 +137,10 @@ const { t } = useI18n()
 const searchNeedle = ref('')
 const pendingServiceId = ref(null)
 const feeInputDrafts = ref({})
+
+const resolvedLabel = computed(() =>
+  props.label || t('appointmentServicesLabel'),
+)
 
 const selectedIds = computed(() =>
   props.lines.map(line => line.serviceId),
@@ -376,103 +347,3 @@ function onDurationChange(index, value) {
   emit('duration-change', { index, value })
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables';
-
-.appointment-service-lines {
-  &__search-row {
-    width: 100%;
-  }
-
-  &__add-btn {
-    min-height: 40px;
-  }
-
-  &__empty {
-    font-size: 0.875rem;
-    color: $grey-7;
-  }
-
-  &__card {
-    border: 1px solid $border-subtle;
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: #fff;
-  }
-
-  &__card-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    min-width: 0;
-  }
-
-  &__info {
-    flex: 1 1 auto;
-    min-width: 0;
-    padding-top: 1px;
-  }
-
-  &__name {
-    margin: 0;
-    font-weight: 700;
-    font-size: 0.875rem;
-    color: $text-strong;
-    line-height: 1.3;
-  }
-
-  &__meta {
-    margin: 4px 0 0;
-    font-size: 0.8125rem;
-    color: $grey-7;
-    line-height: 1.35;
-  }
-
-  &__field {
-    flex: 0 0 auto;
-    width: 104px;
-
-    :deep(.form-field__label) {
-      margin-bottom: 4px;
-    }
-
-    :deep(.q-field) {
-      width: 100%;
-    }
-  }
-
-  &__duration-input {
-    :deep(input[type='number']) {
-      appearance: textfield;
-    }
-
-    :deep(input[type='number']::-webkit-outer-spin-button),
-    :deep(input[type='number']::-webkit-inner-spin-button) {
-      margin: 0;
-      appearance: none;
-    }
-  }
-
-  &__field--fee {
-    width: 112px;
-  }
-
-  &__suffix,
-  &__currency {
-    font-size: 0.8125rem;
-    color: $grey-7;
-    font-weight: 500;
-  }
-
-  &__currency {
-    color: $text-strong;
-  }
-
-  &__remove-btn {
-    flex: 0 0 auto;
-    align-self: flex-start;
-    margin-top: -2px;
-  }
-}
-</style>
