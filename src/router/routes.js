@@ -164,14 +164,6 @@ const routes = [
         },
       },
       {
-        path: 'administration/ai-config',
-        name: 'AdminAiConfig',
-        component: () => import('pages/admin/AiConfigPage.vue'),
-        meta: {
-          requiresPermission: permissionNames.manageAiConfig,
-        },
-      },
-      {
         path: 'administration/users/add',
         name: 'AdminUsersAdd',
         component: () => import('pages/admin/UserList.vue'),

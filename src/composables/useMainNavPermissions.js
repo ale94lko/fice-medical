@@ -27,7 +27,6 @@ const administrationPermissions = [
   permissionNames.viewSubtenants,
   permissionNames.manageScreeningTemplates,
   permissionNames.manageClinicalResources,
-  permissionNames.manageAiConfig,
   permissionNames.consentView,
   permissionNames.consentCreate,
   permissionNames.consentEdit,
@@ -169,10 +168,6 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.viewClinicalAudit),
   )
 
-  const showAiConfig = computed(() =>
-    hasPermission(permissions.value, permissionNames.manageAiConfig),
-  )
-
   const showClinicalResourcesMenu = computed(() =>
     hasPermission(permissions.value, permissionNames.viewClinicalResources),
   )
@@ -203,7 +198,6 @@ export function useMainNavPermissions() {
     showScreeningTemplates,
     showConsentTemplates,
     showClinicalAudit,
-    showAiConfig,
     showClinicalResourcesMenu,
   }
 }

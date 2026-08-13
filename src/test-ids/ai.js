@@ -22,3 +22,15 @@ export const aiTestIds = {
   configPage: 'ai-config-page',
   configSave: 'ai-config-btn-save',
 }
+
+export const chartChatTestIds = {
+  panel: 'chart-chat-panel',
+  toggle: 'chart-chat-toggle',
+  close: 'chart-chat-close',
+  list: 'chart-chat-list',
+  input: 'chart-chat-input',
+  send: 'chart-chat-send',
+  suggestion: name => toTestId('chart-chat-suggestion', name),
+  openSummary: index => toTestId('chart-chat-open-summary', index),
+  sectionLink: index => toTestId('chart-chat-section-link', index),
+}

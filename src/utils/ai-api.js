@@ -171,3 +171,29 @@ export async function generateCarePlanDraft(clientId, body = {}) {
 
   return normalizeAiSuggestion(unwrapData(response.data))
 }
+
+export async function askChartChat(clientId, message, options = {}) {
+  const payload = {
+    message: String(message ?? '').trim(),
+  }
+  if (options.encounterId != null && options.encounterId !== '') {
+    payload.encounter_id = Number(options.encounterId)
+  }
+  const response = await apiInstance.post(
+    apiPaths.aiChartChat(clientId),
+    payload,
+    generateRequestConfig,
+  )
+  const data = unwrapData(response.data) || {}
+  const suggestionRaw = data.suggestion
+
+  return {
+    feature: data.feature || '',
+    intent: data.intent || '',
+    answer: data.answer || '',
+    fromChart: Boolean(data.fromChart ?? data.from_chart),
+    suggestion: suggestionRaw
+      ? normalizeAiSuggestion(suggestionRaw)
+      : null,
+  }
+}

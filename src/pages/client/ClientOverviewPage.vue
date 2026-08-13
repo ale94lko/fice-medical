@@ -53,9 +53,10 @@
     />
 
     <AiAssistantFab
-      :visible="Boolean(header) && canUseClinicalSummary"
+      :visible="Boolean(header)"
       :disable="loading"
       :client-id="clientId"
+      @open-chart-section="onOpenChartSection"
     />
   </q-page>
 </template>
@@ -74,7 +75,6 @@ import ClientOverviewSidebar from
   'components/client-overview/ClientOverviewSidebar.vue'
 import ClientOverviewModuleDialog from
   'components/client-overview/ClientOverviewModuleDialog.vue'
-import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientOverview } from 'src/composables/useClientOverview.js'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 
@@ -82,7 +82,6 @@ const route = useRoute()
 const router = useRouter()
 
 const clientId = computed(() => route.params.id)
-const { canUseClinicalSummary } = useAiPermissions()
 
 const {
   loading,
@@ -129,5 +128,12 @@ function onOpenModuleRecord() {
   }
 
   goToEdit(module.tabKey, module.subTabKey ?? '')
+}
+
+function onOpenChartSection(section) {
+  if (!section?.tab) {
+    return
+  }
+  goToEdit(section.tab, section.subTab || '')
 }
 </script>

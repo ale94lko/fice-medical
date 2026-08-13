@@ -111,9 +111,10 @@
     />
 
     <AiAssistantFab
-      :visible="Boolean(workspace?.encounter?.clientId)
-        && canUseClinicalSummary"
+      :visible="Boolean(workspace?.encounter?.clientId)"
       :client-id="workspace?.encounter?.clientId"
+      :encounter-id="workspace?.encounter?.id"
+      @open-chart-section="onOpenChartSection"
     />
   </q-page>
 </template>
@@ -157,7 +158,6 @@ import EncounterWorkspaceTabs from
   'components/encounter/EncounterWorkspaceTabs.vue'
 import EncounterWorkspaceVisit from
   'components/encounter/EncounterWorkspaceVisit.vue'
-import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -190,7 +190,6 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const $q = useQuasar()
-const { canUseClinicalSummary } = useAiPermissions()
 
 const loading = ref(false)
 const actionBusy = ref(false)
@@ -320,6 +319,22 @@ function goToModule(key) {
       ...(encounter != null ? { encounterId: String(encounter) } : {}),
     },
   })
+}
+
+function onOpenChartSection(section) {
+  if (section?.intent === 'ALLERGIES') {
+    goToModule('allergies')
+
+    return
+  }
+  if (section?.intent === 'MEDICATIONS') {
+    goToModule('medications')
+
+    return
+  }
+  if (section?.intent === 'LAST_APPOINTMENT') {
+    goToModule('appointments')
+  }
 }
 
 function onQuickAction(key) {

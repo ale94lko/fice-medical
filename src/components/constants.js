@@ -1120,6 +1120,9 @@ export const aiFeatures = {
   soapDraft: 'SOAP_DRAFT',
   icd10Suggest: 'ICD10_SUGGEST',
   carePlanDraft: 'CARE_PLAN_DRAFT',
+  chartChat: 'CHART_CHAT',
+  assistantRouter: 'ASSISTANT_ROUTER',
+  freeText: 'FREE_TEXT',
 }
 
 export const aiSuggestionStatuses = {
@@ -1569,6 +1572,9 @@ export const apiPaths = {
   aiClinicalSummary: clientId => `/ai/v1/clients/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/clinical-summary`,
+  aiChartChat: clientId => `/ai/v1/clients/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/chart-chat`,
   aiSoapDraft: encounterId => `/ai/v1/encounters/${encodeURIComponent(
     String(encounterId ?? '').trim(),
   )}/soap-draft`,

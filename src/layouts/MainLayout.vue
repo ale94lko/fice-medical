@@ -554,14 +554,6 @@
               {{ t('clinicalAuditListTitle') }}
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
-              v-if="showAiConfig"
-              icon="psychology"
-              to="/administration/ai-config"
-              :active-class="activeClass"
-              :test-id="layoutTestIds.navAdminAiConfig">
-              {{ t('aiConfigTitle') }}
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
               v-if="showAdminGeneral"
               icon="tune">
               {{ t('administrationGeneral') }}
@@ -626,14 +618,6 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminClinicalAudit">
                 {{ t('clinicalAuditListTitle') }}
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showAiConfig"
-                icon="psychology"
-                to="/administration/ai-config"
-                :active-class="activeClass"
-                :test-id="layoutTestIds.navAdminAiConfig">
-                {{ t('aiConfigTitle') }}
               </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showAdminGeneral"
@@ -858,7 +842,6 @@ const {
   showScreeningTemplates,
   showConsentTemplates,
   showClinicalAudit,
-  showAiConfig,
   showClinicalResourcesMenu,
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')

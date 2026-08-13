@@ -3850,6 +3850,27 @@ export default {
     + 'líneas de chart review.',
   aiLastEncounterMissing:
     'No hay encounter para este cliente.',
+  chartChatToggle: 'Consultar el chart',
+  chartChatTitle: 'Asistente del chart',
+  chartChatPlaceholder: 'Pregunte por este cliente…',
+  chartChatSend: 'Enviar',
+  chartChatError: 'No se pudo responder desde el chart.',
+  chartChatEmptyAnswer: 'No hubo respuesta.',
+  chartChatThinking: 'Escribiendo…',
+  chartChatGreeting: 'Hola, ¿en qué puedo ayudarte?',
+  chartChatGreetingNamed:
+    'Hola {name}, ¿en qué puedo ayudarte?',
+  chartChatChipEncounter: 'Último encounter',
+  chartChatChipHistory: 'Resumen reciente',
+  chartChatSummaryReadyEncounter:
+    'Aquí está el resumen del último encounter.',
+  chartChatSummaryReadyHistory:
+    'Aquí está el resumen reciente.',
+  chartChatDraftReadySummary: 'Aquí está el resumen.',
+  chartChatDraftReadySoap: 'Aquí está el borrador SOAP.',
+  chartChatDraftReadyIcd: 'Aquí están las sugerencias ICD-10.',
+  chartChatDraftReadyCarePlan: 'Aquí está el borrador del care plan.',
+  chartChatVerifySection: 'Comprobar en {section}',
   aiHistoryDays: 'Días de historial',
   aiEncounter: 'Encuentro',
   aiEncounterPlaceholder: 'Seleccione un encuentro',
