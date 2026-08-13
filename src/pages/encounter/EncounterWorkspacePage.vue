@@ -322,19 +322,23 @@ function goToModule(key) {
 }
 
 function onOpenChartSection(section) {
-  if (section?.intent === 'ALLERGIES') {
-    goToModule('allergies')
-
+  if (!section?.tab) {
     return
   }
-  if (section?.intent === 'MEDICATIONS') {
-    goToModule('medications')
-
+  const clientId = workspace.value?.encounter?.clientId
+  const encounter = workspace.value?.encounter?.id
+  if (clientId == null) {
     return
   }
-  if (section?.intent === 'LAST_APPOINTMENT') {
-    goToModule('appointments')
-  }
+  router.push({
+    name: 'EditClient',
+    params: { id: String(clientId) },
+    query: {
+      tab: section.tab,
+      ...(section.subTab ? { subTab: section.subTab } : {}),
+      ...(encounter != null ? { encounterId: String(encounter) } : {}),
+    },
+  })
 }
 
 function onQuickAction(key) {
