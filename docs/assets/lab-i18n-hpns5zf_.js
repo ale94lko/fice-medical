@@ -1,0 +1,1 @@
+function e(e,t){let n=String(t??``).trim();if(!n)return e;let r=n.split(`_`).filter(Boolean).map((e,t)=>{let n=e.toLowerCase();return t===0?n:n.charAt(0).toUpperCase()+n.slice(1)}).join(``);return`${e}${r.charAt(0).toUpperCase()+r.slice(1)}`}export{e as t};

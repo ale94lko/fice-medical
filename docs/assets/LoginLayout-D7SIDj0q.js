@@ -1,1 +1,0 @@
-import{Cf as e,Df as t,Nf as n,nf as r,sf as i,yt as a}from"./index-v_Xr56RP.js";import{r as o,t as s}from"./QLayout-BGgBytDN.js";var c={};function l(a,c){let l=t(`router-view`);return e(),r(s,{view:`hHh Lpr lff`},{default:n(()=>[i(o,null,{default:n(()=>[i(l)]),_:1})]),_:1})}var u=a(c,[[`render`,l]]);export{u as default};
