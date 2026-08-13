@@ -1212,6 +1212,7 @@ export const encounterRequirementSeverities = {
 export const encounterRequirementTypes = {
   vitals: 'VITALS',
   note: 'NOTE',
+  chiefComplaint: 'CHIEF_COMPLAINT',
   assessment: 'ASSESSMENT',
   form: 'FORM',
   safetyAssessment: 'SAFETY_ASSESSMENT',
@@ -1224,6 +1225,7 @@ export const encounterRequirementTypes = {
 export const encounterRequirementActionTypes = {
   openVitals: 'OPEN_VITALS',
   openNote: 'OPEN_NOTE',
+  openVisit: 'OPEN_VISIT',
   openAssessment: 'OPEN_ASSESSMENT',
   openForm: 'OPEN_FORM',
   openSafetyAssessment: 'OPEN_SAFETY_ASSESSMENT',

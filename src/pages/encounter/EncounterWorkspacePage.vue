@@ -7,7 +7,7 @@
     <template v-if="workspace?.encounter">
       <EncounterWorkspaceHeader
         :encounter="workspace.encounter"
-        :can-complete="workspace.completion?.canComplete === true"
+        :can-complete="completion?.canComplete === true"
         :show-reopen="canReopen"
         :show-cancel="canEdit"
         :busy="actionBusy"
@@ -27,7 +27,7 @@
       <div class="encounter-workspace-page__body">
         <EncounterWorkspaceOverview
           v-if="activeTab === encounterWorkspaceTabs.overview"
-          :completion="workspace.completion"
+          :completion="completion"
           :billing-readiness="workspace.billingReadiness"
           @requirement-action="onRequirementAction"
           @quick-action="onQuickAction"
@@ -39,7 +39,7 @@
           :can-edit="canEdit"
           @services-saved="onVisitFieldsSaved"
           @diagnoses-saved="onVisitFieldsSaved"
-          @add-note="goToModule('clinical-notes')"
+          @chief-complaint-saved="onVisitFieldsSaved"
         />
         <EncounterWorkspaceClinical
           v-else-if="activeTab === encounterWorkspaceTabs.clinical"
@@ -175,6 +175,10 @@ import {
 import { resolveRequirementActionTarget } from
   'src/utils/encounter-requirement-actions.js'
 import {
+  hasEncounterChiefComplaint,
+  withChiefComplaintRequirement,
+} from 'src/utils/encounter-completion-chief-complaint.js'
+import {
   markEncounterTimerResumed,
 } from 'src/utils/encounter-session-watch.js'
 import {
@@ -212,6 +216,19 @@ const canEdit = computed(() =>
 
 const canReopen = computed(() =>
   canReopenEncounter(workspace.value),
+)
+
+const completion = computed(() =>
+  withChiefComplaintRequirement(
+    workspace.value?.completion,
+    workspace.value?.encounter,
+    {
+      label: t('encounterNotesSection'),
+      description: '',
+      actionLabel: t('encounterChiefComplaintRequirementAction'),
+      addServiceAction: t('encounterAddService'),
+    },
+  ),
 )
 
 const patientGender = computed(() => {
@@ -532,6 +549,16 @@ async function onVisitFieldsSaved(updated) {
 async function onComplete() {
   const id = workspace.value?.encounter?.id
   if (id == null) {
+    return
+  }
+  if (!hasEncounterChiefComplaint(workspace.value?.encounter)) {
+    activeTab.value = encounterWorkspaceTabs.visit
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('encounterChiefComplaintRequiredToComplete'),
+      position: 'top',
+    })
+
     return
   }
   actionBusy.value = true

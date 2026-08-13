@@ -205,8 +205,6 @@ export const serviceProcedureDialogTestIds = {
 export const screeningTemplateListTestIds = {
   page: 'screening-template-list-page',
   search: 'screening-template-list-input-search',
-  statusFilter: 'screening-template-list-select-status',
-  showArchived: 'screening-template-list-toggle-archived',
   add: 'screening-template-list-btn-add',
   rowView: id => toTestId('screening-tpl-row', id, 'btn-view'),
   rowEdit: id => toTestId('screening-tpl-row', id, 'btn-edit'),

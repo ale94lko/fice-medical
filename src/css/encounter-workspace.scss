@@ -376,13 +376,28 @@
   gap: 12px;
 }
 
+.encounter-workspace-visit > .encounter-workspace-card,
 .encounter-workspace-visit__columns .encounter-workspace-card {
   padding-top: 10px;
 }
 
+.encounter-workspace-visit > .encounter-workspace-card
+  .encounter-workspace-card__head,
 .encounter-workspace-visit__columns .encounter-workspace-card__head {
   margin-bottom: 10px;
   align-items: center;
+}
+
+.encounter-workspace-visit
+  > .encounter-workspace-visit__chief-complaint
+  .encounter-workspace-card__head {
+  margin-bottom: 0;
+}
+
+.encounter-workspace-visit
+  > .encounter-workspace-visit__chief-complaint
+  > .q-field {
+  margin-top: 0;
 }
 
 .encounter-workspace-visit__list {

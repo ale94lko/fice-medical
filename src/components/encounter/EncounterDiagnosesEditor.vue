@@ -7,12 +7,13 @@
         flat
         dense
         round
-        color="primary"
+        class="app-btn-ai-icon"
         icon="auto_awesome"
         :disable="saving"
-        :aria-label="t('encounterDiagnosesAiSuggest')"
-        @click="aiDialogOpen = true"
-      />
+        :aria-label="t('aiAssistantName')"
+        @click="aiDialogOpen = true">
+        <q-tooltip>{{ t('aiAssistantName') }}</q-tooltip>
+      </q-btn>
     </div>
 
     <template v-if="canEdit">
@@ -121,6 +122,7 @@
     <EncounterDiagnosesAiSuggestDialog
       v-model="aiDialogOpen"
       :encounter-id="encounter?.id"
+      :chief-complaint="chiefComplaintText"
       :existing-codes="existingCodes"
       @insert="insertFromAi"
     />
@@ -147,6 +149,9 @@ import {
 } from 'src/utils/encounter-api.js'
 import { searchIcd10Cm, normalizeIcd10CodeKey } from
   'src/utils/icd10-api.js'
+import {
+  resolveEncounterChiefComplaint,
+} from 'src/utils/encounter-completion-chief-complaint.js'
 
 const props = defineProps({
   encounter: {
@@ -177,6 +182,10 @@ let keySeq = 0
 
 const existingCodes = computed(() =>
   rows.value.map(row => row.icd10Code),
+)
+
+const chiefComplaintText = computed(() =>
+  resolveEncounterChiefComplaint(props.encounter),
 )
 
 const columns = computed(() => {

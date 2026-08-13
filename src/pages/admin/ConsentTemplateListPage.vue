@@ -42,13 +42,7 @@
         :loading="false">
         <template #body-cell-name="scope">
           <q-td :props="scope" class="admin-data-table__primary-cell">
-            <button
-              type="button"
-              class="admin-data-table__link"
-              :data-testid="listTid.rowView(scope.row.id)"
-              @click="openView(scope.row)">
-              {{ scope.row.name || '—' }}
-            </button>
+            {{ scope.row.name || '—' }}
           </q-td>
         </template>
         <template #body-cell-consentType="scope">
@@ -85,6 +79,7 @@
               size="sm"
               icon="visibility"
               class="app-btn-icon-action"
+              :data-testid="listTid.rowView(row.id)"
               :aria-label="t('view')"
               @click="openView(row)"
             />

@@ -1,6 +1,6 @@
 <template>
   <q-page
-    class="admin-page ai-config-page"
+    class="admin-page admin-list-page ai-config-page"
     :data-testid="aiTestIds.configPage">
     <AppLoadingOverlay scope="content" :showing="loading" />
 
@@ -47,50 +47,50 @@
 
       <div class="row q-col-gutter-md">
         <div class="col-12 col-md-6">
-          <FormField :label="t('aiPromptClinicalSoap')" spaced>
-            <q-input
-              v-model.number="draft.clinicalSoap"
+          <FormField :label="t('aiPromptClinicalSoap')">
+            <TextInput
+              :model-value="promptInput(draft.clinicalSoap)"
               type="number"
-              outlined
-              dense
-              min="1"
-              :data-testid="aiTestIds.field('prompt-soap')"
+              :external-label="true"
+              :test-id="aiTestIds.field('prompt-soap')"
+              @update:model-value="value =>
+                onPromptInput('clinicalSoap', value)"
             />
           </FormField>
         </div>
         <div class="col-12 col-md-6">
-          <FormField :label="t('aiPromptIcd10')" spaced>
-            <q-input
-              v-model.number="draft.icd10Suggestion"
+          <FormField :label="t('aiPromptIcd10')">
+            <TextInput
+              :model-value="promptInput(draft.icd10Suggestion)"
               type="number"
-              outlined
-              dense
-              min="1"
-              :data-testid="aiTestIds.field('prompt-icd10')"
+              :external-label="true"
+              :test-id="aiTestIds.field('prompt-icd10')"
+              @update:model-value="value =>
+                onPromptInput('icd10Suggestion', value)"
             />
           </FormField>
         </div>
         <div class="col-12 col-md-6">
-          <FormField :label="t('aiPromptClinicalSummary')" spaced>
-            <q-input
-              v-model.number="draft.clinicalSummary"
+          <FormField :label="t('aiPromptClinicalSummary')">
+            <TextInput
+              :model-value="promptInput(draft.clinicalSummary)"
               type="number"
-              outlined
-              dense
-              min="1"
-              :data-testid="aiTestIds.field('prompt-clinical')"
+              :external-label="true"
+              :test-id="aiTestIds.field('prompt-clinical')"
+              @update:model-value="value =>
+                onPromptInput('clinicalSummary', value)"
             />
           </FormField>
         </div>
         <div class="col-12 col-md-6">
-          <FormField :label="t('aiPromptCarePlan')" spaced>
-            <q-input
-              v-model.number="draft.carePlanDraft"
+          <FormField :label="t('aiPromptCarePlan')">
+            <TextInput
+              :model-value="promptInput(draft.carePlanDraft)"
               type="number"
-              outlined
-              dense
-              min="1"
-              :data-testid="aiTestIds.field('prompt-care-plan')"
+              :external-label="true"
+              :test-id="aiTestIds.field('prompt-care-plan')"
+              @update:model-value="value =>
+                onPromptInput('carePlanDraft', value)"
             />
           </FormField>
         </div>
@@ -122,6 +122,7 @@ import AdminListPageHeader from
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import FormField from 'components/FormField.vue'
 import SectionHeading from 'components/SectionHeading.vue'
+import TextInput from 'components/TextInput.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { aiTestIds } from 'src/test-ids/ai.js'
 import {
@@ -161,6 +162,15 @@ function applyDraft(prompts) {
   draft.icd10Suggestion = prompts.icd10Suggestion
   draft.clinicalSummary = prompts.clinicalSummary
   draft.carePlanDraft = prompts.carePlanDraft
+}
+
+function promptInput(value) {
+  return value == null ? '' : String(value)
+}
+
+function onPromptInput(key, value) {
+  const n = Number(String(value ?? '').trim())
+  draft[key] = Number.isFinite(n) && n >= 1 ? Math.round(n) : 1
 }
 
 async function loadConfig() {

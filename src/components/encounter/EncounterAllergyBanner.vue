@@ -47,6 +47,6 @@ const allergyText = computed(() =>
     }
 
     return name
-  }).join(' · '),
+  }).join(' | '),
 )
 </script>

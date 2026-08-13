@@ -33,23 +33,6 @@
       </q-badge>
     </div>
 
-    <div
-      class="ai-suggestion-review-panel__provenance text-caption
-        text-grey-7 q-mb-md"
-      :data-testid="aiTestIds.provenance">
-      <span>{{ t('aiProvenanceProvider') }}:
-        {{ suggestion.provider || '—' }}</span>
-      <span class="q-mx-sm">·</span>
-      <span>{{ t('aiProvenanceModel') }}:
-        {{ suggestion.model || '—' }}</span>
-      <span class="q-mx-sm">·</span>
-      <span>{{ t('aiProvenancePrompt') }}:
-        {{ suggestion.promptVersion || '—' }}</span>
-      <span class="q-mx-sm">·</span>
-      <span>{{ t('aiProvenanceCreated') }}:
-        {{ formatCreatedAt }}</span>
-    </div>
-
     <AiSuggestionResultEditor
       v-model="draftResult"
       v-model:selected-paths="selectedPaths"
@@ -251,19 +234,6 @@ const statusLabel = computed(() => {
   return key ? t(key) : (props.suggestion?.status || '—')
 })
 
-const formatCreatedAt = computed(() => {
-  const raw = props.suggestion?.createdAt
-  if (!raw) {
-    return '—'
-  }
-  const d = new Date(raw)
-  if (Number.isNaN(d.getTime())) {
-    return raw
-  }
-
-  return d.toLocaleString()
-})
-
 watch(
   () => props.suggestion,
   (next) => {
@@ -309,17 +279,15 @@ function onReject() {
 </script>
 
 <style scoped lang="scss">
+@import 'src/css/quasar.variables';
+
 .ai-suggestion-review-panel__framing {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
   border-radius: 8px;
-  background: rgba(0, 128, 128, 0.08);
-  border: 1px solid rgba(0, 128, 128, 0.2);
-}
-
-.ai-suggestion-review-panel__provenance {
-  line-height: 1.5;
+  background: rgba($ai-accent, 0.08);
+  border: 1px solid rgba($ai-accent, 0.22);
 }
 </style>

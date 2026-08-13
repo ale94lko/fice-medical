@@ -1141,8 +1141,6 @@ export default {
   screeningTemplateListSubtitle:
     'Gestiona las plantillas de tamizaje disponibles para tu organización.',
   screeningTemplateListSearchPlaceholder: 'Buscar plantillas',
-  screeningTemplateStatusFilterPlaceholder: 'Filtrar por estado',
-  screeningTemplateShowArchived: 'Mostrar archivadas',
   screeningTemplateListAdd: 'Nueva plantilla',
   screeningTemplateListEmpty: 'No se encontraron plantillas de tamizaje.',
   screeningTemplateListError:
@@ -3801,8 +3799,12 @@ export default {
     'Alergias o medicamentos pueden no estar documentados. '
     + 'Nunca asuma NKDA ni ausencia de medicamentos.',
   aiResultSummary: 'Resumen',
-  aiResultHighlights: 'Aspectos destacados (uno por línea)',
-  aiResultRisks: 'Riesgos (uno por línea)',
+  aiResultHighlights: 'Aspectos destacados',
+  aiResultRisks: 'Riesgos',
+  aiResultChartReview: 'Revisión de chart',
+  aiResultChartReviewEncounters: 'Encuentros',
+  aiResultChartReviewLabs: 'Laboratorios',
+  aiResultChartReviewScreenings: 'Tamizajes',
   aiResultAllergies: 'Alergias',
   aiResultMedications: 'Medicamentos',
   aiResultJson: 'Resultado (JSON)',
@@ -3830,7 +3832,8 @@ export default {
   aiGenerateSoapDraft: 'Borrador SOAP con IA',
   aiGenerateIcd10: 'Sugerir ICD-10 con IA',
   aiGenerateCarePlan: 'Borrador de care plan con IA',
-  aiBtnClinicalSummary: 'AI Assistant',
+  aiBtnClinicalSummary: 'FiCE AI Assistant',
+  aiAssistantName: 'FiCE AI Assistant',
   aiBtnSoapDraft: 'Borrador SOAP con IA',
   aiBtnIcd10: 'Sugerir ICD-10',
   aiBtnCarePlanDraft: 'Borrador de care plan',
@@ -3838,6 +3841,16 @@ export default {
   aiClinicalScopeFaceSheet: 'Face sheet',
   aiClinicalScopeEncounter: 'Último encounter',
   aiClinicalScopeHistory: 'Historial reciente',
+  aiClinicalSummaryFramingHint:
+    'Borrador de resumen clínico para revisión. No es un '
+    + 'diagnóstico ni un tratamiento.',
+  aiClinicalScopeFaceSheetHint:
+    'Vista general a partir del face sheet del cliente.',
+  aiClinicalScopeEncounterHint:
+    'Resumen centrado en el encounter seleccionado.',
+  aiClinicalScopeHistoryHint:
+    'Historial por ventana con resumen, highlights, riesgos y '
+    + 'líneas de chart review.',
   aiLastEncounterMissing:
     'No hay encounter para este cliente.',
   aiHistoryDays: 'Días de historial',
@@ -3921,6 +3934,9 @@ export default {
   encounterCompleteVisitTitle: 'Completar esta visita',
   encounterProgressLabel: '{completed} de {total} completados',
   encounterRequired: 'Obligatorio',
+  encounterChiefComplaintRequirementAction: 'Añadir Chief Complaint',
+  encounterChiefComplaintRequiredToComplete:
+    'El Chief Complaint es obligatorio antes de completar la visita.',
   encounterChecklistEmpty:
     'No hay requisitos de finalización.',
   encounterOtherClinicalActions: 'Otras acciones clínicas',
@@ -4001,6 +4017,14 @@ export default {
   encounterDiagnosesAiDialogHint:
     'Escriba notas clínicas y genere sugerencias ICD-10 para añadir.',
   encounterDiagnosesAiClinicalText: 'Texto clínico',
+  encounterDiagnosesAiClinicalTextPlaceholder:
+    'Introduzca texto clínico para guiar la codificación',
+  encounterDiagnosesAiClinicalTextRequired:
+    'El texto clínico es obligatorio.',
+  encounterDiagnosesAiCopyChiefComplaint:
+    'Copiar desde Chief Complaint',
+  encounterDiagnosesAiNoChiefComplaint:
+    'No hay chief complaint disponible para copiar.',
   encounterDiagnosesAiGenerate: 'Generar sugerencias',
   encounterDiagnosesAiRegenerate: 'Volver a generar',
   encounterDiagnosesAiInsert: 'Añadir seleccionados',
@@ -4018,9 +4042,12 @@ export default {
   encounterDiagnosesSaved: 'Diagnósticos actualizados.',
   encounterDiagnosesSaveError: 'No se pudieron actualizar los diagnósticos.',
   encounterPrimaryDiagnosis: 'Primario',
-  encounterNotesSection: 'Notas del encounter',
-  encounterNotesEmpty: 'No hay notas para este encounter',
+  encounterNotesSection: 'Chief Complaint',
+  encounterNotesEmpty: 'No hay chief complaint para este encounter',
   encounterAddNote: 'Añadir nota',
+  encounterChiefComplaintPlaceholder: 'Introduzca el chief complaint',
+  encounterChiefComplaintSaveError:
+    'No se pudo actualizar el chief complaint.',
   encounterClinicalReuseHint:
     'Abra el módulo del chart ligado a este encounter.',
   encounterClinicalCount: '{count} registro(s)',

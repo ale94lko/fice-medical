@@ -5,7 +5,14 @@
     :data-testid="aiTestIds.generateDialog"
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="insurance-dialog app-dialog-card ai-generate-dialog">
+    <q-card
+      class="insurance-dialog app-dialog-card ai-generate-dialog"
+      :class="{
+        'ai-generate-dialog--clinical-summary':
+          feature === aiFeatures.clinicalSummary,
+        'ai-generate-dialog--review': step === 'review',
+      }"
+    >
       <AppDialogHeader
         :close-label="t('close')"
         @close="onClose">
@@ -13,8 +20,29 @@
       </AppDialogHeader>
 
       <q-card-section
-        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <p class="text-body2 text-grey-7 q-mb-md">
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md"
+        :class="{
+          'ai-generate-dialog__body--review': step === 'review',
+        }"
+      >
+        <div
+          v-if="feature === aiFeatures.clinicalSummary
+            && step === 'options'"
+          class="ai-generate-dialog__framing q-mb-md"
+        >
+          <q-icon name="psychology" size="sm" color="primary" />
+          <div>
+            <div class="text-weight-medium">
+              {{ t('aiSuggestionFraming') }}
+            </div>
+            <div class="text-caption text-grey-7">
+              {{ clinicalSummaryFramingHint }}
+            </div>
+          </div>
+        </div>
+        <p
+          v-else-if="step === 'options'"
+          class="text-body2 text-grey-7 q-mb-md">
           {{ t('aiSuggestionFraming') }}
         </p>
 
@@ -32,6 +60,10 @@
                     :test-id="aiTestIds.field('clinical-scope')"
                   />
                 </FormField>
+                <p
+                  class="text-caption text-grey-7 q-mt-xs q-mb-none">
+                  {{ clinicalScopeHint }}
+                </p>
               </div>
               <div
                 v-if="needsEncounter"
@@ -411,6 +443,24 @@ const dialogTitle = computed(() => {
   return t(map[props.feature] || 'aiSuggestionFraming')
 })
 
+const clinicalSummaryFramingHint = computed(() =>
+  t('aiClinicalSummaryFramingHint'),
+)
+
+const clinicalScopeHint = computed(() => {
+  if (form.scope === aiClinicalSummaryScopes.faceSheetLite) {
+    return t('aiClinicalScopeFaceSheetHint')
+  }
+  if (form.scope === aiClinicalSummaryScopes.currentEncounter) {
+    return t('aiClinicalScopeEncounterHint')
+  }
+  if (form.scope === aiClinicalSummaryScopes.recentHistory) {
+    return t('aiClinicalScopeHistoryHint')
+  }
+
+  return ''
+})
+
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -659,8 +709,33 @@ function onClose() {
 </script>
 
 <style scoped lang="scss">
+@import 'src/css/quasar.variables';
+
 .ai-generate-dialog {
   min-width: min(720px, 96vw);
   max-width: 920px;
+}
+
+.ai-generate-dialog--clinical-summary {
+  max-width: 980px;
+}
+
+.ai-generate-dialog--review {
+  max-width: min(1040px, 96vw);
+}
+
+.ai-generate-dialog__body--review {
+  max-height: min(72vh, 760px);
+  overflow: auto;
+}
+
+.ai-generate-dialog__framing {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: rgba($ai-accent, 0.08);
+  border: 1px solid rgba($ai-accent, 0.22);
 }
 </style>

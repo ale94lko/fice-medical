@@ -8,37 +8,21 @@
       :title="t('screeningTemplateListTitle')"
       :subtitle="t('screeningTemplateListSubtitle')">
       <template #center>
-        <div
-          class="screening-template-list-page__toolbar
-            row items-center">
-          <q-input
-            v-model="searchQuery"
-            outlined
-            clearable
-            hide-bottom-space
-            class="admin-list-page__search-input
-              screening-template-list-page__search"
-            :data-testid="screeningTemplateListTestIds.search"
-            :disable="loading"
-            :placeholder="t('screeningTemplateListSearchPlaceholder')"
-            :aria-label="t('screeningTemplateListSearchPlaceholder')">
-            <template #prepend>
-              <q-icon name="search" size="18px" />
-            </template>
-          </q-input>
-          <FormSelect
-            :model-value="statusFilter"
-            :options="statusFilterOptions"
-            clearable
-            outlined
-            hide-bottom-space
-            class="screening-template-list-page__filter"
-            :disable="loading"
-            :placeholder="t('screeningTemplateStatusFilterPlaceholder')"
-            :test-id="screeningTemplateListTestIds.statusFilter"
-            @update:model-value="onStatusFilterChange"
-          />
-        </div>
+        <q-input
+          v-model="searchQuery"
+          outlined
+          clearable
+          hide-bottom-space
+          class="admin-list-page__search-input
+            screening-template-list-page__search"
+          :data-testid="screeningTemplateListTestIds.search"
+          :disable="loading"
+          :placeholder="t('screeningTemplateListSearchPlaceholder')"
+          :aria-label="t('screeningTemplateListSearchPlaceholder')">
+          <template #prepend>
+            <q-icon name="search" size="18px" />
+          </template>
+        </q-input>
       </template>
       <template #actions>
         <AdminListPageActions :actions="pageActions" />
@@ -267,13 +251,11 @@ import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
-import FormSelect from 'components/FormSelect.vue'
 import ScreeningTemplateDialog from
   'components/admin/ScreeningTemplateDialog.vue'
 import ScreeningTemplatePreviewDialog from
   'components/admin/ScreeningTemplatePreviewDialog.vue'
 import {
-  buildScreeningTemplateStatusOptions,
   useScreeningTemplatePermissions,
 } from 'src/composables/useScreeningTemplatePermissions.js'
 import {
@@ -311,7 +293,6 @@ const {
 const loading = ref(false)
 const rows = ref([])
 const searchQuery = ref('')
-const statusFilter = ref(null)
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
 const dialogSaving = ref(false)
@@ -327,10 +308,6 @@ const tablePagination = ref({
 })
 
 const { showGrid } = useAdminTableMobileGrid()
-
-const statusFilterOptions = computed(() =>
-  buildScreeningTemplateStatusOptions(t),
-)
 
 const copySourceOptions = computed(() =>
   rows.value.map(row => ({ label: row.name, value: row.id })),
@@ -431,11 +408,7 @@ function isArchived(row) {
 async function loadTemplates() {
   loading.value = true
   try {
-    const wantsArchived = statusFilter.value === statusValues.archived
-    rows.value = await listManageScreeningTemplates({
-      status: statusFilter.value ?? undefined,
-      includeArchived: wantsArchived,
-    }, t)
+    rows.value = await listManageScreeningTemplates({}, t)
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
@@ -446,15 +419,6 @@ async function loadTemplates() {
   } finally {
     loading.value = false
   }
-}
-
-function reload() {
-  void loadTemplates()
-}
-
-function onStatusFilterChange(value) {
-  statusFilter.value = value ?? null
-  reload()
 }
 
 function openAddDialog() {

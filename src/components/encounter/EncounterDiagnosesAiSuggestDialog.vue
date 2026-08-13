@@ -43,16 +43,45 @@
         </template>
 
         <template v-else>
-          <FormField :label="t('encounterDiagnosesAiClinicalText')">
-            <q-input
-              v-model="clinicalText"
-              type="textarea"
-              outlined
-              :rows="4"
-              :placeholder="t('aiClinicalTextPlaceholder')"
-              data-testid="encounter-diagnoses-ai-clinical-text"
-            />
-          </FormField>
+          <div class="form-field">
+            <div
+              class="
+                encounter-diagnoses-ai-dialog__clinical-head
+                row items-center justify-between no-wrap
+              "
+            >
+              <FormFieldLabel
+                :label="clinicalTextLabel"
+              />
+              <q-btn
+                flat
+                dense
+                no-caps
+                color="primary"
+                class="q-px-sm"
+                icon="content_copy"
+                :disable="!canCopyChiefComplaint"
+                :label="t('encounterDiagnosesAiCopyChiefComplaint')"
+                data-testid="encounter-diagnoses-ai-copy-chief-complaint"
+                @click="copyFromChiefComplaint"
+              />
+            </div>
+            <div class="form-field__control">
+              <q-input
+                v-model="clinicalText"
+                type="textarea"
+                outlined
+                :rows="4"
+                hide-bottom-space
+                :error="Boolean(clinicalTextError)"
+                :error-message="clinicalTextError"
+                :placeholder="
+                  t('encounterDiagnosesAiClinicalTextPlaceholder')"
+                data-testid="encounter-diagnoses-ai-clinical-text"
+                @update:model-value="onClinicalTextInput"
+              />
+            </div>
+          </div>
 
           <div
             v-if="suggestions.length"
@@ -197,14 +226,18 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
-import FormField from 'components/FormField.vue'
+import FormFieldLabel from 'components/FormFieldLabel.vue'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { formatRequiredFieldLabel } from 'src/utils/base.js'
 import {
   aiApiErrorMessage,
   generateIcd10Suggest,
 } from 'src/utils/ai-api.js'
 import { normalizeIcdSuggestions } from 'src/utils/ai-normalize.js'
 import { normalizeIcd10CodeKey } from 'src/utils/icd10-api.js'
+import {
+  resolveEncounterChiefComplaint,
+} from 'src/utils/encounter-completion-chief-complaint.js'
 
 const props = defineProps({
   modelValue: {
@@ -214,6 +247,10 @@ const props = defineProps({
   encounterId: {
     type: [Number, String],
     default: null,
+  },
+  chiefComplaint: {
+    type: String,
+    default: '',
   },
   existingCodes: {
     type: Array,
@@ -231,10 +268,25 @@ const open = computed({
 })
 
 const clinicalText = ref('')
+const clinicalTextError = ref('')
 const generating = ref(false)
 const generatedOnce = ref(false)
 const suggestions = ref([])
 const selectedPaths = ref([])
+
+const chiefComplaintText = computed(() =>
+  resolveEncounterChiefComplaint({
+    chiefComplaint: props.chiefComplaint,
+  }),
+)
+
+const canCopyChiefComplaint = computed(
+  () => chiefComplaintText.value.length > 0,
+)
+
+const clinicalTextLabel = computed(() =>
+  formatRequiredFieldLabel(t('encounterDiagnosesAiClinicalText')),
+)
 
 const existingCodeSet = computed(() => new Set(
   (props.existingCodes ?? [])
@@ -280,6 +332,7 @@ watch(() => props.modelValue, (visible) => {
     return
   }
   clinicalText.value = ''
+  clinicalTextError.value = ''
   suggestions.value = []
   selectedPaths.value = []
   generatedOnce.value = false
@@ -293,6 +346,27 @@ watch(existingCodeSet, () => {
     return item != null && !isAlreadyAdded(item.suggestedCode)
   })
 })
+
+function onClinicalTextInput() {
+  if (clinicalTextError.value
+    && String(clinicalText.value ?? '').trim()) {
+    clinicalTextError.value = ''
+  }
+}
+
+function copyFromChiefComplaint() {
+  if (!canCopyChiefComplaint.value) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('encounterDiagnosesAiNoChiefComplaint'),
+      position: 'top',
+    })
+
+    return
+  }
+  clinicalText.value = chiefComplaintText.value
+  clinicalTextError.value = ''
+}
 
 function isAlreadyAdded(code) {
   const normalized = normalizeIcd10CodeKey(code)
@@ -318,10 +392,19 @@ async function onGenerate() {
   if (props.encounterId == null) {
     return
   }
+  const text = String(clinicalText.value ?? '').trim()
+  if (!text) {
+    clinicalTextError.value = t(
+      'encounterDiagnosesAiClinicalTextRequired',
+    )
+
+    return
+  }
+  clinicalTextError.value = ''
   generating.value = true
   try {
     const suggestion = await generateIcd10Suggest(props.encounterId, {
-      clinicalText: String(clinicalText.value ?? '').trim() || undefined,
+      clinicalText: text,
       limit: 8,
     })
     suggestions.value = normalizeIcdSuggestions(
@@ -392,6 +475,15 @@ function onInsert() {
   border-radius: 8px;
   background: rgba($primary, 0.08);
   border: 1px solid rgba($primary, 0.2);
+}
+
+.encounter-diagnoses-ai-dialog__clinical-head {
+  gap: 8px;
+  margin-bottom: 6px;
+
+  :deep(.form-field__label) {
+    margin-bottom: 0;
+  }
 }
 
 .encounter-diagnoses-ai-dialog__list {

@@ -1,71 +1,188 @@
 <template>
   <div class="ai-result-editor" :data-testid="aiTestIds.field('result')">
     <template v-if="isSummaryFeature">
-      <FormField :label="t('aiResultSummary')" spaced>
-        <q-input
-          v-model="local.summary"
-          type="textarea"
-          outlined
-          autogrow
-          :readonly="readonly"
-          :data-testid="aiTestIds.field('summary')"
-          @update:model-value="emitChange"
-        />
-      </FormField>
-      <FormField :label="t('aiResultHighlights')" spaced>
-        <q-input
-          :model-value="listToText(local.highlights)"
-          type="textarea"
-          outlined
-          autogrow
-          :readonly="readonly"
-          :data-testid="aiTestIds.field('highlights')"
-          @update:model-value="v => onListField('highlights', v)"
-        />
-      </FormField>
-      <FormField :label="t('aiResultRisks')" spaced>
-        <q-input
-          :model-value="listToText(local.risks)"
-          type="textarea"
-          outlined
-          autogrow
-          :readonly="readonly"
-          :data-testid="aiTestIds.field('risks')"
-          @update:model-value="v => onListField('risks', v)"
-        />
-      </FormField>
-      <div
-        v-if="showNotDocumentedWarning"
-        class="ai-result-editor__warning q-mt-md"
-        :data-testid="aiTestIds.notDocumentedWarning">
-        <q-icon name="warning_amber" color="warning" size="sm" />
-        <span>{{ t('aiNotDocumentedWarning') }}</span>
+      <div class="ai-result-editor__summary">
+        <section
+          class="ai-result-editor__section"
+          data-testid="ai-result-summary-section">
+          <div class="ai-result-editor__section-head">
+            <span class="ai-result-editor__section-icon">
+              <q-icon name="subject" size="18px" />
+            </span>
+            <strong>{{ t('aiResultSummary') }}</strong>
+          </div>
+          <q-input
+            v-model="local.summary"
+            type="textarea"
+            outlined
+            autogrow
+            hide-bottom-space
+            class="ai-result-editor__field"
+            :readonly="readonly"
+            :data-testid="aiTestIds.field('summary')"
+            @update:model-value="emitChange"
+          />
+        </section>
+
+        <div class="ai-result-editor__split">
+          <section
+            class="
+              ai-result-editor__section
+              ai-result-editor__section--highlights
+            "
+          >
+            <div class="ai-result-editor__section-head">
+              <span
+                class="
+                  ai-result-editor__section-icon
+                  ai-result-editor__section-icon--highlights
+                "
+              >
+                <q-icon name="lightbulb" size="18px" />
+              </span>
+              <strong>{{ t('aiResultHighlights') }}</strong>
+            </div>
+            <q-input
+              :model-value="listToBulletedText(local.highlights)"
+              type="textarea"
+              outlined
+              autogrow
+              hide-bottom-space
+              class="ai-result-editor__field"
+              :readonly="readonly"
+              :data-testid="aiTestIds.field('highlights')"
+              @update:model-value="
+                v => onBulletedListField('highlights', v)"
+            />
+          </section>
+
+          <section
+            class="
+              ai-result-editor__section
+              ai-result-editor__section--risks
+            "
+          >
+            <div class="ai-result-editor__section-head">
+              <span
+                class="
+                  ai-result-editor__section-icon
+                  ai-result-editor__section-icon--risks
+                "
+              >
+                <q-icon name="warning_amber" size="18px" />
+              </span>
+              <strong>{{ t('aiResultRisks') }}</strong>
+            </div>
+            <q-input
+              :model-value="listToBulletedText(local.risks)"
+              type="textarea"
+              outlined
+              autogrow
+              hide-bottom-space
+              class="ai-result-editor__field"
+              :readonly="readonly"
+              :data-testid="aiTestIds.field('risks')"
+              @update:model-value="
+                v => onBulletedListField('risks', v)"
+            />
+          </section>
+        </div>
+
+        <section
+          v-if="hasChartReview"
+          class="
+            ai-result-editor__section
+            ai-result-editor__section--chart
+          "
+          data-testid="ai-result-chart-review-section"
+        >
+          <div class="ai-result-editor__section-head">
+            <span
+              class="
+                ai-result-editor__section-icon
+                ai-result-editor__section-icon--chart
+              "
+            >
+              <q-icon name="folder_shared" size="18px" />
+            </span>
+            <strong>{{ t('aiResultChartReview') }}</strong>
+          </div>
+          <div class="ai-result-editor__chart-grid">
+            <FormField
+              :label="t('aiResultChartReviewEncounters')"
+            >
+              <q-input
+                :model-value="chartReview.encounters"
+                type="textarea"
+                outlined
+                autogrow
+                hide-bottom-space
+                class="ai-result-editor__field"
+                :readonly="readonly"
+                :data-testid="
+                  aiTestIds.field('chart-review-encounters')"
+                @update:model-value="
+                  v => onChartReviewField('encounters', v)"
+              />
+            </FormField>
+            <FormField :label="t('aiResultChartReviewLabs')">
+              <q-input
+                :model-value="chartReview.labs"
+                type="textarea"
+                outlined
+                autogrow
+                hide-bottom-space
+                class="ai-result-editor__field"
+                :readonly="readonly"
+                :data-testid="aiTestIds.field('chart-review-labs')"
+                @update:model-value="
+                  v => onChartReviewField('labs', v)"
+              />
+            </FormField>
+            <FormField
+              :label="t('aiResultChartReviewScreenings')"
+            >
+              <q-input
+                :model-value="chartReview.screenings"
+                type="textarea"
+                outlined
+                autogrow
+                hide-bottom-space
+                class="ai-result-editor__field"
+                :readonly="readonly"
+                :data-testid="
+                  aiTestIds.field('chart-review-screenings')"
+                @update:model-value="
+                  v => onChartReviewField('screenings', v)"
+              />
+            </FormField>
+          </div>
+        </section>
+
+        <section
+          v-if="hasMedications"
+          class="ai-result-editor__section"
+        >
+          <div class="ai-result-editor__section-head">
+            <span class="ai-result-editor__section-icon">
+              <q-icon name="medication" size="18px" />
+            </span>
+            <strong>{{ t('aiResultMedications') }}</strong>
+          </div>
+          <q-input
+            :model-value="statusBlockText(local.medications)"
+            type="textarea"
+            outlined
+            autogrow
+            hide-bottom-space
+            class="ai-result-editor__field"
+            :readonly="readonly"
+            :data-testid="aiTestIds.field('medications')"
+            @update:model-value="
+              v => onStatusBlock('medications', v)"
+          />
+        </section>
       </div>
-      <FormField :label="t('aiResultAllergies')" spaced>
-        <q-input
-          :model-value="statusBlockText(local.allergies)"
-          type="textarea"
-          outlined
-          autogrow
-          :readonly="readonly"
-          :data-testid="aiTestIds.field('allergies')"
-          @update:model-value="v => onStatusBlock('allergies', v)"
-        />
-      </FormField>
-      <FormField
-        v-if="hasMedications"
-        :label="t('aiResultMedications')"
-        spaced>
-        <q-input
-          :model-value="statusBlockText(local.medications)"
-          type="textarea"
-          outlined
-          autogrow
-          :readonly="readonly"
-          :data-testid="aiTestIds.field('medications')"
-          @update:model-value="v => onStatusBlock('medications', v)"
-        />
-      </FormField>
     </template>
 
     <template v-else-if="feature === aiFeatures.soapDraft">
@@ -205,6 +322,7 @@ import { aiFeatures } from 'components/constants.js'
 import { aiTestIds } from 'src/test-ids/ai.js'
 import {
   cloneAiResult,
+  normalizeClinicalSummaryResult,
   normalizeIcdSuggestions,
   suggestionHasNotDocumentedRisk,
 } from 'src/utils/ai-normalize.js'
@@ -247,6 +365,21 @@ const hasMedications = computed(() =>
   local.value?.medications != null,
 )
 
+const hasChartReview = computed(() =>
+  local.value?.chartReview != null
+  || local.value?.chart_review != null,
+)
+
+const chartReview = computed(() =>
+  local.value?.chartReview
+  || local.value?.chart_review
+  || {
+    encounters: '',
+    labs: '',
+    screenings: '',
+  },
+)
+
 const showNotDocumentedWarning = computed(() =>
   suggestionHasNotDocumentedRisk(local.value),
 )
@@ -258,7 +391,9 @@ const icdItems = computed(() =>
 watch(
   () => props.modelValue,
   (next) => {
-    local.value = cloneAiResult(next)
+    local.value = props.feature === aiFeatures.clinicalSummary
+      ? normalizeClinicalSummaryResult(next)
+      : cloneAiResult(next)
     carePlanJson.value = JSON.stringify(local.value, null, 2)
     genericJson.value = JSON.stringify(local.value, null, 2)
     jsonError.value = ''
@@ -286,8 +421,43 @@ function textToList(value) {
     .filter(Boolean)
 }
 
+function stripBulletPrefix(line) {
+  return String(line ?? '')
+    .replace(/^[•●▪◦\-*\u2022]\s*/, '')
+    .trim()
+}
+
+function listToBulletedText(value) {
+  return textToList(listToText(value))
+    .map(line => `• ${stripBulletPrefix(line)}`)
+    .join('\n')
+}
+
+function bulletedTextToList(value) {
+  return textToList(value).map(stripBulletPrefix).filter(Boolean)
+}
+
 function onListField(key, value) {
   local.value[key] = textToList(value)
+  emitChange()
+}
+
+function onBulletedListField(key, value) {
+  local.value[key] = bulletedTextToList(value)
+  emitChange()
+}
+
+function onChartReviewField(key, value) {
+  const next = {
+    encounters: '',
+    labs: '',
+    screenings: '',
+    ...(local.value.chartReview || local.value.chart_review || {}),
+    [key]: String(value ?? ''),
+  }
+  local.value.chartReview = next
+  // eslint-disable-next-line camelcase -- API payload key
+  local.value.chart_review = next
   emitChange()
 }
 
@@ -389,6 +559,106 @@ function onGenericJson(value) {
 </script>
 
 <style scoped lang="scss">
+@import 'src/css/quasar.variables';
+
+.ai-result-editor__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: $typography-font-family;
+  color: $text-strong;
+}
+
+.ai-result-editor__section {
+  padding: 14px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+  box-shadow: $shadow-sm;
+}
+
+.ai-result-editor__section--highlights {
+  background: rgba($primary, 0.03);
+  border-color: rgba($primary, 0.14);
+}
+
+.ai-result-editor__section--risks {
+  background: rgba($warning, 0.04);
+  border-color: rgba($warning, 0.22);
+}
+
+.ai-result-editor__section--chart {
+  background: $surface-muted;
+}
+
+.ai-result-editor__section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  strong {
+    display: block;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $text-strong;
+    line-height: 1.3;
+  }
+}
+
+.ai-result-editor__section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  color: $primary;
+  background: rgba($primary, 0.1);
+
+  &--highlights {
+    color: $primary;
+    background: rgba($primary, 0.12);
+  }
+
+  &--risks {
+    color: $warning;
+    background: rgba($warning, 0.14);
+  }
+
+  &--chart {
+    color: $ai-accent;
+    background: rgba($ai-accent, 0.12);
+  }
+}
+
+.ai-result-editor__field {
+  font-family: $typography-font-family;
+
+  :deep(.q-field__native),
+  :deep(.q-field__input),
+  :deep(textarea) {
+    font-family: $typography-font-family !important;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: $text-strong;
+  }
+}
+
+.ai-result-editor__split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ai-result-editor__chart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .ai-result-editor__warning {
   display: flex;
   align-items: flex-start;
@@ -408,5 +678,12 @@ function onGenericJson(value) {
 
 .ai-result-editor__icd-body {
   min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .ai-result-editor__split,
+  .ai-result-editor__chart-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

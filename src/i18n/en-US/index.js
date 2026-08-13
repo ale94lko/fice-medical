@@ -1095,8 +1095,6 @@ export default {
   screeningTemplateListSubtitle:
     'Manage the screening templates available for your organization.',
   screeningTemplateListSearchPlaceholder: 'Search templates',
-  screeningTemplateStatusFilterPlaceholder: 'Filter by status',
-  screeningTemplateShowArchived: 'Show archived',
   screeningTemplateListAdd: 'New template',
   screeningTemplateListEmpty: 'No screening templates found.',
   screeningTemplateListError: 'Could not load screening templates.',
@@ -3657,8 +3655,12 @@ export default {
     'Allergies or medications may be not documented. '
     + 'Never assume NKDA or no medications.',
   aiResultSummary: 'Summary',
-  aiResultHighlights: 'Highlights (one per line)',
-  aiResultRisks: 'Risks (one per line)',
+  aiResultHighlights: 'Highlights',
+  aiResultRisks: 'Risks',
+  aiResultChartReview: 'Chart review',
+  aiResultChartReviewEncounters: 'Encounters',
+  aiResultChartReviewLabs: 'Labs',
+  aiResultChartReviewScreenings: 'Screenings',
   aiResultAllergies: 'Allergies',
   aiResultMedications: 'Medications',
   aiResultJson: 'Result (JSON)',
@@ -3684,7 +3686,8 @@ export default {
   aiGenerateSoapDraft: 'Draft SOAP with AI',
   aiGenerateIcd10: 'Suggest ICD-10 with AI',
   aiGenerateCarePlan: 'Draft care plan with AI',
-  aiBtnClinicalSummary: 'AI Assistant',
+  aiBtnClinicalSummary: 'FiCE AI Assistant',
+  aiAssistantName: 'FiCE AI Assistant',
   aiBtnSoapDraft: 'Draft SOAP with AI',
   aiBtnIcd10: 'Suggest ICD-10',
   aiBtnCarePlanDraft: 'Draft care plan',
@@ -3692,6 +3695,16 @@ export default {
   aiClinicalScopeFaceSheet: 'Face sheet',
   aiClinicalScopeEncounter: 'Last encounter',
   aiClinicalScopeHistory: 'Recent history',
+  aiClinicalSummaryFramingHint:
+    'Draft clinical overview for review. Not a diagnosis '
+    + 'and not treatment.',
+  aiClinicalScopeFaceSheetHint:
+    'High-level overview from the client face sheet.',
+  aiClinicalScopeEncounterHint:
+    'Summary focused on the selected encounter.',
+  aiClinicalScopeHistoryHint:
+    'Windowed history with summary, highlights, risks and '
+    + 'chart review lines.',
   aiLastEncounterMissing:
     'No encounter found for this client.',
   aiHistoryDays: 'History days',
@@ -3770,6 +3783,9 @@ export default {
   encounterCompleteVisitTitle: 'Complete this visit',
   encounterProgressLabel: '{completed} of {total} complete',
   encounterRequired: 'Required',
+  encounterChiefComplaintRequirementAction: 'Add Chief Complaint',
+  encounterChiefComplaintRequiredToComplete:
+    'Chief Complaint is required before completing this visit.',
   encounterChecklistEmpty: 'No completion requirements returned.',
   encounterOtherClinicalActions: 'Other Clinical Actions',
   encounterRequirementWaived: 'Waived',
@@ -3815,7 +3831,7 @@ export default {
   encounterEditServicesTitle: 'Edit Services',
   encounterEditServicesHint:
     'Add or remove service procedures and adjust units for this visit.',
-  encounterAddService: 'Add service',
+  encounterAddService: 'Add Service',
   encounterAddServicePlaceholder: 'Search service by name or code',
   encounterServiceCode: 'Code',
   encounterServiceUnits: 'Units',
@@ -3849,6 +3865,14 @@ export default {
   encounterDiagnosesAiDialogHint:
     'Enter clinical notes and generate ICD-10 suggestions to add.',
   encounterDiagnosesAiClinicalText: 'Clinical text',
+  encounterDiagnosesAiClinicalTextPlaceholder:
+    'Enter clinical text to guide coding',
+  encounterDiagnosesAiClinicalTextRequired:
+    'Clinical text is required.',
+  encounterDiagnosesAiCopyChiefComplaint:
+    'Copy from Chief Complaint',
+  encounterDiagnosesAiNoChiefComplaint:
+    'No chief complaint available to copy.',
   encounterDiagnosesAiGenerate: 'Generate suggestions',
   encounterDiagnosesAiRegenerate: 'Regenerate',
   encounterDiagnosesAiInsert: 'Add selected',
@@ -3866,9 +3890,12 @@ export default {
   encounterDiagnosesSaved: 'Diagnoses updated.',
   encounterDiagnosesSaveError: 'Could not update diagnoses.',
   encounterPrimaryDiagnosis: 'Primary',
-  encounterNotesSection: 'Encounter Notes',
-  encounterNotesEmpty: 'No notes for this encounter',
+  encounterNotesSection: 'Chief Complaint',
+  encounterNotesEmpty: 'No chief complaint for this encounter',
   encounterAddNote: 'Add Note',
+  encounterChiefComplaintPlaceholder: 'Enter chief complaint',
+  encounterChiefComplaintSaveError:
+    'Could not update the chief complaint.',
   encounterClinicalReuseHint:
     'Open the client chart module bound to this encounter.',
   encounterClinicalCount: '{count} record(s)',

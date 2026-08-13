@@ -22,6 +22,10 @@ export function resolveRequirementActionTarget(item = {}) {
         workspaceTab: encounterWorkspaceTabs.note,
         moduleKey: 'clinical-notes',
       }
+    case encounterRequirementActionTypes.openVisit:
+      return {
+        workspaceTab: encounterWorkspaceTabs.visit,
+      }
     case encounterRequirementActionTypes.openVitals:
       return {
         workspaceTab: encounterWorkspaceTabs.clinical,
@@ -64,6 +68,16 @@ function fallbackFromCode(item) {
       workspaceTab: encounterWorkspaceTabs.clinical,
       clinicalSubTab: encounterClinicalSubTabs.vitals,
       moduleKey: 'vitals',
+    }
+  }
+  if (code.includes('chief') || code.includes('complaint')) {
+    return {
+      workspaceTab: encounterWorkspaceTabs.visit,
+    }
+  }
+  if (code.includes('service')) {
+    return {
+      workspaceTab: encounterWorkspaceTabs.visit,
     }
   }
   if (code.includes('note') || code.includes('soap')) {

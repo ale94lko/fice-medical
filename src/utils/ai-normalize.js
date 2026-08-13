@@ -56,10 +56,15 @@ function normalizeStatusBlock(raw = {}) {
 
 export function normalizeAiSuggestion(raw = {}) {
   const row = asObject(raw)
+  const feature = trim(row.feature)
+  const resultRaw = asObject(row.result)
+  const result = feature === aiFeatures.clinicalSummary
+    ? normalizeClinicalSummaryResult(resultRaw)
+    : resultRaw
 
   return {
     id: parseOptionalNumber(row.id),
-    feature: trim(row.feature),
+    feature,
     status: trim(row.status) || aiSuggestionStatuses.pending,
     provider: trim(row.provider),
     model: trim(row.model),
@@ -68,7 +73,7 @@ export function normalizeAiSuggestion(raw = {}) {
     ),
     createdAt: trim(row.created_at ?? row.createdAt),
     createdBy: parseOptionalNumber(row.created_by ?? row.createdBy),
-    result: asObject(row.result),
+    result,
     acceptedAt: trim(row.accepted_at ?? row.acceptedAt) || null,
     acceptedBy: parseOptionalNumber(row.accepted_by ?? row.acceptedBy),
     rejectedAt: trim(row.rejected_at ?? row.rejectedAt) || null,
@@ -154,6 +159,39 @@ export function suggestionHasNotDocumentedRisk(result) {
 
   return allergies.status === 'not_documented'
     || medications.status === 'not_documented'
+}
+
+/**
+ * Normalize CLINICAL_SUMMARY result payloads.
+ * RECENT_HISTORY includes chart_review { encounters, labs, screenings }.
+ */
+export function normalizeClinicalSummaryResult(raw = {}) {
+  const data = asObject(raw)
+  const hasChartReview = Object.prototype.hasOwnProperty.call(
+    data,
+    'chart_review',
+  )
+    || Object.prototype.hasOwnProperty.call(data, 'chartReview')
+  const rawReview = asObject(data.chart_review ?? data.chartReview)
+  const next = {
+    ...data,
+    summary: data.summary == null ? '' : String(data.summary),
+    highlights: asArray(data.highlights),
+    risks: asArray(data.risks),
+  }
+  if (hasChartReview || Object.keys(rawReview).length > 0) {
+    const chartReview = {
+      encounters: trim(rawReview.encounters),
+      labs: trim(rawReview.labs),
+      screenings: trim(rawReview.screenings),
+    }
+    next.chartReview = chartReview
+    // Keep API snake_case in sync for edits / accept payloads.
+    // eslint-disable-next-line camelcase -- API payload key
+    next.chart_review = chartReview
+  }
+
+  return next
 }
 
 export function normalizeIcdSuggestions(result) {

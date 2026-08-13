@@ -11,8 +11,8 @@
       icon="auto_awesome"
       :disable="disable || generating"
       :loading="generating"
-      :label="t('aiBtnClinicalSummary')"
-      :aria-label="t('aiBtnClinicalSummary')"
+      :label="t('aiAssistantName')"
+      :aria-label="t('aiAssistantName')"
       :data-testid="aiTestIds.featureBtn('clinical-summary')">
       <q-menu
         anchor="top right"
