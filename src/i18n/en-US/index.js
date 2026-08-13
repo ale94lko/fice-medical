@@ -3692,14 +3692,11 @@ export default {
   aiBtnIcd10: 'Suggest ICD-10',
   aiBtnCarePlanDraft: 'Draft care plan',
   aiClinicalScope: 'Scope',
-  aiClinicalScopeFaceSheet: 'Face sheet',
   aiClinicalScopeEncounter: 'Last encounter',
   aiClinicalScopeHistory: 'Recent history',
   aiClinicalSummaryFramingHint:
     'Draft clinical overview for review. Not a diagnosis '
     + 'and not treatment.',
-  aiClinicalScopeFaceSheetHint:
-    'High-level overview from the client face sheet.',
   aiClinicalScopeEncounterHint:
     'Summary focused on the selected encounter.',
   aiClinicalScopeHistoryHint:

@@ -355,7 +355,7 @@ const encountersLoading = ref(false)
 const encounterOptions = ref([])
 
 const form = reactive({
-  scope: aiClinicalSummaryScopes.faceSheetLite,
+  scope: aiClinicalSummaryScopes.recentHistory,
   encounterId: null,
   historyDays: 90,
   clinicalText: '',
@@ -366,10 +366,6 @@ const form = reactive({
 })
 
 const clinicalScopeOptions = computed(() => [
-  {
-    label: t('aiClinicalScopeFaceSheet'),
-    value: aiClinicalSummaryScopes.faceSheetLite,
-  },
   {
     label: t('aiClinicalScopeEncounter'),
     value: aiClinicalSummaryScopes.currentEncounter,
@@ -448,9 +444,6 @@ const clinicalSummaryFramingHint = computed(() =>
 )
 
 const clinicalScopeHint = computed(() => {
-  if (form.scope === aiClinicalSummaryScopes.faceSheetLite) {
-    return t('aiClinicalScopeFaceSheetHint')
-  }
   if (form.scope === aiClinicalSummaryScopes.currentEncounter) {
     return t('aiClinicalScopeEncounterHint')
   }
@@ -492,7 +485,7 @@ function resetState() {
   form.problemMode = aiCarePlanProblemModes.single
   form.focusProblemsText = ''
   if (props.feature === aiFeatures.clinicalSummary) {
-    form.scope = aiClinicalSummaryScopes.faceSheetLite
+    form.scope = aiClinicalSummaryScopes.recentHistory
   }
   form.encounterId = props.encounterId
     ?? getCachedActiveEncounterId(props.clientId)

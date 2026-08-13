@@ -100,11 +100,6 @@ const suggestion = ref(null)
 
 const scopeOptions = computed(() => [
   {
-    label: t('aiClinicalScopeFaceSheet'),
-    value: aiClinicalSummaryScopes.faceSheetLite,
-    icon: 'badge',
-  },
-  {
     label: t('aiClinicalScopeEncounter'),
     value: aiClinicalSummaryScopes.currentEncounter,
     icon: 'medical_services',

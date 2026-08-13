@@ -1133,7 +1133,6 @@ export const aiSuggestionStatuses = {
 }
 
 export const aiClinicalSummaryScopes = {
-  faceSheetLite: 'FACE_SHEET_LITE',
   currentEncounter: 'CURRENT_ENCOUNTER',
   recentHistory: 'RECENT_HISTORY',
 }

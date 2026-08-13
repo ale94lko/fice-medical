@@ -3838,14 +3838,11 @@ export default {
   aiBtnIcd10: 'Sugerir ICD-10',
   aiBtnCarePlanDraft: 'Borrador de care plan',
   aiClinicalScope: 'Alcance',
-  aiClinicalScopeFaceSheet: 'Face sheet',
   aiClinicalScopeEncounter: 'Último encounter',
   aiClinicalScopeHistory: 'Historial reciente',
   aiClinicalSummaryFramingHint:
     'Borrador de resumen clínico para revisión. No es un '
     + 'diagnóstico ni un tratamiento.',
-  aiClinicalScopeFaceSheetHint:
-    'Vista general a partir del face sheet del cliente.',
   aiClinicalScopeEncounterHint:
     'Resumen centrado en el encounter seleccionado.',
   aiClinicalScopeHistoryHint:
