@@ -164,6 +164,7 @@ import {
   askChartChat,
 } from 'src/utils/ai-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { chartChatHistoryPayload } from 'src/utils/chart-chat-history.js'
 import { chartChatSection } from 'src/utils/chart-chat-section.js'
 import { staffGivenName } from 'src/utils/login-staff-member.js'
 
@@ -204,6 +205,7 @@ const open = ref(false)
 const draft = ref('')
 const sending = ref(false)
 const messages = ref([])
+const conversationId = ref('')
 const listEl = ref(null)
 const reviewFeature = ref(aiFeatures.clinicalSummary)
 
@@ -311,6 +313,7 @@ watch(
   () => {
     messages.value = [greetingMessage()]
     draft.value = ''
+    conversationId.value = ''
   },
 )
 
@@ -396,19 +399,27 @@ async function sendText(raw) {
   try {
     const result = await askChartChat(props.clientId, text, {
       encounterId: props.encounterId,
+      conversationId: conversationId.value,
+      history: conversationId.value
+        ? []
+        : chartChatHistoryPayload(messages.value),
     })
+    if (result?.conversationId) {
+      conversationId.value = result.conversationId
+    }
     messages.value = [
       ...messages.value,
       assistantMessage(result),
     ]
   } catch (error) {
+    const apiMessage = aiApiErrorMessage(error, '')
+    if (String(apiMessage).toLowerCase().includes('conversation')) {
+      conversationId.value = ''
+    }
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
         type: quasarNotifyTypes.negative,
-        message: aiApiErrorMessage(
-          error,
-          t('chartChatError'),
-        ),
+        message: apiMessage || t('chartChatError'),
       })
     }
   } finally {

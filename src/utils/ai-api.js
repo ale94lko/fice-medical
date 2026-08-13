@@ -179,6 +179,12 @@ export async function askChartChat(clientId, message, options = {}) {
   if (options.encounterId != null && options.encounterId !== '') {
     payload.encounter_id = Number(options.encounterId)
   }
+  const conversationId = String(options.conversationId ?? '').trim()
+  if (conversationId) {
+    payload.conversation_id = conversationId
+  } else if (Array.isArray(options.history) && options.history.length) {
+    payload.history = options.history
+  }
   const response = await apiInstance.post(
     apiPaths.aiChartChat(clientId),
     payload,
@@ -195,5 +201,7 @@ export async function askChartChat(clientId, message, options = {}) {
     suggestion: suggestionRaw
       ? normalizeAiSuggestion(suggestionRaw)
       : null,
+    conversationId:
+      data.conversation_id || data.conversationId || '',
   }
 }
