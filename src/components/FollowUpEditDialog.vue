@@ -4,7 +4,7 @@
     persistent
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="allergy-dialog app-dialog-card">
+    <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
         @close="onCancel">

@@ -39,156 +39,29 @@
       {{ t('followUpPendingSaveHint') }}
     </p>
 
-    <div
-      v-if="!displayFollowUps.length"
-      class="fmh-list-card q-pa-xl text-center">
-      <q-icon name="event_busy" size="md" color="grey-6" />
-      <p class="text-body1 text-grey-8 q-mt-md q-mb-xs">
-        {{ t('followUpListEmpty') }}
-      </p>
-      <p class="text-body2 text-grey-7 q-mb-none">
-        {{ t('followUpListEmptyHint') }}
-      </p>
-    </div>
+    <AdminTablePanel
+      class="follow-ups-table-panel admin-table-panel--wide"
+      :show-column-settings="false">
+      <FollowUpsTable
+        :entries="displayFollowUps"
+        :empty-label="t('followUpListEmpty')"
+        :clinician-options="clinicianOptions"
+        :related-label-fn="relatedDisplay"
+        :can-add="canAddFollowUps"
+        :can-edit="canEditFollowUps"
+        @edit="openEdit"
+        @view="openView"
+        @complete="confirmComplete"
+        @cancel="confirmCancel"
+        @remove-pending="removePending"
+      />
+    </AdminTablePanel>
 
-    <template v-else>
-      <div class="follow-ups-tab__cards q-gutter-y-md">
-        <article
-          v-for="item in displayFollowUps"
-          :key="item.id"
-          class="follow-up-card fmh-list-card q-pa-md"
-          :class="{ 'follow-up-card--overdue': item.overdue }">
-          <div class="follow-up-card__row row no-wrap">
-            <div
-              class="follow-up-card__icon"
-              :class="iconClass(item)">
-              <q-icon
-                :name="cardIconName(item)"
-                size="20px"
-              />
-            </div>
-
-            <div class="follow-up-card__body col">
-              <div class="row items-start no-wrap">
-                <div class="col">
-                  <div class="follow-up-card__type">
-                    {{ typeLabel(item.type) }}
-                    <span
-                      v-if="isUnsavedItem(item)"
-                      class="follow-up-card__pending-badge">
-                      {{ t('followUpPendingBadge') }}
-                    </span>
-                  </div>
-                  <div
-                    v-if="relatedDisplay(item)"
-                    class="follow-up-card__related text-body2">
-                    {{ relatedDisplay(item) }}
-                  </div>
-                  <div
-                    v-if="item.notes"
-                    class="follow-up-card__notes text-body2">
-                    {{ item.notes }}
-                  </div>
-                  <div class="follow-up-card__meta row q-gutter-md">
-                    <span class="follow-up-card__meta-item">
-                      <q-icon name="event" size="14px" />
-                      {{ t('followUpDueLabel') }}:
-                      {{ item.dueDate || '—' }}
-                    </span>
-                    <span
-                      v-if="providerLabel(item)"
-                      class="follow-up-card__meta-item">
-                      <q-icon name="person" size="14px" />
-                      {{ providerLabel(item) }}
-                    </span>
-                  </div>
-                  <p
-                    v-if="item.overdue"
-                    class="follow-up-card__overdue-hint text-body2">
-                    {{ t('followUpOverdueHint') }}
-                  </p>
-                </div>
-
-                <div class="follow-up-card__aside col-auto">
-                  <span
-                    class="follow-up-status-badge"
-                    :class="statusBadgeClass(item)">
-                    {{ statusLabel(item) }}
-                  </span>
-                  <q-btn
-                    v-if="showRowMenu(item)"
-                    flat
-                    round
-                    dense
-                    icon="more_vert"
-                    color="grey-8"
-                    :aria-label="t('actions')"
-                    :data-testid="tid.rowMenu(item.id)">
-                    <q-menu anchor="bottom right" self="top right">
-                      <q-list dense style="min-width: 160px">
-                        <q-item
-                          v-if="canEditRow(item)"
-                          v-close-popup
-                          clickable
-                          :data-testid="tid.rowEdit(item.id)"
-                          @click="openEdit(item)">
-                          <q-item-section>
-                            {{ t('edit') }}
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-if="canCompleteRow(item)"
-                          v-close-popup
-                          clickable
-                          :data-testid="tid.rowComplete(item.id)"
-                          @click="confirmComplete(item)">
-                          <q-item-section>
-                            {{ t('followUpActionComplete') }}
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-if="canCancelRow(item)"
-                          v-close-popup
-                          clickable
-                          :data-testid="tid.rowCancel(item.id)"
-                          @click="confirmCancel(item)">
-                          <q-item-section>
-                            {{ t('followUpActionCancel') }}
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-if="canViewRow(item)"
-                          v-close-popup
-                          clickable
-                          :data-testid="tid.rowView(item.id)"
-                          @click="openView(item)">
-                          <q-item-section>
-                            {{ t('followUpActionView') }}
-                          </q-item-section>
-                        </q-item>
-                        <q-item
-                          v-if="canRemovePending(item)"
-                          v-close-popup
-                          clickable
-                          @click="removePending(item)">
-                          <q-item-section>
-                            {{ t('followUpActionRemovePending') }}
-                          </q-item-section>
-                        </q-item>
-                      </q-list>
-                    </q-menu>
-                  </q-btn>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <p class="follow-ups-tab__count text-body2 text-grey-7">
-        {{ t('followUpCount', { count: displayFollowUps.length }) }}
-      </p>
-    </template>
+    <p
+      v-if="displayFollowUps.length"
+      class="follow-ups-tab__count text-body2 text-grey-7">
+      {{ t('followUpCount', { count: displayFollowUps.length }) }}
+    </p>
 
     <FollowUpEditDialog
       v-model="formDialogOpen"
@@ -227,9 +100,11 @@
 import { computed, ref, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FollowUpEditDialog from 'components/FollowUpEditDialog.vue'
+import FollowUpsTable from 'components/FollowUpsTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
-import { followUpStatuses, quasarNotifyTypes } from 'components/constants.js'
+import { quasarNotifyTypes } from 'components/constants.js'
 import { useClientFollowUpPermissions } from
   'src/composables/useClientFollowUpPermissions.js'
 import { useFollowUpReferenceSources } from
@@ -241,14 +116,6 @@ import {
   mapEntryFromDraft,
   mapPendingFollowUpFromDraft,
 } from 'src/utils/client-follow-ups.js'
-import {
-  buildFollowUpTypeOptions,
-  followUpCanEditRecord,
-  followUpCanViewRecord,
-  followUpStatusLabel,
-  providerLabelForFollowUp,
-  resolveFollowUpDisplayStatus,
-} from 'src/utils/follow-up-utils.js'
 import { followUpTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -297,8 +164,6 @@ const section = computed({
   set: value => emit('update:modelValue', value),
 })
 
-const typeOptions = computed(() => buildFollowUpTypeOptions(t))
-
 const hasUnsavedChanges = computed(() =>
   followUpsSectionHasUnsavedChanges(section.value),
 )
@@ -315,22 +180,6 @@ function patchSection(nextSection) {
   }
 }
 
-function isUnsavedItem(item) {
-  return item.isPending || item.isDirty || Boolean(item.pendingAction)
-}
-
-function typeLabel(type) {
-  const match = typeOptions.value.find(
-    opt => String(opt.value) === String(type),
-  )
-
-  return match?.label ?? type ?? '—'
-}
-
-function providerLabel(item) {
-  return providerLabelForFollowUp(item, props.clinicianOptions)
-}
-
 function relatedDisplay(item) {
   if (!item?.relatedTo) {
     return ''
@@ -341,71 +190,6 @@ function relatedDisplay(item) {
     item.reference,
     item.referenceLabel ?? '',
   )
-}
-
-function statusLabel(item) {
-  return followUpStatusLabel(t, resolveFollowUpDisplayStatus(item))
-}
-
-function statusBadgeClass(item) {
-  const status = resolveFollowUpDisplayStatus(item)
-
-  return `follow-up-status-badge--${status.toLowerCase()}`
-}
-
-function iconClass(item) {
-  const status = resolveFollowUpDisplayStatus(item)
-
-  return `follow-up-card__icon--${status.toLowerCase()}`
-}
-
-function cardIconName(item) {
-  const status = resolveFollowUpDisplayStatus(item)
-  if (status === followUpStatuses.completed) {
-    return 'check'
-  }
-  if (status === followUpStatuses.overdue) {
-    return 'error_outline'
-  }
-  if (status === followUpStatuses.cancelled) {
-    return 'block'
-  }
-
-  return 'event'
-}
-
-function canEditRow(item) {
-  if (item.isPending) {
-    return canAddFollowUps.value
-  }
-
-  return canEditFollowUps.value && followUpCanEditRecord(item)
-}
-
-function canCompleteRow(item) {
-  return canEditFollowUps.value
-    && followUpCanEditRecord(item)
-    && !item.isPending
-}
-
-function canCancelRow(item) {
-  return canCompleteRow(item)
-}
-
-function canViewRow(item) {
-  return followUpCanViewRecord(item) && !item.isPending
-}
-
-function canRemovePending(item) {
-  return item.isPending && canAddFollowUps.value
-}
-
-function showRowMenu(item) {
-  return canEditRow(item)
-    || canCompleteRow(item)
-    || canCancelRow(item)
-    || canViewRow(item)
-    || canRemovePending(item)
 }
 
 function openAdd() {
@@ -535,9 +319,6 @@ function onCancelConfirmed() {
 
 .add-client-follow-ups-tab {
   width: 100%;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
 
   .follow-ups-tab__list-title {
     font-size: 1rem;
@@ -548,94 +329,6 @@ function onCancelConfirmed() {
   .follow-ups-tab__count {
     margin: 16px 0 0;
     text-align: center;
-  }
-}
-
-.follow-up-card {
-  &--overdue {
-    border-color: rgba(#dc2626, 0.35);
-  }
-
-  &__row {
-    gap: 12px;
-  }
-
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    flex-shrink: 0;
-
-    &--scheduled {
-      background: #fef9c3;
-      color: #ca8a04;
-    }
-
-    &--completed {
-      background: #dcfce7;
-      color: #16a34a;
-    }
-
-    &--overdue {
-      background: #fee2e2;
-      color: #dc2626;
-    }
-
-    &--cancelled {
-      background: #f3f4f6;
-      color: #6b7280;
-    }
-  }
-
-  &__type {
-    font-weight: 600;
-    color: $text-strong;
-    margin-bottom: 4px;
-  }
-
-  &__pending-badge {
-    margin-left: 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: $primary;
-  }
-
-  &__related {
-    color: $grey-8;
-    margin-bottom: 4px;
-  }
-
-  &__notes {
-    color: $grey-7;
-    margin-bottom: 8px;
-  }
-
-  &__overdue-hint {
-    color: #b91c1c;
-    margin: 6px 0 0;
-  }
-
-  &__meta {
-    margin-top: 4px;
-  }
-
-  &__meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.8125rem;
-    color: $grey-7;
-  }
-
-  &__aside {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-    margin-left: 12px;
   }
 }
 </style>
@@ -669,5 +362,15 @@ function onCancelConfirmed() {
     background: #f3f4f6;
     color: #4b5563;
   }
+
+  &--unsaved {
+    background: #e0f2f1;
+    color: #0f766e;
+  }
+}
+
+.admin-table-grid-item.follow-ups-table__card--overdue
+.admin-table-grid-card {
+  border-color: rgba(#dc2626, 0.35);
 }
 </style>

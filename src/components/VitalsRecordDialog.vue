@@ -20,9 +20,11 @@
             <AddClientLabeledField
               :label="t('vitalsBloodPressure')"
               required>
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
-                  <div class="row q-col-gutter-sm items-start">
+              <div class="row q-col-gutter-sm items-center
+                add-client-vitals-tab__value-row">
+                <div class="col add-client-vitals-tab__value">
+                  <div class="row q-col-gutter-sm items-start
+                    add-client-vitals-tab__bp-fields">
                     <div class="col">
                       <q-input
                         v-model="localDraft.systolic"
@@ -32,7 +34,7 @@
                         :data-testid="tid.vitalsField('systolic')"
                         type="text"
                         inputmode="numeric"
-                        :placeholder="t('vitalsSystolic')"
+                        :placeholder="systolicPlaceholder"
                         :error="Boolean(fieldErrors.systolic)"
                         :error-message="errorMessage('systolic')"
                         @keypress="onSystolicKeypress"
@@ -51,7 +53,7 @@
                         :data-testid="tid.vitalsField('diastolic')"
                         type="text"
                         inputmode="numeric"
-                        :placeholder="t('vitalsDiastolic')"
+                        :placeholder="diastolicPlaceholder"
                         :error="Boolean(fieldErrors.diastolic)"
                         :error-message="errorMessage('diastolic')"
                         @keypress="onDiastolicKeypress"
@@ -76,8 +78,9 @@
               :label="t('vitalsTemperature')"
               required
               spaced>
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
+              <div class="row q-col-gutter-sm items-center
+                add-client-vitals-tab__value-row">
+                <div class="col add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.temperature"
                     outlined
@@ -112,8 +115,9 @@
             <AddClientLabeledField
               :label="t('vitalsOxygenSaturation')"
               spaced>
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
+              <div class="row q-col-gutter-sm items-center
+                add-client-vitals-tab__value-row">
+                <div class="col add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.oxygenSaturation"
                     outlined
@@ -192,8 +196,9 @@
 
           <div class="col-12 col-md-6 add-client-vitals-tab__col">
             <AddClientLabeledField :label="t('vitalsHeartRate')" required>
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
+              <div class="row q-col-gutter-sm items-center
+                add-client-vitals-tab__value-row">
+                <div class="col add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.heartRate"
                     outlined
@@ -226,8 +231,9 @@
               </div>
             </AddClientLabeledField>
             <AddClientLabeledField :label="t('vitalsRespiratoryRate')" spaced>
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
+              <div class="row q-col-gutter-sm items-center
+                add-client-vitals-tab__value-row">
+                <div class="col add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.respiratoryRate"
                     outlined
@@ -282,8 +288,9 @@
               </q-input>
             </AddClientLabeledField>
             <AddClientLabeledField :label="t('vitalsBmi')" spaced>
-              <div class="row q-col-gutter-sm items-center">
-                <div class="col">
+              <div class="row q-col-gutter-sm items-center
+                add-client-vitals-tab__value-row">
+                <div class="col add-client-vitals-tab__value">
                   <q-input
                     :model-value="bmiDisplay"
                     outlined
@@ -532,6 +539,7 @@ import {
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { resolveDefaultResponsibleClinicianOption } from
   'src/utils/care-plan-orders.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
@@ -578,8 +586,16 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 const authStore = useAuthStore()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
+
+const systolicPlaceholder = computed(() => (
+  isMobile.value ? t('vitalsSystolicShort') : t('vitalsSystolic')
+))
+const diastolicPlaceholder = computed(() => (
+  isMobile.value ? t('vitalsDiastolicShort') : t('vitalsDiastolic')
+))
 
 const localDraft = ref(createEmptyVitalsDraft())
 const fieldErrors = ref({})

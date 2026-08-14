@@ -11,6 +11,8 @@
       :rows="rows"
       :columns="columns"
       :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout"
       :table-row-class-fn="labRowClassFn">
       <template #body-cell-testName="scope">
         <q-td
@@ -243,6 +245,8 @@ import {
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
 import {
@@ -285,10 +289,28 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => sortLabsByOrderedDateDesc(props.rows ?? []))
+
+/** Same compact card hierarchy as Vitals / Insurance (mobile). */
+const mobileCardLayout = {
+  title: 'testName',
+  status: 'status',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: [
+    'category',
+    'orderedDate',
+    'collectedDate',
+    'resultDate',
+    'resultStatus',
+  ],
+  hideEmpty: true,
+}
 
 function canCollectRow(row) {
   return canAdvanceLabToCollect(row?.status)

@@ -120,6 +120,9 @@ export function resolveAdminTableCardLayout(cols, config = {}) {
   const subtitle = config.subtitle === undefined
     ? pickFirst(names, SUBTITLE_CANDIDATES)
     : config.subtitle
+  const titleExtra = config.titleExtra === undefined
+    ? null
+    : config.titleExtra
   const status = config.status === undefined
     ? pickFirst(names, STATUS_CANDIDATES)
     : config.status
@@ -141,7 +144,7 @@ export function resolveAdminTableCardLayout(cols, config = {}) {
   }
 
   const reserved = new Set(
-    [title, subtitle, status, contact, identifier?.column]
+    [title, subtitle, titleExtra, status, contact, identifier?.column]
       .filter(Boolean),
   )
 
@@ -184,6 +187,9 @@ export function resolveAdminTableCardLayout(cols, config = {}) {
   return {
     title: title && names.includes(title) ? title : null,
     subtitle: subtitle && names.includes(subtitle) ? subtitle : null,
+    titleExtra: titleExtra && names.includes(titleExtra)
+      ? titleExtra
+      : null,
     status: status && names.includes(status) ? status : null,
     contact: contact && names.includes(contact) ? contact : null,
     identifier: resolvedIdentifier,

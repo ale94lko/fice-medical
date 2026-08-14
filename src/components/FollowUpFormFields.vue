@@ -183,11 +183,12 @@
             <q-input
               v-model="local.notes"
               outlined
-              hide-bottom-space
               type="textarea"
-              autogrow
+              rows="4"
+              class="full-width notes-field"
               :readonly="props.readonly"
               :maxlength="followUpNotesMaxLength"
+              counter
               :placeholder="t('followUpNotesPlaceholder')"
               :error="Boolean(props.errors.notes)"
               :error-message="props.errors.notes"

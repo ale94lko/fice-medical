@@ -458,9 +458,34 @@
         color: $text-muted;
       }
 
-      /* Slot subtitle unused in list cards; caption uses subTitle prop. */
-      .data-item-sub-title {
+      /* Title-extra slot (e.g. Unsaved badge under title) */
+      .data-item-sub-title:empty {
         display: none;
+      }
+
+      .data-item-sub-title:not(:empty) {
+        display: inline-block;
+        margin-top: 4px;
+        width: auto;
+        max-width: 100%;
+        background: transparent !important;
+        box-shadow: none !important;
+
+        .q-td {
+          display: inline-block !important;
+          width: auto !important;
+          min-width: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+      }
+
+      .data-item-actions {
+        background: transparent !important;
+        box-shadow: none !important;
+        align-items: center;
       }
     }
 
@@ -468,37 +493,54 @@
     .q-td {
       min-width: 0 !important;
       max-width: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
+    .admin-table-grid-card__header {
+      .q-td,
+      .data-item-actions,
+      .data-item-sub-title {
+        background: transparent !important;
+        box-shadow: none !important;
+      }
     }
 
     .data-item-actions {
       flex: 0 0 auto;
       max-width: 45%;
+      background: transparent !important;
+      box-shadow: none !important;
 
       .q-td {
-        display: block !important;
+        display: inline-block !important;
         width: auto !important;
         min-width: 0 !important;
         padding: 0 !important;
         border: 0 !important;
         background: transparent !important;
+        box-shadow: none !important;
       }
 
       .admin-table-status-badge,
-      .allergy-severity-badge {
+      .allergy-severity-badge,
+      .follow-up-status-badge {
         max-width: 100%;
       }
     }
 
     &__status {
       flex: 0 0 auto;
+      background: transparent !important;
 
       .q-td {
-        display: block !important;
+        display: inline-block !important;
         width: auto !important;
         min-width: 0 !important;
         padding: 0 !important;
         border: 0 !important;
         background: transparent !important;
+        box-shadow: none !important;
       }
 
       .admin-table-status-badge {

@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
     <template #body-cell-recordedDateTime="scope">
       <q-td
         :props="scope"
@@ -160,6 +162,8 @@ import VitalsHistoryStatusValue from
   'components/VitalsHistoryStatusValue.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { resolveBmiClassification } from 'src/utils/bmi-us.js'
 import {
   formatBmiDisplay,
@@ -210,17 +214,35 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.entries ?? [])
+
+/** Same compact card hierarchy as Insurance / Allergies (mobile). */
+const mobileCardLayout = {
+  title: 'recordedDateTime',
+  status: 'bloodPressure',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: [
+    'heartRate',
+    'temperature',
+    'oxygenSaturation',
+    'bmi',
+    'recordedBy',
+  ],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {
     name: 'recordedDateTime',
     label: t('vitalsColDateTime'),
     align: 'left',
-    field: row => row.recordedDate,
+    field: row => formatRecordedDateTimeDisplay(row),
     sortable: false,
     headerStyle: 'min-width: 140px',
     style: 'min-width: 140px',

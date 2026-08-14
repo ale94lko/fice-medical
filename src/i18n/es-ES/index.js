@@ -3054,6 +3054,8 @@ export default {
   vitalsBloodPressure: 'Presión arterial',
   vitalsSystolic: 'Sistólica',
   vitalsDiastolic: 'Diastólica',
+  vitalsSystolicShort: 'S',
+  vitalsDiastolicShort: 'D',
   vitalsBpNormal: 'Normal',
   vitalsBpElevated: 'Elevada',
   vitalsBpStage1: 'Hipertensión Estadio 1',

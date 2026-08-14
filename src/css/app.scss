@@ -691,6 +691,52 @@ body.vp-mobile {
   flex-shrink: 0;
 }
 
+/* Mobile: Save/Close top-right, aligned with profile photo */
+body.vp-mobile {
+  .admin-page.add-client-page .add-client-page__header {
+    position: relative;
+    align-items: flex-start;
+  }
+
+  .admin-page.add-client-page .add-client-page__actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 72px;
+    margin-left: 0;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    z-index: 2;
+  }
+
+  .admin-page.add-client-page .add-client-page__intro {
+    flex: 1 1 0;
+    min-width: 0;
+    /* Keep title/breadcrumbs clear of Save/Close */
+    padding-right: 9.75rem;
+  }
+
+  .admin-page.add-client-page .add-client-page__subtitle,
+  .admin-page.add-client-page .add-client-page__breadcrumbs {
+    display: none;
+  }
+
+  .admin-page.add-client-page .add-client-page__actions {
+    .app-btn-primary,
+    .app-btn-outline {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+  }
+
+  .admin-page.add-client-page
+  .add-client-page__duplicate-banner-anchor {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
+
 .client-profile-photo-field {
   position: relative;
   flex-shrink: 0;
@@ -1914,6 +1960,20 @@ body.vp-mobile {
   width: 100%;
   max-width: 920px;
   min-width: 320px;
+}
+
+/* Mobile: keep form dialogs inside the viewport */
+body.vp-mobile {
+  .allergy-dialog.app-dialog-card,
+  .family-medical-history-dialog.app-dialog-card,
+  .app-dialog-card--sm,
+  .modal-card.app-dialog-card,
+  .insurance-dialog.app-dialog-card:not(.app-dialog-card--sm),
+  .user-dialog.app-dialog-card:not(.app-dialog-card--sm) {
+    min-width: 0;
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
 }
 
 .generate-document-dialog.insurance-dialog.app-dialog-card {
@@ -3901,6 +3961,17 @@ body.vp-mobile {
   }
 }
 
+/* Mobile: date on one line, time on the next */
+body.vp-mobile {
+  .add-client-vitals-tab__datetime-row {
+    > .col-6 {
+      width: 100%;
+      max-width: 100%;
+      flex: 0 0 100%;
+    }
+  }
+}
+
 .add-client-vitals-tab__bp-sep {
   display: flex;
   align-items: center;
@@ -3924,6 +3995,76 @@ body.vp-mobile {
   display: flex;
   align-items: center;
   flex: 0 0 auto;
+}
+
+/* Mobile: value 50% + level 50%; BP sys/dia 25% each + level 50% */
+body.vp-mobile {
+  .add-client-vitals-tab__value-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    gap: 8px;
+
+    > [class*='col'] {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    > .add-client-vitals-tab__value {
+      flex: 0 0 calc(50% - 4px);
+      max-width: calc(50% - 4px);
+      width: calc(50% - 4px);
+      min-width: 0;
+    }
+
+    > .add-client-vitals-tab__level {
+      flex: 0 0 calc(50% - 4px);
+      max-width: calc(50% - 4px);
+      width: calc(50% - 4px);
+      min-width: 0;
+    }
+  }
+
+  .add-client-vitals-tab__bp-fields {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    gap: 4px;
+
+    > [class*='col'] {
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+
+    > .col {
+      flex: 1 1 0;
+      max-width: none;
+      width: auto;
+      min-width: 0;
+    }
+
+    > .add-client-vitals-tab__bp-sep {
+      flex: 0 0 auto;
+    }
+
+    .q-field__native,
+    .q-field__input {
+      text-align: right;
+    }
+  }
+
+  .add-client-vitals-tab__level-badge {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 0.6875rem;
+  }
 }
 
 .add-client-vitals-tab__level-badge {

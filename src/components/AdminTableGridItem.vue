@@ -17,6 +17,15 @@
           :avatar-text="avatarText"
           :sub-title="subtitleText">
           <template
+            v-if="titleExtraCol && showField(titleExtraCol)"
+            #subTitle>
+            <slot
+              :name="`body-cell-${titleExtraCol.name}`"
+              v-bind="toCellScope(titleExtraCol)">
+              {{ formatCardColValue(titleExtraCol) }}
+            </slot>
+          </template>
+          <template
             v-if="statusCol && showField(statusCol)"
             #actions>
             <slot
@@ -187,6 +196,9 @@ const titleCol = computed(() =>
 )
 const subtitleCol = computed(() =>
   findCardColumn(rawCols.value, layout.value.subtitle),
+)
+const titleExtraCol = computed(() =>
+  findCardColumn(rawCols.value, layout.value.titleExtra),
 )
 const statusCol = computed(() =>
   findCardColumn(rawCols.value, layout.value.status),
