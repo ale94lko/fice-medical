@@ -11,7 +11,6 @@ import {
   mapAvailabilityWindows,
   mapBookableServiceProcedures,
   normalizeAppointment,
-  normalizeCarePlanOption,
   normalizeRecurringSeries,
 } from 'src/utils/appointment-normalize.js'
 
@@ -210,21 +209,6 @@ export async function listAppointmentAvailabilityRanges(params = {}) {
   )
 
   return mapAvailabilityRangesResponse(unwrapData(response.data))
-}
-
-export async function listClientReferrals(clientId) {
-  const { listClientReferralOptions } = await import(
-    'src/utils/referral-api.js'
-  )
-
-  return listClientReferralOptions(clientId, { schedulableOnly: true })
-}
-
-export async function listClientCarePlans(clientId) {
-  const response = await apiInstance.get(apiPaths.clientCarePlans(clientId))
-
-  return unwrapList(response.data).map(normalizeCarePlanOption)
-    .filter(row => row.value != null)
 }
 
 export async function bookAppointment(body, idempotencyKey = null) {

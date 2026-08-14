@@ -23,13 +23,7 @@
           v-if="showClinicalResourcesMenu"
           class="q-mr-xs"
         />
-        <q-btn
-          flat
-          round
-          dense
-          icon="notifications"
-          :data-testid="layoutTestIds.notifications"
-        />
+        <AppHeaderNotifications />
         <AppHeaderUserMenu
           class="q-ml-xs"
           @change-password="handleChangePassword"
@@ -496,18 +490,21 @@
           <q-item
             v-if="showBilling"
             clickable
-            v-ripple>
+            v-ripple
+            to="/billing/superbills"
+            :data-testid="layoutTestIds.navBilling"
+            :active-class="activeClass">
             <q-item-section avatar>
               <q-icon name="account_balance" />
             </q-item-section>
-            <q-item-section>Billing</q-item-section>
+            <q-item-section>{{ t('navBilling') }}</q-item-section>
             <q-tooltip
               v-if="drawerShowsMiniTooltips"
               anchor="center right"
               self="center left"
               :offset="[8, 0]"
               class="app-drawer-tooltip">
-              Billing
+              {{ t('navBilling') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -746,6 +743,8 @@ import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 import ActiveEncounterHeaderChip from
   'components/ActiveEncounterHeaderChip.vue'
 import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
+import AppHeaderNotifications from
+  'components/AppHeaderNotifications.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'

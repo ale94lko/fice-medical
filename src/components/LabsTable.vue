@@ -161,7 +161,7 @@
           </q-tooltip>
         </q-btn>
           <q-btn
-            v-if="canEdit && canReviewRow(row)"
+            v-if="canReview && canReviewRow(row)"
             flat
             round
             dense
@@ -272,6 +272,10 @@ const props = defineProps({
   canEdit: {
     type: Boolean,
     default: true,
+  },
+  canReview: {
+    type: Boolean,
+    default: false,
   },
   canDelete: {
     type: Boolean,

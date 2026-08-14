@@ -157,7 +157,61 @@ export function normalizeEncounter(raw) {
       ?? []
     ).map(normalizeServiceProcedure),
     diagnoses: (raw.diagnoses ?? []).map(normalizeDiagnosis),
+    wait: normalizeWaitSummary(raw.wait),
     isInProgress: status === encounterStatuses.inProgress,
+    isWaiting: status === encounterStatuses.waitingForResults,
+    isReadyToResume: status === encounterStatuses.readyToResume,
+    isOpen: isOpenEncounterStatus(status),
+  }
+}
+
+function normalizeWaitDependency(row = {}) {
+  return {
+    id: parseOptionalNumber(row.id),
+    dependencyType: trim(
+      row.dependency_type ?? row.dependencyType,
+    ).toUpperCase(),
+    diagnosticOrderId: parseOptionalNumber(
+      row.diagnostic_order_id ?? row.diagnosticOrderId,
+    ),
+    testName: trim(row.test_name ?? row.testName),
+    status: trim(row.status).toUpperCase(),
+    blocking: parseOptionalBool(row.blocking) !== false,
+    resolvedAt: trim(row.resolved_at ?? row.resolvedAt),
+  }
+}
+
+function normalizeWaitSummary(raw) {
+  if (raw == null || typeof raw !== 'object') {
+    return null
+  }
+  const pending = raw.pending_dependencies ?? raw.pendingDependencies ?? []
+  const resolved = raw.resolved_dependencies
+    ?? raw.resolvedDependencies
+    ?? []
+
+  return {
+    waitingSince: trim(raw.waiting_since ?? raw.waitingSince),
+    readyToResumeSince: trim(
+      raw.ready_to_resume_since ?? raw.readyToResumeSince,
+    ),
+    currentActivityType: trim(
+      raw.current_activity_type ?? raw.currentActivityType,
+    ).toUpperCase(),
+    activeClinicalMinutes: parseOptionalNumber(
+      raw.active_clinical_minutes ?? raw.activeClinicalMinutes,
+    ),
+    waitingMinutes: parseOptionalNumber(
+      raw.waiting_minutes ?? raw.waitingMinutes,
+    ),
+    elapsedMinutes: parseOptionalNumber(
+      raw.elapsed_minutes ?? raw.elapsedMinutes,
+    ),
+    reason: trim(raw.reason),
+    pendingDependencies: (Array.isArray(pending) ? pending : [])
+      .map(normalizeWaitDependency),
+    resolvedDependencies: (Array.isArray(resolved) ? resolved : [])
+      .map(normalizeWaitDependency),
   }
 }
 
@@ -169,6 +223,31 @@ export function mapEncountersList(rows) {
   return rows.map(normalizeEncounter).filter(Boolean)
 }
 
+export function isOpenEncounterStatus(status) {
+  const token = String(status ?? '').trim().toUpperCase()
+
+  return token === encounterStatuses.inProgress
+    || token === encounterStatuses.waitingForResults
+    || token === encounterStatuses.readyToResume
+}
+
 export function isEncounterInProgress(encounter) {
   return Boolean(encounter?.isInProgress)
+}
+
+export function isEncounterOpen(encounter) {
+  return Boolean(encounter?.isOpen)
+    || isOpenEncounterStatus(encounter?.status)
+}
+
+export function isEncounterWaiting(encounter) {
+  return Boolean(encounter?.isWaiting)
+    || String(encounter?.status ?? '').toUpperCase()
+      === encounterStatuses.waitingForResults
+}
+
+export function isEncounterReadyToResume(encounter) {
+  return Boolean(encounter?.isReadyToResume)
+    || String(encounter?.status ?? '').toUpperCase()
+      === encounterStatuses.readyToResume
 }

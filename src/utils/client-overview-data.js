@@ -471,7 +471,12 @@ export function buildClientOverviewModuleSummaries(
     clinicalNotes: rawSummaries.clinicalNotes,
     screenings: rawSummaries.screenings,
     careTeam: comingSoonSummary(t),
-    authorizations: comingSoonSummary(t),
+    authorizations: moduleSummary(
+      0,
+      [],
+      t('authorizationsSubtitle'),
+      t('authorizationListEmpty'),
+    ),
     tasks: comingSoonSummary(t),
     billing: comingSoonSummary(t),
     claims: comingSoonSummary(t),

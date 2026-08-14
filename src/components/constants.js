@@ -135,6 +135,8 @@ export const serviceProcedureFieldKeys = {
   cptCode: 'cptCode',
   hcpcsCode: 'hcpcsCode',
   defaultFee: 'defaultFee',
+  billable: 'billable',
+  defaultUnits: 'defaultUnits',
   authorizationRequirement: 'authorizationRequirement',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -145,6 +147,7 @@ export const serviceProcedureListColumnKeys = {
   category: 'category',
   duration: 'duration',
   requiresAppointment: 'requiresAppointment',
+  billable: 'billable',
   codes: 'codes',
   status: 'status',
   actions: 'actions',
@@ -901,6 +904,39 @@ export const referralPriorities = {
   stat: 'STAT',
 }
 
+export const authorizationStatuses = {
+  pending: 'PENDING',
+  approved: 'APPROVED',
+  denied: 'DENIED',
+  cancelled: 'CANCELLED',
+}
+
+export const authorizationEffectiveStatuses = {
+  ...authorizationStatuses,
+  expired: 'EXPIRED',
+  exhausted: 'EXHAUSTED',
+}
+
+export const authorizationQuantityTypes = {
+  visits: 'VISITS',
+  units: 'UNITS',
+}
+
+export const authorizationPriorities = {
+  routine: 'ROUTINE',
+  urgent: 'URGENT',
+}
+
+export const authorizationVerificationSources = {
+  payerPortal: 'PAYER_PORTAL',
+  phone: 'PHONE',
+  fax: 'FAX',
+  email: 'EMAIL',
+  other: 'OTHER',
+}
+
+export const authorizationNotesMaxLength = 500
+
 export const referralSourceSelfReferredCode = 'SELF_REFERRED'
 
 export const referralIntakeSourceDetailsMaxLength = 500
@@ -1014,6 +1050,8 @@ export const permissionNames = {
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
   startEncounter: 'START_ENCOUNTER',
+  waitEncounter: 'WAIT_ENCOUNTER',
+  resumeEncounter: 'RESUME_ENCOUNTER',
   manageServiceRequirements: 'MANAGE_SERVICE_REQUIREMENTS',
   useAiClinicalSummary: 'USE_AI_CLINICAL_SUMMARY',
   useAiScribe: 'USE_AI_SCRIBE',
@@ -1022,6 +1060,11 @@ export const permissionNames = {
   useAiMissingInfo: 'USE_AI_MISSING_INFO',
   manageAiConfig: 'MANAGE_AI_CONFIG',
   manageAiSuggestion: 'MANAGE_AI_SUGGESTION',
+  superbillView: 'SUPERBILL_VIEW',
+  superbillReview: 'SUPERBILL_REVIEW',
+  superbillReopen: 'SUPERBILL_REOPEN',
+  superbillVoid: 'SUPERBILL_VOID',
+  superbillEditBillingFields: 'SUPERBILL_EDIT_BILLING_FIELDS',
 }
 
 export const clientPermissionNames = {
@@ -1049,6 +1092,7 @@ export const clientPermissionNames = {
   viewLabsClient: 'VIEW_LABS_CLIENT',
   addLabsClient: 'ADD_LABS_CLIENT',
   editLabsClient: 'EDIT_LABS_CLIENT',
+  reviewLabsClient: 'REVIEW_LABS_CLIENT',
   deleteLabsClient: 'DELETE_LABS_CLIENT',
   viewScreenings: 'VIEW_SCREENINGS',
   addScreenings: 'ADD_SCREENINGS',
@@ -1084,6 +1128,13 @@ export const clientPermissionNames = {
   addReferrals: 'ADD_REFERRALS',
   editReferrals: 'EDIT_REFERRALS',
   deleteReferrals: 'DELETE_REFERRALS',
+  authorizationView: 'AUTHORIZATION_VIEW',
+  authorizationCreate: 'AUTHORIZATION_CREATE',
+  authorizationEdit: 'AUTHORIZATION_EDIT',
+  authorizationApprove: 'AUTHORIZATION_APPROVE',
+  authorizationDeny: 'AUTHORIZATION_DENY',
+  authorizationCancel: 'AUTHORIZATION_CANCEL',
+  authorizationAttachDocument: 'AUTHORIZATION_ATTACH_DOCUMENT',
   viewMedications: 'VIEW_MEDICATIONS',
   addMedications: 'ADD_MEDICATIONS',
   editMedications: 'EDIT_MEDICATIONS',
@@ -1105,6 +1156,8 @@ export const clientPermissionNames = {
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
   startEncounter: permissionNames.startEncounter,
+  waitEncounter: permissionNames.waitEncounter,
+  resumeEncounter: permissionNames.resumeEncounter,
   manageServiceRequirements: permissionNames.manageServiceRequirements,
   useAiClinicalSummary: permissionNames.useAiClinicalSummary,
   useAiScribe: permissionNames.useAiScribe,
@@ -1154,6 +1207,8 @@ export const aiGenerateTimeoutMs = 60000
 
 export const encounterStatuses = {
   inProgress: 'IN_PROGRESS',
+  waitingForResults: 'WAITING_FOR_RESULTS',
+  readyToResume: 'READY_TO_RESUME',
   completed: 'COMPLETED',
   cancelled: 'CANCELLED',
 }
@@ -1171,6 +1226,26 @@ export const encounterBillingReadinessStatuses = {
   notReady: 'NOT_READY',
   ready: 'READY',
   billed: 'BILLED',
+}
+
+export const superbillStatuses = {
+  notReady: 'NOT_READY',
+  ready: 'READY',
+  reviewed: 'REVIEWED',
+  voided: 'VOIDED',
+}
+
+export const billingResponsibilityValues = {
+  insurance: 'INSURANCE',
+  selfPay: 'SELF_PAY',
+}
+
+export const superbillRequirementActions = {
+  viewNote: 'VIEW_NOTE',
+  reviewAuthorization: 'REVIEW_AUTHORIZATION',
+  reviewDiagnosis: 'REVIEW_DIAGNOSIS',
+  viewInsurance: 'VIEW_INSURANCE',
+  viewEncounter: 'VIEW_ENCOUNTER',
 }
 
 export const encounterWorkspaceTabs = {
@@ -1222,6 +1297,7 @@ export const encounterRequirementTypes = {
   carePlanReview: 'CARE_PLAN_REVIEW',
   diagnosis: 'DIAGNOSIS',
   service: 'SERVICE',
+  diagnosticResultReview: 'DIAGNOSTIC_RESULT_REVIEW',
 }
 
 export const encounterRequirementActionTypes = {
@@ -1233,6 +1309,7 @@ export const encounterRequirementActionTypes = {
   openSafetyAssessment: 'OPEN_SAFETY_ASSESSMENT',
   openMedicationReview: 'OPEN_MEDICATION_REVIEW',
   openCarePlanReview: 'OPEN_CARE_PLAN_REVIEW',
+  openResults: 'OPEN_RESULTS',
 }
 
 export const encounterTypes = {
@@ -1461,6 +1538,9 @@ export const apiPaths = {
   }`,
   permissionsForCurrentUser: '/permissions/v1/user/me',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
+  clientClinicians: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/clinicians`,
   clientClinicalNotes: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/clinical-notes`,
@@ -1541,15 +1621,53 @@ export const apiPaths = {
   encounterCarePlanReviews: id => `/encounters/v1/${
     encodeURIComponent(String(id ?? '').trim())
   }/care-plan-reviews`,
+  encountersOpen: '/encounters/v1/open',
+  encounterWaitForResults: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/wait-for-results`,
+  encounterResume: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/resume`,
   encounterComplete: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/complete`,
+  notifications: '/notifications/v1',
+  notificationRead: id => `/notifications/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/read`,
+  notificationById: id => `/notifications/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  notificationsReadAll: '/notifications/v1/read-all',
   encounterCancel: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/cancel`,
   encounterReopen: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/reopen`,
+  encounterSuperbill: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/superbill`,
+  superbillsList: '/superbills/v1',
+  billingWorkQueue: '/billing/v1/work-queue',
+  superbillById: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  superbillReview: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/review`,
+  superbillVoid: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/void`,
+  superbillReopen: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/reopen`,
+  superbillNotes: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/notes`,
+  superbillHistory: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/history`,
   serviceProcedureRequirements: id => `/service-procedures/v1/${
     encodeURIComponent(String(id ?? '').trim())
   }/requirements`,
@@ -1613,6 +1731,53 @@ export const apiPaths = {
   ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
   }/referrals/${encodeURIComponent(String(referralId ?? '').trim())
   }/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
+  clientAuthorizations: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/authorizations`,
+  clientAuthorizationById: (clientId, authorizationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}`,
+  clientAuthorizationApprove: (clientId, authorizationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}/approve`,
+  clientAuthorizationDeny: (clientId, authorizationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}/deny`,
+  clientAuthorizationCancel: (clientId, authorizationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}/cancel`,
+  clientAuthorizationFiles: (clientId, authorizationId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}/files`,
+  clientAuthorizationFileDownload: (
+    clientId,
+    authorizationId,
+    fileId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}/files/${encodeURIComponent(String(fileId ?? '').trim())}/download`,
+  clientAuthorizationFileById: (
+    clientId,
+    authorizationId,
+    fileId,
+  ) => `/client/v1/${encodeURIComponent(String(clientId ?? '').trim())
+  }/authorizations/${encodeURIComponent(
+    String(authorizationId ?? '').trim(),
+  )}/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
+  clientInsuranceProfiles: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/insurance-profiles`,
   clientCarePlans: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/care-plans`,

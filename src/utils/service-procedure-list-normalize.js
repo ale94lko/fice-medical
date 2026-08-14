@@ -62,6 +62,8 @@ export function mapServiceProcedureListItem(item, t) {
     [fk.cptCode]: String(item.cpt_code ?? item.cptCode ?? '').trim(),
     [fk.hcpcsCode]: String(item.hcpcs_code ?? item.hcpcsCode ?? '').trim(),
     [fk.defaultFee]: item.default_fee ?? item.defaultFee ?? null,
+    [fk.billable]: Boolean(item.billable),
+    [fk.defaultUnits]: item.default_units ?? item.defaultUnits ?? null,
     [fk.authorizationRequirement]: String(
       item.authorization_requirement ?? item.authorizationRequirement ?? '',
     ).trim(),
@@ -82,6 +84,10 @@ export function mapServiceProcedureListItem(item, t) {
     requiresAppointmentLabel: normalized[fk.requiresAppointment]
       ? t('yes')
       : t('no'),
+    billableLabel: normalized[fk.billable]
+      ? t('yes')
+      : t('no'),
+    billableVariant: normalized[fk.billable] ? 'active' : 'pending',
     codesLabel: formatCodesLabel(
       normalized[fk.cptCode],
       normalized[fk.hcpcsCode],
@@ -90,6 +96,8 @@ export function mapServiceProcedureListItem(item, t) {
       normalized[fk.authorizationRequirement],
       t,
     ),
+    defaultDurationMin:
+      item.default_duration_min ?? item.defaultDurationMin ?? null,
     statusLabel: isActive ? t('active') : t('inactive'),
     statusVariant: isActive ? 'active' : 'inactive',
   }

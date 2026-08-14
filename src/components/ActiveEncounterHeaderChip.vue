@@ -3,7 +3,8 @@
     <div
       v-if="visible"
       ref="shellRef"
-      class="app-active-encounter">
+      class="app-active-encounter"
+      :class="{ 'app-active-encounter--paused': isPaused }">
       <span
         class="app-active-encounter__border-flow"
         aria-hidden="true">
@@ -36,7 +37,10 @@
         <span
           class="app-active-encounter__pulse"
           aria-hidden="true">
-          <span class="app-active-encounter__pulse-ring" />
+          <span
+            v-if="!isPaused"
+            class="app-active-encounter__pulse-ring"
+          />
           <span class="app-active-encounter__icon-badge">
             <q-icon name="medical_services" size="18px" />
           </span>
@@ -99,6 +103,7 @@
 
           <q-list class="app-active-encounter-menu__list">
             <q-item
+              v-if="!isPaused"
               v-close-popup
               clickable
               :disable="busy"
@@ -111,7 +116,10 @@
                 {{ t('activeEncounterComplete') }}
               </q-item-section>
             </q-item>
-            <q-separator class="app-active-encounter-menu__separator" />
+            <q-separator
+              v-if="!isPaused"
+              class="app-active-encounter-menu__separator"
+            />
             <q-item
               v-close-popup
               clickable
@@ -188,6 +196,8 @@ import { formatPersonDisplayNameFromRecord } from
   'src/utils/person-display-name.js'
 import { useActiveEncounterWatchdog } from
   'src/composables/useActiveEncounterWatchdog.js'
+import { useToolbarOpenEncounterSync } from
+  'src/composables/useToolbarOpenEncounterSync.js'
 import {
   cancelEncounter,
   completeEncounter,
@@ -196,12 +206,18 @@ import {
   isEncounterInvalidError,
   toolbarActiveEncounter,
 } from 'src/utils/encounter-api.js'
+import {
+  isEncounterOpen,
+  isEncounterReadyToResume,
+  isEncounterWaiting,
+} from 'src/utils/encounter-normalize.js'
 
 const { t } = useI18n()
 const $q = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
 const siteStore = useSiteStore()
+useToolbarOpenEncounterSync()
 
 const {
   elapsedLabel,
@@ -322,8 +338,15 @@ const canViewClient = computed(() =>
 
 const visible = computed(() =>
   canView.value
-  && Boolean(toolbarActiveEncounter.value?.encounter?.isInProgress),
+  && isEncounterOpen(toolbarActiveEncounter.value?.encounter),
 )
+
+const isPaused = computed(() => {
+  const encounter = toolbarActiveEncounter.value?.encounter
+
+  return isEncounterWaiting(encounter)
+    || isEncounterReadyToResume(encounter)
+})
 
 watch(visible, (isVisible) => {
   if (!isVisible) {
@@ -405,11 +428,17 @@ function encounterTypeLabel(type) {
   }
 }
 
-const encounterMetaLabel = computed(() =>
-  t('activeEncounterToolbarMeta', {
-    type: encounterTypeLabel(activeEncounter.value?.encounterType),
-  }),
-)
+const encounterMetaLabel = computed(() => {
+  const type = encounterTypeLabel(activeEncounter.value?.encounterType)
+  if (isEncounterReadyToResume(activeEncounter.value)) {
+    return t('activeEncounterToolbarMetaReady', { type })
+  }
+  if (isEncounterWaiting(activeEncounter.value) || isPaused.value) {
+    return t('activeEncounterToolbarMetaPaused', { type })
+  }
+
+  return t('activeEncounterToolbarMeta', { type })
+})
 
 async function onMenuBeforeShow() {
   const clientId = String(
@@ -643,6 +672,17 @@ async function onCancel(payload = {}) {
 
 .app-active-encounter__chevron {
   opacity: 0.9;
+}
+
+.app-active-encounter--paused {
+  .app-active-encounter__border-flow {
+    display: none;
+  }
+
+  .app-active-encounter__pulse-ring {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* pathLength=100: tip reaches left midpoint at -80 */

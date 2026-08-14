@@ -264,10 +264,12 @@
           />
           <StartEncounterMenuButton
             :show="showStartEncounter"
+            :has-active-encounter="hasActiveEncounter"
             :client-id="clientId"
             :loading="loading"
             :busy="startEncounterBusy"
             @select="emit('start-encounter', $event)"
+            @open-active="emit('open-active-encounter')"
           />
         </div>
       </div>
@@ -313,6 +315,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hasActiveEncounter: {
+    type: Boolean,
+    default: false,
+  },
   startEncounterBusy: {
     type: Boolean,
     default: false,
@@ -324,6 +330,7 @@ const emit = defineEmits([
   'edit',
   'document-generated',
   'start-encounter',
+  'open-active-encounter',
 ])
 
 const { t } = useI18n()

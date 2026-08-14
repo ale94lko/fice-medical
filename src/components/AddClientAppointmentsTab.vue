@@ -139,7 +139,6 @@
     <AppointmentEditDialog
       v-model="editOpen"
       :record="activeAppointment"
-      :client-id="clientId"
       :saving="actionSaving"
       @save="onEditSave"
       @cancel="editOpen = false"

@@ -85,7 +85,7 @@ function isComingSoonSubTab(parentKey, subTabKey) {
     return subTabKey !== 'attachments' && subTabKey !== 'consents'
   }
   if (parentKey === addClientTabKeys.careCoordination) {
-    return ['careTeam', 'authorizations', 'tasks'].includes(subTabKey)
+    return ['careTeam', 'tasks'].includes(subTabKey)
   }
 
   return false

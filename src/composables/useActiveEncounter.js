@@ -16,7 +16,7 @@ import {
   startClientEncounter,
   toolbarActiveEncounter,
 } from 'src/utils/encounter-api.js'
-import { isEncounterInProgress } from 'src/utils/encounter-normalize.js'
+import { isEncounterOpen } from 'src/utils/encounter-normalize.js'
 
 /**
  * Cache + actions for the client's active (IN_PROGRESS) encounter.
@@ -45,7 +45,7 @@ export function useActiveEncounter(clientIdRef) {
   })
 
   const hasActiveEncounter = computed(() =>
-    isEncounterInProgress(activeEncounter.value),
+    isEncounterOpen(activeEncounter.value),
   )
 
   const activeEncounterId = computed(() =>

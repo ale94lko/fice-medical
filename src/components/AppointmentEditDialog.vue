@@ -30,21 +30,6 @@
               />
             </AddClientLabeledField>
           </div>
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="t('appointmentReferralOptional')"
-              :test-id="tid.field('referral')">
-              <FormSelect
-                v-model="local.referralId"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                clearable
-                :options="referralOptions"
-              />
-            </AddClientLabeledField>
-          </div>
         </div>
       </q-card-section>
       <q-card-actions align="right" class="app-dialog-card__actions">
@@ -74,15 +59,12 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
-import FormSelect from 'components/FormSelect.vue'
 import { appointmentNotesMaxLength } from 'components/constants.js'
-import { listClientReferrals } from 'src/utils/appointment-api.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   record: { type: Object, default: null },
-  clientId: { type: [String, Number], default: null },
   saving: { type: Boolean, default: false },
 })
 
@@ -95,24 +77,19 @@ const open = computed({
   set: value => emit('update:modelValue', value),
 })
 
-const local = ref({ notes: '', referralId: null })
+const local = ref({ notes: '' })
 const errors = ref({})
-const referralOptions = ref([])
 
 watch(
   () => [props.modelValue, props.record],
-  async() => {
+  () => {
     if (!props.modelValue || !props.record) {
       return
     }
     local.value = {
       notes: props.record.notes ?? '',
-      referralId: props.record.referralId ?? null,
     }
     errors.value = {}
-    if (props.clientId) {
-      referralOptions.value = await listClientReferrals(props.clientId)
-    }
   },
   { deep: true },
 )
@@ -135,11 +112,8 @@ function onSave() {
 }
 
 function buildEditPayload() {
-  /* eslint-disable camelcase -- API PATCH payload */
   return {
     notes: local.value.notes || null,
-    referral_id: local.value.referralId ?? null,
   }
-  /* eslint-enable camelcase */
 }
 </script>

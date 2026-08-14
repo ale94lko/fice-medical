@@ -5,16 +5,34 @@
     <AppLoadingOverlay scope="content" :showing="loading" />
 
     <template v-if="workspace?.encounter">
+      <div
+        v-if="returnSuperbillId"
+        class="encounter-workspace-return no-print">
+        <q-btn
+          no-caps
+          flat
+          dense
+          color="primary"
+          icon="arrow_back"
+          :data-testid="tid.returnToBilling"
+          :label="t('encounterReturnToBilling')"
+          @click="goBackToSuperbill"
+        />
+      </div>
       <EncounterWorkspaceHeader
         :encounter="workspace.encounter"
         :can-complete="completion?.canComplete === true"
         :show-reopen="canReopen"
-        :show-cancel="canEdit"
+        :show-cancel="canCancelEncounter"
+        :show-wait="canWaitForResults"
+        :show-resume="canResumeEncounter"
         :busy="actionBusy"
         @patient-chart="goToPatientChart"
         @cancel="cancelOpen = true"
         @complete="onComplete"
         @reopen="reopenOpen = true"
+        @wait="waitOpen = true"
+        @resume="onResume"
       />
 
       <EncounterAllergyBanner
@@ -29,9 +47,13 @@
           v-if="activeTab === encounterWorkspaceTabs.overview"
           :completion="completion"
           :billing-readiness="workspace.billingReadiness"
+          :superbill="workspace.superbill"
+          :show-generate-superbill="showGenerateSuperbill"
           @requirement-action="onRequirementAction"
           @quick-action="onQuickAction"
           @waive-requirement="onWaiveRequest"
+          @view-superbill="onViewSuperbill"
+          @generate-superbill="onGenerateSuperbill"
         />
         <EncounterWorkspaceVisit
           v-else-if="activeTab === encounterWorkspaceTabs.visit"
@@ -92,6 +114,12 @@
       :saving="actionBusy"
       @confirm="onCancelConfirm"
     />
+    <EncounterWaitForResultsDialog
+      v-model="waitOpen"
+      :labs="workspace?.labs ?? []"
+      :saving="actionBusy"
+      @confirm="onWaitConfirm"
+    />
     <EncounterReopenDialog
       v-model="reopenOpen"
       :saving="actionBusy"
@@ -126,6 +154,7 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import {
   addClientTabKeys,
+  clientPermissionNames,
   encounterClinicalSubTabs,
   encounterRequirementPurposes,
   encounterStatuses,
@@ -144,6 +173,8 @@ import EncounterReopenDialog from
   'components/encounter/EncounterReopenDialog.vue'
 import EncounterWaiveRequirementDialog from
   'components/encounter/EncounterWaiveRequirementDialog.vue'
+import EncounterWaitForResultsDialog from
+  'components/encounter/EncounterWaitForResultsDialog.vue'
 import EncounterWorkspaceClinical from
   'components/encounter/EncounterWorkspaceClinical.vue'
 import EncounterWorkspaceFollowUp from
@@ -170,8 +201,12 @@ import {
   fetchEncounterRequirements,
   fetchEncounterWorkspace,
   reopenEncounter,
+  resumeEncounter,
+  waitEncounterForResults,
   waiveEncounterRequirement,
 } from 'src/utils/encounter-api.js'
+import { hasAnyPermission } from 'src/utils/auth-permissions.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 import { resolveRequirementActionTarget } from
   'src/utils/encounter-requirement-actions.js'
 import {
@@ -183,13 +218,19 @@ import {
 } from 'src/utils/encounter-session-watch.js'
 import {
   canReopenEncounter,
+  isEncounterCompleted,
   parseCompletionRequirementsError,
 } from 'src/utils/encounter-workspace-normalize.js'
+import {
+  generateEncounterSuperbill,
+  superbillApiErrorMessage,
+} from 'src/utils/superbill-api.js'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const loading = ref(false)
 const actionBusy = ref(false)
@@ -198,6 +239,7 @@ const loadError = ref('')
 const activeTab = ref(encounterWorkspaceTabs.overview)
 const clinicalSubTab = ref(encounterClinicalSubTabs.vitals)
 const cancelOpen = ref(false)
+const waitOpen = ref(false)
 const reopenOpen = ref(false)
 const waiveOpen = ref(false)
 const waiveTarget = ref(null)
@@ -211,6 +253,37 @@ const encounterId = computed(() =>
 
 const canEdit = computed(() =>
   workspace.value?.encounter?.status === encounterStatuses.inProgress,
+)
+
+const encounterStatus = computed(() =>
+  workspace.value?.encounter?.status,
+)
+
+const showGenerateSuperbill = computed(() =>
+  isEncounterCompleted(workspace.value?.encounter)
+  && !workspace.value?.superbill?.id,
+)
+
+const canCancelEncounter = computed(() =>
+  encounterStatus.value === encounterStatuses.inProgress
+    || encounterStatus.value === encounterStatuses.waitingForResults
+    || encounterStatus.value === encounterStatuses.readyToResume,
+)
+
+const canWaitForResults = computed(() =>
+  encounterStatus.value === encounterStatuses.inProgress
+    && hasAnyPermission(authStore.permissions, [
+      clientPermissionNames.waitEncounter,
+      clientPermissionNames.manageEncounter,
+    ]),
+)
+
+const canResumeEncounter = computed(() =>
+  encounterStatus.value === encounterStatuses.readyToResume
+    && hasAnyPermission(authStore.permissions, [
+      clientPermissionNames.resumeEncounter,
+      clientPermissionNames.manageEncounter,
+    ]),
 )
 
 const canReopen = computed(() =>
@@ -565,6 +638,67 @@ async function onVisitFieldsSaved(updated) {
   await refreshCompletion()
 }
 
+async function onWaitConfirm(payload) {
+  const id = workspace.value?.encounter?.id
+  if (id == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    await waitEncounterForResults(id, payload)
+    waitOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterWaitSuccess'),
+    })
+    await loadWorkspace()
+  } catch (error) {
+    if (isAuthSessionEndUIError(error)) {
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: encounterApiErrorMessage(
+        error,
+        t('encounterWaitError'),
+      ),
+    })
+  } finally {
+    actionBusy.value = false
+  }
+}
+
+async function onResume() {
+  const before = workspace.value?.encounter
+  const id = before?.id
+  if (id == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    const resumed = await resumeEncounter(id)
+    markEncounterTimerResumed(before, resumed)
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterResumeSuccess'),
+    })
+    await loadWorkspace()
+  } catch (error) {
+    if (isAuthSessionEndUIError(error)) {
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: encounterApiErrorMessage(
+        error,
+        t('encounterResumeError'),
+      ),
+    })
+  } finally {
+    actionBusy.value = false
+  }
+}
+
 async function onComplete() {
   const id = workspace.value?.encounter?.id
   if (id == null) {
@@ -697,4 +831,72 @@ async function onReopenConfirm(payload) {
 watch(encounterId, () => {
   void loadWorkspace()
 }, { immediate: true })
+
+watch(() => route.query.tab, tab => {
+  const value = Array.isArray(tab) ? tab[0] : tab
+  const allowed = Object.values(encounterWorkspaceTabs)
+  if (allowed.includes(value)) {
+    activeTab.value = value
+  }
+}, { immediate: true })
+
+function onViewSuperbill() {
+  const id = workspace.value?.superbill?.id
+  if (id == null) {
+    return
+  }
+  void router.push({
+    name: 'SuperbillDetail',
+    params: { id: String(id) },
+  })
+}
+
+const returnSuperbillId = computed(() =>
+  String(route.query.returnSuperbillId ?? '').trim(),
+)
+
+function goBackToSuperbill() {
+  if (!returnSuperbillId.value) {
+    return
+  }
+  void router.push({
+    name: 'SuperbillDetail',
+    params: { id: returnSuperbillId.value },
+  })
+}
+
+async function onGenerateSuperbill() {
+  const id = encounterId.value
+  if (!id) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    const generated = await generateEncounterSuperbill(id)
+    await loadWorkspace()
+    if (!generated?.id) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('superbillGenerateEmpty'),
+      })
+      return
+    }
+    void router.push({
+      name: 'SuperbillDetail',
+      params: { id: String(generated.id) },
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: superbillApiErrorMessage(
+          error,
+          t('superbillActionError'),
+        ),
+      })
+    }
+  } finally {
+    actionBusy.value = false
+  }
+}
 </script>

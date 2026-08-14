@@ -3,6 +3,8 @@
     class="encounter-workspace-header"
     :data-testid="tid.header">
     <div
+      class="encounter-workspace-header__main">
+    <div
       class="encounter-workspace-header__identity
         client-overview-header__profile-head">
       <div class="client-overview-header__avatar-wrap">
@@ -60,6 +62,12 @@
       <span v-if="serviceCodes">{{ serviceCodes }}</span>
       <span v-if="startedLabel">
         {{ t('encounterStartedAt', { time: startedLabel }) }}
+      </span>
+      <span v-if="waitingSinceLabel">
+        {{ t('encounterWaitingSince', { time: waitingSinceLabel }) }}
+      </span>
+      <span v-if="readySinceLabel">
+        {{ t('encounterReadySince', { time: readySinceLabel }) }}
       </span>
     </div>
 
@@ -119,6 +127,17 @@
           @click="emit('cancel')"
         />
         <q-btn
+          v-if="showWait"
+          no-caps
+          unelevated
+          color="warning"
+          class="app-btn-primary"
+          :disable="busy"
+          :label="t('encounterWait')"
+          :data-testid="tid.wait"
+          @click="emit('wait')"
+        />
+        <q-btn
           v-if="showComplete"
           no-caps
           unelevated
@@ -129,6 +148,18 @@
           :label="t('encounterComplete')"
           :data-testid="tid.complete"
           @click="emit('complete')"
+        />
+        <q-btn
+          v-else-if="showResume"
+          no-caps
+          unelevated
+          color="primary"
+          class="app-btn-primary"
+          :disable="busy"
+          :loading="busy"
+          :label="t('encounterResume')"
+          :data-testid="tid.resume"
+          @click="emit('resume')"
         />
         <q-btn
           v-else-if="showReopen"
@@ -142,6 +173,31 @@
           :data-testid="tid.reopen"
           @click="emit('reopen')"
         />
+      </div>
+    </div>
+    </div>
+
+    <div
+      v-if="showWaitBanner"
+      class="encounter-workspace-header__wait"
+      :data-testid="tid.waitBanner">
+      <div class="encounter-workspace-header__wait-copy">
+        <strong>
+          {{ waitBannerTitle }}
+        </strong>
+        <ul class="encounter-workspace-header__wait-list">
+          <li
+            v-for="item in waitItems"
+            :key="item.key">
+            {{ item.done ? '✓' : '○' }}
+            {{ item.name }}
+          </li>
+        </ul>
+      </div>
+      <div
+        v-if="activityTimeLabel"
+        class="encounter-workspace-header__wait-time">
+        {{ activityTimeLabel }}
       </div>
     </div>
   </header>
@@ -178,6 +234,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showWait: {
+    type: Boolean,
+    default: false,
+  },
+  showResume: {
+    type: Boolean,
+    default: false,
+  },
   busy: {
     type: Boolean,
     default: false,
@@ -189,6 +253,8 @@ const emit = defineEmits([
   'cancel',
   'complete',
   'reopen',
+  'wait',
+  'resume',
 ])
 
 const { t } = useI18n()
@@ -293,6 +359,63 @@ const startedLabel = computed(() =>
   formatTime(props.encounter?.startedAtUtc),
 )
 
+const waitingSinceLabel = computed(() =>
+  formatTime(props.encounter?.wait?.waitingSince),
+)
+
+const readySinceLabel = computed(() =>
+  formatTime(props.encounter?.wait?.readyToResumeSince),
+)
+
+const waitItems = computed(() => {
+  const wait = props.encounter?.wait
+  if (!wait) {
+    return []
+  }
+  const pending = (wait.pendingDependencies ?? []).map(dep => ({
+    key: `p-${dep.id ?? dep.diagnosticOrderId}`,
+    name: dep.testName || t('encounterWaitUnnamedLab'),
+    done: false,
+  }))
+  const resolved = (wait.resolvedDependencies ?? []).map(dep => ({
+    key: `r-${dep.id ?? dep.diagnosticOrderId}`,
+    name: dep.testName || t('encounterWaitUnnamedLab'),
+    done: true,
+  }))
+
+  return [...resolved, ...pending]
+})
+
+const showWaitBanner = computed(() =>
+  props.encounter?.status === encounterStatuses.waitingForResults
+    || props.encounter?.status === encounterStatuses.readyToResume,
+)
+
+const waitBannerTitle = computed(() => {
+  if (props.encounter?.status === encounterStatuses.readyToResume) {
+    return t('encounterResultsAvailable')
+  }
+
+  return t('encounterWaitingFor')
+})
+
+const activityTimeLabel = computed(() => {
+  const wait = props.encounter?.wait
+  if (!wait) {
+    return ''
+  }
+  const active = wait.activeClinicalMinutes
+  const waiting = wait.waitingMinutes
+  if (active == null && waiting == null) {
+    return ''
+  }
+
+  return t('encounterActivityTime', {
+    active: active ?? 0,
+    waiting: waiting ?? 0,
+  })
+})
+
 const dateLabel = computed(() =>
   formatDate(props.encounter?.startedAtUtc),
 )
@@ -368,6 +491,12 @@ const statusLabel = computed(() => {
   if (status === encounterStatuses.inProgress) {
     return t('encounterStatusInProgress')
   }
+  if (status === encounterStatuses.waitingForResults) {
+    return t('encounterStatusWaitingForResults')
+  }
+  if (status === encounterStatuses.readyToResume) {
+    return t('encounterStatusReadyToResume')
+  }
   if (status === encounterStatuses.completed) {
     return t('encounterStatusCompleted')
   }
@@ -382,6 +511,12 @@ const statusTone = computed(() => {
   const status = props.encounter?.status
   if (status === encounterStatuses.inProgress) {
     return 'progress'
+  }
+  if (status === encounterStatuses.waitingForResults) {
+    return 'waiting'
+  }
+  if (status === encounterStatuses.readyToResume) {
+    return 'ready'
   }
   if (status === encounterStatuses.completed) {
     return 'completed'

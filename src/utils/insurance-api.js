@@ -9,6 +9,38 @@ function unwrapData(body) {
   return body
 }
 
+function unwrapList(body) {
+  const root = body?.data ?? body
+  if (Array.isArray(root)) {
+    return root
+  }
+  if (Array.isArray(root?.content)) {
+    return root.content
+  }
+  if (Array.isArray(root?.items)) {
+    return root.items
+  }
+
+  return []
+}
+
+export async function listClientInsuranceProfiles(
+  clientId,
+  params = {},
+) {
+  const response = await apiInstance.get(
+    apiPaths.clientInsuranceProfiles(clientId),
+    {
+      params: {
+        limit: params.limit ?? 100,
+        page: params.page ?? 0,
+      },
+    },
+  )
+
+  return unwrapList(response.data)
+}
+
 export function insuranceApiErrorMessage(
   error,
   fallback = 'Request failed',

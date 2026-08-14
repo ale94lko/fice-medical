@@ -16,6 +16,15 @@ export const authTestIds = {
 export const layoutTestIds = {
   menuToggle: 'layout-btn-menu-toggle',
   notifications: 'layout-btn-notifications',
+  notificationsMenu: 'layout-notifications-menu',
+  notificationsLoading: 'layout-notifications-loading',
+  notificationsMarkAll: 'layout-notifications-mark-all',
+  notificationItem: id => toTestId('layout-notification-item', id),
+  notificationMarkRead: id => toTestId(
+    'layout-notification-mark-read',
+    id,
+  ),
+  notificationDelete: id => toTestId('layout-notification-delete', id),
   userMenu: 'layout-btn-user-menu',
   userMenuMyProfile: 'layout-menu-user-my-profile',
   userMenuSettings: 'layout-menu-user-settings',
@@ -44,6 +53,48 @@ export const layoutTestIds = {
   navAdminConsentTemplates: 'layout-nav-admin-consent-templates',
   navAdminClinicalAudit: 'layout-nav-admin-clinical-audit',
   navClinicalResources: 'layout-nav-clinical-resources',
+  navBilling: 'layout-nav-billing',
+}
+
+export const superbillListTestIds = {
+  page: 'superbill-list-page',
+  search: 'superbill-list-search',
+  statusFilter: 'superbill-list-status-filter',
+  queueTab: name => toTestId('billing-queue-tab', name),
+  dosFilter: 'billing-queue-dos-filter',
+  providerFilter: 'billing-queue-provider-filter',
+  payerFilter: 'billing-queue-payer-filter',
+  locationFilter: 'billing-queue-location-filter',
+  serviceFilter: 'billing-queue-service-filter',
+  sortFilter: 'billing-queue-sort-filter',
+  includeVoided: 'billing-queue-include-voided',
+  issueBadge: id => toTestId('billing-queue-issues', id),
+  rowView: id => toTestId('superbill-list-row-view', id),
+}
+
+export const superbillDetailTestIds = {
+  page: 'superbill-detail-page',
+  back: 'superbill-detail-back',
+  print: 'superbill-detail-print',
+  actions: 'superbill-detail-actions',
+  markReviewed: 'superbill-detail-mark-reviewed',
+  void: 'superbill-detail-void',
+  reopen: 'superbill-detail-reopen',
+  tab: name => toTestId('superbill-detail-tab', name),
+  addNote: 'superbill-detail-add-note',
+  viewEncounter: 'superbill-detail-view-encounter',
+  viewClient: 'superbill-detail-view-client',
+  viewNote: 'superbill-detail-view-note',
+  requirementRow: (code, id) => toTestId(
+    'superbill-req-row',
+    code,
+    id,
+  ),
+  requirementAction: (code, id) => toTestId(
+    'superbill-req-action',
+    code,
+    id,
+  ),
 }
 
 export const myProfileTestIds = {
@@ -346,6 +397,19 @@ export const clientOverviewAltTestIds = {
   viewAllActivity: 'client-overview-alt-btn-view-all-activity',
 }
 
+export const assignCliniciansTestIds = {
+  dialog: 'assign-clinicians-dialog',
+  search: 'assign-clinicians-search',
+  assign: 'assign-clinicians-btn-assign',
+  unassign: 'assign-clinicians-btn-unassign',
+  clearAll: 'assign-clinicians-btn-clear-all',
+  save: 'assign-clinicians-btn-save',
+  cancel: 'assign-clinicians-btn-cancel',
+  availableItem: id => toTestId('assign-clinicians-available', id),
+  assignedItem: id => toTestId('assign-clinicians-assigned', id),
+  remove: id => toTestId('assign-clinicians-remove', id),
+}
+
 export const encounterTestIds = {
   banner: 'active-encounter-banner',
   toolbarPill: 'active-encounter-toolbar-pill',
@@ -353,10 +417,15 @@ export const encounterTestIds = {
   complete: 'active-encounter-btn-complete',
   cancel: 'active-encounter-btn-cancel',
   startButton: 'start-encounter-btn',
+  openActive: 'open-active-encounter-btn',
   startMenu: 'start-encounter-menu',
   startDialog: 'start-encounter',
   startSubmit: 'start-encounter-btn-submit',
   field: name => toTestId('start-encounter-field', name),
+  cancelDialog: 'encounter-cancel-dialog',
+  cancelReason: 'encounter-cancel-reason',
+  cancelNotes: 'encounter-cancel-notes',
+  cancelSubmit: 'encounter-cancel-submit',
 }
 
 export const clientPageTestIds = {
@@ -562,6 +631,14 @@ export const referralTestIds = {
   rowMore: id => toTestId('referral-row', id, 'btn-more'),
   rowSchedule: id => toTestId('referral-row', id, 'btn-schedule'),
   rowDelete: id => toTestId('referral-row', id, 'btn-delete'),
+}
+
+export const authorizationTestIds = {
+  btn: name => toTestId('authorization-btn', name),
+  field: name => toTestId('authorization-field', name),
+  rowView: id => toTestId('authorization-row', id, 'btn-view'),
+  rowEdit: id => toTestId('authorization-row', id, 'btn-edit'),
+  rowCancel: id => toTestId('authorization-row', id, 'btn-cancel'),
 }
 
 export const calendarTestIds = {

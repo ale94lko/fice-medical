@@ -123,8 +123,115 @@
       </div>
     </section>
 
+    <section
+      class="encounter-workspace-card encounter-workspace-billing"
+      :data-testid="tid.billing">
+      <div class="encounter-workspace-card__head">
+        <h2>{{ t('encounterBillingReadiness') }}</h2>
+        <AdminTableStatusCell
+          :label="billingLabel"
+          :variant="billingVariant"
+        />
+      </div>
+
+      <div
+        v-if="billingIsClear"
+        class="encounter-workspace-billing__banner
+          encounter-workspace-billing__banner--ready">
+        <q-icon name="check_circle" color="positive" size="22px" />
+        <div>
+          <strong>{{ billingLabel }}</strong>
+          <p class="text-body2 text-grey-7 q-mb-none">
+            {{ t('encounterBillingReadyBody') }}
+          </p>
+        </div>
+      </div>
+      <div
+        v-else-if="billingIssueCount"
+        class="encounter-workspace-billing__banner
+          encounter-workspace-billing__banner--alert">
+        {{ t('encounterBillingAlert', {
+          count: billingIssueCount,
+        }) }}
+      </div>
+
+      <div
+        v-if="billingChecks.length"
+        class="encounter-workspace-checklist">
+        <div
+          v-for="check in billingChecks"
+          :key="billingCheckKey(check)"
+          class="encounter-workspace-checklist__item">
+          <q-icon
+            :name="billingCheckIcon(check)"
+            :color="billingCheckColor(check)"
+            size="22px"
+          />
+          <div class="encounter-workspace-checklist__body">
+            <strong>{{ billingCheckTitle(check) }}</strong>
+            <p
+              v-if="check.message && !check.passed"
+              class="text-body2 text-grey-7 q-mb-none">
+              {{ check.message }}
+            </p>
+            <p
+              v-else-if="check.serviceName"
+              class="text-caption text-grey-7 q-mb-none">
+              {{ check.serviceName }}
+            </p>
+          </div>
+        </div>
+      </div>
+      <p
+        v-else
+        class="text-body2 text-grey-7 q-mb-none">
+        {{ t('encounterBillingEmpty') }}
+      </p>
+
+      <div
+        v-if="superbill?.id"
+        class="encounter-workspace-billing__superbill">
+        <div class="encounter-workspace-billing__superbill-row">
+          <strong>{{ superbill.superbillNumber }}</strong>
+          <AdminTableStatusCell
+            :label="superbillStatusLabel"
+            :variant="superbillVariant"
+          />
+        </div>
+        <q-btn
+          no-caps
+          outline
+          dense
+          color="primary"
+          class="app-btn-outline"
+          :data-testid="tid.viewSuperbill"
+          :label="t('superbillViewFromEncounter')"
+          @click="emit('view-superbill')"
+        />
+      </div>
+      <div
+        v-else-if="showGenerateSuperbill"
+        class="encounter-workspace-billing__superbill">
+        <p class="text-body2 text-grey-7 q-mb-sm">
+          {{ t('superbillNoneYet') }}
+        </p>
+        <q-btn
+          no-caps
+          outline
+          dense
+          color="primary"
+          class="app-btn-outline"
+          :data-testid="tid.generateSuperbill"
+          :label="t('superbillGenerateRetry')"
+          @click="emit('generate-superbill')"
+        />
+      </div>
+    </section>
+
     <aside class="encounter-workspace-card">
-      <h2>{{ t('encounterQuickActions') }}</h2>
+      <div class="encounter-workspace-card__head">
+        <h2>{{ t('encounterQuickActions') }}</h2>
+      </div>
       <div class="encounter-workspace-quick-actions">
         <button
           v-for="action in quickActions"
@@ -145,36 +252,6 @@
           <q-icon name="chevron_right" size="18px" color="grey-6" />
         </button>
       </div>
-
-      <div
-        class="encounter-workspace-billing q-mt-lg"
-        :data-testid="tid.billing">
-        <h3>{{ t('encounterBillingReadiness') }}</h3>
-        <q-badge
-          :color="billingTone"
-          outline>
-          {{ billingLabel }}
-        </q-badge>
-        <p
-          v-if="billingMetaLabel"
-          class="text-body2 text-grey-7 q-mb-none q-mt-sm">
-          {{ billingMetaLabel }}
-        </p>
-        <ul
-          v-if="billingChecks.length"
-          class="encounter-workspace-billing__checks">
-          <li
-            v-for="check in billingChecks"
-            :key="check.code || check.label">
-            <q-icon
-              :name="check.passed ? 'check' : 'close'"
-              :color="check.passed ? 'positive' : 'negative'"
-              size="16px"
-            />
-            <span>{{ check.label || check.message }}</span>
-          </li>
-        </ul>
-      </div>
     </aside>
   </div>
 </template>
@@ -182,9 +259,12 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminTableStatusCell from
+  'components/admin-table/AdminTableStatusCell.vue'
 import {
   encounterBillingReadinessStatuses,
   encounterRequirementStatuses,
+  superbillStatuses,
 } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
@@ -198,12 +278,22 @@ const props = defineProps({
     type: Object,
     default: () => ({}),
   },
+  superbill: {
+    type: Object,
+    default: null,
+  },
+  showGenerateSuperbill: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits([
   'requirement-action',
   'quick-action',
   'waive-requirement',
+  'view-superbill',
+  'generate-superbill',
 ])
 const { t } = useI18n()
 
@@ -267,30 +357,99 @@ const billingLabel = computed(() => {
   return t('encounterBillingNotReady')
 })
 
-const billingTone = computed(() => {
+const billingVariant = computed(() => {
   const status = props.billingReadiness?.status
   if (status === encounterBillingReadinessStatuses.ready) {
-    return 'positive'
+    return 'active'
   }
   if (status === encounterBillingReadinessStatuses.billed) {
-    return 'primary'
+    return 'completed'
   }
 
-  return 'warning'
+  return 'pending'
 })
 
-const billingMetaLabel = computed(() => {
-  const blocking = props.billingReadiness?.blockingCount
-  const warning = props.billingReadiness?.warningCount
-  if (blocking == null && warning == null) {
-    return ''
+const billingIsClear = computed(() => {
+  const status = props.billingReadiness?.status
+
+  return status === encounterBillingReadinessStatuses.ready
+    || status === encounterBillingReadinessStatuses.billed
+})
+
+const billingIssueCount = computed(() => {
+  const blocking = props.billingReadiness?.blockingCount ?? 0
+  const warning = props.billingReadiness?.warningCount ?? 0
+
+  return blocking + warning
+})
+
+const superbillStatusLabel = computed(() => {
+  const status = props.superbill?.status
+  if (status === superbillStatuses.ready) {
+    return t('superbillStatusReady')
+  }
+  if (status === superbillStatuses.reviewed) {
+    return t('superbillStatusReviewed')
+  }
+  if (status === superbillStatuses.voided) {
+    return t('superbillStatusVoided')
   }
 
-  return t('encounterBillingCounts', {
-    blocking: blocking ?? 0,
-    warning: warning ?? 0,
-  })
+  return t('superbillStatusNotReady')
 })
+
+const superbillVariant = computed(() => {
+  const status = props.superbill?.status
+  if (status === superbillStatuses.ready) {
+    return 'active'
+  }
+  if (status === superbillStatuses.reviewed) {
+    return 'completed'
+  }
+  if (status === superbillStatuses.voided) {
+    return 'inactive'
+  }
+
+  return 'pending'
+})
+
+function billingCheckKey(check) {
+  return [
+    check.code,
+    check.serviceLineId,
+    check.label,
+  ].filter(Boolean).join('-')
+}
+
+function billingCheckIcon(check) {
+  if (check.passed) {
+    return 'check_circle'
+  }
+  if (check.severity === 'WARNING') {
+    return 'error_outline'
+  }
+
+  return 'cancel'
+}
+
+function billingCheckColor(check) {
+  if (check.passed) {
+    return 'positive'
+  }
+  if (check.severity === 'WARNING') {
+    return 'warning'
+  }
+
+  return 'negative'
+}
+
+function billingCheckTitle(check) {
+  return check.label
+    || check.title
+    || check.serviceName
+    || check.code
+    || check.message
+}
 
 const quickActions = computed(() => [
   {

@@ -276,57 +276,6 @@
                 <q-icon name="payments" size="18px" />
                 <span>{{ suggestedFeeLabel }}</span>
               </div>
-              <div
-                v-if="summaryCarePlan"
-                class="appointment-summary-item">
-                <q-icon name="assignment" size="18px" />
-                <span>{{ summaryCarePlan }}</span>
-              </div>
-              <div
-                v-if="summaryReferral"
-                class="appointment-summary-item">
-                <q-icon name="link" size="18px" />
-                <span>{{ summaryReferral }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-if="mode === 'book'"
-          class="q-mt-lg">
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('appointmentCarePlanOptional')"
-                :test-id="tid.field('care-plan')">
-                <FormSelect
-                  v-model="draft.carePlanId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  clearable
-                  :options="carePlanOptions"
-                  :test-id="tid.field('care-plan')"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('appointmentReferralOptional')"
-                :test-id="tid.field('referral')">
-                <FormSelect
-                  v-model="draft.referralId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  clearable
-                  :options="referralOptions"
-                  :test-id="tid.field('referral')"
-                />
-              </AddClientLabeledField>
             </div>
           </div>
         </div>
@@ -411,11 +360,8 @@ import {
   sumServiceLineDurations,
   sumSuggestedFees,
 } from 'src/utils/appointment-booking.js'
-import {
-  listBookableServiceProcedures,
-  listClientCarePlans,
-  listClientReferrals,
-} from 'src/utils/appointment-api.js'
+import { listBookableServiceProcedures } from
+  'src/utils/appointment-api.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
 import { buildSupervisorSelectOptions } from
   'src/utils/clinician-supervisor.js'
@@ -481,8 +427,6 @@ const clientPickerSearchHasMore = ref(false)
 const clientPickerLoadingMore = ref(false)
 const clientPickerUserScrolled = ref(false)
 let clientPickerRequestId = 0
-const carePlanOptions = ref([])
-const referralOptions = ref([])
 
 const showClientPicker = computed(() =>
   props.mode === 'book' && !String(props.clientId ?? '').trim(),
@@ -676,16 +620,6 @@ const summaryServices = computed(() =>
     .join(', ') || '—',
 )
 
-const summaryCarePlan = computed(() =>
-  carePlanOptions.value.find(opt => opt.value === draft.value.carePlanId)
-    ?.label ?? '',
-)
-
-const summaryReferral = computed(() =>
-  referralOptions.value.find(opt => opt.value === draft.value.referralId)
-    ?.label ?? '',
-)
-
 const clientSearchNoOptionLabel = computed(() => {
   const needle = clientFilterNeedle.value.trim()
   if (!needle) {
@@ -708,8 +642,6 @@ function createDraft() {
     placeOfServiceId: null,
     clinicianId: null,
     supervisorId: null,
-    carePlanId: null,
-    referralId: null,
     notes: '',
     repeatAppointment: false,
     recurrence: {
@@ -1063,22 +995,6 @@ function onClientSelected(value) {
   }
 }
 
-async function loadLinkedOptions() {
-  const client = String(resolvedClientId.value ?? '').trim()
-  if (!client) {
-    carePlanOptions.value = []
-    referralOptions.value = []
-
-    return
-  }
-  const [carePlans, referrals] = await Promise.all([
-    listClientCarePlans(client),
-    listClientReferrals(client),
-  ])
-  carePlanOptions.value = carePlans
-  referralOptions.value = referrals
-}
-
 async function loadFormOptions() {
   const [servicesResult, clinicianResult, placesResult] =
     await Promise.allSettled([
@@ -1355,8 +1271,6 @@ function buildBookPayload() {
       ?? draft.value.clinicianId
       ?? null,
     supervisor_id: draft.value.supervisorId ?? null,
-    referral_id: draft.value.referralId ?? null,
-    care_plan_id: draft.value.carePlanId ?? null,
     repeat_appointment: Boolean(draft.value.repeatAppointment),
     recurrence: buildRecurrencePayload(),
   }
@@ -1404,14 +1318,6 @@ watch(
     resetClientSearchState()
     await loadFormOptions()
     void bootstrapClientPickerOptions()
-    await loadLinkedOptions()
-  },
-)
-
-watch(
-  () => resolvedClientId.value,
-  () => {
-    void loadLinkedOptions()
   },
 )
 

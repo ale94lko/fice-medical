@@ -1,6 +1,17 @@
 <template>
+  <q-btn
+    v-if="show && hasActiveEncounter"
+    no-caps
+    unelevated
+    class="app-btn-primary client-overview-alt-header__start-encounter"
+    icon="medical_services"
+    :label="t('startEncounterButton')"
+    :disable="loading || busy"
+    :data-testid="encounterTestIds.openActive"
+    @click="emit('open-active')"
+  />
   <q-btn-dropdown
-    v-if="show"
+    v-else-if="show"
     no-caps
     unelevated
     class="app-btn-primary client-overview-alt-header__start-encounter"
@@ -124,12 +135,13 @@ import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 
 const props = defineProps({
   show: { type: Boolean, default: false },
+  hasActiveEncounter: { type: Boolean, default: false },
   clientId: { type: [String, Number], default: null },
   loading: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['select'])
+const emit = defineEmits(['select', 'open-active'])
 const { t } = useI18n()
 
 const loadingAppointments = ref(false)

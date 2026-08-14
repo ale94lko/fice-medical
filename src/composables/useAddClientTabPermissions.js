@@ -41,6 +41,9 @@ const SUB_TAB_VIEW = {
   [addClientCareCoordinationSubTabKeys.referrals]: [
     clientPermissionNames.viewReferrals,
   ],
+  [addClientCareCoordinationSubTabKeys.authorizations]: [
+    clientPermissionNames.authorizationView,
+  ],
   [addClientCareCoordinationSubTabKeys.appointments]: [
     clientPermissionNames.viewAppointmentSlot,
   ],
@@ -90,6 +93,13 @@ const SUB_TAB_EDIT = {
   [addClientCareCoordinationSubTabKeys.referrals]: [
     clientPermissionNames.editReferrals,
     clientPermissionNames.addReferrals,
+  ],
+  [addClientCareCoordinationSubTabKeys.authorizations]: [
+    clientPermissionNames.authorizationEdit,
+    clientPermissionNames.authorizationCreate,
+    clientPermissionNames.authorizationApprove,
+    clientPermissionNames.authorizationDeny,
+    clientPermissionNames.authorizationCancel,
   ],
   [addClientCareCoordinationSubTabKeys.appointments]: [
     clientPermissionNames.bookAppointment,

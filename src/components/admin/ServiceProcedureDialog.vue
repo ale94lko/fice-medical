@@ -139,29 +139,47 @@
             icon="payments"
             :title="t('serviceProcedureSectionBilling')"
           />
+          <div class="row items-center q-mt-md">
+            <FormToggle
+              :model-value="local.billable"
+              :disable="readonly"
+              :label="t('serviceProcedureBillableLabel')"
+              :test-id="serviceProcedureDialogTestIds.field('billable')"
+              @update:model-value="onBillableInput"
+            />
+          </div>
+          <p class="text-body2 text-grey-7 q-mb-none q-mt-xs">
+            {{ t('serviceProcedureBillableHint') }}
+          </p>
           <div class="row q-col-gutter-md q-mt-md">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
               <AddClientLabeledField :label="t('serviceProcedureCptCodeLabel')">
                 <TextInput
                   v-model="local.cptCode"
                   :external-label="true"
-                  :readonly="readonly"
+                  :disable="billingFieldsDisabled"
+                  :error="Boolean(errors.cptCode)"
+                  :error-message="errors.cptCode"
                   :test-id="serviceProcedureDialogTestIds.field('cpt-code')"
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('serviceProcedureHcpcsCodeLabel')">
                 <TextInput
                   v-model="local.hcpcsCode"
                   :external-label="true"
-                  :readonly="readonly"
+                  :disable="billingFieldsDisabled"
+                  :error="Boolean(errors.hcpcsCode)"
+                  :error-message="errors.hcpcsCode"
                   :test-id="serviceProcedureDialogTestIds.field('hcpcs-code')"
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12 col-md-4">
+          </div>
+          <div class="row q-col-gutter-md q-mt-md">
+            <div class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('serviceProcedureDefaultFeeLabel')">
                 <q-input
@@ -169,7 +187,7 @@
                   outlined
                   hide-bottom-space
                   inputmode="decimal"
-                  :readonly="readonly"
+                  :disable="billingFieldsDisabled"
                   :placeholder="t('serviceProcedureDefaultFeePlaceholder')"
                   :error="Boolean(errors.defaultFee)"
                   :error-message="errors.defaultFee"
@@ -181,6 +199,21 @@
                     <span class="text-grey-7 text-body2">$</span>
                   </template>
                 </q-input>
+              </AddClientLabeledField>
+            </div>
+            <div class="col-12 col-md-6">
+              <AddClientLabeledField
+                :label="t('serviceProcedureDefaultUnitsLabel')">
+                <TextInput
+                  v-model="local.defaultUnits"
+                  type="number"
+                  :external-label="true"
+                  :disable="billingFieldsDisabled"
+                  :error="Boolean(errors.defaultUnits)"
+                  :error-message="errors.defaultUnits"
+                  :test-id="
+                    serviceProcedureDialogTestIds.field('default-units')"
+                />
               </AddClientLabeledField>
             </div>
           </div>
@@ -308,6 +341,18 @@ const statusActive = computed({
       : serviceProcedureStatusValues.inactive
   },
 })
+
+const billingFieldsDisabled = computed(() =>
+  readonly.value || !local.value.billable,
+)
+
+function onBillableInput(value) {
+  local.value.billable = Boolean(value)
+  if (local.value.billable
+    && !String(local.value.defaultUnits ?? '').trim()) {
+    local.value.defaultUnits = '1'
+  }
+}
 
 function resetErrors() {
   errors.value = {}

@@ -98,7 +98,7 @@ export async function createServiceProcedure(form) {
 
 export async function updateServiceProcedure(id, form) {
   const body = buildServiceProcedureRequest(form)
-  const response = await apiInstance.put(
+  const response = await apiInstance.patch(
     apiPaths.serviceProcedureById(id),
     body,
   )

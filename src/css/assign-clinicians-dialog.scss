@@ -1,0 +1,244 @@
+@import 'quasar.variables';
+
+.assign-clinicians-dialog.insurance-dialog.app-dialog-card {
+  min-width: min(1080px, 96vw);
+  max-width: 1120px;
+  width: 96vw;
+}
+
+.assign-clinicians-dialog__body {
+  position: relative;
+}
+
+.assign-clinicians-dialog__panes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+  min-height: 420px;
+}
+
+.assign-clinicians-dialog__pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  padding: 12px;
+  background: $surface;
+}
+
+.assign-clinicians-dialog__pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.assign-clinicians-dialog__pane-title {
+  margin: 0 0 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.assign-clinicians-dialog__pane-head
+  .assign-clinicians-dialog__pane-title {
+  margin-bottom: 0;
+}
+
+.assign-clinicians-dialog__search {
+  margin-bottom: 10px;
+}
+
+.assign-clinicians-dialog__list {
+  flex: 1 1 auto;
+  min-height: 220px;
+  overflow-y: auto;
+}
+
+.assign-clinicians-dialog__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 180px;
+  padding: 16px;
+  text-align: center;
+  color: $text-muted;
+  font-size: 0.875rem;
+}
+
+.assign-clinicians-dialog__row,
+.assign-clinicians-dialog__row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.assign-clinicians-dialog__check {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.assign-clinicians-dialog__row {
+  border-radius: $radius-md;
+}
+
+.assign-clinicians-dialog__row:hover,
+.assign-clinicians-dialog__row--selected {
+  background: rgba($primary, 0.06);
+}
+
+.assign-clinicians-dialog__row--assigned {
+  padding-right: 4px;
+}
+
+.assign-clinicians-dialog__row-main {
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 0;
+}
+
+.assign-clinicians-dialog__row-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.assign-clinicians-dialog__name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: $text-strong;
+  line-height: 1.3;
+}
+
+.assign-clinicians-dialog__meta {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  color: $text-muted;
+  line-height: 1.35;
+}
+
+.assign-clinicians-dialog__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba($primary, 0.12);
+  color: $primary;
+  font-size: 0.75rem;
+  font-weight: 700;
+  overflow: hidden;
+}
+
+.assign-clinicians-dialog__badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  max-width: 42%;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assign-clinicians-dialog__badge--green {
+  color: #1b7a4a;
+  background: rgba(27, 122, 74, 0.12);
+}
+
+.assign-clinicians-dialog__badge--purple {
+  color: #6b4bb3;
+  background: rgba(107, 75, 179, 0.12);
+}
+
+.assign-clinicians-dialog__badge--teal {
+  color: $primary;
+  background: rgba($primary, 0.12);
+}
+
+.assign-clinicians-dialog__badge--blue {
+  color: #2f6fed;
+  background: rgba(47, 111, 237, 0.12);
+}
+
+.assign-clinicians-dialog__badge--neutral {
+  color: $text-muted;
+  background: rgba($grey-5, 0.35);
+}
+
+.assign-clinicians-dialog__transfer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.assign-clinicians-dialog__transfer-btn {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
+.assign-clinicians-dialog__pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: $text-muted;
+}
+
+.assign-clinicians-dialog__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: $radius-md;
+  background: rgba($primary, 0.08);
+  color: $text-strong;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.assign-clinicians-dialog__clear {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+body.vp-mobile {
+  .assign-clinicians-dialog.insurance-dialog.app-dialog-card {
+    min-width: 0;
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
+
+  .assign-clinicians-dialog__panes {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .assign-clinicians-dialog__transfer {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

@@ -23,7 +23,7 @@ import {
   ENCOUNTER_REMINDER_MS,
   formatEncounterElapsedLabel,
   loadEncounterWatchState,
-  resolveEncounterElapsedAnchorMs,
+  resolveActiveElapsedMs,
   resolveRouteClientId,
   saveEncounterWatchState,
 } from 'src/utils/encounter-session-watch.js'
@@ -34,6 +34,7 @@ import {
   isEncounterInvalidError,
   toolbarActiveEncounter,
 } from 'src/utils/encounter-api.js'
+import { isEncounterOpen } from 'src/utils/encounter-normalize.js'
 
 /**
  * Elapsed timer + idle reminders for the toolbar active encounter.
@@ -68,7 +69,7 @@ export function useActiveEncounterWatchdog() {
       return
     }
     saveEncounterWatchState(session.encounterId, {
-      autoCompleteAtMs: session.autoCompleteAtMs,
+      autoCompleteAtActiveMs: session.autoCompleteAtActiveMs,
       firedReminders: [...session.firedReminders],
     })
   }
@@ -94,47 +95,50 @@ export function useActiveEncounterWatchdog() {
   function buildSession(entry) {
     const encounter = entry.encounter
     const encounterId = encounter.id
-    // Anchor discounts inactive time after reopen (not raw startedAt).
-    const startedAtMs = resolveEncounterElapsedAnchorMs(encounter)
     const stored = loadEncounterWatchState(encounterId)
-    const defaultAutoAt = startedAtMs + ENCOUNTER_AUTO_COMPLETE_MS
-    const autoCompleteAtMs = Number.isFinite(stored?.autoCompleteAtMs)
-      && stored.autoCompleteAtMs > startedAtMs
-      ? stored.autoCompleteAtMs
-      : defaultAutoAt
+    const storedAutoAt = Number(stored?.autoCompleteAtActiveMs)
+    const autoCompleteAtActiveMs = Number.isFinite(storedAutoAt)
+      && storedAutoAt > 0
+      ? storedAutoAt
+      : ENCOUNTER_AUTO_COMPLETE_MS
 
     return {
       encounterId,
       clientId: String(entry.clientId ?? encounter.clientId ?? '').trim(),
-      startedAtMs,
-      autoCompleteAtMs,
+      autoCompleteAtActiveMs,
       firedReminders: new Set(stored?.firedReminders ?? []),
       autoCompletePrompted: false,
     }
   }
 
+  function isActivelyTicking(encounter) {
+    return Boolean(
+      encounter?.isInProgress
+      && !encounter.isWaiting
+      && !encounter.isReadyToResume,
+    )
+  }
+
   function syncSessionFromToolbar() {
     const entry = toolbarActiveEncounter.value
     const encounter = entry?.encounter
-    if (!encounter?.isInProgress || encounter.id == null) {
-      if (session) {
+    if (!isEncounterOpen(encounter) || encounter.id == null) {
+      if (session || autoCompleteOpen.value) {
         resetSession()
       }
 
       return false
     }
-    const nextStartedAtMs = resolveEncounterElapsedAnchorMs(encounter)
     if (
       !session
       || String(session.encounterId) !== String(encounter.id)
-      || session.startedAtMs !== nextStartedAtMs
     ) {
       clearCountdown()
       session = buildSession(entry)
       persistSession()
     }
 
-    return true
+    return isActivelyTicking(encounter) ? 'active' : 'paused'
   }
 
   function isWorkingOnOtherClient() {
@@ -237,9 +241,11 @@ export function useActiveEncounterWatchdog() {
       return
     }
     const entry = toolbarActiveEncounter.value
-    if (!entry?.encounter?.isInProgress || !entry.encounter.id) {
+    if (!isActivelyTicking(entry?.encounter) || !entry.encounter.id) {
       clearCountdown()
-      resetSession()
+      if (session) {
+        session.autoCompletePrompted = false
+      }
 
       return
     }
@@ -289,7 +295,9 @@ export function useActiveEncounterWatchdog() {
       return
     }
     clearCountdown()
-    session.autoCompleteAtMs = Date.now() + ENCOUNTER_EXTEND_MS
+    const encounter = toolbarActiveEncounter.value?.encounter
+    const elapsedMs = resolveActiveElapsedMs(encounter)
+    session.autoCompleteAtActiveMs = elapsedMs + ENCOUNTER_EXTEND_MS
     session.autoCompletePrompted = false
     persistSession()
     $q.notify({
@@ -298,13 +306,12 @@ export function useActiveEncounterWatchdog() {
     })
   }
 
-  function evaluateMilestones(nowMs) {
+  function evaluateMilestones(elapsedMs) {
     if (!session) {
       return
     }
-    const elapsed = nowMs - session.startedAtMs
     ENCOUNTER_REMINDER_MS.forEach(threshold => {
-      if (elapsed < threshold) {
+      if (elapsedMs < threshold) {
         return
       }
       if (session.firedReminders.has(threshold)) {
@@ -319,7 +326,7 @@ export function useActiveEncounterWatchdog() {
     })
 
     if (
-      nowMs >= session.autoCompleteAtMs
+      elapsedMs >= session.autoCompleteAtActiveMs
       && !autoCompleteOpen.value
       && !countdownTimer
       && !completing
@@ -329,16 +336,25 @@ export function useActiveEncounterWatchdog() {
   }
 
   function tick() {
-    if (!syncSessionFromToolbar()) {
+    const mode = syncSessionFromToolbar()
+    if (!mode) {
       return
     }
-    const nowMs = Date.now()
-    const elapsedSec = Math.max(
-      0,
-      Math.floor((nowMs - session.startedAtMs) / 1000),
-    )
+    const encounter = toolbarActiveEncounter.value?.encounter
+    const elapsedMs = resolveActiveElapsedMs(encounter)
+    const elapsedSec = Math.max(0, Math.floor(elapsedMs / 1000))
     elapsedLabel.value = formatEncounterElapsedLabel(elapsedSec)
-    evaluateMilestones(nowMs)
+    if (mode !== 'active') {
+      if (autoCompleteOpen.value || countdownTimer) {
+        if (session) {
+          session.autoCompletePrompted = false
+        }
+        clearCountdown()
+      }
+
+      return
+    }
+    evaluateMilestones(elapsedMs)
   }
 
   function startTicker() {
@@ -362,7 +378,11 @@ export function useActiveEncounterWatchdog() {
     if (!session) {
       return
     }
-    evaluateMilestones(Date.now())
+    const encounter = toolbarActiveEncounter.value?.encounter
+    if (!isActivelyTicking(encounter)) {
+      return
+    }
+    evaluateMilestones(resolveActiveElapsedMs(encounter))
   })
 
   onMounted(() => {

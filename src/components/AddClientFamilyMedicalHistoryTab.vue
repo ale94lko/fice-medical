@@ -16,7 +16,7 @@
       :title="t('fmhAddSectionTitle')"
       section-test-id="add-client-accordion-fmh-add"
       :toggle-test-id="tid.accordionToggle('fmh-add')">
-      <div class="row q-col-gutter-sm q-col-gutter-md items-start">
+      <div class="row q-col-gutter-md items-start">
             <div class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('fmhFamilyRelationship')"
@@ -62,8 +62,8 @@
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12 row items-center no-wrap
-              fmh-add-actions q-col-gutter-md">
+      </div>
+      <div class="row items-center no-wrap fmh-add-actions">
               <div class="col">
                 <div class="insurance-info-banner fmh-add-hint">
                   <q-icon name="info" size="20px" />
@@ -91,7 +91,6 @@
                   @click="onAddEntry"
                 />
               </div>
-            </div>
       </div>
     </AccordionSection>
 

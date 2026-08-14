@@ -66,8 +66,33 @@ export function getSubdomainFromHostname(
  * Subdomain from host or defaultTenant.
  */
 export function resolveTenantKeyFromHost(hostname) {
+  const fromQuery = getDomainFromSearch()
+  if (fromQuery) {
+    return fromQuery
+  }
   const host = hostname
     ?? (typeof window !== 'undefined' ? window.location.hostname : '')
 
   return getSubdomainFromHostname(host) || defaultTenant
+}
+
+function getDomainFromSearch(search) {
+  const raw = typeof search === 'string'
+    ? search
+    : (typeof window !== 'undefined' ? window.location.search : '')
+  if (!raw) {
+    return null
+  }
+  const params = new URLSearchParams(
+    raw.startsWith('?') ? raw.slice(1) : raw,
+  )
+  const domain = String(params.get('domain') ?? '')
+    .trim()
+    .toLowerCase()
+  if (!domain || reservedTenantSubdomains.has(domain)) {
+    return null
+  }
+  const sanitized = domain.replace(/[^a-z0-9_-]/g, '')
+
+  return sanitized || null
 }

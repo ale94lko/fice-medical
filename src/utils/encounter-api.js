@@ -5,7 +5,14 @@ import { apiPaths } from 'components/constants.js'
 import {
   mapEncountersList,
   normalizeEncounter,
+  isEncounterInProgress,
+  isEncounterOpen,
 } from 'src/utils/encounter-normalize.js'
+import {
+  markEncounterTimerPaused,
+  markEncounterTimerResumed,
+  unfreezeEncounterTimer,
+} from 'src/utils/encounter-session-watch.js'
 import { normalizeEncounterWorkspace } from
   'src/utils/encounter-workspace-normalize.js'
 import {
@@ -26,17 +33,26 @@ function clientKey(clientId) {
 }
 
 function syncToolbarActiveEncounter() {
+  let openFallback = null
   for (const [id, encounter] of activeEncounterByClientId.entries()) {
     if (encounter?.isInProgress) {
       toolbarActiveEncounter.value = {
         clientId: id,
         encounter,
       }
+      persistOpenEncounters()
 
       return
     }
+    if (!openFallback && isEncounterOpen(encounter)) {
+      openFallback = {
+        clientId: id,
+        encounter,
+      }
+    }
   }
-  toolbarActiveEncounter.value = null
+  toolbarActiveEncounter.value = openFallback
+  persistOpenEncounters()
 }
 
 function unwrapData(body) {
@@ -71,6 +87,69 @@ function resolveEncounterId(value) {
   return Number.isFinite(n) ? n : value
 }
 
+function getCachedEncounterById(encounterId) {
+  const id = resolveEncounterId(encounterId)
+  if (id == null) {
+    return null
+  }
+  for (const encounter of activeEncounterByClientId.values()) {
+    if (resolveEncounterId(encounter?.id) === id) {
+      return encounter
+    }
+  }
+
+  return null
+}
+
+const TOOLBAR_STORAGE_KEY = 'fice.toolbarOpenEncounters.v1'
+
+function persistOpenEncounters() {
+  try {
+    const rows = []
+    for (const [id, encounter] of activeEncounterByClientId.entries()) {
+      if (!isEncounterOpen(encounter)) {
+        continue
+      }
+      rows.push({
+        clientId: id,
+        encounter,
+      })
+    }
+    if (!rows.length) {
+      sessionStorage.removeItem(TOOLBAR_STORAGE_KEY)
+
+      return
+    }
+    sessionStorage.setItem(TOOLBAR_STORAGE_KEY, JSON.stringify(rows))
+  } catch {
+    // Ignore quota / private mode.
+  }
+}
+
+export function restoreToolbarOpenEncounters() {
+  try {
+    const raw = sessionStorage.getItem(TOOLBAR_STORAGE_KEY)
+    if (!raw) {
+      return
+    }
+    const rows = JSON.parse(raw)
+    if (!Array.isArray(rows)) {
+      return
+    }
+    for (const row of rows) {
+      const encounter = row?.encounter
+      const key = clientKey(row?.clientId ?? encounter?.clientId)
+      if (!key || !isEncounterOpen(encounter)) {
+        continue
+      }
+      activeEncounterByClientId.set(key, encounter)
+    }
+    syncToolbarActiveEncounter()
+  } catch {
+    // Ignore malformed storage.
+  }
+}
+
 export function getCachedActiveEncounter(clientId) {
   const key = clientKey(clientId)
   if (!key) {
@@ -99,6 +178,20 @@ export function setCachedActiveEncounter(clientId, encounter) {
   syncToolbarActiveEncounter()
 }
 
+function cacheOpenEncounter(encounter) {
+  const key = encounter?.clientId
+  if (key == null) {
+    return encounter
+  }
+  if (isEncounterOpen(encounter)) {
+    setCachedActiveEncounter(key, encounter)
+  } else {
+    setCachedActiveEncounter(key, null)
+  }
+
+  return encounter
+}
+
 export function clearCachedActiveEncounter(clientId) {
   const key = clientKey(clientId)
   if (!key) {
@@ -115,7 +208,8 @@ export function clearCachedActiveEncounter(clientId) {
 export function attachEncounterId(body, clientId) {
   const payload = body && typeof body === 'object' ? { ...body } : {}
   const encounterId = getCachedActiveEncounterId(clientId)
-  if (encounterId == null) {
+  const cached = getCachedActiveEncounter(clientId)
+  if (encounterId == null || !isEncounterInProgress(cached)) {
     delete payload.encounter_id
 
     return payload
@@ -134,7 +228,9 @@ export function attachEncounterIdToRows(rows, clientId) {
     return rows
   }
   const encounterId = getCachedActiveEncounterId(clientId)
+  const cached = getCachedActiveEncounter(clientId)
   const resolved = encounterId == null
+    || !isEncounterInProgress(cached)
     ? null
     : resolveEncounterId(encounterId)
 
@@ -184,7 +280,8 @@ export function attachEncounterIdToClientClinicalBody(body, clientId) {
     }
   })
   const encounterId = getCachedActiveEncounterId(clientId)
-  if (encounterId == null) {
+  const cached = getCachedActiveEncounter(clientId)
+  if (encounterId == null || !isEncounterInProgress(cached)) {
     delete next.encounter_id
   } else {
     next.encounter_id = resolveEncounterId(encounterId)
@@ -364,9 +461,7 @@ export async function createEncounter(form) {
     encounterCreateToApiPayload(form),
   )
   const encounter = normalizeEncounter(unwrapData(response.data))
-  if (encounter?.clientId != null) {
-    setCachedActiveEncounter(encounter.clientId, encounter)
-  }
+  cacheOpenEncounter(encounter)
 
   return encounter
 }
@@ -380,9 +475,7 @@ export async function startClientEncounter(clientId, form = {}) {
     }),
   )
   const encounter = normalizeEncounter(unwrapData(response.data))
-  if (encounter?.clientId != null) {
-    setCachedActiveEncounter(encounter.clientId, encounter)
-  }
+  cacheOpenEncounter(encounter)
 
   return encounter
 }
@@ -392,9 +485,7 @@ export async function startAppointmentEncounter(appointmentId) {
     apiPaths.appointmentEncounterStart(appointmentId),
   )
   const encounter = normalizeEncounter(unwrapData(response.data))
-  if (encounter?.clientId != null) {
-    setCachedActiveEncounter(encounter.clientId, encounter)
-  }
+  cacheOpenEncounter(encounter)
 
   return encounter
 }
@@ -406,10 +497,7 @@ export async function fetchEncounterWorkspace(encounterId) {
   const workspace = normalizeEncounterWorkspace(
     unwrapData(response.data),
   )
-  const encounter = workspace.encounter
-  if (encounter?.clientId != null && encounter.isInProgress) {
-    setCachedActiveEncounter(encounter.clientId, encounter)
-  }
+  cacheOpenEncounter(workspace.encounter)
 
   return workspace
 }
@@ -538,9 +626,7 @@ export async function patchEncounter(encounterId, form) {
     encounterPatchToApiPayload(form),
   )
   const encounter = normalizeEncounter(unwrapData(response.data))
-  if (encounter?.clientId != null && encounter.isInProgress) {
-    setCachedActiveEncounter(encounter.clientId, encounter)
-  }
+  cacheOpenEncounter(encounter)
 
   return encounter
 }
@@ -594,9 +680,78 @@ export async function reopenEncounter(
     },
   )
   const encounter = normalizeEncounter(unwrapData(response.data))
-  if (encounter?.clientId != null && encounter.isInProgress) {
-    setCachedActiveEncounter(encounter.clientId, encounter)
-  }
+  cacheOpenEncounter(encounter)
 
   return encounter
+}
+
+export async function waitEncounterForResults(
+  encounterId,
+  payload = {},
+) {
+  const previous = getCachedEncounterById(encounterId)
+  if (previous) {
+    markEncounterTimerPaused(previous)
+  }
+  try {
+    const response = await apiInstance.post(
+      apiPaths.encounterWaitForResults(encounterId),
+      {
+        diagnostic_order_ids: (payload.diagnosticOrderIds
+          ?? payload.diagnostic_order_ids
+          ?? [])
+          .map(id => Number(id))
+          .filter(id => Number.isFinite(id)),
+        reason: String(payload.reason ?? '').trim(),
+      },
+    )
+    const encounter = normalizeEncounter(unwrapData(response.data))
+    if (!previous) {
+      markEncounterTimerPaused(encounter)
+    }
+    cacheOpenEncounter(encounter)
+
+    return encounter
+  } catch (error) {
+    if (previous) {
+      unfreezeEncounterTimer(previous)
+    }
+    throw error
+  }
+}
+
+export async function resumeEncounter(encounterId) {
+  const previous = getCachedEncounterById(encounterId)
+  const response = await apiInstance.post(
+    apiPaths.encounterResume(encounterId),
+  )
+  const encounter = normalizeEncounter(unwrapData(response.data))
+  if (previous) {
+    markEncounterTimerResumed(previous, encounter)
+  }
+  cacheOpenEncounter(encounter)
+
+  return encounter
+}
+
+export async function listOpenEncounters(clinicianId) {
+  const params = {}
+  const id = resolveEncounterId(clinicianId)
+  if (id != null) {
+    params.clinician_id = id
+  }
+  const response = await apiInstance.get(apiPaths.encountersOpen, {
+    params,
+  })
+
+  return mapEncountersList(unwrapList(response.data))
+}
+
+export async function hydrateToolbarOpenEncounters() {
+  const rows = await listOpenEncounters()
+  for (const encounter of rows) {
+    cacheOpenEncounter(encounter)
+  }
+
+  return rows
 }

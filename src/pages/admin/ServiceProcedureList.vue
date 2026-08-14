@@ -95,6 +95,15 @@
           </q-td>
         </template>
 
+        <template #body-cell-billable="scope">
+          <q-td :props="scope">
+            <AdminTableStatusCell
+              :label="scope.row.billableLabel"
+              :variant="scope.row.billableVariant"
+            />
+          </q-td>
+        </template>
+
         <template #body-cell-codes="scope">
           <q-td
             :props="scope"
@@ -246,7 +255,12 @@ const mobileCardLayout = {
   title: col.name,
   subtitle: col.category,
   status: col.status,
-  badges: [col.duration, col.requiresAppointment, col.codes],
+  badges: [
+    col.duration,
+    col.requiresAppointment,
+    col.billable,
+    col.codes,
+  ],
   hideEmpty: true,
 }
 
@@ -291,6 +305,15 @@ const visibleColumns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
+  },
+  {
+    name: col.billable,
+    label: t('serviceProcedureBillableShortLabel'),
+    align: 'left',
+    field: row => row.billableLabel,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
   },
   {
     name: col.codes,

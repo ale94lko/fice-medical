@@ -95,6 +95,10 @@ export function useClientPermissions() {
     permissions,
     clientPermissionNames.editLabsClient,
   )
+  const canReviewLabs = usePermission(
+    permissions,
+    clientPermissionNames.reviewLabsClient,
+  )
   const canDeleteLabs = usePermission(
     permissions,
     clientPermissionNames.deleteLabsClient,
@@ -216,6 +220,8 @@ export function useClientPermissions() {
       clientPermissionNames.addCarePlans,
       clientPermissionNames.editReferrals,
       clientPermissionNames.addReferrals,
+      clientPermissionNames.authorizationCreate,
+      clientPermissionNames.authorizationEdit,
       clientPermissionNames.editFollowUps,
       clientPermissionNames.addFollowUps,
       clientPermissionNames.bookAppointment,
@@ -244,6 +250,7 @@ export function useClientPermissions() {
     canViewLabs,
     canAddLabs,
     canEditLabs,
+    canReviewLabs,
     canDeleteLabs,
     canViewScreenings,
     canAddScreenings,

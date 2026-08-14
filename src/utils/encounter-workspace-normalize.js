@@ -19,6 +19,7 @@ import { mapMedicationsListFromApi } from
 import { mapReferralsListFromApi } from 'src/utils/referral-normalize.js'
 import { mapScreeningsListFromApi } from
   'src/utils/screening-normalize.js'
+import { normalizeSuperbill } from 'src/utils/superbill-normalize.js'
 import { normalizeStoredFile } from 'src/utils/stored-file-normalize.js'
 import { mapClientVitalsListFromApi } from
   'src/utils/vitals-normalize.js'
@@ -516,6 +517,18 @@ export function mergeClientRecordIntoEncounter(encounter, clientRaw) {
   }
 }
 
+function normalizeWorkspaceSuperbill(raw) {
+  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+    return null
+  }
+  const normalized = normalizeSuperbill(raw)
+  if (normalized.id == null) {
+    return null
+  }
+
+  return normalized
+}
+
 /**
  * Normalize GET /encounters/v1/{id}/workspace payload.
  */
@@ -539,6 +552,9 @@ export function normalizeEncounterWorkspace(raw = {}) {
     completion,
     billingReadiness: normalizeBillingReadinessSnapshot(
       body.billing_readiness ?? body.billingReadiness,
+    ),
+    superbill: normalizeWorkspaceSuperbill(
+      body.superbill,
     ),
     sections: normalizeSections(body.sections),
     ...clinical,

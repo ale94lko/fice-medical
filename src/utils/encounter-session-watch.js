@@ -1,3 +1,4 @@
+import { encounterStatuses } from 'components/constants.js'
 import { formatTelehealthElapsedLabel } from
   'src/utils/telehealth-normalize.js'
 
@@ -66,6 +67,7 @@ export function loadEncounterResumeTimer(encounterId) {
       baseActiveMs: Number.isFinite(baseActiveMs)
         ? Math.max(0, baseActiveMs)
         : 0,
+      paused: Boolean(parsed.paused),
     }
   } catch {
     return null
@@ -81,6 +83,7 @@ export function saveEncounterResumeTimer(encounterId, state) {
     localStorage.setItem(resumeStorageKey(id), JSON.stringify({
       resumedAtMs: state.resumedAtMs,
       baseActiveMs: Math.max(0, Number(state.baseActiveMs) || 0),
+      paused: Boolean(state.paused),
     }))
   } catch {
     // Ignore quota / private mode.
@@ -97,6 +100,79 @@ export function clearEncounterResumeTimer(encounterId) {
   } catch {
     // Ignore.
   }
+}
+
+function encounterStatusToken(encounter) {
+  return String(encounter?.status ?? '').trim().toUpperCase()
+}
+
+function isPausedEncounter(encounter) {
+  const status = encounterStatusToken(encounter)
+
+  return status === encounterStatuses.waitingForResults
+    || status === encounterStatuses.readyToResume
+}
+
+function minutesToMs(value) {
+  const minutes = Number(value)
+
+  return Number.isFinite(minutes) && minutes > 0
+    ? minutes * 60 * 1000
+    : 0
+}
+
+function waitingMsFromEncounter(encounter) {
+  return minutesToMs(encounter?.wait?.waitingMinutes)
+}
+
+function wallActiveMs(encounter, nowMs) {
+  const startedMs = parseIsoToMs(encounter?.startedAtUtc)
+  if (!startedMs) {
+    return 0
+  }
+  const reopenedMs = parseIsoToMs(encounter?.reopenedAtUtc)
+  const completedMs = parseIsoToMs(encounter?.completedAtUtc)
+  const waitingMs = waitingMsFromEncounter(encounter)
+
+  if (reopenedMs != null) {
+    let priorActiveMs = 0
+    if (
+      completedMs != null
+      && completedMs > startedMs
+      && completedMs <= reopenedMs
+    ) {
+      priorActiveMs = completedMs - startedMs
+    }
+
+    return Math.max(
+      0,
+      nowMs - (reopenedMs - priorActiveMs) - waitingMs,
+    )
+  }
+
+  return Math.max(0, nowMs - startedMs - waitingMs)
+}
+
+/**
+ * Live clinical elapsed. Frozen while paused; does not include wait time.
+ */
+export function resolveActiveElapsedMs(
+  encounter,
+  nowMs = Date.now(),
+) {
+  const resume = loadEncounterResumeTimer(encounter?.id)
+  if (resume?.paused) {
+    return Math.max(0, resume.baseActiveMs)
+  }
+  if (isPausedEncounter(encounter)) {
+    return computeActiveMsAfterPause(encounter, nowMs)
+  }
+  if (resume?.resumedAtMs != null) {
+    return resume.baseActiveMs
+      + Math.max(0, nowMs - resume.resumedAtMs)
+  }
+
+  return wallActiveMs(encounter, nowMs)
 }
 
 /**
@@ -132,17 +208,123 @@ export function computeActiveMsBeforeReopen(
 }
 
 /**
- * Persist timer resume so elapsed discounts inactive (completed→reopen) time.
+ * Clinical time only: excludes WAITING_FOR_RESULTS / READY_TO_RESUME.
+ */
+export function computeActiveMsAfterPause(
+  encounter,
+  nowMs = Date.now(),
+) {
+  const waitingSinceMs = parseIsoToMs(encounter?.wait?.waitingSince)
+  const existing = loadEncounterResumeTimer(encounter?.id)
+
+  if (existing?.paused) {
+    return Math.max(0, existing.baseActiveMs)
+  }
+  if (existing?.resumedAtMs != null) {
+    const pauseAtMs = waitingSinceMs
+      && waitingSinceMs > existing.resumedAtMs
+      ? waitingSinceMs
+      : nowMs
+
+    return existing.baseActiveMs
+      + Math.max(0, pauseAtMs - existing.resumedAtMs)
+  }
+
+  const clinicalMs = minutesToMs(
+    encounter?.wait?.activeClinicalMinutes,
+  )
+  if (clinicalMs > 0) {
+    return clinicalMs
+  }
+
+  const startedMs = parseIsoToMs(encounter?.startedAtUtc)
+  if (startedMs && waitingSinceMs && waitingSinceMs > startedMs) {
+    return waitingSinceMs - startedMs
+  }
+
+  const waitingMs = waitingMsFromEncounter(encounter)
+  if (startedMs && waitingMs > 0) {
+    return Math.max(0, nowMs - startedMs - waitingMs)
+  }
+
+  return computeActiveMsBeforeReopen(encounter, nowMs)
+}
+
+/**
+ * Persist timer resume so elapsed discounts inactive time
+ * (completed→reopen, or pause→resume).
  */
 export function markEncounterTimerResumed(before, after = null) {
   const id = after?.id ?? before?.id
   if (id == null) {
     return
   }
-  const baseActiveMs = computeActiveMsBeforeReopen(before)
+  const existing = loadEncounterResumeTimer(id)
+  let baseActiveMs = computeActiveMsBeforeReopen(before)
+  if (existing?.paused) {
+    baseActiveMs = existing.baseActiveMs
+  } else if (isPausedEncounter(before)) {
+    baseActiveMs = computeActiveMsAfterPause(before)
+  }
   const resumedAtMs = parseIsoToMs(after?.reopenedAtUtc) ?? Date.now()
-  saveEncounterResumeTimer(id, { baseActiveMs, resumedAtMs })
-  clearEncounterWatchState(id)
+  saveEncounterResumeTimer(id, {
+    baseActiveMs,
+    resumedAtMs,
+    paused: false,
+  })
+  if (!existing?.paused) {
+    clearEncounterWatchState(id)
+  }
+}
+
+/**
+ * Freeze clinical elapsed at the moment the clinician pauses.
+ */
+export function markEncounterTimerPaused(
+  encounter,
+  nowMs = Date.now(),
+) {
+  const id = encounter?.id
+  if (id == null) {
+    return
+  }
+  const existing = loadEncounterResumeTimer(id)
+  let baseActiveMs
+  if (existing?.paused) {
+    baseActiveMs = existing.baseActiveMs
+  } else if (existing?.resumedAtMs != null) {
+    baseActiveMs = existing.baseActiveMs
+      + Math.max(0, nowMs - existing.resumedAtMs)
+  } else {
+    baseActiveMs = wallActiveMs(encounter, nowMs)
+  }
+  saveEncounterResumeTimer(id, {
+    baseActiveMs,
+    resumedAtMs: nowMs,
+    paused: true,
+  })
+}
+
+/**
+ * Continue ticking after a failed pause request.
+ */
+export function unfreezeEncounterTimer(
+  encounter,
+  nowMs = Date.now(),
+) {
+  const id = encounter?.id
+  if (id == null) {
+    return
+  }
+  const existing = loadEncounterResumeTimer(id)
+  if (!existing?.paused) {
+    return
+  }
+  saveEncounterResumeTimer(id, {
+    baseActiveMs: existing.baseActiveMs,
+    resumedAtMs: nowMs,
+    paused: false,
+  })
 }
 
 /**
@@ -160,6 +342,7 @@ export function resolveEncounterElapsedAnchorMs(
   const startedMs = parseIsoToMs(encounter?.startedAtUtc)
   const reopenedMs = parseIsoToMs(encounter?.reopenedAtUtc)
   const completedMs = parseIsoToMs(encounter?.completedAtUtc)
+  const waitingMs = waitingMsFromEncounter(encounter)
 
   if (reopenedMs != null && startedMs != null) {
     let priorActiveMs = 0
@@ -171,7 +354,11 @@ export function resolveEncounterElapsedAnchorMs(
       priorActiveMs = completedMs - startedMs
     }
 
-    return reopenedMs - priorActiveMs
+    return reopenedMs - priorActiveMs + waitingMs
+  }
+
+  if (startedMs != null && waitingMs > 0) {
+    return startedMs + waitingMs
   }
 
   return startedMs ?? fallbackMs
@@ -197,7 +384,8 @@ export function loadEncounterWatchState(encounterId) {
     }
 
     return {
-      autoCompleteAtMs: Number(parsed.autoCompleteAtMs) || null,
+      autoCompleteAtActiveMs: Number(parsed.autoCompleteAtActiveMs)
+        || null,
       firedReminders: Array.isArray(parsed.firedReminders)
         ? parsed.firedReminders.map(Number).filter(Number.isFinite)
         : [],
@@ -214,7 +402,7 @@ export function saveEncounterWatchState(encounterId, state) {
   }
   try {
     sessionStorage.setItem(storageKey(id), JSON.stringify({
-      autoCompleteAtMs: state.autoCompleteAtMs ?? null,
+      autoCompleteAtActiveMs: state.autoCompleteAtActiveMs ?? null,
       firedReminders: [...(state.firedReminders ?? [])],
     }))
   } catch {

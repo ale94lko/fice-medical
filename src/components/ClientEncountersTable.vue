@@ -228,6 +228,12 @@ function statusLabel(status) {
   if (token === encounterStatuses.inProgress) {
     return t('encounterStatusInProgress')
   }
+  if (token === encounterStatuses.waitingForResults) {
+    return t('encounterStatusWaitingForResults')
+  }
+  if (token === encounterStatuses.readyToResume) {
+    return t('encounterStatusReadyToResume')
+  }
   if (token === encounterStatuses.completed) {
     return t('encounterStatusCompleted')
   }
@@ -241,6 +247,12 @@ function statusLabel(status) {
 function statusVariant(status) {
   const token = String(status ?? '').toUpperCase()
   if (token === encounterStatuses.inProgress) {
+    return 'active'
+  }
+  if (token === encounterStatuses.waitingForResults) {
+    return 'other'
+  }
+  if (token === encounterStatuses.readyToResume) {
     return 'active'
   }
   if (token === encounterStatuses.completed) {

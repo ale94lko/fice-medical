@@ -128,7 +128,7 @@ export function useMainNavPermissions() {
   )
 
   const showBilling = computed(() =>
-    hasPermission(permissions.value, permissionNames.viewTenantsBilling),
+    hasPermission(permissions.value, permissionNames.superbillView),
   )
 
   const showAdministrationMenu = computed(() =>

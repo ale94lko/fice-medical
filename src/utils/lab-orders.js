@@ -546,6 +546,12 @@ export function isLabTerminal(status) {
   return token === labStatuses.reviewed || token === labStatuses.cancelled
 }
 
+export function canWaitForLabResult(status) {
+  const token = labStatusToken(status)
+
+  return token === labStatuses.ordered || token === labStatuses.collected
+}
+
 export function canEditLabOrderFields(status) {
   return labStatusToken(status) === labStatuses.ordered
 }

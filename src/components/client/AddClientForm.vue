@@ -875,6 +875,13 @@
                 :client-id="props.clientId"
                 :appointments="clientAppointments"
               />
+              <AddClientAuthorizationsTab
+                v-else-if="
+                  subTab.key === CARE_COORDINATION_AUTHORIZATIONS_SUB_TAB
+                "
+                :client-id="props.clientId"
+                :clinician-options="assignedClinicianOptions"
+              />
               <AddClientFollowUpsTab
                 v-else-if="
                   subTab.key === CARE_COORDINATION_FOLLOW_UPS_SUB_TAB
@@ -1068,6 +1075,8 @@ import AddClientClinicalNotesTab from '../AddClientClinicalNotesTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
 import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
 import AddClientReferralsTab from '../AddClientReferralsTab.vue'
+import AddClientAuthorizationsTab from
+  '../AddClientAuthorizationsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAttachmentsTab from '../AddClientAttachmentsTab.vue'
@@ -1132,6 +1141,7 @@ import {
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
   CARE_COORDINATION_REFERRALS_SUB_TAB,
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
+  CARE_COORDINATION_AUTHORIZATIONS_SUB_TAB,
   DOCUMENTS_ATTACHMENTS_SUB_TAB,
   DOCUMENTS_CONSENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'

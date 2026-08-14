@@ -34,6 +34,9 @@ export const CARE_COORDINATION_FOLLOW_UPS_SUB_TAB =
 export const CARE_COORDINATION_APPOINTMENTS_SUB_TAB =
   addClientCareCoordinationSubTabKeys.appointments
 
+export const CARE_COORDINATION_AUTHORIZATIONS_SUB_TAB =
+  addClientCareCoordinationSubTabKeys.authorizations
+
 export const DOCUMENTS_ATTACHMENTS_SUB_TAB =
   addClientDocumentsSubTabKeys.attachments
 

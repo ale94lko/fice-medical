@@ -174,10 +174,30 @@ export function normalizeBillingReadinessSnapshot(raw = {}) {
 
     return {
       code: trim(item.code ?? item.key),
-      label: trim(item.label ?? item.name),
-      passed: parseOptionalBool(item.passed ?? item.ok ?? item.ready),
-      message: trim(item.message ?? item.description),
+      label: trim(item.label ?? item.name ?? item.title),
+      title: trim(item.title ?? item.label ?? item.name),
+      passed: parseOptionalBool(
+        item.passed ?? item.ok ?? item.ready ?? item.met,
+      ),
+      message: trim(
+        item.message
+        ?? item.description
+        ?? item.detail
+        ?? item.summary,
+      ),
+      summary: trim(item.summary ?? item.detail ?? item.message),
       severity: trim(item.severity).toUpperCase(),
+      action: trim(item.action).toUpperCase(),
+      actionLabel: trim(item.action_label ?? item.actionLabel),
+      serviceName: trim(item.service_name ?? item.serviceName),
+      serviceLineId: parseOptionalNumber(
+        item.service_line_id ?? item.serviceLineId,
+      ),
+      sourceType: trim(item.source_type ?? item.sourceType),
+      sourceId: parseOptionalNumber(
+        item.source_id ?? item.sourceId,
+      ),
+      evidence: asObject(item.evidence),
     }
   })
 

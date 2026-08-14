@@ -462,33 +462,6 @@ export function normalizeAppointment(raw) {
   }
 }
 
-export function normalizeReferralOption(raw) {
-  const row = raw ?? {}
-  const id = parseOptionalNumber(row.id ?? row.referral_id)
-
-  return {
-    value: id,
-    label: trim(row.label)
-      || trim(row.referral_label ?? row.referralLabel)
-      || [
-        trim(row.referral_number ?? row.referralNumber) || (id ? `#${id}` : ''),
-        trim(row.referring_provider_name ?? row.referringProviderName),
-      ].filter(Boolean).join(' – '),
-  }
-}
-
-export function normalizeCarePlanOption(raw) {
-  const row = raw ?? {}
-  const id = parseOptionalNumber(row.id ?? row.care_plan_id)
-  const number = trim(row.number ?? row.care_plan_number ?? row.code)
-  const name = trim(row.name ?? row.problem ?? row.title)
-
-  return {
-    value: id,
-    label: [number, name].filter(Boolean).join(' – ') || (id ? `#${id}` : ''),
-  }
-}
-
 export function mapBookableServiceProcedures(rawList) {
   const list = Array.isArray(rawList) ? rawList : []
 

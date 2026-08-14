@@ -228,6 +228,19 @@
             @change-status="changeStatus([row])">
             <template #more>
               <q-item
+                v-if="canEditBasicInfo"
+                v-close-popup
+                clickable
+                :data-testid="clientListTestIds.rowAssign(row.id)"
+                @click="openAssignClinicians(row)">
+                <q-item-section avatar>
+                  <q-icon name="person_add" size="18px" />
+                </q-item-section>
+                <q-item-section>
+                  {{ t('assignClinicians') }}
+                </q-item-section>
+              </q-item>
+              <q-item
                 v-close-popup
                 clickable
                 :data-testid="clientListTestIds.rowOverviewClassic(row.id)"
@@ -259,6 +272,12 @@
         </template>
       </AdminQTable>
     </AdminTablePanel>
+
+    <AssignCliniciansDialog
+      v-model="assignCliniciansOpen"
+      :client-id="assignClientId"
+      @saved="onCliniciansAssigned"
+    />
 
     <AdminTableColumnSettingsDialog
       v-model="columnSettingsOpen"
@@ -308,6 +327,8 @@ import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import AssignCliniciansDialog from
+  'components/AssignCliniciansDialog.vue'
 import ClientListSummaryCards from 'components/ClientListSummaryCards.vue'
 import { adminTableTestIds } from 'src/test-ids/index.js'
 import { clientListTestIds } from 'src/test-ids/index.js'
@@ -337,6 +358,7 @@ const {
   canAddClient,
   canViewClient,
   canChangeStatus,
+  canEditBasicInfo,
 } = useClientPermissions()
 
 const router = useRouter()
@@ -344,6 +366,8 @@ const $q = useQuasar()
 const loading = ref(false)
 const selected = ref([])
 const columnSettingsOpen = ref(false)
+const assignCliniciansOpen = ref(false)
+const assignClientId = ref(null)
 const activeSummaryFilter = ref('')
 
 const siteStore = useSiteStore()
@@ -778,8 +802,29 @@ function openClientOverviewClassic(row) {
   })
 }
 
+function openAssignClinicians(row) {
+  const id = row?.id
+  if (id == null || id === '') {
+    return
+  }
+  assignClientId.value = id
+  assignCliniciansOpen.value = true
+}
+
 function assignClinicians() {
-  console.log('Assign Clinician', selected.value)
+  if (selected.value.length !== 1) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('assignCliniciansSelectOne'),
+    })
+    return
+  }
+  openAssignClinicians(selected.value[0])
+}
+
+function onCliniciansAssigned() {
+  selected.value = []
+  loadClientsOrSearch(tablePagination.value)
 }
 
 const changeStatus = () => {
@@ -807,7 +852,8 @@ const pageActions = computed(() => [
     icon: 'person_add',
     variant: 'outline',
     testId: clientListTestIds.assignClinicians,
-    disable: selected.value.length === 0 || loading.value,
+    disable: selected.value.length !== 1 || loading.value,
+    visible: canEditBasicInfo.value,
     onClick: assignClinicians,
   },
   {

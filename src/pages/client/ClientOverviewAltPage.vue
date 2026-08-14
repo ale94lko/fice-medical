@@ -14,11 +14,13 @@
         :header="header"
         :missing-items="missingItems"
         :loading="loading"
-        :show-start-encounter="canStartEncounter && !hasActiveEncounter"
+        :show-start-encounter="showEncounterHeaderButton"
+        :has-active-encounter="hasActiveEncounter"
         :start-encounter-busy="actionBusy"
         @review-missing="goToEdit(addClientTabKeys.insurance)"
         @edit="goToEdit()"
         @start-encounter="onStartEncounterSelect"
+        @open-active-encounter="onOpenActiveEncounter"
       />
 
       <div
@@ -185,14 +187,24 @@ const {
 
 const {
   hasActiveEncounter,
+  activeEncounterId,
   actionBusy,
   canStartEncounter,
+  canViewEncounter,
   refreshActiveEncounter,
   startEncounter,
   isEncounterConflictError,
   isEncounterInvalidError,
   encounterApiErrorMessage,
 } = useActiveEncounter(clientId)
+
+const showEncounterHeaderButton = computed(() => {
+  if (hasActiveEncounter.value) {
+    return canViewEncounter.value
+  }
+
+  return canStartEncounter.value
+})
 
 const clientAppointments = computed(() => {
   const id = String(clientId.value ?? '').trim()
@@ -282,6 +294,17 @@ async function onAppointmentCheckedIn() {
       notifyError(error, 'activeEncounterLoadError')
     }
   }
+}
+
+function onOpenActiveEncounter() {
+  const id = activeEncounterId.value
+  if (id == null) {
+    return
+  }
+  router.push({
+    name: 'EncounterWorkspace',
+    params: { id: String(id) },
+  })
 }
 
 async function onStartEncounterSelect(selection = {}) {

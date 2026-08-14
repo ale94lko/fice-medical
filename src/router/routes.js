@@ -97,6 +97,29 @@ const routes = [
         },
       },
       {
+        path: 'billing/superbills',
+        name: 'SuperbillList',
+        component: () => import(
+          'pages/billing/SuperbillListPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.superbillView,
+        },
+      },
+      {
+        path: 'billing/superbills/:id',
+        name: 'SuperbillDetail',
+        component: () => import(
+          'pages/billing/SuperbillDetailPage.vue'
+        ),
+        meta: {
+          requiresAnyPermission: [
+            permissionNames.superbillView,
+            permissionNames.viewEncounter,
+          ],
+        },
+      },
+      {
         path: 'administration/subtenants/add',
         name: 'AdminSubtenantsAdd',
         component: () => import('pages/admin/SubtenantList.vue'),

@@ -54,6 +54,11 @@ export function resolveRequirementActionTarget(item = {}) {
         review: 'care-plan',
         carePlanId: targetId,
       }
+    case encounterRequirementActionTypes.openResults:
+      return {
+        workspaceTab: encounterWorkspaceTabs.clinical,
+        clinicalSubTab: encounterClinicalSubTabs.labs,
+      }
     default:
       return fallbackFromCode(item)
   }
@@ -106,6 +111,12 @@ function fallbackFromCode(item) {
       workspaceTab: encounterWorkspaceTabs.clinical,
       clinicalSubTab: encounterClinicalSubTabs.carePlans,
       review: 'care-plan',
+    }
+  }
+  if (code.includes('result') || code.includes('lab')) {
+    return {
+      workspaceTab: encounterWorkspaceTabs.clinical,
+      clinicalSubTab: encounterClinicalSubTabs.labs,
     }
   }
 

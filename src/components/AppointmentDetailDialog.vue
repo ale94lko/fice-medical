@@ -198,25 +198,6 @@
           <div class="appointment-detail-dialog__grid-cell">
             <div
               class="appointment-detail-dialog__cell-icon
-                appointment-detail-dialog__cell-icon--orange">
-              <q-icon name="groups" />
-            </div>
-            <div>
-              <p class="appointment-detail-dialog__cell-label">
-                {{ t('appointmentColReferral') }}
-              </p>
-              <p class="appointment-detail-dialog__cell-value">
-                {{ referralValue }}
-              </p>
-              <p class="appointment-detail-dialog__cell-hint">
-                {{ referralHint }}
-              </p>
-            </div>
-          </div>
-
-          <div class="appointment-detail-dialog__grid-cell">
-            <div
-              class="appointment-detail-dialog__cell-icon
                 appointment-detail-dialog__cell-icon--teal">
               <q-icon name="place" />
             </div>
@@ -475,18 +456,6 @@ const servicesSummary = computed(() => {
 
   return props.record?.appointmentTypeName || '—'
 })
-
-const referralValue = computed(() =>
-  props.record?.referralLabel
-  ?? props.record?.referralNumber
-  ?? '—',
-)
-
-const referralHint = computed(() =>
-  referralValue.value === '—'
-    ? t('appointmentDetailReferralEmpty')
-    : t('appointmentDetailReferralLinked'),
-)
 
 const clinicianHint = computed(() =>
   props.record?.clinicianDisplayName

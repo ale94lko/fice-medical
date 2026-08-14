@@ -39,6 +39,29 @@ function parseOptionalFee(value) {
   return Number.isFinite(n) && n >= 0 ? n : null
 }
 
+function parseIntegerUnits(value) {
+  if (value == null || value === '') {
+    return { kind: 'empty' }
+  }
+  const raw = String(value).trim()
+  if (!/^-?\d+$/.test(raw)) {
+    return { kind: 'invalid' }
+  }
+  const n = Number(raw)
+  if (!Number.isFinite(n)) {
+    return { kind: 'invalid' }
+  }
+  if (n <= 0) {
+    return { kind: 'nonpositive' }
+  }
+
+  return { kind: 'ok', n }
+}
+
+function isBillable(form = {}) {
+  return Boolean(form.billable)
+}
+
 function toFeeInputString(value) {
   return formatStaffCompensationRateAmount(value)
     || toOptionalInputString(value)
@@ -73,6 +96,8 @@ export function createEmptyServiceProcedureForm() {
     cptCode: '',
     hcpcsCode: '',
     defaultFee: '',
+    billable: false,
+    defaultUnits: '1',
     authorizationRequirement: authorizationRequirementValues.unknown,
   }
 }
@@ -107,6 +132,10 @@ export function normalizeServiceProcedureFromApi(raw = {}) {
     defaultFee: toFeeInputString(
       parseOptionalFee(raw.default_fee ?? raw.defaultFee),
     ),
+    billable: Boolean(raw.billable),
+    defaultUnits: toOptionalInputString(
+      raw.default_units ?? raw.defaultUnits,
+    ),
     authorizationRequirement: parseAuthorizationRequirement(
       raw.authorization_requirement ?? raw.authorizationRequirement,
     ),
@@ -128,6 +157,8 @@ export function buildServiceProcedureRequest(form = {}) {
     cpt_code: trim(form.cptCode) || null,
     hcpcs_code: trim(form.hcpcsCode) || null,
     default_fee: parseOptionalFee(form.defaultFee),
+    billable: Boolean(form.billable),
+    default_units: parseOptionalPositiveInt(form.defaultUnits),
     authorization_requirement: parseAuthorizationRequirement(
       form.authorizationRequirement,
     ),
@@ -146,6 +177,8 @@ export function cloneServiceProcedureForm(form) {
     minDurationMin: toOptionalInputString(base.minDurationMin),
     maxDurationMin: toOptionalInputString(base.maxDurationMin),
     defaultFee: toFeeInputString(base.defaultFee),
+    billable: Boolean(base.billable),
+    defaultUnits: toOptionalInputString(base.defaultUnits),
   }
 }
 
@@ -182,6 +215,31 @@ export function validateServiceProcedureForm(form, t) {
   const fee = parseOptionalFee(form.defaultFee)
   if (form.defaultFee != null && form.defaultFee !== '' && fee == null) {
     errors.defaultFee = t('serviceProcedureDefaultFeeInvalid')
+  }
+
+  const units = parseIntegerUnits(form.defaultUnits)
+  if (units.kind === 'invalid') {
+    errors.defaultUnits = t('serviceProcedureDefaultUnitsInvalid')
+  }
+  if (units.kind === 'nonpositive') {
+    errors.defaultUnits = t('serviceProcedureDefaultUnitsRequired')
+  }
+
+  if (isBillable(form)) {
+    const cpt = trim(form.cptCode)
+    const hcpcs = trim(form.hcpcsCode)
+    if (cpt && hcpcs) {
+      errors.cptCode = t('serviceProcedureBillingCodeAmbiguous')
+      errors.hcpcsCode = t('serviceProcedureBillingCodeAmbiguous')
+    } else if (!cpt && !hcpcs) {
+      errors.cptCode = t('serviceProcedureBillingCodeRequired')
+    }
+    if (fee == null || fee <= 0) {
+      errors.defaultFee = t('serviceProcedureDefaultFeeRequired')
+    }
+    if (units.kind !== 'ok') {
+      errors.defaultUnits = t('serviceProcedureDefaultUnitsRequired')
+    }
   }
 
   return errors

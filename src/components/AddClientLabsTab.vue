@@ -51,6 +51,7 @@
         <LabsTable
           :rows="labs"
           :can-edit="!readonly"
+          :can-review="!readonly && canReviewLabs"
           :can-delete="canDelete"
           :empty-label="resolvedEmptyLabel"
           @view="openView"
@@ -127,6 +128,9 @@ import {
 } from 'src/utils/lab-orders.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
+import { useClientPermissions } from 'src/composables/useClientPermissions.js'
+
+const { canReviewLabs } = useClientPermissions()
 
 const props = defineProps({
   patientId: {
