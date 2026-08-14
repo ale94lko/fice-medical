@@ -1,0 +1,1 @@
+import{n as e}from"./index-Cw_2pT-Y.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
