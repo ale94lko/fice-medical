@@ -11,6 +11,8 @@
       :rows="rows"
       :columns="columns"
       :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout"
       :table-row-class-fn="allergyRowClassFn"
       :card-class-fn="allergyRowCardClass">
     <template #body-cell-allergy="scope">
@@ -116,6 +118,8 @@ import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   clientListAllergySeverityBadgeClass,
@@ -145,10 +149,22 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.entries ?? [])
+
+/** Same compact card hierarchy as Clients list (mobile). */
+const mobileCardLayout = {
+  title: 'allergy',
+  status: 'severity',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: ['startYear'],
+  hideEmpty: true,
+}
 
 const invalidRowIdSet = computed(
   () => new Set(props.invalidRowIds ?? []),

@@ -11,7 +11,9 @@
           :data-testid="layoutTestIds.menuToggle"
           @click="toggleLeftDrawer"
         />
-        <q-toolbar-title shrink>
+        <q-toolbar-title
+          v-if="!mobileView"
+          shrink>
           FiCE Medical
         </q-toolbar-title>
         <q-space />

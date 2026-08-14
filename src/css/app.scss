@@ -72,12 +72,15 @@
     align-items: center;
     gap: 10px;
     min-height: 38px;
+    max-width: 100%;
+    min-width: 0;
     padding: 4px 14px 4px 4px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
     color: $shell-text;
+    overflow: hidden;
   }
 
   .app-subtenant__pill--interactive {
@@ -159,6 +162,50 @@
   }
 }
 
+/* Mobile: clinic pill sits left (after menu), not cramped against icons */
+body.vp-mobile {
+  .app-header {
+    .q-toolbar > .q-btn:first-child {
+      order: 0;
+    }
+
+    .app-subtenant {
+      order: 1;
+      flex-shrink: 0;
+      max-width: none;
+      margin-right: 8px;
+      overflow: visible;
+    }
+
+    .q-space {
+      order: 2;
+    }
+
+    .q-space ~ * {
+      order: 3;
+      flex-shrink: 0;
+    }
+
+    .app-subtenant__pill,
+    .app-subtenant__pill.q-btn {
+      max-width: none;
+      overflow: visible;
+    }
+
+    .app-subtenant__pill.q-btn .q-btn__content {
+      max-width: none;
+      overflow: visible;
+    }
+
+    .app-subtenant__name {
+      max-width: none;
+      overflow: visible;
+      text-overflow: unset;
+      white-space: nowrap;
+    }
+  }
+}
+
 .app-subtenant-menu {
   min-width: 220px;
   overflow: hidden;
@@ -228,10 +275,10 @@ body.vp-mobile {
     &__toolbar {
       flex-wrap: wrap;
       align-items: center;
-      min-height: auto;
+      min-height: 48px;
       height: auto;
-      padding: 6px 10px;
-      gap: 2px 8px;
+      padding: 12px 14px;
+      gap: 6px 8px;
     }
 
     .q-space {
@@ -252,17 +299,16 @@ body.vp-mobile {
       width: 100%;
       max-width: 100%;
       margin: 0;
-      font-size: 0.625rem;
-      line-height: 1.2;
+      font-size: 0.8125rem;
+      line-height: 1.35;
       text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
     }
 
     .q-toolbar {
-      min-height: 0;
+      min-height: 48px;
       height: auto;
+      font-size: 0.8125rem;
     }
   }
 }
@@ -2570,6 +2616,40 @@ input:-webkit-autofill {
   }
 }
 
+/* Mobile: keep Contact subtab labels readable (no tiny ellipsis) */
+body.vp-mobile {
+  .add-client-subtabs--contact {
+    .q-tab {
+      flex: 0 0 auto;
+      padding: 0 10px;
+    }
+
+    .contact-subtab--removable {
+      min-width: auto;
+      max-width: none;
+    }
+
+    .contact-subtab-label {
+      width: auto;
+    }
+
+    .contact-subtab-text,
+    .contact-subtab-text.ellipsis {
+      flex: 0 0 auto;
+      min-width: auto;
+      max-width: none;
+      overflow: visible;
+      text-overflow: unset;
+      white-space: nowrap;
+    }
+
+    .q-tab__content {
+      width: auto !important;
+      max-width: none;
+    }
+  }
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -3041,6 +3121,12 @@ input:-webkit-autofill {
   gap: 10px;
 }
 
+body.vp-mobile {
+  .preferred-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .point-of-contact-error {
   max-width: 720px;
   margin-left: auto;
@@ -3495,6 +3581,22 @@ input:-webkit-autofill {
 
 .allergy-severity-label {
   text-align: left;
+}
+
+body.vp-mobile {
+  .allergy-severity-chip {
+    justify-content: center;
+    padding-left: 8px;
+    padding-right: 8px;
+
+    .allergy-severity-dot {
+      display: none;
+    }
+  }
+
+  .allergy-severity-label {
+    text-align: center;
+  }
 }
 
 .allergy-severity-badge {
@@ -4087,6 +4189,24 @@ input:-webkit-autofill {
   justify-content: flex-end;
 }
 
+.insurance-header__actions--menu {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.insurance-header__menu-btn {
+  min-width: 40px;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.insurance-header__actions-menu {
+  .q-item {
+    min-height: 40px;
+  }
+}
+
 .insurance-show-inactive {
   gap: 6px;
 }
@@ -4589,6 +4709,12 @@ input:-webkit-autofill {
 .admin-data-table--embedded
 .q-table tbody tr.allergies-table__row--error:hover td {
   background: rgba($negative, 0.1) !important;
+}
+
+.admin-table-grid-item.allergies-table__row--error
+.admin-table-grid-card {
+  background: rgba($negative, 0.08);
+  border-color: rgba($negative, 0.35);
 }
 
 .add-client-care-plans-tab {

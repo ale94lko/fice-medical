@@ -430,7 +430,10 @@ export const addClientTestIds = {
   vitalsRowDelete: id => toTestId('add-client-vitals-row', id, 'btn-delete'),
   insuranceField: name => toTestId('add-client-insurance-field', name),
   insuranceBtnAdd: 'add-client-insurance-btn-add',
+  insuranceActionsMenu: 'add-client-insurance-actions-menu',
   insuranceShowInactive: 'add-client-insurance-show-inactive',
+  insuranceShowInactiveToggle:
+    'add-client-insurance-show-inactive-toggle',
   insuranceRowView: id => toTestId('add-client-insurance-row', id, 'btn-view'),
   insuranceRowEdit: id => toTestId('add-client-insurance-row', id, 'btn-edit'),
   insuranceRowDeactivate: id => toTestId(

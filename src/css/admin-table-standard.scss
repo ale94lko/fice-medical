@@ -470,6 +470,25 @@
       max-width: none !important;
     }
 
+    .data-item-actions {
+      flex: 0 0 auto;
+      max-width: 45%;
+
+      .q-td {
+        display: block !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+      }
+
+      .admin-table-status-badge,
+      .allergy-severity-badge {
+        max-width: 100%;
+      }
+    }
+
     &__status {
       flex: 0 0 auto;
 

@@ -10,7 +10,9 @@
       row-key="id"
       :rows="profiles"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-priority="scope">
         <q-td :props="scope">
           <AdminTableStatusCell
@@ -176,6 +178,8 @@ import {
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { apiDateTimeToDisplay } from 'src/utils/app-datetime.js'
 import {
@@ -204,8 +208,20 @@ defineProps({
 const emit = defineEmits(['view', 'edit', 'deactivate', 'reactivate'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
+
+/** Same compact card hierarchy as Allergies / Clients (mobile). */
+const mobileCardLayout = {
+  title: 'payerPlan',
+  status: 'priority',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: ['insuranceType', 'memberId', 'status'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {

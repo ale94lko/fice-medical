@@ -19,8 +19,10 @@
           {{ t('insuranceProfilesSubtitle') }}
         </p>
       </div>
-      <div class="col-auto row items-center no-wrap
-        insurance-header__actions q-gutter-md">
+      <div
+        v-if="!isMobile"
+        class="col-auto row items-center no-wrap
+          insurance-header__actions q-gutter-md">
         <div class="insurance-show-inactive row items-center no-wrap">
           <span class="insurance-show-inactive__label text-body2">
             {{ t('insuranceShowInactive') }}
@@ -58,6 +60,73 @@
           <q-tooltip v-if="!canAddInsuranceProfile">
             {{ t('insuranceMaxActivePriorities') }}
           </q-tooltip>
+        </q-btn>
+      </div>
+      <div
+        v-else
+        class="col-auto insurance-header__actions
+          insurance-header__actions--menu">
+        <q-btn
+          unelevated
+          outline
+          no-caps
+          color="primary"
+          :icon="adminTableActionIcons.more"
+          class="app-btn-outline insurance-header__menu-btn"
+          :data-testid="tid.insuranceActionsMenu"
+          :aria-label="t('moreActions')">
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('moreActions') }}
+          </q-tooltip>
+          <q-menu
+            anchor="bottom right"
+            self="top right"
+            :offset="[0, 8]"
+            class="app-light-menu insurance-header__actions-menu">
+            <q-list dense style="min-width: 220px">
+              <q-item
+                v-if="!readonly"
+                v-close-popup
+                clickable
+                :disable="!canAddInsuranceProfile"
+                :data-testid="tid.insuranceBtnAdd"
+                @click="openAdd">
+                <q-item-section avatar>
+                  <q-icon name="add" color="primary" size="18px" />
+                </q-item-section>
+                <q-item-section>
+                  {{ t('insuranceAddProfile') }}
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                :data-testid="tid.insuranceShowInactive"
+                @click="toggleShowInactiveInsurance">
+                <q-item-section avatar>
+                  <q-icon
+                    name="visibility"
+                    color="primary"
+                    size="18px"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  {{ t('insuranceShowInactive') }}
+                </q-item-section>
+                <q-item-section side>
+                  <FormToggle
+                    :model-value="showInactiveInsurance"
+                    :test-id="tid.insuranceShowInactiveToggle"
+                    @update:model-value="onShowInactiveFromMenu"
+                    @click.stop
+                  />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
         </q-btn>
       </div>
     </div>
@@ -124,6 +193,8 @@ import FormToggle from 'components/FormToggle.vue'
 import InsuranceProfilesTable from 'components/InsuranceProfilesTable.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   areAllActiveInsurancePrioritiesTaken,
@@ -179,6 +250,7 @@ const section = defineModel({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 
 const dialogOpen = ref(false)
 const dialogMode = ref('add')
@@ -198,6 +270,14 @@ const displayProfiles = computed(() =>
 const canAddInsuranceProfile = computed(
   () => !areAllActiveInsurancePrioritiesTaken(section.value),
 )
+
+function toggleShowInactiveInsurance() {
+  showInactiveInsurance.value = !showInactiveInsurance.value
+}
+
+function onShowInactiveFromMenu(value) {
+  showInactiveInsurance.value = Boolean(value)
+}
 
 function hasPersistedClient() {
   const id = props.clientId
