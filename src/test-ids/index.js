@@ -460,6 +460,7 @@ export const addClientTestIds = {
     btnIgnore: 'add-client-duplicate-match-btn-ignore',
     btnNotMatch: 'add-client-duplicate-match-review-btn-not-match',
     btnOpenExisting: 'add-client-duplicate-match-review-btn-open-existing',
+    btnReviewMore: 'add-client-duplicate-match-review-btn-more',
     btnSaveConfirmCreate: 'add-client-duplicate-save-confirm-btn-create',
     btnSaveConfirmCancel: 'add-client-duplicate-save-confirm-btn-cancel',
     btnNavigateConfirm: 'add-client-duplicate-navigate-confirm-btn-confirm',

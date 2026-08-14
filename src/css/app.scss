@@ -734,6 +734,222 @@ body.vp-mobile {
   .add-client-page__duplicate-banner-anchor {
     flex: 1 1 100%;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    order: 3;
+  }
+
+  /* Possible Matches: stack title + actions so buttons stay on screen */
+  .banner {
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+
+    .data-item-component {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      padding-right: 8px;
+      padding-left: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .q-item {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .data-item-actions {
+      margin-left: 0;
+      width: 100%;
+      align-items: stretch;
+    }
+
+    .banner__actions {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      width: 100%;
+      gap: 8px;
+      align-self: stretch;
+      padding-top: 0;
+
+      > * {
+        margin: 0 !important;
+      }
+    }
+
+    .banner__action-btn {
+      flex: 1 1 0 !important;
+      width: 50%;
+      max-width: calc(50% - 4px);
+      min-width: 0;
+
+      .q-btn__content {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .q-btn__wrapper {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
+      /* Ignore Matches: text only on mobile */
+      &:not(.banner__toggle) .q-icon {
+        display: none;
+      }
+    }
+  }
+
+  .banner__menu-card {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Equal side insets — Quasar anchors can pin the menu to the right edge */
+  .q-menu.banner__menu {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    box-sizing: border-box;
+  }
+
+  .banner__menu .banner__menu-header.data-item-component,
+  .banner__menu .banner__menu-header {
+    position: relative;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    padding: 12px 12px 10px 6px;
+    box-sizing: border-box;
+  }
+
+  .banner__menu .banner__menu-header .q-item {
+    min-width: 0;
+    width: 100%;
+    flex: 1 1 auto;
+    padding-left: 6px;
+    padding-right: 0;
+  }
+
+  .banner__menu .banner__menu-header .q-item__section--avatar {
+    min-width: 36px;
+    padding-right: 8px;
+  }
+
+  /* Keep title clear of the top-right badge; subtitle uses full width */
+  .banner__menu .banner__menu-header .q-item-section > .q-item-label:first-child {
+    padding-right: 6.75rem;
+  }
+
+  .banner__menu .banner__menu-header .banner__meta,
+  .banner__menu .banner__menu-header .q-item-label.caption {
+    display: block;
+    max-width: 100%;
+    padding-right: 0;
+    white-space: normal;
+  }
+
+  .banner__menu .banner__menu-header .data-item-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    margin-left: 0;
+    width: auto;
+    flex: 0 0 auto;
+    align-items: flex-start;
+    z-index: 1;
+  }
+
+  .banner__menu .banner__menu-count-wrap {
+    width: auto;
+  }
+
+  .banner__menu .banner__menu-count-badge {
+    width: auto;
+    max-width: 9.5rem;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 4px 8px;
+    gap: 4px;
+    font-size: 0.6875rem;
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+
+    .banner__menu-count-icon,
+    .q-icon {
+      font-size: 14px !important;
+    }
+  }
+
+  .banner__item {
+    margin: 8px 8px 8px 4px;
+    overflow: hidden;
+
+    .data-item-component {
+      position: relative;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 0;
+      padding: 8px 10px 10px 0;
+      box-sizing: border-box;
+    }
+
+    .q-item {
+      min-width: 0;
+      width: 100%;
+      padding-left: 4px;
+      padding-right: 4.25rem; /* room for % badge */
+    }
+
+    .q-item__section--avatar {
+      min-width: 36px;
+      padding-right: 8px;
+    }
+
+    .q-item-section {
+      min-width: 0;
+    }
+
+    .q-item-label {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .data-item-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      margin-left: 0;
+      width: auto;
+      padding-left: 0;
+      align-items: flex-end;
+      z-index: 1;
+    }
+
+    .banner__badge {
+      max-width: none;
+      gap: 4px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+    }
+
+    .banner__badge-sep,
+    .banner__badge-term {
+      display: none;
+    }
+
+    .banner__confidence-label {
+      justify-content: flex-end;
+      margin: 6px 0 0;
+    }
   }
 }
 
@@ -5281,10 +5497,11 @@ body.vp-mobile {
   flex-shrink: 0;
   align-self: flex-start;
   padding-top: 2px;
+  gap: 8px;
 }
 
 .banner__menu-card {
-  min-width: 520px;
+  min-width: min(520px, calc(100vw - 32px));
   max-width: min(100vw - 24px, 720px);
 
   border-radius: $radius-md;

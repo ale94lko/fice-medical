@@ -21,15 +21,26 @@
           class="duplicate-match-review__sections">
           <div class="duplicate-match-review__summary-bar">
             <div class="duplicate-match-review__summary-left">
-              <data-item-component
-                icon="person"
-                icon-size="80px"
-                title-size="large"
-                :title="existingClientDisplayName">
-                <template #subTitle>
+              <div class="duplicate-match-review__identity-row">
+                <div class="duplicate-match-review__identity-person">
+                  <q-icon
+                    name="person"
+                    size="28px"
+                    class="duplicate-match-review__identity-person-icon"
+                  />
+                </div>
+                <div class="duplicate-match-review__identity-text">
+                  <div class="duplicate-match-review__identity-name">
+                    {{ existingClientDisplayName }}
+                  </div>
                   <div class="duplicate-match-review__badges-row">
                     <div class="duplicate-match-review__score-pill">
-                      {{ matchScorePercent }}% Match
+                      <span class="duplicate-match-review__score-pill-full">
+                        {{ matchScorePercent }}% Match
+                      </span>
+                      <span class="duplicate-match-review__score-pill-short">
+                        {{ matchScorePercent }}%
+                      </span>
                     </div>
                     <div
                       class="duplicate-match-review__confidence-pill"
@@ -45,50 +56,48 @@
                       </span>
                     </div>
                   </div>
-                </template>
-                <template #actions>
-                  <div class="duplicate-match-review__summary-cards">
-                    <div
-                      class="duplicate-match-review__stat-card
-                        duplicate-match-review__stat-card--matched">
-                      <div class="duplicate-match-review__stat-card-header">
-                        <q-icon
-                          name="check_circle"
-                          class="duplicate-match-review__stat-card-icon
-                            duplicate-match-review__stat-card-icon--match"
-                          size="18px" />
-                        <span class="duplicate-match-review__stat-card-title">
-                          {{ t('duplicateMatchMatchedCardTitle', {
-                            count: matchedFields.length,
-                          }) }}
-                        </span>
-                      </div>
-                      <div class="duplicate-match-review__stat-card-detail">
-                        {{ matchedFields.join(', ') }}
-                      </div>
-                    </div>
-                    <div
-                      class="duplicate-match-review__stat-card
-                  duplicate-match-review__stat-card--missing">
-                      <div class="duplicate-match-review__stat-card-header">
-                        <q-icon
-                          name="warning"
-                          class="duplicate-match-review__stat-card-icon
-                      duplicate-match-review__stat-card-icon--missing"
-                          size="18px" />
-                        <span class="duplicate-match-review__stat-card-title">
-                    {{ t('duplicateMatchMissingCardTitle', {
-                          count: missingFields.length,
-                        }) }}
+                </div>
+              </div>
+            </div>
+            <div class="duplicate-match-review__summary-cards">
+              <div
+                class="duplicate-match-review__stat-card
+                  duplicate-match-review__stat-card--matched">
+                <div class="duplicate-match-review__stat-card-header">
+                  <q-icon
+                    name="check_circle"
+                    class="duplicate-match-review__stat-card-icon
+                      duplicate-match-review__stat-card-icon--match"
+                    size="18px" />
+                  <span class="duplicate-match-review__stat-card-title">
+                    {{ t('duplicateMatchMatchedCardTitle', {
+                      count: matchedFields.length,
+                    }) }}
                   </span>
-                      </div>
-                      <div class="duplicate-match-review__stat-card-detail">
-                        {{ missingFields.join(', ') }}
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </data-item-component>
+                </div>
+                <div class="duplicate-match-review__stat-card-detail">
+                  {{ matchedFields.join(', ') }}
+                </div>
+              </div>
+              <div
+                class="duplicate-match-review__stat-card
+                  duplicate-match-review__stat-card--missing">
+                <div class="duplicate-match-review__stat-card-header">
+                  <q-icon
+                    name="warning"
+                    class="duplicate-match-review__stat-card-icon
+                      duplicate-match-review__stat-card-icon--missing"
+                    size="18px" />
+                  <span class="duplicate-match-review__stat-card-title">
+                    {{ t('duplicateMatchMissingCardTitle', {
+                      count: missingFields.length,
+                    }) }}
+                  </span>
+                </div>
+                <div class="duplicate-match-review__stat-card-detail">
+                  {{ missingFields.join(', ') }}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -171,34 +180,88 @@
       </q-card-section>
       <q-card-actions
         align="right"
-        class="app-dialog-card__actions duplicate-match-review__actions">
-        <q-btn
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          :data-testid="modalTestIds.cancel('duplicate-match-review')"
-          :label="t('cancel')"
-          @click="onCancel"
-        />
-        <q-btn
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          :data-testid="tid.btnNotMatch"
-          :label="t('duplicateMatchNotMatch')"
-          @click="onNotMatch"
-        />
-        <q-btn
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          :data-testid="tid.btnOpenExisting"
-          :label="t('duplicateMatchOpenExisting')"
-          @click="emit('open-existing')"
-        />
+        class="app-dialog-card__actions duplicate-match-review__actions"
+        :class="{
+          'duplicate-match-review__actions--mobile': isMobile,
+        }">
+        <template v-if="!isMobile">
+          <q-btn
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            :data-testid="modalTestIds.cancel('duplicate-match-review')"
+            :label="t('cancel')"
+            @click="onCancel"
+          />
+          <q-btn
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            :data-testid="tid.btnNotMatch"
+            :label="t('duplicateMatchNotMatch')"
+            @click="onNotMatch"
+          />
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            :data-testid="tid.btnOpenExisting"
+            :label="t('duplicateMatchOpenExisting')"
+            @click="emit('open-existing')"
+          />
+        </template>
+        <template v-else>
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary duplicate-match-review__open-btn"
+            :data-testid="tid.btnOpenExisting"
+            :label="t('duplicateMatchOpenExisting')"
+            @click="emit('open-existing')"
+          />
+          <q-btn
+            unelevated
+            outline
+            no-caps
+            color="primary"
+            :icon="adminTableActionIcons.more"
+            class="app-btn-outline duplicate-match-review__more-btn"
+            :data-testid="tid.btnReviewMore"
+            :aria-label="t('moreActions')">
+            <q-menu
+              anchor="top right"
+              self="bottom right"
+              :offset="[0, 8]"
+              class="app-light-menu">
+              <q-list dense style="min-width: 180px">
+                <q-item
+                  v-close-popup
+                  clickable
+                  :data-testid="
+                    modalTestIds.cancel('duplicate-match-review')
+                  "
+                  @click="onCancel">
+                  <q-item-section>
+                    {{ t('cancel') }}
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  v-close-popup
+                  clickable
+                  :data-testid="tid.btnNotMatch"
+                  @click="onNotMatch">
+                  <q-item-section>
+                    {{ t('duplicateMatchNotMatch') }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </template>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -213,6 +276,8 @@ import {
   clientFieldKeys as ck,
   clientFormSections,
 } from 'components/constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { modalTestIds } from 'src/test-ids/index.js'
 import { addClientTestIds } from 'src/test-ids/index.js'
 import {
@@ -220,7 +285,6 @@ import {
   normalizePhoneDigits,
 } from 'src/utils/client-contact-form.js'
 import { formatClientDisplayName } from 'src/utils/client-display-name.js'
-import DataItemComponent from 'components/template/DataItemComponent.vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -238,6 +302,7 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 const tid = addClientTestIds.duplicateMatch
 
 const reviewDialogTestId = modalTestIds.dialog('duplicate-match-review')
@@ -556,18 +621,21 @@ function onNotMatch() {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .duplicate-match-review__identity-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+  width: 100%;
+  min-width: 0;
 }
 
 .duplicate-match-review__identity-person {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: #E6FFFA;
   display: flex;
@@ -580,12 +648,17 @@ function onNotMatch() {
   color: #0D9488;
 }
 
+.duplicate-match-review__identity-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .duplicate-match-review__identity-name {
   font-weight: 700;
   color: #111827;
   font-size: 1.125rem;
-  line-height: 1.2;
-  white-space: nowrap;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .duplicate-match-review__badges-row {
@@ -593,6 +666,7 @@ function onNotMatch() {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 8px;
 }
 
 .duplicate-match-review__score-pill {
@@ -607,6 +681,10 @@ function onNotMatch() {
   background: #E0F7FA;
   border: 1px solid #99F6E4;
   white-space: nowrap;
+}
+
+.duplicate-match-review__score-pill-short {
+  display: none;
 }
 
 .duplicate-match-review__confidence-pill {
@@ -651,7 +729,6 @@ function onNotMatch() {
   align-items: stretch;
   gap: 12px;
   flex-shrink: 0;
-  width: calc(100% - 25px);
 }
 
 .duplicate-match-review__stat-card {
@@ -768,9 +845,68 @@ function onNotMatch() {
 }
 
 @media (max-width: 767px) {
+  .duplicate-match-review__card {
+    min-width: 0;
+  }
+
   .duplicate-match-review__summary-bar {
     flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .duplicate-match-review__summary-left {
+    width: 100%;
+  }
+
+  .duplicate-match-review__identity-row {
+    position: relative;
     align-items: flex-start;
+    gap: 10px;
+  }
+
+  .duplicate-match-review__identity-person {
+    width: 48px;
+    height: 48px;
+  }
+
+  .duplicate-match-review__identity-text {
+    padding-right: 3.75rem;
+  }
+
+  .duplicate-match-review__identity-name {
+    font-size: 1.0625rem;
+    line-height: 1.3;
+  }
+
+  .duplicate-match-review__badges-row {
+    margin-top: 8px;
+    gap: 6px;
+  }
+
+  .duplicate-match-review__score-pill {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 5px 8px;
+    font-size: 0.75rem;
+    border-radius: 999px;
+  }
+
+  .duplicate-match-review__score-pill-full {
+    display: none;
+  }
+
+  .duplicate-match-review__score-pill-short {
+    display: inline;
+  }
+
+  .duplicate-match-review__confidence-pill {
+    padding: 5px 8px;
+  }
+
+  .duplicate-match-review__confidence-pill-text {
+    font-size: 0.75rem;
   }
 
   .duplicate-match-review__summary-cards {
@@ -778,12 +914,32 @@ function onNotMatch() {
   }
 
   .duplicate-match-review__stat-card {
-    flex: 1;
+    flex: 1 1 0;
     min-width: 0;
+    padding: 10px 12px;
   }
 
-  .duplicate-match-review__badges-row {
-    padding-left: 0;
+  .duplicate-match-review__actions--mobile {
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    gap: 8px;
+
+    .duplicate-match-review__open-btn {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    /* Square icon btn: override .app-btn-outline horizontal padding */
+    .duplicate-match-review__more-btn {
+      flex: 0 0 $app-button-height;
+      width: $app-button-height !important;
+      min-width: $app-button-height !important;
+      max-width: $app-button-height !important;
+      height: $app-button-height !important;
+      min-height: $app-button-height !important;
+      max-height: $app-button-height !important;
+      padding: 0 !important;
+    }
   }
 }
 </style>

@@ -10,7 +10,7 @@
       icon="warning"
       icon-style="warning">
       <template #actions>
-        <div class="banner__actions row items-center no-wrap q-gutter-sm">
+        <div class="banner__actions row items-center">
           <q-btn
             no-caps
             unelevated
@@ -29,16 +29,18 @@
             :label="t('duplicateMatchViewMatches')">
             <q-menu
               v-model="menuOpen"
-              anchor="bottom end"
-              self="top end"
+              :anchor="menuAnchor"
+              :self="menuSelf"
               class="banner__menu"
+              :max-height="menuMaxHeight"
               @hide="menuShowAll = false">
               <data-item-component
+                class="banner__menu-header"
                 :title="t('duplicateMatchMenuTitle')"
                 :sub-title="t('duplicateMatchMenuSubtitle')"
                 icon="person_search">
                 <template #actions>
-                  <div class="row items-start no-wrap">
+                  <div class="banner__menu-count-wrap row items-start">
                     <div class="banner__menu-count-badge
                       row items-center no-wrap">
                       <q-icon
@@ -138,6 +140,7 @@ import { sortDuplicateMatches } from 'src/utils/client-duplicate-match-sort.js'
 import { addClientTestIds } from 'src/test-ids/index.js'
 import { formatPersonDisplayNameFromRecord } from
   'src/utils/person-display-name.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import DataItemComponent from 'components/template/DataItemComponent.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 
@@ -167,12 +170,25 @@ const props = defineProps({
 const emit = defineEmits(['review', 'ignore'])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 const tid = addClientTestIds.duplicateMatch
 const menuOpen = ref(false)
 const menuShowAll = ref(false)
 
 const visible = computed(
   () => !props.ignored && props.matches.length > 0,
+)
+
+const menuAnchor = computed(() =>
+  (isMobile.value ? 'bottom middle' : 'bottom end'),
+)
+
+const menuSelf = computed(() =>
+  (isMobile.value ? 'top middle' : 'top end'),
+)
+
+const menuMaxHeight = computed(() =>
+  (isMobile.value ? 'min(70vh, 560px)' : undefined),
 )
 
 const displayedMatches = computed(() => {
@@ -188,9 +204,15 @@ const hasMoreMatchesThanPreview = computed(
   () => props.matches.length > props.menuPreviewLimit,
 )
 
-const menuListMaxHeight = computed(() =>
-  menuShowAll.value ? 'min(70vh, 520px)' : '280px',
-)
+const menuListMaxHeight = computed(() => {
+  if (isMobile.value) {
+    return menuShowAll.value
+      ? 'min(50vh, 360px)'
+      : 'min(40vh, 240px)'
+  }
+
+  return menuShowAll.value ? 'min(70vh, 520px)' : '280px'
+})
 
 function onPickMatch(match) {
   menuOpen.value = false
