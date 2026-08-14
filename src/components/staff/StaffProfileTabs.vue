@@ -1,21 +1,33 @@
 <template>
-  <div
-    class="client-overview-alt-tabs staff-profile-tabs"
-    role="tablist">
-    <button
-      v-for="tab in tabs"
-      :key="tab.key"
-      type="button"
-      role="tab"
-      class="client-overview-alt-tabs__tab"
-      :class="{
-        'client-overview-alt-tabs__tab--active': tab.key === modelValue,
-      }"
-      :aria-selected="tab.key === modelValue"
-      @click="emit('update:modelValue', tab.key)">
-      <q-icon :name="tab.icon" size="18px" />
-      <span>{{ tab.label }}</span>
-    </button>
+  <div class="chrome staff-profile-tabs">
+    <div class="tabs-row">
+      <q-tabs
+        :model-value="modelValue"
+        dense
+        no-caps
+        outside-arrows
+        mobile-arrows
+        class="add-client-tabs"
+        active-color="white"
+        indicator-color="transparent"
+        align="left"
+        @update:model-value="emit('update:modelValue', $event)">
+        <q-tab
+          v-for="tab in tabs"
+          :key="tab.key"
+          :name="tab.key"
+          :aria-selected="tab.key === modelValue">
+          <span class="label row items-center no-wrap">
+            <q-icon
+              :name="tab.icon"
+              size="18px"
+              class="icon"
+            />
+            <span class="text">{{ tab.label }}</span>
+          </span>
+        </q-tab>
+      </q-tabs>
+    </div>
   </div>
 </template>
 
@@ -49,7 +61,7 @@ const tabs = computed(() => {
     {
       key: staffProfileTabKeys.contact,
       label: t('tabStaffContactInformation'),
-      icon: 'contact_mail',
+      icon: 'contact_phone',
     },
     {
       key: staffProfileTabKeys.employment,
@@ -67,7 +79,7 @@ const tabs = computed(() => {
   list.push({
     key: staffProfileTabKeys.systemAccess,
     label: t('tabStaffSystemAccess'),
-    icon: 'manage_accounts',
+    icon: 'admin_panel_settings',
   })
 
   return list

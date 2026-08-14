@@ -60,7 +60,9 @@
             {{ t('staffTaxonomiesHint') }}
           </span>
         </div>
-        <div class="col-auto text-body2 text-weight-medium">
+        <div
+          class="staff-taxonomies-section__total col-auto
+            text-body2 text-weight-medium">
           {{ t('staffTaxonomiesTotal', { count: taxonomies.length }) }}
         </div>
       </div>
@@ -262,5 +264,25 @@ watch(
     border-radius: $radius-md;
     background: rgba($primary, 0.06);
   }
+}
+
+body.vp-mobile .staff-taxonomies-section__footer {
+  flex-direction: column;
+  align-items: stretch;
+
+  > .col,
+  > .col-auto {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+}
+
+body.vp-mobile .staff-taxonomies-section__info {
+  width: 100%;
+}
+
+body.vp-mobile .staff-taxonomies-section__total {
+  width: 100%;
 }
 </style>

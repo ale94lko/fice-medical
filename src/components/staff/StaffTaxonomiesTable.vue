@@ -10,7 +10,9 @@
       row-key="code"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-primary="scope">
         <q-td :props="scope">
           <div
@@ -125,6 +127,8 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
 import { siteBreakpoints } from 'components/constants.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import {
   taxonomyProviderTypeLabel,
   taxonomySpecialtyLabel,
@@ -153,9 +157,21 @@ const props = defineProps({
 const emit = defineEmits(['set-primary', 'delete'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.taxonomies ?? [])
+
+/** Compact mobile cards: code + primary, then description fields. */
+const mobileCardLayout = {
+  title: 'code',
+  subtitle: null,
+  status: 'primary',
+  contact: null,
+  identifier: null,
+  badges: ['description', 'specialty', 'type'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {
@@ -294,7 +310,8 @@ function typeLabel(row) {
     font-size: 0.75rem;
     font-weight: 600;
     line-height: 1.2;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   &__specialty--green {
@@ -320,6 +337,21 @@ function typeLabel(row) {
   &__specialty--neutral {
     color: $text-muted;
     background: rgba($text-muted, 0.12);
+  }
+
+  /* Mobile cards: primary control as a compact row in the header */
+  :deep(.admin-table-grid-card) {
+    .staff-taxonomies-table__primary {
+      flex-direction: row;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .q-td {
+      display: contents;
+      padding: 0;
+    }
   }
 }
 </style>

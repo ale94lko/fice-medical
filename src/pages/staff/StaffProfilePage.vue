@@ -1,7 +1,6 @@
 <template>
   <q-page
-    class="admin-page client-overview-page client-overview-alt-page
-      staff-profile-page">
+    class="admin-page add-client-page staff-profile-page fit">
     <AppLoadingOverlay
       scope="content"
       :showing="loading"
@@ -10,7 +9,7 @@
 
     <StaffProfileHeader
       v-if="profile"
-      class="client-overview-page__header"
+      class="staff-profile-page__header"
       :staff-id="route.params.id"
       :header="profile"
       :can-edit="canEditStaff"
@@ -20,32 +19,32 @@
     />
     <ClientOverviewHeaderSkeleton
       v-else
-      class="client-overview-page__header"
+      class="staff-profile-page__header"
     />
 
-    <div class="client-overview-page__main client-overview-alt-page__main">
-      <StaffProfileTabs
-        v-if="profile"
-        v-model="activeTab"
-        :show-clinical="Boolean(profile.sections.clinical)"
-      />
-
-      <div
-        class="client-overview-page__body
-          client-overview-alt-page__body
-          staff-profile-page__body">
+    <q-card flat bordered class="add-client-page__card">
+      <q-card-section class="add-client-page__card-body q-pa-md">
         <div
-          class="client-overview-alt-page__content
-            staff-profile-page__content">
-          <StaffProfileSection
-            v-if="activeSection"
-            :icon="activeSection.icon"
-            :title="activeSection.title"
-            :fields="activeSection.fields"
+          v-if="profile"
+          class="add-client-form staff-profile-page__shell">
+          <StaffProfileTabs
+            v-model="activeTab"
+            :show-clinical="Boolean(profile.sections.clinical)"
           />
+
+          <div class="content">
+            <div class="panel-scroll staff-profile-page__content">
+              <StaffProfileSection
+                v-if="activeSection"
+                :icon="activeSection.icon"
+                :title="activeSection.title"
+                :fields="activeSection.fields"
+              />
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 

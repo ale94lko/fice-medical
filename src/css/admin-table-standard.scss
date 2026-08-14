@@ -432,15 +432,34 @@
       margin: 0 !important;
       align-items: flex-start;
       font-weight: 400;
+      min-width: 0;
 
       .q-item {
         min-height: 0;
         padding: 4px 0;
+        min-width: 0;
+      }
+
+      .q-item__section {
+        min-width: 0 !important;
       }
 
       .q-item__section--avatar {
         min-width: 44px;
         padding-right: 10px;
+      }
+
+      .data-item-title-medium,
+      .data-item-title-small,
+      .data-item-title-large,
+      .q-item__label,
+      .q-item__label--caption,
+      .banner__meta {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .data-item-title-medium {
@@ -526,6 +545,8 @@
       .allergy-severity-badge,
       .follow-up-status-badge {
         max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }
     }
 
@@ -546,6 +567,8 @@
       .admin-table-status-badge {
         padding: 4px 10px;
         font-size: 0.75rem;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }
     }
 
@@ -590,6 +613,10 @@
       font-weight: 400;
       line-height: 1.35;
       color: $text-muted;
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
+      overflow-wrap: anywhere;
       word-break: break-word;
 
       &--accent {
@@ -620,6 +647,22 @@
       .admin-allergy-chip,
       .admin-contact-overflow {
         font-size: inherit;
+      }
+
+      /* Cell helpers that truncate in table mode must wrap in cards */
+      [class$='__ellipsis'],
+      [class*='__ellipsis'],
+      .staff-taxonomies-table__specialty,
+      .staff-taxonomies-table__code,
+      .staff-taxonomies-table__description-title,
+      .staff-taxonomies-table__description-subtitle {
+        display: block;
+        max-width: 100% !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
     }
 

@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
     <template #body-cell-type="scope">
       <q-td
         :props="scope"
@@ -149,6 +151,8 @@ import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 
 const props = defineProps({
   licenses: {
@@ -172,10 +176,22 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.licenses ?? [])
+
+/** Compact mobile cards: type + status, then license details. */
+const mobileCardLayout = {
+  title: 'type',
+  subtitle: 'identifier',
+  status: 'status',
+  contact: null,
+  identifier: null,
+  badges: ['expirationDate', 'isPrimary', 'attachment'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {
@@ -281,3 +297,14 @@ function hasAttachment(row) {
   return row?.attachmentFileId != null && row.attachmentFileId !== ''
 }
 </script>
+
+<style lang="scss" scoped>
+.staff-licenses-table {
+  :deep(.admin-table-grid-card) {
+    .q-td {
+      display: contents;
+      padding: 0;
+    }
+  }
+}
+</style>

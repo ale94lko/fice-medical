@@ -420,6 +420,42 @@ body.vp-mobile {
 
   &.q-drawer--mini {
     transition: width 0.2s ease, box-shadow 0.2s ease;
+
+    .q-list--padding {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
+    /* Icon-only rail: kill label/gap so icons sit in the center */
+    .q-item {
+      justify-content: center;
+      align-items: center;
+      padding-left: 0;
+      padding-right: 0;
+      gap: 0;
+    }
+
+    .q-item__section--main,
+    .q-item__section--side {
+      display: none !important;
+    }
+
+    .q-item__section--avatar {
+      min-width: 0 !important;
+      width: auto;
+      padding: 0 !important;
+      margin: 0 !important;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .q-expansion-item > .q-expansion-item__container > .q-item {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+      gap: 0;
+    }
   }
 
   &.q-drawer--standard.q-drawer--on-top {

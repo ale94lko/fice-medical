@@ -1,8 +1,18 @@
 .staff-profile-page {
-  &__body {
-    /* Full-width content (no activity sidebar). */
-    display: block;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+
+  &__header {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+
+  &__shell {
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   &__content {
