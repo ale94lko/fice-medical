@@ -1,9 +1,12 @@
 <template>
   <div
-    class="admin-table-pagination row items-center justify-end">
+    class="admin-table-pagination row items-center justify-end"
+    :class="{ 'admin-table-pagination--compact': isMobile }">
     <div
-      class="admin-table-pagination__end row items-center no-wrap">
-      <p class="admin-table-pagination__summary q-mb-none">
+      class="admin-table-pagination__end row items-center">
+      <p
+        v-if="!isMobile"
+        class="admin-table-pagination__summary q-mb-none">
         {{ summaryText }}
       </p>
       <div class="row items-center admin-table-pagination__controls">
@@ -17,9 +20,38 @@
           :model-value="rowsPerPage"
           :options="rowsPerPageOptions"
           :disable="disable"
+          :aria-label="t('rowsPerPage')"
           @update:model-value="emit('update:rowsPerPage', $event)"
         />
+        <template v-if="isMobile">
+          <q-btn
+            flat
+            dense
+            round
+            size="sm"
+            icon="chevron_left"
+            class="admin-table-pagination__nav-btn"
+            :disable="disable || page <= 1"
+            :aria-label="t('adminTablePaginationPrev')"
+            @click="emit('update:page', page - 1)"
+          />
+          <span class="admin-table-pagination__page-indicator">
+            {{ page }} / {{ pagesNumber }}
+          </span>
+          <q-btn
+            flat
+            dense
+            round
+            size="sm"
+            icon="chevron_right"
+            class="admin-table-pagination__nav-btn"
+            :disable="disable || page >= pagesNumber"
+            :aria-label="t('adminTablePaginationNext')"
+            @click="emit('update:page', page + 1)"
+          />
+        </template>
         <q-pagination
+          v-else
           :model-value="page"
           :max="pagesNumber"
           :max-pages="6"
@@ -38,6 +70,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 
 const props = defineProps({
   page: {
@@ -73,6 +106,7 @@ const props = defineProps({
 const emit = defineEmits(['update:page', 'update:rowsPerPage'])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 
 const pagesNumber = computed(() => {
   if (!props.rowsNumber) {

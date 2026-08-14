@@ -23,6 +23,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="rows"
         :columns="visibleColumns"
         :loading="false">
@@ -223,6 +224,14 @@ const tablePagination = ref({
 })
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: col.name,
+  subtitle: col.code,
+  status: col.status,
+  badges: [col.main],
+  hideEmpty: true,
+}
 
 const visibleColumns = computed(() => [
   {

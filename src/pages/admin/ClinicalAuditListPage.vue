@@ -23,6 +23,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="rows"
         :columns="visibleColumns"
         :loading="false"
@@ -179,6 +180,17 @@ const tablePagination = ref({
 })
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: 'action',
+  subtitle: 'entityType',
+  identifier: {
+    column: 'entityId',
+    labelKey: 'adminTableCardNoLabel',
+  },
+  badges: ['createdAt', 'changedBy', 'clientId'],
+  hideEmpty: true,
+}
 
 const activeFilterCount = computed(() =>
   countActiveClinicalAuditFilters(appliedFilters.value),

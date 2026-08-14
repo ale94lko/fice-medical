@@ -14,7 +14,8 @@ Antes de crear o modificar un listado con tabla, usar los componentes y estilos 
 |-----------|------------|
 | Título 40px + subtítulo 16px + slot acciones | `AdminListPageHeader` |
 | Acciones de página (desktop botones / mobile ⋮) | `AdminListPageActions` |
-| Grid/cards mobile (`showGrid`) | `useAdminTableMobileGrid` + `AdminQTable` |
+| Grid/cards mobile (`showGrid`) | `useAdminTableMobileGrid` + `AdminQTable` + `:card-layout` |
+| Jerarquía card mobile | `cardLayout` (title/subtitle/status/id/contact/badges) → `AdminTableGridItem` |
 | Estilos mobile/tablet aislados | `body.vp-mobile` / `body.vp-tablet` via `useViewportLayout` (ver `viewport-layout-classes.mdc`) |
 | Card tabla + toolbar + ⚙ columnas en header | `AdminTablePanel` |
 | Tabla Quasar | `AdminQTable` + clase `admin-data-table` |

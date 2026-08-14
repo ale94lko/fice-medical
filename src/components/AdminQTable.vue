@@ -20,7 +20,8 @@
     <template #item="scope">
       <AdminTableGridItem
         :table-props="scope"
-        :row-class="gridCardClass(scope.row)">
+        :row-class="gridCardClass(scope.row)"
+        :card-layout="cardLayout">
         <template v-if="hasRowActions" #actions>
           <slot name="row-actions" :row="scope.row" />
         </template>
@@ -51,6 +52,14 @@ const props = defineProps({
   grid: {
     type: Boolean,
     default: false,
+  },
+  /**
+   * Compact mobile card field hierarchy (title/subtitle/status/…).
+   * Passed through to AdminTableGridItem.
+   */
+  cardLayout: {
+    type: Object,
+    default: null,
   },
 })
 

@@ -11,9 +11,16 @@
       <q-item-section avatar>
         <q-avatar
           :size="iconSize"
-          :icon="icon"
+          :icon="avatarText ? undefined : icon"
           :color="iconColor"
-          :text-color="iconTextColor" />
+          :text-color="iconTextColor"
+          :font-size="avatarText ? '0.875rem' : undefined">
+          <span
+            v-if="avatarText"
+            class="data-item-avatar-text">
+            {{ avatarText }}
+          </span>
+        </q-avatar>
       </q-item-section>
       <q-item-section>
         <q-item-label :class="labelClass">
@@ -44,7 +51,14 @@ import { computed } from 'vue'
 const props = defineProps({
   icon: {
     type: String,
-    required: true,
+    default: 'person',
+  },
+  /**
+   * When set, shows initials in the avatar instead of `icon`.
+   */
+  avatarText: {
+    type: String,
+    default: '',
   },
   iconStyle: {
     type: String,
@@ -92,6 +106,9 @@ const iconColor = computed(() => {
     case 'warning':
       color = 'warning'
       break
+    case 'neutral':
+      color = 'grey-3'
+      break
 
     default:
       color = 'teal-1'
@@ -106,6 +123,9 @@ const iconTextColor = computed(() => {
   switch (props.iconStyle) {
     case 'warning':
       color = 'white'
+      break
+    case 'neutral':
+      color = 'grey-8'
       break
 
     default:

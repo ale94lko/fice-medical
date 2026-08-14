@@ -222,6 +222,51 @@
   }
 }
 
+/* Mobile footer: pagination on top, copyright below — no overlap */
+body.vp-mobile {
+  .app-footer {
+    &__toolbar {
+      flex-wrap: wrap;
+      align-items: center;
+      min-height: auto;
+      height: auto;
+      padding: 6px 10px;
+      gap: 2px 8px;
+    }
+
+    .q-space {
+      display: none;
+    }
+
+    &__pagination {
+      order: 1;
+      flex: 1 1 100%;
+      width: 100%;
+      max-width: 100%;
+      justify-content: stretch;
+    }
+
+    &__copyright {
+      order: 2;
+      flex: 1 1 100%;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      font-size: 0.625rem;
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .q-toolbar {
+      min-height: 0;
+      height: auto;
+    }
+  }
+}
+
 .app-drawer {
   --app-drawer-item-padding-x: 8px;
   --app-drawer-main-icon-size: 20px;
@@ -2603,6 +2648,13 @@ input:-webkit-autofill {
 
 .data-item-title-large {
   font-size: 1.5rem;
+}
+
+.data-item-avatar-text {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .data-item-sub-title {

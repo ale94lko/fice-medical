@@ -45,6 +45,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="rows"
         :columns="visibleColumns"
         :loading="false"
@@ -410,6 +411,14 @@ const { setFooterPagination, patchFooterPagination, clearFooterPagination } =
   useAppFooterPagination()
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: col.title,
+  subtitle: col.category,
+  status: col.status,
+  badges: [col.type, col.pinned, col.favorite],
+  hideEmpty: true,
+}
 
 const archiveConfirmMessage = computed(() => {
   const title = pendingArchiveResource.value?.[fk.title] || '—'

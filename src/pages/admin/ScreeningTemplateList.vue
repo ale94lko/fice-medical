@@ -37,6 +37,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="filteredRows"
         :columns="visibleColumns"
         :loading="false">
@@ -308,6 +309,14 @@ const tablePagination = ref({
 })
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: 'name',
+  subtitle: 'category',
+  status: 'status',
+  badges: ['version'],
+  hideEmpty: true,
+}
 
 const copySourceOptions = computed(() =>
   rows.value.map(row => ({ label: row.name, value: row.id })),

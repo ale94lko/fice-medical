@@ -37,10 +37,12 @@
     </q-header>
     <q-footer class="app-footer">
       <q-toolbar class="app-footer__toolbar">
-        <p class="app-footer__copyright q-mb-none">
+        <p
+          v-if="showFooterCopyright"
+          class="app-footer__copyright q-mb-none">
           &copy; 2026 FiCE Medical. Powered by LandA Apps
         </p>
-        <q-space />
+        <q-space v-if="showFooterCopyright" />
         <div class="app-footer__pagination">
           <AppFooterPaginationHost />
         </div>
@@ -745,6 +747,8 @@ import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
+import { useAppFooterPagination } from
+  'src/composables/useAppFooterPagination.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
 import { refreshClinicLogoOnPageLoad } from
   'src/utils/sync-auth-subtenants.js'
@@ -758,6 +762,12 @@ const {
   isMobile: mobileView,
   isTablet: tabletView,
 } = useViewportLayout()
+const { footerPaginationState } = useAppFooterPagination()
+
+/** Hide copyright on mobile when list pagination occupies the footer. */
+const showFooterCopyright = computed(
+  () => !(mobileView.value && footerPaginationState.visible),
+)
 
 const activeContentKey = computed(() =>
   `${route.fullPath}::${authStore.activeSubtenantId ?? 0}`,

@@ -55,6 +55,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100, 0]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="rows"
         :columns="visibleColumns"
         :loading="false"
@@ -521,6 +522,23 @@ const showEmptyActions = computed(() =>
 )
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: col.name,
+  subtitle: col.position,
+  status: col.status,
+  identifier: {
+    column: col.staffNo,
+  },
+  contact: col.email,
+  badges: [col.role, col.hireDate],
+  footerBadges: [col.clinician],
+  exclude: [col.username],
+  hideEmpty: true,
+  hideIfSameAs: {
+    [col.username]: col.email,
+  },
+}
 
 const allColumns = computed(() => [
   {

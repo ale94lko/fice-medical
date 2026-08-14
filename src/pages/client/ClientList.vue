@@ -56,6 +56,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="rows"
         :columns="visibleColumns"
         :loading="false"
@@ -721,6 +722,23 @@ watch(
 )
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: col.name,
+  status: col.status,
+  identifier: {
+    column: col.clientNumber,
+  },
+  contact: col.email,
+  badges: [col.allergies],
+  exclude: [
+    col.phones,
+    col.dob,
+    col.clinicians,
+    col.admissionDate,
+  ],
+  hideEmpty: true,
+}
 
 const addClient = () => {
   router.push('/clients/add')

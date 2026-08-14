@@ -46,6 +46,7 @@
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
         :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="rows"
         :columns="visibleColumns"
         :loading="false"
@@ -706,6 +707,13 @@ watch(
 )
 
 const { showGrid } = useAdminTableMobileGrid()
+
+const mobileCardLayout = {
+  title: col.user,
+  status: col.status,
+  badges: [col.roles, col.createdAt, col.lastLogin],
+  hideEmpty: true,
+}
 </script>
 
 <style lang="scss" scoped>
