@@ -1,0 +1,1 @@
+import{n as e}from"./index-DAF2kz2K.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
