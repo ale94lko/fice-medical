@@ -131,8 +131,14 @@ export function getCalendarEventMinuteRange(
 export function eventStatusClass(status) {
   const normalized = trim(status).toUpperCase()
 
+  if (normalized === appointmentStatuses.pending) {
+    return 'calendar-event--pending'
+  }
   if (normalized === appointmentStatuses.checkedIn) {
     return 'calendar-event--checked-in'
+  }
+  if (normalized === appointmentStatuses.inProgress) {
+    return 'calendar-event--in-progress'
   }
   if (normalized === appointmentStatuses.completed) {
     return 'calendar-event--completed'
@@ -143,8 +149,11 @@ export function eventStatusClass(status) {
   if (normalized === appointmentStatuses.noShow) {
     return 'calendar-event--no-show'
   }
+  if (normalized === appointmentStatuses.rescheduled) {
+    return 'calendar-event--rescheduled'
+  }
 
-  return 'calendar-event--confirmed'
+  return 'calendar-event--scheduled'
 }
 
 export function appointmentToCalendarEvent(appointment, options = {}) {

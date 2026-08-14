@@ -50,6 +50,8 @@ export const layoutTestIds = {
   navAdminSubtenants: 'layout-nav-admin-subtenants',
   navAdminServices: 'layout-nav-admin-services',
   navAdminScreeningTemplates: 'layout-nav-admin-screening-templates',
+  navAdminClinicalNoteTemplates:
+    'layout-nav-admin-clinical-note-templates',
   navAdminConsentTemplates: 'layout-nav-admin-consent-templates',
   navAdminClinicalAudit: 'layout-nav-admin-clinical-audit',
   navClinicalResources: 'layout-nav-clinical-resources',
@@ -250,6 +252,29 @@ export const serviceProcedureDialogTestIds = {
     id,
     'btn-delete',
   ),
+}
+
+export const clinicalNoteTemplateListTestIds = {
+  page: 'clinical-note-template-list-page',
+  search: 'clinical-note-template-list-input-search',
+  add: 'clinical-note-template-list-btn-add',
+}
+
+export const clinicalNoteTemplateDialogTestIds = {
+  dialog: 'clinical-note-template-dialog',
+  field: name => toTestId('clinical-note-template-dialog-field', name),
+  addSection: 'clinical-note-template-dialog-btn-add-section',
+  moveUp: index => toTestId(
+    'clinical-note-template-dialog-section',
+    index,
+    'move-up',
+  ),
+  moveDown: index => toTestId(
+    'clinical-note-template-dialog-section',
+    index,
+    'move-down',
+  ),
+  btn: name => toTestId('clinical-note-template-dialog-btn', name),
 }
 
 export const screeningTemplateListTestIds = {

@@ -1,11 +1,12 @@
 <template>
   <q-dialog
-    :model-value="modelValue"
+    v-if="modelValue"
+    :model-value="true"
     persistent
     transition-show="scale"
     transition-hide="scale"
     :data-testid="sessionInactivityTestIds.dialog"
-    @update:model-value="emit('update:modelValue', $event)">
+    @update:model-value="onDialogUpdate">
     <q-card class="session-expiry-dialog app-dialog-card">
       <q-card-section class="session-expiry-dialog__body">
         <div
@@ -105,6 +106,12 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+
+function onDialogUpdate(open) {
+  if (!open) {
+    emit('update:modelValue', false)
+  }
+}
 
 const actionsDisabled = computed(
   () => props.keepOpenLoading || props.closingSection,

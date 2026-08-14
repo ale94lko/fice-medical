@@ -134,6 +134,27 @@
           </div>
         </div>
 
+        <div class="row q-col-gutter-md q-mt-md">
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('serviceProcedureDefaultClinicalNoteTemplate')">
+              <FormSelect
+                v-model="local.defaultClinicalNoteTemplateId"
+                outlined
+                hide-bottom-space
+                clearable
+                emit-value
+                map-options
+                :options="templateOptions"
+                :readonly="readonly"
+                :test-id="serviceProcedureDialogTestIds.field(
+                  'clinical-note-template',
+                )"
+              />
+            </AddClientLabeledField>
+          </div>
+        </div>
+
         <div class="insurance-dialog__card-section q-mt-lg">
           <SubsectionHeading
             icon="payments"
@@ -279,6 +300,8 @@ import {
   sanitizeStaffCompensationRateInput,
 } from 'src/utils/staff-form.js'
 import { serviceProcedureDialogTestIds } from 'src/test-ids/index.js'
+import { listActiveClinicalNoteTemplates } from
+  'src/utils/clinical-note-template-api.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -296,6 +319,7 @@ const { t } = useI18n()
 
 const local = ref(createEmptyServiceProcedureForm())
 const errors = ref({})
+const templateOptions = ref([])
 
 const open = computed({
   get: () => props.modelValue,
@@ -372,10 +396,23 @@ watch(
   () => {
     if (props.modelValue) {
       syncLocalFromProps()
+      void loadTemplateOptions()
     }
   },
   { immediate: true },
 )
+
+async function loadTemplateOptions() {
+  try {
+    const templates = await listActiveClinicalNoteTemplates()
+    templateOptions.value = templates.map(item => ({
+      label: item.name,
+      value: item.id,
+    }))
+  } catch {
+    templateOptions.value = []
+  }
+}
 
 function onCancel() {
   emit('cancel')

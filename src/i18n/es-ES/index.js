@@ -301,6 +301,9 @@ export default {
   serviceProcedureNameLabel: 'Nombre',
   serviceProcedureCategoryLabel: 'Categoría',
   serviceProcedureDescriptionLabel: 'Descripción',
+  serviceProcedureDefaultClinicalNoteTemplate:
+    'Plantilla de nota clínica predeterminada',
+  serviceProcedureNoClinicalNoteTemplate: 'Ninguna',
   serviceProcedureStatusActiveLabel: 'Activo',
   serviceProcedureMinDurationLabel: 'Duración mín. (minutos)',
   serviceProcedureMaxDurationLabel: 'Duración máx. (minutos)',
@@ -1165,6 +1168,78 @@ export default {
   screeningTemplateListEmpty: 'No se encontraron plantillas de tamizaje.',
   screeningTemplateListError:
     'No se pudieron cargar las plantillas de tamizaje.',
+  clinicalNoteTemplateListTitle: 'Plantillas de nota clínica',
+  clinicalNoteTemplateListSubtitle:
+    'Define cómo se ensambla la nota clínica generada a partir de '
+    + 'datos del encounter y campos narrativos.',
+  clinicalNoteTemplateListSearchPlaceholder: 'Buscar plantillas',
+  clinicalNoteTemplateListAdd: 'Nueva plantilla',
+  clinicalNoteTemplateListError:
+    'No se pudieron cargar las plantillas de nota clínica.',
+  clinicalNoteTemplateNameLabel: 'Nombre',
+  clinicalNoteTemplateDescriptionLabel: 'Descripción',
+  clinicalNoteTemplateStatusLabel: 'Estado',
+  clinicalNoteTemplateVersionLabel: 'Versión',
+  clinicalNoteTemplateStatusActive: 'Activa',
+  clinicalNoteTemplateStatusInactive: 'Inactiva',
+  clinicalNoteTemplateAddTitle: 'Añadir plantilla de nota clínica',
+  clinicalNoteTemplateEditTitle: 'Editar plantilla de nota clínica',
+  clinicalNoteTemplateViewTitle: 'Ver plantilla de nota clínica',
+  clinicalNoteTemplateBuilderHint:
+    'Configure el orden, las etiquetas y las fuentes usadas al '
+    + 'generar la nota clínica desde un encounter.',
+  clinicalNoteTemplateSectionsTitle: 'Secciones',
+  clinicalNoteTemplateAddSection: 'Añadir sección',
+  clinicalNoteTemplateSectionLabel: 'Etiqueta',
+  clinicalNoteTemplateSectionType: 'Tipo',
+  clinicalNoteTemplateDataSource: 'Origen de datos',
+  clinicalNoteTemplateShowWhenEmpty: 'Mostrar si está vacío',
+  clinicalNoteTemplateInputType: 'Tipo de entrada',
+  clinicalNoteTemplatePlaceholder: 'Marcador de posición',
+  clinicalNoteTemplateAssessment: 'Plantilla de evaluación',
+  clinicalNoteTemplateRequired: 'Obligatorio',
+  clinicalNoteTemplateMoveUp: 'Subir',
+  clinicalNoteTemplateMoveDown: 'Bajar',
+  clinicalNoteTemplatePreview: 'Vista previa',
+  clinicalNoteTemplatePreviewHint:
+    'Vista previa del orden final. No crea datos de encounter ni '
+    + 'de nota.',
+  clinicalNoteTemplatePreviewUntitled: 'Plantilla sin título',
+  clinicalNoteTemplateDuplicate: 'Duplicar',
+  clinicalNoteTemplateActivate: 'Activar',
+  clinicalNoteTemplateDeactivate: 'Desactivar',
+  clinicalNoteTemplateSaveSuccess: 'Plantilla guardada.',
+  clinicalNoteTemplateSaveError: 'No se pudo guardar la plantilla.',
+  clinicalNoteTemplateDuplicateSuccess: 'Plantilla duplicada.',
+  clinicalNoteTemplateDuplicateError:
+    'No se pudo duplicar la plantilla.',
+  clinicalNoteTemplateStatusError:
+    'No se pudo actualizar el estado de la plantilla.',
+  clinicalNoteSectionAutoData: 'Datos automáticos',
+  clinicalNoteSectionNarrative: 'Campo narrativo',
+  clinicalNoteSectionAssessment: 'Evaluación',
+  clinicalNoteSectionStructured: 'Sección estructurada',
+  clinicalNotePreviewAuto: 'Automático desde {source}',
+  clinicalNotePreviewNarrative:
+    'El clínico lo introduce durante la visita.',
+  clinicalNotePreviewAssessment:
+    'Usa el resultado del tamizaje/evaluación vinculado.',
+  clinicalNotePreviewStructured:
+    'Campos estructurados completados en el encounter.',
+  'clinicalNoteDataSource_ENCOUNTER_SUMMARY': 'Resumen del encounter',
+  'clinicalNoteDataSource_REASON_FOR_VISIT': 'Motivo de la visita',
+  'clinicalNoteDataSource_SERVICES': 'Servicios',
+  'clinicalNoteDataSource_DIAGNOSES': 'Diagnósticos',
+  'clinicalNoteDataSource_VITALS': 'Signos vitales',
+  'clinicalNoteDataSource_MEDICATIONS': 'Medicamentos',
+  'clinicalNoteDataSource_CARE_PLAN': 'Plan de cuidado',
+  'clinicalNoteDataSource_FOLLOW_UP': 'Seguimiento',
+  'clinicalNoteDataSource_REFERRALS': 'Derivaciones',
+  'clinicalNoteDataSource_PROVIDER': 'Información del proveedor',
+  'clinicalNoteDataSource_MEDICATION_CHANGES': 'Cambios de medicación',
+  'clinicalNoteInputType_SHORT_TEXT': 'Texto corto',
+  'clinicalNoteInputType_LONG_TEXT': 'Texto largo',
+  'clinicalNoteInputType_RICH_TEXT': 'Texto enriquecido',
   screeningTemplateListPaginationSummary:
     'Mostrando {from} a {to} de {total} plantillas de tamizaje',
   screeningTemplateLoadError: 'No se pudo cargar la plantilla.',
@@ -1578,6 +1653,7 @@ export default {
     'Las notas firmadas no se pueden editar.',
   clinicalNoteSignedAt: 'Firmada el {date}',
   clinicalNoteStatusDraft: 'Borrador',
+  clinicalNoteStatusGenerated: 'Generada',
   clinicalNoteStatusSigned: 'Firmada',
   clinicalNoteColDateTime: 'Fecha y hora',
   clinicalNoteColClinician: 'Clínico',
@@ -2116,12 +2192,15 @@ export default {
   appointmentDetailViewClient: 'Ver cliente',
   appointmentDetailCopiedNumber: 'Número de cita copiado.',
   appointmentDetailCopyError: 'No se pudo copiar el número de cita.',
-  appointmentDetailStatusConfirmedHint: 'La cita está confirmada',
+  appointmentDetailStatusScheduledHint: 'La cita está programada',
+  appointmentDetailStatusConfirmedHint: 'La cita está programada',
   appointmentDetailStatusCheckedInHint: 'El cliente hizo check-in',
   appointmentDetailStatusCompletedHint: 'La cita ha sido completada',
   appointmentDetailStatusCancelledHint: 'La cita ha sido cancelada',
   appointmentDetailStatusNoShowHint: 'El cliente no asistió',
   appointmentDetailStatusPendingHint: 'La cita está pendiente de confirmación',
+  appointmentDetailStatusInProgressHint: 'La cita está en curso',
+  appointmentDetailStatusRescheduledHint: 'La cita fue reprogramada',
   appointmentEditTitle: 'Editar cita',
   appointmentSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar citas.',
@@ -2338,7 +2417,8 @@ export default {
   appointmentPaginationSummary:
     'Mostrando {from} a {to} de {total} citas',
   appointmentStatusPending: 'Pendiente',
-  appointmentStatusConfirmed: 'Confirmada',
+  appointmentStatusScheduled: 'Programada',
+  appointmentStatusConfirmed: 'Programada',
   appointmentStatusCheckedIn: 'Check-in',
   appointmentStatusInProgress: 'En curso',
   appointmentStatusCompleted: 'Completada',
@@ -4166,7 +4246,8 @@ export default {
   encounterTabOverview: 'Overview',
   encounterTabVisit: 'Visit',
   encounterTabClinical: 'Clinical',
-  encounterTabNote: 'Note',
+  encounterTabNarrative: 'Narrative',
+  encounterTabNote: 'Narrative',
   encounterTabFollowUp: 'Follow Up',
   encounterCompleteVisitTitle: 'Completar esta visita',
   encounterProgressLabel: '{completed} de {total} completados',
@@ -4543,6 +4624,35 @@ export default {
     'No se pudo cargar el historial completo del cliente.',
   encounterOpenInChart: 'Abrir {module}',
   encounterProgressNote: 'Progress Note',
+  encounterNarrativeTitle: 'Narrative',
+  encounterNarrativeHint:
+    'Complete la información narrativa de esta visita.',
+  encounterNarrativeEmpty:
+    'Esta plantilla no tiene campos narrativos para este encounter.',
+  encounterNarrativeNoTemplate:
+    'Este encounter no tiene plantilla de nota clínica configurada.',
+  encounterNarrativeSaved: 'Guardado',
+  encounterNarrativeSaveError: 'No se pudo guardar la narrativa.',
+  encounterNarrativeConflict:
+    'Este campo fue actualizado por otro usuario. '
+    + 'Recargue e intente de nuevo.',
+  encounterNarrativeIncomplete:
+    '{count} campo obligatorio incompleto | '
+    + '{count} campos obligatorios incompletos',
+  encounterGeneratedNoteTitle: 'Nota clínica',
+  encounterGeneratedNoteReady: 'Lista para revisar',
+  encounterGeneratedNoteFailed:
+    'Falló la generación de la nota clínica. Puede reintentar '
+    + 'sin crear un duplicado.',
+  encounterGeneratedNoteRetry: 'Reintentar generación',
+  encounterGeneratedNoteReview: 'Revisar nota clínica',
+  encounterGeneratedNoteRegenerate: 'Regenerar nota clínica',
+  encounterGeneratedNoteSource: 'Origen: {source}',
+  encounterGeneratedNoteSignSuccess: 'Nota clínica firmada.',
+  encounterGeneratedNoteRegenerateSuccess: 'Nota clínica regenerada.',
+  encounterGeneratedNoteGenerateSuccess: 'Nota clínica generada.',
+  encounterGeneratedNoteMissing:
+    'La nota clínica aún no está disponible.',
   encounterNoteReuseHint:
     'Use el módulo de notas clínicas para borradores y firma SOAP.',
   encounterOpenNotes: 'Abrir notas',

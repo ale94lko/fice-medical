@@ -1,7 +1,9 @@
 <template>
-  <router-view />
-  <ForcedChangePasswordDialog v-if="mustChangePassword" />
-  <TelehealthFloatingCall />
+  <div class="fit">
+    <router-view />
+    <ForcedChangePasswordDialog v-if="mustChangePassword" />
+    <TelehealthFloatingCall />
+  </div>
 </template>
 
 <script setup>

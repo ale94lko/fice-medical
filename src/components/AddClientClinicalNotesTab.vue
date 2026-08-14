@@ -116,6 +116,16 @@
       @confirm="onDeleteConfirmed"
     />
 
+    <EncounterGeneratedNoteDialog
+      v-model="generatedOpen"
+      :note="generatedNote"
+      :busy="saving"
+      :can-sign="canSignClinicalNotes"
+      :can-regenerate="canRegenerateGenerated"
+      @sign="onSignGenerated"
+      @regenerate="onRegenerateGenerated"
+    />
+
     <AiGenerateDialog
       v-model="aiDialogOpen"
       :feature="aiFeature"
@@ -133,9 +143,12 @@ import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import ClinicalNoteDialog from 'components/ClinicalNoteDialog.vue'
 import ClinicalNotesTable from 'components/ClinicalNotesTable.vue'
+import EncounterGeneratedNoteDialog from
+  'components/encounter/EncounterGeneratedNoteDialog.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import {
   aiFeatures,
+  permissionNames,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import { useAiPermissions } from 'src/composables/useAiPermissions.js'
@@ -166,6 +179,12 @@ import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { aiTestIds } from 'src/test-ids/ai.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
+import { hasPermission } from 'src/utils/auth-permissions.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
+import {
+  fetchGeneratedClinicalNote,
+  regenerateClinicalNote,
+} from 'src/utils/encounter-narrative-api.js'
 
 const props = defineProps({
   clientId: {
@@ -189,6 +208,7 @@ const props = defineProps({
 const { t } = useI18n()
 const $q = useQuasar()
 const siteStore = useSiteStore()
+const authStore = useAuthStore()
 const {
   canViewClinicalNotes,
   canAddClinicalNotes,
@@ -210,6 +230,16 @@ const exportDialogOpen = ref(false)
 const exportContext = ref({})
 const aiDialogOpen = ref(false)
 const aiFeature = ref(aiFeatures.soapDraft)
+const generatedOpen = ref(false)
+const generatedNote = ref(null)
+
+const canRegenerateGenerated = computed(() =>
+  hasPermission(
+    authStore.permissions,
+    permissionNames.clinicalNoteRegenerate,
+  )
+  && String(generatedNote.value?.status ?? '').toUpperCase() !== 'SIGNED',
+)
 
 const hasClientId = computed(() =>
   Boolean(String(props.clientId ?? '').trim()),
@@ -294,6 +324,11 @@ function openAdd() {
 }
 
 function openView(row) {
+  if (row.generated || row.isGenerated) {
+    void openGenerated(row)
+
+    return
+  }
   if (isServerClinicalNoteId(row.id)) {
     const detail = noteDetailFromRecord(row.id)
     if (detail) {
@@ -309,8 +344,90 @@ function openView(row) {
   dialogOpen.value = true
 }
 
+async function openGenerated(row) {
+  const encounterId = row.encounterId
+  if (encounterId == null) {
+    return
+  }
+  saving.value = true
+  try {
+    generatedNote.value = await fetchGeneratedClinicalNote(encounterId)
+    generatedOpen.value = true
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('clinicalNoteLoadError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onSignGenerated(signatureData) {
+  if (!canSignClinicalNotes.value || generatedNote.value?.id == null) {
+    return
+  }
+  saving.value = true
+  try {
+    await signClinicalNote(
+      clientId.value,
+      generatedNote.value.id,
+      signatureData,
+      resolvedClinicianOptions.value,
+    )
+    generatedOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterGeneratedNoteSignSuccess'),
+      position: 'top',
+    })
+    await refreshClientClinicalNotes()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('clinicalNoteSignError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onRegenerateGenerated() {
+  const encounterId = generatedNote.value?.encounterId
+  if (encounterId == null) {
+    return
+  }
+  saving.value = true
+  try {
+    generatedNote.value = await regenerateClinicalNote(encounterId)
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterGeneratedNoteRegenerateSuccess'),
+      position: 'top',
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('clinicalNoteSaveError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
 function openEdit(row) {
   if (!canEditClinicalNotes.value) {
+    return
+  }
+  if (row.generated || row.isGenerated) {
+    void openGenerated(row)
+
     return
   }
   if (isServerClinicalNoteId(row.id)) {

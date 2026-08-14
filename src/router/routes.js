@@ -171,6 +171,29 @@ const routes = [
         },
       },
       {
+        path: 'administration/clinical-note-templates/add',
+        name: 'AdminClinicalNoteTemplatesAdd',
+        component: () => import(
+          'pages/admin/ClinicalNoteTemplateList.vue'
+        ),
+        meta: {
+          requiresPermission:
+            permissionNames.clinicalNoteTemplateCreate,
+          clinicalNoteTemplateListAutoOpen: 'add',
+        },
+      },
+      {
+        path: 'administration/clinical-note-templates',
+        name: 'AdminClinicalNoteTemplatesList',
+        component: () => import(
+          'pages/admin/ClinicalNoteTemplateList.vue'
+        ),
+        meta: {
+          requiresPermission:
+            permissionNames.clinicalNoteTemplateView,
+        },
+      },
+      {
         path: 'administration/consent-templates',
         name: 'AdminConsentTemplatesList',
         component: () => import('pages/admin/ConsentTemplateListPage.vue'),

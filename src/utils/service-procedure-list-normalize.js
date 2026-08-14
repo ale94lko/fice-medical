@@ -67,6 +67,10 @@ export function mapServiceProcedureListItem(item, t) {
     [fk.authorizationRequirement]: String(
       item.authorization_requirement ?? item.authorizationRequirement ?? '',
     ).trim(),
+    [fk.defaultClinicalNoteTemplateId]:
+      item.default_clinical_note_template_id
+      ?? item.defaultClinicalNoteTemplateId
+      ?? null,
     [fk.createdAt]: item.created_at ?? item.createdAt ?? '',
     [fk.updatedAt]: item.updated_at ?? item.updatedAt ?? '',
   }

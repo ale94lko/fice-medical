@@ -539,6 +539,14 @@
               {{ t('screeningTemplateListTitle') }}
             </AppDrawerSubNavItem>
             <AppDrawerSubNavItem
+              v-if="showClinicalNoteTemplates"
+              icon="description"
+              to="/administration/clinical-note-templates"
+              :active-class="activeClass"
+              :test-id="layoutTestIds.navAdminClinicalNoteTemplates">
+              {{ t('clinicalNoteTemplateListTitle') }}
+            </AppDrawerSubNavItem>
+            <AppDrawerSubNavItem
               v-if="showConsentTemplates"
               icon="draw"
               to="/administration/consent-templates"
@@ -603,6 +611,14 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminScreeningTemplates">
                 {{ t('screeningTemplateListTitle') }}
+              </AppDrawerSubNavItem>
+              <AppDrawerSubNavItem
+                v-if="showClinicalNoteTemplates"
+                icon="description"
+                to="/administration/clinical-note-templates"
+                :active-class="activeClass"
+                :test-id="layoutTestIds.navAdminClinicalNoteTemplates">
+                {{ t('clinicalNoteTemplateListTitle') }}
               </AppDrawerSubNavItem>
               <AppDrawerSubNavItem
                 v-if="showConsentTemplates"
@@ -699,26 +715,25 @@
     <q-page-container id="app-content-root" class="app-content-root">
       <router-view :key="activeContentKey" />
     </q-page-container>
+    <ModalComponent
+      v-model="showSignOutConfirm"
+      :confirm-text="t('confirm')"
+      :cancel-text="t('cancel')"
+      :title="t('confirmSignOutTitle')"
+      :message="t('confirmSignOut')"
+      @confirm="handleSignOutConfirm"
+      @cancel="handleSignOutCancel"
+    />
+    <SessionExpiryDialog
+      v-model="sessionWarningVisible"
+      :countdown="formattedCountdown"
+      :keep-open-loading="keepOpenLoading"
+      :closing-section="closingSection"
+      @close-section="closeSection"
+      @keep-open="keepSectionOpen"
+    />
+    <ChangePasswordDialog v-model="showChangePasswordDialog" />
   </q-layout>
-  <ModalComponent
-    v-model="showSignOutConfirm"
-    :confirm-text="t('confirm')"
-    :cancel-text="t('cancel')"
-    :title="t('confirmSignOutTitle')"
-    :message="t('confirmSignOut')"
-    @confirm="handleSignOutConfirm"
-    @cancel="handleSignOutCancel"
-  />
-  <SessionExpiryDialog
-    v-if="!authStore.mustChangePassword"
-    v-model="warningVisible"
-    :countdown="formattedCountdown"
-    :keep-open-loading="keepOpenLoading"
-    :closing-section="closingSection"
-    @close-section="closeSection"
-    @keep-open="keepSectionOpen"
-  />
-  <ChangePasswordDialog v-model="showChangePasswordDialog" />
 </template>
 
 <script setup>
@@ -781,6 +796,15 @@ const {
   closeSection,
   keepSectionOpen,
 } = useSessionInactivity()
+
+const sessionWarningVisible = computed({
+  get() {
+    return warningVisible.value && !authStore.mustChangePassword
+  },
+  set(value) {
+    warningVisible.value = value
+  },
+})
 
 function readInitialSidebarOpen() {
   if (typeof window === 'undefined') {
@@ -851,6 +875,7 @@ const {
   showAdminUsers,
   showServicesProcedures,
   showScreeningTemplates,
+  showClinicalNoteTemplates,
   showConsentTemplates,
   showClinicalAudit,
   showClinicalResourcesMenu,

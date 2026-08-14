@@ -18,6 +18,9 @@ function normalizeStatus(status) {
   if (token === clinicalNoteStatuses.signed) {
     return clinicalNoteStatuses.signed
   }
+  if (token === clinicalNoteStatuses.generated) {
+    return clinicalNoteStatuses.generated
+  }
 
   return clinicalNoteStatuses.draft
 }
@@ -118,8 +121,13 @@ export function normalizeClinicalNoteSummary(
       : subjective || '—',
     status,
     signedAt: row?.signed_at ?? row?.signedAt ?? null,
+    generated: Boolean(row?.generated)
+      || status === clinicalNoteStatuses.generated,
+    encounterId: row?.encounter_id ?? row?.encounterId ?? null,
     isDraft: status === clinicalNoteStatuses.draft,
     isSigned: status === clinicalNoteStatuses.signed,
+    isGenerated: status === clinicalNoteStatuses.generated
+      || Boolean(row?.generated),
   }
 }
 

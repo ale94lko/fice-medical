@@ -966,6 +966,41 @@
     color: #b45309;
   }
 
+  &--scheduled {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  &--checked-in {
+    background: #ccfbf1;
+    color: #0f766e;
+  }
+
+  &--in-progress {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+
+  &--complete {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &--cancel {
+    background: #fee2e2;
+    color: #b91c1c;
+  }
+
+  &--no-show {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+
+  &--rescheduled {
+    background: #ffedd5;
+    color: #c2410c;
+  }
+
   .admin-table-search-highlight__mark {
     color: inherit;
   }

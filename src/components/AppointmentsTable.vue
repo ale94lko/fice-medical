@@ -103,7 +103,7 @@
       <q-td :props="scope">
         <AdminTableStatusCell
           :label="statusLabel(scope.row.status)"
-          :variant="statusVariant(scope.row.status)"
+          :variant="appointmentStatusVariant(scope.row.status)"
         />
       </q-td>
     </template>
@@ -165,7 +165,7 @@ import AdminTableClinicianAvatars from
   'components/admin-table/AdminTableClinicianAvatars.vue'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
-import { appointmentStatuses, siteBreakpoints } from 'components/constants.js'
+import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import {
   appointmentCanCancel,
@@ -175,6 +175,7 @@ import {
   appointmentCanEdit,
   appointmentCanNoShow,
   appointmentCanReschedule,
+  appointmentStatusVariant,
 } from 'src/utils/appointment-actions.js'
 import {
   formatUtcDateLong,
@@ -364,36 +365,6 @@ function statusLabel(status) {
     .join('')}`
 
   return t(key)
-}
-
-function statusVariant(status) {
-  const token = String(status ?? '').toUpperCase()
-  if (token === appointmentStatuses.pending) {
-    return 'pending'
-  }
-  if (token === appointmentStatuses.confirmed) {
-    return 'active'
-  }
-  if (token === appointmentStatuses.checkedIn) {
-    return 'completed'
-  }
-  if (token === appointmentStatuses.inProgress) {
-    return 'active'
-  }
-  if (token === appointmentStatuses.completed) {
-    return 'completed'
-  }
-  if (token === appointmentStatuses.cancelled) {
-    return 'cancelled'
-  }
-  if (token === appointmentStatuses.noShow) {
-    return 'inactive'
-  }
-  if (token === appointmentStatuses.rescheduled) {
-    return 'other'
-  }
-
-  return 'other'
 }
 
 function clinicianEntries(row) {

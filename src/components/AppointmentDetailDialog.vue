@@ -473,6 +473,13 @@ const statusMeta = computed(() => {
       hintKey: 'appointmentDetailStatusCheckedInHint',
     }
   }
+  if (status === appointmentStatuses.inProgress) {
+    return {
+      icon: 'play_circle',
+      tone: 'in-progress',
+      hintKey: 'appointmentDetailStatusInProgressHint',
+    }
+  }
   if (status === appointmentStatuses.completed) {
     return {
       icon: 'task_alt',
@@ -501,11 +508,18 @@ const statusMeta = computed(() => {
       hintKey: 'appointmentDetailStatusPendingHint',
     }
   }
+  if (status === appointmentStatuses.rescheduled) {
+    return {
+      icon: 'update',
+      tone: 'rescheduled',
+      hintKey: 'appointmentDetailStatusRescheduledHint',
+    }
+  }
 
   return {
-    icon: 'check_circle',
-    tone: 'confirmed',
-    hintKey: 'appointmentDetailStatusConfirmedHint',
+    icon: 'event_available',
+    tone: 'scheduled',
+    hintKey: 'appointmentDetailStatusScheduledHint',
   }
 })
 
@@ -517,20 +531,9 @@ const statusIconClass = computed(() =>
   `appointment-detail-dialog__hero-icon--status-${statusMeta.value.tone}`,
 )
 
-const statusTitleClass = computed(() => {
-  const tone = statusMeta.value.tone
-  if (tone === 'cancelled' || tone === 'no-show') {
-    return 'text-negative'
-  }
-  if (tone === 'completed') {
-    return 'text-grey-8'
-  }
-  if (tone === 'pending') {
-    return 'text-warning'
-  }
-
-  return 'text-positive'
-})
+const statusTitleClass = computed(() =>
+  `appointment-detail-dialog__hero-status-title--${statusMeta.value.tone}`,
+)
 
 const statusHint = computed(() => t(statusMeta.value.hintKey))
 

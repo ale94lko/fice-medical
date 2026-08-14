@@ -40,7 +40,10 @@
         @view-allergies="goToModule('allergies')"
       />
 
-      <EncounterWorkspaceTabs v-model="activeTab" />
+      <EncounterWorkspaceTabs
+        v-model="activeTab"
+        :show-narrative="showNarrativeTab"
+      />
 
       <div class="encounter-workspace-page__body">
         <EncounterWorkspaceOverview
@@ -49,11 +52,15 @@
           :billing-readiness="workspace.billingReadiness"
           :superbill="workspace.superbill"
           :show-generate-superbill="showGenerateSuperbill"
+          :narrative="workspace.narrative"
+          :generated-note="generatedNoteForOverview"
           @requirement-action="onRequirementAction"
           @quick-action="onQuickAction"
           @waive-requirement="onWaiveRequest"
           @view-superbill="onViewSuperbill"
           @generate-superbill="onGenerateSuperbill"
+          @review-generated-note="generatedNoteOpen = true"
+          @retry-generate="onRetryGenerate"
         />
         <EncounterWorkspaceVisit
           v-else-if="activeTab === encounterWorkspaceTabs.visit"
@@ -80,10 +87,12 @@
           :patient-gender="patientGender"
           @changed="onClinicalDataChanged"
         />
-        <EncounterWorkspaceNote
-          v-else-if="activeTab === encounterWorkspaceTabs.note"
-          :sections="workspace.sections"
-          @open-notes="goToModule('clinical-notes')"
+        <EncounterWorkspaceNarrative
+          v-else-if="activeTab === encounterWorkspaceTabs.narrative"
+          :encounter-id="workspace.encounter.id"
+          :narrative="workspace.narrative"
+          :can-edit="canEditNarrative"
+          @saved="onNarrativeSaved"
         />
         <EncounterWorkspaceFollowUp
           v-else
@@ -138,6 +147,16 @@
       @confirm="onReviewConfirm"
     />
 
+    <EncounterGeneratedNoteDialog
+      v-model="generatedNoteOpen"
+      :note="workspace?.generatedClinicalNote"
+      :busy="actionBusy"
+      :can-sign="canSignGeneratedNote"
+      :can-regenerate="canRegenerateGeneratedNote"
+      @sign="onSignGeneratedNote"
+      @regenerate="onRegenerateGeneratedNote"
+    />
+
     <AiAssistantFab
       :visible="Boolean(workspace?.encounter?.clientId)"
       :client-id="workspace?.encounter?.clientId"
@@ -159,6 +178,7 @@ import {
   encounterRequirementPurposes,
   encounterStatuses,
   encounterWorkspaceTabs,
+  permissionNames,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
@@ -181,8 +201,10 @@ import EncounterWorkspaceFollowUp from
   'components/encounter/EncounterWorkspaceFollowUp.vue'
 import EncounterWorkspaceHeader from
   'components/encounter/EncounterWorkspaceHeader.vue'
-import EncounterWorkspaceNote from
-  'components/encounter/EncounterWorkspaceNote.vue'
+import EncounterGeneratedNoteDialog from
+  'components/encounter/EncounterGeneratedNoteDialog.vue'
+import EncounterWorkspaceNarrative from
+  'components/encounter/EncounterWorkspaceNarrative.vue'
 import EncounterWorkspaceOverview from
   'components/encounter/EncounterWorkspaceOverview.vue'
 import EncounterWorkspaceTabs from
@@ -205,7 +227,8 @@ import {
   waitEncounterForResults,
   waiveEncounterRequirement,
 } from 'src/utils/encounter-api.js'
-import { hasAnyPermission } from 'src/utils/auth-permissions.js'
+import { hasAnyPermission, hasPermission } from
+  'src/utils/auth-permissions.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { resolveRequirementActionTarget } from
   'src/utils/encounter-requirement-actions.js'
@@ -225,6 +248,13 @@ import {
   generateEncounterSuperbill,
   superbillApiErrorMessage,
 } from 'src/utils/superbill-api.js'
+import {
+  regenerateClinicalNote,
+  retryGenerateClinicalNote,
+} from 'src/utils/encounter-narrative-api.js'
+import { signClinicalNote } from 'src/utils/clinical-note-api.js'
+import { useClientClinicalNotePermissions } from
+  'src/composables/useClientClinicalNotePermissions.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -246,6 +276,8 @@ const waiveTarget = ref(null)
 const reviewOpen = ref(false)
 const reviewMode = ref('medication')
 const reviewCarePlanId = ref(null)
+const generatedNoteOpen = ref(false)
+const { canSignClinicalNotes } = useClientClinicalNotePermissions()
 
 const encounterId = computed(() =>
   String(route.params.id ?? '').trim(),
@@ -289,6 +321,59 @@ const canResumeEncounter = computed(() =>
 const canReopen = computed(() =>
   canReopenEncounter(workspace.value),
 )
+
+const showNarrativeTab = computed(() =>
+  workspace.value?.narrative?.showTab !== false
+  && Boolean(workspace.value?.narrative?.fields?.length),
+)
+
+const canEditNarrative = computed(() => {
+  const status = encounterStatus.value
+  const open = status === encounterStatuses.inProgress
+    || status === encounterStatuses.waitingForResults
+    || status === encounterStatuses.readyToResume
+
+  return open
+    && (hasPermission(
+      authStore.permissions,
+      permissionNames.encounterNarrativeEdit,
+    )
+      || hasPermission(
+        authStore.permissions,
+        clientPermissionNames.manageEncounter,
+      ))
+})
+
+const canSignGeneratedNote = computed(() =>
+  canSignClinicalNotes.value
+  && isEncounterCompleted(workspace.value?.encounter),
+)
+
+const canRegenerateGeneratedNote = computed(() =>
+  hasPermission(
+    authStore.permissions,
+    permissionNames.clinicalNoteRegenerate,
+  )
+  && isEncounterCompleted(workspace.value?.encounter)
+  && String(workspace.value?.generatedClinicalNote?.status ?? '')
+    .toUpperCase() !== 'SIGNED',
+)
+
+const generatedNoteForOverview = computed(() => {
+  const note = workspace.value?.generatedClinicalNote
+  if (note?.id) {
+    return note
+  }
+  if (isEncounterCompleted(workspace.value?.encounter)
+    && workspace.value?.encounter?.clinicalNoteTemplateId) {
+    return {
+      ...(note || {}),
+      generationFailed: true,
+    }
+  }
+
+  return note
+})
 
 const completion = computed(() =>
   withChiefComplaintRequirement(
@@ -500,6 +585,11 @@ async function refreshCompletion() {
 
 function onRequirementAction(item) {
   const target = resolveRequirementActionTarget(item)
+  if (target.reviewGeneratedNote) {
+    generatedNoteOpen.value = true
+
+    return
+  }
   if (target.workspaceTab) {
     activeTab.value = target.workspaceTab
   }
@@ -725,6 +815,7 @@ async function onComplete() {
       message: t('encounterCompleteSuccess'),
     })
     await loadWorkspace()
+    await ensureGeneratedNote(id)
   } catch (error) {
     if (isAuthSessionEndUIError(error)) {
       return
@@ -749,6 +840,12 @@ async function onComplete() {
         type: quasarNotifyTypes.warning,
         message: t('encounterCompleteRequirementsMissing'),
       })
+      const narrativeMissing = (
+        missing.missingRequirements || []
+      ).some(row => String(row.type).toUpperCase() === 'NARRATIVE')
+      if (narrativeMissing) {
+        activeTab.value = encounterWorkspaceTabs.narrative
+      }
 
       return
     }
@@ -828,6 +925,129 @@ async function onReopenConfirm(payload) {
   }
 }
 
+async function ensureGeneratedNote(id) {
+  if (workspace.value?.generatedClinicalNote?.id) {
+    return
+  }
+  if (!workspace.value?.encounter?.clinicalNoteTemplateId) {
+    return
+  }
+  try {
+    const note = await retryGenerateClinicalNote(id)
+    if (note?.id && workspace.value) {
+      workspace.value = {
+        ...workspace.value,
+        generatedClinicalNote: note,
+      }
+    }
+  } catch {
+    // Generation can be retried from Overview.
+  }
+}
+
+function onNarrativeSaved(saved) {
+  if (!workspace.value) {
+    return
+  }
+  workspace.value = {
+    ...workspace.value,
+    narrative: saved,
+  }
+  void refreshCompletion()
+}
+
+async function onSignGeneratedNote(signatureData) {
+  const note = workspace.value?.generatedClinicalNote
+  const clientId = workspace.value?.encounter?.clientId
+  if (note?.id == null || clientId == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    await signClinicalNote(clientId, note.id, signatureData)
+    generatedNoteOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterGeneratedNoteSignSuccess'),
+    })
+    await loadWorkspace()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: encounterApiErrorMessage(
+          error,
+          t('clinicalNoteSignError'),
+        ),
+      })
+    }
+  } finally {
+    actionBusy.value = false
+  }
+}
+
+async function onRegenerateGeneratedNote() {
+  const id = workspace.value?.encounter?.id
+  if (id == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    const note = await regenerateClinicalNote(id)
+    workspace.value = {
+      ...workspace.value,
+      generatedClinicalNote: note,
+    }
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterGeneratedNoteRegenerateSuccess'),
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: encounterApiErrorMessage(
+          error,
+          t('clinicalNoteSaveError'),
+        ),
+      })
+    }
+  } finally {
+    actionBusy.value = false
+  }
+}
+
+async function onRetryGenerate() {
+  const id = workspace.value?.encounter?.id
+  if (id == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    const note = await retryGenerateClinicalNote(id)
+    workspace.value = {
+      ...workspace.value,
+      generatedClinicalNote: note,
+    }
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('encounterGeneratedNoteGenerateSuccess'),
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: encounterApiErrorMessage(
+          error,
+          t('clinicalNoteSaveError'),
+        ),
+      })
+    }
+  } finally {
+    actionBusy.value = false
+  }
+}
+
 watch(encounterId, () => {
   void loadWorkspace()
 }, { immediate: true })
@@ -839,6 +1059,12 @@ watch(() => route.query.tab, tab => {
     activeTab.value = value
   }
 }, { immediate: true })
+
+watch(showNarrativeTab, visible => {
+  if (!visible && activeTab.value === encounterWorkspaceTabs.narrative) {
+    activeTab.value = encounterWorkspaceTabs.overview
+  }
+})
 
 function onViewSuperbill() {
   const id = workspace.value?.superbill?.id

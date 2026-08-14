@@ -117,26 +117,44 @@
   }
 
   &__hero-card--status {
-    &--confirmed,
-    &--checked-in {
-      border-color: rgba($positive, 0.25);
-      background: rgba($positive, 0.06);
+    &--scheduled {
+      border-color: rgba(#1d4ed8, 0.28);
+      background: #eff6ff;
     }
 
-    &--cancelled,
-    &--no-show {
-      border-color: rgba($negative, 0.22);
-      background: rgba($negative, 0.05);
+    &--checked-in {
+      border-color: rgba(#0f766e, 0.28);
+      background: #f0fdfa;
+    }
+
+    &--in-progress {
+      border-color: rgba(#6d28d9, 0.25);
+      background: #f5f3ff;
     }
 
     &--completed {
-      border-color: rgba($grey-6, 0.35);
-      background: rgba($grey-3, 0.35);
+      border-color: rgba($positive, 0.28);
+      background: #f0fdf4;
+    }
+
+    &--cancelled {
+      border-color: rgba($negative, 0.22);
+      background: #fef2f2;
+    }
+
+    &--no-show {
+      border-color: rgba(#64748b, 0.28);
+      background: #f8fafc;
     }
 
     &--pending {
       border-color: rgba($warning, 0.28);
-      background: rgba($warning, 0.08);
+      background: #fffbeb;
+    }
+
+    &--rescheduled {
+      border-color: rgba(#c2410c, 0.25);
+      background: #fff7ed;
     }
   }
 
@@ -151,16 +169,44 @@
     background: rgba($primary, 0.1);
     color: $primary;
 
-    &--status-confirmed,
-    &--status-checked-in {
-      background: rgba($positive, 0.14);
-      color: $positive;
+    &--status-scheduled {
+      background: #dbeafe;
+      color: #1d4ed8;
     }
 
-    &--status-cancelled,
+    &--status-checked-in {
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    &--status-in-progress {
+      background: #ede9fe;
+      color: #6d28d9;
+    }
+
+    &--status-completed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    &--status-cancelled {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
     &--status-no-show {
-      background: rgba($negative, 0.12);
-      color: $negative;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    &--status-pending {
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    &--status-rescheduled {
+      background: #ffedd5;
+      color: #c2410c;
     }
   }
 
@@ -196,7 +242,39 @@
     font-size: 0.9375rem;
     line-height: 1.35;
     font-weight: 700;
-    color: color.adjust($positive, $lightness: -6%);
+    color: $text-strong;
+
+    &--scheduled {
+      color: #1d4ed8;
+    }
+
+    &--checked-in {
+      color: #0f766e;
+    }
+
+    &--in-progress {
+      color: #6d28d9;
+    }
+
+    &--completed {
+      color: #166534;
+    }
+
+    &--cancelled {
+      color: #b91c1c;
+    }
+
+    &--no-show {
+      color: #64748b;
+    }
+
+    &--pending {
+      color: #b45309;
+    }
+
+    &--rescheduled {
+      color: #c2410c;
+    }
   }
 
   &__hero-status-hint {

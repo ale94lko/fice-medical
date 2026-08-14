@@ -158,6 +158,16 @@ export function normalizeEncounter(raw) {
     ).map(normalizeServiceProcedure),
     diagnoses: (raw.diagnoses ?? []).map(normalizeDiagnosis),
     wait: normalizeWaitSummary(raw.wait),
+    clinicalNoteTemplateId: parseOptionalNumber(
+      raw.clinical_note_template_id ?? raw.clinicalNoteTemplateId,
+    ),
+    clinicalNoteTemplateVersion: parseOptionalNumber(
+      raw.clinical_note_template_version
+      ?? raw.clinicalNoteTemplateVersion,
+    ),
+    clinicalNoteTemplateName: trim(
+      raw.clinical_note_template_name ?? raw.clinicalNoteTemplateName,
+    ),
     isInProgress: status === encounterStatuses.inProgress,
     isWaiting: status === encounterStatuses.waitingForResults,
     isReadyToResume: status === encounterStatuses.readyToResume,

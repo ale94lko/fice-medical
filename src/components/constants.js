@@ -138,6 +138,7 @@ export const serviceProcedureFieldKeys = {
   billable: 'billable',
   defaultUnits: 'defaultUnits',
   authorizationRequirement: 'authorizationRequirement',
+  defaultClinicalNoteTemplateId: 'defaultClinicalNoteTemplateId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
 }
@@ -841,6 +842,7 @@ export const carePlanStatuses = {
 
 export const clinicalNoteStatuses = {
   draft: 'DRAFT',
+  generated: 'GENERATED',
   signed: 'SIGNED',
 }
 
@@ -1034,6 +1036,14 @@ export const permissionNames = {
   uploadFiles: 'UPLOAD_FILES',
   deleteFiles: 'DELETE_FILES',
   manageScreeningTemplates: 'MANAGE_SCREENING_TEMPLATES',
+  clinicalNoteTemplateView: 'CLINICAL_NOTE_TEMPLATE_VIEW',
+  clinicalNoteTemplateCreate: 'CLINICAL_NOTE_TEMPLATE_CREATE',
+  clinicalNoteTemplateEdit: 'CLINICAL_NOTE_TEMPLATE_EDIT',
+  clinicalNoteTemplateDuplicate: 'CLINICAL_NOTE_TEMPLATE_DUPLICATE',
+  clinicalNoteTemplateActivate: 'CLINICAL_NOTE_TEMPLATE_ACTIVATE',
+  clinicalNoteTemplateDeactivate: 'CLINICAL_NOTE_TEMPLATE_DEACTIVATE',
+  encounterNarrativeEdit: 'ENCOUNTER_NARRATIVE_EDIT',
+  clinicalNoteRegenerate: 'CLINICAL_NOTE_REGENERATE',
   viewClinicalResources: 'VIEW_CLINICAL_RESOURCES',
   manageClinicalResources: 'MANAGE_CLINICAL_RESOURCES',
   viewReferenceData: 'VIEW_REFERENCE_DATA',
@@ -1252,7 +1262,8 @@ export const encounterWorkspaceTabs = {
   overview: 'overview',
   visit: 'visit',
   clinical: 'clinical',
-  note: 'note',
+  narrative: 'narrative',
+  note: 'narrative',
   followUp: 'follow-up',
 }
 
@@ -1298,11 +1309,13 @@ export const encounterRequirementTypes = {
   diagnosis: 'DIAGNOSIS',
   service: 'SERVICE',
   diagnosticResultReview: 'DIAGNOSTIC_RESULT_REVIEW',
+  narrative: 'NARRATIVE',
 }
 
 export const encounterRequirementActionTypes = {
   openVitals: 'OPEN_VITALS',
   openNote: 'OPEN_NOTE',
+  openNarrative: 'OPEN_NARRATIVE',
   openVisit: 'OPEN_VISIT',
   openAssessment: 'OPEN_ASSESSMENT',
   openForm: 'OPEN_FORM',
@@ -1363,7 +1376,7 @@ export const telehealthChatBodyMaxLength = 4000
 
 export const appointmentStatuses = {
   pending: 'PENDING',
-  confirmed: 'CONFIRMED',
+  scheduled: 'SCHEDULED',
   checkedIn: 'CHECKED_IN',
   inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
@@ -1628,6 +1641,18 @@ export const apiPaths = {
   encounterResume: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/resume`,
+  encounterNarrative: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/narrative`,
+  encounterClinicalNote: id => `/encounters/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/clinical-note`,
+  encounterClinicalNoteGenerate: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/clinical-note/generate`,
+  encounterClinicalNoteRegenerate: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/clinical-note/regenerate`,
   encounterComplete: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/complete`,
@@ -1846,6 +1871,17 @@ export const apiPaths = {
     encodeURIComponent(String(id ?? '').trim())
   }/manage`,
   screeningTemplateStatus: id => `/screenings/v1/templates/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/status`,
+  clinicalNoteTemplates: '/clinical-notes/v1/templates',
+  clinicalNoteTemplatesActive: '/clinical-notes/v1/templates/active',
+  clinicalNoteTemplateById: id => `/clinical-notes/v1/templates/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
+  clinicalNoteTemplateDuplicate: id => `/clinical-notes/v1/templates/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/duplicate`,
+  clinicalNoteTemplateStatus: id => `/clinical-notes/v1/templates/${
     encodeURIComponent(String(id ?? '').trim())
   }/status`,
   clientScreenings: clientId => `/client/v1/${encodeURIComponent(

@@ -237,6 +237,9 @@ function statusLabel(status) {
   if (status === clinicalNoteStatuses.signed) {
     return t('clinicalNoteStatusSigned')
   }
+  if (status === clinicalNoteStatuses.generated) {
+    return t('clinicalNoteStatusGenerated')
+  }
   if (status === clinicalNoteStatuses.draft) {
     return t('clinicalNoteStatusDraft')
   }
@@ -248,6 +251,9 @@ function statusVariant(status) {
   if (status === clinicalNoteStatuses.signed) {
     return 'active'
   }
+  if (status === clinicalNoteStatuses.generated) {
+    return 'pending'
+  }
   if (status === clinicalNoteStatuses.draft) {
     return 'inactive'
   }
@@ -256,11 +262,17 @@ function statusVariant(status) {
 }
 
 function canEditRow(row) {
-  return props.canEdit && row.status === clinicalNoteStatuses.draft
+  return props.canEdit
+    && row.status === clinicalNoteStatuses.draft
+    && !row.generated
+    && !row.isGenerated
 }
 
 function canDeleteRow(row) {
-  return props.canDelete && row.status === clinicalNoteStatuses.draft
+  return props.canDelete
+    && row.status === clinicalNoteStatuses.draft
+    && !row.generated
+    && !row.isGenerated
 }
 
 function canDownloadRow(row) {

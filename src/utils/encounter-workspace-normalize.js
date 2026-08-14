@@ -9,6 +9,10 @@ import { mapFollowUpFromApi } from 'src/utils/client-follow-ups.js'
 import { mapClientConsentsList } from 'src/utils/consent-normalize.js'
 import { normalizeEncounter } from 'src/utils/encounter-normalize.js'
 import {
+  normalizeEncounterNarrative,
+  normalizeGeneratedClinicalNote,
+} from 'src/utils/encounter-narrative-api.js'
+import {
   normalizeBillingReadinessSnapshot,
   normalizeEncounterRequirement,
   normalizeEncounterRequirementsSnapshot,
@@ -555,6 +559,12 @@ export function normalizeEncounterWorkspace(raw = {}) {
     ),
     superbill: normalizeWorkspaceSuperbill(
       body.superbill,
+    ),
+    narrative: normalizeEncounterNarrative(
+      body.narrative,
+    ),
+    generatedClinicalNote: normalizeGeneratedClinicalNote(
+      body.generated_clinical_note ?? body.generatedClinicalNote,
     ),
     sections: normalizeSections(body.sections),
     ...clinical,

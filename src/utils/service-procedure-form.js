@@ -99,6 +99,7 @@ export function createEmptyServiceProcedureForm() {
     billable: false,
     defaultUnits: '1',
     authorizationRequirement: authorizationRequirementValues.unknown,
+    defaultClinicalNoteTemplateId: null,
   }
 }
 
@@ -139,6 +140,10 @@ export function normalizeServiceProcedureFromApi(raw = {}) {
     authorizationRequirement: parseAuthorizationRequirement(
       raw.authorization_requirement ?? raw.authorizationRequirement,
     ),
+    defaultClinicalNoteTemplateId: parseOptionalPositiveInt(
+      raw.default_clinical_note_template_id
+      ?? raw.defaultClinicalNoteTemplateId,
+    ),
     createdAt: trim(raw.created_at ?? raw.createdAt),
     updatedAt: trim(raw.updated_at ?? raw.updatedAt),
   }
@@ -162,6 +167,8 @@ export function buildServiceProcedureRequest(form = {}) {
     authorization_requirement: parseAuthorizationRequirement(
       form.authorizationRequirement,
     ),
+    default_clinical_note_template_id:
+      parseOptionalPositiveInt(form.defaultClinicalNoteTemplateId),
   }
   /* eslint-enable camelcase */
 }

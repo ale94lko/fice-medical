@@ -788,7 +788,7 @@ export function canStartTelehealthForAppointmentStatus(status) {
 
   return (
     token === 'PENDING'
-    || token === 'CONFIRMED'
+    || token === 'SCHEDULED'
     || token === 'CHECKED_IN'
   )
 }

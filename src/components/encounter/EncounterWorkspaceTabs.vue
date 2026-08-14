@@ -31,41 +31,51 @@ import { encounterWorkspaceTabs } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: String,
     required: true,
+  },
+  showNarrative: {
+    type: Boolean,
+    default: true,
   },
 })
 
 const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 
-const tabs = computed(() => [
-  {
-    key: encounterWorkspaceTabs.overview,
-    label: t('encounterTabOverview'),
-    icon: 'home',
-  },
-  {
-    key: encounterWorkspaceTabs.visit,
-    label: t('encounterTabVisit'),
-    icon: 'event',
-  },
-  {
-    key: encounterWorkspaceTabs.clinical,
-    label: t('encounterTabClinical'),
-    icon: 'favorite',
-  },
-  {
-    key: encounterWorkspaceTabs.note,
-    label: t('encounterTabNote'),
-    icon: 'description',
-  },
-  {
+const tabs = computed(() => {
+  const items = [
+    {
+      key: encounterWorkspaceTabs.overview,
+      label: t('encounterTabOverview'),
+      icon: 'home',
+    },
+    {
+      key: encounterWorkspaceTabs.visit,
+      label: t('encounterTabVisit'),
+      icon: 'event',
+    },
+    {
+      key: encounterWorkspaceTabs.clinical,
+      label: t('encounterTabClinical'),
+      icon: 'favorite',
+    },
+  ]
+  if (props.showNarrative) {
+    items.push({
+      key: encounterWorkspaceTabs.narrative,
+      label: t('encounterTabNarrative'),
+      icon: 'notes',
+    })
+  }
+  items.push({
     key: encounterWorkspaceTabs.followUp,
     label: t('encounterTabFollowUp'),
     icon: 'event_available',
-  },
-])
+  })
+
+  return items
+})
 </script>

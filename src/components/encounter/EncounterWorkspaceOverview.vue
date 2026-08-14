@@ -124,6 +124,57 @@
     </section>
 
     <section
+      v-if="generatedNote || generationFailed"
+      class="encounter-workspace-card"
+      :data-testid="tid.generatedNote">
+      <div class="encounter-workspace-card__head">
+        <div>
+          <h2>{{ t('encounterGeneratedNoteTitle') }}</h2>
+          <p class="text-body2 text-grey-7 q-mb-none">
+            {{ generatedNote?.templateName
+              || t('encounterGeneratedNoteTitle') }}
+          </p>
+        </div>
+        <AdminTableStatusCell
+          :label="generatedStatusLabel"
+          :variant="generatedStatusVariant"
+        />
+      </div>
+      <p
+        v-if="generationFailed"
+        class="text-body2 text-negative q-mb-md">
+        {{ t('encounterGeneratedNoteFailed') }}
+      </p>
+      <p
+        v-else-if="generatedUnsigned"
+        class="text-body2 text-grey-7 q-mb-md">
+        {{ t('encounterGeneratedNoteReady') }}
+      </p>
+      <div class="row q-gutter-sm">
+        <q-btn
+          v-if="generationFailed"
+          no-caps
+          unelevated
+          color="primary"
+          class="app-btn-primary"
+          :label="t('encounterGeneratedNoteRetry')"
+          :data-testid="tid.generatedNoteRetry"
+          @click="emit('retry-generate')"
+        />
+        <q-btn
+          v-else
+          no-caps
+          unelevated
+          color="primary"
+          class="app-btn-primary"
+          :label="t('encounterGeneratedNoteReview')"
+          :data-testid="tid.generatedNoteReview"
+          @click="emit('review-generated-note')"
+        />
+      </div>
+    </section>
+
+    <section
       class="encounter-workspace-card encounter-workspace-billing"
       :data-testid="tid.billing">
       <div class="encounter-workspace-card__head">
@@ -262,8 +313,10 @@ import { useI18n } from 'vue-i18n'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import {
+  clinicalNoteStatuses,
   encounterBillingReadinessStatuses,
   encounterRequirementStatuses,
+  encounterRequirementTypes,
   superbillStatuses,
 } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
@@ -286,6 +339,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  narrative: {
+    type: Object,
+    default: null,
+  },
+  generatedNote: {
+    type: Object,
+    default: null,
+  },
 })
 
 const emit = defineEmits([
@@ -294,16 +355,68 @@ const emit = defineEmits([
   'waive-requirement',
   'view-superbill',
   'generate-superbill',
+  'review-generated-note',
+  'retry-generate',
 ])
 const { t } = useI18n()
 
 const waivedStatus = encounterRequirementStatuses.waived
 
-const requirements = computed(() =>
-  Array.isArray(props.completion?.requirements)
-    ? props.completion.requirements
-    : [],
+const generationFailed = computed(() =>
+  Boolean(props.generatedNote?.generationFailed),
 )
+
+const generatedUnsigned = computed(() => {
+  const status = String(props.generatedNote?.status ?? '').toUpperCase()
+
+  return Boolean(props.generatedNote?.id)
+    && status !== clinicalNoteStatuses.signed
+})
+
+const generatedStatusLabel = computed(() => {
+  const status = String(props.generatedNote?.status ?? '').toUpperCase()
+  if (status === clinicalNoteStatuses.signed) {
+    return t('clinicalNoteStatusSigned')
+  }
+  if (status === clinicalNoteStatuses.generated) {
+    return t('clinicalNoteStatusGenerated')
+  }
+
+  return t('clinicalNoteStatusDraft')
+})
+
+const generatedStatusVariant = computed(() => {
+  const status = String(props.generatedNote?.status ?? '').toUpperCase()
+  if (status === clinicalNoteStatuses.signed) {
+    return 'active'
+  }
+
+  return 'pending'
+})
+
+const requirements = computed(() => {
+  const list = Array.isArray(props.completion?.requirements)
+    ? props.completion.requirements
+    : []
+
+  return list.map(item => {
+    if (item.type !== encounterRequirementTypes.narrative
+      || item.completed) {
+      return item
+    }
+    const required = props.narrative?.requiredCount ?? 0
+    const done = props.narrative?.completedRequiredCount ?? 0
+    const missing = Math.max(0, required - done)
+    if (!missing) {
+      return item
+    }
+
+    return {
+      ...item,
+      description: t('encounterNarrativeIncomplete', missing),
+    }
+  })
+})
 
 const optionalActions = computed(() =>
   Array.isArray(props.completion?.optionalActions)

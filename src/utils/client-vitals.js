@@ -18,7 +18,7 @@ export {
 export const VITALS_LIMITS = {
   systolic: { min: 1, max: 300 },
   diastolic: { min: 1, max: 180 },
-  heartRate: { min: 0, max: 300 },
+  heartRate: { min: 30, max: 250 },
   respiratoryRate: { min: 0, max: 120 },
   temperature: { min: 90, max: 115 },
   oxygenSaturation: { min: 0, max: 100 },

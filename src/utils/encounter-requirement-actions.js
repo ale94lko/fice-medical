@@ -19,8 +19,11 @@ export function resolveRequirementActionTarget(item = {}) {
   switch (type) {
     case encounterRequirementActionTypes.openNote:
       return {
-        workspaceTab: encounterWorkspaceTabs.note,
-        moduleKey: 'clinical-notes',
+        reviewGeneratedNote: true,
+      }
+    case encounterRequirementActionTypes.openNarrative:
+      return {
+        workspaceTab: encounterWorkspaceTabs.narrative,
       }
     case encounterRequirementActionTypes.openVisit:
       return {
@@ -85,10 +88,14 @@ function fallbackFromCode(item) {
       workspaceTab: encounterWorkspaceTabs.visit,
     }
   }
+  if (code.includes('narrative')) {
+    return {
+      workspaceTab: encounterWorkspaceTabs.narrative,
+    }
+  }
   if (code.includes('note') || code.includes('soap')) {
     return {
-      workspaceTab: encounterWorkspaceTabs.note,
-      moduleKey: 'clinical-notes',
+      reviewGeneratedNote: true,
     }
   }
   if (code.includes('screen') || code.includes('assess')
