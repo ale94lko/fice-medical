@@ -61,6 +61,8 @@ export async function listSuperbills({
   from,
   to,
   q,
+  clientId,
+  includeVoided,
   limit = 20,
   page = 1,
 } = {}) {
@@ -80,6 +82,13 @@ export async function listSuperbills({
   }
   if (q) {
     params.q = q
+  }
+  const id = Number(clientId)
+  if (Number.isFinite(id) && id > 0) {
+    params['client_id'] = id
+  }
+  if (includeVoided) {
+    params['include_voided'] = true
   }
   const response = await apiInstance.get(apiPaths.superbillsList, {
     params,

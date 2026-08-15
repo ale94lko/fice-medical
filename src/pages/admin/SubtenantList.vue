@@ -254,6 +254,15 @@ const visibleColumns = computed(() => [
     classes: 'admin-data-table__secondary-cell',
   },
   {
+    name: col.clinicType,
+    label: t('clinicType'),
+    align: 'left',
+    field: row => row.clinicTypeLabel,
+    sortable: false,
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
+  },
+  {
     name: col.main,
     label: t('subtenantMainLabel'),
     align: 'left',
@@ -466,6 +475,19 @@ async function onDeleteConfirm() {
   }
 }
 
+function notifyAddedRoles(saved) {
+  const roles = Array.isArray(saved?.addedSystemRoles)
+    ? saved.addedSystemRoles.filter(Boolean)
+    : []
+  if (roles.length === 0) {
+    return
+  }
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t('subtenantRolesAdded', { roles: roles.join(', ') }),
+  })
+}
+
 async function onDialogSave(form) {
   dialogSaving.value = true
   try {
@@ -476,13 +498,15 @@ async function onDialogSave(form) {
         type: quasarNotifyTypes.positive,
         message: t('subtenantCreateSuccess', { code: created.code }),
       })
+      notifyAddedRoles(created)
     } else {
-      await updateSubtenant(form.id, form)
+      const updated = await updateSubtenant(form.id, form)
       await syncAuthSubtenantsFromApi()
       $q.notify({
         type: quasarNotifyTypes.positive,
         message: t('subtenantUpdateSuccess'),
       })
+      notifyAddedRoles(updated)
     }
     closeDialog()
     await loadSubtenants(tablePagination.value)

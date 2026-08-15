@@ -36,7 +36,7 @@
         </div>
         <div class="row q-gutter-sm items-center no-wrap">
           <q-btn
-            v-if="canEdit"
+            v-if="canAddVitals"
             no-caps
             unelevated
             color="primary"
@@ -65,7 +65,7 @@
         :show-column-settings="false">
         <VitalsHistoryTable
           :entries="vitalsEntries"
-          :can-edit="canEdit"
+          :can-edit="canEditVitals"
           :empty-label="t('encounterClinicalVitalsEmpty')"
           :clinician-options="clinicianOptions"
           :patient-dob="patientDob"
@@ -82,7 +82,8 @@
       v-else-if="isAssessmentsTab"
       :client-id="clientId"
       :screenings="screenings"
-      :can-edit="canEdit"
+      :can-add="canAddScreenings"
+      :can-edit="canEditScreenings"
       :clinician-options="clinicianOptions"
       @changed="emit('changed')"
     />
@@ -92,6 +93,7 @@
       :client-id="clientId"
       :medications="medications"
       :clinician-options="clinicianOptions"
+      :encounter-open="encounterOpen"
       @changed="emit('changed')"
     />
 
@@ -100,6 +102,7 @@
       :client-id="clientId"
       :care-plans="carePlans"
       :clinician-options="clinicianOptions"
+      :encounter-open="encounterOpen"
       @changed="emit('changed')"
     />
 
@@ -107,7 +110,8 @@
       v-else-if="isLabsTab"
       :client-id="clientId"
       :labs="labs"
-      :can-edit="canEdit"
+      :can-add="canAddLabs"
+      :can-edit="canEditLabs"
       :clinician-options="clinicianOptions"
       @changed="emit('changed')"
     />
@@ -120,7 +124,7 @@
       :patient-age="patientAge"
       :patient-age-unit="patientAgeUnit"
       :patient-gender="patientGender"
-      :readonly="!canEdit"
+      :readonly="vitalsDialogReadonly"
       :saving="saving"
       @save="onVitalsSave"
     />
@@ -212,7 +216,31 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
-  canEdit: {
+  encounterOpen: {
+    type: Boolean,
+    default: false,
+  },
+  canAddVitals: {
+    type: Boolean,
+    default: false,
+  },
+  canEditVitals: {
+    type: Boolean,
+    default: false,
+  },
+  canAddScreenings: {
+    type: Boolean,
+    default: false,
+  },
+  canEditScreenings: {
+    type: Boolean,
+    default: false,
+  },
+  canAddLabs: {
+    type: Boolean,
+    default: false,
+  },
+  canEditLabs: {
     type: Boolean,
     default: false,
   },
@@ -294,6 +322,14 @@ const clientKey = computed(() => String(props.clientId ?? '').trim())
 const encounterKey = computed(
   () => String(props.encounterId ?? '').trim(),
 )
+
+const vitalsDialogReadonly = computed(() => {
+  if (editingEntry.value) {
+    return !props.canEditVitals
+  }
+
+  return !props.canAddVitals
+})
 
 const subTabs = computed(() => [
   {
@@ -387,6 +423,9 @@ function resolveEncounterIdNumber() {
 }
 
 function openAddVitals() {
+  if (!props.canAddVitals) {
+    return
+  }
   editingEntry.value = null
   recordDialogOpen.value = true
 }
@@ -413,11 +452,17 @@ async function openAllVitals() {
 }
 
 function openEditVitals(row) {
+  if (!props.canEditVitals) {
+    return
+  }
   editingEntry.value = { ...row }
   recordDialogOpen.value = true
 }
 
 function openDeleteVitals(row) {
+  if (!props.canEditVitals) {
+    return
+  }
   if (row?.apiId != null && String(row.apiId).trim()) {
     $q.notify({
       type: quasarNotifyTypes.warning,
@@ -464,6 +509,13 @@ function upsertLocalEntry(entry) {
 async function onVitalsSave({ id, draft }) {
   const clientId = clientKey.value
   if (!clientId) {
+    return
+  }
+  const isEdit = Boolean(id)
+  if (isEdit && !props.canEditVitals) {
+    return
+  }
+  if (!isEdit && !props.canAddVitals) {
     return
   }
   const normalized = normalizeVitalsEntry(draft)

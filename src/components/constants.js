@@ -88,14 +88,26 @@ export const subtenantStatusValues = {
 export const subtenantFieldKeys = {
   id: 'id',
   name: 'name',
+  legalName: 'legalName',
   code: 'code',
+  clinicType: 'clinicType',
   main: 'main',
   status: 'status',
+}
+
+export const clinicTypeValues = {
+  primaryCare: 'PRIMARY_CARE',
+  specialty: 'SPECIALTY',
+  behavioralHealth: 'BEHAVIORAL_HEALTH',
+  urgentCare: 'URGENT_CARE',
+  telehealth: 'TELEHEALTH',
+  multiSpecialty: 'MULTI_SPECIALTY',
 }
 
 export const subtenantListColumnKeys = {
   name: 'name',
   code: 'code',
+  clinicType: 'clinicType',
   main: 'main',
   status: 'status',
   actions: 'actions',
@@ -222,6 +234,12 @@ export const addClientDocumentsSubTabKeys = {
   attachments: 'attachments',
   consents: 'consents',
   signedForms: 'signedForms',
+}
+
+export const addClientFinancialsSubTabKeys = {
+  billing: 'billing',
+  claims: 'claims',
+  payments: 'payments',
 }
 
 /** entity_type values used with stored_file (Source column). */
@@ -1060,6 +1078,10 @@ export const permissionNames = {
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
   startEncounter: 'START_ENCOUNTER',
+  completeEncounter: 'COMPLETE_ENCOUNTER',
+  cancelEncounter: 'CANCEL_ENCOUNTER',
+  reopenEncounter: 'REOPEN_ENCOUNTER',
+  waiveEncounterRequirement: 'WAIVE_ENCOUNTER_REQUIREMENT',
   waitEncounter: 'WAIT_ENCOUNTER',
   resumeEncounter: 'RESUME_ENCOUNTER',
   manageServiceRequirements: 'MANAGE_SERVICE_REQUIREMENTS',
@@ -1166,6 +1188,11 @@ export const clientPermissionNames = {
   viewEncounter: 'VIEW_ENCOUNTER',
   manageEncounter: 'MANAGE_ENCOUNTER',
   startEncounter: permissionNames.startEncounter,
+  completeEncounter: permissionNames.completeEncounter,
+  cancelEncounter: permissionNames.cancelEncounter,
+  reopenEncounter: permissionNames.reopenEncounter,
+  waiveEncounterRequirement:
+    permissionNames.waiveEncounterRequirement,
   waitEncounter: permissionNames.waitEncounter,
   resumeEncounter: permissionNames.resumeEncounter,
   manageServiceRequirements: permissionNames.manageServiceRequirements,

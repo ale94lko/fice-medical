@@ -9,7 +9,7 @@
       </div>
       <div class="row q-gutter-sm items-center no-wrap">
         <q-btn
-          v-if="canEdit"
+          v-if="canAdd"
           no-caps
           unelevated
           color="primary"
@@ -99,6 +99,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  canAdd: {
+    type: Boolean,
+    default: false,
+  },
   clinicianOptions: {
     type: Array,
     default: () => [],
@@ -144,6 +148,9 @@ const dialogClientScreenings = computed(() =>
 )
 
 function openCreateDialog() {
+  if (!props.canAdd) {
+    return
+  }
   dialogMode.value = 'create'
   dialogScreeningId.value = null
   dialogReadonly.value = false

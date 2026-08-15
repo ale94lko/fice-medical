@@ -11,12 +11,12 @@
         <div class="client-overview-header__avatar-block">
           <div
             class="client-overview-header__avatar
-              encounter-workspace-header__avatar"
-            role="img"
-            :aria-label="t('clientOverviewProfilePhotoPlaceholder')">
+              encounter-workspace-header__avatar">
             <StoredFileAvatar
               :file-id="photoFileId"
+              previewable
               spinner-size="32px"
+              :preview-label="t('photoPreviewAria')"
             />
           </div>
           <span
@@ -226,6 +226,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  showComplete: {
+    type: Boolean,
+    default: false,
+  },
   showReopen: {
     type: Boolean,
     default: false,
@@ -261,10 +265,6 @@ const { t } = useI18n()
 const $q = useQuasar()
 const authStore = useAuthStore()
 const { linkedStaffProfile, activeSubtenant } = storeToRefs(authStore)
-
-const showComplete = computed(() =>
-  props.encounter?.status === encounterStatuses.inProgress,
-)
 
 const displayName = computed(() =>
   String(props.encounter?.clientDisplayName ?? '').trim() || '—',

@@ -76,7 +76,6 @@ export const superbillListTestIds = {
 
 export const superbillDetailTestIds = {
   page: 'superbill-detail-page',
-  back: 'superbill-detail-back',
   print: 'superbill-detail-print',
   actions: 'superbill-detail-actions',
   markReviewed: 'superbill-detail-mark-reviewed',
@@ -417,9 +416,15 @@ export const clientOverviewAltTestIds = {
   insurance: 'client-overview-alt-insurance',
   appointments: 'client-overview-alt-appointments',
   encounters: 'client-overview-alt-encounters',
+  billing: 'client-overview-alt-billing',
   modulesTab: key => toTestId('client-overview-alt-modules', key),
   sidebar: 'client-overview-alt-sidebar',
   viewAllActivity: 'client-overview-alt-btn-view-all-activity',
+}
+
+export const clientBillingTestIds = {
+  root: 'client-billing-tab',
+  rowView: id => toTestId('client-billing-row-view', id),
 }
 
 export const assignCliniciansTestIds = {
@@ -459,6 +464,7 @@ export const clientPageTestIds = {
   close: 'client-page-btn-close',
   breadcrumbClients: 'client-page-breadcrumb-clients',
   profilePhotoCamera: 'client-page-profile-photo-camera',
+  profilePhotoPreview: 'client-page-profile-photo-preview',
   profilePhotoCameraSelect: 'client-page-profile-photo-camera-select',
   profilePhotoCropDialog: 'client-page-profile-photo-crop-dialog',
   profilePhotoCropViewport: 'client-page-profile-photo-crop-viewport',
@@ -680,6 +686,12 @@ export const calendarTestIds = {
   clinicianToggle: id => toTestId('calendar-clinician', id, 'toggle'),
   sourceToggle: id => toTestId('calendar-source', id, 'toggle'),
   event: id => toTestId('calendar-event', id),
+}
+
+export const photoPreviewTestIds = {
+  dialog: 'photo-preview',
+  trigger: 'photo-preview-trigger',
+  image: 'photo-preview-image',
 }
 
 export const modalTestIds = {

@@ -1,4 +1,5 @@
 import {
+  addClientFinancialsSubTabKeys,
   addClientTabKeys,
 } from 'components/constants.js'
 import {
@@ -79,7 +80,7 @@ export function buildClientOverviewModuleConfigs() {
 
 function isComingSoonSubTab(parentKey, subTabKey) {
   if (parentKey === addClientTabKeys.financials) {
-    return true
+    return subTabKey !== addClientFinancialsSubTabKeys.billing
   }
   if (parentKey === addClientTabKeys.documents) {
     return subTabKey !== 'attachments' && subTabKey !== 'consents'

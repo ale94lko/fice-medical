@@ -478,7 +478,12 @@ export function buildClientOverviewModuleSummaries(
       t('authorizationListEmpty'),
     ),
     tasks: comingSoonSummary(t),
-    billing: comingSoonSummary(t),
+    billing: moduleSummary(
+      0,
+      [],
+      t('clientBillingSubtitle'),
+      t('clientBillingEmpty'),
+    ),
     claims: comingSoonSummary(t),
     payments: comingSoonSummary(t),
     attachments: moduleSummary(

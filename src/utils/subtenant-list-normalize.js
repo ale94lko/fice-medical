@@ -2,6 +2,7 @@ import {
   subtenantFieldKeys as fk,
   subtenantStatusValues,
 } from 'components/constants.js'
+import { clinicTypeLabel } from 'src/utils/clinic-type.js'
 
 function parseOptionalPhotoFileId(item) {
   const value = item?.photo_file_id
@@ -28,6 +29,13 @@ export function mapSubtenantListItem(item, t) {
     id: item.id,
     [fk.name]: String(item.name ?? '').trim(),
     [fk.code]: String(item.code ?? '').trim(),
+    [fk.clinicType]: String(
+      item.clinic_type ?? item.clinicType ?? '',
+    ).trim(),
+    clinicTypeLabel: clinicTypeLabel(
+      t,
+      item.clinic_type ?? item.clinicType,
+    ),
     [fk.main]: Boolean(item.main),
     mainLabel: item.main ? t('yes') : t('no'),
     [fk.status]: status,

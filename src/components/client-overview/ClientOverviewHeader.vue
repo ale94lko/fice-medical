@@ -7,13 +7,12 @@
         <div class="client-overview-header__profile-head">
           <div class="client-overview-header__avatar-wrap">
             <div class="client-overview-header__avatar-block">
-              <div
-                class="client-overview-header__avatar"
-                role="img"
-                :aria-label="t('clientOverviewProfilePhotoPlaceholder')">
+              <div class="client-overview-header__avatar">
                 <StoredFileAvatar
                   :file-id="header.photoFileId"
+                  previewable
                   spinner-size="32px"
+                  :preview-label="t('photoPreviewAria')"
                 />
               </div>
               <span

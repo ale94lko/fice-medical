@@ -68,7 +68,10 @@
               @click="emit('requirement-action', item)"
             />
             <q-btn
-              v-if="!item.completed && item.waivable && item.id != null"
+              v-if="canWaiveRequirement
+                && !item.completed
+                && item.waivable
+                && item.id != null"
               no-caps
               flat
               dense
@@ -250,6 +253,7 @@
           />
         </div>
         <q-btn
+          v-if="showViewSuperbill"
           no-caps
           outline
           dense
@@ -336,6 +340,14 @@ const props = defineProps({
     default: null,
   },
   showGenerateSuperbill: {
+    type: Boolean,
+    default: false,
+  },
+  showViewSuperbill: {
+    type: Boolean,
+    default: false,
+  },
+  canWaiveRequirement: {
     type: Boolean,
     default: false,
   },

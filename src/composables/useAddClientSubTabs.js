@@ -3,6 +3,7 @@ import {
   addClientClinicalSubTabKeys,
   addClientCareCoordinationSubTabKeys,
   addClientDocumentsSubTabKeys,
+  addClientFinancialsSubTabKeys,
   addClientTabKeys,
 } from 'components/constants.js'
 
@@ -42,6 +43,9 @@ export const DOCUMENTS_ATTACHMENTS_SUB_TAB =
 
 export const DOCUMENTS_CONSENTS_SUB_TAB =
   addClientDocumentsSubTabKeys.consents
+
+export const FINANCIALS_BILLING_SUB_TAB =
+  addClientFinancialsSubTabKeys.billing
 
 export const ADD_CLIENT_MAIN_TABS = [
   {
@@ -162,17 +166,17 @@ export const ADD_CLIENT_SUB_TABS = {
   ],
   [addClientTabKeys.financials]: [
     {
-      key: 'billing',
+      key: addClientFinancialsSubTabKeys.billing,
       icon: 'payments',
       labelKey: 'subTabBilling',
     },
     {
-      key: 'claims',
+      key: addClientFinancialsSubTabKeys.claims,
       icon: 'receipt_long',
       labelKey: 'subTabClaims',
     },
     {
-      key: 'payments',
+      key: addClientFinancialsSubTabKeys.payments,
       icon: 'paid',
       labelKey: 'subTabPayments',
     },

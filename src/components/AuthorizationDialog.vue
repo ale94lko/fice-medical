@@ -403,6 +403,8 @@ import {
   authorizationRequirementValues,
   authorizationStatuses,
 } from 'components/constants.js'
+import { useClientAuthorizationPermissions } from
+  'src/composables/useClientAuthorizationPermissions.js'
 import {
   authorizationVerificationOptions,
   cloneAuthorization,
@@ -464,6 +466,10 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const {
+  canApproveAuthorizations,
+  canDenyAuthorizations,
+} = useClientAuthorizationPermissions()
 const local = ref(createEmptyAuthorization())
 const errors = ref({})
 const pendingFiles = ref([])
@@ -557,20 +563,31 @@ const serviceMeta = computed(() => {
   return t('authorizationServiceMeta', { duration, cpt, hcpcs })
 })
 
-const statusOptions = computed(() => [
-  {
-    label: t('authorizationStatusPending'),
-    value: authorizationStatuses.pending,
-  },
-  {
-    label: t('authorizationStatusApproved'),
-    value: authorizationStatuses.approved,
-  },
-  {
-    label: t('authorizationStatusDenied'),
-    value: authorizationStatuses.denied,
-  },
-])
+const statusOptions = computed(() => {
+  const current = local.value.status
+  const options = [
+    {
+      label: t('authorizationStatusPending'),
+      value: authorizationStatuses.pending,
+    },
+  ]
+  if (canApproveAuthorizations.value
+    || current === authorizationStatuses.approved) {
+    options.push({
+      label: t('authorizationStatusApproved'),
+      value: authorizationStatuses.approved,
+    })
+  }
+  if (canDenyAuthorizations.value
+    || current === authorizationStatuses.denied) {
+    options.push({
+      label: t('authorizationStatusDenied'),
+      value: authorizationStatuses.denied,
+    })
+  }
+
+  return options
+})
 
 const quantityTypeOptions = computed(() => [
   {

@@ -78,13 +78,9 @@
               :module-cards="moduleCards"
               @open-record="onOpenModuleRecord"
             />
-            <ClientOverviewAltModulesTab
+            <ClientOverviewAltBilling
               v-else-if="activeTab === addClientTabKeys.financials"
-              :tab-key="addClientTabKeys.financials"
-              :title="t('tabFinancial')"
-              icon="payments"
-              :module-cards="moduleCards"
-              @open-record="onOpenModuleRecord"
+              :client-id="clientId"
             />
             <ClientOverviewAltModulesTab
               v-else-if="activeTab === addClientTabKeys.documents"
@@ -132,6 +128,8 @@ import ClientOverviewAltAppointments from
   'components/client-overview/ClientOverviewAltAppointments.vue'
 import ClientOverviewAltEncounters from
   'components/client-overview/ClientOverviewAltEncounters.vue'
+import ClientOverviewAltBilling from
+  'components/client-overview/ClientOverviewAltBilling.vue'
 import ClientOverviewAltHeader from
   'components/client-overview/ClientOverviewAltHeader.vue'
 import ClientOverviewAltTabs from

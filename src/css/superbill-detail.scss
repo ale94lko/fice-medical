@@ -13,16 +13,6 @@
   box-shadow: $shadow-sm;
 }
 
-.superbill-detail__back {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  margin: 0 0 8px;
-  color: $primary;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .superbill-detail__title-row {
   display: flex;
   align-items: flex-start;
@@ -300,7 +290,6 @@
   .q-header,
   .q-drawer,
   .q-footer,
-  .superbill-detail__back,
   .superbill-detail__tabs {
     display: none !important;
   }

@@ -27,7 +27,11 @@
         <section
           v-for="module in nodes"
           :key="module.id"
-          class="permission-module-picker__card">
+          class="permission-module-picker__card"
+          :class="{
+            'permission-module-picker__card--warning':
+              moduleHasImplicationWarning(module),
+          }">
           <div class="permission-module-picker__header">
             <q-checkbox
               dense
@@ -60,6 +64,21 @@
               </span>
               <span class="permission-module-picker__title">
                 {{ module.label }}
+              </span>
+              <span
+                v-if="moduleHasImplicationWarning(module)"
+                class="permission-module-picker__hint"
+                :data-testid="`${testId}-module-${module.id}-hint`"
+                :aria-label="t('permissionImplicationWarning')"
+                @click.stop.prevent>
+                ?
+                <q-tooltip
+                  class="permission-module-picker__hint-tooltip"
+                  anchor="top middle"
+                  self="bottom middle"
+                  :offset="[0, 6]">
+                  {{ t('permissionImplicationWarning') }}
+                </q-tooltip>
               </span>
               <span class="permission-module-picker__badge">
                 {{ selectedCount(module) }}/{{ leafCount(module) }}
@@ -114,6 +133,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { resolvePermissionModuleIcon } from
   'src/utils/permission-tree-utils.js'
 import {
@@ -121,6 +141,8 @@ import {
   toggleBranchSelection,
   toggleLeafSelection,
 } from 'src/utils/tree-selection.js'
+import { moduleKeysWithMissingViewImplications } from
+  'src/utils/permission-implication.js'
 
 const props = defineProps({
   nodes: {
@@ -154,6 +176,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+const { t } = useI18n()
 
 const expandedByModuleId = ref({})
 
@@ -169,6 +192,22 @@ const leafValuesByModuleId = computed(() => {
 
   return map
 })
+
+const warningModuleKeys = computed(() =>
+  moduleKeysWithMissingViewImplications(
+    props.nodes,
+    props.modelValue,
+  ),
+)
+
+function moduleHasImplicationWarning(module) {
+  const key = module?.id
+  if (key == null) {
+    return false
+  }
+
+  return warningModuleKeys.value.has(String(key))
+}
 
 watch(
   () => props.nodes,
@@ -337,6 +376,16 @@ function onPermissionToggle(permission, checked) {
     overflow: hidden;
   }
 
+  &__card--warning {
+    background: #fff7ed;
+    border-color: #fdba74;
+  }
+
+  &__card--warning &__icon {
+    background: rgba(#ea580c, 0.14);
+    color: #c2410c;
+  }
+
   &__header {
     display: flex;
     align-items: flex-start;
@@ -385,6 +434,22 @@ function onPermissionToggle(permission, checked) {
     font-size: 0.875rem;
     font-weight: 700;
     line-height: 1.3;
+  }
+
+  &__hint {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: #ffedd5;
+    color: #c2410c;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
   }
 
   &__badge {

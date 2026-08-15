@@ -9,7 +9,7 @@
       </div>
       <div class="row q-gutter-sm items-center no-wrap">
         <q-btn
-          v-if="canAddMedications"
+          v-if="canAddHere"
           no-caps
           unelevated
           color="primary"
@@ -39,8 +39,8 @@
       <MedicationsTable
         :rows="medicationRows"
         :empty-label="t('encounterClinicalMedicationsEmpty')"
-        :can-edit="canEditMedications"
-        :can-delete="canDeleteMedications"
+        :can-edit="canEditHere"
+        :can-delete="canDeleteHere"
         @view="openViewMedication"
         @edit="openEditMedication"
         @change-status="openStatusChange"
@@ -58,7 +58,7 @@
       :dosage-unit-options="dosageUnitOptions"
       :route-options="routeOptions"
       :frequency-options="frequencyOptions"
-      :can-add-pharmacy="canAddPharmacies"
+      :can-add-pharmacy="canAddPharmacyHere"
       :saving="saving"
       @save="onSaveMedication"
       @cancel="medicationDialogOpen = false"
@@ -212,6 +212,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  encounterOpen: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['changed'])
@@ -224,6 +228,19 @@ const {
   canDeleteMedications,
   canAddPharmacies,
 } = useClientMedicationPermissions()
+
+const canAddHere = computed(() =>
+  props.encounterOpen && canAddMedications.value,
+)
+const canEditHere = computed(() =>
+  props.encounterOpen && canEditMedications.value,
+)
+const canDeleteHere = computed(() =>
+  props.encounterOpen && canDeleteMedications.value,
+)
+const canAddPharmacyHere = computed(() =>
+  props.encounterOpen && canAddPharmacies.value,
+)
 
 const saving = ref(false)
 const catalogsByName = ref({})
@@ -353,6 +370,9 @@ function notifySuccess(key) {
 }
 
 function openAddMedication() {
+  if (!canAddHere.value) {
+    return
+  }
   medicationDialogMode.value = 'add'
   activeMedication.value = createEmptyMedicationForm()
   if (!preferredPharmacy.value) {
@@ -368,24 +388,36 @@ function openViewMedication(row) {
 }
 
 function openEditMedication(row) {
+  if (!canEditHere.value) {
+    return
+  }
   medicationDialogMode.value = 'edit'
   activeMedication.value = { ...row }
   medicationDialogOpen.value = true
 }
 
 function openAddPharmacy() {
+  if (!canAddPharmacyHere.value) {
+    return
+  }
   pharmacyDialogMode.value = 'add'
   activePharmacy.value = createEmptyPharmacyForm()
   pharmacyDialogOpen.value = true
 }
 
 function openStatusChange(row) {
+  if (!canEditHere.value) {
+    return
+  }
   statusTarget.value = row
   statusDraft.value = row.status || medicationStatuses.active
   statusDialogOpen.value = true
 }
 
 function openDeleteMedication(row) {
+  if (!canDeleteHere.value) {
+    return
+  }
   deleteTarget.value = row
   deleteDialogOpen.value = true
 }
@@ -411,6 +443,14 @@ async function openAllRecords() {
 
 async function onSaveMedication({ form, addAnother }) {
   if (!hasClientId.value || saving.value) {
+    return
+  }
+  const isEdit = medicationDialogMode.value === 'edit'
+    && form?.id != null
+  if (isEdit && !canEditHere.value) {
+    return
+  }
+  if (!isEdit && !canAddHere.value) {
     return
   }
   saving.value = true

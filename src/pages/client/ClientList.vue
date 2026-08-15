@@ -216,7 +216,7 @@
         <template #row-actions="{ row }">
           <AdminTableRowActions
             :show-view="canViewClient"
-            :show-edit="canViewClient"
+            :show-edit="canEditAnyClientSection"
             :show-change-status="canChangeStatus"
             :show-more="canViewClient"
             :view-test-id="clientListTestIds.rowView(row.id)"
@@ -359,6 +359,7 @@ const {
   canViewClient,
   canChangeStatus,
   canEditBasicInfo,
+  canEditAnyClientSection,
 } = useClientPermissions()
 
 const router = useRouter()

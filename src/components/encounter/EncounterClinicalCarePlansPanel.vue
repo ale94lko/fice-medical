@@ -9,7 +9,7 @@
       </div>
       <div class="row q-gutter-sm items-center no-wrap">
         <q-btn
-          v-if="canUseCarePlanDraft"
+          v-if="canDraftHere"
           no-caps
           outline
           color="primary"
@@ -21,7 +21,7 @@
           @click="aiDialogOpen = true"
         />
         <q-btn
-          v-if="canAddCarePlans"
+          v-if="canAddHere"
           no-caps
           unelevated
           color="primary"
@@ -51,8 +51,8 @@
       <CarePlansTable
         :rows="planRows"
         :empty-label="t('encounterClinicalCarePlansEmpty')"
-        :can-edit="canEditCarePlans"
-        :can-sign="canSignCarePlans"
+        :can-edit="canEditHere"
+        :can-sign="canSignHere"
         @view="openView"
         @edit="openEdit"
         @sign="openSign"
@@ -66,7 +66,7 @@
       :mode="dialogMode"
       :plan="activePlan"
       :clinician-options="resolvedClinicianOptions"
-      :can-sign="canSignCarePlans"
+      :can-sign="canSignHere"
       :saving="saving"
       @save="onSave"
       @cancel="dialogOpen = false"
@@ -152,6 +152,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  encounterOpen: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['changed'])
@@ -164,6 +168,19 @@ const {
   canSignCarePlans,
 } = useClientCarePlanPermissions()
 const { canUseCarePlanDraft } = useAiPermissions()
+
+const canAddHere = computed(() =>
+  props.encounterOpen && canAddCarePlans.value,
+)
+const canEditHere = computed(() =>
+  props.encounterOpen && canEditCarePlans.value,
+)
+const canSignHere = computed(() =>
+  props.encounterOpen && canSignCarePlans.value,
+)
+const canDraftHere = computed(() =>
+  props.encounterOpen && canUseCarePlanDraft.value,
+)
 
 const saving = ref(false)
 const dialogOpen = ref(false)
@@ -213,6 +230,9 @@ function planDetailFromRecord(planId) {
 }
 
 function openAdd() {
+  if (!canAddHere.value) {
+    return
+  }
   dialogMode.value = 'add'
   activePlan.value = createEmptyCarePlan()
   dialogOpen.value = true
@@ -235,7 +255,7 @@ function openView(row) {
 }
 
 function openEdit(row) {
-  if (!canEditCarePlans.value) {
+  if (!canEditHere.value) {
     return
   }
   if (isServerNumericId(row.id)) {
@@ -254,7 +274,7 @@ function openEdit(row) {
 }
 
 function openSign(row) {
-  if (!canSignCarePlans.value) {
+  if (!canSignHere.value) {
     return
   }
   const detail = planDetailFromRecord(row.id)
@@ -323,6 +343,13 @@ async function onSave({ plan, activate }) {
   if (!clientKey.value) {
     return
   }
+  const isEdit = isServerNumericId(plan?.id)
+  if (isEdit && !canEditHere.value) {
+    return
+  }
+  if (!isEdit && !canAddHere.value) {
+    return
+  }
   saving.value = true
   try {
     const payload = prepareCarePlanForSave(plan)
@@ -345,7 +372,7 @@ async function onSave({ plan, activate }) {
 
         return
       }
-      if (!canSignCarePlans.value) {
+      if (!canSignHere.value) {
         $q.notify({
           type: quasarNotifyTypes.negative,
           message: t('carePlanNoSignPermission'),
@@ -382,7 +409,7 @@ async function onSave({ plan, activate }) {
 }
 
 async function onChangeStatus(row, status) {
-  if (!canEditCarePlans.value || !clientKey.value) {
+  if (!canEditHere.value || !clientKey.value) {
     return
   }
   try {

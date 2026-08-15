@@ -45,6 +45,25 @@
             </AddClientLabeledField>
           </div>
 
+          <div class="col-12">
+            <AddClientLabeledField
+              :label="t('subtenantLegalNameLabel')">
+              <TextInput
+                v-model="local.legalName"
+                :external-label="true"
+                :readonly="readonly"
+                :maxlength="subtenantLegalNameMaxLength"
+                :error="Boolean(errors.legalName)"
+                :error-message="errors.legalName"
+                :placeholder="t('subtenantLegalNamePlaceholder')"
+                :test-id="subtenantDialogTestIds.field('legal-name')"
+              />
+            </AddClientLabeledField>
+            <p class="text-body2 text-grey-7 q-mt-sm q-mb-none">
+              {{ t('subtenantLegalNameHint') }}
+            </p>
+          </div>
+
           <div
             v-if="showCodeField"
             class="col-12">
@@ -54,6 +73,25 @@
                 :external-label="true"
                 readonly
                 :test-id="subtenantDialogTestIds.field('code')"
+              />
+            </AddClientLabeledField>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('clinicType')"
+              required>
+              <FormSelect
+                v-model="local.clinicType"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                :options="clinicTypeOptions"
+                :readonly="readonly"
+                :error="Boolean(errors.clinicType)"
+                :error-message="errors.clinicType"
+                :test-id="subtenantDialogTestIds.field('clinic-type')"
               />
             </AddClientLabeledField>
           </div>
@@ -110,13 +148,16 @@ import { subtenantStatusValues, storedFileCategories } from
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import CompanyLogoField from 'components/CompanyLogoField.vue'
+import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
 import TextInput from 'components/TextInput.vue'
 import {
   cloneSubtenantForm,
   createEmptySubtenantForm,
+  subtenantLegalNameMaxLength,
 } from 'src/utils/subtenant-form.js'
 import { subtenantDialogTestIds } from 'src/test-ids/index.js'
+import { clinicTypeSelectOptions } from 'src/utils/clinic-type.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -135,6 +176,7 @@ const { t } = useI18n()
 const local = ref(createEmptySubtenantForm())
 const errors = ref({})
 const companyLogoCategory = storedFileCategories.companyLogo
+const clinicTypeOptions = computed(() => clinicTypeSelectOptions(t))
 
 const open = computed({
   get: () => props.modelValue,
@@ -186,6 +228,15 @@ function validateForm() {
   resetErrors()
   if (!String(local.value.name ?? '').trim()) {
     errors.value.name = t('subtenantNameRequired')
+  }
+  const legalName = String(local.value.legalName ?? '').trim()
+  if (legalName.length > subtenantLegalNameMaxLength) {
+    errors.value.legalName = t('subtenantLegalNameTooLong', {
+      max: subtenantLegalNameMaxLength,
+    })
+  }
+  if (!String(local.value.clinicType ?? '').trim()) {
+    errors.value.clinicType = t('clinicTypeRequired')
   }
 
   return Object.keys(errors.value).length === 0

@@ -6,7 +6,7 @@
 
     <template v-if="workspace?.encounter">
       <div
-        v-if="returnSuperbillId"
+        v-if="returnSuperbillId && canViewSuperbill"
         class="encounter-workspace-return no-print">
         <q-btn
           no-caps
@@ -21,9 +21,10 @@
       </div>
       <EncounterWorkspaceHeader
         :encounter="workspace.encounter"
+        :show-complete="showCompleteButton"
         :can-complete="completion?.canComplete === true"
         :show-reopen="canReopen"
-        :show-cancel="canCancelEncounter"
+        :show-cancel="showCancelEncounter"
         :show-wait="canWaitForResults"
         :show-resume="canResumeEncounter"
         :busy="actionBusy"
@@ -52,6 +53,8 @@
           :billing-readiness="workspace.billingReadiness"
           :superbill="workspace.superbill"
           :show-generate-superbill="showGenerateSuperbill"
+          :show-view-superbill="showViewSuperbill"
+          :can-waive-requirement="canWaiveRequirement"
           :narrative="workspace.narrative"
           :generated-note="generatedNoteForOverview"
           @requirement-action="onRequirementAction"
@@ -65,7 +68,7 @@
         <EncounterWorkspaceVisit
           v-else-if="activeTab === encounterWorkspaceTabs.visit"
           :encounter="workspace.encounter"
-          :can-edit="canEdit"
+          :can-edit="canEditVisit"
           @services-saved="onVisitFieldsSaved"
           @diagnoses-saved="onVisitFieldsSaved"
           @chief-complaint-saved="onVisitFieldsSaved"
@@ -80,7 +83,13 @@
           :labs="workspace.labs"
           :client-id="workspace.encounter.clientId"
           :encounter-id="workspace.encounter.id"
-          :can-edit="canEdit"
+          :encounter-open="encounterIsOpen"
+          :can-add-vitals="canAddVitalsHere"
+          :can-edit-vitals="canEditVitalsHere"
+          :can-add-screenings="canAddScreeningsHere"
+          :can-edit-screenings="canEditScreeningsHere"
+          :can-add-labs="canAddLabsHere"
+          :can-edit-labs="canEditLabsHere"
           :patient-dob="workspace.encounter.clientDateOfBirth"
           :patient-age="workspace.encounter.clientAge"
           :patient-age-unit="workspace.encounter.clientAgeUnit || 'years'"
@@ -255,6 +264,10 @@ import {
 import { signClinicalNote } from 'src/utils/clinical-note-api.js'
 import { useClientClinicalNotePermissions } from
   'src/composables/useClientClinicalNotePermissions.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
+import { useEncounterPermissions } from
+  'src/composables/useEncounterPermissions.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -278,28 +291,86 @@ const reviewMode = ref('medication')
 const reviewCarePlanId = ref(null)
 const generatedNoteOpen = ref(false)
 const { canSignClinicalNotes } = useClientClinicalNotePermissions()
+const {
+  canAddVitals,
+  canEditVitals,
+  canAddScreenings,
+  canEditScreenings,
+  canAddLabs,
+  canEditLabs,
+} = useClientPermissions()
+const {
+  canManageEncounter,
+  canCompleteEncounter,
+  canCancelEncounter,
+  canReopenEncounter: hasReopenEncounterPermission,
+  canWaiveRequirement,
+  canGenerateSuperbill,
+  canViewSuperbill,
+} = useEncounterPermissions()
 
 const encounterId = computed(() =>
   String(route.params.id ?? '').trim(),
-)
-
-const canEdit = computed(() =>
-  workspace.value?.encounter?.status === encounterStatuses.inProgress,
 )
 
 const encounterStatus = computed(() =>
   workspace.value?.encounter?.status,
 )
 
-const showGenerateSuperbill = computed(() =>
-  isEncounterCompleted(workspace.value?.encounter)
-  && !workspace.value?.superbill?.id,
+const encounterIsOpen = computed(() =>
+  encounterStatus.value === encounterStatuses.inProgress,
 )
 
-const canCancelEncounter = computed(() =>
-  encounterStatus.value === encounterStatuses.inProgress
+const canEditVisit = computed(() =>
+  encounterIsOpen.value && canManageEncounter.value,
+)
+
+const canAddVitalsHere = computed(() =>
+  encounterIsOpen.value && canAddVitals.value,
+)
+
+const canEditVitalsHere = computed(() =>
+  encounterIsOpen.value && canEditVitals.value,
+)
+
+const canAddScreeningsHere = computed(() =>
+  encounterIsOpen.value && canAddScreenings.value,
+)
+
+const canEditScreeningsHere = computed(() =>
+  encounterIsOpen.value && canEditScreenings.value,
+)
+
+const canAddLabsHere = computed(() =>
+  encounterIsOpen.value && canAddLabs.value,
+)
+
+const canEditLabsHere = computed(() =>
+  encounterIsOpen.value && canEditLabs.value,
+)
+
+const showCompleteButton = computed(() =>
+  encounterIsOpen.value && canCompleteEncounter.value,
+)
+
+const showGenerateSuperbill = computed(() =>
+  isEncounterCompleted(workspace.value?.encounter)
+  && !workspace.value?.superbill?.id
+  && canGenerateSuperbill.value,
+)
+
+const showViewSuperbill = computed(() =>
+  Boolean(workspace.value?.superbill?.id)
+  && canViewSuperbill.value,
+)
+
+const showCancelEncounter = computed(() =>
+  canCancelEncounter.value
+  && (
+    encounterStatus.value === encounterStatuses.inProgress
     || encounterStatus.value === encounterStatuses.waitingForResults
-    || encounterStatus.value === encounterStatuses.readyToResume,
+    || encounterStatus.value === encounterStatuses.readyToResume
+  ),
 )
 
 const canWaitForResults = computed(() =>
@@ -319,7 +390,8 @@ const canResumeEncounter = computed(() =>
 )
 
 const canReopen = computed(() =>
-  canReopenEncounter(workspace.value),
+  canReopenEncounter(workspace.value)
+  && hasReopenEncounterPermission.value,
 )
 
 const showNarrativeTab = computed(() =>
@@ -597,6 +669,9 @@ function onRequirementAction(item) {
     clinicalSubTab.value = target.clinicalSubTab
   }
   if (target.review === 'medication') {
+    if (!canManageEncounter.value) {
+      return
+    }
     reviewMode.value = 'medication'
     reviewCarePlanId.value = null
     reviewOpen.value = true
@@ -604,6 +679,9 @@ function onRequirementAction(item) {
     return
   }
   if (target.review === 'care-plan') {
+    if (!canManageEncounter.value) {
+      return
+    }
     reviewMode.value = 'care-plan'
     reviewCarePlanId.value = target.carePlanId
     reviewOpen.value = true
@@ -620,6 +698,9 @@ function onRequirementAction(item) {
 }
 
 function onWaiveRequest(item) {
+  if (!canWaiveRequirement.value) {
+    return
+  }
   waiveTarget.value = item
   waiveOpen.value = true
 }
@@ -627,7 +708,8 @@ function onWaiveRequest(item) {
 async function onWaiveConfirm({ reason }) {
   const encounter = workspace.value?.encounter
   const requirementId = waiveTarget.value?.id
-  if (encounter?.id == null || requirementId == null) {
+  if (encounter?.id == null || requirementId == null
+    || !canWaiveRequirement.value) {
     return
   }
   actionBusy.value = true
@@ -663,7 +745,7 @@ async function onWaiveConfirm({ reason }) {
 
 async function onReviewConfirm({ notes }) {
   const encounter = workspace.value?.encounter
-  if (encounter?.id == null) {
+  if (encounter?.id == null || !canManageEncounter.value) {
     return
   }
   actionBusy.value = true
@@ -791,7 +873,7 @@ async function onResume() {
 
 async function onComplete() {
   const id = workspace.value?.encounter?.id
-  if (id == null) {
+  if (id == null || !canCompleteEncounter.value) {
     return
   }
   if (!hasEncounterChiefComplaint(workspace.value?.encounter)) {
@@ -863,7 +945,7 @@ async function onComplete() {
 
 async function onCancelConfirm(payload) {
   const id = workspace.value?.encounter?.id
-  if (id == null) {
+  if (id == null || !canCancelEncounter.value) {
     return
   }
   actionBusy.value = true
@@ -897,7 +979,7 @@ async function onCancelConfirm(payload) {
 async function onReopenConfirm(payload) {
   const before = workspace.value?.encounter
   const id = before?.id
-  if (id == null) {
+  if (id == null || !hasReopenEncounterPermission.value) {
     return
   }
   actionBusy.value = true
@@ -1068,7 +1150,7 @@ watch(showNarrativeTab, visible => {
 
 function onViewSuperbill() {
   const id = workspace.value?.superbill?.id
-  if (id == null) {
+  if (id == null || !canViewSuperbill.value) {
     return
   }
   void router.push({
@@ -1082,7 +1164,7 @@ const returnSuperbillId = computed(() =>
 )
 
 function goBackToSuperbill() {
-  if (!returnSuperbillId.value) {
+  if (!returnSuperbillId.value || !canViewSuperbill.value) {
     return
   }
   void router.push({
@@ -1093,7 +1175,7 @@ function goBackToSuperbill() {
 
 async function onGenerateSuperbill() {
   const id = encounterId.value
-  if (!id) {
+  if (!id || !canGenerateSuperbill.value) {
     return
   }
   actionBusy.value = true
@@ -1105,6 +1187,13 @@ async function onGenerateSuperbill() {
         type: quasarNotifyTypes.negative,
         message: t('superbillGenerateEmpty'),
       })
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('superbillGenerateSuccess'),
+    })
+    if (!canViewSuperbill.value) {
       return
     }
     void router.push({

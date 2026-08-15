@@ -222,9 +222,15 @@ export function useClientPermissions() {
       clientPermissionNames.addReferrals,
       clientPermissionNames.authorizationCreate,
       clientPermissionNames.authorizationEdit,
+      clientPermissionNames.authorizationApprove,
       clientPermissionNames.editFollowUps,
       clientPermissionNames.addFollowUps,
       clientPermissionNames.bookAppointment,
+      clientPermissionNames.addMedications,
+      clientPermissionNames.editMedications,
+      clientPermissionNames.addPharmacies,
+      clientPermissionNames.editPharmacies,
+      clientPermissionNames.consentAssign,
     ]),
   )
 

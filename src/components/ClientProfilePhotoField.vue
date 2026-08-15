@@ -1,25 +1,20 @@
 <template>
   <div class="client-profile-photo-field">
     <div class="client-profile-photo-field__avatar-shell">
-      <div
-        class="client-profile-photo-field__avatar"
-        role="img"
-        :aria-label="t('clientOverviewProfilePhotoPlaceholder')">
+      <div class="client-profile-photo-field__avatar">
         <q-spinner
           v-if="uploading"
           class="client-profile-photo-field__spinner"
           color="primary"
           size="28px"
         />
-        <img
-          v-else-if="previewSrc"
-          :src="previewSrc"
-          alt=""
-          class="client-profile-photo-field__image"
-        />
-        <ClientOverviewProfileAvatarPlaceholder
+        <StoredFileAvatar
           v-else
-          class="client-profile-photo-field__placeholder"
+          :file-id="fileId"
+          previewable
+          spinner-size="28px"
+          :preview-label="t('photoPreviewAria')"
+          :preview-test-id="clientPageTestIds.profilePhotoPreview"
         />
       </div>
     </div>
@@ -92,23 +87,20 @@
 </template>
 
 <script setup>
-import { ref, toRef } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import ClientOverviewProfileAvatarPlaceholder from
-  'components/client-overview/ClientOverviewProfileAvatarPlaceholder.vue'
 import ClientProfilePhotoCropDialog from
   'components/ClientProfilePhotoCropDialog.vue'
 import ProfilePhotoCameraDialog from
   'components/ProfilePhotoCameraDialog.vue'
+import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import {
   clientProfilePhotoMaxBytes,
   clientProfilePhotoMimeTypes,
   quasarNotifyTypes,
   storedFileCategories,
 } from 'components/constants.js'
-import { useStoredFilePreview } from
-  'src/composables/useStoredFilePreview.js'
 import { uploadStoredFile } from 'src/utils/stored-file-api.js'
 import { clientPageTestIds } from 'src/test-ids/index.js'
 
@@ -140,9 +132,6 @@ const uploading = ref(false)
 const cropDialogOpen = ref(false)
 const pendingCropFile = ref(null)
 const cameraDialogOpen = ref(false)
-
-const fileIdRef = toRef(props, 'fileId')
-const { previewSrc } = useStoredFilePreview(fileIdRef)
 
 function openPicker() {
   if (props.disabled || uploading.value) {

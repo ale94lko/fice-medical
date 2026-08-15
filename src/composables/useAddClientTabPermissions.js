@@ -5,6 +5,7 @@ import {
   addClientDocumentsSubTabKeys,
   addClientTabKeys,
   clientPermissionNames,
+  permissionNames,
 } from 'components/constants.js'
 import {
   ADD_CLIENT_MAIN_TABS,
@@ -208,7 +209,7 @@ export function canViewMainTab(modules, tabKey, isCreate) {
     case addClientTabKeys.documents:
       return filterSubTabs(modules, tabKey).length > 0
     case addClientTabKeys.financials:
-      return hasPermission(modules, 'VIEW_TENANTS_BILLING')
+      return hasPermission(modules, permissionNames.superbillView)
     default:
       return false
   }
@@ -217,7 +218,9 @@ export function canViewMainTab(modules, tabKey, isCreate) {
 export function filterSubTabs(modules, parentKey) {
   const tabs = ADD_CLIENT_SUB_TABS[parentKey] ?? []
   if (parentKey === addClientTabKeys.financials) {
-    return hasPermission(modules, 'VIEW_TENANTS_BILLING') ? tabs : []
+    return hasPermission(modules, permissionNames.superbillView)
+      ? tabs
+      : []
   }
 
   return tabs.filter(tab => canViewSubTab(modules, tab.key))

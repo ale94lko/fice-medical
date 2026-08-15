@@ -9,7 +9,7 @@
       </div>
       <div class="row q-gutter-sm items-center no-wrap">
         <q-btn
-          v-if="canEdit"
+          v-if="canAdd"
           no-caps
           unelevated
           color="primary"
@@ -38,7 +38,7 @@
       hide-header
       :patient-id="clientId"
       :clinician-options="clinicianOptions"
-      :readonly="!canEdit"
+      :readonly="!canEdit && !canAdd"
       :empty-label="t('encounterClinicalLabsEmpty')"
       @changed="emit('changed')"
     />
@@ -98,6 +98,10 @@ const props = defineProps({
     default: () => [],
   },
   canEdit: {
+    type: Boolean,
+    default: false,
+  },
+  canAdd: {
     type: Boolean,
     default: false,
   },

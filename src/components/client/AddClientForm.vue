@@ -914,7 +914,13 @@
               :key="subTab.key"
               :name="subTab.key"
               class="q-pa-none">
-              <div class="text-body1 text-grey-7 q-py-xl text-center">
+              <AddClientBillingTab
+                v-if="subTab.key === FINANCIALS_BILLING_SUB_TAB"
+                :client-id="props.clientId"
+              />
+              <div
+                v-else
+                class="text-body1 text-grey-7 q-py-xl text-center">
                 {{ t('tabComingSoon') }}
               </div>
             </q-tab-panel>
@@ -1080,6 +1086,7 @@ import AddClientAuthorizationsTab from
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAttachmentsTab from '../AddClientAttachmentsTab.vue'
+import AddClientBillingTab from '../AddClientBillingTab.vue'
 import AddClientConsentsTab from '../AddClientConsentsTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
 import AppLoadingOverlay from '../AppLoadingOverlay.vue'
@@ -1144,6 +1151,7 @@ import {
   CARE_COORDINATION_AUTHORIZATIONS_SUB_TAB,
   DOCUMENTS_ATTACHMENTS_SUB_TAB,
   DOCUMENTS_CONSENTS_SUB_TAB,
+  FINANCIALS_BILLING_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useAddClientTabPermissions } from

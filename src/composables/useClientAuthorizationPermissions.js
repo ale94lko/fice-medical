@@ -32,6 +32,18 @@ export function useClientAuthorizationPermissions() {
       clientPermissionNames.authorizationCancel,
     ),
   )
+  const canApproveAuthorizations = computed(() =>
+    hasPermission(
+      permissions.value,
+      clientPermissionNames.authorizationApprove,
+    ),
+  )
+  const canDenyAuthorizations = computed(() =>
+    hasPermission(
+      permissions.value,
+      clientPermissionNames.authorizationDeny,
+    ),
+  )
   const canAttachDocuments = computed(() =>
     hasAnyPermission(permissions.value, [
       clientPermissionNames.authorizationAttachDocument,
@@ -45,6 +57,8 @@ export function useClientAuthorizationPermissions() {
     canCreateAuthorizations,
     canEditAuthorizations,
     canCancelAuthorizations,
+    canApproveAuthorizations,
+    canDenyAuthorizations,
     canAttachDocuments,
   }
 }

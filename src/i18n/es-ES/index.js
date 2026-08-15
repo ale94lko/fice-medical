@@ -254,6 +254,13 @@ export default {
   subtenantListPaginationSummary:
     'Mostrando {from} a {to} de {total} subtenants',
   subtenantNameLabel: 'Nombre',
+  subtenantLegalNameLabel: 'Nombre legal',
+  subtenantLegalNamePlaceholder: 'Introduzca el nombre legal',
+  subtenantLegalNameHint:
+    'Nombre formal para Face Sheet, consentimientos y otros documentos. '
+    + 'Si está vacío, se usa el nombre visible.',
+  subtenantLegalNameTooLong:
+    'El nombre legal admite como máximo {max} caracteres.',
   subtenantCodeLabel: 'Código',
   subtenantMainLabel: 'Sucursal principal',
   subtenantStatusActiveLabel: 'Activo',
@@ -266,6 +273,15 @@ export default {
   subtenantLogoTooLarge: 'El archivo del logo es demasiado grande.',
   subtenantLogoUploadError: 'No se pudo subir el logo.',
   subtenantNameRequired: 'El nombre es obligatorio.',
+  clinicType: 'Tipo de clínica',
+  clinicTypeRequired: 'El tipo de clínica es obligatorio.',
+  clinicTypePrimaryCare: 'Atención primaria',
+  clinicTypeSpecialty: 'Especialidad',
+  clinicTypeBehavioralHealth: 'Salud mental',
+  clinicTypeUrgentCare: 'Urgencias',
+  clinicTypeTelehealth: 'Telehealth',
+  clinicTypeMultiSpecialty: 'Multi-especialidad',
+  subtenantRolesAdded: 'Se añadieron los roles: {roles}',
   subtenantDialogAddTitle: 'Añadir subtenant',
   subtenantDialogEditTitle: 'Editar subtenant',
   subtenantDialogViewTitle: 'Detalle del subtenant',
@@ -464,6 +480,9 @@ export default {
   userPermissionsLoading: 'Cargando permisos…',
   userPermissionsLoadError:
     'No se pudieron cargar los permisos. Inténtelo de nuevo.',
+  permissionImplicationWarning:
+    'Tener permisos de escritura sin el de ver suele no funcionar: '
+    + 'el usuario puede no ver la pantalla que puede editar.',
   treeExpand: 'Expandir',
   treeCollapse: 'Contraer',
   userDescriptionPlaceholder: 'Introduzca descripción',
@@ -1067,6 +1086,9 @@ export default {
   profilePhotoCameraPermissionError: 'Se denegó el permiso de la cámara.',
   profilePhotoCameraUnavailable:
     'La cámara no está disponible en este navegador.',
+  photoPreviewTitle: 'Vista previa de la foto',
+  photoPreviewAria: 'Ver foto en grande',
+  photoPreviewError: 'No se pudo cargar la foto.',
   cancelClientEditTitle: '¿Descartar cambios?',
   cancelClientEditMessage:
     'Tiene cambios sin guardar. Si sale ahora, se perderán.',
@@ -2633,6 +2655,14 @@ export default {
   followUpStatusCancelled: 'Cancelado',
   followUpStatusOverdue: 'Vencido',
   subTabBilling: 'Facturación',
+  clientBillingTitle: 'Facturación',
+  clientBillingSubtitle:
+    'Superbills generados a partir de las consultas de este cliente.',
+  clientBillingEmpty: 'Este cliente no tiene facturas.',
+  clientBillingLoadError: 'No se pudieron cargar las facturas.',
+  clientBillingNoPermission:
+    'No tiene permiso para ver la facturación.',
+  clientBillingOpen: 'Abrir superbill',
   subTabClaims: 'Reclamaciones',
   subTabPayments: 'Pagos',
   subTabAttachments: 'Adjuntos',
@@ -4303,7 +4333,6 @@ export default {
   billingWorkspaceSubtitle:
     'Revise y gestione las visitas clínicas para facturar.',
   billingReviewTitle: 'Revisión de facturación',
-  billingBackToQueue: 'Volver a Facturación',
   billingReviewEnableHint:
     'Resuelva todos los bloqueos para habilitar.',
   billingQueueNeedsAttention: 'Requiere atención',
@@ -4483,6 +4512,7 @@ export default {
   superbillGenerateRetry: 'Generar Superbill',
   superbillGenerateEmpty:
     'No se pudo generar un Superbill para este encounter.',
+  superbillGenerateSuccess: 'Superbill generado.',
   superbillNoneYet: 'Aún no se ha generado un superbill.',
   superbillActionError: 'No se pudo completar esta acción.',
   superbillReqEncounterCompleted: 'Encounter completado',

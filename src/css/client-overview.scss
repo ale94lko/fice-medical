@@ -565,6 +565,36 @@
     object-position: center;
   }
 
+  &__preview-btn {
+    position: absolute;
+    inset: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: inherit;
+  }
+
+  &__zoom {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.42);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+  }
+
+  &__preview-btn:hover .stored-file-avatar__zoom,
+  &__preview-btn:focus-visible .stored-file-avatar__zoom {
+    opacity: 1;
+  }
+
   &--loading .q-spinner {
     position: relative;
     z-index: 1;

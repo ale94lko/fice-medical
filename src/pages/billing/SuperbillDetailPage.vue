@@ -6,14 +6,6 @@
 
     <template v-if="detail">
       <div class="superbill-detail__top">
-        <button
-          v-if="canViewSuperbills"
-          type="button"
-          class="superbill-detail__back"
-          :data-testid="tid.back"
-          @click="goToList">
-          {{ t('billingBackToQueue') }}
-        </button>
         <div class="superbill-detail__title-row">
           <div>
             <div class="row items-center q-gutter-sm">
@@ -650,7 +642,6 @@ const $q = useQuasar()
 const route = useRoute()
 const router = useRouter()
 const {
-  canViewSuperbills,
   canReviewSuperbill,
   canReopenSuperbill,
   canVoidSuperbill,
@@ -995,10 +986,6 @@ function billingReturnQuery(extra = {}) {
   }
 
   return { ...extra, returnSuperbillId: String(id) }
-}
-
-function goToList() {
-  void router.push({ name: 'SuperbillList' })
 }
 
 function goToEncounter(tab) {
