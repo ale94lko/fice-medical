@@ -1,1 +1,0 @@
-import{Bf as e,Gf as t,Ot as n,_p as r,dp as i,sp as a}from"./index-CtY48JAg.js";import{r as o,t as s}from"./QLayout-Bpl_59Gv.js";var c={};function l(n,c){let l=i(`router-view`);return a(),e(s,{view:`hHh Lpr lff`},{default:r(()=>[t(o,null,{default:r(()=>[t(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};

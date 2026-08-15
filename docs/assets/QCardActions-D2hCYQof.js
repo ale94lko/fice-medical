@@ -1,1 +1,0 @@
-import{Jd as e,Jf as t,Rd as n,Rf as r,wf as i,zd as a}from"./index-CtY48JAg.js";var o=i({name:`QCardActions`,props:{...n,vertical:Boolean},setup(n,{slots:i}){let o=a(n),s=r(()=>`q-card__actions ${o.value} q-card__actions--${n.vertical===!0?`vert column`:`horiz row`}`);return()=>t(`div`,{class:s.value},e(i.default))}});export{o as t};
