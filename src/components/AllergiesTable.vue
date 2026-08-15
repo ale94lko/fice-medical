@@ -51,7 +51,9 @@
       </q-td>
     </template>
 
-    <template #row-actions="{ row }">
+    <template
+      v-if="showActions"
+      #row-actions="{ row }">
       <div class="admin-table-row-actions">
         <q-btn
           v-if="canEdit"
@@ -144,6 +146,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  showActions: {
+    type: Boolean,
+    default: true,
+  },
 })
 
 const emit = defineEmits(['edit', 'delete'])
@@ -170,45 +176,52 @@ const invalidRowIdSet = computed(
   () => new Set(props.invalidRowIds ?? []),
 )
 
-const columns = computed(() => [
-  {
-    name: 'allergy',
-    label: t('allergyName'),
-    align: 'left',
-    field: row => row.allergy,
-    sortable: false,
-    headerStyle: 'min-width: 160px',
-    style: 'min-width: 160px',
-  },
-  {
-    name: 'severity',
-    label: t('allergySeverity'),
-    align: 'left',
-    field: row => row.severity,
-    sortable: false,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
-  },
-  {
-    name: 'startYear',
-    label: t('allergyStartYear'),
-    align: 'left',
-    field: row => row.startYear,
-    sortable: false,
-    headerStyle: 'min-width: 100px',
-    style: 'min-width: 100px',
-  },
-  {
-    name: 'actions',
-    label: t('actions'),
-    align: 'center',
-    field: row => row.id,
-    sortable: false,
-    required: true,
-    headerStyle: 'min-width: 96px',
-    style: 'min-width: 96px',
-  },
-])
+const columns = computed(() => {
+  const cols = [
+    {
+      name: 'allergy',
+      label: t('allergyName'),
+      align: 'left',
+      field: row => row.allergy,
+      sortable: false,
+      headerStyle: 'min-width: 160px',
+      style: 'min-width: 160px',
+    },
+    {
+      name: 'severity',
+      label: t('allergySeverity'),
+      align: 'left',
+      field: row => row.severity,
+      sortable: false,
+      headerStyle: 'min-width: 140px',
+      style: 'min-width: 140px',
+    },
+    {
+      name: 'startYear',
+      label: t('allergyStartYear'),
+      align: 'left',
+      field: row => row.startYear,
+      sortable: false,
+      headerStyle: 'min-width: 100px',
+      style: 'min-width: 100px',
+    },
+  ]
+
+  if (props.showActions) {
+    cols.push({
+      name: 'actions',
+      label: t('actions'),
+      align: 'center',
+      field: row => row.id,
+      sortable: false,
+      required: true,
+      headerStyle: 'min-width: 96px',
+      style: 'min-width: 96px',
+    })
+  }
+
+  return cols
+})
 
 function formatStartYear(year) {
   if (year == null || year === '') {

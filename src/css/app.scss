@@ -4902,6 +4902,17 @@ body.vp-mobile {
     width: 100%;
   }
 
+  &__actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  &__actions--menu {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    padding-top: 2px;
+  }
+
   &__menu-btn {
     min-width: 40px;
     padding-left: 8px !important;
@@ -4909,8 +4920,19 @@ body.vp-mobile {
   }
 
   &__actions-menu {
+    min-width: 260px;
+
     .q-item {
       min-height: 40px;
+    }
+  }
+
+  &__actions-menu-extra {
+    padding: 10px 12px 8px;
+    border-bottom: 1px solid $border-subtle;
+
+    .q-field {
+      width: 100%;
     }
   }
 

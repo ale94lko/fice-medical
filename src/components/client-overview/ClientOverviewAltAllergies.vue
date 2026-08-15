@@ -13,23 +13,30 @@
       {{ t('clientOverviewNoKnownAllergies') }}
     </p>
     <p
-      v-else-if="!items.length"
+      v-else-if="!entries.length"
       class="client-overview-alt-panel__empty">
       {{ t('clientOverviewNoAllergies') }}
     </p>
-    <ClientOverviewAllergiesDialogList
+    <AdminTablePanel
       v-else
-      :items="items"
-    />
+      class="admin-table-panel--wide"
+      :show-column-settings="false">
+      <AllergiesTable
+        :entries="entries"
+        :empty-label="t('clientOverviewNoAllergies')"
+        :can-edit="false"
+        :show-actions="false"
+      />
+    </AdminTablePanel>
   </section>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
+import AllergiesTable from 'components/AllergiesTable.vue'
 import SectionHeading from 'components/SectionHeading.vue'
-import ClientOverviewAllergiesDialogList from
-  'components/client-overview/ClientOverviewAllergiesDialogList.vue'
 import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -41,8 +48,29 @@ const props = defineProps({
 
 const { t } = useI18n()
 
-const items = computed(() => props.allergyDetail?.rows ?? [])
 const noKnownAllergies = computed(() =>
   Boolean(props.allergyDetail?.noKnownAllergies),
 )
+
+const entries = computed(() => {
+  const rows = Array.isArray(props.allergyDetail?.rows)
+    ? props.allergyDetail.rows
+    : []
+
+  return rows.map((item, index) => ({
+    id: `overview-allergy-${index}`,
+    allergy: item?.label || '',
+    severity: item?.severityModifier || item?.severityLabel || '',
+    startYear: normalizeYear(item?.year),
+  }))
+})
+
+function normalizeYear(year) {
+  const text = String(year ?? '').trim()
+  if (!text || text === '—') {
+    return ''
+  }
+
+  return text
+}
 </script>

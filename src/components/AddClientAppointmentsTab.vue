@@ -39,7 +39,7 @@
           </p>
         </div>
         <div
-          v-if="showAppointmentSearch"
+          v-if="showAppointmentSearch && !isMobile"
           class="col-grow appointments-header__search">
           <q-input
             :model-value="searchQuery"
@@ -68,10 +68,9 @@
           </p>
         </div>
         <div
-          v-if="canBookAppointment"
+          v-if="canBookAppointment && !isMobile"
           class="col-auto">
           <q-btn
-            v-if="!isMobile"
             no-caps
             unelevated
             color="primary"
@@ -82,8 +81,12 @@
             :data-testid="tid.btn('add')"
             @click="openBookDrawer"
           />
+        </div>
+        <div
+          v-if="showMobileActionsMenu"
+          class="col-auto appointments-header__actions
+            appointments-header__actions--menu">
           <q-btn
-            v-else
             unelevated
             outline
             no-caps
@@ -105,7 +108,44 @@
               self="top right"
               :offset="[0, 8]"
               class="app-light-menu appointments-header__actions-menu">
-              <q-list dense style="min-width: 220px">
+              <div
+                v-if="showAppointmentSearch"
+                class="appointments-header__actions-menu-extra"
+                @click.stop>
+                <q-input
+                  :model-value="searchQuery"
+                  outlined
+                  dense
+                  clearable
+                  hide-bottom-space
+                  class="admin-list-page__search-input
+                    appointments-header__search-input"
+                  :data-testid="tid.field('search')"
+                  :disable="actionSaving"
+                  :loading="searchLoading"
+                  :placeholder="
+                    t('appointmentListSearchPlaceholder')
+                  "
+                  :aria-label="
+                    t('appointmentListSearchPlaceholder')
+                  "
+                  @update:model-value="setSearchQuery"
+                  @clear="resetSearchQuery">
+                  <template #prepend>
+                    <q-icon name="search" size="18px" />
+                  </template>
+                </q-input>
+                <p
+                  v-if="searchHint"
+                  class="appointments-header__search-hint
+                    text-caption text-grey-7 q-mb-none q-mt-xs">
+                  {{ searchHint }}
+                </p>
+              </div>
+              <q-list
+                v-if="canBookAppointment"
+                dense
+                style="min-width: 220px">
                 <q-item
                   v-close-popup
                   clickable
@@ -113,7 +153,11 @@
                   :data-testid="tid.btn('add')"
                   @click="openBookDrawer">
                   <q-item-section avatar>
-                    <q-icon name="add" color="primary" size="18px" />
+                    <q-icon
+                      name="add"
+                      color="primary"
+                      size="18px"
+                    />
                   </q-item-section>
                   <q-item-section>
                     {{ t('appointmentAddButton') }}
@@ -357,6 +401,11 @@ const searchHint = computed(() => {
 
 const showAppointmentSearch = computed(() =>
   embeddedRows.value.length > 0 || isSearchActive.value,
+)
+
+const showMobileActionsMenu = computed(() =>
+  isMobile.value
+  && (canBookAppointment.value || showAppointmentSearch.value),
 )
 
 const listEmptyLabel = computed(() => {

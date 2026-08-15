@@ -10,7 +10,9 @@
       row-key="appointmentId"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
     <template #body-cell-date="scope">
       <q-td
         :props="scope"
@@ -187,6 +189,8 @@ import { clinicianInitialsFromPersonName } from
   'src/utils/clinician-display.js'
 import { resolveRoleBadgeTone } from 'src/utils/user-list-display.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 
 const APPOINTMENT_SERVICE_LABEL_MAX = 60
 
@@ -217,15 +221,33 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
+
+/** Same compact card hierarchy as Encounters / Billing (mobile). */
+const mobileCardLayout = {
+  title: 'date',
+  status: 'status',
+  subtitle: null,
+  titleExtra: 'time',
+  contact: null,
+  identifier: null,
+  badges: [
+    'appointmentType',
+    'serviceCode',
+    'clinician',
+    'placeOfService',
+  ],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {
     name: 'date',
     label: t('appointmentColDate'),
     align: 'left',
-    field: row => row.startAtUtc,
+    field: row => formatDate(row.startAtUtc),
     sortable: false,
     headerStyle: 'min-width: 140px',
     style: 'min-width: 140px',
@@ -234,7 +256,7 @@ const columns = computed(() => [
     name: 'time',
     label: t('appointmentColTime'),
     align: 'left',
-    field: row => row.startAtUtc,
+    field: row => formatTimeRange(row.startAtUtc, row.endAtUtc),
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
