@@ -5,6 +5,7 @@
     lazy-rules="ondemand"
     hide-bottom-space
     class="login-text-input full-width"
+    :key="inputKey"
     :data-testid="testId"
     :type="resolvedType"
     :label="label || undefined"
@@ -79,6 +80,15 @@ const resolvedType = computed(() =>
     ? passwordFieldInputType(showPlainPassword.value)
     : props.type,
 )
+
+/** Remount on toggle so mobile browsers apply password↔text. */
+const inputKey = computed(() => {
+  if (!isPasswordField.value) {
+    return 'login-input'
+  }
+
+  return showPlainPassword.value ? 'login-pwd-plain' : 'login-pwd-hidden'
+})
 
 const maxlengthResolved = computed(() => {
   if (props.maxlength == null || props.maxlength === '') {

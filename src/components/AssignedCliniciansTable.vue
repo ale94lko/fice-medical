@@ -10,7 +10,9 @@
       row-key="value"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-primary="scope">
         <q-td :props="scope">
           <div
@@ -49,21 +51,21 @@
         </q-td>
       </template>
 
-    <template #body-cell-specialty="scope">
-      <q-td :props="scope">
-        <span
-          v-if="clinicianSpecialty(scope.row)"
-          class="assigned-clinicians-table__specialty"
-          :class="`assigned-clinicians-table__specialty--${
-            specialtyTone(scope.row)
-          }`">
-          {{ clinicianSpecialty(scope.row) }}
-        </span>
-        <span v-else class="text-grey-7">—</span>
-      </q-td>
-    </template>
+      <template #body-cell-specialty="scope">
+        <q-td :props="scope">
+          <span
+            v-if="clinicianSpecialty(scope.row)"
+            class="assigned-clinicians-table__specialty"
+            :class="`assigned-clinicians-table__specialty--${
+              specialtyTone(scope.row)
+            }`">
+            {{ clinicianSpecialty(scope.row) }}
+          </span>
+          <span v-else class="text-grey-7">—</span>
+        </q-td>
+      </template>
 
-    <template #row-actions="{ row }">
+      <template #row-actions="{ row }">
         <div class="admin-table-row-actions">
           <q-btn
             v-if="canEdit"
@@ -77,14 +79,14 @@
             :aria-label="t('delete')"
             @click="emit('delete', row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('delete') }}
-          </q-tooltip>
-        </q-btn>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('delete') }}
+            </q-tooltip>
+          </q-btn>
           <span
             v-else
             class="text-grey-6">
@@ -110,6 +112,8 @@ import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
 import ClinicianSelectAvatar from 'components/ClinicianSelectAvatar.vue'
 import { siteBreakpoints } from 'components/constants.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { taxonomySpecialtyTone } from
   'src/utils/staff-taxonomy-display.js'
@@ -132,9 +136,19 @@ const props = defineProps({
 const emit = defineEmits(['delete', 'set-primary'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.entries ?? [])
+
+/** Compact mobile cards (same pattern as FMH / Insurance). */
+const mobileCardLayout = {
+  title: 'clinician',
+  subtitle: null,
+  status: 'primary',
+  badges: ['specialty'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {
@@ -197,7 +211,7 @@ function specialtyTone(row) {
     max-width: 100%;
   }
 
-  &.table :deep(.q-table) {
+  &.table:not(.q-table--grid) {
     min-width: 560px;
   }
 

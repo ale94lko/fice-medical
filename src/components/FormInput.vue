@@ -9,6 +9,7 @@
       outlined
       hide-bottom-space
       class="full-width"
+      :key="inputKey"
       :data-testid="props.testId"
       :type="resolvedType"
       :rules="props.rules || []"
@@ -34,6 +35,7 @@
     ref="inputRef"
     v-model="model"
     outlined
+    :key="inputKey"
     :stack-label="stackSpacing"
     :hide-bottom-space="!stackSpacing"
     :class="{ 'text-input--stack-spacing': stackSpacing }"
@@ -145,6 +147,15 @@ const resolvedType = computed(() =>
     ? passwordFieldInputType(showPlainPassword.value)
     : props.type,
 )
+
+/** Remount on toggle so mobile browsers apply password↔text. */
+const inputKey = computed(() => {
+  if (!isPasswordField.value) {
+    return 'form-input'
+  }
+
+  return showPlainPassword.value ? 'pwd-plain' : 'pwd-hidden'
+})
 
 const maxlengthResolved = computed(() => {
   if (props.maxlength == null || props.maxlength === '') {
