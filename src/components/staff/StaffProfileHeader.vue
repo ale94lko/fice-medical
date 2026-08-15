@@ -177,11 +177,14 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useQuasar, copyToClipboard } from 'quasar'
+import { computed } from 'vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 
 const props = defineProps({
   staffId: {
@@ -206,6 +209,10 @@ const emit = defineEmits(['edit', 'close'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+
+useSyncAppPageTitle(computed(() =>
+  String(props.header?.fullName ?? '').trim(),
+))
 
 function copyStaffNo() {
   copyToClipboard(props.header.staffNo)

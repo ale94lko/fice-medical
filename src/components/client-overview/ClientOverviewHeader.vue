@@ -384,6 +384,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
@@ -397,6 +398,8 @@ import GenerateDocumentAction from
 import { documentTypes, clientOverviewGenerateDocumentOptions } from
   'src/utils/document-generation-constants.js'
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 
 const props = defineProps({
   clientId: {
@@ -424,6 +427,10 @@ const props = defineProps({
     default: false,
   },
 })
+
+useSyncAppPageTitle(computed(() =>
+  String(props.header?.fullName ?? '').trim(),
+))
 
 const emit = defineEmits([
   'review-missing',

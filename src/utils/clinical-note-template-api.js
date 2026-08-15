@@ -53,7 +53,8 @@ export function normalizeClinicalNoteTemplateSection(raw = {}) {
   return {
     id: raw.id ?? null,
     sectionKey: String(raw.section_key ?? raw.sectionKey ?? '').trim(),
-    sectionType: String(raw.section_type ?? raw.sectionType ?? '').toUpperCase(),
+    sectionType: String(raw.section_type
+      ?? raw.sectionType ?? '').toUpperCase(),
     label: String(raw.label ?? '').trim(),
     displayOrder: raw.display_order ?? raw.displayOrder ?? 0,
     required: Boolean(raw.required),

@@ -16,16 +16,34 @@
           shrink>
           FiCE Medical
         </q-toolbar-title>
+        <q-toolbar-title
+          v-else
+          shrink
+          class="app-header__page-title">
+          {{ mobilePageTitle }}
+        </q-toolbar-title>
         <q-space />
         <ActiveEncounterHeaderChip />
-        <SubtenantToolbar class="q-mr-xs" />
-        <ClinicalResourcesQuickPanel
-          v-if="showClinicalResourcesMenu"
+        <SubtenantToolbar
+          v-if="!mobileView"
           class="q-mr-xs"
         />
-        <AppHeaderNotifications />
-        <AppHeaderUserMenu
+        <template v-if="!mobileView">
+          <ClinicalResourcesQuickPanel
+            v-if="showClinicalResourcesMenu"
+            class="q-mr-xs"
+          />
+          <AppHeaderNotifications />
+          <AppHeaderUserMenu
+            class="q-ml-xs"
+            @change-password="handleChangePassword"
+            @logout="handleLogout"
+          />
+        </template>
+        <AppHeaderMobileOverflow
+          v-else
           class="q-ml-xs"
+          :show-clinical="showClinicalResourcesMenu"
           @change-password="handleChangePassword"
           @logout="handleLogout"
         />
@@ -760,9 +778,12 @@ import ActiveEncounterHeaderChip from
 import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import AppHeaderNotifications from
   'components/AppHeaderNotifications.vue'
+import AppHeaderMobileOverflow from
+  'components/AppHeaderMobileOverflow.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
+import { useAppPageTitle } from 'src/composables/useAppPageTitle.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
@@ -778,7 +799,12 @@ const {
   isMobile: mobileView,
   isTablet: tabletView,
 } = useViewportLayout()
+const { appPageTitle } = useAppPageTitle()
 const { footerPaginationState } = useAppFooterPagination()
+
+const mobilePageTitle = computed(
+  () => appPageTitle.value || 'FiCE Medical',
+)
 
 /** Hide copyright on mobile when list pagination occupies the footer. */
 const showFooterCopyright = computed(

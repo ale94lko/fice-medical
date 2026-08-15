@@ -174,6 +174,8 @@ import { useAppointmentCalendar } from
   'src/composables/useAppointmentCalendar.js'
 import { useCalendarPermissions } from
   'src/composables/useCalendarPermissions.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 import {
   bookAppointment,
   extractBookingConflicts,
@@ -187,6 +189,8 @@ const { t } = useI18n()
 const $q = useQuasar()
 const { canSelectClinicianSources, canBookAppointment } =
   useCalendarPermissions()
+
+useSyncAppPageTitle(computed(() => t('calendarPageTitle')))
 
 const bookDialogOpen = ref(false)
 const bookSaving = ref(false)

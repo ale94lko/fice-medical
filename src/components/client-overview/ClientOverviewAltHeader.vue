@@ -293,6 +293,8 @@ import { documentTypes } from 'src/utils/document-generation-constants.js'
 import {
   clientOverviewAltTestIds,
 } from 'src/test-ids/index.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 
 const props = defineProps({
   clientId: {
@@ -324,6 +326,10 @@ const props = defineProps({
     default: false,
   },
 })
+
+useSyncAppPageTitle(computed(() =>
+  String(props.header?.fullName ?? '').trim(),
+))
 
 const emit = defineEmits([
   'review-missing',

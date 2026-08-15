@@ -216,6 +216,8 @@ import {
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 
 const props = defineProps({
   encounter: {
@@ -269,6 +271,8 @@ const { linkedStaffProfile, activeSubtenant } = storeToRefs(authStore)
 const displayName = computed(() =>
   String(props.encounter?.clientDisplayName ?? '').trim() || '—',
 )
+
+useSyncAppPageTitle(displayName)
 
 const photoFileId = computed(() =>
   props.encounter?.clientPhotoFileId ?? null,

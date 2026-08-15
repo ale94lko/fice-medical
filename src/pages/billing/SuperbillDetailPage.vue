@@ -636,6 +636,8 @@ import {
   superbillRequirementLabelKey,
   superbillWorkspaceTabForAction,
 } from 'src/utils/superbill-normalize.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 
 const { t, te } = useI18n()
 const $q = useQuasar()
@@ -647,6 +649,8 @@ const {
   canVoidSuperbill,
   canEditBillingFields,
 } = useSuperbillPermissions()
+
+useSyncAppPageTitle(computed(() => t('billingReviewTitle')))
 
 const readyStatus = superbillStatuses.ready
 const loading = ref(false)

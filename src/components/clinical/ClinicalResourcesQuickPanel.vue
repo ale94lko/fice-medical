@@ -256,6 +256,12 @@ function onItemAction(item) {
 onMounted(() => {
   void loadPinned()
 })
+
+defineExpose({
+  open() {
+    menuOpen.value = true
+  },
+})
 </script>
 
 <style lang="scss" scoped>

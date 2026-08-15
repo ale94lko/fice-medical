@@ -177,6 +177,20 @@ body.vp-mobile {
       order: 0;
     }
 
+    .app-header__page-title {
+      order: 1;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding: 0 8px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: $shell-text;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .app-subtenant {
       order: 1;
       flex-shrink: 0;
@@ -187,11 +201,17 @@ body.vp-mobile {
 
     .q-space {
       order: 2;
+      display: none;
     }
 
     .q-space ~ * {
       order: 3;
       flex-shrink: 0;
+    }
+
+    .app-header-mobile-overflow {
+      order: 4;
+      margin-left: auto;
     }
 
     .app-subtenant__pill,
@@ -211,6 +231,116 @@ body.vp-mobile {
       text-overflow: unset;
       white-space: nowrap;
     }
+  }
+
+  /* Title lives in the app bar; keep subtitle/actions in the page. */
+  .admin-list-page__title,
+  .calendar-page__title,
+  .add-client-page__title,
+  .superbill-detail__title,
+  .client-overview-header__name,
+  .encounter-workspace-header__name {
+    display: none !important;
+  }
+
+  .client-overview-alt-header__name-copy {
+    display: none !important;
+  }
+}
+
+.app-header-mobile-overflow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  &__anchors {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__trigger {
+    color: $shell-text-muted;
+  }
+
+  &__clinic-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: $secondary-2;
+    color: $primary;
+    overflow: hidden;
+
+    .q-icon {
+      opacity: 0.95;
+    }
+
+    .app-subtenant__logo,
+    .stored-file-avatar {
+      width: 100%;
+      height: 100%;
+    }
+
+    .app-subtenant__logo .stored-file-avatar__image,
+    .stored-file-avatar__image {
+      border-radius: 50%;
+      object-fit: contain;
+      padding: 3px;
+      background: rgba(255, 255, 255, 0.92);
+    }
+  }
+
+  &__list {
+    min-width: 240px;
+    padding: 6px 0;
+  }
+
+  &__separator {
+    margin: 6px 0;
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px 8px;
+    min-width: 0;
+  }
+
+  &__user-text {
+    min-width: 0;
+  }
+
+  &__user-name,
+  &__user-meta {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__user-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: $text-strong;
+    line-height: 1.25;
+  }
+
+  &__user-meta {
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: $text-muted;
+    line-height: 1.25;
   }
 }
 

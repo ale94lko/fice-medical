@@ -24,7 +24,11 @@
 </template>
 
 <script setup>
-defineProps({
+import { toRef } from 'vue'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
+
+const props = defineProps({
   title: {
     type: String,
     default: '',
@@ -34,4 +38,6 @@ defineProps({
     default: '',
   },
 })
+
+useSyncAppPageTitle(toRef(props, 'title'))
 </script>

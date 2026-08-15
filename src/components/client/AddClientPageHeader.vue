@@ -34,11 +34,14 @@
 </template>
 
 <script setup>
+import { toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ClientProfilePhotoField from 'components/ClientProfilePhotoField.vue'
 import { clientPageTestIds } from 'src/test-ids/index.js'
+import { useSyncAppPageTitle } from
+  'src/composables/useAppPageTitle.js'
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true,
@@ -72,4 +75,5 @@ defineProps({
 const emit = defineEmits(['update:photoFileId'])
 
 const { t } = useI18n()
+useSyncAppPageTitle(toRef(props, 'title'))
 </script>

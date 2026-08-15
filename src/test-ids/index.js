@@ -15,6 +15,12 @@ export const authTestIds = {
 
 export const layoutTestIds = {
   menuToggle: 'layout-btn-menu-toggle',
+  headerOverflow: 'layout-btn-header-overflow',
+  headerOverflowMenu: 'layout-header-overflow-menu',
+  headerOverflowSubtenant: 'layout-header-overflow-subtenant',
+  headerOverflowClinical: 'layout-header-overflow-clinical',
+  headerOverflowNotifications:
+    'layout-header-overflow-notifications',
   notifications: 'layout-btn-notifications',
   notificationsMenu: 'layout-notifications-menu',
   notificationsLoading: 'layout-notifications-loading',

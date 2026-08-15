@@ -186,6 +186,12 @@ const loading = ref(false)
 const busy = ref(false)
 let timer = null
 
+const emit = defineEmits(['update:unreadCount'])
+
+function emitUnreadCount() {
+  emit('update:unreadCount', unreadCount.value)
+}
+
 function itemIcon(item) {
   return item?.type === RESULTS_READY_TYPE
     ? 'science'
@@ -229,6 +235,7 @@ function notifyError(key) {
 
 function syncUnreadCount() {
   unreadCount.value = items.value.filter(row => row.unread).length
+  emitUnreadCount()
 }
 
 function hideMenu() {
@@ -328,6 +335,13 @@ async function onOpen(item) {
     })
   }
 }
+
+defineExpose({
+  unreadCount,
+  open() {
+    menuRef.value?.show?.()
+  },
+})
 
 onMounted(() => {
   void refresh()
