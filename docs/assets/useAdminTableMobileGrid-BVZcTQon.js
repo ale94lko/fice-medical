@@ -1,1 +1,0 @@
-import{n as e}from"./index-CT46GD1L.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
