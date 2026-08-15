@@ -247,7 +247,9 @@ body.vp-mobile {
     display: none !important;
   }
 
-  .dashboard-page {
+  .dashboard-page,
+  .subtenant-list-page,
+  .clinical-audit-list-page {
     .admin-list-page__heading {
       display: none;
     }
@@ -261,7 +263,9 @@ body.vp-mobile {
       flex-wrap: wrap;
       justify-content: flex-end;
     }
+  }
 
+  .dashboard-page {
     .dashboard-widget-card--edit-mobile {
       .dashboard-widget__icon {
         visibility: hidden;
@@ -282,7 +286,14 @@ body.vp-mobile {
   }
 
   .client-list-page .admin-list-page__subtitle,
-  .staff-list-page .admin-list-page__subtitle {
+  .staff-list-page .admin-list-page__subtitle,
+  .user-list-page .admin-list-page__subtitle,
+  .subtenant-list-page .admin-list-page__subtitle,
+  .service-procedure-list-page .admin-list-page__subtitle,
+  .screening-template-list-page .admin-list-page__subtitle,
+  .consent-template-list-page .admin-list-page__subtitle,
+  .clinical-audit-list-page .admin-list-page__subtitle,
+  .clinical-resource-list-page .admin-list-page__subtitle {
     display: none !important;
   }
 }
@@ -1991,6 +2002,15 @@ body.vp-mobile {
     }
   }
 
+  &__menu-filter {
+    width: 100%;
+    min-width: 220px;
+
+    .q-field {
+      width: 100%;
+    }
+  }
+
   @media (max-width: 1023px) {
     .admin-list-page__title-row {
       flex-wrap: wrap;
@@ -1998,17 +2018,16 @@ body.vp-mobile {
     }
 
     &__toolbar {
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
 
     &__search {
-      flex: 1 1 100%;
+      flex: 1 1 auto;
       max-width: none;
     }
 
     &__filter {
-      flex: 1 1 100%;
-      width: auto;
+      display: none;
     }
   }
 }

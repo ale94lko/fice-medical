@@ -32,6 +32,7 @@
             </template>
           </q-input>
           <FormSelect
+            v-if="isDesktop"
             :model-value="categoryFilter"
             :options="categoryFilterOptions"
             clearable
@@ -45,11 +46,30 @@
         </div>
       </template>
       <template #actions>
-        <AdminListPageActions :actions="pageActions" />
+        <AdminListPageActions :actions="pageActions">
+          <template
+            v-if="!isDesktop"
+            #menu-extra>
+            <FormSelect
+              :model-value="categoryFilter"
+              :options="categoryFilterOptions"
+              clearable
+              outlined
+              dense
+              hide-bottom-space
+              class="service-procedure-list-page__menu-filter"
+              :disable="loading"
+              :test-id="serviceProcedureListTestIds.categoryFilter"
+              @update:model-value="onCategoryFilterChange"
+            />
+          </template>
+        </AdminListPageActions>
       </template>
     </AdminListPageHeader>
 
-    <AdminTablePanel class="admin-list-page__table-panel">
+    <AdminTablePanel
+      class="admin-list-page__table-panel"
+      :show-column-settings="false">
       <AdminQTable
         class="table admin-data-table"
         flat
@@ -206,6 +226,8 @@ import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import {
   buildServiceProcedureCategoryOptions,
   useServiceProcedurePermissions,
@@ -250,6 +272,7 @@ const tablePagination = ref({
 })
 
 const { showGrid } = useAdminTableMobileGrid()
+const { isDesktop } = useViewportLayout()
 
 const mobileCardLayout = {
   title: col.name,

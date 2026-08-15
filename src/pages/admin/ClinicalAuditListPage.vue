@@ -8,7 +8,10 @@
       :title="t('clinicalAuditListTitle')"
       :subtitle="t('clinicalAuditListSubtitle')">
       <template #actions>
-        <AdminListPageActions :actions="pageActions" />
+        <AdminListPageActions
+          :actions="pageActions"
+          :compact="false"
+        />
       </template>
     </AdminListPageHeader>
 

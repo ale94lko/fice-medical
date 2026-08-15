@@ -11,11 +11,16 @@
       :title="t('subtenantListTitle')"
       :subtitle="t('subtenantListSubtitle')">
       <template #actions>
-        <AdminListPageActions :actions="pageActions" />
+        <AdminListPageActions
+          :actions="pageActions"
+          :compact="false"
+        />
       </template>
     </AdminListPageHeader>
 
-    <AdminTablePanel class="admin-list-page__table-panel">
+    <AdminTablePanel
+      class="admin-list-page__table-panel"
+      :show-column-settings="false">
       <AdminQTable
         class="table admin-data-table"
         flat

@@ -37,6 +37,8 @@
         row-key="id"
         v-model:pagination="tablePagination"
         :rows-per-page-options="[20, 50, 100]"
+        :grid="showGrid"
+        :card-layout="mobileCardLayout"
         :rows="filteredRows"
         :columns="columns"
         :loading="false">
@@ -165,7 +167,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminListPageActions from
@@ -185,6 +193,10 @@ import ConsentTemplateDialog from
 import ConsentVersionDialog from
   'components/admin/ConsentVersionDialog.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
+import { useAppFooterPagination } from
+  'src/composables/useAppFooterPagination.js'
 import { useConsentPermissions } from
   'src/composables/useConsentPermissions.js'
 import { consentTemplateListTestIds as listTid } from
@@ -207,6 +219,12 @@ import { consentTypeI18nKey } from 'src/utils/consent-i18n.js'
 const { t, te } = useI18n()
 const $q = useQuasar()
 const {
+  setFooterPagination,
+  patchFooterPagination,
+  clearFooterPagination,
+} = useAppFooterPagination()
+const { showGrid } = useAdminTableMobileGrid()
+const {
   canCreate,
   canEdit,
   canPublish,
@@ -222,6 +240,14 @@ const tablePagination = ref({
   sortBy: 'name',
   descending: false,
 })
+
+const mobileCardLayout = {
+  title: 'name',
+  subtitle: 'consentType',
+  status: 'active',
+  badges: ['required', 'signatureRequired'],
+  hideEmpty: true,
+}
 
 const templateDialogOpen = ref(false)
 const templateDialogMode = ref('add')
@@ -336,6 +362,29 @@ function typeLabel(type) {
   const key = consentTypeI18nKey(type)
 
   return te(key) ? t(key) : (type || '—')
+}
+
+function onPageChange(page) {
+  tablePagination.value = { ...tablePagination.value, page }
+}
+
+function onRowsPerPageChange(rowsPerPage) {
+  tablePagination.value = {
+    ...tablePagination.value,
+    rowsPerPage,
+    page: 1,
+  }
+}
+
+function syncFooterPaginationBar() {
+  patchFooterPagination({
+    page: tablePagination.value.page,
+    rowsPerPage: tablePagination.value.rowsPerPage,
+    rowsNumber: filteredRows.value.length,
+    disable: loading.value,
+    onPageChange,
+    onRowsPerPageChange,
+  })
 }
 
 function notifyError(error, fallbackKey) {
@@ -537,6 +586,35 @@ async function confirmDelete() {
 }
 
 onMounted(() => {
+  setFooterPagination({
+    page: tablePagination.value.page,
+    rowsPerPage: tablePagination.value.rowsPerPage,
+    rowsNumber: filteredRows.value.length,
+    disable: loading.value,
+    summaryKey: 'consentTemplateListPaginationSummary',
+    onPageChange,
+    onRowsPerPageChange,
+  })
   void loadTemplates()
+})
+
+watch(searchQuery, () => {
+  tablePagination.value = { ...tablePagination.value, page: 1 }
+})
+
+watch(
+  () => [
+    tablePagination.value.page,
+    tablePagination.value.rowsPerPage,
+    filteredRows.value.length,
+    loading.value,
+  ],
+  () => {
+    syncFooterPaginationBar()
+  },
+)
+
+onBeforeUnmount(() => {
+  clearFooterPagination()
 })
 </script>

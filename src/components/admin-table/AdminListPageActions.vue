@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="visibleActions.length"
+    v-if="showRoot"
     class="admin-list-page__actions">
     <div
       v-if="!useCompactMenu"
@@ -46,7 +46,15 @@
         self="top right"
         :offset="[0, 8]"
         class="app-light-menu admin-list-page__actions-menu">
-        <q-list dense>
+        <div
+          v-if="$slots['menu-extra']"
+          class="admin-list-page__actions-menu-extra"
+          @click.stop>
+          <slot name="menu-extra" />
+        </div>
+        <q-list
+          v-if="visibleActions.length"
+          dense>
           <q-item
             v-for="action in visibleActions"
             :key="action.key"
@@ -73,7 +81,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { adminTableTestIds } from 'src/test-ids/index.js'
@@ -100,6 +108,7 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const slots = useSlots()
 const { isDesktop } = useViewportLayout()
 
 const useCompactMenu = computed(() => {
@@ -118,6 +127,16 @@ const visibleActions = computed(() =>
     action => action && action.visible !== false,
   ),
 )
+
+const hasMenuExtra = computed(() => Boolean(slots['menu-extra']))
+
+const showRoot = computed(() => {
+  if (visibleActions.value.length > 0) {
+    return true
+  }
+
+  return useCompactMenu.value && hasMenuExtra.value
+})
 
 function isPrimary(action) {
   return action.variant === 'primary'

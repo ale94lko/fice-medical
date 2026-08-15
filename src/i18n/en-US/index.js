@@ -2587,6 +2587,8 @@ export default {
   consentTemplateListSearchPlaceholder: 'Search templates',
   consentTemplateListEmpty: 'No consent templates found.',
   consentTemplateListLoadError: 'Could not load consent templates.',
+  consentTemplateListPaginationSummary:
+    'Showing {from} to {to} of {total} consent templates',
   consentTemplateAdd: 'Add template',
   consentTemplateAddTitle: 'Add consent template',
   consentTemplateEditTitle: 'Edit consent template',

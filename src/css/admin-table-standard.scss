@@ -106,6 +106,15 @@
     min-width: 220px;
   }
 
+  &__actions-menu-extra {
+    padding: 10px 12px 8px;
+    border-bottom: 1px solid $border-subtle;
+
+    .q-field {
+      width: 100%;
+    }
+  }
+
   &__center {
     flex: 1 1 auto;
     min-width: 160px;
@@ -1534,7 +1543,6 @@ body.vp-tablet {
 
   .user-list-page__search,
   .user-list-page__filter,
-  .clinical-resource-list-page__search,
   .screening-template-list-page__search,
   .service-procedure-list-page__search,
   .service-procedure-list-page__filter {
@@ -1542,6 +1550,41 @@ body.vp-tablet {
     max-width: none !important;
     width: 100%;
     min-width: 0;
+  }
+
+  .clinical-resource-list-page {
+    .admin-list-page__heading {
+      display: none;
+    }
+
+    .admin-list-page__title-row {
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    .admin-list-page__center {
+      flex: 1 1 auto;
+      min-width: 0;
+      order: 1;
+    }
+
+    .admin-list-page__actions {
+      flex: 0 0 auto;
+      align-self: center;
+      order: 2;
+    }
+
+    .clinical-resource-list-page__toolbar {
+      flex-wrap: nowrap !important;
+      width: 100%;
+    }
+
+    .clinical-resource-list-page__search {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
+      max-width: none !important;
+    }
   }
 }
 

@@ -2677,6 +2677,8 @@ export default {
   consentTemplateListEmpty: 'No se encontraron plantillas.',
   consentTemplateListLoadError:
     'No se pudieron cargar las plantillas de consentimiento.',
+  consentTemplateListPaginationSummary:
+    'Mostrando {from} a {to} de {total} plantillas de consentimiento',
   consentTemplateAdd: 'Agregar plantilla',
   consentTemplateAddTitle: 'Agregar plantilla de consentimiento',
   consentTemplateEditTitle: 'Editar plantilla de consentimiento',
