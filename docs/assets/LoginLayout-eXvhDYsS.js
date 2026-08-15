@@ -1,1 +1,0 @@
-import{At as e,Wf as t,Yf as n,dp as r,hp as i,xp as a}from"./index-tOsH6G90.js";import{r as o,t as s}from"./QLayout-SsExux72.js";var c={};function l(e,c){let l=i(`router-view`);return r(),t(s,{view:`hHh Lpr lff`},{default:a(()=>[n(o,null,{default:a(()=>[n(l)]),_:1})]),_:1})}var u=e(c,[[`render`,l]]);export{u as default};
