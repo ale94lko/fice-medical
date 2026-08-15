@@ -1,6 +1,9 @@
 <template>
   <q-list
     class="start-encounter-menu"
+    :class="{
+      'start-encounter-menu--dialog': layout === 'dialog',
+    }"
     :data-testid="encounterTestIds.startMenu">
     <q-item
       v-for="opt in staticTypeOptions"
@@ -111,6 +114,11 @@ defineProps({
     type: Array,
     default: () => [],
   },
+  layout: {
+    type: String,
+    default: 'menu',
+    validator: value => ['menu', 'dialog'].includes(value),
+  },
 })
 
 const emit = defineEmits(['select'])
@@ -130,6 +138,19 @@ function emitSelect(encounterType, appointmentId = null) {
 .start-encounter-menu {
   min-width: 320px;
   max-width: 380px;
+
+  &--dialog {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+
+    :deep(.q-item__label),
+    :deep(.q-item__label--caption) {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
 }
 
 .start-encounter-menu__section {

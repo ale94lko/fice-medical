@@ -1,5 +1,33 @@
 <template>
-  <template v-if="asOverflowItem">
+  <!-- Dialog host: stays mounted outside q-menu -->
+  <q-dialog
+    v-if="dialogHost"
+    v-model="dialogOpenModel"
+    persistent
+    transition-show="scale"
+    transition-hide="scale">
+    <q-card
+      class="insurance-dialog app-dialog-card
+        start-encounter-dialog"
+      :data-testid="encounterTestIds.startDialog">
+      <AppDialogHeader @close="closeDialog">
+        {{ t('startEncounterButton') }}
+      </AppDialogHeader>
+      <q-card-section
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+        <StartEncounterMenuList
+          layout="dialog"
+          :static-type-options="staticTypeOptions"
+          :loading-appointments="loadingAppointments"
+          :appointments-error="appointmentsError"
+          :today-appointments="todayAppointments"
+          @select="onDialogSelect"
+        />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
+  <template v-else-if="asOverflowItem">
     <q-item
       v-if="show && hasActiveEncounter"
       v-close-popup
@@ -22,9 +50,11 @@
     </q-item>
     <q-item
       v-else-if="show"
+      v-close-popup
       clickable
       :disable="loading || busy"
-      :data-testid="encounterTestIds.startButton">
+      :data-testid="encounterTestIds.startButton"
+      @click="emit('request-dialog')">
       <q-item-section avatar>
         <q-icon
           name="medical_services"
@@ -40,20 +70,6 @@
       <q-item-section side>
         <q-icon name="chevron_right" size="18px" />
       </q-item-section>
-      <q-menu
-        anchor="top end"
-        self="top start"
-        :offset="[8, 0]"
-        class="app-light-menu"
-        @before-show="onBeforeShow">
-        <StartEncounterMenuList
-          :static-type-options="staticTypeOptions"
-          :loading-appointments="loadingAppointments"
-          :appointments-error="appointmentsError"
-          :today-appointments="todayAppointments"
-          @select="onMenuSelect"
-        />
-      </q-menu>
     </q-item>
   </template>
   <q-btn
@@ -66,6 +82,18 @@
     :disable="loading || busy"
     :data-testid="encounterTestIds.openActive"
     @click="emit('open-active')"
+  />
+  <q-btn
+    v-else-if="show && isMobile"
+    no-caps
+    unelevated
+    class="app-btn-primary client-overview-alt-header__start-encounter"
+    icon="medical_services"
+    :label="t('startEncounterButton')"
+    :disable="loading || busy"
+    :loading="busy"
+    :data-testid="encounterTestIds.startButton"
+    @click="openSelfDialog"
   />
   <q-btn-dropdown
     v-else-if="show"
@@ -88,18 +116,48 @@
       @select="onMenuSelect"
     />
   </q-btn-dropdown>
+
+  <!-- Standalone mobile button owns its dialog -->
+  <q-dialog
+    v-if="!dialogHost && !asOverflowItem"
+    v-model="selfDialogOpen"
+    persistent
+    transition-show="scale"
+    transition-hide="scale">
+    <q-card
+      class="insurance-dialog app-dialog-card
+        start-encounter-dialog"
+      :data-testid="encounterTestIds.startDialog">
+      <AppDialogHeader @close="selfDialogOpen = false">
+        {{ t('startEncounterButton') }}
+      </AppDialogHeader>
+      <q-card-section
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+        <StartEncounterMenuList
+          layout="dialog"
+          :static-type-options="staticTypeOptions"
+          :loading-appointments="loadingAppointments"
+          :appointments-error="appointmentsError"
+          :today-appointments="todayAppointments"
+          @select="onSelfDialogSelect"
+        />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   appointmentStatuses,
   appointmentTerminalStatuses,
   encounterTypes,
 } from 'components/constants.js'
+import AppDialogHeader from 'components/AppDialogHeader.vue'
 import StartEncounterMenuList from
   'components/StartEncounterMenuList.vue'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { encounterTestIds } from 'src/test-ids/index.js'
 import { listClientAppointments } from 'src/utils/appointment-api.js'
 import {
@@ -118,14 +176,29 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
   asOverflowItem: { type: Boolean, default: false },
+  /** Renders only the dialog; keep mounted outside q-menu. */
+  dialogHost: { type: Boolean, default: false },
+  dialogOpen: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['select', 'open-active'])
+const emit = defineEmits([
+  'select',
+  'open-active',
+  'request-dialog',
+  'update:dialogOpen',
+])
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 
+const selfDialogOpen = ref(false)
 const loadingAppointments = ref(false)
 const appointmentsError = ref(false)
 const todayAppointments = ref([])
+
+const dialogOpenModel = computed({
+  get: () => props.dialogOpen,
+  set: value => emit('update:dialogOpen', value),
+})
 
 const staticTypeOptions = computed(() => [
   {
@@ -150,6 +223,15 @@ const staticTypeOptions = computed(() => [
     toneClass: 'start-encounter-menu__icon--telehealth',
   },
 ])
+
+watch(
+  () => props.dialogOpen,
+  open => {
+    if (props.dialogHost && open) {
+      onBeforeShow()
+    }
+  },
+)
 
 function appointmentTimeLabel(appt) {
   return formatUtcTimeRange(
@@ -230,7 +312,26 @@ function onBeforeShow() {
   void loadTodayAppointments()
 }
 
+function openSelfDialog() {
+  selfDialogOpen.value = true
+  onBeforeShow()
+}
+
+function closeDialog() {
+  dialogOpenModel.value = false
+}
+
 function onMenuSelect(payload) {
+  emit('select', payload)
+}
+
+function onDialogSelect(payload) {
+  closeDialog()
+  emit('select', payload)
+}
+
+function onSelfDialogSelect(payload) {
+  selfDialogOpen.value = false
   emit('select', payload)
 }
 </script>

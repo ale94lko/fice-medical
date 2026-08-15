@@ -4050,8 +4050,11 @@ export default {
   encounterHeaderMrn: 'MRN: {mrn}',
   encounterReopen: 'Reopen Encounter',
   encounterStartedAt: 'Started at {time}',
+  encounterStartedAtLabel: 'Started at',
   encounterWaitingSince: 'Waiting since {time}',
+  encounterWaitingSinceLabel: 'Waiting since',
   encounterReadySince: 'Ready since {time}',
+  encounterReadySinceLabel: 'Ready since',
   encounterWaitingFor: 'Waiting for',
   encounterResultsAvailable: 'Results available',
   encounterActivityTime:

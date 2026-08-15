@@ -49,7 +49,7 @@
                   @click="emit('review-missing')">
                   <q-icon
                     name="warning_amber"
-                    size="22px"
+                    size="16px"
                   />
                   <q-tooltip anchor="bottom middle" self="top middle">
                     {{ t('clientOverviewMissingInformation', {
@@ -164,6 +164,7 @@
                       :busy="startEncounterBusy"
                       @select="emit('start-encounter', $event)"
                       @open-active="emit('open-active-encounter')"
+                      @request-dialog="onRequestEncounterDialog"
                     />
                   </q-list>
                 </q-menu>
@@ -221,7 +222,7 @@
                     @click="emit('review-missing')">
                     <q-icon
                       name="warning_amber"
-                      size="22px"
+                      size="16px"
                     />
                     <q-tooltip anchor="bottom middle" self="top middle">
                       {{ t('clientOverviewMissingInformation', {
@@ -325,6 +326,11 @@
                       <q-icon name="phone" size="16px" />
                       {{ t('phone') }}
                     </span>
+                    <span
+                      v-if="isCompactHeader && phoneTypeLabel"
+                      class="client-overview-alt-header__phone-type-badge">
+                      {{ phoneTypeLabel }}
+                    </span>
                     <q-btn
                       flat
                       dense
@@ -346,6 +352,10 @@
                   </div>
                   <AdminTableContactOverflow
                     class="client-overview-alt-header__phones"
+                    :class="{
+                      'client-overview-alt-header__phones--compact':
+                        isCompactHeader,
+                    }"
                     :entries="headerPhones"
                     icon="phone"
                     variant="header"
@@ -435,11 +445,22 @@
         </div>
       </div>
     </div>
+
+    <StartEncounterMenuButton
+      dialog-host
+      v-model:dialog-open="encounterDialogOpen"
+      :show="showStartEncounter"
+      :has-active-encounter="hasActiveEncounter"
+      :client-id="clientId"
+      :loading="loading"
+      :busy="startEncounterBusy"
+      @select="emit('start-encounter', $event)"
+    />
   </section>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
@@ -503,7 +524,16 @@ const emit = defineEmits([
 const { t } = useI18n()
 const $q = useQuasar()
 
+const encounterDialogOpen = ref(false)
+
 const isCompactHeader = computed(() => $q.screen.width < 900)
+
+function onRequestEncounterDialog() {
+  // Menu unmounts the overflow item; open host dialog after it closes.
+  void nextTick(() => {
+    encounterDialogOpen.value = true
+  })
+}
 
 const headerPhones = computed(() =>
   Array.isArray(props.header?.phones) ? props.header.phones : [],
@@ -527,6 +557,10 @@ const hasDobAge = computed(() => {
 })
 
 const hasPhone = computed(() => headerPhones.value.length > 0)
+
+const phoneTypeLabel = computed(() =>
+  String(headerPhones.value[0]?.type ?? '').trim(),
+)
 
 const hasAddress = computed(() => {
   const line = String(props.header?.addressLine ?? '').trim()

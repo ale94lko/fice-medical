@@ -565,3 +565,138 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mobile-only encounter header (<=499px / .vp-mobile) */
+body.vp-mobile {
+  .encounter-workspace-header {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .encounter-workspace-header__main--mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .encounter-workspace-header__mobile-top {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .encounter-workspace-header__mobile-top
+    .client-overview-header__avatar-block {
+    width: auto;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .encounter-workspace-header__avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .encounter-workspace-header__client-number-mid {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-self: center;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .encounter-workspace-header__client-number-badge {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .encounter-workspace-header__avatar-menu {
+    display: flex;
+    flex-shrink: 0;
+    align-items: flex-start;
+    padding-top: 4px;
+  }
+
+  .encounter-workspace-header__status-badge--inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    width: fit-content;
+  }
+
+  .encounter-workspace-header__mobile-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .encounter-workspace-header__meta-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .encounter-workspace-header__meta-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $table-text-secondary;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .encounter-workspace-header__label {
+    font-weight: 600;
+  }
+
+  .encounter-workspace-header__provider {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding-top: 0;
+  }
+
+  .encounter-workspace-header__status-block {
+    align-items: flex-start;
+    padding-top: 0;
+  }
+
+  .encounter-workspace-header__status-meta {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .encounter-workspace-header__encounter-code {
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $table-text-secondary;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .encounter-workspace-header__actions {
+    display: none;
+  }
+
+  .encounter-workspace-header__wait {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .encounter-workspace-header__wait-time {
+    white-space: normal;
+  }
+}

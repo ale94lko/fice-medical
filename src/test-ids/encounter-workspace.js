@@ -11,6 +11,8 @@ export const encounterWorkspaceTestIds = {
   resume: 'encounter-workspace-btn-resume',
   cancel: 'encounter-workspace-btn-cancel',
   reopen: 'encounter-workspace-btn-reopen',
+  actionsMenu: 'encounter-workspace-btn-actions-menu',
+  actionsMenuPanel: 'encounter-workspace-actions-menu',
   waitDialog: 'encounter-wait-dialog',
   waitReason: 'encounter-wait-reason',
   waitLabs: 'encounter-wait-labs',

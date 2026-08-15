@@ -277,15 +277,21 @@
     display: block;
     overflow: visible;
 
+    /*
+     * Quasar still renders an empty .q-table__middle above
+     * .q-table__grid-content; hide it so cards sit flush.
+     */
     .q-table__middle {
-      flex: none;
-      min-height: auto;
-      overflow: visible;
-      padding-bottom: 8px;
+      display: none !important;
     }
 
     .q-table__grid-content {
+      padding-top: 0;
       padding-bottom: 4px;
+    }
+
+    .admin-table-grid-item:first-child {
+      padding-top: 0 !important;
     }
   }
 
@@ -523,6 +529,11 @@
       max-width: none !important;
       background: transparent !important;
       box-shadow: none !important;
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .admin-table-grid-card__header {
@@ -588,6 +599,17 @@
       padding: 14px 14px 12px;
       min-width: 0;
       border-bottom: 1px solid $table-border;
+
+      /* Quasar .q-td defaults to nowrap — wrap long values in cards */
+      .q-td,
+      .admin-data-table__primary-cell,
+      .admin-data-table__secondary-cell {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
     }
 
     &__field-row {
@@ -639,17 +661,26 @@
         display: block !important;
         width: 100% !important;
         min-width: 0 !important;
+        max-width: 100% !important;
         padding: 0 !important;
         border: 0 !important;
         background: transparent !important;
         box-shadow: none !important;
         position: static !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .admin-data-table__link {
         color: inherit;
         font-weight: inherit;
         text-align: left;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
 
       .admin-table-search-highlight,
@@ -1590,24 +1621,31 @@ body.vp-tablet {
 
 /* Phone only: card/grid scroll — keep off tablet/desktop table flex */
 body.vp-mobile {
+  /*
+   * Drop the panel enclosure around grid cards everywhere
+   * (Add/Edit Client, overview, staff, dialogs, etc.).
+   * Keep each card's own border/shadow.
+   */
+  .admin-table-panel:has(.q-table--grid),
+  .admin-table-panel:has(.admin-table-grid-card) {
+    min-height: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .admin-table-panel__table-wrap:has(.q-table--grid),
+  .admin-table-panel__table-wrap:has(.admin-table-grid-card) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: transparent;
+  }
+
   .admin-list-page {
     &__table-panel:has(.q-table--grid) {
       margin-top: 0;
-    }
-
-    .admin-table-panel:has(.q-table--grid) {
-      min-height: 0;
-      background: transparent;
-      border: none;
-      box-shadow: none;
-      overflow: visible;
-    }
-
-    .admin-table-panel__table-wrap:has(.q-table--grid) {
-      overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      background: transparent;
     }
 
     .admin-data-table.q-table--grid {
@@ -1618,18 +1656,13 @@ body.vp-mobile {
       overflow: visible;
       background: transparent;
 
-      .q-table__middle,
+      .q-table__middle {
+        display: none !important;
+      }
+
       .q-table__grid-content,
       .q-table__container {
         background: transparent;
-      }
-
-      .q-table__middle {
-        flex: none;
-        min-height: auto;
-        overflow: visible;
-        padding-top: 0;
-        padding-bottom: 12px;
       }
 
       .q-table__grid-content {
@@ -1648,5 +1681,18 @@ body.vp-mobile {
     overflow-x: hidden;
     overflow-y: visible;
     background: transparent;
+  }
+
+  .admin-data-table.q-table--grid {
+    background: transparent;
+
+    .q-table__middle {
+      display: none !important;
+    }
+
+    .q-table__grid-content,
+    .q-table__container {
+      background: transparent;
+    }
   }
 }

@@ -4210,8 +4210,11 @@ export default {
   encounterHeaderMrn: 'MRN: {mrn}',
   encounterReopen: 'Reabrir encounter',
   encounterStartedAt: 'Iniciado a las {time}',
+  encounterStartedAtLabel: 'Iniciado a las',
   encounterWaitingSince: 'En espera desde {time}',
+  encounterWaitingSinceLabel: 'En espera desde',
   encounterReadySince: 'Listo desde {time}',
+  encounterReadySinceLabel: 'Listo desde',
   encounterWaitingFor: 'Esperando',
   encounterResultsAvailable: 'Resultados disponibles',
   encounterActivityTime:

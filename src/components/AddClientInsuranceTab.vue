@@ -15,7 +15,9 @@
         <h2 class="insurance-title">
           {{ t('insuranceProfilesTitle') }}
         </h2>
-        <p class="insurance-subtitle text-body2">
+        <p
+          v-if="!isMobile"
+          class="insurance-subtitle text-body2">
           {{ t('insuranceProfilesSubtitle') }}
         </p>
       </div>
