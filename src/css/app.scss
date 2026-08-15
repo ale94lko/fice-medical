@@ -246,6 +246,45 @@ body.vp-mobile {
   .client-overview-alt-header__name-copy {
     display: none !important;
   }
+
+  .dashboard-page {
+    .admin-list-page__heading {
+      display: none;
+    }
+
+    .admin-list-page__title-row {
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .admin-list-page__actions-bar {
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .dashboard-widget-card--edit-mobile {
+      .dashboard-widget__icon {
+        visibility: hidden;
+      }
+
+      .dashboard-widget__heading {
+        padding-right: 52px;
+      }
+    }
+  }
+
+  /* List summary filter cards (above the table/cards). */
+  .client-list-summary,
+  .staff-list-summary,
+  .client-list-page__summary,
+  .staff-list-page__summary {
+    display: none !important;
+  }
+
+  .client-list-page .admin-list-page__subtitle,
+  .staff-list-page .admin-list-page__subtitle {
+    display: none !important;
+  }
 }
 
 .app-header-mobile-overflow {
@@ -407,15 +446,15 @@ body.vp-mobile {
   }
 }
 
-/* Mobile footer: pagination on top, copyright below — no overlap */
+/* Mobile footer: match app header height (56px); pagination only. */
 body.vp-mobile {
   .app-footer {
     &__toolbar {
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
-      min-height: 48px;
-      height: auto;
-      padding: 12px 14px;
+      min-height: 56px;
+      height: 56px;
+      padding: 0 16px 0 12px;
       gap: 6px 8px;
     }
 
@@ -425,10 +464,12 @@ body.vp-mobile {
 
     &__pagination {
       order: 1;
-      flex: 1 1 100%;
+      flex: 1 1 auto;
       width: 100%;
       max-width: 100%;
       justify-content: stretch;
+      align-items: center;
+      min-height: 56px;
     }
 
     &__copyright {
@@ -444,8 +485,8 @@ body.vp-mobile {
     }
 
     .q-toolbar {
-      min-height: 48px;
-      height: auto;
+      min-height: 56px;
+      height: 56px;
       font-size: 0.8125rem;
     }
   }
@@ -5922,15 +5963,33 @@ body.vp-mobile {
   }
 
   &__body {
+    position: relative;
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
 
-    > * {
+    > *:not(.dashboard-widget-card__visibility-in-card) {
       flex: 1 1 auto;
       min-height: 0;
       height: 100%;
+    }
+  }
+
+  &__visibility-in-card {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0;
+    pointer-events: auto;
+
+    .app-form-toggle {
+      margin: 0;
     }
   }
 }

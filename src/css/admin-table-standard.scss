@@ -1548,14 +1548,23 @@ body.vp-tablet {
 /* Phone only: card/grid scroll — keep off tablet/desktop table flex */
 body.vp-mobile {
   .admin-list-page {
-    .admin-table-panel {
+    &__table-panel:has(.q-table--grid) {
+      margin-top: 0;
+    }
+
+    .admin-table-panel:has(.q-table--grid) {
       min-height: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      overflow: visible;
     }
 
     .admin-table-panel__table-wrap:has(.q-table--grid) {
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      background: transparent;
     }
 
     .admin-data-table.q-table--grid {
@@ -1564,22 +1573,37 @@ body.vp-mobile {
       flex: 0 0 auto;
       max-height: none;
       overflow: visible;
+      background: transparent;
+
+      .q-table__middle,
+      .q-table__grid-content,
+      .q-table__container {
+        background: transparent;
+      }
 
       .q-table__middle {
         flex: none;
         min-height: auto;
         overflow: visible;
+        padding-top: 0;
         padding-bottom: 12px;
       }
 
       .q-table__grid-content {
+        padding-top: 0;
         padding-bottom: 8px;
+        gap: 0;
       }
+    }
+
+    .admin-table-grid-item:first-child {
+      padding-top: 0 !important;
     }
   }
 
   .admin-data-table__scroll:has(.q-table--grid) {
     overflow-x: hidden;
     overflow-y: visible;
+    background: transparent;
   }
 }

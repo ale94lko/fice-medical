@@ -88,13 +88,30 @@ const props = defineProps({
     type: String,
     default: adminTableTestIds.pageActionsMenu,
   },
+  /**
+   * null — compact on mobile/tablet (default)
+   * true — always ⋮ menu
+   * false — always inline action buttons
+   */
+  compact: {
+    default: null,
+    validator: value => value === null || typeof value === 'boolean',
+  },
 })
 
 const { t } = useI18n()
 const { isDesktop } = useViewportLayout()
 
-// Compact ⋮ menu on mobile + tablet; full buttons on desktop/laptop.
-const useCompactMenu = computed(() => !isDesktop.value)
+const useCompactMenu = computed(() => {
+  if (props.compact === true) {
+    return true
+  }
+  if (props.compact === false) {
+    return false
+  }
+
+  return !isDesktop.value
+})
 
 const visibleActions = computed(() =>
   (Array.isArray(props.actions) ? props.actions : []).filter(

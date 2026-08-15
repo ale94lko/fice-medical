@@ -3,16 +3,17 @@
     class="dashboard-widget-card"
     :class="{
       'dashboard-widget-card--edit': editMode,
+      'dashboard-widget-card--edit-mobile': showInCardVisibility,
       'dashboard-widget-card--hidden': editMode && !visible,
       'dashboard-widget-card--dragging': dragging,
     }"
-    :draggable="editMode"
+    :draggable="canDragReorder"
     @dragstart="onDragStart"
     @dragend="emit('drag-end')"
-    @dragover.prevent="emit('drag-over', $event)"
-    @drop.prevent="emit('drop')">
+    @dragover.prevent="onDragOver"
+    @drop.prevent="onDrop">
     <div
-      v-if="editMode"
+      v-if="showToolbar"
       class="dashboard-widget-card__toolbar row items-center no-wrap"
       @mousedown.stop
       @click.stop
@@ -57,6 +58,21 @@
     </div>
 
     <div class="dashboard-widget-card__body">
+      <div
+        v-if="showInCardVisibility"
+        class="dashboard-widget-card__visibility-in-card"
+        @mousedown.stop
+        @click.stop
+        @dragstart.stop.prevent>
+        <FormToggle
+          :model-value="visible"
+          :aria-label="visible
+            ? t('dashboardWidgetVisible')
+            : t('dashboardWidgetHidden')"
+          :test-id="dashboardTestIds.cardVisible(widgetId)"
+          @update:model-value="onVisible"
+        />
+      </div>
       <slot />
     </div>
   </div>
@@ -67,6 +83,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { dashboardTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -102,6 +119,19 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
+
+const showToolbar = computed(
+  () => props.editMode && !isMobile.value,
+)
+
+const showInCardVisibility = computed(
+  () => props.editMode && isMobile.value,
+)
+
+const canDragReorder = computed(
+  () => props.editMode && !isMobile.value,
+)
 
 const sizeOptions = computed(() => [
   { label: t('dashboardSizeS'), value: 'S' },
@@ -117,8 +147,22 @@ function onVisible(value) {
   emit('update:visible', Boolean(value))
 }
 
+function onDragOver(event) {
+  if (!canDragReorder.value) {
+    return
+  }
+  emit('drag-over', event)
+}
+
+function onDrop() {
+  if (!canDragReorder.value) {
+    return
+  }
+  emit('drop')
+}
+
 function onDragStart(event) {
-  if (!props.editMode) {
+  if (!canDragReorder.value) {
     return
   }
   if (event?.dataTransfer) {

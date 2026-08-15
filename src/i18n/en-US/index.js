@@ -625,7 +625,7 @@ export default {
   adminTableCardNoLabel: 'No.',
   adminTablePaginationPrev: 'Previous page',
   adminTablePaginationNext: 'Next page',
-  staffList: 'Staff List',
+  staffList: 'Staff / Clinicians',
   staffListSubtitle: 'Manage and view all staff members.',
   staffListSearchPlaceholder: 'Search staff-clinicians',
   staffListEmpty: 'No staff members found.',

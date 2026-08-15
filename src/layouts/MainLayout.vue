@@ -49,7 +49,9 @@
         />
       </q-toolbar>
     </q-header>
-    <q-footer class="app-footer">
+    <q-footer
+      v-if="showAppFooter"
+      class="app-footer">
       <q-toolbar class="app-footer__toolbar">
         <p
           v-if="showFooterCopyright"
@@ -804,6 +806,11 @@ const { footerPaginationState } = useAppFooterPagination()
 
 const mobilePageTitle = computed(
   () => appPageTitle.value || 'FiCE Medical',
+)
+
+/** Mobile: hide footer unless a list pagination host is active. */
+const showAppFooter = computed(
+  () => !mobileView.value || footerPaginationState.visible,
 )
 
 /** Hide copyright on mobile when list pagination occupies the footer. */

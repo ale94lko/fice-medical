@@ -27,11 +27,12 @@
 
       <AdminListPageHeader
         :title="t('dashboard')"
-        :subtitle="editMode
-          ? t('dashboardEditSubtitle')
-          : t('dashboardSubtitle')">
+        :subtitle="headerSubtitle">
         <template #actions>
-          <AdminListPageActions :actions="pageActions" />
+          <AdminListPageActions
+            :actions="pageActions"
+            :compact="false"
+          />
         </template>
       </AdminListPageHeader>
 
@@ -139,12 +140,14 @@ import {
   widgetGridColClass,
 } from 'src/utils/dashboard-normalize.js'
 import { useAuthStore } from 'stores/auth-store.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { dashboardTestIds } from 'src/test-ids/index.js'
 
 const { t, te } = useI18n()
 const router = useRouter()
 const $q = useQuasar()
 const authStore = useAuthStore()
+const { isMobile } = useViewportLayout()
 
 const hasAssignedPermissions = computed(
   () => authStore.hasAssignedPermissions,
@@ -152,6 +155,16 @@ const hasAssignedPermissions = computed(
 
 const loading = ref(false)
 const editMode = ref(false)
+
+const headerSubtitle = computed(() => {
+  if (isMobile.value) {
+    return ''
+  }
+
+  return editMode.value
+    ? t('dashboardEditSubtitle')
+    : t('dashboardSubtitle')
+})
 const widgets = ref([])
 const configWidgets = ref([])
 const gridEl = ref(null)

@@ -655,7 +655,7 @@ export default {
   adminTableCardNoLabel: 'No.',
   adminTablePaginationPrev: 'Página anterior',
   adminTablePaginationNext: 'Página siguiente',
-  staffList: 'Lista de personal',
+  staffList: 'Personal / Clínicos',
   staffListSubtitle: 'Administre y consulte todo el personal.',
   staffListSearchPlaceholder: 'Buscar personal-clínicos',
   staffListEmpty: 'No se encontró personal.',
