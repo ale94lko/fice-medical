@@ -7,25 +7,40 @@
         spinner-color="white"
       />
       <q-card class="my-card">
-        <form @submit.prevent.stop="handleLogin">
+        <form @submit.prevent.stop="handleSubmit">
           <q-card-section class="login-inputs">
-            <LoginTextInput
-              v-model="email"
-              icon-left="mail"
-              :test-id="authTestIds.emailInput"
-              :label="t('email')"
-              :error-message="emailErrorMessage"
-              :error="isEmailInvalid"
-            />
-            <LoginTextInput
-              v-model="password"
-              icon-left="lock"
-              type="password"
-              :test-id="authTestIds.passwordInput"
-              :label="t('password')"
-              :error-message="passwordErrorMessage"
-              :error="isPasswordInvalid"
-            />
+            <template v-if="phase === 'password'">
+              <LoginTextInput
+                v-model="email"
+                icon-left="mail"
+                :test-id="authTestIds.emailInput"
+                :label="t('email')"
+                :error-message="emailErrorMessage"
+                :error="isEmailInvalid"
+              />
+              <LoginTextInput
+                v-model="password"
+                icon-left="lock"
+                type="password"
+                :test-id="authTestIds.passwordInput"
+                :label="t('password')"
+                :error-message="passwordErrorMessage"
+                :error="isPasswordInvalid"
+              />
+            </template>
+            <template v-else>
+              <p class="login-mfa-hint text-body2 text-grey-7 q-mb-md">
+                {{ t('loginMfaSubtitle') }}
+              </p>
+              <LoginTextInput
+                v-model="mfaCode"
+                icon-left="pin"
+                :test-id="authTestIds.mfaCodeInput"
+                :label="t('loginMfaCodeLabel')"
+                :error-message="mfaCodeErrorMessage"
+                :error="isMfaCodeInvalid"
+              />
+            </template>
             <q-item-label v-if="loginError" class="login-error-msg">
               {{ loginError }}
             </q-item-label>
@@ -37,16 +52,28 @@
               color="primary"
               type="submit"
               class="full-width"
-              :data-testid="authTestIds.signInButton"
-              :label="t('signIn')"
+              :data-testid="phase === 'mfa'
+                ? authTestIds.mfaVerifyButton
+                : authTestIds.signInButton"
+              :label="phase === 'mfa'
+                ? t('loginMfaVerify')
+                : t('signIn')"
               :loading="loading">
             </q-btn>
             <div class="forgot-password-container">
               <q-item-label
+                v-if="phase === 'password'"
                 class="forgot-password"
                 :data-testid="authTestIds.forgotPasswordLink"
                 @click="router.push('/reset-password')">
                 {{ t('forgotPassword') }}
+              </q-item-label>
+              <q-item-label
+                v-else
+                class="forgot-password"
+                :data-testid="authTestIds.mfaBackButton"
+                @click="backToPassword">
+                {{ t('loginMfaBack') }}
               </q-item-label>
             </div>
           </q-card-actions>
@@ -69,22 +96,24 @@ import LoginTextInput from 'components/auth/LoginTextInput.vue'
 import LoginPromoPanel from '../../components/LoginPromoPanel.vue'
 import { authTestIds } from 'src/test-ids/index.js'
 
-// Quasar + Router + Auth Store
 const $q = useQuasar()
 const router = useRouter()
 const authStore = useAuthStore()
 
-// Reactive form fields
 const email = ref('')
 const password = ref('')
+const mfaCode = ref('')
+const mfaChallengeToken = ref('')
+const phase = ref('password')
 
-// Validation flags
 const isEmailInvalid = ref(false)
 const isPasswordInvalid = ref(false)
+const isMfaCodeInvalid = ref(false)
 const loginError = ref('')
 const loading = ref(false)
 
-// Validation error messages
+const { t } = useI18n()
+
 const emailErrorMessage = computed(() => {
   const valid = /.+@.+\..+/.test(email.value)
   return email.value.trim() === ''
@@ -96,33 +125,77 @@ const passwordErrorMessage = computed(() => {
   return password.value.trim() === '' ? 'Password is required' : ''
 })
 
-const { t } = useI18n()
+const mfaCodeErrorMessage = computed(() => {
+  return mfaCode.value.trim() === '' ? t('loginMfaCodeRequired') : ''
+})
 
-// Responsive logic
 const windowWidth = computed(() => $q.screen.width)
 const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
 
-// Login handler
-async function handleLogin() {
-  isEmailInvalid.value = !!emailErrorMessage.value
-  isPasswordInvalid.value = password.value.trim() === ''
-  loading.value = true
-
-  if (!isEmailInvalid.value && !isPasswordInvalid.value) {
-    try {
-      const result = await authStore.login(
-        email.value.trim(),
-        password.value,
-        t
-      )
-      if (result) {
-        await router.push('/dashboard')
-      }
-    } catch (error) {
-      loginError.value = error.message || t('networkError')
-    }
-  }
-  loading.value = false
+function backToPassword() {
+  phase.value = 'password'
+  mfaCode.value = ''
+  mfaChallengeToken.value = ''
+  loginError.value = ''
+  isMfaCodeInvalid.value = false
 }
 
+async function handleSubmit() {
+  loginError.value = ''
+  loading.value = true
+  try {
+    if (phase.value === 'mfa') {
+      await handleMfa()
+    } else {
+      await handlePassword()
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handlePassword() {
+  isEmailInvalid.value = !!emailErrorMessage.value
+  isPasswordInvalid.value = password.value.trim() === ''
+  if (isEmailInvalid.value || isPasswordInvalid.value) {
+    return
+  }
+  try {
+    const result = await authStore.login(
+      email.value.trim(),
+      password.value,
+      t,
+    )
+    if (result?.mfaRequired) {
+      mfaChallengeToken.value = result.token
+      mfaCode.value = ''
+      phase.value = 'mfa'
+      return
+    }
+    if (result) {
+      await router.push('/dashboard')
+    }
+  } catch (error) {
+    loginError.value = error.message || t('networkError')
+  }
+}
+
+async function handleMfa() {
+  isMfaCodeInvalid.value = !!mfaCodeErrorMessage.value
+  if (isMfaCodeInvalid.value) {
+    return
+  }
+  try {
+    const ok = await authStore.completeMfaLogin(
+      mfaChallengeToken.value,
+      mfaCode.value,
+      t,
+    )
+    if (ok) {
+      await router.push('/dashboard')
+    }
+  } catch (error) {
+    loginError.value = error.message || t('networkError')
+  }
+}
 </script>

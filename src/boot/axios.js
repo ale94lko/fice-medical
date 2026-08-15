@@ -32,6 +32,11 @@ import {
   applyPasswordChangeRequiredFromApiResponse,
   createPasswordChangeRequiredRejection,
 } from '../utils/api-password-change-required.js'
+import {
+  applyMfaEnrollmentRequiredFromApiError,
+  applyMfaEnrollmentRequiredFromApiResponse,
+  createMfaEnrollmentRequiredRejection,
+} from '../utils/api-mfa-enrollment-required.js'
 import { deepMapRequestKeysToSnakeCase } from '../utils/request-key-case.js'
 //import { resolveTenantKeyFromHost } from '../utils/tenant-from-host.js'
 import { i18nGlobalT } from './i18n.js'
@@ -124,6 +129,7 @@ function isPublicAuthUrl(url) {
     || u.includes(apiPaths.oauthRefresh)
     || u.includes(apiPaths.oauthForgotPassword)
     || u.includes(apiPaths.oauthResetPassword)
+    || u.includes(apiPaths.oauthMfaChallenge)
     || u.includes('/meet/v1/public/')
     || u.includes('/consents/v1/public/')
 }
@@ -284,11 +290,17 @@ api.interceptors.response.use(
     if (await applyPasswordChangeRequiredFromApiResponse(response)) {
       return createPasswordChangeRequiredRejection(response)
     }
+    if (await applyMfaEnrollmentRequiredFromApiResponse(response)) {
+      return createMfaEnrollmentRequiredRejection(response)
+    }
 
     return response
   },
   async error => {
     if (await applyPasswordChangeRequiredFromApiError(error)) {
+      return Promise.reject(error)
+    }
+    if (await applyMfaEnrollmentRequiredFromApiError(error)) {
       return Promise.reject(error)
     }
 
@@ -307,6 +319,7 @@ api.interceptors.response.use(
       cfg.url?.includes(apiPaths.oauthLogin)
       || cfg.url?.includes(apiPaths.oauthForgotPassword)
       || cfg.url?.includes(apiPaths.oauthResetPassword)
+      || cfg.url?.includes(apiPaths.oauthMfaChallenge)
     ) {
       return Promise.reject(error)
     }

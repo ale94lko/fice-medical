@@ -61,6 +61,13 @@
             {{ signatureError }}
           </p>
         </div>
+        <ClinicalNoteAddendaSection
+          v-if="!unsigned"
+          :addenda="note?.addenda ?? []"
+          :can-add="canSign"
+          :adding="busy"
+          @add="emit('add-addendum')"
+        />
       </q-card-section>
       <q-card-actions align="right" class="app-dialog-card__actions">
         <q-btn
@@ -104,6 +111,8 @@ import { useI18n } from 'vue-i18n'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import ClinicalNoteAddendaSection from
+  'components/ClinicalNoteAddendaSection.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import { clinicalNoteStatuses } from 'components/constants.js'
@@ -118,7 +127,12 @@ const props = defineProps({
   canRegenerate: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:modelValue', 'sign', 'regenerate'])
+const emit = defineEmits([
+  'update:modelValue',
+  'sign',
+  'regenerate',
+  'add-addendum',
+])
 const { t } = useI18n()
 const signatureData = ref('')
 const signatureError = ref('')

@@ -10,6 +10,7 @@ import {
 import {
   extractLoginSubtenants,
   extractLoginUserInfo,
+  extractMfaChallenge,
   extractOAuthTokenPayload,
 } from 'components/helpers.js'
 import {
@@ -19,6 +20,7 @@ import {
   readStoredExpireAt,
   readStoredModules,
   readStoredMustChangePassword,
+  readStoredMustEnrollMfa,
   readStoredPasswordChangeMode,
   readStoredPermissions,
   readStoredRefreshToken,
@@ -31,6 +33,7 @@ import {
   writeStoredExpireAt,
   writeStoredModules,
   writeStoredMustChangePassword,
+  writeStoredMustEnrollMfa,
   writeStoredPasswordChangeMode,
   writeStoredPermissions,
   writeStoredRefreshToken,
@@ -39,6 +42,8 @@ import {
   writeStoredTenantId,
   writeStoredUserInfo,
 } from '../utils/auth-local-storage.js'
+import { completeMfaChallenge as postMfaChallenge } from
+  '../utils/mfa-api.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
 import { beginFreshSessionInactivityClock } from
   '../utils/session-inactivity-sync.js'
@@ -76,6 +81,7 @@ export const useAuthStore = defineStore('auth', {
     userInfo: null,
     mustChangePassword: false,
     passwordChangeMode: null,
+    mustEnrollMfa: false,
     _initialized: false,
   }),
   getters: {
@@ -223,13 +229,17 @@ export const useAuthStore = defineStore('auth', {
       this.passwordChangeMode = this.mustChangePassword
         ? passwordChangeModes.initial
         : null
+      this.mustEnrollMfa = Boolean(userInfo.mfaEnrollmentRequired)
+        && !userInfo.mfaEnabled
       writeStoredUserInfo(this.userInfo)
       writeStoredMustChangePassword(this.mustChangePassword)
       writeStoredPasswordChangeMode(this.passwordChangeMode)
+      writeStoredMustEnrollMfa(this.mustEnrollMfa)
     },
     completePasswordChange() {
       this.mustChangePassword = false
       this.passwordChangeMode = null
+      this.mustEnrollMfa = false
       if (this.userInfo) {
         this.userInfo = {
           ...this.userInfo,
@@ -239,6 +249,29 @@ export const useAuthStore = defineStore('auth', {
       }
       writeStoredMustChangePassword(false)
       writeStoredPasswordChangeMode(null)
+    },
+    completeMfaEnrollment() {
+      this.mustEnrollMfa = false
+      if (this.userInfo) {
+        this.userInfo = {
+          ...this.userInfo,
+          mfaEnabled: true,
+          mfaEnrollmentRequired: false,
+        }
+        writeStoredUserInfo(this.userInfo)
+      }
+      writeStoredMustEnrollMfa(false)
+    },
+    requireMfaEnrollment() {
+      this.mustEnrollMfa = true
+      if (this.userInfo) {
+        this.userInfo = {
+          ...this.userInfo,
+          mfaEnrollmentRequired: true,
+        }
+        writeStoredUserInfo(this.userInfo)
+      }
+      writeStoredMustEnrollMfa(true)
     },
     requirePasswordChange() {
       this.mustChangePassword = true
@@ -260,10 +293,52 @@ export const useAuthStore = defineStore('auth', {
           password: pass,
         })
 
+        const challenge = extractMfaChallenge(response.data)
+        if (challenge) {
+          return {
+            mfaRequired: true,
+            token: challenge.token,
+            expires: challenge.expires,
+          }
+        }
+
         const td = extractOAuthTokenPayload(response.data)
         this.applyTokensFromApi(td)
         this.applyUserInfo(extractLoginUserInfo(response.data))
         const subtenants = extractLoginSubtenants(response.data)
+        if (subtenants.length) {
+          this.applySubtenants(subtenants)
+        } else if (Array.isArray(td?.subtenants) && td.subtenants.length) {
+          this.applySubtenants(td.subtenants)
+        }
+        clearSessionExpiredUiSuppression()
+        beginFreshSessionInactivityClock()
+
+        return { mfaRequired: false }
+      } catch (error) {
+        const st = error.response?.status ?? error.status
+        switch (st) {
+          case 401:
+            throw new Error(t('invalidCredentials'))
+          case 423:
+            throw new Error(t('loginAccountLocked'))
+          case 429:
+            throw new Error(t('loginTooManyRequests'))
+        }
+
+        throw error
+      }
+    },
+    async completeMfaLogin(challengeToken, code, t) {
+      try {
+        const response = await postMfaChallenge({
+          mfaChallengeToken: challengeToken,
+          code,
+        })
+        const td = extractOAuthTokenPayload(response)
+        this.applyTokensFromApi(td)
+        this.applyUserInfo(extractLoginUserInfo(response))
+        const subtenants = extractLoginSubtenants(response)
         if (subtenants.length) {
           this.applySubtenants(subtenants)
         } else if (Array.isArray(td?.subtenants) && td.subtenants.length) {
@@ -277,7 +352,11 @@ export const useAuthStore = defineStore('auth', {
         const st = error.response?.status ?? error.status
         switch (st) {
           case 401:
-            throw new Error(t('invalidCredentials'))
+            throw new Error(t('loginMfaInvalidCode'))
+          case 423:
+            throw new Error(t('loginAccountLocked'))
+          case 429:
+            throw new Error(t('loginTooManyRequests'))
         }
 
         throw error
@@ -312,6 +391,7 @@ export const useAuthStore = defineStore('auth', {
       const userInfo = readStoredUserInfo()
       const mustChangePassword = readStoredMustChangePassword()
       const storedPasswordChangeMode = readStoredPasswordChangeMode()
+      const mustEnrollMfa = readStoredMustEnrollMfa()
       if (token) {
         this.token = token
         this.expireAt = expireAt
@@ -329,6 +409,11 @@ export const useAuthStore = defineStore('auth', {
             userInfo,
           )
           : null
+        this.mustEnrollMfa = mustEnrollMfa
+          || (
+            Boolean(userInfo?.mfaEnrollmentRequired)
+            && !userInfo?.mfaEnabled
+          )
         syncAppDateTimeConfigFromAuth(configData)
         this.applySubtenants(subtenants, activeSubtenantId)
       }
@@ -346,6 +431,7 @@ export const useAuthStore = defineStore('auth', {
       this.userInfo = null
       this.mustChangePassword = false
       this.passwordChangeMode = null
+      this.mustEnrollMfa = false
       syncAppDateTimeConfigFromAuth(null)
       clearClinicalResourceUserRolesCache()
       clearAuthLocalStorage()
@@ -370,6 +456,7 @@ export const useAuthStore = defineStore('auth', {
             this.userInfo = null
             this.mustChangePassword = false
             this.passwordChangeMode = null
+            this.mustEnrollMfa = false
             syncAppDateTimeConfigFromAuth(null)
             if (this.router) {
               this.router.push('/login')

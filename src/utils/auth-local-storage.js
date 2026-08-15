@@ -224,6 +224,19 @@ export function writeStoredPasswordChangeMode(mode) {
   localStorage.removeItem(keys.passwordChangeMode)
 }
 
+export function readStoredMustEnrollMfa() {
+  return localStorage.getItem(keys.mustEnrollMfa) === 'true'
+}
+
+export function writeStoredMustEnrollMfa(value) {
+  if (value) {
+    localStorage.setItem(keys.mustEnrollMfa, 'true')
+
+    return
+  }
+  localStorage.removeItem(keys.mustEnrollMfa)
+}
+
 export function clearAuthLocalStorage() {
   [
     keys.token,
@@ -240,6 +253,7 @@ export function clearAuthLocalStorage() {
     keys.userInfo,
     keys.mustChangePassword,
     keys.passwordChangeMode,
+    keys.mustEnrollMfa,
   ].forEach(k => localStorage.removeItem(k))
   clearSharedSessionInactivityState()
 }

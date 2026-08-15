@@ -79,6 +79,7 @@ import {
   previewClinicalResourceDocument,
 } from 'src/utils/clinical-resource-document-actions.js'
 import { clinicalResourceTestIds } from 'src/test-ids/index.js'
+import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -100,7 +101,9 @@ const open = computed({
 const formattedContent = computed(() => {
   const raw = String(props.resource?.content ?? '').trim()
   if (!raw) {
-    return `<p>${t('clinicalResourceNoContent')}</p>`
+    return sanitizeHtml(
+      `<p>${t('clinicalResourceNoContent')}</p>`,
+    )
   }
   const escaped = raw
     .replace(/&/g, '&amp;')
@@ -108,7 +111,7 @@ const formattedContent = computed(() => {
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '<br>')
 
-  return `<p>${escaped}</p>`
+  return sanitizeHtml(`<p>${escaped}</p>`)
 })
 
 function onClose() {

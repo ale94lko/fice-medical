@@ -121,7 +121,8 @@ import {
   formatUtcTimeRange,
   resolveBrowserTimeZone,
 } from 'src/utils/appointment-datetime.js'
-import { publicLobbyTelehealth } from 'src/utils/telehealth-api.js'
+import { publicLobbyTelehealth, isGuestJoinDisabledError } from
+  'src/utils/telehealth-api.js'
 import {
   cacheGuestAppointmentSummary,
   readCachedGuestAppointmentSummary,
@@ -267,8 +268,9 @@ async function onLobbyJoin(payload) {
     await markReady(readyFlags.value)
   } catch (err) {
     const status = Number(err?.response?.status)
-    // Expired / rotated invite after API deploy or resend-invite.
-    if (status === 401 || status === 403 || status === 404) {
+    if (isGuestJoinDisabledError(err)) {
+      linkError.value = t('telehealthGuestJoinDisabled')
+    } else if (status === 401 || status === 403 || status === 404) {
       linkError.value = t('telehealthInviteInvalid')
     }
     // 429 and other errors stay on the lobby via session.error.
@@ -343,7 +345,9 @@ async function loadGuestLobbySummary(invite) {
     applyGuestAppointmentCache(meetingToken, lobby)
   } catch (err) {
     const status = Number(err?.response?.status)
-    if (status === 401 || status === 403 || status === 404) {
+    if (isGuestJoinDisabledError(err)) {
+      linkError.value = t('telehealthGuestJoinDisabled')
+    } else if (status === 401 || status === 403 || status === 404) {
       linkError.value = t('telehealthInviteInvalid')
     }
     // Soft fail: keep cache / empty topbar for other errors.

@@ -117,6 +117,26 @@ export default {
     'Your password has been updated. You can continue using the app.',
   forcedChangePasswordFailed:
     'Could not update your password. Please try again.',
+  loginMfaSubtitle:
+    'Enter the 6-digit code from your authenticator app, or a recovery code.',
+  loginMfaCodeLabel: 'Authentication code',
+  loginMfaCodeRequired: 'Authentication code is required.',
+  loginMfaVerify: 'Verify',
+  loginMfaBack: 'Back to sign in',
+  loginMfaInvalidCode:
+    'That authentication code is not valid. Try again.',
+  forcedMfaEnrollTitle: 'Set up two-factor authentication',
+  forcedMfaEnrollSubtitle:
+    'Scan the QR code with an authenticator app, then enter the 6-digit code.',
+  forcedMfaQrAlt: 'Authenticator QR code',
+  forcedMfaRecoverySubtitle:
+    'Save these recovery codes now. They will not be shown again.',
+  forcedMfaSetupFailed:
+    'Could not start two-factor setup. Please try again.',
+  forcedMfaEnrollSuccess:
+    'Two-factor authentication is now enabled.',
+  myProfileQuickTwoFactorEnabledHint:
+    'Two-factor authentication is enabled on your account.',
   passwordRequired: 'Password is required.',
   emailRequired: 'Email is required',
   emailMaxLength: 'Email must be at most 32 characters',
@@ -141,6 +161,10 @@ export default {
     'Built for healthcare. Designed for you. More time for what matters '
     + 'most: your clients.',
   invalidCredentials: 'Invalid credentials, please try again.',
+  loginAccountLocked:
+    'Account locked after too many failed sign-ins. Try again later.',
+  loginTooManyRequests:
+    'Too many attempts. Please wait a minute and try again.',
   sessionExpiredRelogin:
     'Your session has expired, please sign in again',
   sessionExpiryTitle: 'Session Expiring Soon',
@@ -223,6 +247,13 @@ export default {
   clinicalAuditActionPreviewFile: 'Preview file',
   clinicalAuditActionSigned: 'Signed',
   clinicalAuditActionCancelled: 'Cancelled',
+  clinicalAuditActionLogin: 'Login',
+  clinicalAuditActionLogout: 'Logout',
+  clinicalAuditActionLoginFailed: 'Failed login',
+  clinicalAuditActionExported: 'Exported',
+  clinicalAuditActionAiGenerated: 'AI generated',
+  clinicalAuditActionAiAccepted: 'AI accepted',
+  clinicalAuditActionAiRejected: 'AI rejected',
   clinicalAuditEntityClient: 'Client',
   clinicalAuditEntityAllergy: 'Allergy',
   clinicalAuditEntityVitals: 'Vitals',
@@ -237,6 +268,8 @@ export default {
   clinicalAuditEntityInsurance: 'Insurance',
   clinicalAuditEntityFamilyMedicalHistory: 'Family medical history',
   clinicalAuditEntityStoredFile: 'Stored file',
+  clinicalAuditEntityAuthSession: 'Auth session',
+  clinicalAuditEntityAiSuggestion: 'AI suggestion',
   subtenantListTitle: 'Subtenants',
   subtenantListSubtitle: 'Manage tenant branches and sites.',
   subtenantListAdd: 'Add Subtenant',
@@ -1609,8 +1642,35 @@ export default {
   clinicalNoteDraftHint:
     'Note: You can save as draft and sign later.',
   clinicalNoteSignedRestrictionHint:
-    'Signed notes cannot be edited.',
+    'Signed notes cannot be edited. Use an addendum to amend.',
   clinicalNoteSignedAt: 'Signed on {date}',
+  clinicalNoteAddendaTitle: 'Addenda',
+  clinicalNoteAddendaHint:
+    'The original signed note is not changed. '
+    + 'Addenda are dated and signed separately.',
+  clinicalNoteAddendaEmpty: 'No addenda on this signed note.',
+  clinicalNoteAddAddendum: 'Add addendum',
+  clinicalNoteAddendumTitle: 'Add Addendum',
+  clinicalNoteAddendumSubtitle:
+    'Amend a signed note without changing the original.',
+  clinicalNoteAddendumImmutableHint:
+    'The original SOAP note stays unchanged. '
+    + 'This addendum is a new signed record.',
+  clinicalNoteAddendumBody: 'Addendum',
+  clinicalNoteAddendumBodyPlaceholder:
+    'Describe the amendment or additional clinical information.',
+  clinicalNoteAddendumBodyRequired:
+    'Addendum text is required.',
+  clinicalNoteAddendumSignatureHint:
+    'Sign below to authorize this addendum.',
+  clinicalNoteAddendumSign: 'Sign Addendum',
+  clinicalNoteAddendumConfirmTitle: 'Sign addendum?',
+  clinicalNoteAddendumConfirmMessage:
+    'This action is irreversible. The original note will not be edited.',
+  clinicalNoteAddendumSigned: 'Addendum signed successfully.',
+  clinicalNoteAddendumSignError: 'Could not sign the addendum.',
+  clinicalNoteAddendumItemTitle: 'Addendum {n}',
+  clinicalNoteAddendumSignedAt: 'Addendum signed on {date}',
   clinicalNoteStatusDraft: 'Draft',
   clinicalNoteStatusGenerated: 'Generated',
   clinicalNoteStatusSigned: 'Signed',
@@ -3894,6 +3954,9 @@ export default {
   telehealthGuestLinkInvalid: 'This meeting link is not valid.',
   telehealthGuestLinkMissingParams:
     'Missing tenant, subtenant, code or token in the link.',
+  telehealthGuestJoinDisabled:
+    'Guest join is disabled. Ask the clinic to admit you '
+    + 'from an authenticated visit.',
 
   aiSuggestionFraming:
     'AI suggestion — requires clinical review',

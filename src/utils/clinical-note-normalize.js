@@ -128,7 +128,40 @@ export function normalizeClinicalNoteSummary(
     isSigned: status === clinicalNoteStatuses.signed,
     isGenerated: status === clinicalNoteStatuses.generated
       || Boolean(row?.generated),
+    addenda: normalizeClinicalNoteAddenda(row, clinicianOptions),
   }
+}
+
+export function normalizeClinicalNoteAddenda(
+  row,
+  clinicianOptions = [],
+) {
+  const list = row?.addenda ?? row?.addendums ?? []
+  if (!Array.isArray(list)) {
+    return []
+  }
+
+  return list.map(item => {
+    const clinicianId = item?.clinician_id ?? item?.clinicianId ?? null
+    const clinician = item?.clinician ?? null
+    const clinicianLabel = resolveClinicianLabel(
+      clinician ?? { id: clinicianId },
+      clinicianOptions,
+    )
+
+    return {
+      id: item?.id ?? null,
+      clinicalNoteId:
+        item?.clinical_note_id ?? item?.clinicalNoteId ?? null,
+      clinicianId,
+      clinician,
+      clinicianLabel,
+      body: trim(item?.body),
+      signatureData:
+        item?.signature_data ?? item?.signatureData ?? '',
+      signedAt: item?.signed_at ?? item?.signedAt ?? null,
+    }
+  })
 }
 
 export function normalizeClinicalNoteDetail(

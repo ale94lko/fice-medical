@@ -73,6 +73,18 @@ function isMeetPublicRequest(error) {
   return url.includes('/meet/v1/public/')
 }
 
+export function isGuestJoinDisabledError(error) {
+  const data = error?.response?.data
+  const msg = String(
+    data?.error_description
+    ?? data?.message
+    ?? data?.error
+    ?? '',
+  )
+
+  return /guest telehealth join is disabled/i.test(msg)
+}
+
 function sleep(ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms)

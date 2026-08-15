@@ -288,10 +288,53 @@ export function extractLoginUserInfo(body) {
     changePassword: Boolean(
       raw.change_password ?? raw.changePassword ?? false,
     ),
+    mfaEnabled: Boolean(raw.mfa_enabled ?? raw.mfaEnabled ?? false),
+    mfaEnrollmentRequired: Boolean(
+      raw.mfa_enrollment_required ?? raw.mfaEnrollmentRequired ?? false,
+    ),
     staffMember: staffMember ?? null,
   }
 
   return userInfo
+}
+
+export function extractMfaChallenge(body) {
+  if (!body || typeof body !== 'object') {
+    return null
+  }
+  const roots = [body]
+  if (body.data && typeof body.data === 'object') {
+    roots.push(body.data)
+  }
+  for (const root of roots) {
+    const required = root.mfa_required ?? root.mfaRequired
+    if (!required) {
+      continue
+    }
+    const token = String(
+      root.mfa_challenge_token ?? root.mfaChallengeToken ?? '',
+    ).trim()
+    if (!token) {
+      continue
+    }
+
+    return {
+      token,
+      expires: root.mfa_challenge_expires
+        ?? root.mfaChallengeExpires
+        ?? null,
+    }
+  }
+
+  return null
+}
+
+export function unwrapApiData(body) {
+  if (!body || typeof body !== 'object') {
+    return body
+  }
+
+  return body.data ?? body
 }
 
 export function extractLoginModules(body) {

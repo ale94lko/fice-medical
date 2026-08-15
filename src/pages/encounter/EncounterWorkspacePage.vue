@@ -164,6 +164,15 @@
       :can-regenerate="canRegenerateGeneratedNote"
       @sign="onSignGeneratedNote"
       @regenerate="onRegenerateGeneratedNote"
+      @add-addendum="openGeneratedAddendum"
+    />
+
+    <ClinicalNoteAddendumDialog
+      v-model="addendumDialogOpen"
+      :clinician-options="addendumClinicianOptions"
+      :saving="actionBusy"
+      @sign="onAddendumSign"
+      @cancel="addendumDialogOpen = false"
     />
 
     <AiAssistantFab
@@ -212,6 +221,8 @@ import EncounterWorkspaceHeader from
   'components/encounter/EncounterWorkspaceHeader.vue'
 import EncounterGeneratedNoteDialog from
   'components/encounter/EncounterGeneratedNoteDialog.vue'
+import ClinicalNoteAddendumDialog from
+  'components/ClinicalNoteAddendumDialog.vue'
 import EncounterWorkspaceNarrative from
   'components/encounter/EncounterWorkspaceNarrative.vue'
 import EncounterWorkspaceOverview from
@@ -261,7 +272,10 @@ import {
   regenerateClinicalNote,
   retryGenerateClinicalNote,
 } from 'src/utils/encounter-narrative-api.js'
-import { signClinicalNote } from 'src/utils/clinical-note-api.js'
+import {
+  addClinicalNoteAddendum,
+  signClinicalNote,
+} from 'src/utils/clinical-note-api.js'
 import { useClientClinicalNotePermissions } from
   'src/composables/useClientClinicalNotePermissions.js'
 import { useClientPermissions } from
@@ -290,6 +304,7 @@ const reviewOpen = ref(false)
 const reviewMode = ref('medication')
 const reviewCarePlanId = ref(null)
 const generatedNoteOpen = ref(false)
+const addendumDialogOpen = ref(false)
 const { canSignClinicalNotes } = useClientClinicalNotePermissions()
 const {
   canAddVitals,
@@ -445,6 +460,20 @@ const generatedNoteForOverview = computed(() => {
   }
 
   return note
+})
+
+const addendumClinicianOptions = computed(() => {
+  const encounter = workspace.value?.encounter
+  const note = workspace.value?.generatedClinicalNote
+  const id = note?.clinicianId ?? encounter?.clinicianId
+  if (id == null) {
+    return []
+  }
+  const label = String(
+    encounter?.clinicianDisplayName ?? '',
+  ).trim() || `Clinician #${id}`
+
+  return [{ value: id, label }]
 })
 
 const completion = computed(() =>
@@ -1060,6 +1089,43 @@ async function onSignGeneratedNote(signatureData) {
         message: encounterApiErrorMessage(
           error,
           t('clinicalNoteSignError'),
+        ),
+      })
+    }
+  } finally {
+    actionBusy.value = false
+  }
+}
+
+function openGeneratedAddendum() {
+  if (!canSignGeneratedNote.value) {
+    return
+  }
+  addendumDialogOpen.value = true
+}
+
+async function onAddendumSign(payload) {
+  const note = workspace.value?.generatedClinicalNote
+  const clientId = workspace.value?.encounter?.clientId
+  if (note?.id == null || clientId == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    await addClinicalNoteAddendum(clientId, note.id, payload)
+    addendumDialogOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('clinicalNoteAddendumSigned'),
+    })
+    await loadWorkspace()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: encounterApiErrorMessage(
+          error,
+          t('clinicalNoteAddendumSignError'),
         ),
       })
     }

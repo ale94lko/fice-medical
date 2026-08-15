@@ -11,6 +11,9 @@ export const authTestIds = {
   passwordInput: 'auth-input-password',
   signInButton: 'auth-btn-sign-in',
   forgotPasswordLink: 'auth-link-forgot-password',
+  mfaCodeInput: 'auth-input-mfa-code',
+  mfaVerifyButton: 'auth-btn-mfa-verify',
+  mfaBackButton: 'auth-btn-mfa-back',
 }
 
 export const layoutTestIds = {
@@ -108,6 +111,7 @@ export const myProfileTestIds = {
   page: 'my-profile-page',
   summary: 'my-profile-summary',
   changePassword: 'my-profile-quick-change-password',
+  twoFactor: 'my-profile-quick-two-factor',
   tab: name => toTestId('my-profile-tab', name),
 }
 
@@ -135,6 +139,16 @@ export const forcedChangePasswordTestIds = {
   newPassword: 'forced-change-password-input-new',
   repeatPassword: 'forced-change-password-input-repeat',
   submit: 'forced-change-password-btn-submit',
+}
+
+export const forcedMfaEnrollTestIds = {
+  dialog: 'forced-mfa-enroll-dialog',
+  code: 'forced-mfa-enroll-input-code',
+  submit: 'forced-mfa-enroll-btn-submit',
+  continue: 'forced-mfa-enroll-btn-continue',
+  secret: 'forced-mfa-enroll-secret',
+  qr: 'forced-mfa-enroll-qr',
+  cancel: 'forced-mfa-enroll-btn-cancel',
 }
 
 export const changePasswordTestIds = {
@@ -632,6 +646,7 @@ export const clinicalNoteTestIds = {
   rowEdit: id => toTestId('clinical-note-row', id, 'btn-edit'),
   rowDelete: id => toTestId('clinical-note-row', id, 'btn-delete'),
   rowDownload: id => toTestId('clinical-note-row', id, 'btn-download'),
+  addendumItem: id => toTestId('clinical-note-addendum', id),
 }
 
 export const followUpTestIds = {

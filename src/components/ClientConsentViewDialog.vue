@@ -47,7 +47,7 @@
 
         <div
           class="client-consent-view-dialog__content"
-          v-html="consent?.contentHtml || ''"
+          v-html="safeContentHtml"
         />
       </q-card-section>
 
@@ -81,6 +81,7 @@ import {
   consentStatusVariant,
   formatConsentDateTime,
 } from 'src/utils/consent-i18n.js'
+import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -94,6 +95,10 @@ const open = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value),
 })
+
+const safeContentHtml = computed(() => sanitizeHtml(
+  props.consent?.contentHtml,
+))
 
 const statusLabel = computed(() => {
   const key = consentStatusI18nKey(props.consent?.status)

@@ -1590,6 +1590,9 @@ export const apiPaths = {
   clientClinicalNoteSign: (clientId, noteId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/clinical-notes/${encodeURIComponent(String(noteId ?? '').trim())}/sign`,
+  clientClinicalNoteAddenda: (clientId, noteId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/clinical-notes/${encodeURIComponent(String(noteId ?? '').trim())}/addenda`,
   clientClinicalNoteDownload: (clientId, noteId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/clinical-notes/${encodeURIComponent(String(noteId ?? '').trim())}/download`,
@@ -2168,6 +2171,11 @@ export const apiPaths = {
   oauthResetPassword: '/oauth/v1/reset-password',
   oauthChangeInitialPassword: '/oauth/v1/change-initial-password',
   oauthChangePassword: '/oauth/v1/change-password',
+  oauthMfaChallenge: '/oauth/v1/mfa/challenge',
+  oauthMfaSetup: '/oauth/v1/mfa/setup',
+  oauthMfaVerifySetup: '/oauth/v1/mfa/verify-setup',
+  oauthMfaStatus: '/oauth/v1/mfa/status',
+  oauthMfaDisable: '/oauth/v1/mfa/disable',
   logout: '/logout',
   clinicalResourcesList: '/clinical-resources/v1',
   clinicalResourcesPinned: '/clinical-resources/v1/pinned',
@@ -2211,6 +2219,7 @@ export const authStorageKeys = {
   userInfo: 'userInfo',
   mustChangePassword: 'mustChangePassword',
   passwordChangeMode: 'passwordChangeMode',
+  mustEnrollMfa: 'mustEnrollMfa',
 }
 
 export const passwordChangeModes = {

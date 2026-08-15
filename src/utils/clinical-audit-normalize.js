@@ -150,6 +150,13 @@ export const clinicalAuditActionValues = [
   'PREVIEW_FILE',
   'SIGNED',
   'CANCELLED',
+  'LOGIN',
+  'LOGOUT',
+  'LOGIN_FAILED',
+  'EXPORTED',
+  'AI_GENERATED',
+  'AI_ACCEPTED',
+  'AI_REJECTED',
 ]
 
 export const clinicalAuditEntityTypeValues = [
@@ -167,6 +174,8 @@ export const clinicalAuditEntityTypeValues = [
   'INSURANCE',
   'FAMILY_MEDICAL_HISTORY',
   'STORED_FILE',
+  'AUTH_SESSION',
+  'AI_SUGGESTION',
 ]
 
 const ACTION_I18N_KEYS = {
@@ -177,6 +186,13 @@ const ACTION_I18N_KEYS = {
   PREVIEW_FILE: 'clinicalAuditActionPreviewFile',
   SIGNED: 'clinicalAuditActionSigned',
   CANCELLED: 'clinicalAuditActionCancelled',
+  LOGIN: 'clinicalAuditActionLogin',
+  LOGOUT: 'clinicalAuditActionLogout',
+  LOGIN_FAILED: 'clinicalAuditActionLoginFailed',
+  EXPORTED: 'clinicalAuditActionExported',
+  AI_GENERATED: 'clinicalAuditActionAiGenerated',
+  AI_ACCEPTED: 'clinicalAuditActionAiAccepted',
+  AI_REJECTED: 'clinicalAuditActionAiRejected',
 }
 
 const ENTITY_I18N_KEYS = {
@@ -194,6 +210,8 @@ const ENTITY_I18N_KEYS = {
   INSURANCE: 'clinicalAuditEntityInsurance',
   FAMILY_MEDICAL_HISTORY: 'clinicalAuditEntityFamilyMedicalHistory',
   STORED_FILE: 'clinicalAuditEntityStoredFile',
+  AUTH_SESSION: 'clinicalAuditEntityAuthSession',
+  AI_SUGGESTION: 'clinicalAuditEntityAiSuggestion',
 }
 
 export function clinicalAuditActionI18nKey(action) {

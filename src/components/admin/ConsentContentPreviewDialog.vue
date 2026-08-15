@@ -38,6 +38,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import { modalTestIds } from 'src/test-ids/index.js'
+import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -53,7 +54,7 @@ const open = computed({
   set: value => emit('update:modelValue', value),
 })
 
-const safeHtml = computed(() => String(props.contentHtml ?? ''))
+const safeHtml = computed(() => sanitizeHtml(props.contentHtml))
 
 function onClose() {
   open.value = false

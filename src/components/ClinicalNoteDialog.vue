@@ -226,6 +226,14 @@
             </p>
           </template>
         </div>
+
+        <ClinicalNoteAddendaSection
+          v-if="readonly && local.isSigned"
+          :addenda="local.addenda"
+          :can-add="canSign"
+          :adding="saving"
+          @add="emit('add-addendum')"
+        />
       </q-card-section>
 
       <q-card-actions align="right" class="app-dialog-card__actions">
@@ -286,6 +294,8 @@ import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
+import ClinicalNoteAddendaSection from
+  'components/ClinicalNoteAddendaSection.vue'
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
@@ -344,6 +354,7 @@ const emit = defineEmits([
   'update:modelValue',
   'save-draft',
   'sign',
+  'add-addendum',
   'cancel',
 ])
 

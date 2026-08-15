@@ -1,5 +1,7 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
+import { normalizeClinicalNoteAddenda } from
+  'src/utils/clinical-note-normalize.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -76,6 +78,7 @@ export function normalizeGeneratedClinicalNote(raw) {
       sourceType: section.source_type ?? section.sourceType ?? '',
       sourceLabel: section.source_label ?? section.sourceLabel ?? '',
     })),
+    addenda: normalizeClinicalNoteAddenda(raw),
   }
 }
 

@@ -103,7 +103,16 @@
       :saving="saving"
       @save-draft="onSaveDraft"
       @sign="onSign"
+      @add-addendum="openAddendumFromNote"
       @cancel="dialogOpen = false"
+    />
+
+    <ClinicalNoteAddendumDialog
+      v-model="addendumDialogOpen"
+      :clinician-options="resolvedClinicianOptions"
+      :saving="saving"
+      @sign="onAddendumSign"
+      @cancel="addendumDialogOpen = false"
     />
 
     <ModalComponent
@@ -124,6 +133,7 @@
       :can-regenerate="canRegenerateGenerated"
       @sign="onSignGenerated"
       @regenerate="onRegenerateGenerated"
+      @add-addendum="openAddendumFromGenerated"
     />
 
     <AiGenerateDialog
@@ -142,6 +152,8 @@ import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import ClinicalNoteDialog from 'components/ClinicalNoteDialog.vue'
+import ClinicalNoteAddendumDialog from
+  'components/ClinicalNoteAddendumDialog.vue'
 import ClinicalNotesTable from 'components/ClinicalNotesTable.vue'
 import EncounterGeneratedNoteDialog from
   'components/encounter/EncounterGeneratedNoteDialog.vue'
@@ -157,6 +169,7 @@ import { useClientClinicalNotePermissions } from
 import { useDocumentGenerationPermissions } from
   'src/composables/useDocumentGenerationPermissions.js'
 import {
+  addClinicalNoteAddendum,
   apiErrorMessage,
   createClinicalNote,
   deleteClinicalNote,
@@ -232,6 +245,8 @@ const aiDialogOpen = ref(false)
 const aiFeature = ref(aiFeatures.soapDraft)
 const generatedOpen = ref(false)
 const generatedNote = ref(null)
+const addendumDialogOpen = ref(false)
+const addendumNoteId = ref(null)
 
 const canRegenerateGenerated = computed(() =>
   hasPermission(
@@ -518,6 +533,68 @@ async function onSaveDraft(note) {
       $q.notify({
         type: quasarNotifyTypes.negative,
         message: apiErrorMessage(error) || t('clinicalNoteSaveError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+function openAddendumFromNote() {
+  if (!canSignClinicalNotes.value || !activeNote.value?.id) {
+    return
+  }
+  addendumNoteId.value = activeNote.value.id
+  addendumDialogOpen.value = true
+}
+
+function openAddendumFromGenerated() {
+  if (!canSignClinicalNotes.value || !generatedNote.value?.id) {
+    return
+  }
+  addendumNoteId.value = generatedNote.value.id
+  addendumDialogOpen.value = true
+}
+
+async function onAddendumSign(payload) {
+  if (!canSignClinicalNotes.value || addendumNoteId.value == null) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('clinicalNoteNoSignPermission'),
+      position: 'top',
+    })
+
+    return
+  }
+  saving.value = true
+  try {
+    const updated = await addClinicalNoteAddendum(
+      clientId.value,
+      addendumNoteId.value,
+      payload,
+      resolvedClinicianOptions.value,
+    )
+    addendumDialogOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('clinicalNoteAddendumSigned'),
+      position: 'top',
+    })
+    if (dialogOpen.value && activeNote.value) {
+      activeNote.value = updated
+    }
+    if (generatedOpen.value && generatedNote.value?.encounterId != null) {
+      generatedNote.value = await fetchGeneratedClinicalNote(
+        generatedNote.value.encounterId,
+      )
+    }
+    await refreshClientClinicalNotes()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error)
+          || t('clinicalNoteAddendumSignError'),
       })
     }
   } finally {

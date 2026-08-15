@@ -97,6 +97,27 @@ export async function signClinicalNote(
   return normalizeClinicalNoteDetail(data, clinicianOptions)
 }
 
+export async function addClinicalNoteAddendum(
+  clientId,
+  noteId,
+  addendum,
+  clinicianOptions = [],
+) {
+  const response = await apiInstance.post(
+    apiPaths.clientClinicalNoteAddenda(clientId, noteId),
+    {
+      body: addendum.body,
+      // eslint-disable-next-line camelcase
+      signature_data: addendum.signatureData,
+      // eslint-disable-next-line camelcase
+      clinician_id: Number(addendum.clinicianId),
+    },
+  )
+  const data = unwrapData(response.data)
+
+  return normalizeClinicalNoteDetail(data, clinicianOptions)
+}
+
 export async function deleteClinicalNote(clientId, noteId) {
   await apiInstance.delete(
     apiPaths.clientClinicalNoteById(clientId, noteId),

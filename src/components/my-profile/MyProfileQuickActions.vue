@@ -60,7 +60,9 @@
       <button
         type="button"
         class="my-profile-quick-actions__item"
-        disabled>
+        :disabled="mfaEnabled"
+        :data-testid="myProfileTestIds.twoFactor"
+        @click="onTwoFactor">
         <span class="my-profile-quick-actions__icon">
           <q-icon name="verified_user" size="20px" />
         </span>
@@ -69,7 +71,9 @@
             {{ t('myProfileQuickTwoFactor') }}
           </p>
           <p class="my-profile-quick-actions__subtitle">
-            {{ t('myProfileQuickTwoFactorHint') }}
+            {{ mfaEnabled
+              ? t('myProfileQuickTwoFactorEnabledHint')
+              : t('myProfileQuickTwoFactorHint') }}
           </p>
         </span>
         <q-icon
@@ -94,9 +98,17 @@ defineProps({
     type: [String, Number],
     default: null,
   },
+  mfaEnabled: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['change-password'])
+const emit = defineEmits(['change-password', 'setup-mfa'])
 
 const { t } = useI18n()
+
+function onTwoFactor() {
+  emit('setup-mfa')
+}
 </script>

@@ -63,7 +63,9 @@
           <div class="my-profile-card__body">
                 <MyProfileQuickActions
                   :user-id="profile.tenantUserId"
+                  :mfa-enabled="Boolean(authStore.userInfo?.mfaEnabled)"
                   @change-password="changePasswordOpen = true"
+                  @setup-mfa="mfaEnrollOpen = true"
                 />
           </div>
         </section>
@@ -71,6 +73,11 @@
     </div>
 
     <ChangePasswordDialog v-model="changePasswordOpen" />
+    <ForcedMfaEnrollDialog
+      v-if="mfaEnrollOpen"
+      :forced="false"
+      @close="mfaEnrollOpen = false"
+    />
   </q-page>
 </template>
 
@@ -83,6 +90,8 @@ import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import ChangePasswordDialog from 'components/ChangePasswordDialog.vue'
+import ForcedMfaEnrollDialog from
+  'components/ForcedMfaEnrollDialog.vue'
 import MyProfileSummaryCard from
   'components/my-profile/MyProfileSummaryCard.vue'
 import MyProfileFieldGrid from
@@ -107,6 +116,7 @@ const { userInfo, activeSubtenant } = storeToRefs(authStore)
 const loading = ref(false)
 const activeTab = ref(myProfileTabKeys.personal)
 const changePasswordOpen = ref(false)
+const mfaEnrollOpen = ref(false)
 const profile = ref(null)
 
 const tabs = computed(() => [

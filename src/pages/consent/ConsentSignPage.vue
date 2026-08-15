@@ -47,7 +47,7 @@
 
         <div
           class="consent-sign-card__content"
-          v-html="preview?.contentHtml || ''"
+          v-html="safeContentHtml"
         />
 
         <div class="consent-sign-card__tabs q-mt-lg">
@@ -207,6 +207,7 @@ import {
   consentStatusI18nKey,
   consentTypeI18nKey,
 } from 'src/utils/consent-i18n.js'
+import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -252,6 +253,10 @@ const modeOptions = computed(() => [
   { label: t('consentSignPublicModeSign'), value: 'sign' },
   { label: t('consentSignPublicModeDecline'), value: 'decline' },
 ])
+
+const safeContentHtml = computed(() => sanitizeHtml(
+  preview.value?.contentHtml,
+))
 
 const metaLine = computed(() => {
   if (!preview.value) {

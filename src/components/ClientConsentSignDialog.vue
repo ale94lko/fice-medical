@@ -83,7 +83,7 @@
         class="client-consent-sign-dialog__body">
         <div
           class="client-consent-sign-dialog__content"
-          v-html="consent?.contentHtml || ''"
+          v-html="safeContentHtml"
         />
         <div class="client-consent-sign-dialog__form">
           <div class="row q-col-gutter-md">
@@ -277,6 +277,7 @@ import { resolveGuardianSignerFromContact } from
   'src/utils/consent-signer-contact.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { triggerBlobDownload } from 'src/utils/stored-file-api.js'
+import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -296,6 +297,10 @@ const open = computed({
   get: () => props.modelValue,
   set: value => emit('update:modelValue', value),
 })
+
+const safeContentHtml = computed(() => sanitizeHtml(
+  props.consent?.contentHtml,
+))
 
 const step = ref('method')
 const signerName = ref('')

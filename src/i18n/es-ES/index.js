@@ -122,6 +122,26 @@ export default {
     'Su contraseña se actualizó correctamente. Ya puede continuar.',
   forcedChangePasswordFailed:
     'No se pudo actualizar la contraseña. Inténtelo de nuevo.',
+  loginMfaSubtitle:
+    'Introduzca el código de 6 dígitos de su app o un código de recuperación.',
+  loginMfaCodeLabel: 'Código de autenticación',
+  loginMfaCodeRequired: 'El código de autenticación es obligatorio.',
+  loginMfaVerify: 'Verificar',
+  loginMfaBack: 'Volver al inicio de sesión',
+  loginMfaInvalidCode:
+    'Ese código de autenticación no es válido. Inténtelo de nuevo.',
+  forcedMfaEnrollTitle: 'Configurar autenticación en dos pasos',
+  forcedMfaEnrollSubtitle:
+    'Escanee el código QR con una app de autenticación e introduzca el código.',
+  forcedMfaQrAlt: 'Código QR del autenticador',
+  forcedMfaRecoverySubtitle:
+    'Guarde estos códigos de recuperación ahora. No se mostrarán otra vez.',
+  forcedMfaSetupFailed:
+    'No se pudo iniciar la configuración 2FA. Inténtelo de nuevo.',
+  forcedMfaEnrollSuccess:
+    'La autenticación en dos pasos ya está activada.',
+  myProfileQuickTwoFactorEnabledHint:
+    'La autenticación en dos pasos está activada en su cuenta.',
   passwordRequired: 'La contraseña es obligatoria.',
   emailRequired: 'El correo es obligatorio',
   emailMaxLength: 'El correo debe tener como máximo 32 caracteres',
@@ -148,6 +168,10 @@ export default {
     'Creado para la salud. Diseñado para ti. Más tiempo para lo que más '
     + 'importa: tus clientes.',
   invalidCredentials: 'Credenciales inválidas, intente de nuevo.',
+  loginAccountLocked:
+    'Cuenta bloqueada por demasiados intentos. Prueba más tarde.',
+  loginTooManyRequests:
+    'Demasiados intentos. Espera un minuto e inténtalo de nuevo.',
   sessionExpiredRelogin:
     'La session expiró, por favor inicia session de nuevo',
   sessionExpiryTitle: 'La sesión expirará pronto',
@@ -230,6 +254,13 @@ export default {
   clinicalAuditActionPreviewFile: 'Vista previa de archivo',
   clinicalAuditActionSigned: 'Firmado',
   clinicalAuditActionCancelled: 'Cancelado',
+  clinicalAuditActionLogin: 'Inicio de sesión',
+  clinicalAuditActionLogout: 'Cierre de sesión',
+  clinicalAuditActionLoginFailed: 'Login fallido',
+  clinicalAuditActionExported: 'Exportado',
+  clinicalAuditActionAiGenerated: 'IA generada',
+  clinicalAuditActionAiAccepted: 'IA aceptada',
+  clinicalAuditActionAiRejected: 'IA rechazada',
   clinicalAuditEntityClient: 'Cliente',
   clinicalAuditEntityAllergy: 'Alergia',
   clinicalAuditEntityVitals: 'Signos vitales',
@@ -244,6 +275,8 @@ export default {
   clinicalAuditEntityInsurance: 'Seguro',
   clinicalAuditEntityFamilyMedicalHistory: 'Historial médico familiar',
   clinicalAuditEntityStoredFile: 'Archivo almacenado',
+  clinicalAuditEntityAuthSession: 'Sesión de acceso',
+  clinicalAuditEntityAiSuggestion: 'Sugerencia de IA',
   subtenantListTitle: 'Subtenants',
   subtenantListSubtitle:
     'Gestione sucursales y sedes del tenant.',
@@ -1672,8 +1705,35 @@ export default {
   clinicalNoteDraftHint:
     'Nota: puede guardar como borrador y firmar más tarde.',
   clinicalNoteSignedRestrictionHint:
-    'Las notas firmadas no se pueden editar.',
+    'Las notas firmadas no se pueden editar. Use un addendum para enmendar.',
   clinicalNoteSignedAt: 'Firmada el {date}',
+  clinicalNoteAddendaTitle: 'Addenda',
+  clinicalNoteAddendaHint:
+    'La nota firmada original no cambia. '
+    + 'Los addenda se fechan y firman por separado.',
+  clinicalNoteAddendaEmpty: 'No hay addenda en esta nota firmada.',
+  clinicalNoteAddAddendum: 'Añadir addendum',
+  clinicalNoteAddendumTitle: 'Añadir addendum',
+  clinicalNoteAddendumSubtitle:
+    'Enmiende una nota firmada sin cambiar el original.',
+  clinicalNoteAddendumImmutableHint:
+    'El SOAP original no se modifica. '
+    + 'Este addendum es un registro firmado nuevo.',
+  clinicalNoteAddendumBody: 'Addendum',
+  clinicalNoteAddendumBodyPlaceholder:
+    'Describa la enmienda o la información clínica adicional.',
+  clinicalNoteAddendumBodyRequired:
+    'El texto del addendum es obligatorio.',
+  clinicalNoteAddendumSignatureHint:
+    'Firme abajo para autorizar este addendum.',
+  clinicalNoteAddendumSign: 'Firmar addendum',
+  clinicalNoteAddendumConfirmTitle: '¿Firmar addendum?',
+  clinicalNoteAddendumConfirmMessage:
+    'Esta acción es irreversible. La nota original no se editará.',
+  clinicalNoteAddendumSigned: 'Addendum firmado correctamente.',
+  clinicalNoteAddendumSignError: 'No se pudo firmar el addendum.',
+  clinicalNoteAddendumItemTitle: 'Addendum {n}',
+  clinicalNoteAddendumSignedAt: 'Addendum firmado el {date}',
   clinicalNoteStatusDraft: 'Borrador',
   clinicalNoteStatusGenerated: 'Generada',
   clinicalNoteStatusSigned: 'Firmada',
@@ -4045,6 +4105,9 @@ export default {
   telehealthGuestLinkInvalid: 'Este enlace de reunión no es válido.',
   telehealthGuestLinkMissingParams:
     'Faltan tenant, subtenant, code o token en el enlace.',
+  telehealthGuestJoinDisabled:
+    'El acceso de invitado está desactivado. Pida a la clínica '
+    + 'que le admita desde una visita autenticada.',
 
   aiSuggestionFraming:
     'Sugerencia de IA — requiere revisión clínica',
