@@ -179,16 +179,17 @@
     </div>
 
     <div class="content">
-      <div
-        ref="panelScrollRef"
-        class="panel-scroll">
       <q-form
         ref="formRef"
         greedy
         novalidate
         autocomplete="off"
+        class="add-client-form__form"
         :data-testid="tid.formFields"
         @submit.prevent="onSave">
+        <div
+          ref="panelScrollRef"
+          class="panel-scroll">
         <q-tab-panels
           v-model="activeTab"
           keep-alive
@@ -962,7 +963,8 @@
             </q-tab-panel>
           </q-tab-panels>
         </q-tab-panel>
-      </q-tab-panels>
+          </q-tab-panels>
+        </div>
 
         <footer
           v-if="canGoPreviousFiltered() || canGoNextFiltered()"
@@ -997,7 +999,6 @@
           />
         </footer>
       </q-form>
-      </div>
     </div>
 
     <ModalComponent
