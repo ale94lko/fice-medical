@@ -119,6 +119,33 @@
     .client-overview-header__copy-btn {
       flex-shrink: 0;
     }
+
+    .client-overview-alt-header__missing-alert-btn--inline {
+      margin-left: 2px;
+      margin-right: 0;
+    }
+  }
+
+  &__dob-value-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  &__age-badge {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1.2;
+    background: rgba($primary, 0.12);
+    color: $primary;
+    white-space: nowrap;
   }
 
   &__phones {
@@ -132,10 +159,26 @@
     }
 
     .admin-contact-overflow__type {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: $text-muted;
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      line-height: 1.2;
+      background: rgba($primary, 0.12);
+      color: $primary;
+      white-space: nowrap;
     }
+  }
+
+  &__avatar-menu {
+    display: flex;
+    flex-shrink: 0;
+    align-items: flex-start;
+    margin-left: auto;
   }
 
   &__address-value {
@@ -293,36 +336,187 @@
   }
 }
 
-@media (max-width: 599px) {
-  .client-overview-alt-header__actions {
-    width: 100%;
-  }
-
-  .client-overview-alt-header__actions-row {
-    flex-wrap: wrap;
-
-    .q-btn {
+@media (max-width: 899px) {
+  .client-overview-alt-header {
+    .client-overview-header__avatar-wrap {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: flex-start;
+      align-self: stretch;
       width: 100%;
-      flex: 1 1 100%;
+      min-height: 0;
+      gap: 10px;
+    }
+
+    .client-overview-header__avatar-block {
+      width: auto;
+      max-width: none;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .client-overview-alt-header__meta-cell--client-number-mid {
+      flex: 1 1 auto;
+      min-width: 0;
+      align-self: center;
+      padding-right: 0;
+    }
+
+    .client-overview-alt-header__avatar-menu {
+      display: flex;
+      flex-shrink: 0;
+      align-items: flex-start;
+      margin-left: 0;
+      padding-top: 4px;
+    }
+
+    .client-overview-header__main {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .client-overview-header__meta-row--client-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 10px;
+      align-items: start;
+
+      .client-overview-header__meta-divider {
+        display: none;
+      }
+
+      .client-overview-alt-header__meta-cell--dob,
+      .client-overview-alt-header__meta-cell--phone,
+      .client-overview-alt-header__meta-cell--address,
+      .client-overview-header__meta-cell--dob {
+        flex: none;
+        max-width: none;
+        width: auto;
+        min-width: 0;
+        padding-right: 0;
+      }
+
+      .client-overview-alt-header__meta-cell--dob,
+      .client-overview-header__meta-cell--dob {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .client-overview-alt-header__meta-cell--phone {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .client-overview-alt-header__meta-cell--address {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+    }
+  }
+}
+
+@media (max-width: 599px) {
+  .client-overview-alt-header {
+    .client-overview-header__meta-row--client-actions {
+      /* Keep 2 cols (classic overview collapses to 1 at 599px). */
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+
+      .client-overview-alt-header__meta-cell--dob,
+      .client-overview-header__meta-cell--dob {
+        grid-column: 1;
+        grid-row: 1;
+      }
+
+      .client-overview-alt-header__meta-cell--phone {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      .client-overview-alt-header__meta-cell--address {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
     }
   }
 }
 
 .client-overview-alt-page {
-  &__main {
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+
+  &__card {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: $surface;
+    border-radius: $radius-lg;
+    border-color: $border-subtle !important;
+    box-shadow: $shadow-sm;
+  }
+
+  &__card-body {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  &__shell {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+
+    /* Content sits in the card like Add/Edit Client (no nested cards). */
+    .client-overview-alt-basic,
+    .client-overview-alt-panel {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+      min-height: 0;
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 
   &__body {
-    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
   }
 
   &__content {
     flex: 1 1 0;
     min-width: 0;
     min-height: 0;
+    overflow-x: hidden;
     overflow-y: auto;
     width: 100%;
+    padding-top: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Tabs sit in shared .chrome / .tabs-row (line under tabs). */
+  .chrome {
+    background: $surface;
+  }
+
+  .tabs-row {
+    background: $surface;
   }
 
   &__placeholder {
@@ -472,9 +666,11 @@
     }
   }
 
+  /* Used by EncounterWorkspaceTabs (button tabs). */
   &__alert-dot {
     width: 8px;
     height: 8px;
+    margin-left: 6px;
     border-radius: 50%;
     background: $warning;
     flex-shrink: 0;
@@ -484,6 +680,12 @@
     background: #fff;
     box-shadow: 0 0 0 1px rgba($primary, 0.35);
   }
+}
+
+/* Overview insurance alert inside shared add-client-tabs. */
+.q-tab--active .client-overview-alt-tabs__alert-dot {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba($primary, 0.35);
 }
 
 .client-overview-alt-basic {
@@ -527,6 +729,21 @@
     .admin-contact-overflow--header .admin-contact-overflow__value {
       font-weight: 500;
       color: $table-text-secondary;
+    }
+
+    .admin-contact-overflow__type {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      line-height: 1.2;
+      background: rgba($primary, 0.12);
+      color: $primary;
+      white-space: nowrap;
     }
   }
 
@@ -619,6 +836,30 @@
     line-height: 1.4;
     color: $table-text-secondary;
     word-break: break-word;
+  }
+
+  &__contact {
+    min-width: 0;
+
+    .admin-contact-overflow--header .admin-contact-overflow__value {
+      font-weight: 500;
+      color: $table-text-secondary;
+    }
+
+    .admin-contact-overflow__type {
+      display: inline-flex;
+      align-items: center;
+      flex-shrink: 0;
+      margin-left: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      line-height: 1.2;
+      background: rgba($primary, 0.12);
+      color: $primary;
+      white-space: nowrap;
+    }
   }
 
   &__empty {

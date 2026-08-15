@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-started="scope">
         <q-td
           :props="scope"
@@ -129,6 +131,8 @@ import {
   formatUtcTime,
 } from 'src/utils/appointment-datetime.js'
 import { encounterTestIds as tid } from 'src/test-ids/index.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 
 const COMPLAINT_MAX = 60
 
@@ -145,8 +149,20 @@ defineProps({
 
 const emit = defineEmits(['open'])
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
+
+/** Same compact card hierarchy as Labs / Follow-ups (mobile). */
+const mobileCardLayout = {
+  title: 'started',
+  status: 'status',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: ['type', 'clinician', 'complaint'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {

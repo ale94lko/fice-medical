@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-number="scope">
         <q-td
           :props="scope"
@@ -132,6 +134,8 @@ import {
 } from 'components/constants.js'
 import { compactServices } from 'src/utils/billing-work-queue.js'
 import { clientBillingTestIds } from 'src/test-ids/index.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 
 defineProps({
   rows: {
@@ -146,7 +150,19 @@ defineProps({
 
 const emit = defineEmits(['open'])
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 const tablePagination = { rowsPerPage: 0 }
+
+/** Same compact card hierarchy as Encounters / Insurance (mobile). */
+const mobileCardLayout = {
+  title: 'number',
+  status: 'status',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: ['dos', 'service', 'provider', 'payer', 'total'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {

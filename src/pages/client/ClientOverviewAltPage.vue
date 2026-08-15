@@ -23,76 +23,86 @@
         @open-active-encounter="onOpenActiveEncounter"
       />
 
-      <div
-        class="client-overview-page__main client-overview-alt-page__main">
-        <ClientOverviewAltTabs
-          v-model="activeTab"
-          :insurance-alert="hasInsuranceAlert"
-          :allergies-severity-modifier="allergiesSeverityModifier"
-        />
+      <q-card
+        flat
+        bordered
+        class="client-overview-alt-page__card">
+        <q-card-section class="client-overview-alt-page__card-body q-pa-md">
+          <div class="client-overview-alt-page__shell">
+            <div class="chrome">
+              <div class="tabs-row">
+                <ClientOverviewAltTabs
+                  v-model="activeTab"
+                  :insurance-alert="hasInsuranceAlert"
+                  :allergies-severity-modifier="allergiesSeverityModifier"
+                />
+              </div>
+            </div>
 
-        <div class="client-overview-page__body client-overview-alt-page__body">
-          <div class="client-overview-alt-page__content">
-            <ClientOverviewAltAppointments
-              v-if="activeTab === addClientTabKeys.appointments"
-              :client-id="clientId"
-              :appointments="clientAppointments"
-              @checked-in="onAppointmentCheckedIn"
-            />
-            <KeepAlive>
-              <ClientOverviewAltEncounters
-                v-if="activeTab === addClientTabKeys.encounters"
-                :key="String(clientId ?? '')"
-                :client-id="clientId"
-              />
-            </KeepAlive>
-            <ClientOverviewAltBasicInfo
-              v-if="activeTab === addClientTabKeys.basic"
-              :basic-info="basicInfo"
-            />
-            <ClientOverviewAltContact
-              v-else-if="activeTab === addClientTabKeys.contact"
-              :contact-info="contactInfo"
-            />
-            <ClientOverviewAltAllergies
-              v-else-if="activeTab === addClientTabKeys.allergies"
-              :allergy-detail="allergyDetail"
-            />
-            <ClientOverviewAltInsurance
-              v-else-if="activeTab === addClientTabKeys.insurance"
-              :insurance-info="insuranceInfo"
-            />
-            <ClientOverviewAltModulesTab
-              v-else-if="activeTab === addClientTabKeys.clinical"
-              :tab-key="addClientTabKeys.clinical"
-              :title="t('tabClinical')"
-              icon="medical_services"
-              :module-cards="moduleCards"
-              @open-record="onOpenModuleRecord"
-            />
-            <ClientOverviewAltModulesTab
-              v-else-if="activeTab === addClientTabKeys.careCoordination"
-              :tab-key="addClientTabKeys.careCoordination"
-              :title="t('tabCareCoordination')"
-              icon="groups"
-              :module-cards="moduleCards"
-              @open-record="onOpenModuleRecord"
-            />
-            <ClientOverviewAltBilling
-              v-else-if="activeTab === addClientTabKeys.financials"
-              :client-id="clientId"
-            />
-            <ClientOverviewAltModulesTab
-              v-else-if="activeTab === addClientTabKeys.documents"
-              :tab-key="addClientTabKeys.documents"
-              :title="t('tabDocuments')"
-              icon="folder"
-              :module-cards="moduleCards"
-              @open-record="onOpenModuleRecord"
-            />
+            <div class="client-overview-alt-page__body">
+              <div class="client-overview-alt-page__content">
+                <ClientOverviewAltAppointments
+                  v-if="activeTab === addClientTabKeys.appointments"
+                  :client-id="clientId"
+                  :appointments="clientAppointments"
+                  @checked-in="onAppointmentCheckedIn"
+                />
+                <KeepAlive>
+                  <ClientOverviewAltEncounters
+                    v-if="activeTab === addClientTabKeys.encounters"
+                    :key="String(clientId ?? '')"
+                    :client-id="clientId"
+                  />
+                </KeepAlive>
+                <ClientOverviewAltBasicInfo
+                  v-if="activeTab === addClientTabKeys.basic"
+                  :basic-info="basicInfo"
+                />
+                <ClientOverviewAltContact
+                  v-else-if="activeTab === addClientTabKeys.contact"
+                  :contact-info="contactInfo"
+                />
+                <ClientOverviewAltAllergies
+                  v-else-if="activeTab === addClientTabKeys.allergies"
+                  :allergy-detail="allergyDetail"
+                />
+                <ClientOverviewAltInsurance
+                  v-else-if="activeTab === addClientTabKeys.insurance"
+                  :insurance-info="insuranceInfo"
+                />
+                <ClientOverviewAltModulesTab
+                  v-else-if="activeTab === addClientTabKeys.clinical"
+                  :tab-key="addClientTabKeys.clinical"
+                  :title="t('tabClinical')"
+                  icon="medical_services"
+                  :module-cards="moduleCards"
+                  @open-record="onOpenModuleRecord"
+                />
+                <ClientOverviewAltModulesTab
+                  v-else-if="activeTab === addClientTabKeys.careCoordination"
+                  :tab-key="addClientTabKeys.careCoordination"
+                  :title="t('tabCareCoordination')"
+                  icon="groups"
+                  :module-cards="moduleCards"
+                  @open-record="onOpenModuleRecord"
+                />
+                <ClientOverviewAltBilling
+                  v-else-if="activeTab === addClientTabKeys.financials"
+                  :client-id="clientId"
+                />
+                <ClientOverviewAltModulesTab
+                  v-else-if="activeTab === addClientTabKeys.documents"
+                  :tab-key="addClientTabKeys.documents"
+                  :title="t('tabDocuments')"
+                  icon="folder"
+                  :module-cards="moduleCards"
+                  @open-record="onOpenModuleRecord"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </q-card-section>
+      </q-card>
     </template>
 
     <div

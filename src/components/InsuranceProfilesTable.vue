@@ -72,7 +72,9 @@
         </q-td>
       </template>
 
-      <template #row-actions="{ row }">
+      <template
+        v-if="showActions"
+        #row-actions="{ row }">
         <div class="admin-table-row-actions">
           <q-btn
             flat
@@ -190,7 +192,7 @@ import {
   isInsuranceProfileInactive,
 } from 'src/utils/client-insurance.js'
 
-defineProps({
+const props = defineProps({
   profiles: {
     type: Array,
     default: () => [],
@@ -200,6 +202,10 @@ defineProps({
     default: '',
   },
   canEdit: {
+    type: Boolean,
+    default: true,
+  },
+  showActions: {
     type: Boolean,
     default: true,
   },
@@ -223,63 +229,69 @@ const mobileCardLayout = {
   hideEmpty: true,
 }
 
-const columns = computed(() => [
-  {
-    name: 'priority',
-    label: t('insuranceColPriority'),
-    align: 'left',
-    field: row => row.priority,
-    sortable: false,
-    headerStyle: 'min-width: 100px',
-    style: 'min-width: 100px',
-  },
-  {
-    name: 'payerPlan',
-    label: t('insuranceColPayerPlan'),
-    align: 'left',
-    field: row => row.payerName,
-    sortable: false,
-    headerStyle: 'min-width: 200px',
-    style: 'min-width: 200px',
-  },
-  {
-    name: 'insuranceType',
-    label: t('insuranceColType'),
-    align: 'left',
-    field: row => row.insuranceType,
-    sortable: false,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
-  },
-  {
-    name: 'memberId',
-    label: t('insuranceColMemberId'),
-    align: 'left',
-    field: row => row.memberId,
-    sortable: false,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
-  },
-  {
-    name: 'status',
-    label: t('insuranceColStatus'),
-    align: 'left',
-    field: row => row.status,
-    sortable: false,
-    headerStyle: 'min-width: 120px',
-    style: 'min-width: 120px',
-  },
-  {
-    name: 'actions',
-    label: t('actions'),
-    align: 'center',
-    field: row => row.id,
-    sortable: false,
-    required: true,
-    headerStyle: 'min-width: 160px',
-    style: 'min-width: 160px',
-  },
-])
+const columns = computed(() => {
+  const cols = [
+    {
+      name: 'priority',
+      label: t('insuranceColPriority'),
+      align: 'left',
+      field: row => row.priority,
+      sortable: false,
+      headerStyle: 'min-width: 100px',
+      style: 'min-width: 100px',
+    },
+    {
+      name: 'payerPlan',
+      label: t('insuranceColPayerPlan'),
+      align: 'left',
+      field: row => row.payerName,
+      sortable: false,
+      headerStyle: 'min-width: 200px',
+      style: 'min-width: 200px',
+    },
+    {
+      name: 'insuranceType',
+      label: t('insuranceColType'),
+      align: 'left',
+      field: row => row.insuranceType,
+      sortable: false,
+      headerStyle: 'min-width: 140px',
+      style: 'min-width: 140px',
+    },
+    {
+      name: 'memberId',
+      label: t('insuranceColMemberId'),
+      align: 'left',
+      field: row => row.memberId,
+      sortable: false,
+      headerStyle: 'min-width: 140px',
+      style: 'min-width: 140px',
+    },
+    {
+      name: 'status',
+      label: t('insuranceColStatus'),
+      align: 'left',
+      field: row => row.status,
+      sortable: false,
+      headerStyle: 'min-width: 120px',
+      style: 'min-width: 120px',
+    },
+  ]
+  if (props.showActions) {
+    cols.push({
+      name: 'actions',
+      label: t('actions'),
+      align: 'center',
+      field: row => row.id,
+      sortable: false,
+      required: true,
+      headerStyle: 'min-width: 160px',
+      style: 'min-width: 160px',
+    })
+  }
+
+  return cols
+})
 
 function priorityVariant(priority) {
   if (priority === clientInsurancePriorityValues.primary) {

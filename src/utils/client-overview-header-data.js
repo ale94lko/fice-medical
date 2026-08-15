@@ -321,22 +321,23 @@ function formatClientSinceDuration(admissionDateUs, t) {
   return t('clientOverviewDurationMonths', { count: months })
 }
 
-function formatDobAgeLine(form, t) {
+function resolveDobAgeParts(form, t) {
   const dob = trim(form?.[ck.dob])
   const age = trim(form?.[ck.age])
   if (!dob && !age) {
-    return ''
+    return { dobDisplay: '', ageLabel: '', dobAgeLine: '' }
   }
   if (!age) {
-    return dob
+    return { dobDisplay: dob, ageLabel: '', dobAgeLine: dob }
   }
 
   const unit = trim(form?.[ck.ageUnit]) || 'years'
-  const unitLabel = unit === 'years'
+  const ageLabel = unit === 'years'
     ? t('clientOverviewAgeYears', { count: Number(age) || age })
     : age
+  const dobAgeLine = dob ? `${dob} (${ageLabel})` : ageLabel
 
-  return dob ? `${dob} (${unitLabel})` : unitLabel
+  return { dobDisplay: dob, ageLabel, dobAgeLine }
 }
 
 export function buildClientOverviewHeaderData(
@@ -368,7 +369,7 @@ export function buildClientOverviewHeaderData(
     clientInitials: clientInitialsFromForm(form),
     status: trim(form?.[ck.status]) || 'active',
     statusLabel: resolveStatusLabel(form?.[ck.status], t),
-    dobAgeLine: formatDobAgeLine(form, t),
+    ...resolveDobAgeParts(form, t),
     gender: resolveCatalogFieldLabel(
       form?.[ck.gender],
       genderSelectOptions,

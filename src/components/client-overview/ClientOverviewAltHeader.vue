@@ -24,10 +24,157 @@
                 {{ header.statusLabel }}
               </span>
             </div>
+
+            <div
+              v-if="isCompactHeader"
+              class="client-overview-header__meta-cell
+                client-overview-header__meta-cell--client-number
+                client-overview-alt-header__meta-cell--client-number
+                client-overview-alt-header__meta-cell--client-number-mid">
+              <div class="client-overview-alt-header__meta-label-row">
+                <span class="client-overview-header__meta-label
+                  client-overview-alt-header__meta-label">
+                  <q-icon name="badge" size="16px" />
+                  {{ t('clientNumber') }}
+                </span>
+                <button
+                  v-if="missingItems.length"
+                  type="button"
+                  class="client-overview-alt-header__missing-alert-btn
+                    client-overview-alt-header__missing-alert-btn--inline"
+                  :data-testid="clientOverviewAltTestIds.reviewMissing"
+                  :aria-label="t('clientOverviewMissingInformation', {
+                    count: missingItems.length,
+                  })"
+                  @click="emit('review-missing')">
+                  <q-icon
+                    name="warning_amber"
+                    size="22px"
+                  />
+                  <q-tooltip anchor="bottom middle" self="top middle">
+                    {{ t('clientOverviewMissingInformation', {
+                      count: missingItems.length,
+                    }) }}
+                  </q-tooltip>
+                </button>
+              </div>
+              <div class="client-overview-header__meta-value-row
+                client-overview-alt-header__client-number-row">
+                <span
+                  v-if="header.clientNumber"
+                  class="client-overview-header__client-number-badge">
+                  <span
+                    class="client-overview-header__client-number-text">
+                    {{ header.clientNumber }}
+                  </span>
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    size="xs"
+                    icon="content_copy"
+                    class="client-overview-header__copy-btn"
+                    :aria-label="t('clientOverviewCopyClientNumber')"
+                    @click="copyClientNumber"
+                  />
+                </span>
+                <strong
+                  v-else
+                  class="client-overview-header__meta-value">
+                  —
+                </strong>
+              </div>
+            </div>
+
+            <div
+              v-if="isCompactHeader"
+              class="client-overview-alt-header__avatar-menu">
+              <q-btn
+                flat
+                dense
+                round
+                icon="more_vert"
+                :aria-label="t('moreActions')"
+                :disable="loading"
+                :data-testid="clientOverviewAltTestIds.actionsMenu">
+                <q-menu
+                  anchor="bottom right"
+                  self="top right"
+                  :offset="[0, 8]"
+                  class="app-light-menu
+                    client-overview-alt-header__actions-menu"
+                  :data-testid="
+                    clientOverviewAltTestIds.actionsMenuPanel
+                  ">
+                  <q-list>
+                    <q-item
+                      v-close-popup
+                      clickable
+                      :disable="loading"
+                      :data-testid="clientOverviewAltTestIds.edit"
+                      @click="emit('edit')">
+                      <q-item-section avatar>
+                        <q-icon
+                          name="edit"
+                          size="20px"
+                          color="primary"
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ t('editClient') }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <GenerateDocumentAction
+                      v-if="clientId"
+                      :document-type="documentTypes.clientProfile"
+                      :context="{ clientId }"
+                      :label="t('generateDocumentFaceSheet')"
+                      icon="contact_page"
+                      @generated="emit('document-generated')">
+                      <template #trigger="{ open }">
+                        <q-item
+                          v-close-popup
+                          clickable
+                          @click="open()">
+                          <q-item-section avatar>
+                            <q-icon
+                              name="contact_page"
+                              size="20px"
+                              color="primary"
+                            />
+                          </q-item-section>
+                          <q-item-section>
+                            <q-item-label>
+                              {{ t('generateDocumentFaceSheet') }}
+                            </q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </GenerateDocumentAction>
+
+                    <StartEncounterMenuButton
+                      as-overflow-item
+                      :show="showStartEncounter"
+                      :has-active-encounter="hasActiveEncounter"
+                      :client-id="clientId"
+                      :loading="loading"
+                      :busy="startEncounterBusy"
+                      @select="emit('start-encounter', $event)"
+                      @open-active="emit('open-active-encounter')"
+                    />
+                  </q-list>
+                </q-menu>
+              </q-btn>
+            </div>
           </div>
 
           <div class="client-overview-header__profile-body">
-            <div class="client-overview-alt-header__name-row">
+            <div
+              v-if="!isCompactHeader"
+              class="client-overview-alt-header__name-row">
               <h2 class="client-overview-header__name
                 client-overview-alt-header__name">
                 {{ header.fullName }}
@@ -52,14 +199,37 @@
                 client-overview-header__meta-row--client-actions
                 client-overview-alt-header__meta-row">
               <div
+                v-if="!isCompactHeader"
                 class="client-overview-header__meta-cell
                   client-overview-header__meta-cell--client-number
                   client-overview-alt-header__meta-cell--client-number">
-                <span class="client-overview-header__meta-label
-                  client-overview-alt-header__meta-label">
-                  <q-icon name="badge" size="16px" />
-                  {{ t('clientNumber') }}
-                </span>
+                <div class="client-overview-alt-header__meta-label-row">
+                  <span class="client-overview-header__meta-label
+                    client-overview-alt-header__meta-label">
+                    <q-icon name="badge" size="16px" />
+                    {{ t('clientNumber') }}
+                  </span>
+                  <button
+                    v-if="missingItems.length"
+                    type="button"
+                    class="client-overview-alt-header__missing-alert-btn
+                      client-overview-alt-header__missing-alert-btn--inline"
+                    :data-testid="clientOverviewAltTestIds.reviewMissing"
+                    :aria-label="t('clientOverviewMissingInformation', {
+                      count: missingItems.length,
+                    })"
+                    @click="emit('review-missing')">
+                    <q-icon
+                      name="warning_amber"
+                      size="22px"
+                    />
+                    <q-tooltip anchor="bottom middle" self="top middle">
+                      {{ t('clientOverviewMissingInformation', {
+                        count: missingItems.length,
+                      }) }}
+                    </q-tooltip>
+                  </button>
+                </div>
                 <div class="client-overview-header__meta-value-row
                   client-overview-alt-header__client-number-row">
                   <span
@@ -85,31 +255,11 @@
                     class="client-overview-header__meta-value">
                     —
                   </strong>
-                  <button
-                    v-if="missingItems.length"
-                    type="button"
-                    class="client-overview-alt-header__missing-alert-btn
-                      client-overview-alt-header__missing-alert-btn--inline"
-                    :data-testid="clientOverviewAltTestIds.reviewMissing"
-                    :aria-label="t('clientOverviewMissingInformation', {
-                      count: missingItems.length,
-                    })"
-                    @click="emit('review-missing')">
-                    <q-icon
-                      name="warning_amber"
-                      size="22px"
-                    />
-                    <q-tooltip anchor="bottom middle" self="top middle">
-                      {{ t('clientOverviewMissingInformation', {
-                        count: missingItems.length,
-                      }) }}
-                    </q-tooltip>
-                  </button>
                 </div>
               </div>
 
               <div
-                v-if="hasDobAge"
+                v-if="!isCompactHeader && hasDobAge"
                 class="client-overview-header__meta-divider"
                 aria-hidden="true"
               />
@@ -144,9 +294,18 @@
                       </q-tooltip>
                     </q-btn>
                   </div>
-                  <strong class="client-overview-header__meta-value">
-                    {{ header.dobAgeLine }}
-                  </strong>
+                  <div class="client-overview-alt-header__dob-value-row">
+                    <strong
+                      v-if="dobDisplay"
+                      class="client-overview-header__meta-value">
+                      {{ dobDisplay }}
+                    </strong>
+                    <span
+                      v-if="ageLabel"
+                      class="client-overview-alt-header__age-badge">
+                      {{ ageLabel }}
+                    </span>
+                  </div>
                 </template>
               </div>
 
@@ -240,7 +399,9 @@
         </div>
       </div>
 
-      <div class="client-overview-alt-header__actions">
+      <div
+        v-if="!isCompactHeader"
+        class="client-overview-alt-header__actions">
         <div class="client-overview-alt-header__actions-row">
           <q-btn
             no-caps
@@ -342,11 +503,24 @@ const emit = defineEmits([
 const { t } = useI18n()
 const $q = useQuasar()
 
+const isCompactHeader = computed(() => $q.screen.width < 900)
+
 const headerPhones = computed(() =>
   Array.isArray(props.header?.phones) ? props.header.phones : [],
 )
 
+const dobDisplay = computed(() =>
+  String(props.header?.dobDisplay ?? '').trim(),
+)
+
+const ageLabel = computed(() =>
+  String(props.header?.ageLabel ?? '').trim(),
+)
+
 const hasDobAge = computed(() => {
+  if (dobDisplay.value || ageLabel.value) {
+    return true
+  }
   const line = String(props.header?.dobAgeLine ?? '').trim()
 
   return Boolean(line) && line !== '—'

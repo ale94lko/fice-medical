@@ -1,35 +1,38 @@
 <template>
-  <div
-    class="client-overview-alt-tabs"
-    role="tablist"
-    :data-testid="clientOverviewAltTestIds.tabs">
-    <button
+  <q-tabs
+    :model-value="modelValue"
+    dense
+    no-caps
+    outside-arrows
+    mobile-arrows
+    class="add-client-tabs"
+    active-color="white"
+    indicator-color="transparent"
+    align="left"
+    :data-testid="clientOverviewAltTestIds.tabs"
+    @update:model-value="emit('update:modelValue', $event)">
+    <q-tab
       v-for="tab in tabs"
       :key="tab.key"
-      type="button"
-      role="tab"
-      class="client-overview-alt-tabs__tab"
-      :class="{
-        'client-overview-alt-tabs__tab--active': tab.key === modelValue,
-        [`client-overview-alt-tabs__tab--allergies-${
-          allergiesSeverityModifier
-        }`]: Boolean(
-          tab.key === addClientTabKeys.allergies
-          && allergiesSeverityModifier,
-        ),
-      }"
-      :aria-selected="tab.key === modelValue"
+      :name="tab.key"
       :data-testid="clientOverviewAltTestIds.tab(tab.key)"
-      @click="emit('update:modelValue', tab.key)">
-      <q-icon :name="tab.icon" size="18px" />
-      <span>{{ tab.label }}</span>
-      <span
-        v-if="tab.alert"
-        class="client-overview-alt-tabs__alert-dot"
-        aria-hidden="true"
-      />
-    </button>
-  </div>
+      :class="tabClass(tab)"
+      :aria-selected="tab.key === modelValue">
+      <span class="label row items-center no-wrap">
+        <q-icon
+          :name="tab.icon"
+          size="18px"
+          class="icon"
+        />
+        <span class="text">{{ tab.label }}</span>
+        <span
+          v-if="tab.alert"
+          class="client-overview-alt-tabs__alert-dot"
+          aria-hidden="true"
+        />
+      </span>
+    </q-tab>
+  </q-tabs>
 </template>
 
 <script setup>
@@ -110,4 +113,14 @@ const tabs = computed(() => [
     icon: 'folder',
   },
 ])
+
+function tabClass(tab) {
+  if (
+    tab.key === addClientTabKeys.allergies
+    && props.allergiesSeverityModifier
+  ) {
+    return `allergies-${props.allergiesSeverityModifier}`
+  }
+  return undefined
+}
 </script>

@@ -23,21 +23,38 @@ function field(key, label, value) {
   }
 }
 
-function joinMethodValues(entries, valueKey) {
+function resolvePhoneEntries(entries) {
   return (entries ?? [])
-    .map((item) => {
-      const value = valueKey === 'number'
-        ? formatPhoneUs(trim(item?.number))
-        : trim(item?.address)
-      if (!value) {
-        return ''
+    .map((item, index) => {
+      const number = formatPhoneUs(trim(item?.number))
+      if (!number) {
+        return null
       }
-      const type = trim(item?.type)
 
-      return type ? `${value} (${type})` : value
+      return {
+        id: `phone-${index}`,
+        value: number,
+        type: trim(item?.type),
+      }
     })
     .filter(Boolean)
-    .join(', ')
+}
+
+function resolveEmailEntries(entries) {
+  return (entries ?? [])
+    .map((item, index) => {
+      const address = trim(item?.address)
+      if (!address) {
+        return null
+      }
+
+      return {
+        id: `email-${index}`,
+        value: address,
+        type: trim(item?.type),
+      }
+    })
+    .filter(Boolean)
 }
 
 /**
@@ -45,8 +62,8 @@ function joinMethodValues(entries, valueKey) {
  */
 export function buildClientOverviewAltContact(form, t) {
   const contact = form?.[clientFormSections.contact] ?? {}
-  const phones = joinMethodValues(contact?.[cfk.phones], 'number')
-  const emails = joinMethodValues(contact?.[cfk.emails], 'address')
+  const phoneEntries = resolvePhoneEntries(contact?.[cfk.phones])
+  const emailEntries = resolveEmailEntries(contact?.[cfk.emails])
   const otherContacts = (contact?.[cfk.otherContacts] ?? [])
     .filter((item) => !item?.deleted)
     .map((item, index) => {
@@ -75,8 +92,20 @@ export function buildClientOverviewAltContact(form, t) {
       field('state', t('state'), contact?.[cfk.state]),
       field('county', t('county'), contact?.[cfk.county]),
       field('zipCode', t('zipCode'), contact?.[cfk.zipCode]),
-      field('phone', t('phone'), phones),
-      field('email', t('email'), emails),
+      {
+        key: 'phone',
+        label: t('phone'),
+        type: 'phones',
+        entries: phoneEntries,
+        value: displayOrDash(phoneEntries[0]?.value),
+      },
+      {
+        key: 'email',
+        label: t('email'),
+        type: 'emails',
+        entries: emailEntries,
+        value: displayOrDash(emailEntries[0]?.value),
+      },
       field(
         'preferredCommunication',
         t('preferredCommunication'),

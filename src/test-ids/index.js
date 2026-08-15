@@ -409,6 +409,8 @@ export const clientOverviewAltTestIds = {
   header: 'client-overview-alt-header',
   openClassic: 'client-overview-alt-btn-classic',
   edit: 'client-overview-alt-btn-edit',
+  actionsMenu: 'client-overview-alt-btn-actions-menu',
+  actionsMenuPanel: 'client-overview-alt-actions-menu',
   copyName: 'client-overview-alt-btn-copy-name',
   copyDob: 'client-overview-alt-btn-copy-dob',
   copyPhone: 'client-overview-alt-btn-copy-phone',

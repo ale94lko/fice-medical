@@ -14,7 +14,24 @@
         <p class="client-overview-alt-panel__label">
           {{ item.label }}
         </p>
-        <p class="client-overview-alt-panel__value">
+        <div
+          v-if="item.type === 'phones' || item.type === 'emails'"
+          class="client-overview-alt-panel__contact">
+          <AdminTableContactOverflow
+            v-if="item.entries?.length"
+            :entries="item.entries"
+            :icon="item.type === 'phones' ? 'phone' : 'mail_outline'"
+            variant="header"
+          />
+          <p
+            v-else
+            class="client-overview-alt-panel__value">
+            —
+          </p>
+        </div>
+        <p
+          v-else
+          class="client-overview-alt-panel__value">
           {{ item.value }}
         </p>
       </div>
@@ -26,6 +43,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SectionHeading from 'components/SectionHeading.vue'
+import AdminTableContactOverflow from
+  'components/admin-table/AdminTableContactOverflow.vue'
 import { clientOverviewAltTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({

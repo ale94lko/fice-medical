@@ -888,6 +888,194 @@
   }
 }
 
+/* Mobile: same shell as admin list / encounters cards. */
+.client-overview-module-card-grid {
+  min-width: 0;
+
+  &.client-overview-module-card--allergy-mild
+    .admin-table-grid-card {
+    background: #fefce8;
+  }
+
+  &.client-overview-module-card--allergy-moderate
+    .admin-table-grid-card {
+    background: #fff7ed;
+  }
+
+  &.client-overview-module-card--allergy-severe
+    .admin-table-grid-card {
+    background: #fef2f2;
+  }
+
+  &.client-overview-module-card--allergy-nka
+    .admin-table-grid-card {
+    background: #f0fdf4;
+  }
+
+  .admin-table-grid-item {
+    padding: 0 !important;
+  }
+
+  .admin-table-grid-card__footer {
+    justify-content: flex-end;
+  }
+
+  .client-overview-module-card__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+    color: $surface;
+  }
+
+  .client-overview-module-card__view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:disabled {
+      color: $text-muted;
+      cursor: default;
+    }
+  }
+
+  &.client-overview-module-card--tone-red {
+    .client-overview-module-card__count {
+      background: #dc2626;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: #dc2626;
+
+      .q-icon {
+        color: #dc2626;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-orange {
+    .client-overview-module-card__count {
+      background: #ea580c;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: #ea580c;
+
+      .q-icon {
+        color: #ea580c;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-yellow {
+    .client-overview-module-card__count {
+      background: #ca8a04;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: #ca8a04;
+
+      .q-icon {
+        color: #ca8a04;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-green {
+    .client-overview-module-card__count {
+      background: #16a34a;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: #16a34a;
+
+      .q-icon {
+        color: #16a34a;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-blue {
+    .client-overview-module-card__count {
+      background: #2563eb;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: #2563eb;
+
+      .q-icon {
+        color: #2563eb;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-purple {
+    .client-overview-module-card__count {
+      background: #9333ea;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: #9333ea;
+
+      .q-icon {
+        color: #9333ea;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-teal {
+    .client-overview-module-card__count {
+      background: $primary;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: $primary;
+
+      .q-icon {
+        color: $primary;
+      }
+    }
+  }
+
+  &.client-overview-module-card--tone-slate {
+    .client-overview-module-card__count {
+      background: $text-muted;
+    }
+
+    .client-overview-module-card__view-all:not(:disabled) {
+      color: $text-muted;
+
+      .q-icon {
+        color: $text-muted;
+      }
+    }
+  }
+
+  .client-overview-module-card__item-meta {
+    margin-left: 0;
+    font-size: 0.875rem;
+    color: $table-text-secondary;
+  }
+
+  .client-overview-module-card__empty {
+    padding: 0;
+  }
+}
+
 .client-overview-module-dialog {
   &.insurance-dialog.app-dialog-card {
     width: 100%;

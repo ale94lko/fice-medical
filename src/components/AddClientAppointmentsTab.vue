@@ -67,9 +67,11 @@
             {{ searchHint }}
           </p>
         </div>
-        <div class="col-auto">
+        <div
+          v-if="canBookAppointment"
+          class="col-auto">
           <q-btn
-            v-if="canBookAppointment"
+            v-if="!isMobile"
             no-caps
             unelevated
             color="primary"
@@ -80,6 +82,46 @@
             :data-testid="tid.btn('add')"
             @click="openBookDrawer"
           />
+          <q-btn
+            v-else
+            unelevated
+            outline
+            no-caps
+            color="primary"
+            :icon="adminTableActionIcons.more"
+            class="app-btn-outline appointments-header__menu-btn"
+            :disable="actionSaving"
+            :data-testid="tid.btn('actions-menu')"
+            :aria-label="t('moreActions')">
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('moreActions') }}
+            </q-tooltip>
+            <q-menu
+              anchor="bottom right"
+              self="top right"
+              :offset="[0, 8]"
+              class="app-light-menu appointments-header__actions-menu">
+              <q-list dense style="min-width: 220px">
+                <q-item
+                  v-close-popup
+                  clickable
+                  :disable="actionSaving"
+                  :data-testid="tid.btn('add')"
+                  @click="openBookDrawer">
+                  <q-item-section avatar>
+                    <q-icon name="add" color="primary" size="18px" />
+                  </q-item-section>
+                  <q-item-section>
+                    {{ t('appointmentAddButton') }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </div>
       </div>
 
@@ -202,6 +244,8 @@ import { notifyBookedAppointment } from
   'src/utils/telehealth-appointment-ui.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 
 const props = defineProps({
   clientId: {
@@ -227,6 +271,7 @@ const emit = defineEmits(['checked-in'])
 const { t } = useI18n()
 const $q = useQuasar()
 const siteStore = useSiteStore()
+const { isMobile } = useViewportLayout()
 const {
   canViewAppointments,
   canBookAppointment,

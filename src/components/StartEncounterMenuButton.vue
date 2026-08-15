@@ -1,6 +1,63 @@
 <template>
+  <template v-if="asOverflowItem">
+    <q-item
+      v-if="show && hasActiveEncounter"
+      v-close-popup
+      clickable
+      :disable="loading || busy"
+      :data-testid="encounterTestIds.openActive"
+      @click="emit('open-active')">
+      <q-item-section avatar>
+        <q-icon
+          name="medical_services"
+          size="20px"
+          color="primary"
+        />
+      </q-item-section>
+      <q-item-section>
+        <q-item-label>
+          {{ t('startEncounterButton') }}
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item
+      v-else-if="show"
+      clickable
+      :disable="loading || busy"
+      :data-testid="encounterTestIds.startButton">
+      <q-item-section avatar>
+        <q-icon
+          name="medical_services"
+          size="20px"
+          color="primary"
+        />
+      </q-item-section>
+      <q-item-section>
+        <q-item-label>
+          {{ t('startEncounterButton') }}
+        </q-item-label>
+      </q-item-section>
+      <q-item-section side>
+        <q-icon name="chevron_right" size="18px" />
+      </q-item-section>
+      <q-menu
+        anchor="top end"
+        self="top start"
+        :offset="[8, 0]"
+        class="app-light-menu"
+        @before-show="onBeforeShow">
+        <StartEncounterMenuList
+          :static-type-options="staticTypeOptions"
+          :loading-appointments="loadingAppointments"
+          :appointments-error="appointmentsError"
+          :today-appointments="todayAppointments"
+          @select="onMenuSelect"
+        />
+      </q-menu>
+    </q-item>
+  </template>
   <q-btn
-    v-if="show && hasActiveEncounter"
+    v-else-if="show && hasActiveEncounter"
     no-caps
     unelevated
     class="app-btn-primary client-overview-alt-header__start-encounter"
@@ -23,94 +80,13 @@
     menu-anchor="bottom end"
     menu-self="top end"
     @before-show="onBeforeShow">
-    <q-list
-      class="start-encounter-menu"
-      :data-testid="encounterTestIds.startMenu">
-      <q-item
-        v-for="opt in staticTypeOptions"
-        :key="opt.value"
-        v-close-popup
-        clickable
-        :data-testid="encounterTestIds.field(`menu-type-${opt.value}`)"
-        @click="emitSelect(opt.value)">
-        <q-item-section avatar>
-          <div
-            class="start-encounter-menu__icon"
-            :class="opt.toneClass">
-            <q-icon :name="opt.icon" size="20px" />
-          </div>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{ opt.label }}</q-item-label>
-          <q-item-label caption>
-            {{ opt.hint }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
-      <q-separator class="q-my-xs" />
-
-      <q-item-label
-        header
-        class="start-encounter-menu__section">
-        {{ t('encounterTypeScheduled') }}
-      </q-item-label>
-
-      <q-item v-if="loadingAppointments">
-        <q-item-section class="text-grey-7">
-          {{ t('startEncounterAppointmentsLoading') }}
-        </q-item-section>
-      </q-item>
-      <q-item v-else-if="appointmentsError">
-        <q-item-section class="text-negative">
-          {{ t('startEncounterAppointmentsError') }}
-        </q-item-section>
-      </q-item>
-      <q-item v-else-if="!todayAppointments.length" disable>
-        <q-item-section avatar>
-          <div
-            class="start-encounter-menu__icon
-              start-encounter-menu__icon--scheduled">
-            <q-icon name="event_available" size="20px" />
-          </div>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{ t('encounterTypeScheduled') }}</q-item-label>
-          <q-item-label caption>
-            {{ t('startEncounterAppointmentsEmpty') }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item
-        v-for="appt in todayAppointments"
-        :key="appt.appointmentId"
-        v-close-popup
-        clickable
-        :data-testid="encounterTestIds.field(
-          `menu-appointment-${appt.appointmentId}`,
-        )"
-        @click="emitSelect(
-          encounterTypes.scheduled,
-          appt.appointmentId,
-        )">
-        <q-item-section avatar>
-          <div
-            class="start-encounter-menu__icon
-              start-encounter-menu__icon--scheduled">
-            <q-icon name="event_available" size="20px" />
-          </div>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>
-            {{ t('encounterTypeScheduled') }}
-            · {{ appointmentTimeLabel(appt) }}
-          </q-item-label>
-          <q-item-label caption>
-            {{ appointmentMetaLabel(appt) }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
+    <StartEncounterMenuList
+      :static-type-options="staticTypeOptions"
+      :loading-appointments="loadingAppointments"
+      :appointments-error="appointmentsError"
+      :today-appointments="todayAppointments"
+      @select="onMenuSelect"
+    />
   </q-btn-dropdown>
 </template>
 
@@ -122,6 +98,8 @@ import {
   appointmentTerminalStatuses,
   encounterTypes,
 } from 'components/constants.js'
+import StartEncounterMenuList from
+  'components/StartEncounterMenuList.vue'
 import { encounterTestIds } from 'src/test-ids/index.js'
 import { listClientAppointments } from 'src/utils/appointment-api.js'
 import {
@@ -139,6 +117,7 @@ const props = defineProps({
   clientId: { type: [String, Number], default: null },
   loading: { type: Boolean, default: false },
   busy: { type: Boolean, default: false },
+  asOverflowItem: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['select', 'open-active'])
@@ -229,6 +208,11 @@ async function loadTodayAppointments() {
         isSelectableTodayAppointment(appt)
         && localDayKeyFromUtc(appt.startAtUtc, timeZone) === dayKey,
       )
+      .map(appt => ({
+        ...appt,
+        timeLabel: appointmentTimeLabel(appt),
+        metaLabel: appointmentMetaLabel(appt),
+      }))
       .sort((a, b) =>
         String(a.startAtUtc).localeCompare(String(b.startAtUtc)),
       )
@@ -246,58 +230,7 @@ function onBeforeShow() {
   void loadTodayAppointments()
 }
 
-function emitSelect(encounterType, appointmentId = null) {
-  emit('select', {
-    encounterType,
-    appointmentId,
-  })
+function onMenuSelect(payload) {
+  emit('select', payload)
 }
 </script>
-
-<style lang="scss" scoped>
-@import 'src/css/quasar.variables.scss';
-
-.start-encounter-menu {
-  min-width: 320px;
-  max-width: 380px;
-}
-
-.start-encounter-menu__section {
-  padding-top: 4px;
-  padding-bottom: 0;
-  color: $text-muted;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.start-encounter-menu__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-
-  &--walk-in {
-    background: rgba($primary, 0.12);
-    color: $primary;
-  }
-
-  &--phone {
-    background: rgba($info, 0.12);
-    color: $info;
-  }
-
-  &--telehealth {
-    background: rgba($accent, 0.14);
-    color: $fice-teal-dark;
-  }
-
-  &--scheduled {
-    background: rgba($positive, 0.14);
-    color: $positive;
-  }
-}
-</style>
