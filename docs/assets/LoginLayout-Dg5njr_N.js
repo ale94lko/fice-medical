@@ -1,0 +1,1 @@
+import{Fp as e,Ft as t,Tp as n,ip as r,kp as i,lp as a}from"./index-BFFQRRoy.js";import{r as o,t as s}from"./QLayout-Ch0Pb16Z.js";var c={};function l(t,c){let l=i(`router-view`);return n(),r(s,{view:`hHh Lpr lff`},{default:e(()=>[a(o,null,{default:e(()=>[a(l)]),_:1})]),_:1})}var u=t(c,[[`render`,l]]);export{u as default};
