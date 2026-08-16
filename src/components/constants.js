@@ -135,6 +135,13 @@ export const authorizationRequirementValues = {
   notUsuallyRequired: 'NOT_USUALLY_REQUIRED',
 }
 
+export const providerEligibilityModeValues = {
+  anyEligibleProvider: 'ANY_ELIGIBLE_PROVIDER',
+  selectedProviderTypes: 'SELECTED_PROVIDER_TYPES',
+  inheritFromBaseService: 'INHERIT_FROM_BASE_SERVICE',
+}
+
+
 export const serviceProcedureFieldKeys = {
   id: 'id',
   name: 'name',
@@ -1540,6 +1547,18 @@ export const apiPaths = {
     String(id ?? '').trim(),
   )}/status`,
   staffNpiLookup: '/staff/v1/npi-lookup',
+  specialties: '/staff/v1/specialties',
+  licenseTypes: '/staff/v1/license-types',
+  providerTypes: '/staff/v1/provider-types',
+  staffLicenses: staffId => `/staff/v1/${encodeURIComponent(
+    String(staffId ?? '').trim(),
+  )}/licenses`,
+  staffLicenseById: (staffId, licenseId) => `/staff/v1/${encodeURIComponent(
+    String(staffId ?? '').trim(),
+  )}/licenses/${encodeURIComponent(String(licenseId ?? '').trim())}`,
+  staffClinicalEligibility: staffId => `/staff/v1/${encodeURIComponent(
+    String(staffId ?? '').trim(),
+  )}/clinical-eligibility`,
   staffPositionIsClinical: code => `/staff/v1/positions/${encodeURIComponent(
     String(code ?? '').trim(),
   )}/is-clinical`,
@@ -1566,6 +1585,10 @@ export const apiPaths = {
     String(id ?? '').trim(),
   )}`,
   serviceProceduresList: '/service-procedures/v1',
+  serviceProcedureProviderTypes:
+    '/service-procedures/v1/provider-types',
+  serviceProcedureClinicalCapabilities:
+    '/service-procedures/v1/clinical-capabilities',
   serviceProcedureById: id => `/service-procedures/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
@@ -1607,6 +1630,7 @@ export const apiPaths = {
     String(id ?? '').trim(),
   )}`,
   appointmentServiceProcedures: '/appointments/v1/service-procedures',
+  appointmentEligibleClinicians: '/appointments/v1/eligible-clinicians',
   appointmentDurationPreview:
     '/appointments/v1/service-procedures/duration-preview',
   appointmentAvailability: '/appointments/v1/availability',

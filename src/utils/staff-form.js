@@ -205,6 +205,9 @@ export function createEmptyStaffEmployment() {
   return {
     status: 'active',
     position: '',
+    specialtyId: null,
+    specialtyName: '',
+    providerTypeId: null,
     hireDate: '',
     terminationDate: '',
     systemUser: createEmptyStaffSystemUser(),
@@ -216,9 +219,14 @@ export function createEmptyStaffEmployment() {
 export function createEmptyStaffLicense() {
   return {
     id: null,
+    licenseTypeId: null,
+    licenseTypeCode: '',
+    licenseTypeName: '',
     type: '',
     identifier: '',
+    state: '',
     expirationDate: '',
+    validFrom: '',
     status: 'Active',
     attachmentFileId: null,
     isPrimary: false,
@@ -302,6 +310,21 @@ function resolveApiEmployment(apiData = {}) {
   return {
     status: employment.status ?? apiData.status ?? 'active',
     position: employment.position ?? apiData.position ?? '',
+    specialtyId: employment.specialty_id
+      ?? employment.specialtyId
+      ?? apiData.specialty_id
+      ?? apiData.specialtyId
+      ?? null,
+    specialtyName: employment.specialty_name
+      ?? employment.specialtyName
+      ?? apiData.specialty_name
+      ?? apiData.specialtyName
+      ?? '',
+    providerTypeId: employment.provider_type_id
+      ?? employment.providerTypeId
+      ?? apiData.provider_type_id
+      ?? apiData.providerTypeId
+      ?? null,
     hireDate: mapApiDate(
       employment.hire ?? employment.hire_date ?? apiData.hire,
     ),
@@ -333,9 +356,17 @@ export function normalizeStaffCompensationRow(row) {
 export function normalizeStaffLicenseRow(row) {
   return {
     id: row.id ?? nextStaffLicenseId(),
-    type: row.type ?? '',
-    identifier: row.identifier ?? '',
+    licenseTypeId: row.license_type_id ?? row.licenseTypeId ?? null,
+    licenseTypeCode: row.license_type_code ?? row.licenseTypeCode ?? '',
+    licenseTypeName: row.license_type_name ?? row.licenseTypeName ?? '',
+    type: row.license_type_name
+      ?? row.licenseTypeName
+      ?? row.type
+      ?? '',
+    identifier: row.identifier ?? row.license_number ?? row.licenseNumber ?? '',
+    state: row.state ?? '',
     expirationDate: mapApiDate(row.expiration_date ?? row.expirationDate),
+    validFrom: mapApiDate(row.valid_from ?? row.validFrom),
     status: row.status ?? 'Active',
     attachmentFileId: row.attachment_file_id ?? row.attachmentFileId ?? null,
     isPrimary: Boolean(row.is_primary ?? row.isPrimary),
@@ -423,6 +454,12 @@ export function createEmptyStaffForm(
     employment: {
       status: employment.status,
       position: employment.position,
+      specialtyId: employment.specialtyId,
+      specialtyName: employment.specialtyName
+        || clinical.primary_specialty
+        || clinical.specialty
+        || '',
+      providerTypeId: employment.providerTypeId,
       hireDate: employment.hireDate,
       terminationDate: employment.terminationDate,
       systemUser: employment.systemUser,

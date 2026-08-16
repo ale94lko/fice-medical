@@ -76,8 +76,9 @@
                 :readonly="readonly"
                 :npi-readonly="Boolean(form.basic?.npiLookupFound)"
                 :credential-options="credentialOptions"
-                :specialty-options="specialtyOptions"
                 :supervisor-options="supervisorOptions"
+                :state-options="stateOptions"
+                :staff-id="props.staffId"
                 :field-errors="fieldErrors"
               />
             </q-tab-panel>
@@ -87,6 +88,8 @@
                 v-model="form.employment"
                 :readonly="readonly"
                 :position-options="positionOptions"
+                :specialty-options="specialtyOptions"
+                :provider-type-options="providerTypeOptions"
                 :field-errors="fieldErrors"
               />
             </q-tab-panel>
@@ -135,17 +138,6 @@
           </footer>
         </q-form>
     </div>
-
-    <ModalComponent
-      v-model="positionChangeConfirmOpen"
-      test-id="staff-position-change"
-      :title="t('staffPositionChangeTitle')"
-      :message="t('staffPositionChangeMessage')"
-      :confirm-text="t('staffPositionChangeConfirm')"
-      :cancel-text="t('cancel')"
-      @confirm="confirmPositionChange"
-      @cancel="cancelPositionChange"
-    />
   </div>
 </template>
 
@@ -158,7 +150,6 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import ModalComponent from 'components/ModalComponent.vue'
 import StaffBasicInfoTab from 'components/staff/StaffBasicInfoTab.vue'
 import StaffContactTab from 'components/staff/StaffContactTab.vue'
 import StaffEmploymentTab from 'components/staff/StaffEmploymentTab.vue'
@@ -169,11 +160,7 @@ import {
   quasarNotifyTypes,
   staffEntryPoints,
 } from 'components/constants.js'
-import { fetchStaffPositionIsClinical } from 'src/utils/staff-api.js'
-import {
-  createEmptyStaffClinical,
-  staffHasExistingSystemUser,
-} from 'src/utils/staff-form.js'
+import { staffHasExistingSystemUser } from 'src/utils/staff-form.js'
 import {
   extractTaxonomiesFromNpiLookup,
   prefillStaffFormFromNpiLookup,
@@ -184,6 +171,10 @@ import {
   emailTypeSelectOptions,
   phoneTypeSelectOptions,
 } from 'src/utils/client-contact-select-options.js'
+import {
+  findSpecialtyOption,
+  specialtyHasClinicianCapability,
+} from 'src/utils/specialty-api.js'
 
 const props = defineProps({
   modelValue: {
@@ -197,6 +188,10 @@ const props = defineProps({
   isEditMode: {
     type: Boolean,
     default: false,
+  },
+  staffId: {
+    type: [Number, String],
+    default: null,
   },
   readonly: {
     type: Boolean,
@@ -234,6 +229,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  providerTypeOptions: {
+    type: Array,
+    default: () => [],
+  },
   supervisorOptions: {
     type: Array,
     default: () => [],
@@ -252,9 +251,6 @@ const $q = useQuasar()
 const formRef = ref(null)
 const panelScrollRef = ref(null)
 const activeTab = ref('basic')
-const positionIsClinical = ref(false)
-const positionChangeConfirmOpen = ref(false)
-const pendingPositionChange = ref(null)
 
 const form = computed({
   get: () => props.modelValue,
@@ -268,8 +264,22 @@ const isClinicianEntry = computed(() =>
   || isClinicianRecord.value,
 )
 
+const isAddClinicianCreate = computed(() =>
+  !props.isEditMode
+  && props.entryPoint === staffEntryPoints.addClinician,
+)
+
+const selectedSpecialty = computed(() => findSpecialtyOption(
+  props.specialtyOptions,
+  form.value.employment?.specialtyId,
+))
+
+const selectedSpecialtyIsClinical = computed(() =>
+  specialtyHasClinicianCapability(selectedSpecialty.value),
+)
+
 const showClinicalProfileTab = computed(() =>
-  isClinicianRecord.value || positionIsClinical.value,
+  isAddClinicianCreate.value || selectedSpecialtyIsClinical.value,
 )
 
 const systemAccessEnabled = computed({
@@ -306,15 +316,15 @@ const tabDefs = computed(() => [
     label: t('tabStaffContactInformation'),
   },
   {
+    key: 'employment',
+    icon: 'work',
+    label: t('tabStaffEmployment'),
+  },
+  {
     key: 'clinical',
     icon: 'medical_services',
     label: t('tabStaffClinicalProfile'),
     visible: showClinicalProfileTab.value,
-  },
-  {
-    key: 'employment',
-    icon: 'work',
-    label: t('tabStaffEmployment'),
   },
   {
     key: 'systemAccess',
@@ -386,56 +396,64 @@ watch(activeTab, () => {
   scrollFormPanelToTop()
 })
 
-async function resolvePositionClinical(code) {
-  if (isClinicianRecord.value) {
-    positionIsClinical.value = true
-    return
-  }
-  const trimmed = String(code ?? '').trim()
-  if (!trimmed) {
-    positionIsClinical.value = false
-    return
-  }
-  try {
-    positionIsClinical.value = await fetchStaffPositionIsClinical(trimmed)
-  } catch {
-    const match = props.positionOptions.find(
-      opt => String(opt.value) === trimmed,
-    )
-    positionIsClinical.value = Boolean(match?.is_clinical ?? match?.isClinical)
-  }
-}
-
 watch(
-  () => form.value.employment?.position,
-  async(code, prev) => {
-    const wasClinical = positionIsClinical.value
-    await resolvePositionClinical(code)
-    const becameNonClinical = wasClinical && !positionIsClinical.value
-    if (
-      becameNonClinical
-      && !isClinicianRecord.value
-      && hasClinicalData()
-      && code !== prev
-    ) {
-      pendingPositionChange.value = { newCode: code, prevCode: prev }
-      form.value = {
-        ...form.value,
-        employment: {
-          ...form.value.employment,
-          position: prev ?? '',
-        },
-      }
-      await resolvePositionClinical(prev ?? '')
-      positionChangeConfirmOpen.value = true
-    }
+  () => [
+    form.value.employment?.specialtyId,
+    props.specialtyOptions,
+  ],
+  () => {
+    syncSpecialtySelection()
   },
   { immediate: true },
 )
 
+function syncSpecialtySelection() {
+  const employment = form.value.employment ?? {}
+  const specialtyId = employment.specialtyId
+  const match = findSpecialtyOption(props.specialtyOptions, specialtyId)
+  if (specialtyId != null && specialtyId !== '' && !match) {
+    return
+  }
+  if (!match) {
+    if (employment.specialtyName) {
+      form.value = {
+        ...form.value,
+        employment: {
+          ...employment,
+          specialtyName: '',
+        },
+      }
+    }
+    return
+  }
+  const specialtyName = match.label ?? ''
+  const nextPrimary = match.code || specialtyName
+  const clinical = form.value.clinical ?? {}
+  const shouldSyncPrimary = specialtyHasClinicianCapability(match)
+  const nameChanged = employment.specialtyName !== specialtyName
+  const primaryChanged = shouldSyncPrimary
+    && clinical.primarySpecialty !== nextPrimary
+  if (!nameChanged && !primaryChanged) {
+    return
+  }
+  form.value = {
+    ...form.value,
+    employment: {
+      ...employment,
+      specialtyName,
+    },
+    clinical: shouldSyncPrimary
+      ? {
+        ...clinical,
+        primarySpecialty: nextPrimary,
+      }
+      : clinical,
+  }
+}
+
 watch(showClinicalProfileTab, visible => {
   if (!visible && activeTab.value === 'clinical') {
-    activeTab.value = 'contact'
+    activeTab.value = 'employment'
   }
 })
 
@@ -444,39 +462,6 @@ watch(showSystemAccessTab, visible => {
     activeTab.value = 'employment'
   }
 })
-
-function hasClinicalData() {
-  const clinical = form.value.clinical ?? {}
-  return Boolean(
-    clinical.npi
-    || clinical.credential
-    || clinical.primarySpecialty
-    || clinical.taxonomies?.length
-    || clinical.licenses?.length,
-  )
-}
-
-function confirmPositionChange() {
-  const pending = pendingPositionChange.value
-  if (pending?.newCode != null) {
-    form.value = {
-      ...form.value,
-      employment: {
-        ...form.value.employment,
-        position: pending.newCode,
-      },
-      clinical: createEmptyStaffClinical(),
-    }
-    resolvePositionClinical(pending.newCode)
-  }
-  positionChangeConfirmOpen.value = false
-  pendingPositionChange.value = null
-}
-
-function cancelPositionChange() {
-  positionChangeConfirmOpen.value = false
-  pendingPositionChange.value = null
-}
 
 async function onNpiLookupResult(result) {
   if (!result?.found) {
@@ -517,7 +502,7 @@ async function onNpiLookupResult(result) {
 
 function focusTabForField(field) {
   const basicFields = ['firstName', 'lastName', 'dob', 'sex']
-  const employmentFields = ['position', 'hireDate']
+  const employmentFields = ['position', 'hireDate', 'specialtyId']
   const systemAccessFields = [
     'email',
     'password',

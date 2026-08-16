@@ -43,6 +43,7 @@
           v-model="form"
           :entry-point="entryPoint"
           :is-edit-mode="isEditMode"
+          :staff-id="staffId"
           :readonly="readonly"
           :can-create-system-user="canCreateSystemUser"
           :prefix-options="prefixOptions"
@@ -51,7 +52,8 @@
           :state-options="stateOptions"
           :position-options="positionOptions"
           :credential-options="credentialOptions"
-          :specialty-options="specialtyOptions"
+          :specialty-options="displayedSpecialtyOptions"
+          :provider-type-options="providerTypeOptions"
           :supervisor-options="supervisorOptions"
           :field-errors="fieldErrors"
           @update:active-tab-label="activeTabLabel = $event"
@@ -92,6 +94,12 @@ import {
   mapCatalogItemsToSelectOptions,
 } from 'src/utils/catalogs.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
+import {
+  fetchSpecialties,
+  filterClinicalSpecialtyOptions,
+  resolveSpecialtySelectValue,
+} from 'src/utils/specialty-api.js'
+import { fetchProviderTypes } from 'src/utils/staff-license-api.js'
 import { useRegisterUnsavedChanges } from
   'src/composables/useUnsavedChangesRegistry.js'
 
@@ -115,6 +123,7 @@ const genderOptions = ref([])
 const stateOptions = ref([])
 const credentialOptions = ref([])
 const specialtyOptions = ref([])
+const providerTypeOptions = ref([])
 const supervisorOptions = ref([])
 const initialFormSnapshot = ref('')
 
@@ -164,6 +173,16 @@ const isClinicianRecord = computed(() => Boolean(form.value.isClinician))
 const isClinicianEntry = computed(() =>
   entryPoint.value === staffEntryPoints.addClinician || isClinicianRecord.value,
 )
+const displayedSpecialtyOptions = computed(() => {
+  if (
+    entryPoint.value === staffEntryPoints.addClinician
+    && !isEditMode.value
+  ) {
+    return filterClinicalSpecialtyOptions(specialtyOptions.value)
+  }
+
+  return specialtyOptions.value
+})
 const readonly = computed(() => isEditMode.value && !canEditStaff.value)
 const canSave = computed(() => !readonly.value && canEditStaff.value)
 const photoDisabled = computed(() =>
@@ -235,7 +254,6 @@ async function loadCatalogOptions() {
       'suffix',
       'gender',
       'credential_type',
-      'specialty',
       'state',
     ])
     positionOptions.value = mapCatalogItemsToSelectOptions(
@@ -253,14 +271,23 @@ async function loadCatalogOptions() {
     credentialOptions.value = mapCatalogItemsToSelectOptions(
       catalogItemsFromCatalog(catalogs.credential_type),
     )
-    specialtyOptions.value = mapCatalogItemsToSelectOptions(
-      catalogItemsFromCatalog(catalogs.specialty),
-    )
     stateOptions.value = mapCatalogItemsToSelectOptions(
       catalogItemsFromCatalog(catalogs.state),
     )
   } catch {
     positionOptions.value = []
+  }
+
+  try {
+    specialtyOptions.value = await fetchSpecialties()
+  } catch {
+    specialtyOptions.value = []
+  }
+
+  try {
+    providerTypeOptions.value = await fetchProviderTypes()
+  } catch {
+    providerTypeOptions.value = []
   }
 
   try {
@@ -270,11 +297,30 @@ async function loadCatalogOptions() {
   }
 }
 
-function includeClinicalOnSave() {
-  if (form.value.isClinician) {
-    return true
+function hydrateSpecialtyFromClinical() {
+  const current = form.value.employment?.specialtyId
+  if (current != null && current !== '') {
+    return
   }
+  const raw = form.value.clinical?.primarySpecialty
+    || form.value.employment?.specialtyName
+  const specialtyId = resolveSpecialtySelectValue(
+    specialtyOptions.value,
+    raw,
+  )
+  if (specialtyId == null) {
+    return
+  }
+  form.value = {
+    ...form.value,
+    employment: {
+      ...form.value.employment,
+      specialtyId,
+    },
+  }
+}
 
+function includeClinicalOnSave() {
   return staffFormRef.value?.getIncludeClinicalProfile?.() ?? false
 }
 
@@ -340,6 +386,7 @@ onMounted(async() => {
       loadCatalogOptions(),
       loadStaffRecord(),
     ])
+    hydrateSpecialtyFromClinical()
     markStaffFormPristine()
   } finally {
     loading.value = false

@@ -112,6 +112,7 @@
                         map-options
                         :options="typeOptions"
                         :readonly="readonly"
+                        @update:model-value="onSectionTypeChange(section)"
                       />
                     </AddClientLabeledField>
                   </div>
@@ -187,6 +188,56 @@
                     />
                   </AddClientLabeledField>
                 </div>
+                <div
+                  v-if="section.sectionType === types.structuredSection"
+                  class="q-mt-sm">
+                  <p class="text-body2 text-grey-7 q-mb-sm">
+                    {{ t('clinicalNoteTemplateStructuredFieldsHint') }}
+                  </p>
+                  <div
+                    v-for="(field, fieldIndex) in
+                      section.structuredFields"
+                    :key="field.uid"
+                    class="row items-end q-col-gutter-sm q-mb-sm">
+                    <div class="col">
+                      <AddClientLabeledField
+                        :label="t(
+                          'clinicalNoteTemplateStructuredFieldLabel',
+                        )"
+                        required>
+                        <TextInput
+                          v-model="field.label"
+                          :external-label="true"
+                          :readonly="readonly"
+                        />
+                      </AddClientLabeledField>
+                    </div>
+                    <div
+                      v-if="!readonly"
+                      class="col-auto
+                        add-client-form__contact-method-type-row">
+                      <AddClientMethodRowActions
+                        :is-last="fieldIndex
+                          === section.structuredFields.length - 1"
+                        :total="section.structuredFields.length"
+                        :add-label="t(
+                          'clinicalNoteTemplateAddStructuredField',
+                        )"
+                        :remove-label="t('delete')"
+                        :add-test-id="tid.addStructuredField(index)"
+                        :remove-test-id="tid.removeStructuredField(
+                          index,
+                          fieldIndex,
+                        )"
+                        @add="addStructuredField(section)"
+                        @remove="removeStructuredField(
+                          section,
+                          fieldIndex,
+                        )"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div class="row items-center q-gutter-md q-mt-sm">
                   <FormToggle
                     v-if="section.sectionType === types.narrativeField
@@ -194,6 +245,14 @@
                     v-model="section.required"
                     :disable="readonly"
                     :label="t('clinicalNoteTemplateRequired')"
+                  />
+                  <FormToggle
+                    v-if="section.sectionType === types.assessment
+                      || section.sectionType === types.structuredSection"
+                    :model-value="section.showWhenEmpty !== false"
+                    :disable="readonly"
+                    :label="t('clinicalNoteTemplateShowWhenEmpty')"
+                    @update:model-value="section.showWhenEmpty = $event"
                   />
                 </div>
               </div>
@@ -272,6 +331,8 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AddClientMethodRowActions from
+  'components/AddClientMethodRowActions.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
@@ -284,6 +345,10 @@ import {
 } from 'src/composables/useClinicalNoteTemplatePermissions.js'
 import { clinicalNoteTemplateDialogTestIds as tid } from
   'src/test-ids/index.js'
+import {
+  parseStructuredSectionFields,
+  serializeStructuredSectionConfig,
+} from 'src/utils/clinical-note-template-api.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -297,6 +362,16 @@ const emit = defineEmits(['update:modelValue', 'save', 'preview'])
 const { t } = useI18n()
 let uid = 0
 const dragIndex = ref(-1)
+
+function emptyStructuredField() {
+  uid += 1
+
+  return {
+    uid: `sf-${uid}`,
+    key: '',
+    label: '',
+  }
+}
 
 function emptySection() {
   uid += 1
@@ -312,6 +387,7 @@ function emptySection() {
     placeholder: '',
     assessmentTemplateId: null,
     configurationJson: '',
+    structuredFields: [emptyStructuredField()],
     sectionKey: '',
     active: true,
   }
@@ -328,6 +404,9 @@ function cloneTemplate(source) {
         uid,
         showWhenEmpty: section.showWhenEmpty !== false,
         inputType: section.inputType || 'LONG_TEXT',
+        structuredFields: parseStructuredSectionFields(
+          section.configurationJson,
+        ),
       }
     })
     : [emptySection()]
@@ -431,8 +510,38 @@ function onDrop(index) {
   dragIndex.value = -1
 }
 
+function onSectionTypeChange(section) {
+  if (section.sectionType === types.structuredSection
+    && !section.structuredFields?.length) {
+    section.structuredFields = [emptyStructuredField()]
+  }
+}
+
+function addStructuredField(section) {
+  section.structuredFields.push(emptyStructuredField())
+}
+
+function removeStructuredField(section, fieldIndex) {
+  if (section.structuredFields.length <= 1) {
+    return
+  }
+  section.structuredFields.splice(fieldIndex, 1)
+}
+
 function onSave() {
-  emit('save', { ...local.value })
+  const sections = local.value.sections.map(section => {
+    if (section.sectionType !== types.structuredSection) {
+      return section
+    }
+
+    return {
+      ...section,
+      configurationJson: serializeStructuredSectionConfig(
+        section.structuredFields,
+      ),
+    }
+  })
+  emit('save', { ...local.value, sections })
 }
 </script>
 

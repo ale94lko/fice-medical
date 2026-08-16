@@ -1,5 +1,6 @@
 import {
   authorizationRequirementValues,
+  providerEligibilityModeValues,
   serviceProcedureCategoryValues,
   serviceProcedureStatusValues,
 } from 'components/constants.js'
@@ -83,6 +84,46 @@ function parseAuthorizationRequirement(value) {
     : authorizationRequirementValues.unknown
 }
 
+function parseEligibilityMode(value) {
+  const raw = trim(value)
+  const allowed = Object.values(providerEligibilityModeValues)
+
+  return allowed.includes(raw)
+    ? raw
+    : providerEligibilityModeValues.anyEligibleProvider
+}
+
+function parseIdList(value) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map(item => Number(item))
+    .filter(id => Number.isInteger(id) && id > 0)
+}
+
+function parseEligibilityFromApi(raw = {}) {
+  const nested = raw.provider_eligibility ?? raw.providerEligibility ?? {}
+  const typeIds = parseIdList(
+    nested.allowed_provider_type_ids
+    ?? nested.allowedProviderTypeIds,
+  )
+
+  return {
+    providerEligibilityMode: parseEligibilityMode(nested.mode),
+    allowedProviderTypeIds: typeIds,
+    requiredClinicalCapabilityId: parseOptionalPositiveInt(
+      nested.required_clinical_capability_id
+      ?? nested.requiredClinicalCapabilityId,
+    ),
+    baseServiceProcedureId: parseOptionalPositiveInt(
+      nested.base_service_procedure_id
+      ?? nested.baseServiceProcedureId,
+    ),
+  }
+}
+
 export function createEmptyServiceProcedureForm() {
   return {
     id: null,
@@ -100,6 +141,11 @@ export function createEmptyServiceProcedureForm() {
     defaultUnits: '1',
     authorizationRequirement: authorizationRequirementValues.unknown,
     defaultClinicalNoteTemplateId: null,
+    providerEligibilityMode:
+      providerEligibilityModeValues.anyEligibleProvider,
+    allowedProviderTypeIds: [],
+    requiredClinicalCapabilityId: null,
+    baseServiceProcedureId: null,
   }
 }
 
@@ -144,6 +190,7 @@ export function normalizeServiceProcedureFromApi(raw = {}) {
       raw.default_clinical_note_template_id
       ?? raw.defaultClinicalNoteTemplateId,
     ),
+    ...parseEligibilityFromApi(raw),
     createdAt: trim(raw.created_at ?? raw.createdAt),
     updatedAt: trim(raw.updated_at ?? raw.updatedAt),
   }
@@ -169,6 +216,14 @@ export function buildServiceProcedureRequest(form = {}) {
     ),
     default_clinical_note_template_id:
       parseOptionalPositiveInt(form.defaultClinicalNoteTemplateId),
+    provider_eligibility: {
+      mode: parseEligibilityMode(form.providerEligibilityMode),
+      allowed_provider_type_ids: parseIdList(form.allowedProviderTypeIds),
+      required_clinical_capability_id:
+        parseOptionalPositiveInt(form.requiredClinicalCapabilityId),
+      base_service_procedure_id:
+        parseOptionalPositiveInt(form.baseServiceProcedureId),
+    },
   }
   /* eslint-enable camelcase */
 }
@@ -186,6 +241,10 @@ export function cloneServiceProcedureForm(form) {
     defaultFee: toFeeInputString(base.defaultFee),
     billable: Boolean(base.billable),
     defaultUnits: toOptionalInputString(base.defaultUnits),
+    providerEligibilityMode: parseEligibilityMode(
+      base.providerEligibilityMode,
+    ),
+    allowedProviderTypeIds: parseIdList(base.allowedProviderTypeIds),
   }
 }
 
@@ -247,6 +306,34 @@ export function validateServiceProcedureForm(form, t) {
     if (units.kind !== 'ok') {
       errors.defaultUnits = t('serviceProcedureDefaultUnitsRequired')
     }
+  }
+
+  Object.assign(errors, eligibilityErrors(form, t))
+
+  return errors
+}
+
+function eligibilityErrors(form, t) {
+  const errors = {}
+  const mode = parseEligibilityMode(form.providerEligibilityMode)
+  if (mode === providerEligibilityModeValues.selectedProviderTypes) {
+    if (!parseIdList(form.allowedProviderTypeIds).length) {
+      errors.allowedProviderTypeIds = t(
+        'serviceProcedureEligibilityTypesRequired',
+      )
+    }
+    if (parseOptionalPositiveInt(form.requiredClinicalCapabilityId)
+      == null) {
+      errors.requiredClinicalCapabilityId = t(
+        'serviceProcedureEligibilityCapabilityRequired',
+      )
+    }
+  }
+  if (mode === providerEligibilityModeValues.inheritFromBaseService
+    && parseOptionalPositiveInt(form.baseServiceProcedureId) == null) {
+    errors.baseServiceProcedureId = t(
+      'serviceProcedureEligibilityBaseRequired',
+    )
   }
 
   return errors

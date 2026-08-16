@@ -157,6 +157,136 @@
 
         <div class="insurance-dialog__card-section q-mt-lg">
           <SubsectionHeading
+            icon="verified_user"
+            :title="t('serviceProcedureSectionProviderEligibility')"
+          />
+          <p class="text-body2 text-grey-7 q-mt-md q-mb-sm">
+            {{ t('serviceProcedureEligibilityWho') }}
+          </p>
+          <div class="row q-col-gutter-md q-mb-sm">
+            <div class="col-auto">
+              <q-radio
+                v-model="local.providerEligibilityMode"
+                :val="eligibilityModes.anyEligibleProvider"
+                :disable="readonly"
+                color="primary"
+                :label="t('serviceProcedureEligibilityAny')"
+                :data-testid="serviceProcedureDialogTestIds.field(
+                  'eligibility-mode-any',
+                )"
+              />
+            </div>
+            <div class="col-auto">
+              <q-radio
+                v-model="local.providerEligibilityMode"
+                :val="eligibilityModes.selectedProviderTypes"
+                :disable="readonly"
+                color="primary"
+                :label="t('serviceProcedureEligibilitySelected')"
+                :data-testid="serviceProcedureDialogTestIds.field(
+                  'eligibility-mode-selected',
+                )"
+              />
+            </div>
+            <div class="col-auto">
+              <q-radio
+                v-model="local.providerEligibilityMode"
+                :val="eligibilityModes.inheritFromBaseService"
+                :disable="readonly"
+                color="primary"
+                :label="t('serviceProcedureEligibilityInherit')"
+                :data-testid="serviceProcedureDialogTestIds.field(
+                  'eligibility-mode-inherit',
+                )"
+              />
+            </div>
+          </div>
+          <div
+            v-if="isSelectedProviderTypes"
+            class="row q-col-gutter-md q-mt-md">
+            <div class="col-12">
+              <AddClientLabeledField
+                :label="t('serviceProcedureEligibilityAllowedTypes')"
+                required>
+                <FormSelect
+                  v-model="local.allowedProviderTypeIds"
+                  outlined
+                  hide-bottom-space
+                  multiple
+                  use-chips
+                  emit-value
+                  map-options
+                  :options="providerTypeOptions"
+                  :readonly="readonly"
+                  :error="Boolean(errors.allowedProviderTypeIds)"
+                  :error-message="errors.allowedProviderTypeIds"
+                  :test-id="serviceProcedureDialogTestIds.field(
+                    'allowed-provider-types',
+                  )"
+                />
+              </AddClientLabeledField>
+            </div>
+          </div>
+          <div
+            v-if="!isInheritEligibility"
+            class="row q-col-gutter-md q-mt-md">
+            <div class="col-12">
+              <AddClientLabeledField
+                :label="t('serviceProcedureEligibilityCapability')"
+                :required="isSelectedProviderTypes">
+                <FormSelect
+                  v-model="local.requiredClinicalCapabilityId"
+                  outlined
+                  hide-bottom-space
+                  clearable
+                  emit-value
+                  map-options
+                  :options="capabilityOptions"
+                  :readonly="readonly"
+                  :error="Boolean(
+                    errors.requiredClinicalCapabilityId,
+                  )"
+                  :error-message="
+                    errors.requiredClinicalCapabilityId
+                  "
+                  :test-id="serviceProcedureDialogTestIds.field(
+                    'required-capability',
+                  )"
+                />
+              </AddClientLabeledField>
+            </div>
+          </div>
+          <div
+            v-if="isInheritEligibility"
+            class="row q-col-gutter-md q-mt-md">
+            <div class="col-12">
+              <AddClientLabeledField
+                :label="t('serviceProcedureEligibilityBaseService')"
+                required>
+                <FormSelect
+                  v-model="local.baseServiceProcedureId"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  :options="baseServiceOptions"
+                  :readonly="readonly"
+                  :error="Boolean(errors.baseServiceProcedureId)"
+                  :error-message="errors.baseServiceProcedureId"
+                  :test-id="serviceProcedureDialogTestIds.field(
+                    'base-service',
+                  )"
+                />
+              </AddClientLabeledField>
+            </div>
+          </div>
+          <p class="text-body2 text-grey-7 q-mb-none q-mt-md">
+            {{ t('serviceProcedureEligibilityHint') }}
+          </p>
+        </div>
+
+        <div class="insurance-dialog__card-section q-mt-lg">
+          <SubsectionHeading
             icon="payments"
             :title="t('serviceProcedureSectionBilling')"
           />
@@ -277,7 +407,10 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { serviceProcedureStatusValues } from 'components/constants.js'
+import {
+  providerEligibilityModeValues,
+  serviceProcedureStatusValues,
+} from 'components/constants.js'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormSelect from 'components/FormSelect.vue'
@@ -302,6 +435,11 @@ import {
 import { serviceProcedureDialogTestIds } from 'src/test-ids/index.js'
 import { listActiveClinicalNoteTemplates } from
   'src/utils/clinical-note-template-api.js'
+import {
+  listActiveServiceProcedures,
+  listServiceClinicalCapabilities,
+  listServiceProviderTypes,
+} from 'src/utils/service-procedure-api.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -320,6 +458,10 @@ const { t } = useI18n()
 const local = ref(createEmptyServiceProcedureForm())
 const errors = ref({})
 const templateOptions = ref([])
+const providerTypeOptions = ref([])
+const capabilityOptions = ref([])
+const baseServiceOptions = ref([])
+const eligibilityModes = providerEligibilityModeValues
 
 const open = computed({
   get: () => props.modelValue,
@@ -370,6 +512,16 @@ const billingFieldsDisabled = computed(() =>
   readonly.value || !local.value.billable,
 )
 
+const isSelectedProviderTypes = computed(() =>
+  local.value.providerEligibilityMode
+    === eligibilityModes.selectedProviderTypes,
+)
+
+const isInheritEligibility = computed(() =>
+  local.value.providerEligibilityMode
+    === eligibilityModes.inheritFromBaseService,
+)
+
 function onBillableInput(value) {
   local.value.billable = Boolean(value)
   if (local.value.billable
@@ -397,6 +549,7 @@ watch(
     if (props.modelValue) {
       syncLocalFromProps()
       void loadTemplateOptions()
+      void loadEligibilityCatalogs()
     }
   },
   { immediate: true },
@@ -412,6 +565,31 @@ async function loadTemplateOptions() {
   } catch {
     templateOptions.value = []
   }
+}
+
+async function loadEligibilityCatalogs() {
+  const [typesResult, capsResult, servicesResult] =
+    await Promise.allSettled([
+      listServiceProviderTypes(),
+      listServiceClinicalCapabilities(),
+      listActiveServiceProcedures(t),
+    ])
+  providerTypeOptions.value = typesResult.status === 'fulfilled'
+    ? typesResult.value
+    : []
+  capabilityOptions.value = capsResult.status === 'fulfilled'
+    ? capsResult.value
+    : []
+  const currentId = local.value.id
+  const services = servicesResult.status === 'fulfilled'
+    ? servicesResult.value?.items ?? []
+    : []
+  baseServiceOptions.value = services
+    .filter(item => item.id != null && item.id !== currentId)
+    .map(item => ({
+      label: item.name,
+      value: item.id,
+    }))
 }
 
 function onCancel() {

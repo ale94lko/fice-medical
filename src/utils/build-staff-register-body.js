@@ -92,9 +92,22 @@ function mapSystemUser(systemUser = {}, { isEdit }) {
 }
 
 function mapEmployment(employment, { isEdit }) {
+  const specialtyId = employment.specialtyId ?? employment.specialty_id
+  const parsedSpecialtyId = Number(specialtyId)
+  const hasSpecialty = specialtyId != null
+    && specialtyId !== ''
+    && Number.isFinite(parsedSpecialtyId)
+  const providerTypeId = employment.providerTypeId
+    ?? employment.provider_type_id
+  const parsedProviderTypeId = Number(providerTypeId)
+  const hasProviderType = providerTypeId != null
+    && providerTypeId !== ''
+    && Number.isFinite(parsedProviderTypeId)
   const payload = {
     status: trim(employment.status) || 'active',
     position: trim(employment.position),
+    specialty_id: hasSpecialty ? parsedSpecialtyId : null,
+    provider_type_id: hasProviderType ? parsedProviderTypeId : null,
     hire: mapDateForApi(employment.hireDate),
     termination: mapDateForApi(employment.terminationDate),
     system_user: mapSystemUser(employment.systemUser, { isEdit }),
@@ -126,11 +139,14 @@ function mapClinicalProfile(clinical) {
       }))
       .filter(row => row.code),
     licenses: (clinical.licenses ?? []).map(row => ({
-      type: trim(row.type),
-      identifier: trim(row.identifier),
+      license_type_id: row.licenseTypeId ?? row.license_type_id ?? null,
+      type: trim(row.type ?? row.licenseTypeCode ?? row.license_type_code),
+      identifier: trim(row.identifier ?? row.license_number),
+      state: trim(row.state),
       expiration_date: mapDateForApi(
         row.expiration_date ?? row.expirationDate,
       ),
+      valid_from: mapDateForApi(row.valid_from ?? row.validFrom),
       status: trim(row.status),
       attachment_file_id:
         row.attachment_file_id ?? row.attachmentFileId ?? null,

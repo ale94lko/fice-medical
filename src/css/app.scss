@@ -2547,8 +2547,8 @@ body.vp-mobile {
 }
 
 .subtenant-dialog.insurance-dialog.app-dialog-card {
-  max-width: calc(920px * 2 / 3);
-  min-width: 280px;
+  max-width: 920px;
+  min-width: 320px;
 }
 
 .user-dialog.app-dialog-card:not(.app-dialog-card--sm)  {

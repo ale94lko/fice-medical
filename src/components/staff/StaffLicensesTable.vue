@@ -18,7 +18,7 @@
         :props="scope"
         class="admin-data-table__primary-cell">
         <span class="family-medical-history-table__ellipsis">
-          {{ scope.row.type || '—' }}
+          {{ licenseTypeLabel(scope.row) }}
         </span>
       </q-td>
     </template>
@@ -30,6 +30,14 @@
         <span class="family-medical-history-table__ellipsis">
           {{ scope.row.identifier || '—' }}
         </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-state="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ scope.row.state || '—' }}
       </q-td>
     </template>
 
@@ -189,7 +197,7 @@ const mobileCardLayout = {
   status: 'status',
   contact: null,
   identifier: null,
-  badges: ['expirationDate', 'isPrimary', 'attachment'],
+  badges: ['state', 'expirationDate', 'isPrimary', 'attachment'],
   hideEmpty: true,
 }
 
@@ -198,7 +206,7 @@ const columns = computed(() => [
     name: 'type',
     label: t('staffLicenseTypeLabel'),
     align: 'left',
-    field: row => row.type,
+    field: row => licenseTypeLabel(row),
     sortable: false,
     headerStyle: 'min-width: 140px',
     style: 'min-width: 140px',
@@ -211,6 +219,15 @@ const columns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 140px',
     style: 'min-width: 140px',
+  },
+  {
+    name: 'state',
+    label: t('staffLicenseStateLabel'),
+    align: 'left',
+    field: row => row.state,
+    sortable: false,
+    headerStyle: 'min-width: 88px',
+    style: 'min-width: 88px',
   },
   {
     name: 'expirationDate',
@@ -260,6 +277,10 @@ const columns = computed(() => [
   },
 ])
 
+function licenseTypeLabel(row) {
+  return row?.licenseTypeName || row?.type || '—'
+}
+
 function statusLabel(status) {
   const value = String(status ?? '').trim()
   if (!value) {
@@ -271,8 +292,14 @@ function statusLabel(status) {
   if (value === 'Expired') {
     return t('staffLicenseStatusExpired')
   }
+  if (value === 'Suspended') {
+    return t('staffLicenseStatusSuspended')
+  }
   if (value === 'Pending') {
     return t('pending')
+  }
+  if (value === 'Inactive') {
+    return t('staffLicenseStatusInactive')
   }
 
   return value
@@ -283,7 +310,7 @@ function statusVariant(status) {
   if (value === 'Active') {
     return 'active'
   }
-  if (value === 'Expired') {
+  if (value === 'Expired' || value === 'Suspended' || value === 'Inactive') {
     return 'cancelled'
   }
   if (value === 'Pending') {

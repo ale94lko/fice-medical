@@ -2,6 +2,7 @@
 import { mapPhoneTypeFromApi } from 'src/utils/client-contact-select-options.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
 import { resolveCatalogSelectValue } from 'src/utils/catalogs.js'
+import { resolveSpecialtySelectValue } from 'src/utils/specialty-api.js'
 import {
   createEmptyStaffEmail,
   createEmptyStaffPhone,
@@ -155,6 +156,7 @@ function mapLookupLicenses(apiLicenses, existingLicenses) {
     id: nextStaffLicenseId(),
     type: row.type ?? '',
     identifier: row.identifier ?? '',
+    state: row.state ?? '',
     expiration_date: row.expiration_date ?? '',
     status: row.status ?? 'Active',
     attachment_file_id: null,
@@ -231,6 +233,10 @@ export function prefillStaffFormFromNpiLookup(
     ?? clinician.specialty
     ?? taxonomies.find(row => row.isPrimary)?.displayName
     ?? ''
+  const resolvedSpecialtyId = resolveSpecialtySelectValue(
+    specialtyOptions,
+    primarySpecialtyRaw,
+  )
 
   return {
     ...form,
@@ -282,6 +288,12 @@ export function prefillStaffFormFromNpiLookup(
       emails: form.contact?.emails?.length
         ? form.contact.emails
         : [createEmptyStaffEmail()],
+    },
+    employment: {
+      ...form.employment,
+      specialtyId: form.employment?.specialtyId
+        ?? resolvedSpecialtyId
+        ?? null,
     },
     clinical: {
       ...form.clinical,

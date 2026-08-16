@@ -320,6 +320,36 @@ export default {
   subtenantDialogViewTitle: 'Detalle del subtenant',
   subtenantDialogAddSubtitle:
     'El código de sucursal se genera automáticamente al guardar.',
+  subtenantSectionBasic: 'Información básica',
+  subtenantSectionLegal: 'Legal y facturación',
+  subtenantSectionLegalHelper:
+    'Proporciona la información legal y de facturación de esta organización.',
+  subtenantSectionCredentials: 'Credenciales',
+  subtenantSectionCredentialsHelper:
+    'Inscripción de pagadores, identificadores de proveedor '
+    + 'y credenciales de la organización.',
+  subtenantLegalBillingFooterHint:
+    'Puedes actualizar la información legal y de facturación '
+    + 'más tarde en la configuración de la clínica.',
+  sectionBadgeRequired: 'Obligatorio',
+  sectionBadgeFuture: 'Futuro',
+  legalBusinessName: 'Nombre legal (DBA)',
+  legalBusinessNamePlaceholder: 'Introduce el nombre legal',
+  legalBusinessNameTooLong:
+    'El nombre legal no puede superar {max} caracteres.',
+  taxIdEin: 'Tax ID / EIN',
+  taxIdEinPlaceholder: '12-3456789',
+  taxIdEinHint:
+    'Obligatorio para facturación, reclamaciones e integraciones '
+    + 'de pagadores.',
+  taxIdEinInvalid:
+    'Introduce un EIN de 9 dígitos (123456789 o 12-3456789).',
+  billingEmail: 'Correo de facturación',
+  billingEmailPlaceholder: "billing{'@'}dominio.com",
+  billingPhone: 'Teléfono de facturación',
+  billingPhonePlaceholder: '(555) 123-4567',
+  billingAddress: 'Dirección de facturación',
+  billingAddressPlaceholder: 'Introduce la dirección de facturación',
   subtenantDialogEditSubtitle: 'El código de sucursal no se puede cambiar.',
   subtenantCreateSuccess:
     'Subtenant creado. Código de sucursal: {code}',
@@ -383,6 +413,31 @@ export default {
   serviceProcedureAuthorizationRequirementLabel:
     'Requisito de autorización',
   serviceProcedureSectionGeneral: 'Información general',
+  serviceProcedureSectionProviderEligibility:
+    'Elegibilidad del proveedor',
+  serviceProcedureEligibilityWho:
+    '¿Quién puede realizar este servicio?',
+  serviceProcedureEligibilityAny:
+    'Cualquier proveedor clínicamente elegible',
+  serviceProcedureEligibilitySelected:
+    'Solo tipos de proveedor seleccionados',
+  serviceProcedureEligibilityInherit:
+    'Heredar del servicio base',
+  serviceProcedureEligibilityAllowedTypes:
+    'Tipos de proveedor permitidos',
+  serviceProcedureEligibilityCapability:
+    'Capacidad clínica requerida',
+  serviceProcedureEligibilityBaseService: 'Servicio base',
+  serviceProcedureEligibilityHint:
+    'Los clínicos deben cumplir el tipo de proveedor, la capacidad '
+    + 'clínica y los requisitos de licencia profesional aplicables '
+    + 'para la fecha del servicio.',
+  serviceProcedureEligibilityTypesRequired:
+    'Seleccione al menos un tipo de proveedor.',
+  serviceProcedureEligibilityCapabilityRequired:
+    'La capacidad clínica requerida es obligatoria.',
+  serviceProcedureEligibilityBaseRequired:
+    'Seleccione el servicio base para heredar la elegibilidad.',
   serviceProcedureSectionBilling: 'Facturación',
   serviceProcedureSectionRequirements: 'Requisitos del encounter',
   serviceProcedureRequirementAdd: 'Añadir requisito',
@@ -805,6 +860,12 @@ export default {
   staffProfessionalCredentialsTitle: 'Credenciales profesionales',
   staffNpiLabel: 'NPI',
   staffCredentialLabel: 'Credencial',
+  staffSpecialtyLabel: 'Especialidad',
+  staffProviderTypeLabel: 'Tipo de proveedor',
+  staffSpecialtyRequired: 'La especialidad es obligatoria.',
+  staffSpecialtyNotClinical:
+    'La especialidad seleccionada no es elegible para crear un '
+    + 'perfil de clínico.',
   staffPrimarySpecialtyLabel: 'Especialidad principal',
   staffClinicalSupervisionTitle: 'Supervisión clínica',
   staffSupervisorLabel: 'Supervisor',
@@ -910,9 +971,13 @@ export default {
     'Ingrese los datos de la licencia y adjunte un documento si aplica.',
   staffLicenseTypeLabel: 'Tipo de licencia',
   staffLicenseIdentifierLabel: 'Número de licencia',
+  staffLicenseStateLabel: 'Estado',
   staffLicenseExpirationLabel: 'Fecha de vencimiento',
-  staffLicenseStatusLabel: 'Estado',
+  staffLicenseValidFromLabel: 'Válida desde',
+  staffLicenseStatusLabel: 'Estado de la licencia',
   staffLicenseStatusExpired: 'Vencida',
+  staffLicenseStatusSuspended: 'Suspendida',
+  staffLicenseStatusInactive: 'Inactiva',
   staffLicensePrimaryLabel: 'Licencia principal',
   staffLicensePrimaryShort: 'Principal',
   staffLicenseAttachmentLabel: 'Adjunto',
@@ -921,8 +986,21 @@ export default {
     '¿Seguro que desea eliminar esta licencia?',
   staffLicenseTypeRequired: 'El tipo de licencia es obligatorio.',
   staffLicenseIdentifierRequired: 'El número de licencia es obligatorio.',
+  staffLicenseStateRequired: 'El estado es obligatorio.',
   staffLicenseExpirationRequired:
     'La fecha de vencimiento es obligatoria.',
+  staffLicenseStatusRequired: 'El estado de la licencia es obligatorio.',
+  staffClinicalEligibilityTitle: 'Elegibilidad clínica',
+  staffClinicalEligibilitySubtitle:
+    'Indica si este miembro del personal puede realizar acciones '
+    + 'clínicas sensibles según la especialidad y la licencia.',
+  staffClinicalEligibilityEmpty:
+    'La elegibilidad está disponible después de guardar el registro.',
+  staffEligibilityAllowed: 'Permitido',
+  staffEligibilityNotAllowed: 'No permitido',
+  staffEligibilityRequiresLicense: 'Requiere licencia',
+  staffEligibilityLicenseExpired: 'Licencia vencida',
+  staffEligibilityLicenseInactive: 'Licencia inactiva',
   username: 'Usuario',
   adminTableColumnSettingsTitle: 'Configurar columnas',
   adminTableColumnSettingsHint:
@@ -1253,6 +1331,12 @@ export default {
   clinicalNoteTemplatePlaceholder: 'Marcador de posición',
   clinicalNoteTemplateAssessment: 'Plantilla de evaluación',
   clinicalNoteTemplateRequired: 'Obligatorio',
+  clinicalNoteTemplateHideWhenEmpty: 'Ocultar si está vacío',
+  clinicalNoteTemplateStructuredFieldsHint:
+    'Defina los campos estructurados que el clínico completa en '
+    + 'Narrativa durante el encounter.',
+  clinicalNoteTemplateStructuredFieldLabel: 'Etiqueta del campo',
+  clinicalNoteTemplateAddStructuredField: 'Añadir campo',
   clinicalNoteTemplateMoveUp: 'Subir',
   clinicalNoteTemplateMoveDown: 'Bajar',
   clinicalNoteTemplatePreview: 'Vista previa',
@@ -1281,6 +1365,7 @@ export default {
     'Usa el resultado del tamizaje/evaluación vinculado.',
   clinicalNotePreviewStructured:
     'Campos estructurados completados en el encounter.',
+  clinicalNotePreviewStructuredFields: 'Campos: {fields}',
   'clinicalNoteDataSource_ENCOUNTER_SUMMARY': 'Resumen del encounter',
   'clinicalNoteDataSource_REASON_FOR_VISIT': 'Motivo de la visita',
   'clinicalNoteDataSource_SERVICES': 'Servicios',
@@ -2472,6 +2557,10 @@ export default {
   appointmentClinicianOptional: 'Clínico',
   appointmentClinicianPlaceholder: 'Seleccionar clínico',
   appointmentClinicianRequired: 'El clínico es obligatorio.',
+  appointmentNoEligibleClinicians:
+    'No hay clínicos elegibles para este servicio.',
+  appointmentClinicianNotEligible:
+    'El clínico seleccionado no es elegible para uno o más servicios.',
   appointmentSelectClinicianFirst:
     'Seleccione un clínico para ver la disponibilidad.',
   appointmentClinicianHint:
@@ -4279,6 +4368,7 @@ export default {
   encounterReadySince: 'Listo desde {time}',
   encounterReadySinceLabel: 'Listo desde',
   encounterWaitingFor: 'Esperando',
+  encounterWaitEpisodeLabel: 'Episodio de espera {current} de {total}',
   encounterResultsAvailable: 'Resultados disponibles',
   encounterActivityTime:
     'Tiempo clínico activo: {active} min · Espera: {waiting} min',

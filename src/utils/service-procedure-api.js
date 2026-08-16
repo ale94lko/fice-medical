@@ -120,6 +120,41 @@ export async function listActiveServiceProcedures(t) {
   return listServiceProcedures({ activeOnly: true, limit: 500, page: 1 }, t)
 }
 
+function mapCatalogOptions(items = []) {
+  return (Array.isArray(items) ? items : [])
+    .filter(item => item?.id != null)
+    .map(item => ({
+      label: String(item.name ?? item.code ?? '').trim(),
+      value: item.id,
+      code: String(item.code ?? '').trim(),
+    }))
+    .filter(option => option.label)
+}
+
+function readItems(envelope) {
+  if (Array.isArray(envelope)) {
+    return envelope
+  }
+
+  return Array.isArray(envelope?.items) ? envelope.items : []
+}
+
+export async function listServiceProviderTypes() {
+  const response = await apiInstance.get(
+    apiPaths.serviceProcedureProviderTypes,
+  )
+
+  return mapCatalogOptions(readItems(unwrapData(response.data)))
+}
+
+export async function listServiceClinicalCapabilities() {
+  const response = await apiInstance.get(
+    apiPaths.serviceProcedureClinicalCapabilities,
+  )
+
+  return mapCatalogOptions(readItems(unwrapData(response.data)))
+}
+
 export async function listServiceProcedureRequirements(serviceProcedureId) {
   const response = await apiInstance.get(
     apiPaths.serviceProcedureRequirements(serviceProcedureId),

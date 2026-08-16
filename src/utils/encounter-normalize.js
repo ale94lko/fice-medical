@@ -184,6 +184,9 @@ export function normalizeEncounter(raw) {
 function normalizeWaitDependency(row = {}) {
   return {
     id: parseOptionalNumber(row.id),
+    waitEpisodeId: parseOptionalNumber(
+      row.wait_episode_id ?? row.waitEpisodeId,
+    ),
     dependencyType: trim(
       row.dependency_type ?? row.dependencyType,
     ).toUpperCase(),
@@ -197,6 +200,23 @@ function normalizeWaitDependency(row = {}) {
   }
 }
 
+function normalizeWaitEpisode(row = {}) {
+  const dependencies = row.dependencies ?? []
+
+  return {
+    id: parseOptionalNumber(row.id),
+    reason: trim(row.reason),
+    status: trim(row.status).toUpperCase(),
+    startedAt: trim(row.started_at ?? row.startedAt),
+    startedBy: parseOptionalNumber(row.started_by ?? row.startedBy),
+    readyAt: trim(row.ready_at ?? row.readyAt),
+    resumedAt: trim(row.resumed_at ?? row.resumedAt),
+    resumedBy: parseOptionalNumber(row.resumed_by ?? row.resumedBy),
+    dependencies: (Array.isArray(dependencies) ? dependencies : [])
+      .map(normalizeWaitDependency),
+  }
+}
+
 function normalizeWaitSummary(raw) {
   if (raw == null || typeof raw !== 'object') {
     return null
@@ -205,6 +225,8 @@ function normalizeWaitSummary(raw) {
   const resolved = raw.resolved_dependencies
     ?? raw.resolvedDependencies
     ?? []
+  const episodes = raw.episodes ?? []
+  const currentEpisodeRaw = raw.current_episode ?? raw.currentEpisode ?? null
 
   return {
     waitingSince: trim(raw.waiting_since ?? raw.waitingSince),
@@ -224,6 +246,14 @@ function normalizeWaitSummary(raw) {
       raw.elapsed_minutes ?? raw.elapsedMinutes,
     ),
     reason: trim(raw.reason),
+    currentEpisodeId: parseOptionalNumber(
+      raw.current_episode_id ?? raw.currentEpisodeId,
+    ),
+    currentEpisode: currentEpisodeRaw
+      ? normalizeWaitEpisode(currentEpisodeRaw)
+      : null,
+    episodes: (Array.isArray(episodes) ? episodes : [])
+      .map(normalizeWaitEpisode),
     pendingDependencies: (Array.isArray(pending) ? pending : [])
       .map(normalizeWaitDependency),
     resolvedDependencies: (Array.isArray(resolved) ? resolved : [])

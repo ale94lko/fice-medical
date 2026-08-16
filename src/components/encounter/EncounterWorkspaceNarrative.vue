@@ -62,14 +62,19 @@
               v-for="item in structuredFields(field)"
               :key="item.key"
               class="q-mb-sm">
-              <TextInput
-                :model-value="structuredValue(field, item.key)"
-                :external-label="true"
-                :readonly="!canEdit"
-                :placeholder="item.label"
-                @update:model-value="onStructured(field, item.key, $event)"
-                @blur="flushSave"
-              />
+              <AddClientLabeledField :label="item.label">
+                <TextInput
+                  :model-value="structuredValue(field, item.key)"
+                  :external-label="true"
+                  :readonly="!canEdit"
+                  @update:model-value="onStructured(
+                    field,
+                    item.key,
+                    $event,
+                  )"
+                  @blur="flushSave"
+                />
+              </AddClientLabeledField>
             </div>
           </div>
           <TextInput

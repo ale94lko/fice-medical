@@ -3,7 +3,7 @@ import {
   subtenantStatusValues,
 } from 'components/constants.js'
 
-export const subtenantLegalNameMaxLength = 255
+export const subtenantLegalBusinessNameMaxLength = 255
 
 function parseAddedSystemRoles(raw) {
   const value = raw?.added_system_roles ?? raw?.addedSystemRoles
@@ -31,24 +31,32 @@ export function createEmptySubtenantForm() {
   return {
     id: null,
     name: '',
-    legalName: '',
     code: '',
     main: false,
     status: subtenantStatusValues.active,
     clinicType: clinicTypeValues.primaryCare,
     photoFileId: null,
+    legalBusinessName: '',
+    taxId: '',
+    billingEmail: '',
+    billingPhone: '',
+    billingAddress: '',
   }
 }
 
 export function normalizeSubtenantFromApi(raw = {}) {
   const status = Number(raw.status ?? subtenantStatusValues.active)
+  const legalBusinessName = String(
+    raw.legal_business_name
+      ?? raw.legalBusinessName
+      ?? raw.legal_name
+      ?? raw.legalName
+      ?? '',
+  ).trim()
 
   return {
     id: raw.id ?? null,
     name: String(raw.name ?? '').trim(),
-    legalName: String(
-      raw.legal_name ?? raw.legalName ?? '',
-    ).trim(),
     code: String(raw.code ?? '').trim(),
     main: Boolean(raw.main),
     clinicType: String(
@@ -59,14 +67,28 @@ export function normalizeSubtenantFromApi(raw = {}) {
       : subtenantStatusValues.active,
     photoFileId: parseOptionalPhotoFileId(raw),
     addedSystemRoles: parseAddedSystemRoles(raw),
+    legalBusinessName,
+    taxId: String(raw.tax_id ?? raw.taxId ?? '').replace(/\D/g, ''),
+    billingEmail: String(
+      raw.billing_email ?? raw.billingEmail ?? '',
+    ).trim(),
+    billingPhone: String(
+      raw.billing_phone ?? raw.billingPhone ?? '',
+    ).trim(),
+    billingAddress: String(
+      raw.billing_address ?? raw.billingAddress ?? '',
+    ).trim(),
   }
 }
 
 export function buildSubtenantRequest(form = {}) {
+  const legalBusinessName = String(
+    form.legalBusinessName ?? '',
+  ).trim()
   const body = {
     name: String(form.name ?? '').trim(),
     // eslint-disable-next-line camelcase -- API body
-    legal_name: String(form.legalName ?? '').trim(),
+    legal_name: legalBusinessName,
     main: Boolean(form.main),
     status: Number(form.status ?? subtenantStatusValues.active),
   }
@@ -78,6 +100,16 @@ export function buildSubtenantRequest(form = {}) {
     // eslint-disable-next-line camelcase -- API body
     body.photo_file_id = photoFileId
   }
+  // eslint-disable-next-line camelcase -- API body
+  body.legal_business_name = legalBusinessName
+  // eslint-disable-next-line camelcase -- API body
+  body.tax_id = String(form.taxId ?? '').replace(/\D/g, '')
+  // eslint-disable-next-line camelcase -- API body
+  body.billing_email = String(form.billingEmail ?? '').trim()
+  // eslint-disable-next-line camelcase -- API body
+  body.billing_phone = String(form.billingPhone ?? '').trim()
+  // eslint-disable-next-line camelcase -- API body
+  body.billing_address = String(form.billingAddress ?? '').trim()
 
   return body
 }

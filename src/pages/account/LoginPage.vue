@@ -33,8 +33,12 @@
                 {{ t('loginMfaSubtitle') }}
               </p>
               <LoginTextInput
+                ref="mfaInputRef"
                 v-model="mfaCode"
                 icon-left="pin"
+                autocomplete="one-time-code"
+                autofocus
+                float-label-on-value
                 :test-id="authTestIds.mfaCodeInput"
                 :label="t('loginMfaCodeLabel')"
                 :error-message="mfaCodeErrorMessage"
@@ -86,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useQuasar } from 'quasar'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -104,6 +108,7 @@ const email = ref('')
 const password = ref('')
 const mfaCode = ref('')
 const mfaChallengeToken = ref('')
+const mfaInputRef = ref(null)
 const phase = ref('password')
 
 const isEmailInvalid = ref(false)
@@ -131,6 +136,14 @@ const mfaCodeErrorMessage = computed(() => {
 
 const windowWidth = computed(() => $q.screen.width)
 const showPromo = computed(() => windowWidth.value >= siteBreakpointsPx.MD)
+
+watch(phase, async(nextPhase) => {
+  if (nextPhase !== 'mfa') {
+    return
+  }
+  await nextTick()
+  mfaInputRef.value?.focus()
+})
 
 function backToPassword() {
   phase.value = 'password'

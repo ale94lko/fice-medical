@@ -143,6 +143,11 @@
                   :test-id="tid.field('clinician')"
                 />
               </AddClientLabeledField>
+              <p
+                v-if="eligibilityHint"
+                class="text-caption text-grey-7 q-mt-xs">
+                {{ eligibilityHint }}
+              </p>
             </div>
 
             <div class="col-12 col-md-6">
@@ -360,7 +365,7 @@ import {
   sumServiceLineDurations,
   sumSuggestedFees,
 } from 'src/utils/appointment-booking.js'
-import { listBookableServiceProcedures } from
+import { listBookableServiceProcedures, listEligibleClinicians } from
   'src/utils/appointment-api.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
 import { buildSupervisorSelectOptions } from
@@ -373,6 +378,7 @@ import {
 import {
   formatUtcDateLong,
   formatUtcTimeRange,
+  todayLocalDayKey,
   usDateStringToLocalDayKey,
   usDateStringToUtcStartIso,
 } from 'src/utils/appointment-datetime.js'
@@ -414,6 +420,8 @@ const errors = ref({})
 const serviceCatalog = ref([])
 const serviceLines = ref([])
 const clinicianOptions = ref([])
+const allClinicianOptions = ref([])
+const eligibilityHint = ref('')
 const placeOptions = ref([])
 const filteredClientOptions = ref([])
 const clientSearchLoading = ref(false)
@@ -1018,6 +1026,7 @@ async function loadFormOptions() {
       }))
       .filter(option => Number.isFinite(option.value))
     : []
+  allClinicianOptions.value = clinicianOptions.value
   placeOptions.value = placesResult.status === 'fulfilled'
     ? placesResult.value
     : []
@@ -1032,6 +1041,42 @@ async function loadFormOptions() {
   }
   applyDefaultLinkedClinician()
   applySupervisorFromSelectedClinician()
+  await refreshEligibleClinicians()
+}
+
+async function refreshEligibleClinicians() {
+  const ids = serviceProcedureIds.value.filter(id => id != null)
+  if (!ids.length) {
+    clinicianOptions.value = allClinicianOptions.value
+    eligibilityHint.value = ''
+
+    return
+  }
+  const dateOfService = selectedDayKey.value
+    || todayLocalDayKey(timeZone)
+  try {
+    const eligible = await listEligibleClinicians(ids, dateOfService)
+    clinicianOptions.value = eligible
+    if (!eligible.length) {
+      eligibilityHint.value = t('appointmentNoEligibleClinicians')
+    } else {
+      eligibilityHint.value = ''
+    }
+    const selectedId = Number(draft.value.clinicianId)
+    const stillEligible = eligible.some(
+      option => Number(option.value) === selectedId,
+    )
+    if (draft.value.clinicianId != null && !stillEligible) {
+      draft.value.clinicianId = null
+      errors.value = {
+        ...errors.value,
+        clinicianId: t('appointmentClinicianNotEligible'),
+      }
+    }
+  } catch {
+    clinicianOptions.value = allClinicianOptions.value
+    eligibilityHint.value = ''
+  }
 }
 
 function resolveLinkedClinicianId(options = clinicianOptions.value) {
@@ -1348,6 +1393,19 @@ watch(
     applySupervisorFromSelectedClinician()
     clearSelectedWindow()
     await onSchedulingInputsChanged()
+  },
+)
+
+watch(
+  () => [
+    serviceProcedureIds.value.join(','),
+    selectedDayKey.value,
+  ],
+  async() => {
+    if (!open.value) {
+      return
+    }
+    await refreshEligibleClinicians()
   },
 )
 

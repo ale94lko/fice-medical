@@ -49,7 +49,66 @@ export function normalizeClinicalNoteTemplate(raw = {}) {
   }
 }
 
+export function slugStructuredFieldKey(label) {
+  const slug = String(label || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '')
+
+  return slug || 'field'
+}
+
+export function parseStructuredSectionFields(raw) {
+  let parsed = raw
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      parsed = {}
+    }
+  }
+  const list = Array.isArray(parsed?.fields)
+    ? parsed.fields
+    : (Array.isArray(parsed) ? parsed : [])
+
+  const fields = list.map((item, index) => ({
+    uid: `sf-${index}-${item.key || item.label || index}`,
+    key: String(item.key || '').trim(),
+    label: String(item.label || item.key || '').trim(),
+  })).filter(item => item.label || item.key)
+
+  return fields.length
+    ? fields
+    : [{ uid: 'sf-new', key: '', label: '' }]
+}
+
+export function serializeStructuredSectionConfig(fields) {
+  const used = new Set()
+  const list = (fields || []).map(item => {
+    const label = String(item.label || '').trim()
+    if (!label) {
+      return null
+    }
+    let key = slugStructuredFieldKey(item.key || label)
+    let unique = key
+    let suffix = 2
+    while (used.has(unique)) {
+      unique = `${key}_${suffix}`
+      suffix += 1
+    }
+    used.add(unique)
+
+    return { key: unique, label }
+  }).filter(Boolean)
+
+  return list.length ? JSON.stringify({ fields: list }) : null
+}
+
 export function normalizeClinicalNoteTemplateSection(raw = {}) {
+  const configurationJson =
+    raw.configuration_json ?? raw.configurationJson ?? ''
+
   return {
     id: raw.id ?? null,
     sectionKey: String(raw.section_key ?? raw.sectionKey ?? '').trim(),
@@ -64,8 +123,8 @@ export function normalizeClinicalNoteTemplateSection(raw = {}) {
     placeholder: raw.placeholder ?? '',
     assessmentTemplateId:
       raw.assessment_template_id ?? raw.assessmentTemplateId ?? null,
-    configurationJson:
-      raw.configuration_json ?? raw.configurationJson ?? '',
+    configurationJson,
+    structuredFields: parseStructuredSectionFields(configurationJson),
     active: raw.active ?? true,
   }
 }
@@ -88,7 +147,9 @@ export function buildClinicalNoteTemplateRequest(form = {}) {
       input_type: section.inputType || null,
       placeholder: section.placeholder || null,
       assessment_template_id: section.assessmentTemplateId || null,
-      configuration_json: section.configurationJson || null,
+      configuration_json: section.sectionType === 'STRUCTURED_SECTION'
+        ? serializeStructuredSectionConfig(section.structuredFields)
+        : (section.configurationJson || null),
       active: section.active !== false,
     })),
   }

@@ -156,6 +156,39 @@ export async function listBookableServiceProcedures() {
   return mapBookableServiceProcedures(unwrapList(response.data))
 }
 
+export async function listEligibleClinicians(
+  serviceProcedureIds = [],
+  dateOfService,
+) {
+  const ids = (serviceProcedureIds ?? []).filter(id => id != null)
+  const query = {
+    service_procedure_ids: ids.join(','),
+    date_of_service: dateOfService,
+  }
+  const response = await apiInstance.get(
+    apiPaths.appointmentEligibleClinicians,
+    { params: query },
+  )
+
+  return unwrapList(response.data)
+    .map(row => {
+      const id = Number(row.clinician_id ?? row.clinicianId)
+      const label = String(row.display_name ?? row.displayName ?? '')
+        .trim()
+      if (!Number.isFinite(id) || !label) {
+        return null
+      }
+
+      return {
+        label,
+        value: id,
+        name: label,
+        specialty: String(row.specialty ?? '').trim(),
+      }
+    })
+    .filter(Boolean)
+}
+
 export async function fetchAppointmentDurationPreview(
   serviceProcedureIds = [],
   durationMinutes = null,

@@ -18,12 +18,17 @@
             <AddClientLabeledField
               :label="t('staffLicenseTypeLabel')"
               required>
-              <TextInput
-                v-model="local.type"
-                :external-label="true"
-                :disable="readonly"
+              <FormSelect
+                v-model="local.licenseTypeId"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                :readonly="readonly"
+                :options="licenseTypeOptions"
                 :error="Boolean(errors.type)"
                 :error-message="errors.type"
+                :test-id="staffLicenseTestIds.typeField"
               />
             </AddClientLabeledField>
           </div>
@@ -37,6 +42,36 @@
                 :disable="readonly"
                 :error="Boolean(errors.identifier)"
                 :error-message="errors.identifier"
+                :test-id="staffLicenseTestIds.numberField"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('staffLicenseStateLabel')"
+              required>
+              <FormSelect
+                v-model="local.state"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                :readonly="readonly"
+                :options="stateOptions"
+                :error="Boolean(errors.state)"
+                :error-message="errors.state"
+                :test-id="staffLicenseTestIds.stateField"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('staffLicenseValidFromLabel')">
+              <ClientDateField
+                v-model="local.validFrom"
+                :readonly="readonly"
+                :close-label="t('close')"
+                :test-id="staffLicenseTestIds.validFromField"
               />
             </AddClientLabeledField>
           </div>
@@ -50,11 +85,14 @@
                 :close-label="t('close')"
                 :error="Boolean(errors.expirationDate)"
                 :error-message="errors.expirationDate"
+                :test-id="staffLicenseTestIds.expirationField"
               />
             </AddClientLabeledField>
           </div>
           <div class="col-12 col-md-6">
-            <AddClientLabeledField :label="t('staffLicenseStatusLabel')">
+            <AddClientLabeledField
+              :label="t('staffLicenseStatusLabel')"
+              required>
               <FormSelect
                 v-model="local.status"
                 outlined
@@ -63,6 +101,9 @@
                 map-options
                 :readonly="readonly"
                 :options="statusOptions"
+                :error="Boolean(errors.status)"
+                :error-message="errors.status"
+                :test-id="staffLicenseTestIds.statusField"
               />
             </AddClientLabeledField>
           </div>
@@ -90,6 +131,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="staffLicenseTestIds.cancelButton"
           @click="onCancel"
         />
         <q-btn
@@ -100,6 +142,7 @@
           class="app-btn-primary"
           :loading="saving"
           :label="t('save')"
+          :data-testid="staffLicenseTestIds.saveButton"
           @click="onSave"
         />
       </q-card-actions>
@@ -118,6 +161,7 @@ import FormToggle from 'components/FormToggle.vue'
 import InsuranceCardUploadField from 'components/InsuranceCardUploadField.vue'
 import TextInput from 'components/TextInput.vue'
 import { storedFileCategories } from 'components/constants.js'
+import { staffLicenseTestIds } from 'src/test-ids/index.js'
 import { createEmptyStaffLicense } from 'src/utils/staff-form.js'
 import { uploadStoredFile } from 'src/utils/stored-file-api.js'
 
@@ -133,6 +177,14 @@ const props = defineProps({
   readonly: {
     type: Boolean,
     default: false,
+  },
+  licenseTypeOptions: {
+    type: Array,
+    default: () => [],
+  },
+  stateOptions: {
+    type: Array,
+    default: () => [],
   },
 })
 
@@ -157,7 +209,9 @@ const dialogTitle = computed(() =>
 const statusOptions = computed(() => [
   { label: t('active'), value: 'Active' },
   { label: t('staffLicenseStatusExpired'), value: 'Expired' },
+  { label: t('staffLicenseStatusSuspended'), value: 'Suspended' },
   { label: t('pending'), value: 'Pending' },
+  { label: t('staffLicenseStatusInactive'), value: 'Inactive' },
 ])
 
 watch(open, visible => {
@@ -178,14 +232,21 @@ function onCancel() {
 
 function validate() {
   const next = {}
-  if (!String(local.value.type ?? '').trim()) {
+  const typeId = local.value.licenseTypeId
+  if (typeId == null || typeId === '') {
     next.type = t('staffLicenseTypeRequired')
   }
   if (!String(local.value.identifier ?? '').trim()) {
     next.identifier = t('staffLicenseIdentifierRequired')
   }
+  if (!String(local.value.state ?? '').trim()) {
+    next.state = t('staffLicenseStateRequired')
+  }
   if (!String(local.value.expirationDate ?? '').trim()) {
     next.expirationDate = t('staffLicenseExpirationRequired')
+  }
+  if (!String(local.value.status ?? '').trim()) {
+    next.status = t('staffLicenseStatusRequired')
   }
   errors.value = next
 
@@ -206,8 +267,17 @@ async function onSave() {
       )
       attachmentFileId = uploaded?.id ?? attachmentFileId
     }
+    const selectedType = (props.licenseTypeOptions ?? []).find(option =>
+      String(option?.value) === String(local.value.licenseTypeId))
     emit('save', {
       ...local.value,
+      licenseTypeId: local.value.licenseTypeId,
+      type: selectedType?.label
+        || selectedType?.code
+        || local.value.type
+        || '',
+      licenseTypeName: selectedType?.label || local.value.licenseTypeName || '',
+      licenseTypeCode: selectedType?.code || local.value.licenseTypeCode || '',
       attachmentFileId,
     })
     open.value = false

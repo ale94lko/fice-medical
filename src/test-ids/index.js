@@ -201,6 +201,12 @@ export const subtenantDialogTestIds = {
   dialog: 'subtenant-dialog',
   field: name => toTestId('subtenant-dialog-field', name),
   btn: name => toTestId('subtenant-dialog-btn', name),
+  section: name => toTestId('subtenant-dialog-section', name),
+  sectionToggle: name => toTestId(
+    'subtenant-dialog-section',
+    name,
+    'toggle',
+  ),
 }
 
 export const clinicalResourceTestIds = {
@@ -292,6 +298,18 @@ export const clinicalNoteTemplateDialogTestIds = {
     'clinical-note-template-dialog-section',
     index,
     'move-down',
+  ),
+  addStructuredField: index => toTestId(
+    'clinical-note-template-dialog-section',
+    index,
+    'add-structured-field',
+  ),
+  removeStructuredField: (index, fieldIndex) => toTestId(
+    'clinical-note-template-dialog-section',
+    index,
+    'structured-field',
+    fieldIndex,
+    'remove',
   ),
   btn: name => toTestId('clinical-note-template-dialog-btn', name),
 }
@@ -745,6 +763,23 @@ export function otherContactEmailAddTestId(contactId, index) {
 
 export function otherContactEmailRemoveTestId(contactId, index) {
   return toTestId('other-contact', contactId, 'email', index, 'btn-remove')
+}
+
+export const staffLicenseTestIds = {
+  addButton: 'staff-license-btn-add',
+  typeField: 'staff-license-field-type',
+  numberField: 'staff-license-field-number',
+  stateField: 'staff-license-field-state',
+  expirationField: 'staff-license-field-expiration',
+  validFromField: 'staff-license-field-valid-from',
+  statusField: 'staff-license-field-status',
+  saveButton: 'staff-license-btn-save',
+  cancelButton: 'staff-license-btn-cancel',
+  eligibility: 'staff-clinical-eligibility',
+  eligibilityRow: code => toTestId(
+    'staff-clinical-eligibility-row',
+    code,
+  ),
 }
 
 export { clientAttachmentsTestIds } from

@@ -85,14 +85,15 @@ function userStatusLabel(status, t) {
 }
 
 function formatLicenseItem(row, t) {
-  const type = trim(row?.type)
+  const type = trim(row?.licenseTypeName ?? row?.type)
   const identifier = trim(row?.identifier)
+  const state = trim(row?.state)
   const expiration = trim(row?.expirationDate)
   const status = trim(row?.status)
   const primary = row?.isPrimary
     ? ` · ${t('staffLicensePrimaryShort')}`
     : ''
-  const head = [type, identifier].filter(Boolean).join(' · ')
+  const head = [type, identifier, state].filter(Boolean).join(' · ')
   const tail = [expiration, status].filter(Boolean).join(' · ')
   if (!head && !tail) {
     return ''
@@ -172,6 +173,7 @@ function buildContactFields(contact = {}, t) {
 function buildEmploymentFields(employment = {}, t) {
   return [
     field('position', t('staffListColPosition'), employment.position),
+    field('specialty', t('staffSpecialtyLabel'), employment.specialtyName),
     field(
       'status',
       t('status'),
@@ -196,11 +198,6 @@ function buildClinicalFields(clinical = {}, t) {
   const fields = [
     field('npi', t('staffNpiLabel'), clinical.npi),
     field('credential', t('staffCredentialLabel'), clinical.credential),
-    field(
-      'primarySpecialty',
-      t('staffPrimarySpecialtyLabel'),
-      clinical.primarySpecialty,
-    ),
     {
       key: 'licenses',
       label: t('staffLicensesTitle'),

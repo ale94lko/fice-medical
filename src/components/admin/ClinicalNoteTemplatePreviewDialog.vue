@@ -34,6 +34,12 @@
               color="orange">
               {{ t('clinicalNoteTemplateRequired') }}
             </q-badge>
+            <q-badge
+              v-if="section.showWhenEmpty === false"
+              outline
+              color="grey">
+              {{ t('clinicalNoteTemplateHideWhenEmpty') }}
+            </q-badge>
           </div>
           <p class="text-body2 text-grey-7 q-mb-none q-mt-xs">
             {{ previewBody(section) }}
@@ -60,6 +66,9 @@ import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import { clinicalNoteSectionTypes as types } from
   'src/composables/useClinicalNoteTemplatePermissions.js'
+import {
+  parseStructuredSectionFields,
+} from 'src/utils/clinical-note-template-api.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -99,6 +108,24 @@ function previewBody(section) {
   }
   if (section.sectionType === types.assessment) {
     return t('clinicalNotePreviewAssessment')
+  }
+
+  if (section.sectionType === types.structuredSection) {
+    const rawFields = Array.isArray(section.structuredFields)
+      && section.structuredFields.length
+      ? section.structuredFields
+      : parseStructuredSectionFields(section.configurationJson)
+    const names = rawFields
+      .map(item => item.label)
+      .filter(Boolean)
+      .join(', ')
+    if (names) {
+      return t('clinicalNotePreviewStructuredFields', {
+        fields: names,
+      })
+    }
+
+    return t('clinicalNotePreviewStructured')
   }
 
   return t('clinicalNotePreviewStructured')

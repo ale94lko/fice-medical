@@ -354,6 +354,11 @@
         <strong>
           {{ waitBannerTitle }}
         </strong>
+        <p
+          v-if="waitEpisodeLabel"
+          class="text-caption text-grey-7 q-mb-xs q-mt-xs">
+          {{ waitEpisodeLabel }}
+        </p>
         <ul class="encounter-workspace-header__wait-list">
           <li
             v-for="item in waitItems"
@@ -659,6 +664,21 @@ const waitBannerTitle = computed(() => {
   }
 
   return t('encounterWaitingFor')
+})
+
+const waitEpisodeLabel = computed(() => {
+  const episodes = props.encounter?.wait?.episodes ?? []
+  if (episodes.length < 2) {
+    return ''
+  }
+  const currentId = props.encounter?.wait?.currentEpisodeId
+  const index = episodes.findIndex(episode => episode.id === currentId)
+  const current = index >= 0 ? index + 1 : episodes.length
+
+  return t('encounterWaitEpisodeLabel', {
+    current,
+    total: episodes.length,
+  })
 })
 
 const activityTimeLabel = computed(() => {

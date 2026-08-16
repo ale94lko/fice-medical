@@ -37,6 +37,41 @@
         </div>
         <div class="col-12 col-md-6">
           <AddClientLabeledField
+            :label="t('staffSpecialtyLabel')"
+            required>
+            <FormSelect
+              v-model="employment.specialtyId"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              test-id="staff-field-specialty"
+              :readonly="readonly"
+              :options="specialtyOptions"
+              :error="Boolean(fieldErrors.specialtyId)"
+              :error-message="fieldErrors.specialtyId"
+            />
+          </AddClientLabeledField>
+        </div>
+        <div class="col-12 col-md-6">
+          <AddClientLabeledField
+            :label="t('staffProviderTypeLabel')">
+            <FormSelect
+              v-model="employment.providerTypeId"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              test-id="staff-field-provider-type"
+              :readonly="readonly"
+              :options="providerTypeOptions"
+            />
+          </AddClientLabeledField>
+        </div>
+        <div class="col-12 col-md-6">
+          <AddClientLabeledField
             :label="t('staffListColHireDate')"
             required>
             <ClientDateField
@@ -186,6 +221,14 @@ const props = defineProps({
     default: false,
   },
   positionOptions: {
+    type: Array,
+    default: () => [],
+  },
+  specialtyOptions: {
+    type: Array,
+    default: () => [],
+  },
+  providerTypeOptions: {
     type: Array,
     default: () => [],
   },

@@ -21,6 +21,9 @@ export function resolveStaffApiErrorMessage(error, t) {
 
   const message = String(data?.message ?? error?.message ?? '').trim()
   const lower = message.toLowerCase()
+  if (lower.includes('not eligible to create a clinician')) {
+    return t('staffSpecialtyNotClinical')
+  }
   if (
     lower.includes('taxonomy')
     && (
@@ -73,6 +76,9 @@ function validateBasicStaffFields(basic, t, errors) {
 function validateEmploymentFields(employment, t, errors) {
   if (!String(employment.position ?? '').trim()) {
     errors.position = t('staffPositionRequired')
+  }
+  if (employment.specialtyId == null || employment.specialtyId === '') {
+    errors.specialtyId = t('staffSpecialtyRequired')
   }
   if (!String(employment.hireDate ?? '').trim()) {
     errors.hireDate = t('staffHireDateRequired')

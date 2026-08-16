@@ -311,6 +311,35 @@ export default {
   subtenantDialogViewTitle: 'Subtenant Details',
   subtenantDialogAddSubtitle:
     'The branch code is generated automatically after saving.',
+  subtenantSectionBasic: 'Basic Information',
+  subtenantSectionLegal: 'Legal & Billing',
+  subtenantSectionLegalHelper:
+    'Provide legal and billing information for this organization.',
+  subtenantSectionCredentials: 'Credentials',
+  subtenantSectionCredentialsHelper:
+    'Payer enrollment, provider identifiers '
+    + 'and organization credentials.',
+  subtenantLegalBillingFooterHint:
+    'You can update legal and billing information later '
+    + 'from clinic settings.',
+  sectionBadgeRequired: 'Required',
+  sectionBadgeFuture: 'Future',
+  legalBusinessName: 'Legal Business Name (DBA)',
+  legalBusinessNamePlaceholder: 'Enter legal business name',
+  legalBusinessNameTooLong:
+    'Legal business name must be at most {max} characters.',
+  taxIdEin: 'Tax ID / EIN',
+  taxIdEinPlaceholder: '12-3456789',
+  taxIdEinHint:
+    'Required for billing, claims and future payer integrations.',
+  taxIdEinInvalid:
+    'Enter a valid 9-digit EIN (123456789 or 12-3456789).',
+  billingEmail: 'Billing Email',
+  billingEmailPlaceholder: "billing{'@'}domain.com",
+  billingPhone: 'Billing Phone',
+  billingPhonePlaceholder: '(555) 123-4567',
+  billingAddress: 'Billing Address',
+  billingAddressPlaceholder: 'Enter billing address',
   subtenantDialogEditSubtitle: 'Branch code cannot be changed.',
   subtenantCreateSuccess: 'Subtenant created. Branch code: {code}',
   subtenantUpdateSuccess: 'Subtenant updated successfully.',
@@ -369,6 +398,30 @@ export default {
   serviceProcedureAuthorizationRequirementLabel:
     'Authorization requirement',
   serviceProcedureSectionGeneral: 'General information',
+  serviceProcedureSectionProviderEligibility: 'Provider eligibility',
+  serviceProcedureEligibilityWho:
+    'Who can perform this service?',
+  serviceProcedureEligibilityAny:
+    'Any clinically eligible provider',
+  serviceProcedureEligibilitySelected:
+    'Only selected provider types',
+  serviceProcedureEligibilityInherit:
+    'Inherit from base service',
+  serviceProcedureEligibilityAllowedTypes:
+    'Allowed provider types',
+  serviceProcedureEligibilityCapability:
+    'Required clinical capability',
+  serviceProcedureEligibilityBaseService: 'Base service',
+  serviceProcedureEligibilityHint:
+    'Clinicians must meet the provider type, clinical capability, '
+    + 'and applicable professional license requirements for the '
+    + 'Date of Service.',
+  serviceProcedureEligibilityTypesRequired:
+    'Select at least one provider type.',
+  serviceProcedureEligibilityCapabilityRequired:
+    'Required clinical capability is required.',
+  serviceProcedureEligibilityBaseRequired:
+    'Select the base service for inherited eligibility.',
   serviceProcedureSectionBilling: 'Billing',
   serviceProcedureSectionRequirements: 'Encounter requirements',
   serviceProcedureRequirementAdd: 'Add requirement',
@@ -774,6 +827,11 @@ export default {
   staffProfessionalCredentialsTitle: 'Professional Credentials',
   staffNpiLabel: 'NPI',
   staffCredentialLabel: 'Credential',
+  staffSpecialtyLabel: 'Specialty',
+  staffProviderTypeLabel: 'Provider type',
+  staffSpecialtyRequired: 'Specialty is required.',
+  staffSpecialtyNotClinical:
+    'Selected Specialty is not eligible to create a Clinician Profile.',
   staffPrimarySpecialtyLabel: 'Primary Specialty',
   staffClinicalSupervisionTitle: 'Clinical Supervision',
   staffSupervisorLabel: 'Supervisor',
@@ -864,7 +922,7 @@ export default {
   staffTaxonomiesHint:
     'You can add multiple taxonomies. Only one taxonomy can be marked '
     + 'as primary.',
-  staffLicensesTitle: 'Licenses & credentials',
+  staffLicensesTitle: 'Licenses & Credentials',
   staffLicensesSubtitle:
     'Add professional licenses and upload supporting documents.',
   staffLicensesEmpty: 'No licenses added yet.',
@@ -874,9 +932,13 @@ export default {
     'Enter license details and optionally attach a document.',
   staffLicenseTypeLabel: 'License type',
   staffLicenseIdentifierLabel: 'License number',
+  staffLicenseStateLabel: 'State',
   staffLicenseExpirationLabel: 'Expiration date',
+  staffLicenseValidFromLabel: 'Valid from',
   staffLicenseStatusLabel: 'Status',
   staffLicenseStatusExpired: 'Expired',
+  staffLicenseStatusSuspended: 'Suspended',
+  staffLicenseStatusInactive: 'Inactive',
   staffLicensePrimaryLabel: 'Primary license',
   staffLicensePrimaryShort: 'Primary',
   staffLicenseAttachmentLabel: 'Attachment',
@@ -885,7 +947,20 @@ export default {
     'Are you sure you want to delete this license?',
   staffLicenseTypeRequired: 'License type is required.',
   staffLicenseIdentifierRequired: 'License number is required.',
+  staffLicenseStateRequired: 'State is required.',
   staffLicenseExpirationRequired: 'Expiration date is required.',
+  staffLicenseStatusRequired: 'Status is required.',
+  staffClinicalEligibilityTitle: 'Clinical eligibility',
+  staffClinicalEligibilitySubtitle:
+    'Shows whether this staff member can perform sensitive clinical '
+    + 'actions based on specialty capability and license.',
+  staffClinicalEligibilityEmpty:
+    'Eligibility is available after the staff member is saved.',
+  staffEligibilityAllowed: 'Allowed',
+  staffEligibilityNotAllowed: 'Not allowed',
+  staffEligibilityRequiresLicense: 'Requires license',
+  staffEligibilityLicenseExpired: 'License expired',
+  staffEligibilityLicenseInactive: 'License inactive',
   username: 'Username',
   adminTableColumnSettingsTitle: 'Configure columns',
   adminTableColumnSettingsHint:
@@ -1206,6 +1281,12 @@ export default {
   clinicalNoteTemplatePlaceholder: 'Placeholder',
   clinicalNoteTemplateAssessment: 'Assessment template',
   clinicalNoteTemplateRequired: 'Required',
+  clinicalNoteTemplateHideWhenEmpty: 'Hide when empty',
+  clinicalNoteTemplateStructuredFieldsHint:
+    'Define the structured fields the clinician completes in '
+    + 'Narrative during the encounter.',
+  clinicalNoteTemplateStructuredFieldLabel: 'Field label',
+  clinicalNoteTemplateAddStructuredField: 'Add field',
   clinicalNoteTemplateMoveUp: 'Move up',
   clinicalNoteTemplateMoveDown: 'Move down',
   clinicalNoteTemplatePreview: 'Preview',
@@ -1233,6 +1314,7 @@ export default {
     'Uses the linked screening/assessment result.',
   clinicalNotePreviewStructured:
     'Structured fields completed during the encounter.',
+  clinicalNotePreviewStructuredFields: 'Fields: {fields}',
   'clinicalNoteDataSource_ENCOUNTER_SUMMARY': 'Encounter summary',
   'clinicalNoteDataSource_REASON_FOR_VISIT': 'Reason for visit',
   'clinicalNoteDataSource_SERVICES': 'Services',
@@ -2389,6 +2471,10 @@ export default {
   appointmentClinicianOptional: 'Clinician',
   appointmentClinicianPlaceholder: 'Select clinician',
   appointmentClinicianRequired: 'Clinician is required.',
+  appointmentNoEligibleClinicians:
+    'No eligible clinicians are available for this service.',
+  appointmentClinicianNotEligible:
+    'The selected clinician is not eligible for one or more services.',
   appointmentSelectClinicianFirst:
     'Select a clinician to view availability.',
   appointmentClinicianHint:
@@ -4119,6 +4205,7 @@ export default {
   encounterReadySince: 'Ready since {time}',
   encounterReadySinceLabel: 'Ready since',
   encounterWaitingFor: 'Waiting for',
+  encounterWaitEpisodeLabel: 'Wait episode {current} of {total}',
   encounterResultsAvailable: 'Results available',
   encounterActivityTime:
     'Active clinical time: {active} min · Waiting: {waiting} min',

@@ -1,14 +1,21 @@
 <template>
   <q-input
+    ref="fieldRef"
     outlined
     v-model="model"
     lazy-rules="ondemand"
     hide-bottom-space
     class="login-text-input full-width"
+    :class="{
+      'login-text-input--float-on-value': floatLabelOnValue,
+    }"
     :key="inputKey"
+    :autofocus="autofocus"
+    :autocomplete="autocomplete || undefined"
     :data-testid="testId"
     :type="resolvedType"
-    :label="label || undefined"
+    :label="resolvedLabel"
+    :placeholder="resolvedPlaceholder"
     :rules="rules"
     :error="error"
     :error-message="errorMessage || undefined"
@@ -67,11 +74,53 @@ const props = defineProps({
     type: [Number, String],
     default: undefined,
   },
+  autofocus: {
+    type: Boolean,
+    default: false,
+  },
+  autocomplete: {
+    type: String,
+    default: '',
+  },
+  placeholder: {
+    type: String,
+    default: '',
+  },
+  floatLabelOnValue: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const model = defineModel({ type: String, default: '' })
 
+const fieldRef = ref(null)
 const showPlainPassword = ref(false)
+
+const hasValue = computed(() => String(model.value ?? '').length > 0)
+
+const resolvedLabel = computed(() => {
+  if (props.floatLabelOnValue && !hasValue.value) {
+    return undefined
+  }
+  return props.label || undefined
+})
+
+const resolvedPlaceholder = computed(() => {
+  if (props.placeholder) {
+    return props.placeholder
+  }
+  if (props.floatLabelOnValue && !hasValue.value) {
+    return props.label || undefined
+  }
+  return undefined
+})
+
+function focus() {
+  fieldRef.value?.focus()
+}
+
+defineExpose({ focus })
 
 const isPasswordField = computed(() => isPasswordInputType(props.type))
 
@@ -114,5 +163,12 @@ function onUpdate(value) {
 :deep(.q-field) {
   min-width: 120px;
   margin-bottom: 0;
+}
+
+.login-text-input--float-on-value {
+  :deep(.q-field__native::placeholder) {
+    color: $text-muted;
+    opacity: 1;
+  }
 }
 </style>
