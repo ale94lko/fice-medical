@@ -105,6 +105,7 @@ export function useActiveEncounterWatchdog() {
     return {
       encounterId,
       clientId: String(entry.clientId ?? encounter.clientId ?? '').trim(),
+      clientNumber: String(encounter.clientNumber ?? '').trim(),
       autoCompleteAtActiveMs,
       firedReminders: new Set(stored?.firedReminders ?? []),
       autoCompletePrompted: false,
@@ -142,7 +143,8 @@ export function useActiveEncounterWatchdog() {
   }
 
   function isWorkingOnOtherClient() {
-    if (!session?.clientId) {
+    const chartKey = String(session?.clientNumber ?? '').trim()
+    if (!chartKey) {
       return false
     }
     const routeClientId = resolveRouteClientId(route)
@@ -150,16 +152,18 @@ export function useActiveEncounterWatchdog() {
       return false
     }
 
-    return routeClientId !== session.clientId
+    return routeClientId.toUpperCase() !== chartKey.toUpperCase()
+      && routeClientId !== session.clientId
   }
 
   function goToEncounterClient() {
-    if (!session?.clientId) {
+    const id = String(session?.clientNumber ?? '').trim()
+    if (!id) {
       return
     }
     router.push({
       name: 'ClientOverview',
-      params: { id: session.clientId },
+      params: { id },
     })
   }
 

@@ -37,6 +37,12 @@ function indexClientListSource(list) {
     if (id != null && id !== '') {
       byId[String(id)] = client
     }
+    const code = String(
+      client?.clientNumber ?? client?.client_number ?? '',
+    ).trim()
+    if (code) {
+      byId[code] = client
+    }
   }
 
   return byId
@@ -258,6 +264,7 @@ export const useSiteStore = defineStore('site', {
       if (!client || typeof client !== 'object') {
         throw new Error('Client not found')
       }
+      this.putClientDetailInSource(client)
       this.clientListSourceById[id] = client
 
       return client
@@ -275,6 +282,12 @@ export const useSiteStore = defineStore('site', {
         return null
       }
       this.clientListSourceById[id] = client
+      const code = String(
+        client.clientNumber ?? client.client_number ?? '',
+      ).trim()
+      if (code) {
+        this.clientListSourceById[code] = client
+      }
 
       return client
     },

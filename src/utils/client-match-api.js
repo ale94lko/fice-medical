@@ -172,6 +172,9 @@ function normalizeMatchRow(raw) {
 
   return {
     patientId: idNum,
+    clientNumber: String(
+      raw.client_number ?? raw.clientNumber ?? '',
+    ).trim(),
     fullName: String(raw.full_name ?? raw.fullName ?? '').trim()
       || `Client #${idNum}`,
     dateOfBirth: String(raw.date_of_birth ?? raw.dateOfBirth ?? '').trim(),

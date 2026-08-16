@@ -83,8 +83,8 @@ export async function listSuperbills({
   if (q) {
     params.q = q
   }
-  const id = Number(clientId)
-  if (Number.isFinite(id) && id > 0) {
+  const id = String(clientId ?? '').trim()
+  if (id) {
     params['client_id'] = id
   }
   if (includeVoided) {

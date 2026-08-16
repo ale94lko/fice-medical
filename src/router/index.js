@@ -94,6 +94,19 @@ export default defineRouter(function(/* { store, ssrContext } */) {
       }
     }
 
+    if (authStore.token == null) {
+      authStore.restoreSession()
+    }
+
+    const holdOnLogin = to.path === '/login'
+      || to.path === '/reset-password'
+      || to.path.startsWith('/meet')
+      || to.path.startsWith('/consent-sign')
+    if (authStore.needsPostLoginSetup && !holdOnLogin) {
+      next('/login')
+      return
+    }
+
     if (!to.meta.requiresAuth) {
       next()
       return

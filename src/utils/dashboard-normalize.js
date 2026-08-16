@@ -301,7 +301,10 @@ export function resolveDashboardNavigation(widget, item = null) {
         appointmentId,
       }
     }
-    const clientId = trimString(row.client_id ?? row.clientId)
+    const clientId = trimString(
+      row.client_number
+        ?? row.clientNumber,
+    )
     if (clientId) {
       return {
         name: 'ClientOverview',

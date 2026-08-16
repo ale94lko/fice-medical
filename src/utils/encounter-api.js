@@ -155,8 +155,19 @@ export function getCachedActiveEncounter(clientId) {
   if (!key) {
     return null
   }
+  const direct = activeEncounterByClientId.get(key)
+  if (direct) {
+    return direct
+  }
+  const upper = key.toUpperCase()
+  for (const encounter of activeEncounterByClientId.values()) {
+    const code = clientKey(encounter?.clientNumber).toUpperCase()
+    if (code && code === upper) {
+      return encounter
+    }
+  }
 
-  return activeEncounterByClientId.get(key) ?? null
+  return null
 }
 
 export function getCachedActiveEncounterId(clientId) {

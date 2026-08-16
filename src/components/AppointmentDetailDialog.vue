@@ -363,6 +363,7 @@ import {
 import {
   copyTelehealthInviteUrl,
 } from 'src/utils/telehealth-appointment-ui.js'
+import { clientChartKey } from 'components/helpers.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -598,12 +599,16 @@ function onPrint() {
 }
 
 function onViewClient() {
-  const clientId = props.record?.clientId
-  if (!clientId) {
+  const record = props.record
+  const id = clientChartKey({
+    id: record?.clientId,
+    clientNumber: record?.clientNumber,
+  })
+  if (!id) {
     return
   }
 
   open.value = false
-  void router.push({ path: `/clients/${clientId}` })
+  void router.push({ path: `/clients/${id}` })
 }
 </script>

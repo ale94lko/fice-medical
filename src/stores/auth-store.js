@@ -87,6 +87,8 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: state => !!state.token,
     requiresPasswordChange: state => state.mustChangePassword,
+    needsPostLoginSetup: state =>
+      state.mustChangePassword || state.mustEnrollMfa,
     requiresCurrentPasswordForChange: state =>
       state.passwordChangeMode === passwordChangeModes.current,
     activeSubtenant(state) {
@@ -239,7 +241,6 @@ export const useAuthStore = defineStore('auth', {
     completePasswordChange() {
       this.mustChangePassword = false
       this.passwordChangeMode = null
-      this.mustEnrollMfa = false
       if (this.userInfo) {
         this.userInfo = {
           ...this.userInfo,
@@ -249,6 +250,7 @@ export const useAuthStore = defineStore('auth', {
       }
       writeStoredMustChangePassword(false)
       writeStoredPasswordChangeMode(null)
+      void this.enterAppIfReady()
     },
     completeMfaEnrollment() {
       this.mustEnrollMfa = false
@@ -261,6 +263,7 @@ export const useAuthStore = defineStore('auth', {
         writeStoredUserInfo(this.userInfo)
       }
       writeStoredMustEnrollMfa(false)
+      void this.enterAppIfReady()
     },
     requireMfaEnrollment() {
       this.mustEnrollMfa = true
@@ -272,6 +275,7 @@ export const useAuthStore = defineStore('auth', {
         writeStoredUserInfo(this.userInfo)
       }
       writeStoredMustEnrollMfa(true)
+      void this.holdOnLoginIfNeeded()
     },
     requirePasswordChange() {
       this.mustChangePassword = true
@@ -285,6 +289,31 @@ export const useAuthStore = defineStore('auth', {
       }
       writeStoredMustChangePassword(true)
       writeStoredPasswordChangeMode(passwordChangeModes.current)
+      void this.holdOnLoginIfNeeded()
+    },
+    holdOnLoginIfNeeded() {
+      if (!this.mustChangePassword && !this.mustEnrollMfa) {
+        return
+      }
+      const path = String(this.router?.currentRoute?.value?.path ?? '')
+      const stay = path === '/login'
+        || path === '/reset-password'
+        || path.startsWith('/meet')
+        || path.startsWith('/consent-sign')
+      if (!stay && this.router) {
+        void this.router.replace('/login').catch(() => {})
+      }
+    },
+    async enterAppIfReady() {
+      if (this.mustChangePassword || this.mustEnrollMfa) {
+        return false
+      }
+      const path = String(this.router?.currentRoute?.value?.path ?? '')
+      if (path === '/login' || path === '/reset-password') {
+        await this.router.replace('/dashboard').catch(() => {})
+      }
+
+      return true
     },
     async login(email, pass, t) {
       try {

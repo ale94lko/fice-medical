@@ -257,9 +257,7 @@ function onAccept(commitToRecord) {
   commitConfirmOpen.value = false
   const payload = {
     commitToRecord: commitToRecord === true,
-    editedResult: dirty.value
-      ? cloneAiResult(draftResult.value)
-      : undefined,
+    editedResult: cloneAiResult(draftResult.value),
   }
   if (props.suggestion?.feature === aiFeatures.icd10Suggest) {
     payload.acceptedPaths = [...selectedPaths.value]

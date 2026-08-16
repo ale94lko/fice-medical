@@ -81,7 +81,7 @@
           :medications="workspace.medications"
           :care-plans="workspace.carePlans"
           :labs="workspace.labs"
-          :client-id="workspace.encounter.clientId"
+          :client-id="chartClientKey"
           :encounter-id="workspace.encounter.id"
           :encounter-open="encounterIsOpen"
           :can-add-vitals="canAddVitalsHere"
@@ -106,7 +106,7 @@
         <EncounterWorkspaceFollowUp
           v-else
           :sections="workspace.sections"
-          :client-id="workspace.encounter.clientId"
+          :client-id="chartClientKey"
           @changed="onClinicalDataChanged"
         />
       </div>
@@ -176,8 +176,8 @@
     />
 
     <AiAssistantFab
-      :visible="Boolean(workspace?.encounter?.clientId)"
-      :client-id="workspace?.encounter?.clientId"
+      :visible="Boolean(chartClientKey)"
+      :client-id="chartClientKey"
       :encounter-id="workspace?.encounter?.id"
       @open-chart-section="onOpenChartSection"
     />
@@ -234,6 +234,7 @@ import EncounterWorkspaceVisit from
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { clientChartKey } from 'components/helpers.js'
 import {
   cancelEncounter,
   completeEncounter,
@@ -292,6 +293,9 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const actionBusy = ref(false)
 const workspace = ref(null)
+const chartClientKey = computed(() =>
+  clientChartKey(workspace.value?.encounter),
+)
 const loadError = ref('')
 const activeTab = ref(encounterWorkspaceTabs.overview)
 const clinicalSubTab = ref(encounterClinicalSubTabs.vitals)
@@ -552,26 +556,26 @@ async function loadWorkspace() {
 }
 
 function goToPatientChart() {
-  const clientId = workspace.value?.encounter?.clientId
-  if (clientId == null) {
+  const id = clientChartKey(workspace.value?.encounter)
+  if (!id) {
     return
   }
   router.push({
     name: 'ClientOverview',
-    params: { id: String(clientId) },
+    params: { id },
   })
 }
 
 function goToModule(key) {
-  const clientId = workspace.value?.encounter?.clientId
+  const id = clientChartKey(workspace.value?.encounter)
   const encounter = workspace.value?.encounter?.id
-  if (clientId == null) {
+  if (!id) {
     return
   }
   const mapped = moduleRouteMap[key] || { tab: addClientTabKeys.basic }
   router.push({
     name: 'EditClient',
-    params: { id: String(clientId) },
+    params: { id },
     query: {
       ...(mapped.tab ? { tab: mapped.tab } : {}),
       ...(mapped.subTab ? { subTab: mapped.subTab } : {}),
@@ -584,14 +588,14 @@ function onOpenChartSection(section) {
   if (!section?.tab) {
     return
   }
-  const clientId = workspace.value?.encounter?.clientId
+  const id = clientChartKey(workspace.value?.encounter)
   const encounter = workspace.value?.encounter?.id
-  if (clientId == null) {
+  if (!id) {
     return
   }
   router.push({
     name: 'EditClient',
-    params: { id: String(clientId) },
+    params: { id },
     query: {
       tab: section.tab,
       ...(section.subTab ? { subTab: section.subTab } : {}),

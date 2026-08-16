@@ -39,8 +39,8 @@ export function filterAcceptedGuardianConsents(consents) {
 }
 
 export async function listAcceptedGuardianConsents(clientId) {
-  const id = Number(clientId)
-  if (!Number.isFinite(id) || id <= 0) {
+  const id = String(clientId ?? '').trim()
+  if (!id) {
     return []
   }
   const consents = await listClientConsents(id)
@@ -52,8 +52,8 @@ export async function revokeAcceptedGuardianConsents(
   clientId,
   reason,
 ) {
-  const id = Number(clientId)
-  if (!Number.isFinite(id) || id <= 0) {
+  const id = String(clientId ?? '').trim()
+  if (!id) {
     return 0
   }
   const targets = await listAcceptedGuardianConsents(id)

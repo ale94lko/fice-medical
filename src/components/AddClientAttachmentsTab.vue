@@ -146,6 +146,7 @@ import {
 } from 'components/constants.js'
 import { clientAttachmentsTestIds as tid } from 'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { hasClientChartKey } from 'components/helpers.js'
 import {
   CLIENT_ATTACHMENT_FILTER_CATEGORIES,
   CLIENT_ATTACHMENT_FILTER_ENTITY_TYPES,
@@ -205,11 +206,9 @@ const tablePagination = ref({
   descending: false,
 })
 
-const hasClientId = computed(() => {
-  const id = Number(props.clientId)
-
-  return Number.isFinite(id) && id > 0
-})
+const hasClientId = computed(() =>
+  hasClientChartKey(props.clientId),
+)
 
 const categoryFilterOptions = computed(() =>
   CLIENT_ATTACHMENT_FILTER_CATEGORIES.map(value => {
@@ -366,7 +365,6 @@ async function onUploadSubmit(payload) {
     await uploadStoredFile(payload.file, payload.category, {
       clientId: props.clientId,
       entityType: storedFileEntityTypes.client,
-      entityId: Number(props.clientId),
     })
     uploadOpen.value = false
     $q.notify({

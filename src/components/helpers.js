@@ -385,6 +385,18 @@ export function formatClientListName(
   )
 }
 
+export function clientChartKey(client) {
+  return String(
+    client?.clientNumber
+      ?? client?.client_number
+      ?? '',
+  ).trim()
+}
+
+export function hasClientChartKey(value) {
+  return String(value ?? '').trim() !== ''
+}
+
 export function buildClientCreateBody(form) {
   return buildClientRegisterBody(form)
 }

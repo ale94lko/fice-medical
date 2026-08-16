@@ -621,6 +621,7 @@ import { useSuperbillPermissions } from
 import { superbillDetailTestIds as tid } from
   'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { clientChartKey } from 'components/helpers.js'
 import {
   addSuperbillNote,
   fetchSuperbillById,
@@ -1005,25 +1006,25 @@ function goToEncounter(tab) {
 }
 
 function goToClient() {
-  const id = detail.value?.clientId
-  if (id == null) {
+  const id = clientChartKey(detail.value?.client)
+  if (!id) {
     return
   }
   void router.push({
     name: 'ClientOverview',
-    params: { id: String(id) },
+    params: { id },
     query: billingReturnQuery(),
   })
 }
 
 function goToClientInsurance() {
-  const id = detail.value?.clientId
-  if (id == null) {
+  const id = clientChartKey(detail.value?.client)
+  if (!id) {
     return
   }
   void router.push({
     name: 'EditClient',
-    params: { id: String(id) },
+    params: { id },
     query: billingReturnQuery({ tab: 'insurance' }),
   })
 }

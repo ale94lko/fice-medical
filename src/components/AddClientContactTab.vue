@@ -198,6 +198,7 @@ import {
 import { useConsentPermissions } from
   'src/composables/useConsentPermissions.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { hasClientChartKey } from 'components/helpers.js'
 import {
   addClientTestIds as tid,
 } from 'src/test-ids/index.js'
@@ -253,11 +254,9 @@ const contact = computed({
   set: val => emit('update:modelValue', val),
 })
 
-const hasClientId = computed(() => {
-  const id = Number(props.clientId)
-
-  return Number.isFinite(id) && id > 0
-})
+const hasClientId = computed(() =>
+  hasClientChartKey(props.clientId),
+)
 
 const activeOtherIndex = computed(() =>
   (contact.value.otherContacts ?? []).findIndex(

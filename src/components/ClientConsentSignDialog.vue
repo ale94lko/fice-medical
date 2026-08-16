@@ -276,6 +276,7 @@ import { resolveConsentSecureLinkEmail } from
 import { resolveGuardianSignerFromContact } from
   'src/utils/consent-signer-contact.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { hasClientChartKey } from 'components/helpers.js'
 import { triggerBlobDownload } from 'src/utils/stored-file-api.js'
 import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
@@ -412,11 +413,10 @@ const canSubmitInPerson = computed(() => {
 })
 
 const canPrintPaper = computed(() => {
-  const clientId = Number(props.clientId)
+  const clientId = String(props.clientId ?? '').trim()
   const consentId = Number(props.consent?.id)
 
-  return Number.isFinite(clientId)
-    && clientId > 0
+  return hasClientChartKey(clientId)
     && Number.isFinite(consentId)
     && consentId > 0
 })

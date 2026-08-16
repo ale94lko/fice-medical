@@ -194,6 +194,7 @@ import { hasPermission } from 'src/utils/auth-permissions.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { formatPersonDisplayNameFromRecord } from
   'src/utils/person-display-name.js'
+import { clientChartKey } from 'components/helpers.js'
 import { useActiveEncounterWatchdog } from
   'src/composables/useActiveEncounterWatchdog.js'
 import { useToolbarOpenEncounterSync } from
@@ -393,16 +394,18 @@ const clientDisplayName = computed(() => {
   if (fromEncounter) {
     return fromEncounter
   }
+  const chartKey = clientChartKey(activeEncounter.value)
   const clientId = String(
     activeEntry.value?.clientId
     ?? activeEncounter.value?.clientId
     ?? '',
   ).trim()
-  if (!clientId) {
+  if (!chartKey && !clientId) {
     return t('activeEncounterToolbarClientFallback')
   }
   const fromStore = nameFromClientRecord(
-    siteStore.clientListSourceById[clientId],
+    siteStore.clientListSourceById[chartKey]
+    || siteStore.clientListSourceById[clientId],
   )
   if (fromStore) {
     return fromStore
@@ -441,15 +444,11 @@ const encounterMetaLabel = computed(() => {
 })
 
 async function onMenuBeforeShow() {
-  const clientId = String(
-    activeEntry.value?.clientId
-    ?? activeEncounter.value?.clientId
-    ?? '',
-  ).trim()
-  if (!clientId || !canViewClient.value) {
+  const chartKey = clientChartKey(activeEncounter.value)
+  if (!chartKey || !canViewClient.value) {
     return
   }
-  if (nameFromClientRecord(siteStore.clientListSourceById[clientId])) {
+  if (nameFromClientRecord(siteStore.clientListSourceById[chartKey])) {
     return
   }
   if (String(activeEncounter.value?.clientDisplayName ?? '').trim()) {
@@ -457,7 +456,7 @@ async function onMenuBeforeShow() {
   }
   loadingClientName.value = true
   try {
-    await siteStore.fetchClientById(clientId)
+    await siteStore.fetchClientById(chartKey)
   } catch (error) {
     if (isAuthSessionEndUIError(error)) {
       return

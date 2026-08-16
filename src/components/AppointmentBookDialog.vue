@@ -376,6 +376,7 @@ import {
   usDateStringToLocalDayKey,
   usDateStringToUtcStartIso,
 } from 'src/utils/appointment-datetime.js'
+import { clientChartKey } from 'components/helpers.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 import {
   CLIENT_LIST_SEARCH_MIN_LENGTH,
@@ -671,7 +672,7 @@ function mapRowToClientOption(row) {
 
   return {
     label: buildClientOptionLabel(row),
-    value: row.id,
+    value: clientChartKey(row) || row.id,
     name: name || clientNumber || String(row?.id ?? ''),
     clientNumber,
     photoFileId: row?.[ck.photoFileId] ?? null,
@@ -1265,7 +1266,6 @@ function buildBookPayload() {
     place_of_service_id: draft.value.placeOfServiceId,
     // Backend creates meet + invite when true (no front session POST).
     telemedicine: selectedPlaceIsTelemedicine.value,
-    client_id: Number(resolvedClientId.value),
     notes: draft.value.notes || null,
     clinician_id: selectedWindow.value?.clinicianId
       ?? draft.value.clinicianId
@@ -1273,6 +1273,13 @@ function buildBookPayload() {
     supervisor_id: draft.value.supervisorId ?? null,
     repeat_appointment: Boolean(draft.value.repeatAppointment),
     recurrence: buildRecurrencePayload(),
+  }
+
+  const clientKey = String(resolvedClientId.value ?? '').trim()
+  if (/^\d+$/.test(clientKey)) {
+    payload.client_id = Number(clientKey)
+  } else if (clientKey) {
+    payload.client_number = clientKey
   }
 
   if (allowOverScheduleBlocks.value) {

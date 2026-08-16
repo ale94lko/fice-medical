@@ -138,6 +138,7 @@ import { useConsentPermissions } from
   'src/composables/useConsentPermissions.js'
 import { clientConsentsTestIds as tid } from 'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { hasClientChartKey } from 'components/helpers.js'
 import {
   assignClientConsent,
   cancelClientConsent,
@@ -197,11 +198,9 @@ const activeConsent = ref(null)
 const confirmOpen = ref(false)
 const confirmAction = ref(null)
 
-const hasClientId = computed(() => {
-  const id = Number(props.clientId)
-
-  return Number.isFinite(id) && id > 0
-})
+const hasClientId = computed(() =>
+  hasClientChartKey(props.clientId),
+)
 
 const confirmTitle = computed(() => {
   if (confirmAction.value?.type === 'decline') {

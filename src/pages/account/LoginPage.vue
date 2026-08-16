@@ -173,7 +173,7 @@ async function handlePassword() {
       return
     }
     if (result) {
-      await router.push('/dashboard')
+      await authStore.enterAppIfReady()
     }
   } catch (error) {
     loginError.value = error.message || t('networkError')
@@ -192,7 +192,7 @@ async function handleMfa() {
       t,
     )
     if (ok) {
-      await router.push('/dashboard')
+      await authStore.enterAppIfReady()
     }
   } catch (error) {
     loginError.value = error.message || t('networkError')

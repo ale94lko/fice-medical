@@ -99,6 +99,12 @@ export function normalizeEncounter(raw) {
     clientId: parseOptionalNumber(
       raw.client_id ?? raw.clientId ?? nestedClient?.id,
     ),
+    clientNumber: trim(
+      raw.client_number
+        ?? raw.clientNumber
+        ?? nestedClient?.client_number
+        ?? nestedClient?.clientNumber,
+    ),
     clientDisplayName,
     clinicianId: parseOptionalNumber(
       raw.clinician_id ?? raw.clinicianId,

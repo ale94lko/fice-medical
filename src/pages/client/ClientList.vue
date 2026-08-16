@@ -353,6 +353,7 @@ import {
 } from 'src/utils/client-list-allergy-severity.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { clientChartKey } from 'components/helpers.js'
 
 const {
   canAddClient,
@@ -785,21 +786,21 @@ function viewRow(row) {
 }
 
 function openClientOverview(row) {
-  const id = row?.id
-  if (id == null || id === '') {
+  const id = clientChartKey(row)
+  if (!id) {
     return
   }
-  router.push({ name: 'ClientOverview', params: { id: String(id) } })
+  router.push({ name: 'ClientOverview', params: { id } })
 }
 
 function openClientOverviewClassic(row) {
-  const id = row?.id
-  if (id == null || id === '') {
+  const id = clientChartKey(row)
+  if (!id) {
     return
   }
   router.push({
     name: 'ClientOverviewClassic',
-    params: { id: String(id) },
+    params: { id },
   })
 }
 
@@ -880,11 +881,11 @@ const pageActions = computed(() => [
 ])
 
 function editRow(row) {
-  const id = row?.id
-  if (id == null || id === '') {
+  const id = clientChartKey(row)
+  if (!id) {
     return
   }
-  router.push({ name: 'EditClient', params: { id: String(id) } })
+  router.push({ name: 'EditClient', params: { id } })
 }
 
 </script>

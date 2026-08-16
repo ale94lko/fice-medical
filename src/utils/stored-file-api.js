@@ -122,9 +122,9 @@ export async function listStoredFiles(params = {}) {
     // eslint-disable-next-line camelcase -- query param for API
     queryParams.entity_id = Number(params.entityId)
   }
-  if (params.clientId != null) {
+  if (params.clientId != null && params.clientId !== '') {
     // eslint-disable-next-line camelcase -- query param for API
-    queryParams.client_id = Number(params.clientId)
+    queryParams.client_id = String(params.clientId)
   }
   if (params.page != null) {
     queryParams.page = Number(params.page)
@@ -152,8 +152,8 @@ export async function listStoredFiles(params = {}) {
  * GET /client/v1/{clientId}/files
  */
 export async function listClientFiles(clientId, params = {}) {
-  const id = Number(clientId)
-  if (!Number.isFinite(id) || id <= 0) {
+  const id = String(clientId ?? '').trim()
+  if (!id) {
     throw new Error('Invalid client id')
   }
 

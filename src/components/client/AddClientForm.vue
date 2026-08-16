@@ -1129,6 +1129,7 @@ import {
   normalizeSsnDigits,
 } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { clientChartKey } from 'components/helpers.js'
 import { mapPendingFollowUpFromDraft } from 'src/utils/client-follow-ups.js'
 import {
   followUpExistsForReferral,
@@ -2270,6 +2271,10 @@ function duplicateSaveGateActive() {
   )
 }
 
+function matchChartKey(match) {
+  return String(match?.clientNumber ?? '').trim()
+}
+
 function emitNavigateExistingClient(clientId) {
   emit('navigate-existing', { clientId: String(clientId) })
 }
@@ -2286,7 +2291,7 @@ async function onDuplicateReview(match) {
   duplicateReviewPreview.value = null
   try {
     duplicateReviewPreview.value = await siteStore.buildEditFormForClient(
-      String(match.patientId),
+      matchChartKey(match),
       getClientMapOptions(),
     )
   } catch (error) {
@@ -2321,18 +2326,18 @@ function onDuplicateReviewCancel() {
 }
 
 function onDuplicateOpenExistingRequest() {
-  const rawId = duplicateReviewMatch.value?.patientId
+  const chartKey = matchChartKey(duplicateReviewMatch.value)
   duplicateReviewOpen.value = false
-  if (rawId == null || rawId === '') {
+  if (!chartKey) {
     return
   }
   if (hasAddClientDataBeyondFirstLastName(form.value)) {
-    duplicatePendingNavigateClientId.value = rawId
+    duplicatePendingNavigateClientId.value = chartKey
     duplicateNavigateConfirmOpen.value = true
 
     return
   }
-  emitNavigateExistingClient(rawId)
+  emitNavigateExistingClient(chartKey)
 }
 
 function onDuplicateNavigateConfirm() {
@@ -2428,7 +2433,8 @@ async function executeSave() {
       applyMappedClientSections(mapped)
     } else {
       const created = await siteStore.createClient(form.value, t)
-      savedClientId = created?.id ?? created?.client_id ?? savedClientId
+      const createdNumber = clientChartKey(created)
+      savedClientId = createdNumber || savedClientId
       if (created && typeof created === 'object') {
         const mappedCreate = siteStore.buildEditFormFromClient(
           created,
@@ -2436,7 +2442,7 @@ async function executeSave() {
         )
         applyMappedClientSections(mappedCreate)
       }
-      await createIntakeReferralAfterClientSave(savedClientId)
+      await createIntakeReferralAfterClientSave(createdNumber)
     }
     $q.notify({
       type: quasarNotifyTypes.positive,

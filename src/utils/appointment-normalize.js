@@ -398,6 +398,7 @@ export function normalizeAppointment(raw) {
     ),
     status: trim(row.status).toUpperCase(),
     clientId: parseOptionalNumber(row.client_id ?? row.clientId),
+    clientNumber: trim(row.client_number ?? row.clientNumber),
     clientDisplayName: trim(
       row.client_display_name
       ?? row.clientDisplayName

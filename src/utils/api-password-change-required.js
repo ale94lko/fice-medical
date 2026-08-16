@@ -65,33 +65,13 @@ function applyPasswordChangeRequiredState() {
   return true
 }
 
-async function ensureAuthenticatedShellForPasswordChange() {
-  try {
-    const pinia = getActivePinia()
-    if (!pinia) {
-      return
-    }
-    const authStore = useAuthStore(pinia)
-    const router = authStore.router
-    const path = String(router?.currentRoute?.value?.path ?? '')
-    if (!router || path === '/login' || path === '/reset-password') {
-      await router?.replace('/dashboard').catch(() => {})
-    }
-  } catch {
-    // Router may not be mounted yet
-  }
-}
-
 export async function applyPasswordChangeRequiredFromApiError(error) {
   if (!isPasswordChangeRequiredError(error)) {
     return false
   }
 
   markErrorAsPasswordChangeRequired(error)
-  const applied = applyPasswordChangeRequiredState()
-  if (applied) {
-    await ensureAuthenticatedShellForPasswordChange()
-  }
+  applyPasswordChangeRequiredState()
 
   return true
 }
@@ -106,10 +86,7 @@ export async function applyPasswordChangeRequiredFromApiResponse(response) {
     config: response?.config,
   }
   markErrorAsPasswordChangeRequired(error)
-  const applied = applyPasswordChangeRequiredState()
-  if (applied) {
-    await ensureAuthenticatedShellForPasswordChange()
-  }
+  applyPasswordChangeRequiredState()
 
   return true
 }
