@@ -1,1 +1,0 @@
-import{Cp as e,Kf as t,Mt as n,Zf as r,_p as i,pp as a}from"./index-DXrlQCZL.js";import{r as o,t as s}from"./QLayout-CN5SLL4v.js";var c={};function l(n,c){let l=i(`router-view`);return a(),t(s,{view:`hHh Lpr lff`},{default:e(()=>[r(o,null,{default:e(()=>[r(l)]),_:1})]),_:1})}var u=n(c,[[`render`,l]]);export{u as default};

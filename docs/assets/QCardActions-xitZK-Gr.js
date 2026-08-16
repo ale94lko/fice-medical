@@ -1,1 +1,0 @@
-import{Af as e,Gd as t,Wd as n,Wf as r,ef as i,ep as a}from"./index-DXrlQCZL.js";var o=e({name:`QCardActions`,props:{...n,vertical:Boolean},setup(e,{slots:n}){let o=t(e),s=r(()=>`q-card__actions ${o.value} q-card__actions--${e.vertical===!0?`vert column`:`horiz row`}`);return()=>a(`div`,{class:s.value},i(n.default))}});export{o as t};
