@@ -1,27 +1,32 @@
 <template>
-  <div class="tabs-row encounter-workspace-tabs-row">
-    <nav
-      class="client-overview-alt-tabs encounter-workspace-tabs"
-      role="tablist"
-      :data-testid="tid.tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab.key"
-        type="button"
-        role="tab"
-        class="client-overview-alt-tabs__tab"
-        :class="{
-          'client-overview-alt-tabs__tab--active':
-            modelValue === tab.key,
-        }"
-        :aria-selected="modelValue === tab.key"
-        :data-testid="tid.tab(tab.key)"
-        @click="emit('update:modelValue', tab.key)">
-        <q-icon :name="tab.icon" size="18px" />
-        <span>{{ tab.label }}</span>
-      </button>
-    </nav>
-  </div>
+  <q-tabs
+    :model-value="modelValue"
+    dense
+    no-caps
+    outside-arrows
+    mobile-arrows
+    class="add-client-tabs"
+    active-color="white"
+    indicator-color="transparent"
+    align="left"
+    :data-testid="tid.tabs"
+    @update:model-value="emit('update:modelValue', $event)">
+    <q-tab
+      v-for="tab in tabs"
+      :key="tab.key"
+      :name="tab.key"
+      :data-testid="tid.tab(tab.key)"
+      :aria-selected="tab.key === modelValue">
+      <span class="label row items-center no-wrap">
+        <q-icon
+          :name="tab.icon"
+          size="18px"
+          class="icon"
+        />
+        <span class="text">{{ tab.label }}</span>
+      </span>
+    </q-tab>
+  </q-tabs>
 </template>
 
 <script setup>

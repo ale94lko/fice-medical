@@ -41,10 +41,14 @@
         @view-allergies="goToModule('allergies')"
       />
 
-      <EncounterWorkspaceTabs
-        v-model="activeTab"
-        :show-narrative="showNarrativeTab"
-      />
+      <div class="chrome">
+        <div class="tabs-row">
+          <EncounterWorkspaceTabs
+            v-model="activeTab"
+            :show-narrative="showNarrativeTab"
+          />
+        </div>
+      </div>
 
       <div class="encounter-workspace-page__body">
         <EncounterWorkspaceOverview

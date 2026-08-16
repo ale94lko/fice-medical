@@ -286,15 +286,14 @@
   font-size: 0.875rem;
 }
 
-.encounter-workspace-tabs-row.tabs-row {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-  background: transparent;
-}
+.encounter-workspace-page {
+  .chrome {
+    background: $surface;
+  }
 
-.encounter-workspace-tabs {
-  width: 100%;
+  .tabs-row {
+    background: $surface;
+  }
 }
 
 .encounter-workspace-card {
