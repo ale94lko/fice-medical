@@ -25,6 +25,15 @@ export function useSuperbillPermissions() {
       permissionNames.superbillEditBillingFields,
     ),
   )
+  const canHoldSuperbill = computed(() =>
+    hasPermission(permissions.value, permissionNames.superbillHold),
+  )
+  const canReleaseHold = computed(() =>
+    hasPermission(
+      permissions.value,
+      permissionNames.superbillReleaseHold,
+    ),
+  )
 
   return {
     canViewSuperbills,
@@ -32,5 +41,7 @@ export function useSuperbillPermissions() {
     canReopenSuperbill,
     canVoidSuperbill,
     canEditBillingFields,
+    canHoldSuperbill,
+    canReleaseHold,
   }
 }

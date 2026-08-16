@@ -1,15 +1,15 @@
 <template>
   <q-page
     class="admin-page admin-list-page superbill-list-page"
-    :data-testid="superbillListTestIds.page">
+    :data-testid="claimListTestIds.page">
     <AppLoadingOverlay
       scope="content"
       :showing="loading"
     />
 
     <AdminListPageHeader
-      :title="t('billingWorkspaceTitle')"
-      :subtitle="t('billingWorkspaceSubtitle')">
+      :title="t('claimWorkspaceTitle')"
+      :subtitle="t('claimWorkspaceSubtitle')">
       <template #actions>
         <q-btn
           no-caps
@@ -18,14 +18,14 @@
           class="app-btn-outline"
           icon="sync"
           :disable="loading"
-          :data-testid="superbillListTestIds.refresh"
-          :label="t('billingQueueRefresh')"
+          :data-testid="claimListTestIds.refresh"
+          :label="t('claimQueueRefresh')"
           @click="reloadCurrentPage"
         />
       </template>
     </AdminListPageHeader>
 
-    <BillingQueueSummaryCards
+    <ClaimQueueSummaryCards
       :active="queueTab"
       :counts="counts"
       @select="onQueueTabChange"
@@ -38,10 +38,10 @@
         clearable
         hide-bottom-space
         class="billing-queue-filters__search"
-        :data-testid="superbillListTestIds.search"
+        :data-testid="claimListTestIds.search"
         :disable="loading"
-        :placeholder="t('billingQueueSearchPlaceholder')"
-        :aria-label="t('billingQueueSearchPlaceholder')"
+        :placeholder="t('claimQueueSearchPlaceholder')"
+        :aria-label="t('claimQueueSearchPlaceholder')"
         @update:model-value="onSearchInput"
         @clear="resetSearch">
         <template #prepend>
@@ -56,7 +56,7 @@
         outlined
         hide-bottom-space
         :disable="loading"
-        :test-id="superbillListTestIds.dosFilter"
+        :test-id="claimListTestIds.dosFilter"
         @update:model-value="onDosPresetChange"
       />
       <q-input
@@ -66,7 +66,7 @@
         outlined
         hide-bottom-space
         :disable="loading"
-        :aria-label="t('billingQueueDosFrom')"
+        :aria-label="t('claimQueueDosFrom')"
         @update:model-value="onCustomFromChange"
       />
       <q-input
@@ -76,7 +76,7 @@
         outlined
         hide-bottom-space
         :disable="loading"
-        :aria-label="t('billingQueueDosTo')"
+        :aria-label="t('claimQueueDosTo')"
         @update:model-value="onCustomToChange"
       />
       <FormSelect
@@ -87,7 +87,7 @@
         outlined
         hide-bottom-space
         :disable="loading"
-        :test-id="superbillListTestIds.providerFilter"
+        :test-id="claimListTestIds.providerFilter"
         @update:model-value="onProviderChange"
       />
       <FormSelect
@@ -98,29 +98,18 @@
         outlined
         hide-bottom-space
         :disable="loading"
-        :test-id="superbillListTestIds.payerFilter"
+        :test-id="claimListTestIds.payerFilter"
         @update:model-value="onPayerChange"
-      />
-      <FormSelect
-        :model-value="locationId"
-        :options="locationOptions"
-        emit-value
-        map-options
-        outlined
-        hide-bottom-space
-        :disable="loading"
-        :test-id="superbillListTestIds.locationFilter"
-        @update:model-value="onLocationChange"
       />
       <q-input
         :model-value="serviceQuery"
         outlined
         clearable
         hide-bottom-space
-        :data-testid="superbillListTestIds.serviceFilter"
+        :data-testid="claimListTestIds.serviceFilter"
         :disable="loading"
-        :placeholder="t('billingQueueServicePlaceholder')"
-        :aria-label="t('billingQueueServicePlaceholder')"
+        :placeholder="t('claimQueueServicePlaceholder')"
+        :aria-label="t('claimQueueServicePlaceholder')"
         @update:model-value="onServiceInput"
       />
       <FormSelect
@@ -131,14 +120,14 @@
         outlined
         hide-bottom-space
         :disable="loading"
-        :test-id="superbillListTestIds.sortFilter"
+        :test-id="claimListTestIds.sortFilter"
         @update:model-value="onSortChange"
       />
       <FormToggle
         v-if="queueTab === allTab"
         :model-value="includeVoided"
-        :label="t('billingQueueShowVoided')"
-        :test-id="superbillListTestIds.includeVoided"
+        :label="t('claimQueueShowVoided')"
+        :test-id="claimListTestIds.includeVoided"
         @update:model-value="onIncludeVoidedChange"
       />
     </div>
@@ -148,7 +137,7 @@
       :show-column-settings="false">
       <template #toolbar>
         <span class="text-body2 text-grey-7">
-          {{ t('billingQueueItemCount', {
+          {{ t('claimQueueItemCount', {
             count: tablePagination.rowsNumber,
           }) }}
         </span>
@@ -157,7 +146,7 @@
         class="table admin-data-table"
         flat
         row-key="id"
-        :row-class="workQueueRowClass"
+        :row-class="claimWorkQueueRowClass"
         v-model:pagination="tablePagination"
         :rows-per-page-options="[10, 20, 50]"
         :grid="showGrid"
@@ -169,12 +158,12 @@
             <button
               type="button"
               class="admin-data-table__link"
-              :data-testid="superbillListTestIds.rowView(scope.row.id)"
+              :data-testid="claimListTestIds.rowView(scope.row.id)"
               @click="openRow(scope.row)">
-              {{ scope.row.superbillNumber || '—' }}
+              {{ scope.row.claimNumber || '—' }}
             </button>
             <div class="text-caption text-grey-7">
-              {{ scope.row.encounterNumber || '—' }}
+              {{ scope.row.superbillNumber || '—' }}
             </div>
           </q-td>
         </template>
@@ -182,19 +171,6 @@
           <q-td :props="scope">
             <div class="text-weight-medium">
               {{ scope.row.clientName || '—' }}
-            </div>
-            <div class="text-caption">
-              <span
-                v-if="scope.row.clientNumber"
-                class="billing-queue-client-id">
-                {{ scope.row.clientNumber }}
-              </span>
-            </div>
-            <div
-              v-if="scope.row.clientDobDisplay"
-              class="text-caption text-grey-7">
-              {{ t('superbillDob') }}
-              {{ scope.row.clientDobDisplay }}
             </div>
           </q-td>
         </template>
@@ -212,25 +188,6 @@
             </div>
             <div class="text-caption text-grey-7">
               {{ serviceCell(scope.row).name }}
-            </div>
-            <span
-              v-if="(scope.row.services || []).length"
-              class="billing-queue-service-badge">
-              {{ t('billingQueueServiceCount', {
-                count: scope.row.services.length,
-              }) }}
-            </span>
-          </q-td>
-        </template>
-        <template #body-cell-provider="scope">
-          <q-td :props="scope">
-            <div class="text-weight-medium">
-              {{ scope.row.renderingProviderName || '—' }}
-            </div>
-            <div
-              v-if="scope.row.renderingProviderNpi"
-              class="text-caption text-grey-7">
-              NPI {{ scope.row.renderingProviderNpi }}
             </div>
           </q-td>
         </template>
@@ -253,8 +210,8 @@
             dense
             color="primary"
             class="app-btn-outline"
-            :data-testid="superbillListTestIds.rowView(row.id)"
-            :label="rowActionLabel(row)"
+            :data-testid="claimListTestIds.rowView(row.id)"
+            :label="t('claimQueueView')"
             @click="openRow(row)"
           />
         </template>
@@ -283,9 +240,8 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
-  billingResponsibilityValues,
+  claimStatuses,
   quasarNotifyTypes,
-  superbillStatuses,
 } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageHeader from
@@ -293,65 +249,61 @@ import AdminListPageHeader from
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
-import BillingQueueSummaryCards from
-  'components/billing/BillingQueueSummaryCards.vue'
+import ClaimQueueSummaryCards from
+  'components/claims/ClaimQueueSummaryCards.vue'
 import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
-import { superbillListTestIds } from 'src/test-ids/index.js'
+import { claimListTestIds } from 'src/test-ids/index.js'
 import {
-  billingDosPresets,
-  billingQueuePollMs,
-  billingQueueTabs,
+  claimDosPresets,
+  claimQueueEmptyKey,
+  claimQueuePollMs,
+  claimQueueStatusParam,
+  claimQueueTabs,
+  claimWorkQueueRowClass,
   compactServices,
   dosRangeForPreset,
-  queueEmptyKey,
-  queueStatusParam,
-  workQueueRowClass,
-} from 'src/utils/billing-work-queue.js'
+} from 'src/utils/claim-work-queue.js'
 import {
-  listBillingWorkQueue,
-  superbillApiErrorMessage,
-} from 'src/utils/superbill-api.js'
+  claimApiErrorMessage,
+  listClaimWorkQueue,
+} from 'src/utils/claim-api.js'
 
 const { t } = useI18n()
 const $q = useQuasar()
 const router = useRouter()
 const { showGrid } = useAdminTableMobileGrid()
 
-const allTab = billingQueueTabs.all
-const customDos = billingDosPresets.custom
+const allTab = claimQueueTabs.all
+const customDos = claimDosPresets.custom
 const loading = ref(false)
 const rows = ref([])
 const searchQuery = ref('')
 const serviceQuery = ref('')
-const queueTab = ref(billingQueueTabs.needsAttention)
-const dosPreset = ref(billingDosPresets.last30)
+const queueTab = ref(claimQueueTabs.needsAttention)
+const dosPreset = ref(claimDosPresets.last30)
 const customFrom = ref('')
 const customTo = ref('')
 const providerId = ref(null)
-const locationId = ref(null)
 const payer = ref(null)
 const includeVoided = ref(false)
 const sortKey = ref('dateOfService:desc')
 const counts = ref({
   needsAttention: 0,
-  readyForReview: 0,
-  onHold: 0,
-  reviewed: 0,
+  ready: 0,
   all: 0,
 })
 const payers = ref([])
-const locations = ref([])
 const providers = ref([])
 let searchDebounceTimer = null
 let pollTimer = null
 
 const tablePagination = ref({
-  sortBy: 'dateOfService',
+  sortBy: 'dateOfServiceFrom',
   descending: true,
   page: 1,
   rowsPerPage: 10,
@@ -359,61 +311,49 @@ const tablePagination = ref({
 })
 
 const dosPresetOptions = computed(() => [
-  { label: t('billingQueueDosAll'), value: billingDosPresets.all },
-  { label: t('billingQueueDosToday'), value: billingDosPresets.today },
-  { label: t('billingQueueDosLast7'), value: billingDosPresets.last7 },
-  { label: t('billingQueueDosLast30'), value: billingDosPresets.last30 },
-  { label: t('billingQueueDosCustom'), value: billingDosPresets.custom },
+  { label: t('claimQueueDosAll'), value: claimDosPresets.all },
+  { label: t('claimQueueDosToday'), value: claimDosPresets.today },
+  { label: t('claimQueueDosLast7'), value: claimDosPresets.last7 },
+  { label: t('claimQueueDosLast30'), value: claimDosPresets.last30 },
+  { label: t('claimQueueDosCustom'), value: claimDosPresets.custom },
 ])
 
 const providerOptions = computed(() => [
-  { label: t('billingQueueAllProviders'), value: null },
+  { label: t('claimQueueAllProviders'), value: null },
   ...providers.value.map(item => ({
     label: item.name,
     value: item.id,
   })),
 ])
 
-const locationOptions = computed(() => [
-  { label: t('billingQueueAllLocations'), value: null },
-  ...locations.value.map(item => ({
-    label: item.name,
-    value: item.id,
-  })),
-])
-
 const payerOptions = computed(() => [
-  { label: t('billingQueueAllPayers'), value: null },
-  {
-    label: t('superbillSelfPay'),
-    value: billingResponsibilityValues.selfPay,
-  },
+  { label: t('claimQueueAllPayers'), value: null },
   ...payers.value.map(name => ({ label: name, value: name })),
 ])
 
 const sortOptions = computed(() => [
   {
-    label: t('billingQueueSortDosNewest'),
+    label: t('claimQueueSortDosNewest'),
     value: 'dateOfService:desc',
   },
   {
-    label: t('billingQueueSortDosOldest'),
+    label: t('claimQueueSortDosOldest'),
     value: 'dateOfService:asc',
   },
   {
-    label: t('billingQueueSortNumber'),
-    value: 'superbillNumber:asc',
+    label: t('claimQueueSortNumber'),
+    value: 'claimNumber:asc',
   },
   {
-    label: t('billingQueueSortClient'),
+    label: t('claimQueueSortClient'),
     value: 'client:asc',
   },
   {
-    label: t('billingQueueSortStatus'),
+    label: t('claimQueueSortStatus'),
     value: 'status:asc',
   },
   {
-    label: t('billingQueueSortTotal'),
+    label: t('claimQueueSortTotal'),
     value: 'totalCharge:desc',
   },
 ])
@@ -421,16 +361,16 @@ const sortOptions = computed(() => [
 const visibleColumns = computed(() => [
   {
     name: 'number',
-    label: t('superbillColumnNumber'),
+    label: t('claimColumnNumber'),
     align: 'left',
-    field: row => row.superbillNumber,
+    field: row => row.claimNumber,
     sortable: false,
     headerStyle: 'min-width: 140px',
     style: 'min-width: 140px',
   },
   {
     name: 'client',
-    label: t('superbillColumnClient'),
+    label: t('claimColumnClient'),
     align: 'left',
     field: row => row.clientName,
     sortable: false,
@@ -439,7 +379,7 @@ const visibleColumns = computed(() => [
   },
   {
     name: 'dos',
-    label: t('superbillColumnDos'),
+    label: t('claimColumnDos'),
     align: 'left',
     field: row => row.dateOfServiceDisplay,
     sortable: false,
@@ -447,8 +387,17 @@ const visibleColumns = computed(() => [
     style: 'min-width: 140px',
   },
   {
+    name: 'payer',
+    label: t('claimColumnPayer'),
+    align: 'left',
+    field: row => row.payerName,
+    sortable: false,
+    headerStyle: 'min-width: 160px',
+    style: 'min-width: 160px',
+  },
+  {
     name: 'service',
-    label: t('superbillColumnService'),
+    label: t('claimColumnService'),
     align: 'left',
     field: row => serviceCell(row).code,
     sortable: false,
@@ -457,7 +406,7 @@ const visibleColumns = computed(() => [
   },
   {
     name: 'provider',
-    label: t('superbillColumnProvider'),
+    label: t('claimColumnProvider'),
     align: 'left',
     field: row => row.renderingProviderName,
     sortable: false,
@@ -465,17 +414,8 @@ const visibleColumns = computed(() => [
     style: 'min-width: 160px',
   },
   {
-    name: 'payer',
-    label: t('superbillColumnPayer'),
-    align: 'left',
-    field: row => payerLabel(row),
-    sortable: false,
-    headerStyle: 'min-width: 160px',
-    style: 'min-width: 160px',
-  },
-  {
     name: 'total',
-    label: t('superbillColumnTotal'),
+    label: t('claimColumnTotal'),
     align: 'right',
     field: row => row.totalChargeLabel,
     sortable: false,
@@ -484,7 +424,7 @@ const visibleColumns = computed(() => [
   },
   {
     name: 'status',
-    label: t('superbillColumnReadiness'),
+    label: t('claimColumnStatus'),
     align: 'left',
     field: row => row.status,
     sortable: false,
@@ -502,9 +442,9 @@ const visibleColumns = computed(() => [
   },
 ])
 
-const emptyKey = computed(() => queueEmptyKey(queueTab.value))
+const emptyKey = computed(() => claimQueueEmptyKey(queueTab.value))
 const emptyIcon = computed(() => (
-  queueTab.value === billingQueueTabs.needsAttention
+  queueTab.value === claimQueueTabs.needsAttention
     ? 'check_circle'
     : 'inbox'
 ))
@@ -514,99 +454,60 @@ function serviceCell(row) {
 }
 
 function readinessClass(row) {
-  if (row?.onHold) {
-    return 'billing-queue-readiness--hold'
-  }
-  if (row?.status === superbillStatuses.reviewed) {
+  if (row?.status === claimStatuses.ready) {
     return 'billing-queue-readiness--ready'
+  }
+  if (row?.status === claimStatuses.voided) {
+    return 'billing-queue-readiness--hold'
   }
   if ((row?.blockingCount ?? 0) > 0) {
     return 'billing-queue-readiness--blockers'
-  }
-  if ((row?.warningCount ?? 0) > 0) {
-    return 'billing-queue-readiness--warning'
-  }
-  if (row?.status === superbillStatuses.ready) {
-    return 'billing-queue-readiness--ready'
   }
 
   return 'billing-queue-readiness--blockers'
 }
 
+function statusLabel(status) {
+  if (status === claimStatuses.ready) {
+    return t('claimStatusReady')
+  }
+  if (status === claimStatuses.voided) {
+    return t('claimStatusVoided')
+  }
+
+  return t('claimStatusDraft')
+}
+
 function readinessLabel(row) {
-  if (row?.onHold) {
-    return t('billingQueueOnHold')
-  }
-  if (row?.status === superbillStatuses.reviewed) {
-    return t('superbillStatusReviewed')
-  }
   if ((row?.blockingCount ?? 0) > 0) {
-    return t('billingQueueBlockers', {
+    return t('claimQueueBlockers', {
       count: row.blockingCount,
     })
   }
-  if ((row?.warningCount ?? 0) > 0) {
-    return t('billingQueueWarnings', {
-      count: row.warningCount,
-    })
-  }
-  if (row?.status === superbillStatuses.ready) {
-    return t('superbillStatusReady')
-  }
 
-  return t('superbillStatusNotReady')
+  return statusLabel(row?.status)
 }
 
 function readinessHint(row) {
-  if (row?.onHold && row.holdReason) {
-    return holdReasonLabel(row.holdReason)
-  }
   if ((row?.blockingCount ?? 0) > 0) {
-    return t('billingQueueRequiresAction')
+    return t('claimQueueRequiresAction')
   }
   if ((row?.warningCount ?? 0) > 0) {
-    return t('billingQueueWarningHint')
+    return t('claimQueueWarnings', {
+      count: row.warningCount,
+    })
   }
-  if (row?.status === superbillStatuses.ready) {
-    return t('billingQueueReadyHint')
-  }
-
-  return ''
-}
-
-function holdReasonLabel(reason) {
-  const map = {
-    WAITING_FOR_AUTHORIZATION: 'superbillHoldWaitingAuthorization',
-    WAITING_FOR_INSURANCE: 'superbillHoldWaitingInsurance',
-    WAITING_FOR_PROVIDER: 'superbillHoldWaitingProvider',
-    WAITING_FOR_DOCUMENTATION: 'superbillHoldWaitingDocumentation',
-    INTERNAL_REVIEW: 'superbillHoldInternalReview',
-    OTHER: 'superbillHoldOther',
-  }
-  const key = map[reason]
-  return key ? t(key) : reason
-}
-
-function payerLabel(row) {
-  if (row.billingResponsibility === billingResponsibilityValues.selfPay) {
-    return t('superbillSelfPay')
+  if (row?.status === claimStatuses.ready) {
+    return t('claimQueueReadyBody')
   }
 
-  return row.payerName || t('superbillMissingValue')
-}
-
-function rowActionLabel(row) {
-  if (row.status === superbillStatuses.reviewed
-    || row.status === superbillStatuses.voided) {
-    return t('billingQueueView')
-  }
-
-  return t('billingQueueReview')
+  return statusLabel(row?.status)
 }
 
 function tablePaginationFromMeta(paginationPayload, meta) {
   const total = Number(meta?.total ?? 0)
-  const limit = Number(meta?.limit ?? paginationPayload.rowsPerPage) || 10
+  const limit = Number(meta?.limit ?? paginationPayload.rowsPerPage)
+    || 10
   let resolvedPage = paginationPayload.page
   if (meta && Number.isFinite(Number(meta.page))) {
     resolvedPage = Number(meta.page) + 1
@@ -639,15 +540,14 @@ async function loadRows(paginationPayload) {
       customTo.value,
     )
     const sort = parseSort(sortKey.value)
-    const result = await listBillingWorkQueue({
+    const result = await listClaimWorkQueue({
       page: paginationPayload.page,
       limit: paginationPayload.rowsPerPage,
       q: searchQuery.value,
-      status: queueStatusParam(queueTab.value),
+      status: claimQueueStatusParam(queueTab.value),
       from: range.from,
       to: range.to,
       providerId: providerId.value,
-      locationId: locationId.value,
       payer: payer.value || undefined,
       service: serviceQuery.value || undefined,
       includeVoided: queueTab.value === allTab
@@ -658,7 +558,6 @@ async function loadRows(paginationPayload) {
     rows.value = result.items
     counts.value = result.counts
     payers.value = result.payers
-    locations.value = result.locations
     providers.value = result.providers
     tablePagination.value = tablePaginationFromMeta(
       paginationPayload,
@@ -668,9 +567,9 @@ async function loadRows(paginationPayload) {
     if (!isAuthSessionEndUIError(error)) {
       $q.notify({
         type: quasarNotifyTypes.negative,
-        message: superbillApiErrorMessage(
+        message: claimApiErrorMessage(
           error,
-          t('superbillListLoadError'),
+          t('claimListLoadError'),
         ),
       })
     }
@@ -738,7 +637,7 @@ function onQueueTabChange(tab) {
 }
 
 function onDosPresetChange(value) {
-  dosPreset.value = value || billingDosPresets.all
+  dosPreset.value = value || claimDosPresets.all
   resetToFirstPage()
 }
 
@@ -762,11 +661,6 @@ function onPayerChange(value) {
   resetToFirstPage()
 }
 
-function onLocationChange(value) {
-  locationId.value = value ?? null
-  resetToFirstPage()
-}
-
 function onSortChange(value) {
   sortKey.value = value || 'dateOfService:desc'
   resetToFirstPage()
@@ -782,7 +676,7 @@ function openRow(row) {
     return
   }
   void router.push({
-    name: 'SuperbillDetail',
+    name: 'ClaimDetail',
     params: { id: String(row.id) },
   })
 }
@@ -825,7 +719,7 @@ onMounted(async() => {
     rowsPerPage: tablePagination.value.rowsPerPage,
     rowsNumber: tablePagination.value.rowsNumber,
     disable: loading.value,
-    summaryKey: 'billingQueuePaginationSummary',
+    summaryKey: 'claimQueuePaginationSummary',
     perPageKey: 'adminTablePerPage',
     onPageChange,
     onRowsPerPageChange,
@@ -833,7 +727,7 @@ onMounted(async() => {
   await reloadCurrentPage()
   pollTimer = setInterval(() => {
     void reloadCurrentPage()
-  }, billingQueuePollMs)
+  }, claimQueuePollMs)
 })
 
 onBeforeUnmount(() => {

@@ -467,6 +467,10 @@ const schedulingFilters = computed(() => ({
   serviceProcedureIds: serviceProcedureIds.value,
   durationMinutes: totalDurationMinutes.value,
   clinicianId: resolvedSchedulingClinicianId.value,
+  clientId: resolvedClientId.value,
+  excludeAppointmentId: props.mode === 'reschedule'
+    ? props.appointment?.appointmentId ?? null
+    : null,
   placeOfServiceId: draft.value.placeOfServiceId,
 }))
 
@@ -506,11 +510,8 @@ const {
 } = booking
 
 const schedulingLocked = computed(() => {
-  if (props.mode === 'book' && !serviceLines.value.length) {
-    return true
-  }
-
-  if (!resolvedSchedulingClinicianId.value) {
+  if (props.mode === 'book' && !resolvedClientId.value
+    && !resolvedSchedulingClinicianId.value) {
     return true
   }
 
@@ -536,6 +537,9 @@ const primaryButtonLabel = computed(() =>
 )
 
 const availabilityEmptyLabel = computed(() => {
+  if (!resolvedClientId.value && !resolvedSchedulingClinicianId.value) {
+    return t('appointmentSelectClientOrClinicianFirst')
+  }
   if (!serviceLines.value.length) {
     return t('appointmentSelectServicesFirst')
   }
@@ -1188,14 +1192,12 @@ function onServiceFeeChange({ index, value }) {
 }
 
 async function onSchedulingInputsChanged() {
-  clearSelectedWindow()
   await refreshDurationPreview()
-  if (
-    serviceLines.value.length
-    && draft.value.placeOfServiceId
-    && totalDurationMinutes.value
-    && resolvedSchedulingClinicianId.value
-  ) {
+  const canLoadClient = Boolean(resolvedClientId.value)
+  const canLoadClinician = Boolean(resolvedSchedulingClinicianId.value)
+    && serviceLines.value.length
+    && Boolean(totalDurationMinutes.value)
+  if (canLoadClient || canLoadClinician) {
     await loadAvailability()
     tryApplyBookingHint()
   } else {
@@ -1370,6 +1372,18 @@ watch(
     resetClientSearchState()
     await loadFormOptions()
     void bootstrapClientPickerOptions()
+    await onSchedulingInputsChanged()
+  },
+)
+
+watch(
+  resolvedClientId,
+  async(next, prev) => {
+    if (!open.value || next === prev) {
+      return
+    }
+    clearSelectedWindow()
+    await onSchedulingInputsChanged()
   },
 )
 

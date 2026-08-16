@@ -324,7 +324,7 @@ async function loadEligibility() {
   }
   try {
     const data = await fetchClinicalEligibility(props.staffId)
-    eligibility.value = data.capabilities ?? []
+    eligibility.value = data?.capabilities ?? []
   } catch (error) {
     eligibility.value = []
     $q.notify({

@@ -286,6 +286,9 @@ function normalizeAvailabilityBlockType(rawType) {
   if (type === 'APPOINTMENT' || type === 'BOOKED') {
     return 'appointment'
   }
+  if (type === 'CLIENT_BUSY' || type === 'CLIENTBUSY') {
+    return 'clientBusy'
+  }
   if (type === 'AVAILABLE' || type === 'FREE') {
     return 'available'
   }
@@ -517,6 +520,9 @@ export function mapAvailabilityRangesResponse(raw) {
     ),
     ...mapAvailabilityRangeBlocks(
       root.break_ranges ?? root.breakRanges ?? [],
+    ),
+    ...mapAvailabilityRangeBlocks(
+      root.client_busy_ranges ?? root.clientBusyRanges ?? [],
     ),
     ...mapAvailabilityRangeAppointments(root.appointments ?? []),
   ]

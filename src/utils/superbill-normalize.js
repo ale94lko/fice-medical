@@ -244,6 +244,39 @@ function normalizeNote(raw = {}) {
   }
 }
 
+function normalizeHold(raw) {
+  const row = asObject(raw)
+  if (!row.reason && row.id == null) {
+    return null
+  }
+
+  return {
+    id: parseOptionalNumber(row.id),
+    reason: trim(row.reason).toUpperCase(),
+    notes: trim(row.notes),
+    startedAt: trim(row.started_at ?? row.startedAt),
+    startedBy: parseOptionalNumber(row.started_by ?? row.startedBy),
+    releasedAt: trim(row.released_at ?? row.releasedAt),
+    releasedBy: parseOptionalNumber(
+      row.released_by ?? row.releasedBy,
+    ),
+  }
+}
+
+function normalizeActiveClaim(raw) {
+  const row = asObject(raw)
+  const id = parseOptionalNumber(row.id)
+  if (id == null) {
+    return null
+  }
+
+  return {
+    id,
+    claimNumber: trim(row.claim_number ?? row.claimNumber),
+    status: trim(row.status).toUpperCase(),
+  }
+}
+
 function withLineAuthorization(line, checks) {
   const authCheck = checks.find(item =>
     item.code === 'AUTHORIZATION'
@@ -283,6 +316,7 @@ export function normalizeSuperbill(raw = {}) {
   const blockingCount = parseOptionalNumber(
     row.blocking_count ?? row.blockingCount,
   ) ?? billingRequirements.blockingCount ?? 0
+  const onHold = Boolean(row.on_hold ?? row.onHold)
   const unitsTotal = lines.reduce((sum, line) => sum + (line.units || 0), 0)
   const responsibility = trim(
     row.billing_responsibility ?? row.billingResponsibility,
@@ -343,7 +377,12 @@ export function normalizeSuperbill(raw = {}) {
     notes: asArray(row.notes).map(normalizeNote),
     billingRequirements,
     unitsTotal,
-    canMarkReviewed: status === superbillStatuses.ready,
+    onHold,
+    hold: normalizeHold(row.hold),
+    activeClaim: normalizeActiveClaim(
+      row.active_claim ?? row.activeClaim,
+    ),
+    canMarkReviewed: status === superbillStatuses.ready && !onHold,
     isReviewed: status === superbillStatuses.reviewed,
     isVoided: status === superbillStatuses.voided,
     isOpen: status === superbillStatuses.notReady
@@ -441,6 +480,10 @@ export function normalizeWorkQueueItem(raw = {}) {
     clientId: parseOptionalNumber(row.client_id ?? row.clientId),
     clientName,
     clientNumber,
+    clientDob: trim(row.client_dob ?? row.clientDob),
+    clientDobDisplay: apiDateToDisplay(
+      row.client_dob ?? row.clientDob,
+    ),
     client: {
       id: parseOptionalNumber(row.client_id ?? row.clientId),
       fullName: clientName,
@@ -452,6 +495,9 @@ export function normalizeWorkQueueItem(raw = {}) {
     ),
     renderingProviderName: trim(
       row.rendering_provider_name ?? row.renderingProviderName,
+    ),
+    renderingProviderNpi: trim(
+      row.rendering_provider_npi ?? row.renderingProviderNpi,
     ),
     payerName: trim(row.payer_name ?? row.payerName),
     billingResponsibility: responsibility
@@ -466,6 +512,8 @@ export function normalizeWorkQueueItem(raw = {}) {
     warningCount: parseOptionalNumber(
       row.warning_count ?? row.warningCount,
     ) ?? 0,
+    onHold: Boolean(row.on_hold ?? row.onHold),
+    holdReason: trim(row.hold_reason ?? row.holdReason).toUpperCase(),
     unresolvedDays: parseOptionalNumber(
       row.unresolved_days ?? row.unresolvedDays,
     ),

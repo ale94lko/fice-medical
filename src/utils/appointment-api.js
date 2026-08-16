@@ -215,6 +215,8 @@ export async function listAppointmentAvailability(params = {}) {
     service_procedure_ids: (params.service_procedure_ids ?? [])
       .join(','),
     clinician_id: params.clinician_id ?? undefined,
+    client_id: params.client_id ?? undefined,
+    exclude_appointment_id: params.exclude_appointment_id ?? undefined,
     limit: params.limit ?? 50,
   }
 
@@ -233,6 +235,8 @@ export async function listAppointmentAvailabilityRanges(params = {}) {
     service_procedure_ids: (params.service_procedure_ids ?? [])
       .join(','),
     clinician_id: params.clinician_id ?? undefined,
+    client_id: params.client_id ?? undefined,
+    exclude_appointment_id: params.exclude_appointment_id ?? undefined,
     limit: params.limit ?? 100,
   }
 
@@ -341,4 +345,52 @@ export function extractBookingConflicts(error) {
   const data = error?.response?.data?.data ?? error?.response?.data
 
   return Array.isArray(data?.conflicts) ? data.conflicts : []
+}
+
+export function extractScheduleConflictCodes(error) {
+  const payload = error?.response?.data
+  const data = payload?.data ?? payload
+  const codes = []
+  const description = payload?.error_description
+    ?? payload?.errorDescription
+  if (description) {
+    codes.push(String(description))
+  }
+  if (data?.code) {
+    codes.push(String(data.code))
+  }
+  const reasons = Array.isArray(data?.reasons) ? data.reasons : []
+  for (const reason of reasons) {
+    if (reason) {
+      codes.push(String(reason))
+    }
+  }
+  for (const conflict of extractBookingConflicts(error)) {
+    const code = conflict?.reason_code ?? conflict?.reasonCode
+    if (code) {
+      codes.push(String(code))
+    }
+  }
+
+  return [...new Set(codes)]
+}
+
+export function appointmentConflictI18nKey(error) {
+  const codes = extractScheduleConflictCodes(error)
+  const hasClient = codes.includes('CLIENT_SCHEDULE_CONFLICT')
+  const hasClinician = codes.includes('CLINICIAN_SCHEDULE_CONFLICT')
+  if (hasClient && hasClinician) {
+    return 'appointmentBookingBothConflict'
+  }
+  if (hasClient) {
+    return 'appointmentBookingClientConflict'
+  }
+  if (hasClinician) {
+    return 'appointmentBookingClinicianConflict'
+  }
+  if (extractBookingConflicts(error).length) {
+    return 'appointmentBookingConflict'
+  }
+
+  return null
 }

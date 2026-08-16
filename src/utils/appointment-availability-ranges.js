@@ -173,12 +173,13 @@ function spansOverlap(startA, endA, startB, endB) {
   return startA < endB && endA > startB
 }
 
-export function findAppointmentConflictAtMinute(
+export function findBlockConflictAtMinute(
   blocks = [],
   dayKey,
   startMinutes,
   durationMin,
   timeZone = resolveTenantTimeZone(),
+  blockTypes = [],
 ) {
   const duration = Number(durationMin)
   const start = Number(startMinutes)
@@ -193,8 +194,9 @@ export function findAppointmentConflictAtMinute(
     return null
   }
 
+  const allowed = new Set(blockTypes)
   for (const block of blocks) {
-    if (block.blockType !== appointmentAvailabilityBlockTypes.appointment) {
+    if (!allowed.has(block.blockType)) {
       continue
     }
     const span = availabilityRangeMinuteSpanForDay(block, resolvedDayKey, tz)
@@ -207,6 +209,40 @@ export function findAppointmentConflictAtMinute(
   }
 
   return null
+}
+
+export function findAppointmentConflictAtMinute(
+  blocks = [],
+  dayKey,
+  startMinutes,
+  durationMin,
+  timeZone = resolveTenantTimeZone(),
+) {
+  return findBlockConflictAtMinute(
+    blocks,
+    dayKey,
+    startMinutes,
+    durationMin,
+    timeZone,
+    [appointmentAvailabilityBlockTypes.appointment],
+  )
+}
+
+export function findClientBusyConflictAtMinute(
+  blocks = [],
+  dayKey,
+  startMinutes,
+  durationMin,
+  timeZone = resolveTenantTimeZone(),
+) {
+  return findBlockConflictAtMinute(
+    blocks,
+    dayKey,
+    startMinutes,
+    durationMin,
+    timeZone,
+    [appointmentAvailabilityBlockTypes.clientBusy],
+  )
 }
 
 export function findScheduleBlockOverlapTypesAtMinute(
@@ -295,7 +331,17 @@ export function resolveBookingAtMinute({
     return { ok: false, reason: 'conflict' }
   }
 
-  if (findAppointmentConflictAtMinute(
+  if (findClientBusyConflictAtMinute(
+    blocks,
+    resolvedDayKey,
+    minute,
+    duration,
+    timeZone,
+  )) {
+    return { ok: false, reason: 'clientConflict' }
+  }
+
+  if (!allowOverScheduleBlocks && findAppointmentConflictAtMinute(
     blocks,
     resolvedDayKey,
     minute,
@@ -322,6 +368,10 @@ export function resolveBookingAtMinute({
   )
 
   if (!range && !allowOverScheduleBlocks) {
+    if (!preferredClinicianId && !availableRanges.length) {
+      return { ok: false, reason: 'clinicianRequired' }
+    }
+
     return { ok: false, reason: 'conflict' }
   }
 
@@ -414,8 +464,9 @@ export function calendarBlocksForDay(
   const layerOrder = {
     outside: 0,
     break: 1,
-    appointment: 2,
-    available: 3,
+    clientBusy: 2,
+    appointment: 3,
+    available: 4,
   }
 
   return blocks

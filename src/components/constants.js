@@ -1104,6 +1104,11 @@ export const permissionNames = {
   superbillReopen: 'SUPERBILL_REOPEN',
   superbillVoid: 'SUPERBILL_VOID',
   superbillEditBillingFields: 'SUPERBILL_EDIT_BILLING_FIELDS',
+  superbillHold: 'SUPERBILL_HOLD',
+  superbillReleaseHold: 'SUPERBILL_RELEASE_HOLD',
+  claimView: 'CLAIM_VIEW',
+  claimGenerate: 'CLAIM_GENERATE',
+  claimVoid: 'CLAIM_VOID',
 }
 
 export const clientPermissionNames = {
@@ -1279,6 +1284,35 @@ export const superbillStatuses = {
   voided: 'VOIDED',
 }
 
+export const superbillHoldReasons = {
+  waitingForAuthorization: 'WAITING_FOR_AUTHORIZATION',
+  waitingForInsurance: 'WAITING_FOR_INSURANCE',
+  waitingForProvider: 'WAITING_FOR_PROVIDER',
+  waitingForDocumentation: 'WAITING_FOR_DOCUMENTATION',
+  internalReview: 'INTERNAL_REVIEW',
+  other: 'OTHER',
+}
+
+export const claimStatuses = {
+  draft: 'DRAFT',
+  ready: 'READY',
+  voided: 'VOIDED',
+}
+
+export const claimVoidReasons = {
+  sourceSuperbillReopened: 'SOURCE_SUPERBILL_REOPENED',
+  createdInError: 'CREATED_IN_ERROR',
+  duplicate: 'DUPLICATE',
+  other: 'OTHER',
+}
+
+export const claimRequirementActions = {
+  viewSuperbill: 'VIEW_SUPERBILL',
+  viewInsurance: 'VIEW_INSURANCE',
+  viewProvider: 'VIEW_PROVIDER',
+  viewClient: 'VIEW_CLIENT',
+}
+
 export const billingResponsibilityValues = {
   insurance: 'INSURANCE',
   selfPay: 'SELF_PAY',
@@ -1312,6 +1346,7 @@ export const encounterClinicalSubTabs = {
 export const encounterRequirementPurposes = {
   encounterCompletion: 'ENCOUNTER_COMPLETION',
   billingReadiness: 'BILLING_READINESS',
+  claimReadiness: 'CLAIM_READINESS',
 }
 
 export const encounterRequirementStatuses = {
@@ -1436,6 +1471,7 @@ export const appointmentAvailabilityRangesLimit = 500
 export const appointmentAvailabilityBlockTypes = {
   outside: 'outside',
   break: 'break',
+  clientBusy: 'clientBusy',
   appointment: 'appointment',
   available: 'available',
 }
@@ -1741,10 +1777,29 @@ export const apiPaths = {
   superbillReopen: id => `/superbills/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/reopen`,
+  superbillHold: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/hold`,
+  superbillReleaseHold: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/release-hold`,
   superbillNotes: id => `/superbills/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/notes`,
   superbillHistory: id => `/superbills/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/history`,
+  claimWorkQueue: '/claims/v1/work-queue',
+  claimById: id => `/claims/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  claimFromSuperbill: id => `/claims/v1/from-superbill/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
+  claimVoid: id => `/claims/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/void`,
+  claimHistory: id => `/claims/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/history`,
   serviceProcedureRequirements: id => `/service-procedures/v1/${

@@ -118,6 +118,12 @@
               "
             />
             <p
+              v-if="showOverlappingToggle"
+              class="appointment-availability-picker__overlap-hint
+                text-caption text-grey-7 q-mb-none">
+              {{ t('appointmentOverlappingHint') }}
+            </p>
+            <p
               v-if="scheduleBlockOverlapWarning"
               class="appointment-availability-picker__overlap-warning
                 text-body2 text-warning q-mb-none">
@@ -156,6 +162,38 @@
             :readonly="readonly"
             @select-time="emit('select-grid-time', $event)"
           />
+          <div
+            class="appointment-availability-picker__legend
+              text-caption text-grey-7 q-mt-sm">
+            <span class="appointment-availability-picker__legend-item">
+              <span
+                class="appointment-availability-picker__legend-swatch
+                  appointment-availability-picker__legend-swatch--available"
+              />
+              {{ t('appointmentLegendAvailable') }}
+            </span>
+            <span class="appointment-availability-picker__legend-item">
+              <span
+                class="appointment-availability-picker__legend-swatch
+                  appointment-availability-picker__legend-swatch--client"
+              />
+              {{ t('appointmentLegendClientUnavailable') }}
+            </span>
+            <span class="appointment-availability-picker__legend-item">
+              <span
+                class="appointment-availability-picker__legend-swatch
+                  appointment-availability-picker__legend-swatch--clinician"
+              />
+              {{ t('appointmentLegendClinicianUnavailable') }}
+            </span>
+            <span class="appointment-availability-picker__legend-item">
+              <span
+                class="appointment-availability-picker__legend-swatch
+                  appointment-availability-picker__legend-swatch--selected"
+              />
+              {{ t('appointmentLegendSelected') }}
+            </span>
+          </div>
           <q-btn
             flat
             no-caps
@@ -286,12 +324,13 @@ const showDaySchedulePanel = computed(() => {
     return props.selectedDayWindows.length > 0
   }
 
-  return props.selectedDayWindows.length > 0
-    || props.selectedDayBlocks.length > 0
-    || props.allowOverScheduleBlocks
+  return true
 })
 
 const schedulingErrorLabel = computed(() => {
+  if (props.schedulingFieldError === 'clientConflict') {
+    return t('appointmentBookingClientConflict')
+  }
   if (props.schedulingFieldError !== 'appointmentConflict') {
     return ''
   }
@@ -558,11 +597,62 @@ function onEndTimeSpinnerChange(value) {
     flex: 0 0 auto;
   }
 
+  &__overlap-hint {
+    flex: 1 1 12rem;
+    margin: 0;
+    line-height: 1.35;
+  }
+
   &__overlap-warning {
     flex: 0 1 auto;
     margin: 0;
     white-space: nowrap;
     max-width: 100%;
+  }
+
+  &__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+  }
+
+  &__legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    border: 1px solid $border-subtle;
+    flex: 0 0 auto;
+
+    &--available {
+      background: #fff;
+    }
+
+    &--client {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba($primary, 0.35),
+        rgba($primary, 0.35) 3px,
+        rgba($primary, 0.12) 3px,
+        rgba($primary, 0.12) 6px
+      );
+      border-color: rgba($primary, 0.4);
+    }
+
+    &--clinician {
+      background: rgba($positive, 0.35);
+      border-color: rgba($positive, 0.55);
+    }
+
+    &--selected {
+      background: rgba($primary, 0.18);
+      border: 2px solid $primary;
+    }
   }
 }
 </style>

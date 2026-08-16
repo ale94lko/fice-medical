@@ -276,7 +276,7 @@ import {
   checkInAppointment,
   completeAppointment,
   deleteAppointment,
-  extractBookingConflicts,
+  appointmentConflictI18nKey,
   noShowAppointment,
   patchAppointment,
   rescheduleAppointment,
@@ -482,12 +482,8 @@ async function onBook(body) {
     await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
-      const conflicts = extractBookingConflicts(error)
-      if (conflicts.length) {
-        notifyError(new Error(t('appointmentBookingConflict')))
-      } else {
-        notifyError(error)
-      }
+      const conflictKey = appointmentConflictI18nKey(error)
+      notifyError(conflictKey ? new Error(t(conflictKey)) : error)
     }
   } finally {
     actionSaving.value = false
@@ -509,7 +505,8 @@ async function onReschedule(payload) {
     await refreshClientAppointments()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
-      notifyError(error)
+      const conflictKey = appointmentConflictI18nKey(error)
+      notifyError(conflictKey ? new Error(t(conflictKey)) : error)
     }
   } finally {
     actionSaving.value = false

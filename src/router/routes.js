@@ -120,6 +120,26 @@ const routes = [
         },
       },
       {
+        path: 'claims',
+        name: 'ClaimList',
+        component: () => import(
+          'pages/claims/ClaimListPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.claimView,
+        },
+      },
+      {
+        path: 'claims/:id',
+        name: 'ClaimDetail',
+        component: () => import(
+          'pages/claims/ClaimDetailPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.claimView,
+        },
+      },
+      {
         path: 'administration/subtenants/add',
         name: 'AdminSubtenantsAdd',
         component: () => import('pages/admin/SubtenantList.vue'),

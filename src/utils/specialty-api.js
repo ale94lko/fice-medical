@@ -8,7 +8,10 @@ function readEnvelope(response) {
   return response?.data?.data ?? response?.data ?? {}
 }
 
-export function specialtyCapabilityCodes(item = {}) {
+export function specialtyCapabilityCodes(item) {
+  if (item == null || typeof item !== 'object') {
+    return []
+  }
   const raw = item.capabilities ?? item.capabilityCodes ?? []
   if (!Array.isArray(raw)) {
     return []
@@ -44,6 +47,7 @@ export function mapSpecialtiesToSelectOptions(items = []) {
 
 export function filterClinicalSpecialtyOptions(options = []) {
   return (Array.isArray(options) ? options : [])
+    .filter(option => option != null)
     .filter(specialtyHasClinicianCapability)
 }
 

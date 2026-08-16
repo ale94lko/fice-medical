@@ -162,6 +162,10 @@ function isAppointmentBlock(block) {
   return block.blockType === appointmentAvailabilityBlockTypes.appointment
 }
 
+function isClientBusyBlock(block) {
+  return block.blockType === appointmentAvailabilityBlockTypes.clientBusy
+}
+
 function blockClass(block) {
   return `appointment-availability-day-grid__block--${block.blockType}`
 }
@@ -188,6 +192,10 @@ function blockTitle(block) {
     }
 
     return t('appointmentAvailabilityBookedBlock', { time })
+  }
+
+  if (isClientBusyBlock(block)) {
+    return t('appointmentAvailabilityClientBusyBlock', { time })
   }
 
   if (block.blockType === appointmentAvailabilityBlockTypes.break) {

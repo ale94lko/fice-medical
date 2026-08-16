@@ -4,6 +4,7 @@ import { billingResponsibilityValues, superbillStatuses }
 export const billingQueueTabs = {
   needsAttention: 'needsAttention',
   readyForReview: 'readyForReview',
+  onHold: 'onHold',
   reviewed: 'reviewed',
   all: 'all',
 }
@@ -73,6 +74,9 @@ export function queueStatusParam(tab) {
   if (tab === billingQueueTabs.readyForReview) {
     return superbillStatuses.ready
   }
+  if (tab === billingQueueTabs.onHold) {
+    return 'ON_HOLD'
+  }
   if (tab === billingQueueTabs.reviewed) {
     return superbillStatuses.reviewed
   }
@@ -86,6 +90,9 @@ export function queueEmptyKey(tab) {
   }
   if (tab === billingQueueTabs.readyForReview) {
     return 'billingQueueEmptyReady'
+  }
+  if (tab === billingQueueTabs.onHold) {
+    return 'billingQueueEmptyOnHold'
   }
   if (tab === billingQueueTabs.reviewed) {
     return 'billingQueueEmptyReviewed'
@@ -118,6 +125,9 @@ export function payerFilterValue(row) {
 }
 
 export function workQueueRowClass(row) {
+  if (row?.onHold) {
+    return 'billing-queue-row billing-queue-row--hold'
+  }
   if (row?.status === superbillStatuses.notReady) {
     return 'billing-queue-row billing-queue-row--attention'
   }

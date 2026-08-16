@@ -178,7 +178,7 @@ import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
 import {
   bookAppointment,
-  extractBookingConflicts,
+  appointmentConflictI18nKey,
 } from 'src/utils/appointment-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { notifyBookedAppointment } from
@@ -323,11 +323,11 @@ async function onBookAppointment(body) {
     await reloadEvents()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
-      const conflicts = extractBookingConflicts(error)
+      const conflictKey = appointmentConflictI18nKey(error)
       $q.notify({
         type: 'negative',
-        message: conflicts.length
-          ? t('appointmentBookingConflict')
+        message: conflictKey
+          ? t(conflictKey)
           : t('appointmentBookError'),
       })
     }

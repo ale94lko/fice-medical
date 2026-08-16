@@ -527,6 +527,26 @@
               {{ t('navBilling') }}
             </q-tooltip>
           </q-item>
+          <q-item
+            v-if="showClaims"
+            clickable
+            v-ripple
+            to="/claims"
+            :data-testid="layoutTestIds.navClaims"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="receipt_long" />
+            </q-item-section>
+            <q-item-section>{{ t('navClaims') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navClaims') }}
+            </q-tooltip>
+          </q-item>
           <q-expansion-item
             v-if="accordionMenu && showAdministrationMenu"
             v-model="administrationMenu"
@@ -902,6 +922,7 @@ const {
   showHrCredentials,
   showAdminStaffList,
   showBilling,
+  showClaims,
   showAdministrationMenu,
   showAdminGeneral,
   showAdminSubtenants,

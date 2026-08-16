@@ -348,6 +348,60 @@
   flex: 1 1 240px;
 }
 
+.billing-queue-summary {
+  margin: 0 0 16px;
+}
+
+.client-list-summary__card-icon--grey {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.billing-queue-client-id {
+  color: $primary;
+  font-weight: 600;
+}
+
+.billing-queue-service-badge {
+  display: inline-flex;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: $text-muted;
+  font-size: 0.75rem;
+}
+
+.billing-queue-readiness {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.billing-queue-readiness--blockers {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.billing-queue-readiness--warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.billing-queue-readiness--ready {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.billing-queue-readiness--hold {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
 .billing-queue-issue-badge {
   display: inline-flex;
   align-items: center;
@@ -364,6 +418,10 @@
 
 .billing-queue-row--attention td:first-child {
   box-shadow: inset 4px 0 0 #dc2626;
+}
+
+.billing-queue-row--hold td:first-child {
+  box-shadow: inset 4px 0 0 #9ca3af;
 }
 
 @media (max-width: 1023px) {

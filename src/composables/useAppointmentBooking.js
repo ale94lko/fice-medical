@@ -182,9 +182,27 @@ export function useAppointmentBooking(getFilters, options = {}) {
     reason,
     preferredClinicianId = null,
   }) {
+    if (reason === 'clientConflict') {
+      selectedWindowRef.value = null
+      selectedWindowKey.value = ''
+      schedulingNeedsOverlapping.value = false
+      schedulingFieldError.value = 'clientConflict'
+
+      return
+    }
+
     if (reason === 'appointmentConflict') {
+      selectedWindowRef.value = null
+      selectedWindowKey.value = ''
       schedulingNeedsOverlapping.value = false
       schedulingFieldError.value = 'appointmentConflict'
+
+      return
+    }
+
+    if (reason === 'clinicianRequired') {
+      schedulingNeedsOverlapping.value = false
+      schedulingFieldError.value = ''
 
       return
     }
@@ -235,6 +253,19 @@ export function useAppointmentBooking(getFilters, options = {}) {
     }
 
     if (windowsByDay.value.has(dayKey)) {
+      return true
+    }
+
+    const filters = getFilters?.() ?? {}
+    if (filters.clientId && !filters.clinicianId) {
+      return true
+    }
+
+    if (blocksForLocalDay(
+      availabilityBlocks.value,
+      dayKey,
+      timeZone,
+    ).length) {
       return true
     }
 
@@ -563,21 +594,31 @@ export function useAppointmentBooking(getFilters, options = {}) {
     const durationMinutes = Number(
       filters.durationMinutes ?? durationPreview.value?.default_duration_min,
     )
-    if (!serviceIds.length || !Number.isFinite(durationMinutes)
-      || durationMinutes <= 0 || !filters.clinicianId) {
+    const hasClient = filters.clientId != null && filters.clientId !== ''
+    const canQueryClinician = Boolean(filters.clinicianId)
+      && serviceIds.length
+      && Number.isFinite(durationMinutes)
+      && durationMinutes > 0
+    if (!hasClient && !canQueryClinician) {
       clearAvailability()
 
       return
     }
 
-    const { fromUtc, toUtc } = queryRange.value
+    const previousDay = selectedDayKey.value
+    const previousStart = selectedWindowRef.value?.startAtUtc
+    const { fromUtc, toUtc, startDayKey, endDayKey } = queryRange.value
     const query = {
       /* eslint-disable camelcase -- API query params */
       from_utc: fromUtc,
       to_utc: toUtc,
-      duration_minutes: durationMinutes,
+      duration_minutes: Number.isFinite(durationMinutes) && durationMinutes > 0
+        ? durationMinutes
+        : 15,
       service_procedure_ids: serviceIds,
-      clinician_id: filters.clinicianId ?? undefined,
+      clinician_id: canQueryClinician ? filters.clinicianId : undefined,
+      client_id: hasClient ? filters.clientId : undefined,
+      exclude_appointment_id: filters.excludeAppointmentId ?? undefined,
       /* eslint-enable camelcase */
     }
 
@@ -599,11 +640,23 @@ export function useAppointmentBooking(getFilters, options = {}) {
         availabilityWindows.value = windows
         availabilityBlocks.value = []
       }
-      const firstDay = [...windowsByDay.value.keys()].sort()[0] ?? ''
-      if (firstDay) {
-        selectedDayKey.value = firstDay
-        visibleMonthKey.value = monthKeyFromDayKey(firstDay)
-        selectFirstAvailableForDay(firstDay)
+      const firstWindowDay = [...windowsByDay.value.keys()].sort()[0] ?? ''
+      const todayKey = todayLocalDayKey(timeZone)
+      const keepDay = previousDay
+        && isDayKeyInRange(previousDay, startDayKey, endDayKey)
+        ? previousDay
+        : ''
+      const nextDay = keepDay
+        || firstWindowDay
+        || (isDayKeyInRange(todayKey, startDayKey, endDayKey) ? todayKey : '')
+      if (nextDay) {
+        selectedDayKey.value = nextDay
+        visibleMonthKey.value = monthKeyFromDayKey(nextDay)
+        if (previousStart) {
+          revalidateSelectedWindow()
+        } else if (canQueryClinician) {
+          selectFirstAvailableForDay(nextDay)
+        }
       } else {
         selectedDayKey.value = ''
         clearSelectedWindow()

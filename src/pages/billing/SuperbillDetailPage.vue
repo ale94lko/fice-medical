@@ -10,12 +10,28 @@
           <div>
             <div class="row items-center q-gutter-sm">
               <h1 class="superbill-detail__title">
-                {{ t('billingReviewTitle') }}
+                {{ t('superbillTitle', {
+                  number: detail.superbillNumber || detail.id,
+                }) }}
               </h1>
               <AdminTableStatusCell
                 :label="statusLabel(detail.status)"
                 :variant="detail.statusVariant"
               />
+              <span
+                v-if="detail.onHold"
+                class="billing-queue-readiness
+                  billing-queue-readiness--hold">
+                {{ t('billingQueueOnHold') }}
+              </span>
+              <span
+                v-else-if="detail.blockingCount > 0"
+                class="billing-queue-readiness
+                  billing-queue-readiness--blockers">
+                {{ t('billingQueueBlockers', {
+                  count: detail.blockingCount,
+                }) }}
+              </span>
             </div>
             <p class="superbill-detail__subtitle q-mb-none">
               {{ headerClientLine }}
@@ -25,6 +41,57 @@
             </p>
           </div>
           <div class="superbill-detail__actions no-print">
+            <q-btn
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              :data-testid="tid.viewEncounter"
+              :label="t('superbillViewEncounter')"
+              @click="goToEncounter()"
+            />
+            <q-btn
+              v-if="detail.activeClaim?.id && canViewClaims"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              :data-testid="tid.viewClaim"
+              :label="t('superbillViewClaim')"
+              @click="goToClaim"
+            />
+            <q-btn
+              v-else-if="canGenerateClaimFromSuperbill"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              :loading="actionBusy"
+              :data-testid="tid.generateClaim"
+              :label="t('superbillGenerateClaim')"
+              @click="onGenerateClaim"
+            />
+            <q-btn
+              v-if="canPutOnHold"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              :data-testid="tid.hold"
+              :label="t('superbillPutOnHold')"
+              @click="holdOpen = true"
+            />
+            <q-btn
+              v-if="canReleaseActiveHold"
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              :loading="actionBusy"
+              :data-testid="tid.releaseHold"
+              :label="t('superbillReleaseHold')"
+              @click="onReleaseHold"
+            />
             <q-btn
               no-caps
               outline
@@ -86,7 +153,7 @@
               <p
                 v-if="!markReviewedEnabled"
                 class="text-caption text-grey-7 q-mb-none">
-                {{ t('billingReviewEnableHint') }}
+                {{ reviewHint }}
               </p>
             </div>
           </div>
@@ -565,6 +632,11 @@
       {{ loadError || t('superbillLoadError') }}
     </div>
 
+    <SuperbillHoldDialog
+      v-model="holdOpen"
+      :submitting="actionBusy"
+      @confirm="onHold"
+    />
     <SuperbillReasonDialog
       v-model="voidOpen"
       :title="t('superbillVoidTitle')"
@@ -606,6 +678,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
+  addClientCareCoordinationSubTabKeys,
+  addClientTabKeys,
   billingResponsibilityValues,
   quasarNotifyTypes,
   superbillRequirementActions,
@@ -614,10 +688,14 @@ import {
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import SuperbillHoldDialog from
+  'components/billing/SuperbillHoldDialog.vue'
 import SuperbillReasonDialog from
   'components/billing/SuperbillReasonDialog.vue'
 import { useSuperbillPermissions } from
   'src/composables/useSuperbillPermissions.js'
+import { useClaimPermissions } from
+  'src/composables/useClaimPermissions.js'
 import { superbillDetailTestIds as tid } from
   'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -628,10 +706,16 @@ import {
   fetchSuperbillHistory,
   isSuperbillNotReadyError,
   markSuperbillReviewed,
+  putSuperbillOnHold,
+  releaseSuperbillHold,
   reopenSuperbill,
   superbillApiErrorMessage,
   voidSuperbill,
 } from 'src/utils/superbill-api.js'
+import {
+  claimApiErrorMessage,
+  generateClaimFromSuperbill,
+} from 'src/utils/claim-api.js'
 import {
   superbillRequirementActionLabelKey,
   superbillRequirementLabelKey,
@@ -649,7 +733,10 @@ const {
   canReopenSuperbill,
   canVoidSuperbill,
   canEditBillingFields,
+  canHoldSuperbill,
+  canReleaseHold,
 } = useSuperbillPermissions()
+const { canGenerateClaim, canViewClaims } = useClaimPermissions()
 
 useSyncAppPageTitle(computed(() => t('billingReviewTitle')))
 
@@ -661,6 +748,7 @@ const loadError = ref('')
 const activeTab = ref('overview')
 const voidOpen = ref(false)
 const reopenOpen = ref(false)
+const holdOpen = ref(false)
 const noteOpen = ref(false)
 const openChecks = ref({})
 const historyItems = ref([])
@@ -696,6 +784,34 @@ const showMarkReviewed = computed(() =>
 
 const markReviewedEnabled = computed(() =>
   showMarkReviewed.value && detail.value?.canMarkReviewed === true,
+)
+
+const reviewHint = computed(() => {
+  if (detail.value?.onHold) {
+    return t('billingReviewHoldHint')
+  }
+
+  return t('billingReviewEnableHint')
+})
+
+const canGenerateClaimFromSuperbill = computed(() =>
+  canGenerateClaim.value
+  && detail.value?.isReviewed === true
+  && detail.value?.billingResponsibility
+    === billingResponsibilityValues.insurance
+  && !detail.value?.activeClaim?.id,
+)
+
+const canPutOnHold = computed(() =>
+  canHoldSuperbill.value
+  && detail.value?.isOpen === true
+  && detail.value?.onHold !== true
+  && detail.value?.isVoided !== true
+  && detail.value?.isReviewed !== true,
+)
+
+const canReleaseActiveHold = computed(() =>
+  canReleaseHold.value && detail.value?.onHold === true,
 )
 
 const canReopen = computed(() =>
@@ -947,6 +1063,12 @@ function evidenceLabel(key) {
     serviceCode: 'superbillCpt',
     serviceName: 'superbillService',
     assignedDiagnoses: 'superbillDiagnoses',
+    authorizationNumber: 'superbillAuthNumber',
+    authorizationStatus: 'superbillReqAuthorization',
+    remaining: 'superbillAuthRemaining',
+    approved: 'superbillAuthApproved',
+    startDate: 'superbillAuthValidFrom',
+    endDate: 'superbillAuthValidTo',
   }
   const i18nKey = map[key]
   if (i18nKey && te(i18nKey)) {
@@ -964,6 +1086,9 @@ function historyActionLabel(action) {
     SUPERBILL_REOPENED: 'superbillHistoryReopened',
     SUPERBILL_VOIDED: 'superbillHistoryVoided',
     SUPERBILL_NOTE_CREATED: 'superbillHistoryNoteCreated',
+    SUPERBILL_PUT_ON_HOLD: 'superbillHistoryPutOnHold',
+    SUPERBILL_HOLD_RELEASED: 'superbillHistoryHoldReleased',
+    SUPERBILL_READY: 'superbillHistoryReady',
   }
   const key = map[action]
   if (key && te(key)) {
@@ -1005,6 +1130,51 @@ function goToEncounter(tab) {
   })
 }
 
+function goToClaim() {
+  const id = detail.value?.activeClaim?.id
+  if (id == null) {
+    return
+  }
+  void router.push({
+    name: 'ClaimDetail',
+    params: { id: String(id) },
+  })
+}
+
+async function onGenerateClaim() {
+  const id = detail.value?.id
+  if (id == null) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    const claim = await generateClaimFromSuperbill(id)
+    detail.value = await fetchSuperbillById(id)
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('superbillGenerateClaimSuccess'),
+    })
+    if (claim?.id && canViewClaims.value) {
+      void router.push({
+        name: 'ClaimDetail',
+        params: { id: String(claim.id) },
+      })
+    }
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: claimApiErrorMessage(
+          error,
+          t('superbillGenerateClaimError'),
+        ),
+      })
+    }
+  } finally {
+    actionBusy.value = false
+  }
+}
+
 function goToClient() {
   const id = clientChartKey(detail.value?.client)
   if (!id) {
@@ -1029,9 +1199,30 @@ function goToClientInsurance() {
   })
 }
 
+function goToClientAuthorizations() {
+  const id = clientChartKey(detail.value?.client)
+  if (!id) {
+    return
+  }
+  void router.push({
+    name: 'EditClient',
+    params: { id },
+    query: billingReturnQuery({
+      tab: addClientTabKeys.careCoordination,
+      subTab: addClientCareCoordinationSubTabKeys.authorizations,
+    }),
+  })
+}
+
 function onRequirementAction(check) {
   if (check.action === superbillRequirementActions.viewInsurance) {
     goToClientInsurance()
+
+    return
+  }
+  if (check.action
+    === superbillRequirementActions.reviewAuthorization) {
+    goToClientAuthorizations()
 
     return
   }
@@ -1103,6 +1294,50 @@ async function onMarkReviewed() {
     } else {
       notifyError(error, t('superbillActionError'))
     }
+  } finally {
+    actionBusy.value = false
+  }
+}
+
+async function onHold({ reason, notes }) {
+  if (!detail.value) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    detail.value = await putSuperbillOnHold(detail.value.id, {
+      reason,
+      notes,
+      version: detail.value.version,
+    })
+    holdOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('superbillHoldSuccess'),
+    })
+  } catch (error) {
+    notifyError(error, t('superbillActionError'))
+  } finally {
+    actionBusy.value = false
+  }
+}
+
+async function onReleaseHold() {
+  if (!detail.value) {
+    return
+  }
+  actionBusy.value = true
+  try {
+    detail.value = await releaseSuperbillHold(
+      detail.value.id,
+      detail.value.version,
+    )
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('superbillReleaseHoldSuccess'),
+    })
+  } catch (error) {
+    notifyError(error, t('superbillActionError'))
   } finally {
     actionBusy.value = false
   }

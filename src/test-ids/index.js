@@ -65,6 +65,7 @@ export const layoutTestIds = {
   navAdminClinicalAudit: 'layout-nav-admin-clinical-audit',
   navClinicalResources: 'layout-nav-clinical-resources',
   navBilling: 'layout-nav-billing',
+  navClaims: 'layout-nav-claims',
 }
 
 export const superbillListTestIds = {
@@ -79,6 +80,7 @@ export const superbillListTestIds = {
   serviceFilter: 'billing-queue-service-filter',
   sortFilter: 'billing-queue-sort-filter',
   includeVoided: 'billing-queue-include-voided',
+  refresh: 'billing-queue-refresh',
   issueBadge: id => toTestId('billing-queue-issues', id),
   rowView: id => toTestId('superbill-list-row-view', id),
 }
@@ -88,11 +90,15 @@ export const superbillDetailTestIds = {
   print: 'superbill-detail-print',
   actions: 'superbill-detail-actions',
   markReviewed: 'superbill-detail-mark-reviewed',
+  hold: 'superbill-detail-hold',
+  releaseHold: 'superbill-detail-release-hold',
   void: 'superbill-detail-void',
   reopen: 'superbill-detail-reopen',
   tab: name => toTestId('superbill-detail-tab', name),
   addNote: 'superbill-detail-add-note',
   viewEncounter: 'superbill-detail-view-encounter',
+  viewClaim: 'superbill-detail-view-claim',
+  generateClaim: 'superbill-detail-generate-claim',
   viewClient: 'superbill-detail-view-client',
   viewNote: 'superbill-detail-view-note',
   requirementRow: (code, id) => toTestId(
@@ -102,6 +108,37 @@ export const superbillDetailTestIds = {
   ),
   requirementAction: (code, id) => toTestId(
     'superbill-req-action',
+    code,
+    id,
+  ),
+}
+
+export const claimListTestIds = {
+  page: 'claim-list-page',
+  search: 'claim-list-search',
+  queueTab: name => toTestId('claim-queue-tab', name),
+  dosFilter: 'claim-queue-dos-filter',
+  providerFilter: 'claim-queue-provider-filter',
+  payerFilter: 'claim-queue-payer-filter',
+  serviceFilter: 'claim-queue-service-filter',
+  sortFilter: 'claim-queue-sort-filter',
+  includeVoided: 'claim-queue-include-voided',
+  refresh: 'claim-queue-refresh',
+  rowView: id => toTestId('claim-list-row-view', id),
+}
+
+export const claimDetailTestIds = {
+  page: 'claim-detail-page',
+  void: 'claim-detail-void',
+  tab: name => toTestId('claim-detail-tab', name),
+  viewSuperbill: 'claim-detail-view-superbill',
+  requirementRow: (code, id) => toTestId(
+    'claim-req-row',
+    code,
+    id,
+  ),
+  requirementAction: (code, id) => toTestId(
+    'claim-req-action',
     code,
     id,
   ),

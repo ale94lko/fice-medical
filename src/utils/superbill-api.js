@@ -177,6 +177,7 @@ export async function listBillingWorkQueue({
       readyForReview: Number(countsRaw.ready_for_review
         ?? countsRaw.readyForReview ?? 0),
       reviewed: Number(countsRaw.reviewed ?? 0),
+      onHold: Number(countsRaw.on_hold ?? countsRaw.onHold ?? 0),
       voided: Number(countsRaw.voided ?? 0),
       all: Number(countsRaw.all ?? 0),
     },
@@ -271,6 +272,29 @@ export async function addSuperbillNote(id, body) {
   const response = await apiInstance.post(apiPaths.superbillNotes(id), {
     body,
   })
+
+  return normalizeSuperbill(unwrapData(response.data))
+}
+
+export async function putSuperbillOnHold(id, {
+  reason,
+  notes,
+  version,
+}) {
+  const response = await apiInstance.post(apiPaths.superbillHold(id), {
+    reason,
+    notes,
+    version,
+  })
+
+  return normalizeSuperbill(unwrapData(response.data))
+}
+
+export async function releaseSuperbillHold(id, version) {
+  const response = await apiInstance.post(
+    apiPaths.superbillReleaseHold(id),
+    { version },
+  )
 
   return normalizeSuperbill(unwrapData(response.data))
 }

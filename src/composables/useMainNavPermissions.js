@@ -134,6 +134,10 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.superbillView),
   )
 
+  const showClaims = computed(() =>
+    hasPermission(permissions.value, permissionNames.claimView),
+  )
+
   const showAdministrationMenu = computed(() =>
     hasAnyPermission(permissions.value, administrationPermissions),
   )
@@ -200,6 +204,7 @@ export function useMainNavPermissions() {
     showHrCredentials,
     showAdminStaffList,
     showBilling,
+    showClaims,
     showAdministrationMenu,
     showAdminGeneral,
     showAdminSubtenants,

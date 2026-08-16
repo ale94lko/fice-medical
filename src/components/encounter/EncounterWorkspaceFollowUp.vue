@@ -75,7 +75,8 @@ import { useClientFollowUpPermissions } from
   'src/composables/useClientFollowUpPermissions.js'
 import { useClientReferralPermissions } from
   'src/composables/useClientReferralPermissions.js'
-import { bookAppointment } from 'src/utils/appointment-api.js'
+import { bookAppointment, appointmentConflictI18nKey } from
+  'src/utils/appointment-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
   buildFollowUpCreatePayload,
@@ -211,7 +212,11 @@ async function onAppointmentBooked(body) {
     notifyBookedAppointment($q, t, result, message)
     emit('changed')
   } catch (error) {
-    notifyError(error, 'appointmentBookError')
+    const conflictKey = appointmentConflictI18nKey(error)
+    notifyError(
+      conflictKey ? new Error(t(conflictKey)) : error,
+      'appointmentBookError',
+    )
   } finally {
     saving.value = false
   }

@@ -274,9 +274,14 @@ const selectedSpecialty = computed(() => findSpecialtyOption(
   form.value.employment?.specialtyId,
 ))
 
-const selectedSpecialtyIsClinical = computed(() =>
-  specialtyHasClinicianCapability(selectedSpecialty.value),
-)
+const selectedSpecialtyIsClinical = computed(() => {
+  const specialty = selectedSpecialty.value
+  if (!specialty) {
+    return false
+  }
+
+  return specialtyHasClinicianCapability(specialty)
+})
 
 const showClinicalProfileTab = computed(() =>
   isAddClinicianCreate.value || selectedSpecialtyIsClinical.value,
