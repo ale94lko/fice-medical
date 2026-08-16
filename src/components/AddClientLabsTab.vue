@@ -21,7 +21,7 @@
             {{ t('labsSubtitle') }}
           </p>
         </div>
-        <div v-if="!readonly" class="col-auto">
+        <div v-if="allowAdd" class="col-auto">
           <q-btn
             no-caps
             unelevated
@@ -50,8 +50,8 @@
         :show-column-settings="false">
         <LabsTable
           :rows="labs"
-          :can-edit="!readonly"
-          :can-review="!readonly && canReviewLabs"
+          :can-edit="allowEdit"
+          :can-review="allowReview"
           :can-delete="canDelete"
           :empty-label="resolvedEmptyLabel"
           @view="openView"
@@ -130,7 +130,11 @@ import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { useClientPermissions } from 'src/composables/useClientPermissions.js'
 
-const { canReviewLabs } = useClientPermissions()
+const {
+  canAddLabs,
+  canEditLabs,
+  canReviewLabs,
+} = useClientPermissions()
 
 const props = defineProps({
   patientId: {
@@ -144,6 +148,14 @@ const props = defineProps({
   readonly: {
     type: Boolean,
     default: false,
+  },
+  canAdd: {
+    type: Boolean,
+    default: undefined,
+  },
+  canEdit: {
+    type: Boolean,
+    default: undefined,
   },
   canView: {
     type: Boolean,
@@ -172,6 +184,24 @@ const labs = defineModel({
 
 const { t } = useI18n()
 const $q = useQuasar()
+
+const allowAdd = computed(() => {
+  if (typeof props.canAdd === 'boolean') {
+    return props.canAdd
+  }
+
+  return !props.readonly && canAddLabs.value
+})
+
+const allowEdit = computed(() => {
+  if (typeof props.canEdit === 'boolean') {
+    return props.canEdit
+  }
+
+  return !props.readonly && canEditLabs.value
+})
+
+const allowReview = computed(() => canReviewLabs.value)
 
 const loading = ref(false)
 const saving = ref(false)
@@ -243,6 +273,9 @@ function upsertLabInList(lab) {
 }
 
 function openAdd() {
+  if (!allowAdd.value) {
+    return
+  }
   dialogMode.value = 'add'
   dialogIntent.value = null
   activeLab.value = createEmptyLabOrder()
@@ -262,6 +295,13 @@ async function openView(row) {
 }
 
 async function openTransition(row, intent) {
+  const needsReview = intent === 'review'
+  if (needsReview && !allowReview.value) {
+    return
+  }
+  if (!needsReview && !allowEdit.value) {
+    return
+  }
   if (!hasPatientId.value) {
     $q.notify({
       type: quasarNotifyTypes.warning,

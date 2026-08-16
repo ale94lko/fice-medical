@@ -30,7 +30,7 @@
         </div>
         <div class="col-auto">
           <q-btn
-            v-if="!readonly"
+            v-if="allowAdd"
             no-caps
             unelevated
             color="primary"
@@ -49,7 +49,7 @@
         <ScreeningsTable
           :rows="screeningRows"
           :empty-label="t('screeningListEmpty')"
-          :can-edit="!readonly"
+          :can-edit="allowEdit"
           @view="openView"
           @edit="openEdit"
         />
@@ -82,6 +82,8 @@ import { mapScreeningsListFromApi } from 'src/utils/screening-normalize.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { screeningTestIds as tid } from 'src/test-ids/index.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
 
 const props = defineProps({
   patientId: {
@@ -109,6 +111,17 @@ const props = defineProps({
 const { t } = useI18n()
 const $q = useQuasar()
 const siteStore = useSiteStore()
+const {
+  canAddScreenings,
+  canEditScreenings,
+} = useClientPermissions()
+
+const allowAdd = computed(
+  () => !props.readonly && canAddScreenings.value,
+)
+const allowEdit = computed(
+  () => !props.readonly && canEditScreenings.value,
+)
 
 const dialogOpen = ref(false)
 const dialogScreeningId = ref(null)
@@ -132,6 +145,9 @@ const screeningRows = computed(() =>
 )
 
 function openCreateDialog() {
+  if (!allowAdd.value) {
+    return
+  }
   dialogMode.value = 'create'
   dialogScreeningId.value = null
   dialogReadonly.value = false
@@ -149,7 +165,7 @@ function openView(row) {
 }
 
 function openEdit(row) {
-  if (!row?.id || props.readonly) {
+  if (!row?.id || !allowEdit.value) {
     return
   }
   if (row.status !== screeningStatuses.draft) {

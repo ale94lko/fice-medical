@@ -55,14 +55,14 @@
           {{ elapsedLabel }}
         </span>
         <q-icon
-          v-if="canManage"
+          v-if="showActionMenu"
           class="app-active-encounter__chevron"
           name="expand_more"
           size="20px"
           aria-hidden="true"
         />
         <q-menu
-          v-if="canManage"
+          v-if="showActionMenu"
           anchor="bottom middle"
           self="top middle"
           class="app-active-encounter-menu app-light-menu"
@@ -103,7 +103,7 @@
 
           <q-list class="app-active-encounter-menu__list">
             <q-item
-              v-if="!isPaused"
+              v-if="canCompleteEncounter && !isPaused"
               v-close-popup
               clickable
               :disable="busy"
@@ -117,10 +117,12 @@
               </q-item-section>
             </q-item>
             <q-separator
-              v-if="!isPaused"
+              v-if="canCompleteEncounter && !isPaused
+                && canCancelEncounter"
               class="app-active-encounter-menu__separator"
             />
             <q-item
+              v-if="canCancelEncounter"
               v-close-popup
               clickable
               class="app-active-encounter-menu__cancel-item"
@@ -187,10 +189,12 @@ import ActiveEncounterAutoCompleteDialog from
   'components/ActiveEncounterAutoCompleteDialog.vue'
 import EncounterCancelDialog from
   'components/encounter/EncounterCancelDialog.vue'
+import { hasPermission } from 'src/utils/auth-permissions.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { encounterTestIds as tid } from 'src/test-ids/index.js'
-import { hasPermission } from 'src/utils/auth-permissions.js'
+import { useEncounterPermissions } from
+  'src/composables/useEncounterPermissions.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { formatPersonDisplayNameFromRecord } from
   'src/utils/person-display-name.js'
@@ -315,15 +319,16 @@ function unbindShellObserver() {
   }
 }
 
-const canManage = computed(() =>
-  hasPermission(
-    authStore.permissions,
-    clientPermissionNames.manageEncounter,
-  ),
-)
+const {
+  canManageEncounter,
+  canCompleteEncounter,
+  canCancelEncounter,
+} = useEncounterPermissions()
 
 const canView = computed(() =>
-  canManage.value
+  canManageEncounter.value
+  || canCompleteEncounter.value
+  || canCancelEncounter.value
   || hasPermission(
     authStore.permissions,
     clientPermissionNames.viewEncounter,
@@ -335,6 +340,10 @@ const canViewClient = computed(() =>
     authStore.permissions,
     clientPermissionNames.viewClient,
   ),
+)
+
+const showActionMenu = computed(() =>
+  canCompleteEncounter.value || canCancelEncounter.value,
 )
 
 const visible = computed(() =>
@@ -502,7 +511,7 @@ function notifySuccess(message) {
 
 async function onComplete() {
   const entry = toolbarActiveEncounter.value
-  if (!entry?.encounter?.id || !canManage.value) {
+  if (!entry?.encounter?.id || !canCompleteEncounter.value) {
     return
   }
   busy.value = true
@@ -521,7 +530,7 @@ async function onComplete() {
 
 async function onCancel(payload = {}) {
   const entry = toolbarActiveEncounter.value
-  if (!entry?.encounter?.id || !canManage.value) {
+  if (!entry?.encounter?.id || !canCancelEncounter.value) {
     return
   }
   busy.value = true

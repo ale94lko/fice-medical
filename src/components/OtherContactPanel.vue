@@ -312,6 +312,7 @@
                   />
                 </div>
                 <AddClientMethodRowActions
+                  v-if="!readonly"
                   :is-last="index === contact.phones.length - 1"
                   :total="contact.phones.length"
                   :can-add="canAddPhone(index)"
@@ -374,6 +375,7 @@
                   />
                 </div>
                 <AddClientMethodRowActions
+                  v-if="!readonly"
                   :is-last="index === contact.emails.length - 1"
                   :total="contact.emails.length"
                   :can-add="canAddEmail(index)"
@@ -528,6 +530,10 @@ const props = defineProps({
   showDelete: {
     type: Boolean,
     default: true,
+  },
+  readonly: {
+    type: Boolean,
+    default: false,
   },
 })
 

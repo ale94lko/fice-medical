@@ -20,6 +20,7 @@
       v-if="activeSubTab === CONTACT_SUB_TAB_SELF"
       ref="contactSelfPanelRef"
       v-model="contact"
+      :readonly="readonly"
       :rules="rules"
     />
 
@@ -47,6 +48,7 @@
           :suffix-options="suffixSelectOptions"
           :catalogs-loading="catalogsLoading"
           :show-delete="false"
+          :readonly="readonly"
           @update:contact="patch => updateOtherContact(activeOtherIndex, patch)"
           @set-responsible-for-payments="onSetResponsibleForPayments"
           @set-preferred-point-of-contact="onSetPreferredPointOfContact"

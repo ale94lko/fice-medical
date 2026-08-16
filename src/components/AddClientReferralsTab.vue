@@ -52,7 +52,7 @@
           :clinician-options="resolvedClinicianOptions"
           :empty-label="t('referralListEmpty')"
           :can-edit="canEditReferrals"
-          :can-schedule="canAddReferrals"
+          :can-schedule="canBookAppointment"
           :can-delete="canDeleteReferrals"
           @view="openView"
           @edit="openEdit"
@@ -100,6 +100,8 @@ import ReferralsTable from 'components/ReferralsTable.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import { useClientReferralPermissions } from
   'src/composables/useClientReferralPermissions.js'
+import { useClientAppointmentPermissions } from
+  'src/composables/useClientAppointmentPermissions.js'
 import {
   apiErrorMessage,
   createClientReferral,
@@ -156,6 +158,7 @@ const {
   canEditReferrals,
   canDeleteReferrals,
 } = useClientReferralPermissions()
+const { canBookAppointment } = useClientAppointmentPermissions()
 
 const saving = ref(false)
 const documentUploading = ref(false)

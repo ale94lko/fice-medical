@@ -17,11 +17,12 @@
           {{ card.hint }}
         </p>
         <q-btn
+          v-if="card.canOpen"
           no-caps
           outline
           color="primary"
           class="app-btn-outline"
-          :disable="!card.canOpen || saving"
+          :disable="saving"
           :label="card.action"
           @click="openCard(card.key)"
         />
@@ -121,7 +122,7 @@ const emptyReferral = ref(createEmptyReferral())
 
 const clientKey = computed(() => String(props.clientId ?? '').trim())
 
-const cards = computed(() => [
+const allCards = computed(() => [
   {
     key: 'appointments',
     title: t('encounterFollowUpNextAppointment'),
@@ -151,6 +152,10 @@ const cards = computed(() => [
     canOpen: Boolean(clientKey.value) && canAddReferrals.value,
   },
 ])
+
+const cards = computed(() =>
+  allCards.value.filter(card => card.canOpen),
+)
 
 function notifyError(error, fallbackKey) {
   if (isAuthSessionEndUIError(error)) {

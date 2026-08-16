@@ -1,5 +1,4 @@
 import {
-  computed,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -8,12 +7,9 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import {
-  clientPermissionNames,
-  quasarNotifyTypes,
-} from 'components/constants.js'
-import { useAuthStore } from 'src/stores/auth-store.js'
-import { hasPermission } from 'src/utils/auth-permissions.js'
+import { quasarNotifyTypes } from 'components/constants.js'
+import { useEncounterPermissions } from
+  'src/composables/useEncounterPermissions.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
   clearEncounterWatchState,
@@ -45,7 +41,6 @@ export function useActiveEncounterWatchdog() {
   const router = useRouter()
   const { t } = useI18n()
   const $q = useQuasar()
-  const authStore = useAuthStore()
 
   const elapsedLabel = ref('')
   const autoCompleteOpen = ref(false)
@@ -57,12 +52,9 @@ export function useActiveEncounterWatchdog() {
   let session = null
   let completing = false
 
-  const canManage = computed(() =>
-    hasPermission(
-      authStore.permissions,
-      clientPermissionNames.manageEncounter,
-    ),
-  )
+  const {
+    canCompleteEncounter,
+  } = useEncounterPermissions()
 
   function persistSession() {
     if (!session) {
@@ -217,7 +209,7 @@ export function useActiveEncounterWatchdog() {
     if (session) {
       session.autoCompletePrompted = true
     }
-    if (!canManage.value) {
+    if (!canCompleteEncounter.value) {
       $q.notify({
         type: quasarNotifyTypes.warning,
         multiLine: true,

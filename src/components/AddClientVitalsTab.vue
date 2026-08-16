@@ -21,7 +21,7 @@
         </div>
         <div class="col-auto">
           <q-btn
-            v-if="!readonly"
+            v-if="allowAdd"
             no-caps
             unelevated
             color="primary"
@@ -47,7 +47,7 @@
         :show-column-settings="false">
         <VitalsHistoryTable
           :entries="sortedEntries"
-          :can-edit="!readonly"
+          :can-edit="allowEdit"
           :empty-label="t('vitalsHistoryEmpty')"
           :clinician-options="clinicianOptions"
           :patient-dob="patientDob"
@@ -112,6 +112,8 @@ import {
   isEncounterInvalidError,
 } from 'src/utils/encounter-api.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
 
 const props = defineProps({
   modelValue: {
@@ -156,6 +158,14 @@ const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { canAddVitals, canEditVitals } = useClientPermissions()
+
+const allowAdd = computed(
+  () => !props.readonly && canAddVitals.value,
+)
+const allowEdit = computed(
+  () => !props.readonly && canEditVitals.value,
+)
 
 const loading = ref(false)
 const saving = ref(false)
@@ -180,11 +190,17 @@ const sortedEntries = computed(() =>
 )
 
 function openAddDialog() {
+  if (!allowAdd.value) {
+    return
+  }
   editingEntry.value = null
   recordDialogOpen.value = true
 }
 
 function openEditDialog(row) {
+  if (!allowEdit.value) {
+    return
+  }
   editingEntry.value = { ...row }
   recordDialogOpen.value = true
 }

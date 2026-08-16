@@ -145,6 +145,7 @@
                   />
                 </div>
                 <AddClientMethodRowActions
+                  v-if="!readonly"
                   :is-last="index === contact.phones.length - 1"
                   :total="contact.phones.length"
                   :can-add="canAddPhone(index)"
@@ -203,6 +204,7 @@
                   />
                 </div>
                 <AddClientMethodRowActions
+                  v-if="!readonly"
                   :is-last="index === contact.emails.length - 1"
                   :total="contact.emails.length"
                   :can-add="canAddEmail(index)"
@@ -351,6 +353,7 @@ import {
 const props = defineProps({
   modelValue: { type: Object, required: true },
   rules: { type: Object, default: () => ({}) },
+  readonly: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:modelValue'])

@@ -38,7 +38,8 @@
       hide-header
       :patient-id="clientId"
       :clinician-options="clinicianOptions"
-      :readonly="!canEdit && !canAdd"
+      :can-add="canAdd"
+      :can-edit="canEdit"
       :empty-label="t('encounterClinicalLabsEmpty')"
       @changed="emit('changed')"
     />

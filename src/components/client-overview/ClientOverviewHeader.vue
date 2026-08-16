@@ -98,6 +98,7 @@
               </div>
 
               <div
+                v-if="canEditAnyClientSection"
                 class="client-overview-header__meta-cell
                   client-overview-header__meta-cell--edit">
                 <q-btn
@@ -400,6 +401,8 @@ import { documentTypes, clientOverviewGenerateDocumentOptions } from
 import { clientOverviewTestIds } from 'src/test-ids/index.js'
 import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
 
 const props = defineProps({
   clientId: {
@@ -440,6 +443,7 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { canEditAnyClientSection } = useClientPermissions()
 
 function copyClientNumber() {
   copyToClipboard(props.header.clientNumber)

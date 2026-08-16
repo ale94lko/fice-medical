@@ -793,7 +793,6 @@
                 ref="vitalsTabRef"
                 v-model="form[clientFormSections.vitals]"
                 :patient-id="props.clientId"
-                :readonly="vitalsReadonly"
                 :can-view="canViewVitalsTab"
                 :clinician-options="assignedClinicianOptions"
                 :patient-dob="form[ck.dob]"
@@ -805,7 +804,6 @@
                 v-else-if="subTab.key === CLINICAL_SCREENINGS_SUB_TAB"
                 :patient-id="props.clientId"
                 :screenings="clientScreenings"
-                :readonly="screeningsReadonly"
                 :can-view="canViewScreeningsTab"
                 :clinician-options="assignedClinicianOptions"
               />
@@ -813,9 +811,10 @@
                 v-else-if="subTab.key === CLINICAL_LABS_SUB_TAB"
                 v-model="form[clientFormSections.labs]"
                 :patient-id="props.clientId"
-                :readonly="labsReadonly"
                 :can-view="canViewLabsTab"
-                :can-delete="canDeleteLabsTab"
+                :can-add="canAddLabs"
+                :can-edit="canEditLabs"
+                :can-delete="canDeleteLabs"
                 :clinician-options="assignedClinicianOptions"
               />
               <AddClientMedicationsTab
@@ -1215,14 +1214,17 @@ const {
   canEditContact,
   canEditAllergies,
   canEditInsurance,
-  canEditSubTabFor,
   canViewMainTabFor,
   canViewSubTabFor,
   canSaveForm,
   filterSubTabsFor,
 } = useAddClientTabPermissions(isEditMode)
 
-const { canDeleteLabs } = useClientPermissions()
+const {
+  canDeleteLabs,
+  canAddLabs,
+  canEditLabs,
+} = useClientPermissions()
 
 const mainTabs = visibleMainTabs
 
@@ -1234,24 +1236,14 @@ const canViewContactTab = canViewMainTabFor(addClientTabKeys.contact)
 const canViewAllergiesTab = canViewMainTabFor(addClientTabKeys.allergies)
 const canViewInsuranceTab = canViewMainTabFor(addClientTabKeys.insurance)
 
-const vitalsReadonly = computed(
-  () => !canEditSubTabFor(CLINICAL_VITALS_SUB_TAB).value,
-)
 const canViewVitalsTab = canViewSubTabFor(CLINICAL_VITALS_SUB_TAB)
-const screeningsReadonly = computed(
-  () => !canEditSubTabFor(CLINICAL_SCREENINGS_SUB_TAB).value,
-)
 const canViewScreeningsTab = canViewSubTabFor(CLINICAL_SCREENINGS_SUB_TAB)
-const labsReadonly = computed(
-  () => !canEditSubTabFor(CLINICAL_LABS_SUB_TAB).value,
-)
 const canViewLabsTab = canViewSubTabFor(CLINICAL_LABS_SUB_TAB)
 const canViewFollowUpsTab = canViewSubTabFor(
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
 )
 const canViewAttachmentsTab = canViewSubTabFor(DOCUMENTS_ATTACHMENTS_SUB_TAB)
 const canViewConsentsTab = canViewSubTabFor(DOCUMENTS_CONSENTS_SUB_TAB)
-const canDeleteLabsTab = canDeleteLabs
 
 const authStore = useAuthStore()
 const canUploadAttachments = computed(() =>

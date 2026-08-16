@@ -116,7 +116,7 @@ const pageBusyMessage = computed(() => {
   return clientFormRef.value.formBusyMessage ?? t('appLoading')
 })
 const canSaveForm = computed(
-  () => clientFormRef.value?.canSaveForm ?? true,
+  () => clientFormRef.value?.canSaveForm ?? false,
 )
 const hasClientId = computed(() => {
   const id = String(clientId.value ?? '').trim()

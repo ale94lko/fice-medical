@@ -11,9 +11,9 @@
 
     <template v-else>
     <fieldset
-      :disabled="readonly"
       class="add-client-form__readonly-fieldset">
     <AccordionSection
+      v-if="!readonly"
       v-model="section.addExpanded"
       icon="medication"
       :title="t('allergiesAddSectionTitle')"
@@ -149,7 +149,10 @@
       </div>
     </AccordionSection>
 
-    <q-separator class="section-separator" />
+    <q-separator
+      v-if="!readonly"
+      class="section-separator"
+    />
 
     <AccordionSection
       icon="medical_services"

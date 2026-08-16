@@ -153,13 +153,12 @@ const MAIN_TAB_VIEW = {
   },
   [addClientTabKeys.insurance]: {
     create: [
+      clientPermissionNames.addClient,
       clientPermissionNames.viewClient,
-      clientPermissionNames.editTenantData,
       clientPermissionNames.editBasicInfoClient,
     ],
     edit: [
       clientPermissionNames.viewClient,
-      clientPermissionNames.editTenantData,
       clientPermissionNames.editBasicInfoClient,
     ],
   },
@@ -226,6 +225,15 @@ export function filterSubTabs(modules, parentKey) {
   return tabs.filter(tab => canViewSubTab(modules, tab.key))
 }
 
+function canEditInsuranceTab(modules, isCreate) {
+  if (hasPermission(modules, clientPermissionNames.editBasicInfoClient)) {
+    return true
+  }
+
+  return isCreate
+    && hasPermission(modules, clientPermissionNames.addClient)
+}
+
 export function canEditMainTab(modules, tabKey, isCreate) {
   switch (tabKey) {
     case addClientTabKeys.basic:
@@ -237,8 +245,7 @@ export function canEditMainTab(modules, tabKey, isCreate) {
     case addClientTabKeys.allergies:
       return hasPermission(modules, clientPermissionNames.editAllergies)
     case addClientTabKeys.insurance:
-      return hasPermission(modules, clientPermissionNames.editTenantData)
-        || hasPermission(modules, clientPermissionNames.editBasicInfoClient)
+      return canEditInsuranceTab(modules, isCreate)
     default:
       return false
   }

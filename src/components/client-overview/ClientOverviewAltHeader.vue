@@ -108,6 +108,7 @@
                   ">
                   <q-list>
                     <q-item
+                      v-if="canEditAnyClientSection"
                       v-close-popup
                       clickable
                       :disable="loading"
@@ -414,6 +415,7 @@
         class="client-overview-alt-header__actions">
         <div class="client-overview-alt-header__actions-row">
           <q-btn
+            v-if="canEditAnyClientSection"
             no-caps
             unelevated
             color="primary"
@@ -477,6 +479,8 @@ import {
 } from 'src/test-ids/index.js'
 import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
 
 const props = defineProps({
   clientId: {
@@ -523,6 +527,7 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { canEditAnyClientSection } = useClientPermissions()
 
 const encounterDialogOpen = ref(false)
 
