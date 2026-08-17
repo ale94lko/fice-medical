@@ -3,11 +3,11 @@ import { clearSharedSessionInactivityState } from
   'src/utils/session-inactivity-sync.js'
 
 export function readStoredToken() {
-  return localStorage.getItem(keys.token)
+  return sessionStorage.getItem(keys.token)
 }
 
 export function writeStoredToken(value) {
-  localStorage.setItem(keys.token, value ?? '')
+  sessionStorage.setItem(keys.token, value ?? '')
 }
 
 export function readStoredExpireAt() {
@@ -22,16 +22,16 @@ export function writeStoredExpireAt(value) {
 }
 
 export function readStoredRefreshToken() {
-  return localStorage.getItem(keys.refresh)
-    || localStorage.getItem(keys.refreshLegacy)
+  return sessionStorage.getItem(keys.refresh)
+    || sessionStorage.getItem(keys.refreshLegacy)
 }
 
 export function writeStoredRefreshToken(value) {
   if (!value) {
     return
   }
-  localStorage.setItem(keys.refresh, value)
-  localStorage.setItem(keys.refreshLegacy, value)
+  sessionStorage.setItem(keys.refresh, value)
+  sessionStorage.setItem(keys.refreshLegacy, value)
 }
 
 export function readStoredModules() {
