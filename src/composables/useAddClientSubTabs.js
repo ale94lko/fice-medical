@@ -44,8 +44,17 @@ export const DOCUMENTS_ATTACHMENTS_SUB_TAB =
 export const DOCUMENTS_CONSENTS_SUB_TAB =
   addClientDocumentsSubTabKeys.consents
 
+export const FINANCIALS_OVERVIEW_SUB_TAB =
+  addClientFinancialsSubTabKeys.overview
+
+export const FINANCIALS_LEDGER_SUB_TAB =
+  addClientFinancialsSubTabKeys.ledger
+
 export const FINANCIALS_BILLING_SUB_TAB =
   addClientFinancialsSubTabKeys.billing
+
+export const FINANCIALS_PAYMENTS_SUB_TAB =
+  addClientFinancialsSubTabKeys.payments
 
 export const ADD_CLIENT_MAIN_TABS = [
   {
@@ -165,6 +174,16 @@ export const ADD_CLIENT_SUB_TABS = {
     },
   ],
   [addClientTabKeys.financials]: [
+    {
+      key: addClientFinancialsSubTabKeys.overview,
+      icon: 'account_balance_wallet',
+      labelKey: 'subTabFinancialOverview',
+    },
+    {
+      key: addClientFinancialsSubTabKeys.ledger,
+      icon: 'receipt_long',
+      labelKey: 'subTabLedger',
+    },
     {
       key: addClientFinancialsSubTabKeys.billing,
       icon: 'payments',

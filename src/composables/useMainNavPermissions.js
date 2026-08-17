@@ -138,6 +138,21 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.claimView),
   )
 
+  const showRemittances = computed(() =>
+    hasPermission(permissions.value, permissionNames.remittanceView),
+  )
+
+  const showPayments = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.paymentView,
+      permissionNames.clientPaymentView,
+    ]),
+  )
+
+  const showDenials = computed(() =>
+    hasPermission(permissions.value, permissionNames.denialView),
+  )
+
   const showAdministrationMenu = computed(() =>
     hasAnyPermission(permissions.value, administrationPermissions),
   )
@@ -205,6 +220,9 @@ export function useMainNavPermissions() {
     showAdminStaffList,
     showBilling,
     showClaims,
+    showRemittances,
+    showPayments,
+    showDenials,
     showAdministrationMenu,
     showAdminGeneral,
     showAdminSubtenants,

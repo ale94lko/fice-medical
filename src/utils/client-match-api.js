@@ -145,7 +145,8 @@ function normalizeMatchRow(raw) {
   if (!raw || typeof raw !== 'object') {
     return null
   }
-  const patientId = raw.patient_id ?? raw.patientId ?? raw.client_id
+  const patientId = raw.client_id ?? raw.clientId
+    ?? raw.patient_id ?? raw.patientId
   const idNum = Number(patientId)
   if (!Number.isFinite(idNum)) {
     return null

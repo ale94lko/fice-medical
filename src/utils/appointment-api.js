@@ -123,12 +123,19 @@ export async function searchClientAppointments(clientId, params = {}) {
   }
 }
 
+function optionalClientNumber(value) {
+  const key = String(value ?? '').trim()
+
+  return key || undefined
+}
+
 export async function listCalendarAppointments(params = {}) {
   const query = {
     from_utc: params.from_utc,
     to_utc: params.to_utc,
     clinician_ids: params.clinician_ids ?? undefined,
     clinician_id: params.clinician_id ?? undefined,
+    client_number: optionalClientNumber(params.client_number),
     page: params.page ?? 0,
     limit: params.limit ?? 200,
   }
@@ -215,7 +222,7 @@ export async function listAppointmentAvailability(params = {}) {
     service_procedure_ids: (params.service_procedure_ids ?? [])
       .join(','),
     clinician_id: params.clinician_id ?? undefined,
-    client_id: params.client_id ?? undefined,
+    client_number: optionalClientNumber(params.client_number),
     exclude_appointment_id: params.exclude_appointment_id ?? undefined,
     limit: params.limit ?? 50,
   }
@@ -235,7 +242,7 @@ export async function listAppointmentAvailabilityRanges(params = {}) {
     service_procedure_ids: (params.service_procedure_ids ?? [])
       .join(','),
     clinician_id: params.clinician_id ?? undefined,
-    client_id: params.client_id ?? undefined,
+    client_number: optionalClientNumber(params.client_number),
     exclude_appointment_id: params.exclude_appointment_id ?? undefined,
     limit: params.limit ?? 100,
   }

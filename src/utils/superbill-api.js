@@ -41,10 +41,11 @@ export function superbillApiErrorMessage(
   return String(message || fallback)
 }
 
-export function isSuperbillNotReadyError(error) {
+export function isSuperbillHasSubmittedClaimError(error) {
   const data = error?.response?.data
 
-  return String(data?.error_description ?? '') === 'SUPERBILL_NOT_READY'
+  return String(data?.error_description ?? '')
+    === 'SUPERBILL_HAS_SUBMITTED_CLAIM'
 }
 
 export function superbillNotReadyEvaluation(error) {

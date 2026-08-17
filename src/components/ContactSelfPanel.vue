@@ -426,9 +426,9 @@ const communicationOptions = computed(() => [
     label: t('prefCommProviderDidNotAsk'),
   },
   {
-    value: clientPreferredCommunicationValues.patientDeclined,
+    value: clientPreferredCommunicationValues.clientDeclined,
     icon: 'person_off',
-    label: t('prefCommPatientDeclined'),
+    label: t('prefCommClientDeclined'),
   },
   {
     value: clientPreferredCommunicationValues.workPhone,

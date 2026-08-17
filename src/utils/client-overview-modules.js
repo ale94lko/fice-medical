@@ -26,6 +26,8 @@ const MODULE_TONES = {
   tasks: 'slate',
   followUps: 'teal',
   billing: 'green',
+  overview: 'orange',
+  ledger: 'teal',
   claims: 'purple',
   payments: 'green',
   attachments: 'slate',
@@ -81,6 +83,9 @@ export function buildClientOverviewModuleConfigs() {
 function isComingSoonSubTab(parentKey, subTabKey) {
   if (parentKey === addClientTabKeys.financials) {
     return subTabKey !== addClientFinancialsSubTabKeys.billing
+      && subTabKey !== addClientFinancialsSubTabKeys.overview
+      && subTabKey !== addClientFinancialsSubTabKeys.ledger
+      && subTabKey !== addClientFinancialsSubTabKeys.payments
   }
   if (parentKey === addClientTabKeys.documents) {
     return subTabKey !== 'attachments' && subTabKey !== 'consents'

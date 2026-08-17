@@ -704,6 +704,7 @@ import {
   addSuperbillNote,
   fetchSuperbillById,
   fetchSuperbillHistory,
+  isSuperbillHasSubmittedClaimError,
   isSuperbillNotReadyError,
   markSuperbillReviewed,
   putSuperbillOnHold,
@@ -1239,7 +1240,9 @@ function notifyError(error, fallback) {
   }
   $q.notify({
     type: quasarNotifyTypes.negative,
-    message: superbillApiErrorMessage(error, fallback),
+    message: isSuperbillHasSubmittedClaimError(error)
+      ? t('superbillHasSubmittedClaim')
+      : superbillApiErrorMessage(error, fallback),
   })
 }
 

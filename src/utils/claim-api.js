@@ -107,6 +107,13 @@ export async function listClaimWorkQueue({
       needsAttention: Number(countsRaw.needs_attention
         ?? countsRaw.needsAttention ?? 0),
       ready: Number(countsRaw.ready ?? 0),
+      submitted: Number(countsRaw.submitted ?? 0),
+      accepted: Number(countsRaw.accepted ?? 0),
+      rejected: Number(countsRaw.rejected ?? 0),
+      paid: Number(countsRaw.paid ?? 0),
+      partiallyPaid: Number(countsRaw.partially_paid
+        ?? countsRaw.partiallyPaid ?? 0),
+      denied: Number(countsRaw.denied ?? 0),
       voided: Number(countsRaw.voided ?? 0),
       all: Number(countsRaw.all ?? 0),
     },
@@ -160,4 +167,35 @@ export async function fetchClaimHistory(id, {
     pagination: extractEnvelopeListPagination(root)
       ?? root?.pagination,
   }
+}
+
+export async function submitClaim(id, { version } = {}) {
+  const response = await apiInstance.post(apiPaths.claimSubmit(id), {
+    version,
+  })
+
+  return normalizeClaim(unwrapData(response.data))
+}
+
+export async function retryClaimSubmission(id, submissionId) {
+  const response = await apiInstance.post(
+    apiPaths.claimSubmissionRetry(id, submissionId),
+  )
+
+  return normalizeClaim(unwrapData(response.data))
+}
+
+export async function fetchClaimSubmissionRoute() {
+  const response = await apiInstance.get(apiPaths.claimSubmissionRoute)
+
+  return unwrapData(response.data)
+}
+
+export async function updateClaimSubmissionRoute(payload) {
+  const response = await apiInstance.put(
+    apiPaths.claimSubmissionRoute,
+    payload,
+  )
+
+  return unwrapData(response.data)
 }

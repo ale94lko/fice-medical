@@ -66,6 +66,9 @@ export const layoutTestIds = {
   navClinicalResources: 'layout-nav-clinical-resources',
   navBilling: 'layout-nav-billing',
   navClaims: 'layout-nav-claims',
+  navRemittances: 'layout-nav-remittances',
+  navPayments: 'layout-nav-payments',
+  navDenials: 'layout-nav-denials',
 }
 
 export const superbillListTestIds = {
@@ -130,6 +133,8 @@ export const claimListTestIds = {
 export const claimDetailTestIds = {
   page: 'claim-detail-page',
   void: 'claim-detail-void',
+  submit: 'claim-detail-submit',
+  retry: 'claim-detail-retry',
   tab: name => toTestId('claim-detail-tab', name),
   viewSuperbill: 'claim-detail-view-superbill',
   requirementRow: (code, id) => toTestId(
@@ -142,6 +147,56 @@ export const claimDetailTestIds = {
     code,
     id,
   ),
+}
+
+export const remittanceListTestIds = {
+  page: 'remittance-list-page',
+  search: 'remittance-list-search',
+  queueTab: name => toTestId('remittance-queue-tab', name),
+  refresh: 'remittance-queue-refresh',
+  ingest: 'remittance-queue-ingest',
+  rowView: id => toTestId('remittance-list-row-view', id),
+}
+
+export const remittanceDetailTestIds = {
+  page: 'remittance-detail-page',
+  post: 'remittance-detail-post',
+  reviewClaim: id => toTestId('remittance-review-claim', id),
+}
+
+export const paymentListTestIds = {
+  page: 'payment-list-page',
+  search: 'payment-list-search',
+  refresh: 'payment-list-refresh',
+  ingest: 'payment-list-ingest',
+  tabInsurance: 'payment-list-tab-insurance',
+  tabClient: 'payment-list-tab-client',
+  rowView: id => toTestId('payment-list-row-view', id),
+}
+
+export const remittanceIngestTestIds = {
+  payload: 'remittance-ingest-payload',
+  autoPost: 'remittance-ingest-auto-post',
+}
+
+export const denialListTestIds = {
+  page: 'denial-list-page',
+  search: 'denial-list-search',
+  queueTab: name => toTestId('denial-queue-tab', name),
+  refresh: 'denial-queue-refresh',
+  rowView: id => toTestId('denial-list-row-view', id),
+}
+
+export const denialDetailTestIds = {
+  page: 'denial-detail-page',
+  startWork: 'denial-detail-start-work',
+  correct: 'denial-detail-correct',
+  appeal: 'denial-detail-appeal',
+  resolve: 'denial-detail-resolve',
+  viewClaim: 'denial-detail-view-claim',
+  saveRootCause: 'denial-detail-save-root-cause',
+  suggestedAction: 'denial-detail-suggested-action',
+  reopenSource: 'denial-detail-reopen-source',
 }
 
 export const myProfileTestIds = {
@@ -502,6 +557,38 @@ export const clientOverviewAltTestIds = {
 export const clientBillingTestIds = {
   root: 'client-billing-tab',
   rowView: id => toTestId('client-billing-row-view', id),
+}
+
+export const clientFinancialTestIds = {
+  overview: 'client-financial-overview',
+  ledger: 'client-ledger-tab',
+  search: 'client-ledger-search',
+  typeFilter: 'client-ledger-type-filter',
+  statusFilter: 'client-ledger-status-filter',
+  fromDate: 'client-ledger-from-date',
+  toDate: 'client-ledger-to-date',
+  rowView: id => toTestId('client-ledger-row-view', id),
+  recentRow: id => toTestId('client-financial-recent', id),
+  viewClaim: 'client-ledger-btn-view-claim',
+  viewSuperbill: 'client-ledger-btn-view-superbill',
+  detailClose: 'client-ledger-btn-close',
+  overviewTabs: 'client-financial-subtabs',
+  recordPayment: 'client-financial-btn-record-payment',
+  payments: 'client-payments-tab',
+  paymentSearch: 'client-payments-search',
+  paymentRowView: id => toTestId('client-payments-row-view', id),
+  paymentAmount: 'client-payment-amount',
+  paymentDate: 'client-payment-date',
+  paymentMethod: 'client-payment-method',
+  paymentReference: 'client-payment-reference',
+  paymentCheckNumber: 'client-payment-check-number',
+  paymentMethodDescription: 'client-payment-method-description',
+  paymentNotes: 'client-payment-notes',
+  paymentAutoApply: 'client-payment-btn-auto-apply',
+  paymentSubmit: 'client-payment-btn-submit',
+  paymentReverse: 'client-payment-btn-reverse',
+  paymentApply: 'client-payment-btn-apply',
+  paymentReverseReason: 'client-payment-reverse-reason',
 }
 
 export const assignCliniciansTestIds = {

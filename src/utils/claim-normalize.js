@@ -7,6 +7,10 @@ import {
   formatSuperbillMoney,
   maskMemberId,
 } from 'src/utils/superbill-normalize.js'
+import {
+  normalizeAdjudication,
+  normalizeInsurancePayment,
+} from 'src/utils/remittance-normalize.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -36,10 +40,18 @@ function parseOptionalBool(value) {
 }
 
 export function claimStatusVariant(status) {
-  if (status === claimStatuses.ready) {
+  if (status === claimStatuses.ready
+    || status === claimStatuses.accepted
+    || status === claimStatuses.paid) {
     return 'completed'
   }
-  if (status === claimStatuses.voided) {
+  if (status === claimStatuses.submitted
+    || status === claimStatuses.partiallyPaid) {
+    return 'in-progress'
+  }
+  if (status === claimStatuses.rejected
+    || status === claimStatuses.denied
+    || status === claimStatuses.voided) {
     return 'cancelled'
   }
 
@@ -207,13 +219,79 @@ function normalizeReadiness(raw = {}) {
     ready: parseOptionalBool(row.ready),
     blockingCount: parseOptionalNumber(
       row.blocking_count ?? row.blockingCount,
-    ) ?? checks.filter(item => !item.passed
-      && item.severity === 'BLOCKING').length,
+    ) ?? 0,
     warningCount: parseOptionalNumber(
       row.warning_count ?? row.warningCount,
-    ) ?? checks.filter(item => !item.passed
-      && item.severity !== 'BLOCKING').length,
+    ) ?? 0,
     checks,
+  }
+}
+
+function normalizeAcknowledgment(raw = {}) {
+  const row = asObject(raw)
+  if (!Object.keys(row).length) {
+    return null
+  }
+
+  return {
+    id: parseOptionalNumber(row.id),
+    responseType: trim(
+      row.response_type ?? row.responseType,
+    ).toUpperCase(),
+    result: trim(row.result).toUpperCase(),
+    receivedAt: trim(row.received_at ?? row.receivedAt),
+    externalReference: trim(
+      row.external_reference ?? row.externalReference,
+    ),
+    parsedCode: trim(row.parsed_code ?? row.parsedCode),
+    parsedCategory: trim(
+      row.parsed_category ?? row.parsedCategory,
+    ),
+    parsedMessage: trim(row.parsed_message ?? row.parsedMessage),
+    parsedLineRef: trim(row.parsed_line_ref ?? row.parsedLineRef),
+  }
+}
+
+function normalizeSubmission(raw = {}) {
+  const row = asObject(raw)
+  if (row.id == null && !trim(row.status)) {
+    return null
+  }
+
+  return {
+    id: parseOptionalNumber(row.id),
+    attemptNumber: parseOptionalNumber(
+      row.attempt_number ?? row.attemptNumber,
+    ) ?? 0,
+    status: trim(row.status).toUpperCase(),
+    format: trim(row.format),
+    implementationVersion: trim(
+      row.implementation_version ?? row.implementationVersion,
+    ),
+    claimVersion: parseOptionalNumber(
+      row.claim_version ?? row.claimVersion,
+    ),
+    routeName: trim(row.route_name ?? row.routeName),
+    clearinghouseName: trim(
+      row.clearinghouse_name ?? row.clearinghouseName,
+    ),
+    electronicPayerId: trim(
+      row.electronic_payer_id ?? row.electronicPayerId,
+    ),
+    submitterName: trim(row.submitter_name ?? row.submitterName),
+    receiverName: trim(row.receiver_name ?? row.receiverName),
+    generatedAt: trim(row.generated_at ?? row.generatedAt),
+    submittedAt: trim(row.submitted_at ?? row.submittedAt),
+    externalTrackingId: trim(
+      row.external_tracking_id ?? row.externalTrackingId,
+    ),
+    failureCode: trim(row.failure_code ?? row.failureCode),
+    failureMessage: trim(row.failure_message ?? row.failureMessage),
+    ack999: normalizeAcknowledgment(row.ack_999 ?? row.ack999),
+    ack277ca: normalizeAcknowledgment(row.ack_277ca ?? row.ack277ca),
+    acknowledgments: asArray(
+      row.acknowledgments,
+    ).map(normalizeAcknowledgment).filter(Boolean),
   }
 }
 
@@ -283,6 +361,18 @@ export function normalizeClaim(raw = {}) {
     voidedBy: parseOptionalNumber(row.voided_by ?? row.voidedBy),
     voidReason: trim(row.void_reason ?? row.voidReason),
     voidNotes: trim(row.void_notes ?? row.voidNotes),
+    submittedAt: trim(row.submitted_at ?? row.submittedAt),
+    acceptedAt: trim(row.accepted_at ?? row.acceptedAt),
+    rejectedAt: trim(row.rejected_at ?? row.rejectedAt),
+    latestRejectionCode: trim(
+      row.latest_rejection_code ?? row.latestRejectionCode,
+    ),
+    latestRejectionCategory: trim(
+      row.latest_rejection_category ?? row.latestRejectionCategory,
+    ),
+    latestRejectionMessage: trim(
+      row.latest_rejection_message ?? row.latestRejectionMessage,
+    ),
     patient,
     subscriber,
     insurance: {
@@ -319,9 +409,70 @@ export function normalizeClaim(raw = {}) {
     lines,
     diagnoses,
     claimReadiness: readiness,
+    submissionReadiness: normalizeReadiness(
+      row.submission_readiness ?? row.submissionReadiness,
+    ),
+    latestSubmission: normalizeSubmission(
+      row.latest_submission ?? row.latestSubmission,
+    ),
+    latestAdjudication: normalizeAdjudication(
+      row.latest_adjudication ?? row.latestAdjudication,
+    ),
+    adjudications: asArray(
+      row.adjudications,
+    ).map(normalizeAdjudication).filter(item => item.id != null),
+    insurancePayments: asArray(
+      row.insurance_payments ?? row.insurancePayments,
+    ).map(normalizeInsurancePayment).filter(item => item.id != null),
+    parentClaimId: parseOptionalNumber(
+      row.parent_claim_id ?? row.parentClaimId,
+    ),
+    originalClaimId: parseOptionalNumber(
+      row.original_claim_id ?? row.originalClaimId,
+    ),
+    claimRelationshipType: trim(
+      row.claim_relationship_type ?? row.claimRelationshipType,
+    ),
+    claimFrequencyCode: trim(
+      row.claim_frequency_code ?? row.claimFrequencyCode,
+    ),
+    payerClaimControlNumber: trim(
+      row.payer_claim_control_number ?? row.payerClaimControlNumber,
+    ),
+    lineage: asArray(row.lineage).map(item => ({
+      id: parseOptionalNumber(item.id),
+      claimNumber: trim(item.claim_number ?? item.claimNumber),
+      status: trim(item.status),
+      claimRelationshipType: trim(
+        item.claim_relationship_type ?? item.claimRelationshipType,
+      ),
+      parentClaimId: parseOptionalNumber(
+        item.parent_claim_id ?? item.parentClaimId,
+      ),
+    })).filter(item => item.id != null),
+    denialCases: asArray(row.denial_cases ?? row.denialCases)
+      .map(item => ({
+        id: parseOptionalNumber(item.id),
+        denialNumber: trim(item.denial_number ?? item.denialNumber),
+        sourceType: trim(item.source_type ?? item.sourceType),
+        status: trim(item.status),
+        category: trim(item.category),
+      })).filter(item => item.id != null),
     isDraft: status === claimStatuses.draft,
     isReady: status === claimStatuses.ready,
+    isSubmitted: status === claimStatuses.submitted,
+    isAccepted: status === claimStatuses.accepted,
+    isRejected: status === claimStatuses.rejected,
+    isPaid: status === claimStatuses.paid,
+    isPartiallyPaid: status === claimStatuses.partiallyPaid,
+    isDenied: status === claimStatuses.denied,
     isVoided: status === claimStatuses.voided,
+    isSubmittedLifecycle: status === claimStatuses.submitted
+      || status === claimStatuses.accepted
+      || status === claimStatuses.rejected
+      || status === claimStatuses.paid
+      || status === claimStatuses.partiallyPaid
+      || status === claimStatuses.denied,
   }
 }
 
@@ -370,6 +521,14 @@ export function normalizeClaimWorkQueueItem(raw = {}) {
     warningCount: parseOptionalNumber(
       row.warning_count ?? row.warningCount,
     ) ?? 0,
+    issueKind: trim(row.issue_kind ?? row.issueKind).toUpperCase(),
+    issueSummary: trim(row.issue_summary ?? row.issueSummary),
+    submissionReady: parseOptionalBool(
+      row.submission_ready ?? row.submissionReady,
+    ),
+    lastActivityAt: trim(
+      row.last_activity_at ?? row.lastActivityAt,
+    ),
     version: parseOptionalNumber(row.version),
     services,
   }
@@ -414,6 +573,10 @@ export function claimRequirementActionLabelKey(action) {
   }
   if (action === claimRequirementActions.viewClient) {
     return 'claimViewClient'
+  }
+  if (action === claimRequirementActions.viewSubmissionRoute
+    || action === claimRequirementActions.viewPayerConfiguration) {
+    return 'claimViewSubmissionRoute'
   }
 
   return ''

@@ -3,6 +3,7 @@ import {
   addClientCareCoordinationSubTabKeys,
   addClientClinicalSubTabKeys,
   addClientDocumentsSubTabKeys,
+  addClientFinancialsSubTabKeys,
   addClientTabKeys,
   clientPermissionNames,
   permissionNames,
@@ -59,6 +60,21 @@ const SUB_TAB_VIEW = {
   ],
   [addClientDocumentsSubTabKeys.signedForms]: [
     clientPermissionNames.viewTenantData,
+  ],
+  [addClientFinancialsSubTabKeys.overview]: [
+    permissionNames.clientFinancialView,
+  ],
+  [addClientFinancialsSubTabKeys.ledger]: [
+    permissionNames.clientLedgerView,
+  ],
+  [addClientFinancialsSubTabKeys.billing]: [
+    permissionNames.superbillView,
+  ],
+  [addClientFinancialsSubTabKeys.claims]: [
+    permissionNames.claimView,
+  ],
+  [addClientFinancialsSubTabKeys.payments]: [
+    permissionNames.clientPaymentView,
   ],
 }
 
@@ -206,9 +222,8 @@ export function canViewMainTab(modules, tabKey, isCreate) {
     case addClientTabKeys.clinical:
     case addClientTabKeys.careCoordination:
     case addClientTabKeys.documents:
-      return filterSubTabs(modules, tabKey).length > 0
     case addClientTabKeys.financials:
-      return hasPermission(modules, permissionNames.superbillView)
+      return filterSubTabs(modules, tabKey).length > 0
     default:
       return false
   }
@@ -216,11 +231,6 @@ export function canViewMainTab(modules, tabKey, isCreate) {
 
 export function filterSubTabs(modules, parentKey) {
   const tabs = ADD_CLIENT_SUB_TABS[parentKey] ?? []
-  if (parentKey === addClientTabKeys.financials) {
-    return hasPermission(modules, permissionNames.superbillView)
-      ? tabs
-      : []
-  }
 
   return tabs.filter(tab => canViewSubTab(modules, tab.key))
 }

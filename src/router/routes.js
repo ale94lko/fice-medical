@@ -140,6 +140,56 @@ const routes = [
         },
       },
       {
+        path: 'remittances',
+        name: 'RemittanceList',
+        component: () => import(
+          'pages/remittances/RemittanceListPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.remittanceView,
+        },
+      },
+      {
+        path: 'remittances/:id',
+        name: 'RemittanceDetail',
+        component: () => import(
+          'pages/remittances/RemittanceDetailPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.remittanceView,
+        },
+      },
+      {
+        path: 'payments',
+        name: 'PaymentList',
+        component: () => import(
+          'pages/payments/PaymentListPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.paymentView,
+        },
+      },
+      {
+        path: 'denials',
+        name: 'DenialList',
+        component: () => import(
+          'pages/denials/DenialListPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.denialView,
+        },
+      },
+      {
+        path: 'denials/:id',
+        name: 'DenialDetail',
+        component: () => import(
+          'pages/denials/DenialDetailPage.vue'
+        ),
+        meta: {
+          requiresPermission: permissionNames.denialView,
+        },
+      },
+      {
         path: 'administration/subtenants/add',
         name: 'AdminSubtenantsAdd',
         component: () => import('pages/admin/SubtenantList.vue'),

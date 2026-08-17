@@ -14,8 +14,11 @@ const COMM_PREF_FROM_API = {
   work: pref.workPhone,
   work_phone: pref.workPhone,
   mail: pref.mail,
-  declined: pref.patientDeclined,
-  patient_declined: pref.patientDeclined,
+  declined: pref.clientDeclined,
+  patient_declined: pref.clientDeclined,
+  patient_declined_to_specify: pref.clientDeclined,
+  client_declined: pref.clientDeclined,
+  client_declined_to_specify: pref.clientDeclined,
   not_asked: pref.providerDidNotAsk,
   provider_did_not_ask: pref.providerDidNotAsk,
   point_of_contact: pref.pointOfContact,
@@ -27,7 +30,7 @@ const COMM_PREF_TO_API = {
   [pref.homePhone]: 'home',
   [pref.workPhone]: 'work',
   [pref.mail]: 'mail',
-  [pref.patientDeclined]: 'declined',
+  [pref.clientDeclined]: 'declined',
   [pref.providerDidNotAsk]: 'not_asked',
   [pref.pointOfContact]: 'point_of_contact',
 }
@@ -36,7 +39,7 @@ const UI_VALUE_SET = new Set(Object.values(pref))
 
 const EXCLUSIVE_PREFERRED_COMMUNICATION = [
   pref.providerDidNotAsk,
-  pref.patientDeclined,
+  pref.clientDeclined,
 ]
 
 export function defaultPreferredCommunicationList() {

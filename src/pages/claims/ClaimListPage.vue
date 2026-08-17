@@ -295,6 +295,12 @@ const sortKey = ref('dateOfService:desc')
 const counts = ref({
   needsAttention: 0,
   ready: 0,
+  submitted: 0,
+  accepted: 0,
+  rejected: 0,
+  paid: 0,
+  partiallyPaid: 0,
+  denied: 0,
   all: 0,
 })
 const payers = ref([])
@@ -432,6 +438,15 @@ const visibleColumns = computed(() => [
     style: 'min-width: 140px',
   },
   {
+    name: 'activity',
+    label: t('claimColumnLastActivity'),
+    align: 'left',
+    field: row => formatActivity(row.lastActivityAt),
+    sortable: false,
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
+  },
+  {
     name: 'actions',
     label: t('actions'),
     align: 'center',
@@ -453,23 +468,40 @@ function serviceCell(row) {
   return compactServices(row?.services)
 }
 
-function readinessClass(row) {
-  if (row?.status === claimStatuses.ready) {
-    return 'billing-queue-readiness--ready'
+function formatActivity(value) {
+  const raw = String(value ?? '').trim()
+  if (!raw) {
+    return '—'
   }
-  if (row?.status === claimStatuses.voided) {
-    return 'billing-queue-readiness--hold'
-  }
-  if ((row?.blockingCount ?? 0) > 0) {
-    return 'billing-queue-readiness--blockers'
+  const date = new Date(raw)
+  if (Number.isNaN(date.getTime())) {
+    return raw
   }
 
-  return 'billing-queue-readiness--blockers'
+  return date.toLocaleString()
 }
 
 function statusLabel(status) {
   if (status === claimStatuses.ready) {
     return t('claimStatusReady')
+  }
+  if (status === claimStatuses.submitted) {
+    return t('claimStatusSubmitted')
+  }
+  if (status === claimStatuses.accepted) {
+    return t('claimStatusAccepted')
+  }
+  if (status === claimStatuses.rejected) {
+    return t('claimStatusRejected')
+  }
+  if (status === claimStatuses.paid) {
+    return t('claimStatusPaid')
+  }
+  if (status === claimStatuses.partiallyPaid) {
+    return t('claimStatusPartiallyPaid')
+  }
+  if (status === claimStatuses.denied) {
+    return t('claimStatusDenied')
   }
   if (status === claimStatuses.voided) {
     return t('claimStatusVoided')
@@ -478,8 +510,41 @@ function statusLabel(status) {
   return t('claimStatusDraft')
 }
 
+function readinessClass(row) {
+  if (row?.status === claimStatuses.ready
+    && row?.issueKind !== 'SUBMISSION_READINESS') {
+    return 'billing-queue-readiness--ready'
+  }
+  if (row?.status === claimStatuses.accepted
+    || row?.status === claimStatuses.paid) {
+    return 'billing-queue-readiness--ready'
+  }
+  if (row?.status === claimStatuses.submitted
+    || row?.status === claimStatuses.partiallyPaid) {
+    return 'billing-queue-readiness--hold'
+  }
+  if (row?.status === claimStatuses.voided
+    || row?.status === claimStatuses.rejected
+    || row?.status === claimStatuses.denied) {
+    return 'billing-queue-readiness--hold'
+  }
+  if ((row?.blockingCount ?? 0) > 0
+    || row?.issueKind === 'SUBMISSION_READINESS') {
+    return 'billing-queue-readiness--blockers'
+  }
+
+  return 'billing-queue-readiness--blockers'
+}
+
 function readinessLabel(row) {
-  if ((row?.blockingCount ?? 0) > 0) {
+  if (row?.issueKind === 'SUBMISSION_READINESS') {
+    return t('claimQueueSubmissionBlocker')
+  }
+  if (row?.issueKind === 'REJECTION') {
+    return row.issueSummary || t('claimQueueRejectionIssue')
+  }
+  if ((row?.blockingCount ?? 0) > 0
+    && row?.status === claimStatuses.draft) {
     return t('claimQueueBlockers', {
       count: row.blockingCount,
     })
@@ -489,6 +554,15 @@ function readinessLabel(row) {
 }
 
 function readinessHint(row) {
+  if (row?.issueKind === 'SUBMISSION_READINESS') {
+    return row.issueSummary || t('claimQueueSubmissionBlocker')
+  }
+  if (row?.issueKind === 'REJECTION') {
+    return t('claimQueueRejectionIssue')
+  }
+  if (row?.issueKind === 'AWAITING_ACKNOWLEDGMENT') {
+    return t('claimQueueAwaitingAck')
+  }
   if ((row?.blockingCount ?? 0) > 0) {
     return t('claimQueueRequiresAction')
   }

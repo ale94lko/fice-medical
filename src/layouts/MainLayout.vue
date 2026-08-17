@@ -547,6 +547,66 @@
               {{ t('navClaims') }}
             </q-tooltip>
           </q-item>
+          <q-item
+            v-if="showRemittances"
+            clickable
+            v-ripple
+            to="/remittances"
+            :data-testid="layoutTestIds.navRemittances"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="account_balance_wallet" />
+            </q-item-section>
+            <q-item-section>{{ t('navRemittances') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navRemittances') }}
+            </q-tooltip>
+          </q-item>
+          <q-item
+            v-if="showPayments"
+            clickable
+            v-ripple
+            to="/payments"
+            :data-testid="layoutTestIds.navPayments"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="payments" />
+            </q-item-section>
+            <q-item-section>{{ t('navPayments') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navPayments') }}
+            </q-tooltip>
+          </q-item>
+          <q-item
+            v-if="showDenials"
+            clickable
+            v-ripple
+            to="/denials"
+            :data-testid="layoutTestIds.navDenials"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="report" />
+            </q-item-section>
+            <q-item-section>{{ t('navDenials') }}</q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('navDenials') }}
+            </q-tooltip>
+          </q-item>
           <q-expansion-item
             v-if="accordionMenu && showAdministrationMenu"
             v-model="administrationMenu"
@@ -923,6 +983,9 @@ const {
   showAdminStaffList,
   showBilling,
   showClaims,
+  showRemittances,
+  showPayments,
+  showDenials,
   showAdministrationMenu,
   showAdminGeneral,
   showAdminSubtenants,

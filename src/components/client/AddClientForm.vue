@@ -914,8 +914,20 @@
               :key="subTab.key"
               :name="subTab.key"
               class="q-pa-none">
+              <AddClientFinancialOverviewTab
+                v-if="subTab.key === FINANCIALS_OVERVIEW_SUB_TAB"
+                :client-id="props.clientId"
+              />
+              <AddClientLedgerTab
+                v-else-if="subTab.key === FINANCIALS_LEDGER_SUB_TAB"
+                :client-id="props.clientId"
+              />
               <AddClientBillingTab
-                v-if="subTab.key === FINANCIALS_BILLING_SUB_TAB"
+                v-else-if="subTab.key === FINANCIALS_BILLING_SUB_TAB"
+                :client-id="props.clientId"
+              />
+              <AddClientPaymentsTab
+                v-else-if="subTab.key === FINANCIALS_PAYMENTS_SUB_TAB"
                 :client-id="props.clientId"
               />
               <div
@@ -1087,6 +1099,10 @@ import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
 import AddClientInsuranceTab from '../AddClientInsuranceTab.vue'
 import AddClientAttachmentsTab from '../AddClientAttachmentsTab.vue'
 import AddClientBillingTab from '../AddClientBillingTab.vue'
+import AddClientPaymentsTab from '../AddClientPaymentsTab.vue'
+import AddClientFinancialOverviewTab from
+  '../AddClientFinancialOverviewTab.vue'
+import AddClientLedgerTab from '../AddClientLedgerTab.vue'
 import AddClientConsentsTab from '../AddClientConsentsTab.vue'
 import AddClientAccordionSection from '../AccordionSection.vue'
 import AppLoadingOverlay from '../AppLoadingOverlay.vue'
@@ -1152,7 +1168,10 @@ import {
   CARE_COORDINATION_AUTHORIZATIONS_SUB_TAB,
   DOCUMENTS_ATTACHMENTS_SUB_TAB,
   DOCUMENTS_CONSENTS_SUB_TAB,
+  FINANCIALS_OVERVIEW_SUB_TAB,
+  FINANCIALS_LEDGER_SUB_TAB,
   FINANCIALS_BILLING_SUB_TAB,
+  FINANCIALS_PAYMENTS_SUB_TAB,
 } from 'src/composables/useAddClientSubTabs.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useAddClientTabPermissions } from

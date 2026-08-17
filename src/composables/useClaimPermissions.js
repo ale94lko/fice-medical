@@ -16,10 +16,36 @@ export function useClaimPermissions() {
   const canVoidClaim = computed(() =>
     hasPermission(permissions.value, permissionNames.claimVoid),
   )
+  const canSubmitClaim = computed(() =>
+    hasPermission(permissions.value, permissionNames.claimSubmit),
+  )
+  const canViewSubmission = computed(() =>
+    hasPermission(
+      permissions.value,
+      permissionNames.claimViewSubmission,
+    )
+    || canViewClaims.value,
+  )
+  const canRetryTechnicalSubmission = computed(() =>
+    hasPermission(
+      permissions.value,
+      permissionNames.claimRetryTechnicalSubmission,
+    ),
+  )
+  const canManageSubmissionRoute = computed(() =>
+    hasPermission(
+      permissions.value,
+      permissionNames.claimManageSubmissionRoute,
+    ),
+  )
 
   return {
     canViewClaims,
     canGenerateClaim,
     canVoidClaim,
+    canSubmitClaim,
+    canViewSubmission,
+    canRetryTechnicalSubmission,
+    canManageSubmissionRoute,
   }
 }

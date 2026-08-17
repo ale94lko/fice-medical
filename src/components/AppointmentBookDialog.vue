@@ -1323,9 +1323,7 @@ function buildBookPayload() {
   }
 
   const clientKey = String(resolvedClientId.value ?? '').trim()
-  if (/^\d+$/.test(clientKey)) {
-    payload.client_id = Number(clientKey)
-  } else if (clientKey) {
+  if (clientKey) {
     payload.client_number = clientKey
   }
 

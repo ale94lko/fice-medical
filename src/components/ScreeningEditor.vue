@@ -83,7 +83,7 @@
       </div>
     </header>
 
-    <ScreeningPatientMeasurements
+    <ScreeningClientMeasurements
       v-if="ui.showMeasurements"
       v-model:weight="editor.measurements.weight"
       v-model:height="editor.measurements.height"
@@ -147,8 +147,8 @@ import { useI18n } from 'vue-i18n'
 import AccordionSection from './AccordionSection.vue'
 import ScreeningDialogSection from './ScreeningDialogSection.vue'
 import ScreeningDynamicField from 'components/ScreeningDynamicField.vue'
-import ScreeningPatientMeasurements
-  from 'components/ScreeningPatientMeasurements.vue'
+import ScreeningClientMeasurements
+  from 'components/ScreeningClientMeasurements.vue'
 import { useScreeningEditor } from 'src/composables/useScreeningEditor.js'
 import { useScreeningEditorUi } from 'src/composables/useScreeningEditorUi.js'
 import { screeningTestIds as tid } from 'src/test-ids/index.js'

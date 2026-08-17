@@ -244,6 +244,8 @@ export const addClientDocumentsSubTabKeys = {
 }
 
 export const addClientFinancialsSubTabKeys = {
+  overview: 'overview',
+  ledger: 'ledger',
   billing: 'billing',
   claims: 'claims',
   payments: 'payments',
@@ -337,7 +339,7 @@ export const clientEmailTypeValues = {
 
 export const clientPreferredCommunicationValues = {
   providerDidNotAsk: 'Provider did not ask',
-  patientDeclined: 'Client declined to specify',
+  clientDeclined: 'Client declined to specify',
   workPhone: 'Work phone',
   homePhone: 'Home Phone',
   mobilePhone: 'Mobile phone',
@@ -1109,6 +1111,35 @@ export const permissionNames = {
   claimView: 'CLAIM_VIEW',
   claimGenerate: 'CLAIM_GENERATE',
   claimVoid: 'CLAIM_VOID',
+  claimSubmit: 'CLAIM_SUBMIT',
+  claimViewSubmission: 'CLAIM_VIEW_SUBMISSION',
+  claimViewAcknowledgment: 'CLAIM_VIEW_ACKNOWLEDGMENT',
+  claimRetryTechnicalSubmission: 'CLAIM_RETRY_TECHNICAL_SUBMISSION',
+  claimManageSubmissionRoute: 'CLAIM_MANAGE_SUBMISSION_ROUTE',
+  claimAdjudicationView: 'CLAIM_ADJUDICATION_VIEW',
+  remittanceView: 'REMITTANCE_VIEW',
+  remittanceProcess: 'REMITTANCE_PROCESS',
+  remittanceReview: 'REMITTANCE_REVIEW',
+  paymentView: 'PAYMENT_VIEW',
+  paymentPost: 'PAYMENT_POST',
+  paymentAllocationEdit: 'PAYMENT_ALLOCATION_EDIT',
+  denialView: 'DENIAL_VIEW',
+  denialWork: 'DENIAL_WORK',
+  denialAssign: 'DENIAL_ASSIGN',
+  denialCorrectClaim: 'DENIAL_CORRECT_CLAIM',
+  denialCreateReplacement: 'DENIAL_CREATE_REPLACEMENT',
+  denialCreateAppeal: 'DENIAL_CREATE_APPEAL',
+  denialResolve: 'DENIAL_RESOLVE',
+  denialWriteOff: 'DENIAL_WRITE_OFF',
+  denialAdmin: 'DENIAL_ADMIN',
+  clientFinancialView: 'CLIENT_FINANCIAL_VIEW',
+  clientLedgerView: 'CLIENT_LEDGER_VIEW',
+  clientFinancialAdjust: 'CLIENT_FINANCIAL_ADJUST',
+  clientLedgerReverse: 'CLIENT_LEDGER_REVERSE',
+  clientPaymentView: 'CLIENT_PAYMENT_VIEW',
+  clientPaymentCreate: 'CLIENT_PAYMENT_CREATE',
+  clientPaymentAllocate: 'CLIENT_PAYMENT_ALLOCATE',
+  clientPaymentReverse: 'CLIENT_PAYMENT_REVERSE',
 }
 
 export const clientPermissionNames = {
@@ -1296,7 +1327,111 @@ export const superbillHoldReasons = {
 export const claimStatuses = {
   draft: 'DRAFT',
   ready: 'READY',
+  submitted: 'SUBMITTED',
+  accepted: 'ACCEPTED',
+  rejected: 'REJECTED',
+  paid: 'PAID',
+  partiallyPaid: 'PARTIALLY_PAID',
+  denied: 'DENIED',
   voided: 'VOIDED',
+}
+
+export const denialCaseStatuses = {
+  needsReview: 'NEEDS_REVIEW',
+  inProgress: 'IN_PROGRESS',
+  waiting: 'WAITING',
+  readyForResubmission: 'READY_FOR_RESUBMISSION',
+  appealRequired: 'APPEAL_REQUIRED',
+  resolved: 'RESOLVED',
+  closedNoAction: 'CLOSED_NO_ACTION',
+}
+
+export const denialSourceTypes = {
+  rejection: 'REJECTION',
+  adjudicationDenial: 'ADJUDICATION_DENIAL',
+}
+
+export const denialPriorities = {
+  low: 'LOW',
+  normal: 'NORMAL',
+  high: 'HIGH',
+  urgent: 'URGENT',
+}
+
+export const denialResolutionTypes = {
+  correctedAndResubmitted: 'CORRECTED_AND_RESUBMITTED',
+  replacementClaimSubmitted: 'REPLACEMENT_CLAIM_SUBMITTED',
+  appealSubmitted: 'APPEAL_SUBMITTED',
+  paidAfterReprocessing: 'PAID_AFTER_REPROCESSING',
+  writeOff: 'WRITE_OFF',
+  clientResponsibility: 'CLIENT_RESPONSIBILITY',
+  noAction: 'NO_ACTION',
+  other: 'OTHER',
+}
+
+export const claimCorrectionTypes = {
+  correctRejectedClaim: 'CORRECT_REJECTED_CLAIM',
+  replacementClaim: 'REPLACEMENT_CLAIM',
+}
+
+export const ledgerEntryTypes = {
+  clientResponsibility: 'CLIENT_RESPONSIBILITY',
+  selfPayCharge: 'SELF_PAY_CHARGE',
+  clientPayment: 'CLIENT_PAYMENT',
+  credit: 'CREDIT',
+  adjustment: 'ADJUSTMENT',
+  refund: 'REFUND',
+  reversal: 'REVERSAL',
+}
+
+export const ledgerEntryStatuses = {
+  pending: 'PENDING',
+  posted: 'POSTED',
+  reversed: 'REVERSED',
+}
+
+export const ledgerSourceTypes = {
+  payerAdjudication: 'PAYER_ADJUDICATION',
+  superbill: 'SUPERBILL',
+  clientPayment: 'CLIENT_PAYMENT',
+  ledgerReversal: 'LEDGER_REVERSAL',
+}
+
+export const clientPaymentMethods = {
+  cash: 'CASH',
+  card: 'CARD',
+  check: 'CHECK',
+  other: 'OTHER',
+}
+
+export const clientPaymentStatuses = {
+  posted: 'POSTED',
+  reversed: 'REVERSED',
+}
+
+export const obligationStates = {
+  open: 'OPEN',
+  partiallyPaid: 'PARTIALLY_PAID',
+  paid: 'PAID',
+}
+
+export const claimCorrectionReasons = {
+  patientInformation: 'PATIENT_INFORMATION',
+  insuranceInformation: 'INSURANCE_INFORMATION',
+  providerInformation: 'PROVIDER_INFORMATION',
+  authorization: 'AUTHORIZATION',
+  coding: 'CODING',
+  diagnosis: 'DIAGNOSIS',
+  service: 'SERVICE',
+  modifier: 'MODIFIER',
+  payerInstruction: 'PAYER_INSTRUCTION',
+  other: 'OTHER',
+}
+
+export const claimRelationshipTypes = {
+  original: 'ORIGINAL',
+  corrected: 'CORRECTED',
+  replacement: 'REPLACEMENT',
 }
 
 export const claimVoidReasons = {
@@ -1311,6 +1446,9 @@ export const claimRequirementActions = {
   viewInsurance: 'VIEW_INSURANCE',
   viewProvider: 'VIEW_PROVIDER',
   viewClient: 'VIEW_CLIENT',
+  viewSubmissionRoute: 'VIEW_SUBMISSION_ROUTE',
+  viewPayerConfiguration: 'VIEW_PAYER_CONFIGURATION',
+  viewAuthorization: 'VIEW_AUTHORIZATION',
 }
 
 export const billingResponsibilityValues = {
@@ -1802,6 +1940,103 @@ export const apiPaths = {
   claimHistory: id => `/claims/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/history`,
+  claimSubmit: id => `/claims/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/submit`,
+  claimSubmissionReadiness: id => `/claims/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/submission-readiness`,
+  claimSubmissions: id => `/claims/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/submissions`,
+  claimSubmissionRetry: (id, submissionId) =>
+    `/claims/v1/${encodeURIComponent(String(id ?? '').trim())}`
+    + `/submissions/${encodeURIComponent(
+      String(submissionId ?? '').trim(),
+    )}/retry`,
+  claimSubmissionRoute: '/claims/v1/submission-route',
+  remittanceWorkQueue: '/remittances/v1/work-queue',
+  remittanceIngest: '/remittances/v1/ingest',
+  remittanceById: id => `/remittances/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  remittancePost: id => `/remittances/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/post`,
+  denialWorkQueue: '/denials/v1/work-queue',
+  denialById: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}`,
+  denialNotes: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/notes`,
+  denialCorrect: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/correct`,
+  denialReplacement: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/replacement`,
+  denialAppeals: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/appeals`,
+  denialAppealById: (id, appealId) => `/denials/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/appeals/${encodeURIComponent(String(appealId ?? '').trim())}`,
+  denialResolve: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/resolve`,
+  denialSourceReopen: id => `/denials/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/request-source-reopen`,
+  clientFinancialSummary: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/financial-summary`,
+  clientLedger: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/ledger`,
+  clientLedgerEntry: (clientId, entryId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/ledger/${encodeURIComponent(String(entryId ?? '').trim())}`,
+  clientLedgerReverse: (clientId, entryId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/ledger/${encodeURIComponent(String(entryId ?? '').trim())}`
+    + '/reverse',
+  clientOpenObligations: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/open-obligations`,
+  clientPayments: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/payments`,
+  clientPaymentById: (clientId, paymentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/payments/${encodeURIComponent(String(paymentId ?? '').trim())}`,
+  clientPaymentAllocations: (clientId, paymentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/payments/${encodeURIComponent(String(paymentId ?? '').trim())}`
+    + '/allocations',
+  clientPaymentAllocationReverse: (
+    clientId,
+    paymentId,
+    allocationId,
+  ) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/payments/${
+    encodeURIComponent(String(paymentId ?? '').trim())
+  }/allocations/${
+    encodeURIComponent(String(allocationId ?? '').trim())
+  }/reverse`,
+  clientPaymentReverse: (clientId, paymentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/payments/${encodeURIComponent(String(paymentId ?? '').trim())}`
+    + '/reverse',
+  clientPaymentWorkQueue: '/payments/v1/client',
+  clientPaymentQueueById: id => `/payments/v1/client/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
+  insurancePaymentWorkQueue: '/payments/v1/insurance',
+  insurancePaymentById: id => `/payments/v1/insurance/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
   serviceProcedureRequirements: id => `/service-procedures/v1/${
     encodeURIComponent(String(id ?? '').trim())
   }/requirements`,

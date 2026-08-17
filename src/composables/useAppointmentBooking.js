@@ -617,7 +617,7 @@ export function useAppointmentBooking(getFilters, options = {}) {
         : 15,
       service_procedure_ids: serviceIds,
       clinician_id: canQueryClinician ? filters.clinicianId : undefined,
-      client_id: hasClient ? filters.clientId : undefined,
+      client_number: hasClient ? filters.clientId : undefined,
       exclude_appointment_id: filters.excludeAppointmentId ?? undefined,
       /* eslint-enable camelcase */
     }
