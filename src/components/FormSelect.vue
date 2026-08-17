@@ -4,8 +4,14 @@
     :model-value="modelValue"
     :data-testid="resolvedTestId"
     :clearable="showClearable"
-    @update:model-value="onUpdate"
-  />
+    @update:model-value="onUpdate">
+    <template v-if="$slots.selected" #selected="scope">
+      <slot name="selected" v-bind="scope" />
+    </template>
+    <template v-if="$slots.option" #option="scope">
+      <slot name="option" v-bind="scope" />
+    </template>
+  </q-select>
 </template>
 
 <script setup>

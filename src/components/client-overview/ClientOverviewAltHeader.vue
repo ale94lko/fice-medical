@@ -564,7 +564,10 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
-const { canEditAnyClientSection, canInviteToClientPortal } = useClientPermissions()
+const {
+  canEditAnyClientSection,
+  canInviteToClientPortal,
+} = useClientPermissions()
 const invitingPortal = ref(false)
 
 const encounterDialogOpen = ref(false)

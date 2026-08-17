@@ -82,15 +82,14 @@ export default defineRouter(function(/* { store, ssrContext } */) {
 
   let githubPagesRedirectHandled = false
 
-  Router.beforeEach(async(to, from, next) => {
+  Router.beforeEach(async(to) => {
     if (!githubPagesRedirectHandled) {
       githubPagesRedirectHandled = true
       const stored = readGithubPagesStoredRedirect()
       if (stored) {
         const target = parseGithubPagesStoredRedirect(stored, Router)
         if (target && target !== to.fullPath) {
-          next(target)
-          return
+          return target
         }
       }
     }
@@ -107,25 +106,18 @@ export default defineRouter(function(/* { store, ssrContext } */) {
       || to.path.startsWith('/meet')
       || to.path.startsWith('/consent-sign')
     if (authStore.needsPostLoginSetup && !holdOnLogin) {
-      next('/login')
-      return
+      return '/login'
     }
 
     if (!to.meta.requiresAuth) {
-      next()
-      return
+      return true
     }
 
     try {
-      const result = resolveProtectedNavigation(to, authStore)
-      if (result === true) {
-        next()
-      } else {
-        next(result)
-      }
+      return resolveProtectedNavigation(to, authStore)
     } catch (error) {
       console.log(error)
-      next('/login')
+      return '/login'
     }
   })
 

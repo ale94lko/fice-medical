@@ -8,14 +8,15 @@
     class="login-text-input full-width"
     :class="{
       'login-text-input--float-on-value': floatLabelOnValue,
+      'login-text-input--has-value': floatLabelOnValue && hasValue,
     }"
     :key="inputKey"
     :autofocus="autofocus"
     :autocomplete="autocomplete || undefined"
     :data-testid="testId"
     :type="resolvedType"
-    :label="resolvedLabel"
-    :placeholder="resolvedPlaceholder"
+    :label="label || undefined"
+    :placeholder="placeholder || undefined"
     :rules="rules"
     :error="error"
     :error-message="errorMessage || undefined"
@@ -99,23 +100,6 @@ const showPlainPassword = ref(false)
 
 const hasValue = computed(() => String(model.value ?? '').length > 0)
 
-const resolvedLabel = computed(() => {
-  if (props.floatLabelOnValue && !hasValue.value) {
-    return undefined
-  }
-  return props.label || undefined
-})
-
-const resolvedPlaceholder = computed(() => {
-  if (props.placeholder) {
-    return props.placeholder
-  }
-  if (props.floatLabelOnValue && !hasValue.value) {
-    return props.label || undefined
-  }
-  return undefined
-})
-
 function focus() {
   fieldRef.value?.focus()
 }
@@ -165,10 +149,13 @@ function onUpdate(value) {
   margin-bottom: 0;
 }
 
-.login-text-input--float-on-value {
-  :deep(.q-field__native::placeholder) {
-    color: $text-muted;
-    opacity: 1;
+.login-text-input--float-on-value:not(
+  .login-text-input--has-value
+) {
+  :deep(.q-field__label) {
+    transform: none !important;
+    max-width: 100% !important;
+    color: rgba(0, 0, 0, 0.6);
   }
 }
 </style>

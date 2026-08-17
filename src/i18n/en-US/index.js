@@ -1012,6 +1012,19 @@ export default {
   moreActions: 'More actions',
   clientListError: 'Could not load the client list.',
   clientListEmpty: 'No clients registered yet.',
+  clientChangeStatusTitle: 'Change Status',
+  clientChangeStatusMessage:
+    'Choose a new status for this client.',
+  clientChangeStatusMessageNamed:
+    'Choose a new status for {name}.',
+  clientChangeStatusMessageBulk:
+    'Choose a new status for {count} selected clients.',
+  clientChangeStatusCurrent: 'Current status',
+  clientChangeStatusPlaceholder: 'Select status',
+  clientChangeStatusRequired: 'Select a status.',
+  clientChangeStatusConfirm: 'Update status',
+  clientChangeStatusSuccess: 'Client status updated.',
+  clientChangeStatusError: 'Could not update client status.',
   clientSavedSuccess: 'Client was successfully saved',
   clientUpdatedSuccess: 'Client was successfully updated',
   clientSaveError: 'Could not save the client. Please check the form.',
@@ -1138,7 +1151,9 @@ export default {
   clientOverviewModuleDialogOverdue: 'Overdue',
   editClient: 'Edit Client',
   inviteToClientPortal: 'Invite to Client Portal',
-  inviteToClientPortalSent: 'If the contact information is valid, an invitation will be sent.',
+  inviteToClientPortalSent:
+    'If the contact information is valid, '
+    + 'an invitation will be sent.',
   inviteToClientPortalFailed: 'Unable to send the invitation. Try again.',
   editClientWithName: 'Edit Client — {name}',
   editClientSubtitle: 'Update client information and save your changes.',

@@ -1053,6 +1053,19 @@ export default {
   moreActions: 'Más acciones',
   clientListError: 'No se pudo cargar el listado de clientes.',
   clientListEmpty: 'No hay clientes registrados.',
+  clientChangeStatusTitle: 'Cambiar estado',
+  clientChangeStatusMessage:
+    'Elija un estado nuevo para este cliente.',
+  clientChangeStatusMessageNamed:
+    'Elija un estado nuevo para {name}.',
+  clientChangeStatusMessageBulk:
+    'Elija un estado nuevo para {count} clientes seleccionados.',
+  clientChangeStatusCurrent: 'Estado actual',
+  clientChangeStatusPlaceholder: 'Seleccione un estado',
+  clientChangeStatusRequired: 'Seleccione un estado.',
+  clientChangeStatusConfirm: 'Actualizar estado',
+  clientChangeStatusSuccess: 'Estado del cliente actualizado.',
+  clientChangeStatusError: 'No se pudo actualizar el estado del cliente.',
   clientSavedSuccess: 'El cliente se guardó correctamente',
   clientUpdatedSuccess: 'El cliente se actualizó correctamente',
   clientSaveError: 'No se pudo guardar el cliente. Revise el formulario.',
@@ -1179,8 +1192,11 @@ export default {
   clientOverviewModuleDialogOverdue: 'Vencido',
   editClient: 'Editar cliente',
   inviteToClientPortal: 'Invitar al Client Portal',
-  inviteToClientPortalSent: 'Si la información de contacto es válida, se enviará una invitación.',
-  inviteToClientPortalFailed: 'No se pudo enviar la invitación. Inténtalo de nuevo.',
+  inviteToClientPortalSent:
+    'Si la información de contacto es válida, '
+    + 'se enviará una invitación.',
+  inviteToClientPortalFailed:
+    'No se pudo enviar la invitación. Inténtalo de nuevo.',
   editClientWithName: 'Editar cliente — {name}',
   editClientSubtitle:
     'Actualice la información del cliente y guarde los cambios.',

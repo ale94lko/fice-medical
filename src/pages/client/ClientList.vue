@@ -225,7 +225,7 @@
             :more-test-id="clientListTestIds.rowMore(row.id)"
             @view="viewRow(row)"
             @edit="editRow(row)"
-            @change-status="changeStatus([row])">
+            @change-status="openChangeStatus([row])">
             <template #more>
               <q-item
                 v-if="canEditBasicInfo"
@@ -279,6 +279,16 @@
       @saved="onCliniciansAssigned"
     />
 
+    <ClientChangeStatusDialog
+      v-model="changeStatusOpen"
+      :selected-count="changeStatusTargetNumbers.length"
+      :client-name="changeStatusClientName"
+      :current-status-label="changeStatusCurrentLabel"
+      :current-status-variant="changeStatusCurrentVariant"
+      :submitting="changeStatusSubmitting"
+      @confirm="onConfirmChangeStatus"
+    />
+
     <AdminTableColumnSettingsDialog
       v-model="columnSettingsOpen"
       :preferences="columnPreferences"
@@ -329,6 +339,8 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import AssignCliniciansDialog from
   'components/AssignCliniciansDialog.vue'
+import ClientChangeStatusDialog from
+  'components/client/ClientChangeStatusDialog.vue'
 import ClientListSummaryCards from 'components/ClientListSummaryCards.vue'
 import { adminTableTestIds } from 'src/test-ids/index.js'
 import { clientListTestIds } from 'src/test-ids/index.js'
@@ -354,6 +366,7 @@ import {
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
 import { clientChartKey } from 'components/helpers.js'
+import { patchClientStatusBulk } from 'src/utils/client-status-api.js'
 
 const {
   canAddClient,
@@ -370,6 +383,12 @@ const selected = ref([])
 const columnSettingsOpen = ref(false)
 const assignCliniciansOpen = ref(false)
 const assignClientId = ref(null)
+const changeStatusOpen = ref(false)
+const changeStatusTargetNumbers = ref([])
+const changeStatusClientName = ref('')
+const changeStatusCurrentLabel = ref('')
+const changeStatusCurrentVariant = ref('')
+const changeStatusSubmitting = ref(false)
 const activeSummaryFilter = ref('')
 
 const siteStore = useSiteStore()
@@ -829,8 +848,58 @@ function onCliniciansAssigned() {
   loadClientsOrSearch(tablePagination.value)
 }
 
-const changeStatus = () => {
-  console.log('Change Status')
+function openChangeStatus(rows) {
+  const source = Array.isArray(rows) && rows.length
+    ? rows
+    : selected.value
+  const numbers = source
+    .map(row => clientChartKey(row))
+    .filter(Boolean)
+  if (!numbers.length) {
+    return
+  }
+  const first = source[0]
+  const isSingle = source.length === 1
+  changeStatusTargetNumbers.value = numbers
+  changeStatusClientName.value = isSingle
+    ? String(first?.[ck.name] ?? '').trim()
+    : ''
+  changeStatusCurrentLabel.value = isSingle
+    ? String(first?.[ck.status] ?? '').trim()
+    : ''
+  changeStatusCurrentVariant.value = isSingle
+    ? String(first?.statusVariant ?? '').trim()
+    : ''
+  changeStatusOpen.value = true
+}
+
+async function onConfirmChangeStatus(status) {
+  const numbers = changeStatusTargetNumbers.value
+  if (!numbers.length) {
+    return
+  }
+  changeStatusSubmitting.value = true
+  try {
+    await patchClientStatusBulk(numbers, status)
+    selected.value = []
+    changeStatusTargetNumbers.value = []
+    changeStatusOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('clientChangeStatusSuccess'),
+      position: 'top',
+    })
+    await loadClientsOrSearch(tablePagination.value)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientChangeStatusError'),
+      })
+    }
+  } finally {
+    changeStatusSubmitting.value = false
+  }
 }
 
 const showFilters = () => {
@@ -866,7 +935,7 @@ const pageActions = computed(() => [
     testId: clientListTestIds.changeStatus,
     disable: selected.value.length === 0 || loading.value,
     visible: canChangeStatus.value,
-    onClick: changeStatus,
+    onClick: openChangeStatus,
   },
   {
     key: 'filters',

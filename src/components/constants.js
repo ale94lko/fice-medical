@@ -20,6 +20,13 @@ export const clientStatus = {
   OPEN: 1,
 }
 
+export const clientStatuses = {
+  active: 'active',
+  inactive: 'inactive',
+  discharged: 'discharged',
+  pending: 'pending',
+}
+
 export const clientFieldKeys = {
   id: 'id',
   clientNumber: 'clientNumber',
@@ -1809,6 +1816,9 @@ export const apiPaths = {
   }`,
   permissionsForCurrentUser: '/permissions/v1/user/me',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
+  clientStatus: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/status`,
   clientPortalInvitations: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/portal-invitations`,
