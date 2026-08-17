@@ -12,6 +12,7 @@ import {
   parseGithubPagesStoredRedirect,
   readGithubPagesStoredRedirect,
   reloadRouteAfterStaleChunk,
+  installUnhandledStaleChunkReload,
 } from 'src/utils/gh-pages-router.js'
 
 import { canAccessRoute } from 'src/composables/useMainNavPermissions.js'
@@ -126,12 +127,15 @@ export default defineRouter(function(/* { store, ssrContext } */) {
   })
 
   Router.onError((error, to) => {
-    if (isStaleChunkLoadError(error) && reloadRouteAfterStaleChunk(to)) {
+    if (isStaleChunkLoadError(error)
+      && reloadRouteAfterStaleChunk(to, Router)) {
       return
     }
 
     throw error
   })
+
+  installUnhandledStaleChunkReload(Router)
 
   authStore.router = Router
 

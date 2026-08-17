@@ -39,16 +39,40 @@ export function isStaleChunkLoadError(error) {
     || /Importing a module script failed/i.test(message)
 }
 
+function githubPagesAppBase(routerBase) {
+  const fromRouter = String(routerBase ?? '').replace(/\/$/, '')
+  if (fromRouter) {
+    return fromRouter
+  }
+
+  const path = String(window.location.pathname || '/')
+  const known = ['/fice-medical', '/fice-medical-admin', '/fice-medical-client']
+  const match = known.find(base =>
+    path === base || path.startsWith(`${base}/`))
+
+  return match || ''
+}
+
+function assignWithinGithubPages(path, routerBase) {
+  const base = githubPagesAppBase(routerBase)
+  const routePath = String(path || '/').startsWith('/')
+    ? path
+    : `/${path}`
+
+  window.location.assign(`${window.location.origin}${base}${routePath}`)
+}
+
 /**
  * After a deploy, hashed JS chunks change. Reload once so index.html
  * picks up the new entry bundle.
  */
-export function reloadRouteAfterStaleChunk(to) {
+export function reloadRouteAfterStaleChunk(to, router) {
   if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') {
     return false
   }
 
-  const reloadKey = `${CHUNK_RELOAD_SESSION_PREFIX}${to.fullPath}`
+  const fullPath = to?.fullPath || window.location.pathname || '/'
+  const reloadKey = `${CHUNK_RELOAD_SESSION_PREFIX}${fullPath}`
   if (sessionStorage.getItem(reloadKey)) {
     sessionStorage.removeItem(reloadKey)
 
@@ -56,7 +80,28 @@ export function reloadRouteAfterStaleChunk(to) {
   }
 
   sessionStorage.setItem(reloadKey, '1')
-  window.location.assign(to.fullPath)
+  assignWithinGithubPages(
+    to?.fullPath || '/',
+    router?.options?.history?.base,
+  )
 
   return true
+}
+
+/** Prefetch/lazy imports outside the router also 404 after a deploy. */
+export function installUnhandledStaleChunkReload(router) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.addEventListener('unhandledrejection', event => {
+    if (!isStaleChunkLoadError(event.reason)) {
+      return
+    }
+    event.preventDefault()
+    reloadRouteAfterStaleChunk(
+      router?.currentRoute?.value,
+      router,
+    )
+  })
 }

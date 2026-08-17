@@ -141,8 +141,6 @@ watch(phase, async(nextPhase) => {
   if (nextPhase !== 'mfa') {
     return
   }
-  void import('layouts/MainLayout.vue')
-  void import('pages/dashboard/DashboardPage.vue')
   await nextTick()
   mfaInputRef.value?.focus()
 })
