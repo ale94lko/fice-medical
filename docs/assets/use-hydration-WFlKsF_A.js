@@ -1,0 +1,1 @@
+import{ct as e,vn as t}from"./runtime-core.esm-bundler-8hW84IlS.js";import{c as n}from"./symbols-DPgC4sMR.js";function r(){let r=t(!n.value);return r.value||e(()=>{r.value=!0}),{isHydrated:r}}export{r as t};

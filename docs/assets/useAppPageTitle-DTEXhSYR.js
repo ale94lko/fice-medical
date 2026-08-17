@@ -1,1 +1,0 @@
-import{Cp as e,Gp as t,Pp as n,np as r,zp as i}from"./index-BFFQRRoy.js";var a=i(``),o=0;function s(){return{appPageTitle:r(()=>a.value)}}function c(r){let i=++o;n(()=>t(r),e=>{i===o&&(a.value=String(e??``).trim())},{immediate:!0}),e(()=>{i===o&&(a.value=``)})}export{c as n,s as t};
