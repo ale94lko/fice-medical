@@ -31,6 +31,10 @@ export function useClientPermissions() {
     permissions,
     clientPermissionNames.archiveClient,
   )
+  const canInviteToClientPortal = usePermission(
+    permissions,
+    clientPermissionNames.clientPortalInvite,
+  )
   const canViewContact = usePermission(
     permissions,
     clientPermissionNames.viewContact,
@@ -240,6 +244,7 @@ export function useClientPermissions() {
     canEditBasicInfo,
     canChangeStatus,
     canArchiveClient,
+    canInviteToClientPortal,
     canViewContact,
     canEditContact,
     canViewAllergies,

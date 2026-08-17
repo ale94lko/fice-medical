@@ -668,6 +668,7 @@ export const reservedTenantSubdomains = new Set([
   'app',
   'api',
   'admin',
+  'portal',
 ])
 
 export const catalogNames = {
@@ -1052,6 +1053,7 @@ export const permissionNames = {
   editBasicInfoClient: 'EDIT_BASIC_INFO_CLIENT',
   changeStatusClient: 'CHANGE_STATUS_CLIENT',
   archiveClient: 'ARCHIVE_CLIENT',
+  clientPortalInvite: 'CLIENT_PORTAL_INVITE',
   viewClinicians: 'VIEW_CLINICIANS',
   editClinicians: 'EDIT_CLINICIANS',
   viewStaffMembers: 'VIEW_STAFF_MEMBERS',
@@ -1152,6 +1154,7 @@ export const clientPermissionNames = {
   editBasicInfoClient: 'EDIT_BASIC_INFO_CLIENT',
   changeStatusClient: 'CHANGE_STATUS_CLIENT',
   archiveClient: 'ARCHIVE_CLIENT',
+  clientPortalInvite: permissionNames.clientPortalInvite,
   viewContact: 'VIEW_CONTACT',
   editContact: 'EDIT_CONTACT',
   viewAllergies: 'VIEW_ALLERGIES',
@@ -1806,6 +1809,9 @@ export const apiPaths = {
   }`,
   permissionsForCurrentUser: '/permissions/v1/user/me',
   clientById: id => `/client/v1/${encodeURIComponent(String(id ?? '').trim())}`,
+  clientPortalInvitations: id => `/client/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/portal-invitations`,
   clientClinicians: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/clinicians`,

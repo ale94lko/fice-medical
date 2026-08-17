@@ -33,6 +33,7 @@ function devApiProxy(target) {
     '/screenings': { ...o },
     '/staff': { ...o },
     '/logout': { ...o },
+    '/portal': { ...o },
     '/reference-data': { ...o },
     // Meet REST API
     '/meet': { ...o },

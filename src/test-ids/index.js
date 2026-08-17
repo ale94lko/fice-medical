@@ -650,6 +650,7 @@ export const clientOverviewAltTestIds = {
   header: 'client-overview-alt-header',
   openClassic: 'client-overview-alt-btn-classic',
   edit: 'client-overview-alt-btn-edit',
+  invitePortal: 'client-overview-alt-btn-invite-portal',
   actionsMenu: 'client-overview-alt-btn-actions-menu',
   actionsMenuPanel: 'client-overview-alt-actions-menu',
   copyName: 'client-overview-alt-btn-copy-name',

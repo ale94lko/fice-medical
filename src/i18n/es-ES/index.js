@@ -1178,6 +1178,9 @@ export default {
   clientOverviewModuleDialogRemindAt: 'Recordar el',
   clientOverviewModuleDialogOverdue: 'Vencido',
   editClient: 'Editar cliente',
+  inviteToClientPortal: 'Invitar al Client Portal',
+  inviteToClientPortalSent: 'Si la información de contacto es válida, se enviará una invitación.',
+  inviteToClientPortalFailed: 'No se pudo enviar la invitación. Inténtalo de nuevo.',
   editClientWithName: 'Editar cliente — {name}',
   editClientSubtitle:
     'Actualice la información del cliente y guarde los cambios.',

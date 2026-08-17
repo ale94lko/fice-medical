@@ -129,6 +129,27 @@
                       </q-item-section>
                     </q-item>
 
+                    <q-item
+                      v-if="canInviteToClientPortal"
+                      v-close-popup
+                      clickable
+                      :disable="loading || invitingPortal"
+                      :data-testid="clientOverviewAltTestIds.invitePortal"
+                      @click="inviteToPortal">
+                      <q-item-section avatar>
+                        <q-icon
+                          name="person_add"
+                          size="20px"
+                          color="primary"
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ t('inviteToClientPortal') }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+
                     <GenerateDocumentAction
                       v-if="clientId"
                       :document-type="documentTypes.clientProfile"
@@ -428,6 +449,18 @@
             :label="t('editClient')"
             @click="emit('edit')"
           />
+          <q-btn
+            v-if="canInviteToClientPortal"
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            icon="person_add"
+            :data-testid="clientOverviewAltTestIds.invitePortal"
+            :disable="loading || invitingPortal"
+            :label="t('inviteToClientPortal')"
+            @click="inviteToPortal"
+          />
           <GenerateDocumentAction
             v-if="clientId"
             :document-type="documentTypes.clientProfile"
@@ -483,6 +516,8 @@ import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { inviteClientToPortal } from
+  'src/utils/client-portal-invitation-api.js'
 
 const props = defineProps({
   clientId: {
@@ -529,11 +564,33 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
-const { canEditAnyClientSection } = useClientPermissions()
+const { canEditAnyClientSection, canInviteToClientPortal } = useClientPermissions()
+const invitingPortal = ref(false)
 
 const encounterDialogOpen = ref(false)
 
 const isCompactHeader = computed(() => $q.screen.width < 900)
+
+async function inviteToPortal() {
+  if (!props.clientId || invitingPortal.value) {
+    return
+  }
+  invitingPortal.value = true
+  try {
+    await inviteClientToPortal(props.clientId)
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('inviteToClientPortalSent'),
+    })
+  } catch {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('inviteToClientPortalFailed'),
+    })
+  } finally {
+    invitingPortal.value = false
+  }
+}
 
 function onRequestEncounterDialog() {
   // Menu unmounts the overflow item; open host dialog after it closes.
