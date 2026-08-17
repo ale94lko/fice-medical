@@ -1,0 +1,1 @@
+import{t as e}from"./useViewportLayout-5SS2tC-x.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
