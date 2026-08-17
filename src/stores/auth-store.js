@@ -15,8 +15,7 @@ import {
 } from 'components/helpers.js'
 import {
   clearAuthLocalStorage,
-  hydrateStoredActiveSubtenantId,
-  hydrateStoredSubtenants,
+  ensureAuthStorageHydrated,
   readStoredActiveSubtenantId,
   readStoredConfigData,
   readStoredExpireAt,
@@ -411,11 +410,12 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     async restoreSession() {
+      await ensureAuthStorageHydrated()
       const token = readStoredToken()
       const expireAt = readStoredExpireAt()
       const refreshToken = readStoredRefreshToken()
-      const subtenants = await hydrateStoredSubtenants()
-      const activeSubtenantId = await hydrateStoredActiveSubtenantId()
+      const subtenants = readStoredSubtenants()
+      const activeSubtenantId = readStoredActiveSubtenantId()
       const tenantId = readStoredTenantId()
       const configData = readStoredConfigData()
       const userInfo = readStoredUserInfo()

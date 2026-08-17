@@ -12,6 +12,7 @@ import {
   extractOAuthTokenPayload,
 } from 'components/helpers.js'
 import {
+  ensureAuthStorageHydrated,
   readStoredActiveSubtenantId,
   readStoredExpireAt,
   readStoredRefreshToken,
@@ -258,6 +259,7 @@ api.interceptors.request.use(
     if (publicAuth) {
       stripAuthorizationHeader(config)
     } else {
+      await ensureAuthStorageHydrated()
       await maybeRefreshAccessToken()
       const t2 = readStoredToken()
       if (t2) {

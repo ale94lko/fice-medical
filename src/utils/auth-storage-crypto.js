@@ -1,5 +1,6 @@
 export const AUTH_STORAGE_PACKED_PREFIX = 'enc.v1:'
 const PACKED_PREFIX = AUTH_STORAGE_PACKED_PREFIX
+export const AUTH_WRAP_STORAGE_KEY = 'fice.auth.wrap.v1'
 
 function bytesToBase64(bytes) {
   const chunk = 0x8000
@@ -86,4 +87,26 @@ export async function decryptJsonFromStorage(packed, secret) {
   } catch {
     return null
   }
+}
+
+export function readAuthWrapSecret() {
+  if (typeof sessionStorage === 'undefined' || !globalThis.crypto?.getRandomValues) {
+    return ''
+  }
+  const existing = sessionStorage.getItem(AUTH_WRAP_STORAGE_KEY)
+  if (existing) {
+    return existing
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(32))
+  const secret = bytesToBase64(bytes)
+  sessionStorage.setItem(AUTH_WRAP_STORAGE_KEY, secret)
+
+  return secret
+}
+
+export function clearAuthWrapSecret() {
+  if (typeof sessionStorage === 'undefined') {
+    return
+  }
+  sessionStorage.removeItem(AUTH_WRAP_STORAGE_KEY)
 }

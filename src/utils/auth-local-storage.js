@@ -3,20 +3,99 @@ import { clearSharedSessionInactivityState } from
   'src/utils/session-inactivity-sync.js'
 import {
   AUTH_STORAGE_PACKED_PREFIX,
+  AUTH_WRAP_STORAGE_KEY,
+  clearAuthWrapSecret,
   decryptJsonFromStorage,
   encryptJsonForStorage,
+  readAuthWrapSecret,
 } from 'src/utils/auth-storage-crypto.js'
 
+let authStorageHydratePromise = null
+let tokenMemory = undefined
+let refreshTokenMemory = undefined
+let tenantIdMemory = undefined
+let configDataMemory = undefined
+let userInfoMemory = undefined
+let subtenantsMemory = null
+let activeSubtenantIdMemory = undefined
+
+function isPackedStorageValue(raw) {
+  return String(raw || '').startsWith(AUTH_STORAGE_PACKED_PREFIX)
+}
+
+async function persistEncryptedValue(store, key, value) {
+  const packed = await encryptJsonForStorage(value, readAuthWrapSecret())
+  if (!packed) {
+    store.removeItem(key)
+
+    return
+  }
+  store.setItem(key, packed)
+}
+
+async function decryptStoredValue(raw) {
+  const fromWrap = await decryptJsonFromStorage(raw, readAuthWrapSecret())
+  if (fromWrap != null) {
+    return fromWrap
+  }
+  const legacyToken = typeof tokenMemory === 'string' && tokenMemory
+    ? tokenMemory
+    : ''
+  if (!legacyToken) {
+    return null
+  }
+
+  return decryptJsonFromStorage(raw, legacyToken)
+}
+
 export function readStoredToken() {
-  return sessionStorage.getItem(keys.token)
+  if (tokenMemory !== undefined) {
+    return tokenMemory
+  }
+  const raw = sessionStorage.getItem(keys.token)
+  if (!raw || isPackedStorageValue(raw)) {
+    return ''
+  }
+
+  return raw
 }
 
 export function writeStoredToken(value) {
-  sessionStorage.setItem(keys.token, value ?? '')
+  const next = String(value ?? '')
+  tokenMemory = next
+  if (!next) {
+    sessionStorage.removeItem(keys.token)
+
+    return
+  }
+  void persistEncryptedValue(sessionStorage, keys.token, next)
+}
+
+export async function hydrateStoredToken() {
+  if (tokenMemory) {
+    return tokenMemory
+  }
+  const raw = sessionStorage.getItem(keys.token)
+  if (!raw) {
+    tokenMemory = ''
+
+    return ''
+  }
+  if (!isPackedStorageValue(raw)) {
+    tokenMemory = raw
+    void persistEncryptedValue(sessionStorage, keys.token, raw)
+
+    return raw
+  }
+  const parsed = await decryptStoredValue(raw)
+  tokenMemory = typeof parsed === 'string' ? parsed : ''
+
+  return tokenMemory
 }
 
 export function readStoredExpireAt() {
-  return localStorage.getItem(keys.expireAt)
+  return expireAtIsoFromAccessToken(readStoredToken())
+    || localStorage.getItem(keys.expireAt)
     || localStorage.getItem(keys.expireAtLegacy)
 }
 
@@ -44,28 +123,55 @@ function expireAtIsoFromAccessToken(token) {
 }
 
 export function writeStoredExpireAt() {
-  const iso = expireAtIsoFromAccessToken(readStoredToken())
-  if (!iso) {
-    localStorage.removeItem(keys.expireAt)
-    localStorage.removeItem(keys.expireAtLegacy)
-
-    return
-  }
-  localStorage.setItem(keys.expireAt, iso)
-  localStorage.setItem(keys.expireAtLegacy, iso)
+  localStorage.removeItem(keys.expireAt)
+  localStorage.removeItem(keys.expireAtLegacy)
 }
 
 export function readStoredRefreshToken() {
-  return sessionStorage.getItem(keys.refresh)
+  if (refreshTokenMemory !== undefined) {
+    return refreshTokenMemory
+  }
+  const raw = sessionStorage.getItem(keys.refresh)
     || sessionStorage.getItem(keys.refreshLegacy)
+  if (!raw || isPackedStorageValue(raw)) {
+    return ''
+  }
+
+  return raw
 }
 
 export function writeStoredRefreshToken(value) {
   if (!value) {
     return
   }
-  sessionStorage.setItem(keys.refresh, value)
-  sessionStorage.setItem(keys.refreshLegacy, value)
+  const next = String(value)
+  refreshTokenMemory = next
+  sessionStorage.removeItem(keys.refreshLegacy)
+  void persistEncryptedValue(sessionStorage, keys.refresh, next)
+}
+
+export async function hydrateStoredRefreshToken() {
+  if (refreshTokenMemory) {
+    return refreshTokenMemory
+  }
+  const raw = sessionStorage.getItem(keys.refresh)
+    || sessionStorage.getItem(keys.refreshLegacy)
+  if (!raw) {
+    refreshTokenMemory = ''
+
+    return ''
+  }
+  if (!isPackedStorageValue(raw)) {
+    refreshTokenMemory = raw
+    sessionStorage.removeItem(keys.refreshLegacy)
+    void persistEncryptedValue(sessionStorage, keys.refresh, raw)
+
+    return raw
+  }
+  const parsed = await decryptStoredValue(raw)
+  refreshTokenMemory = typeof parsed === 'string' ? parsed : ''
+
+  return refreshTokenMemory
 }
 
 export function readStoredModules() {
@@ -106,8 +212,6 @@ export function writeStoredPermissions() {
   localStorage.removeItem(keys.permissions)
 }
 
-let subtenantsMemory = null
-
 function normalizeStoredSubtenants(value) {
   if (!Array.isArray(value)) {
     return []
@@ -134,7 +238,7 @@ export function readStoredSubtenants() {
     return subtenantsMemory
   }
   const raw = localStorage.getItem(keys.subtenants)
-  if (!raw || String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
+  if (!raw || isPackedStorageValue(raw)) {
     return []
   }
   try {
@@ -142,16 +246,6 @@ export function readStoredSubtenants() {
   } catch {
     return []
   }
-}
-
-async function persistEncryptedValue(key, value) {
-  const packed = await encryptJsonForStorage(value, readStoredToken())
-  if (!packed) {
-    localStorage.removeItem(key)
-
-    return
-  }
-  localStorage.setItem(key, packed)
 }
 
 export function writeStoredSubtenants(subtenants) {
@@ -162,7 +256,7 @@ export function writeStoredSubtenants(subtenants) {
 
     return
   }
-  void persistEncryptedValue(keys.subtenants, payload)
+  void persistEncryptedValue(localStorage, keys.subtenants, payload)
 }
 
 export async function hydrateStoredSubtenants() {
@@ -175,18 +269,14 @@ export async function hydrateStoredSubtenants() {
 
     return subtenantsMemory
   }
-  const parsed = normalizeStoredSubtenants(
-    await decryptJsonFromStorage(raw, readStoredToken()),
-  )
+  const parsed = normalizeStoredSubtenants(await decryptStoredValue(raw))
   subtenantsMemory = parsed
-  if (parsed.length && !String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
-    void persistEncryptedValue(keys.subtenants, parsed)
+  if (parsed.length && !isPackedStorageValue(raw)) {
+    void persistEncryptedValue(localStorage, keys.subtenants, parsed)
   }
 
   return parsed
 }
-
-let activeSubtenantIdMemory = undefined
 
 function normalizeStoredActiveSubtenantId(value) {
   if (value == null || value === '') {
@@ -204,8 +294,7 @@ export function readStoredActiveSubtenantId() {
     return activeSubtenantIdMemory
   }
   const raw = localStorage.getItem(keys.activeSubtenantId)
-  if (raw == null || raw === ''
-    || String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
+  if (raw == null || raw === '' || isPackedStorageValue(raw)) {
     return null
   }
   const id = Number(raw)
@@ -225,7 +314,7 @@ export function writeStoredActiveSubtenantId(id) {
     return
   }
   activeSubtenantIdMemory = nextId
-  void persistEncryptedValue(keys.activeSubtenantId, nextId)
+  void persistEncryptedValue(localStorage, keys.activeSubtenantId, nextId)
 }
 
 export async function hydrateStoredActiveSubtenantId() {
@@ -238,20 +327,29 @@ export async function hydrateStoredActiveSubtenantId() {
 
     return null
   }
-  const nextId = normalizeStoredActiveSubtenantId(
-    await decryptJsonFromStorage(raw, readStoredToken()),
-  )
+  const nextId = normalizeStoredActiveSubtenantId(await decryptStoredValue(raw))
   activeSubtenantIdMemory = nextId
-  if (nextId != null && !String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
-    void persistEncryptedValue(keys.activeSubtenantId, nextId)
+  if (nextId != null && !isPackedStorageValue(raw)) {
+    void persistEncryptedValue(localStorage, keys.activeSubtenantId, nextId)
   }
 
   return nextId
 }
 
+function normalizeStoredTenantId(value) {
+  const id = Number(
+    typeof value === 'object' ? value.id ?? value.tenantId : value,
+  )
+
+  return Number.isFinite(id) ? id : null
+}
+
 export function readStoredTenantId() {
+  if (tenantIdMemory !== undefined) {
+    return tenantIdMemory
+  }
   const raw = localStorage.getItem(keys.tenantId)
-  if (raw == null || raw === '') {
+  if (raw == null || raw === '' || isPackedStorageValue(raw)) {
     return null
   }
   const id = Number(raw)
@@ -261,16 +359,52 @@ export function readStoredTenantId() {
 
 export function writeStoredTenantId(id) {
   if (id == null || id === '') {
+    tenantIdMemory = null
     localStorage.removeItem(keys.tenantId)
 
     return
   }
-  localStorage.setItem(keys.tenantId, String(id))
+  const nextId = Number(id)
+  if (!Number.isFinite(nextId)) {
+    return
+  }
+  tenantIdMemory = nextId
+  void persistEncryptedValue(localStorage, keys.tenantId, nextId)
+}
+
+export async function hydrateStoredTenantId() {
+  if (tenantIdMemory !== undefined) {
+    return tenantIdMemory
+  }
+  const raw = localStorage.getItem(keys.tenantId)
+  if (raw == null || raw === '') {
+    tenantIdMemory = null
+
+    return null
+  }
+  const nextId = normalizeStoredTenantId(await decryptStoredValue(raw))
+  tenantIdMemory = nextId
+  if (nextId != null && !isPackedStorageValue(raw)) {
+    void persistEncryptedValue(localStorage, keys.tenantId, nextId)
+  }
+
+  return nextId
+}
+
+function normalizeStoredConfigData(value) {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  return value
 }
 
 export function readStoredConfigData() {
+  if (configDataMemory !== undefined) {
+    return configDataMemory
+  }
   const raw = localStorage.getItem(keys.configData)
-  if (!raw) {
+  if (!raw || isPackedStorageValue(raw)) {
     return null
   }
   try {
@@ -284,16 +418,48 @@ export function readStoredConfigData() {
 
 export function writeStoredConfigData(configData) {
   if (!configData || typeof configData !== 'object') {
+    configDataMemory = null
     localStorage.removeItem(keys.configData)
 
     return
   }
-  localStorage.setItem(keys.configData, JSON.stringify(configData))
+  configDataMemory = configData
+  void persistEncryptedValue(localStorage, keys.configData, configData)
+}
+
+export async function hydrateStoredConfigData() {
+  if (configDataMemory !== undefined) {
+    return configDataMemory
+  }
+  const raw = localStorage.getItem(keys.configData)
+  if (!raw) {
+    configDataMemory = null
+
+    return null
+  }
+  const parsed = normalizeStoredConfigData(await decryptStoredValue(raw))
+  configDataMemory = parsed
+  if (parsed && !isPackedStorageValue(raw)) {
+    void persistEncryptedValue(localStorage, keys.configData, parsed)
+  }
+
+  return parsed
+}
+
+function normalizeStoredUserInfo(value) {
+  if (!value || typeof value !== 'object') {
+    return null
+  }
+
+  return value
 }
 
 export function readStoredUserInfo() {
+  if (userInfoMemory !== undefined) {
+    return userInfoMemory
+  }
   const raw = localStorage.getItem(keys.userInfo)
-  if (!raw) {
+  if (!raw || isPackedStorageValue(raw)) {
     return null
   }
   try {
@@ -307,55 +473,85 @@ export function readStoredUserInfo() {
 
 export function writeStoredUserInfo(userInfo) {
   if (!userInfo || typeof userInfo !== 'object') {
+    userInfoMemory = null
     localStorage.removeItem(keys.userInfo)
 
     return
   }
-  localStorage.setItem(keys.userInfo, JSON.stringify(userInfo))
+  userInfoMemory = userInfo
+  void persistEncryptedValue(localStorage, keys.userInfo, userInfo)
+}
+
+export async function hydrateStoredUserInfo() {
+  if (userInfoMemory !== undefined) {
+    return userInfoMemory
+  }
+  const raw = localStorage.getItem(keys.userInfo)
+  if (!raw) {
+    userInfoMemory = null
+
+    return null
+  }
+  const parsed = normalizeStoredUserInfo(await decryptStoredValue(raw))
+  userInfoMemory = parsed
+  if (parsed && !isPackedStorageValue(raw)) {
+    void persistEncryptedValue(localStorage, keys.userInfo, parsed)
+  }
+
+  return parsed
 }
 
 export function readStoredMustChangePassword() {
-  return localStorage.getItem(keys.mustChangePassword) === 'true'
+  return Boolean(readStoredUserInfo()?.changePassword)
 }
 
-export function writeStoredMustChangePassword(value) {
-  if (value) {
-    localStorage.setItem(keys.mustChangePassword, 'true')
-
-    return
-  }
+export function writeStoredMustChangePassword() {
   localStorage.removeItem(keys.mustChangePassword)
 }
 
 export function readStoredPasswordChangeMode() {
-  const raw = localStorage.getItem(keys.passwordChangeMode)
-  if (raw === 'initial' || raw === 'current') {
-    return raw
+  if (readStoredUserInfo()?.changePassword) {
+    return 'initial'
   }
 
   return null
 }
 
-export function writeStoredPasswordChangeMode(mode) {
-  if (mode === 'initial' || mode === 'current') {
-    localStorage.setItem(keys.passwordChangeMode, mode)
-
-    return
-  }
+export function writeStoredPasswordChangeMode() {
   localStorage.removeItem(keys.passwordChangeMode)
 }
 
 export function readStoredMustEnrollMfa() {
-  return localStorage.getItem(keys.mustEnrollMfa) === 'true'
+  const userInfo = readStoredUserInfo()
+
+  return Boolean(userInfo?.mfaEnrollmentRequired) && !userInfo?.mfaEnabled
 }
 
-export function writeStoredMustEnrollMfa(value) {
-  if (value) {
-    localStorage.setItem(keys.mustEnrollMfa, 'true')
-
-    return
-  }
+export function writeStoredMustEnrollMfa() {
   localStorage.removeItem(keys.mustEnrollMfa)
+}
+
+async function hydrateAllAuthStorage() {
+  await hydrateStoredToken()
+  await hydrateStoredRefreshToken()
+  await Promise.all([
+    hydrateStoredSubtenants(),
+    hydrateStoredActiveSubtenantId(),
+    hydrateStoredTenantId(),
+    hydrateStoredConfigData(),
+    hydrateStoredUserInfo(),
+  ])
+}
+
+export function ensureAuthStorageHydrated() {
+  if (!authStorageHydratePromise) {
+    authStorageHydratePromise = hydrateAllAuthStorage().catch(error => {
+      authStorageHydratePromise = null
+      throw error
+    })
+  }
+
+  return authStorageHydratePromise
 }
 
 export function clearAuthLocalStorage() {
@@ -375,11 +571,19 @@ export function clearAuthLocalStorage() {
     keys.mustChangePassword,
     keys.passwordChangeMode,
     keys.mustEnrollMfa,
+    AUTH_WRAP_STORAGE_KEY,
   ].forEach(k => {
     localStorage.removeItem(k)
     sessionStorage.removeItem(k)
   })
+  authStorageHydratePromise = null
+  tokenMemory = undefined
+  refreshTokenMemory = undefined
+  tenantIdMemory = undefined
+  configDataMemory = undefined
+  userInfoMemory = undefined
   subtenantsMemory = null
   activeSubtenantIdMemory = undefined
+  clearAuthWrapSecret()
   clearSharedSessionInactivityState()
 }

@@ -31,20 +31,7 @@ function resolveTabId() {
   if (tabId) {
     return tabId
   }
-  if (typeof sessionStorage === 'undefined') {
-    tabId = `tab-${Date.now()}`
-
-    return tabId
-  }
-  const storageKey = 'fice-medical.session-inactivity.tab-id'
-  const existing = sessionStorage.getItem(storageKey)
-  if (existing) {
-    tabId = existing
-
-    return tabId
-  }
   tabId = `tab-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
-  sessionStorage.setItem(storageKey, tabId)
 
   return tabId
 }
