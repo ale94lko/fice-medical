@@ -98,6 +98,9 @@ export default defineRouter(function(/* { store, ssrContext } */) {
     if (authStore.token == null) {
       authStore.restoreSession()
     }
+    if (authStore.token) {
+      await authStore.hydrateAuthorization()
+    }
 
     const holdOnLogin = to.path === '/login'
       || to.path === '/reset-password'

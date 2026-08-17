@@ -18,11 +18,9 @@ import {
   readStoredActiveSubtenantId,
   readStoredConfigData,
   readStoredExpireAt,
-  readStoredModules,
   readStoredMustChangePassword,
   readStoredMustEnrollMfa,
   readStoredPasswordChangeMode,
-  readStoredPermissions,
   readStoredRefreshToken,
   readStoredSubtenants,
   readStoredToken,
@@ -42,6 +40,8 @@ import {
   writeStoredTenantId,
   writeStoredUserInfo,
 } from '../utils/auth-local-storage.js'
+import { fetchCurrentUserPermissionCodes } from
+  '../utils/tenant-permissions-api.js'
 import { completeMfaChallenge as postMfaChallenge } from
   '../utils/mfa-api.js'
 import { clearSessionExpiredUiSuppression } from '../utils/api-session-error.js'
@@ -64,6 +64,8 @@ function resolveRestoredPasswordChangeMode(storedMode, userInfo) {
     ? passwordChangeModes.initial
     : passwordChangeModes.current
 }
+
+let authorizationHydratePromise = null
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -194,14 +196,14 @@ export const useAuthStore = defineStore('auth', {
         this.refreshToken = nextRefresh
         writeStoredRefreshToken(nextRefresh)
       }
-      if (Array.isArray(td.modules)) {
+      if (Array.isArray(td.modules) && td.modules.length) {
         this.modules = td.modules
-        writeStoredModules(td.modules)
       }
-      if (Array.isArray(td.permissions)) {
+      if (Array.isArray(td.permissions) && td.permissions.length) {
         this.permissions = td.permissions
-        writeStoredPermissions(td.permissions)
       }
+      writeStoredModules()
+      writeStoredPermissions()
       if (td.tenantId != null) {
         this.tenantId = td.tenantId
         writeStoredTenantId(td.tenantId)
@@ -411,8 +413,6 @@ export const useAuthStore = defineStore('auth', {
       const token = readStoredToken()
       const expireAt = readStoredExpireAt()
       const refreshToken = readStoredRefreshToken()
-      const modules = readStoredModules()
-      const permissions = readStoredPermissions()
       const subtenants = readStoredSubtenants()
       const activeSubtenantId = readStoredActiveSubtenantId()
       const tenantId = readStoredTenantId()
@@ -425,8 +425,6 @@ export const useAuthStore = defineStore('auth', {
         this.token = token
         this.expireAt = expireAt
         this.refreshToken = refreshToken
-        this.modules = modules
-        this.permissions = permissions
         this.tenantId = tenantId
         this.configData = configData
         this.userInfo = userInfo
@@ -445,9 +443,41 @@ export const useAuthStore = defineStore('auth', {
           )
         syncAppDateTimeConfigFromAuth(configData)
         this.applySubtenants(subtenants, activeSubtenantId)
+        writeStoredModules()
+        writeStoredPermissions()
+      }
+    },
+    async hydrateAuthorization() {
+      if (!this.token) {
+        return
+      }
+      if (hasAssignedPermissions(this.permissions)) {
+        return
+      }
+      if (!authorizationHydratePromise) {
+        authorizationHydratePromise = this.loadAuthorizationFromApi()
+          .finally(() => {
+            authorizationHydratePromise = null
+          })
+      }
+      await authorizationHydratePromise
+    },
+    async loadAuthorizationFromApi() {
+      const tokenAtStart = this.token
+      try {
+        const codes = await fetchCurrentUserPermissionCodes()
+        if (this.token !== tokenAtStart) {
+          return
+        }
+        if (codes.length) {
+          this.permissions = codes
+        }
+      } catch {
+        // Route guards fall back to the in-memory grants from login.
       }
     },
     clearSession() {
+      authorizationHydratePromise = null
       this.token = null
       this.expireAt = null
       this.refreshToken = null

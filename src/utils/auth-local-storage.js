@@ -78,9 +78,7 @@ export function readStoredModules() {
   }
 }
 
-export function writeStoredModules(modules) {
-  const list = Array.isArray(modules) ? modules : []
-  void list
+export function writeStoredModules() {
   localStorage.removeItem(keys.modules)
 }
 
@@ -99,9 +97,7 @@ export function readStoredPermissions() {
   }
 }
 
-export function writeStoredPermissions(permissions) {
-  const list = Array.isArray(permissions) ? permissions : []
-  void list
+export function writeStoredPermissions() {
   localStorage.removeItem(keys.permissions)
 }
 
@@ -286,6 +282,9 @@ export function clearAuthLocalStorage() {
     keys.mustChangePassword,
     keys.passwordChangeMode,
     keys.mustEnrollMfa,
-  ].forEach(k => localStorage.removeItem(k))
+  ].forEach(k => {
+    localStorage.removeItem(k)
+    sessionStorage.removeItem(k)
+  })
   clearSharedSessionInactivityState()
 }
