@@ -96,7 +96,7 @@ export default defineRouter(function(/* { store, ssrContext } */) {
     }
 
     if (authStore.token == null) {
-      authStore.restoreSession()
+      await authStore.restoreSession()
     }
     if (authStore.token) {
       await authStore.hydrateAuthorization()

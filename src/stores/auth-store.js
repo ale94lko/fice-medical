@@ -15,6 +15,7 @@ import {
 } from 'components/helpers.js'
 import {
   clearAuthLocalStorage,
+  hydrateStoredSubtenants,
   readStoredActiveSubtenantId,
   readStoredConfigData,
   readStoredExpireAt,
@@ -22,7 +23,6 @@ import {
   readStoredMustEnrollMfa,
   readStoredPasswordChangeMode,
   readStoredRefreshToken,
-  readStoredSubtenants,
   readStoredToken,
   readStoredTenantId,
   readStoredUserInfo,
@@ -409,11 +409,11 @@ export const useAuthStore = defineStore('auth', {
         await router.push('/login')
       }
     },
-    restoreSession() {
+    async restoreSession() {
       const token = readStoredToken()
       const expireAt = readStoredExpireAt()
       const refreshToken = readStoredRefreshToken()
-      const subtenants = readStoredSubtenants()
+      const subtenants = await hydrateStoredSubtenants()
       const activeSubtenantId = readStoredActiveSubtenantId()
       const tenantId = readStoredTenantId()
       const configData = readStoredConfigData()
@@ -442,7 +442,11 @@ export const useAuthStore = defineStore('auth', {
             && !userInfo?.mfaEnabled
           )
         syncAppDateTimeConfigFromAuth(configData)
-        this.applySubtenants(subtenants, activeSubtenantId)
+        if (subtenants.length) {
+          this.applySubtenants(subtenants, activeSubtenantId)
+        } else if (activeSubtenantId != null) {
+          this.activeSubtenantId = activeSubtenantId
+        }
         writeStoredModules()
         writeStoredPermissions()
       }

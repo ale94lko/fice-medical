@@ -1,6 +1,10 @@
 import { authStorageKeys as keys } from 'components/constants.js'
 import { clearSharedSessionInactivityState } from
   'src/utils/session-inactivity-sync.js'
+import {
+  decryptJsonFromStorage,
+  encryptJsonForStorage,
+} from 'src/utils/auth-storage-crypto.js'
 
 export function readStoredToken() {
   return sessionStorage.getItem(keys.token)
@@ -101,40 +105,84 @@ export function writeStoredPermissions() {
   localStorage.removeItem(keys.permissions)
 }
 
+let subtenantsMemory = null
+
+function normalizeStoredSubtenants(value) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map(item => {
+      const id = Number(item?.id)
+      if (!Number.isFinite(id)) {
+        return null
+      }
+
+      return {
+        id,
+        name: String(item?.name ?? '').trim(),
+        code: String(item?.code ?? '').trim(),
+      }
+    })
+    .filter(item => item?.name)
+}
+
 export function readStoredSubtenants() {
+  if (Array.isArray(subtenantsMemory)) {
+    return subtenantsMemory
+  }
   const raw = localStorage.getItem(keys.subtenants)
-  if (!raw) {
+  if (!raw || String(raw).startsWith('enc.v1:')) {
     return []
   }
   try {
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) {
-      return []
-    }
-
-    return parsed
-      .map(item => {
-        const id = Number(item?.id)
-        if (!Number.isFinite(id)) {
-          return null
-        }
-
-        return {
-          id,
-          name: String(item?.name ?? '').trim(),
-          code: String(item?.code ?? '').trim(),
-        }
-      })
-      .filter(item => item?.name)
+    return normalizeStoredSubtenants(JSON.parse(raw))
   } catch {
     return []
   }
 }
 
+async function persistEncryptedSubtenants(payload) {
+  const packed = await encryptJsonForStorage(payload, readStoredToken())
+  if (!packed) {
+    localStorage.removeItem(keys.subtenants)
+
+    return
+  }
+  localStorage.setItem(keys.subtenants, packed)
+}
+
 export function writeStoredSubtenants(subtenants) {
-  const list = Array.isArray(subtenants) ? subtenants : []
-  void list
-  localStorage.removeItem(keys.subtenants)
+  const payload = normalizeStoredSubtenants(subtenants)
+  subtenantsMemory = payload
+  if (!payload.length) {
+    localStorage.removeItem(keys.subtenants)
+
+    return
+  }
+  void persistEncryptedSubtenants(payload)
+}
+
+export async function hydrateStoredSubtenants() {
+  if (Array.isArray(subtenantsMemory) && subtenantsMemory.length) {
+    return subtenantsMemory
+  }
+  const raw = localStorage.getItem(keys.subtenants)
+  if (!raw) {
+    subtenantsMemory = []
+
+    return subtenantsMemory
+  }
+  const parsed = normalizeStoredSubtenants(
+    await decryptJsonFromStorage(raw, readStoredToken()),
+  )
+  subtenantsMemory = parsed
+  if (parsed.length && !String(raw).startsWith('enc.v1:')) {
+    void persistEncryptedSubtenants(parsed)
+  }
+
+  return parsed
 }
 
 export function readStoredActiveSubtenantId() {
@@ -286,5 +334,6 @@ export function clearAuthLocalStorage() {
     localStorage.removeItem(k)
     sessionStorage.removeItem(k)
   })
+  subtenantsMemory = null
   clearSharedSessionInactivityState()
 }
