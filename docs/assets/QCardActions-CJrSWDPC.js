@@ -1,1 +1,0 @@
-import{Hf as e,ff as t,fp as n,nf as r,np as i,rf as a}from"./index-BFFQRRoy.js";var o=e({name:`QCardActions`,props:{...r,vertical:Boolean},setup(e,{slots:r}){let o=a(e),s=i(()=>`q-card__actions ${o.value} q-card__actions--${e.vertical===!0?`vert column`:`horiz row`}`);return()=>n(`div`,{class:s.value},t(r.default))}});export{o as t};

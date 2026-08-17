@@ -1,1 +1,0 @@
-import{Wn as e,id as t,np as n,ur as r}from"./index-BFFQRRoy.js";function i(){let i=e(),a=n(()=>i.permissions);return{canViewClaims:n(()=>r(a.value,t.claimView)),canGenerateClaim:n(()=>r(a.value,t.claimGenerate)),canVoidClaim:n(()=>r(a.value,t.claimVoid))}}export{i as t};
