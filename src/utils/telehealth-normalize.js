@@ -241,7 +241,7 @@ export function cacheGuestAppointmentSummary(meetingToken, payload = {}) {
     payload.clinicianDisplayName
     || summary?.clinicianDisplayName,
   )
-  if (!summary && !clinicianDisplayName) {
+  if (!clinicianDisplayName) {
     return
   }
   try {
@@ -249,7 +249,6 @@ export function cacheGuestAppointmentSummary(meetingToken, payload = {}) {
       `${GUEST_APPT_CACHE_PREFIX}${token}`,
       JSON.stringify({
         clinicianDisplayName: clinicianDisplayName || null,
-        appointmentSummary: summary,
       }),
     )
   } catch {
@@ -270,12 +269,9 @@ export function readCachedGuestAppointmentSummary(meetingToken) {
       return null
     }
     const parsed = JSON.parse(raw)
-    const appointmentSummary = normalizeTelehealthAppointmentSummary(
-      parsed?.appointmentSummary,
-    )
+    const appointmentSummary = null
     const clinicianDisplayName = trimStr(
-      parsed?.clinicianDisplayName
-      || appointmentSummary?.clinicianDisplayName,
+      parsed?.clinicianDisplayName,
     ) || null
     if (!appointmentSummary && !clinicianDisplayName) {
       return null
