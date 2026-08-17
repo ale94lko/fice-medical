@@ -553,10 +553,18 @@ async function hydrateAllAuthStorage() {
     await persistEncryptedValue(sessionStorage, keys.token, tokenMemory)
   }
   if (refreshTokenMemory) {
-    await persistEncryptedValue(sessionStorage, keys.refresh, refreshTokenMemory)
+    await persistEncryptedValue(
+      sessionStorage,
+      keys.refresh,
+      refreshTokenMemory,
+    )
   }
   if (Array.isArray(subtenantsMemory) && subtenantsMemory.length) {
-    await persistEncryptedValue(localStorage, keys.subtenants, subtenantsMemory)
+    await persistEncryptedValue(
+      localStorage,
+      keys.subtenants,
+      subtenantsMemory,
+    )
   }
   if (activeSubtenantIdMemory != null) {
     await persistEncryptedValue(
@@ -569,7 +577,11 @@ async function hydrateAllAuthStorage() {
     await persistEncryptedValue(localStorage, keys.tenantId, tenantIdMemory)
   }
   if (configDataMemory) {
-    await persistEncryptedValue(localStorage, keys.configData, configDataMemory)
+    await persistEncryptedValue(
+      localStorage,
+      keys.configData,
+      configDataMemory,
+    )
   }
   if (userInfoMemory) {
     await persistEncryptedValue(localStorage, keys.userInfo, userInfoMemory)

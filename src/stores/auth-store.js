@@ -23,6 +23,7 @@ import {
   readStoredMustEnrollMfa,
   readStoredPasswordChangeMode,
   readStoredRefreshToken,
+  readStoredSubtenants,
   readStoredToken,
   readStoredTenantId,
   readStoredUserInfo,

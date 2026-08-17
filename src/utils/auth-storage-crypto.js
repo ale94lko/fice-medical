@@ -90,7 +90,9 @@ export async function decryptJsonFromStorage(packed, material) {
 }
 
 export function readAuthWrapMaterial() {
-  return `${AUTH_WRAP_STORAGE_KEY}:${String(globalThis.location?.origin || 'app')}`
+  const origin = String(globalThis.location?.origin || 'app')
+
+  return `${AUTH_WRAP_STORAGE_KEY}:${origin}`
 }
 
 export function readLegacyStoredWrapMaterial() {
