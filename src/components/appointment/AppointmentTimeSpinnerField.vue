@@ -189,12 +189,9 @@ function stepMinute(delta) {
 
 function applyPeriod(period, base) {
   const hour12 = base.hours % 12 === 0 ? 12 : base.hours % 12
-  let nextHours = 0
-  if (period === 'PM') {
-    nextHours = hour12 === 12 ? 12 : hour12 + 12
-  } else {
-    nextHours = hour12 === 12 ? 0 : hour12
-  }
+  const nextHours = period === 'PM'
+    ? (hour12 === 12 ? 12 : hour12 + 12)
+    : (hour12 === 12 ? 0 : hour12)
 
   emitTime(nextHours, base.minutes)
 }

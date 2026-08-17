@@ -1,9 +1,8 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
-import { defineConfig } from '#q-app/wrappers'
+import { defineConfig } from '#q-app'
 import { fileURLToPath } from 'node:url'
-import { loadEnv } from 'vite'
 
 function devApiProxyOptions(target) {
   const normalized = target.replace(/\/$/, '')
@@ -54,9 +53,7 @@ function photonDevProxy() {
 }
 
 export default defineConfig((ctx) => {
-  const mode = ctx.dev ? 'development' : 'production'
-  const viteEnv = loadEnv(mode, process.cwd(), '')
-  const apiProxyTarget = String(viteEnv.API_PROXY_TARGET ?? '').trim()
+  const apiProxyTarget = String(import.meta.env.API_PROXY_TARGET ?? '').trim()
 
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -93,7 +90,18 @@ export default defineConfig((ctx) => {
     build: {
       target: {
         browser: [ 'es2022', 'firefox115', 'chrome115', 'safari14' ],
-        node: 'node20'
+        node: 'node22'
+      },
+
+      alias: {
+        src: ctx.appPaths.srcDir,
+        app: ctx.appPaths.appDir,
+        components: ctx.appPaths.resolve.src('components'),
+        layouts: ctx.appPaths.resolve.src('layouts'),
+        pages: ctx.appPaths.resolve.src('pages'),
+        assets: ctx.appPaths.resolve.src('assets'),
+        boot: ctx.appPaths.resolve.src('boot'),
+        stores: ctx.appPaths.resolve.src('stores')
       },
 
       vueRouterMode: 'history', // available values: 'hash', 'history'
@@ -104,13 +112,9 @@ export default defineConfig((ctx) => {
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
       publicPath: 'fice-medical',
-      // analyze: true,
-      // env: {},
-      // rawDefine: {}
-      // ignorePublicFolder: true,
-      // minify: false,
-      // polyfillModulePreload: true,
-      // distDir
+      env: {
+        clientPrefix: 'VITE_',
+      },
 
       extendViteConf(viteConf) {
         viteConf.define = {
@@ -119,9 +123,6 @@ export default defineConfig((ctx) => {
         }
       },
       // viteVuePluginOptions: {},
-      extendWebpack(cfg) {
-        cfg.output.filename = '[name].[hash].js'
-      },
       vitePlugins: [
         ['@intlify/unplugin-vue-i18n/vite', {
           // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
@@ -131,7 +132,7 @@ export default defineConfig((ctx) => {
           // you need to set `runtimeOnly: false`
           // runtimeOnly: false,
 
-          ssr: ctx.modeName === 'ssr',
+          ssr: ctx.mode.ssr || ctx.mode.ssg,
 
           // you need to set i18n resource including paths !
           include: [ fileURLToPath(new URL('./src/i18n', import.meta.url)) ]

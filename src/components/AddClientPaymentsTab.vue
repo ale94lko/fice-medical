@@ -145,7 +145,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
-import AdminQTable from 'components/admin-table/AdminQTable.vue'
+import AdminQTable from 'components/AdminQTable.vue'
 import AdminTablePanel from
   'components/admin-table/AdminTablePanel.vue'
 import SectionHeading from 'components/SectionHeading.vue'

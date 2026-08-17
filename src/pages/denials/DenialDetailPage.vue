@@ -509,7 +509,7 @@ import TextInput from 'components/TextInput.vue'
 import { useDenialPermissions } from
   'src/composables/useDenialPermissions.js'
 import { useSyncAppPageTitle } from
-  'src/composables/useSyncAppPageTitle.js'
+  'src/composables/useAppPageTitle.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
   correctDenial,

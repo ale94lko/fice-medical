@@ -302,7 +302,7 @@ function ageYearsFromDob(dobRaw) {
   if (!raw) {
     return null
   }
-  let date = null
+  let date
   const usMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
   if (usMatch) {
     date = new Date(

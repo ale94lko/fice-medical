@@ -109,8 +109,8 @@ export function formatClinicalAuditDetailDateTime(value, timezone = '') {
   const config = getAppDateTimeConfig()
   const tzRaw = String(timezone || config.timezone || '').trim()
   const timeZone = resolveIntlTimeZone(tzRaw || 'UTC')
-  let datePart = ''
-  let timePart = ''
+  let datePart
+  let timePart
   try {
     datePart = new Intl.DateTimeFormat('en-US', {
       timeZone,

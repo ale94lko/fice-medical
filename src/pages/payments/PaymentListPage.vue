@@ -181,7 +181,7 @@ import ClientPaymentQueuePanel from
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { useSyncAppPageTitle } from
-  'src/composables/useSyncAppPageTitle.js'
+  'src/composables/useAppPageTitle.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { hasPermission } from 'src/utils/auth-permissions.js'

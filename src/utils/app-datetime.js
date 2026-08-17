@@ -517,7 +517,7 @@ function sanitizeDisplayDateByFormat(value, format, options = {}) {
   const maxYear = maxToday ? currentYear : currentYear + 50
   const tokens = format.split(/[^A-Z]+/).filter(Boolean)
   const sanitizeOptions = { minYear, maxYear, maxToday, currentYear }
-  let result = ''
+  let result
   if (tokens[0] === 'YYYY') {
     result = sanitizeYearFirstDisplayDate(digits, format, sanitizeOptions)
   } else if (tokens[0] === 'DD') {

@@ -129,7 +129,7 @@ import { useAdminTableMobileGrid } from
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { useSyncAppPageTitle } from
-  'src/composables/useSyncAppPageTitle.js'
+  'src/composables/useAppPageTitle.js'
 import {
   denialApiErrorMessage,
   listDenialWorkQueue,

@@ -147,7 +147,7 @@ import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { useSyncAppPageTitle } from
-  'src/composables/useSyncAppPageTitle.js'
+  'src/composables/useAppPageTitle.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { hasPermission } from 'src/utils/auth-permissions.js'

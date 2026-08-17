@@ -142,7 +142,7 @@ import { useAdminTableMobileGrid } from
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
 import { useSyncAppPageTitle } from
-  'src/composables/useSyncAppPageTitle.js'
+  'src/composables/useAppPageTitle.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { hasPermission } from 'src/utils/auth-permissions.js'
 import {

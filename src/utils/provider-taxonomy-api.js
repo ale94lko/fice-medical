@@ -254,7 +254,7 @@ export async function resolveTaxonomiesAgainstCatalog(rows = []) {
     }
     seen.add(code)
 
-    let taxonomy = null
+    let taxonomy
     try {
       taxonomy = await fetchProviderTaxonomyByCode(code)
     } catch {

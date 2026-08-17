@@ -164,7 +164,7 @@ import {
   permissionNames,
   quasarNotifyTypes,
 } from 'components/constants.js'
-import AdminQTable from 'components/admin-table/AdminQTable.vue'
+import AdminQTable from 'components/AdminQTable.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FormSelect from 'components/FormSelect.vue'
 import SectionHeading from 'components/SectionHeading.vue'

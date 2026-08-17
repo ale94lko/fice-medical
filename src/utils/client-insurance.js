@@ -364,12 +364,9 @@ export function sanitizeMedicareMemberIdInput(value) {
     }
     const i = out.length
     const mbiOk = MEDICARE_MBI_POS_RE[i]?.test(ch)
-    let hicnOk = false
-    if (i < 9) {
-      hicnOk = isHicnDigitPrefix(out) && /^\d$/.test(ch)
-    } else {
-      hicnOk = /^\d{9}$/.test(out.slice(0, 9)) && /^[A-Z0-9]$/.test(ch)
-    }
+    const hicnOk = i < 9
+      ? isHicnDigitPrefix(out) && /^\d$/.test(ch)
+      : /^\d{9}$/.test(out.slice(0, 9)) && /^[A-Z0-9]$/.test(ch)
     if (mbiOk || hicnOk) {
       out += ch
     }
