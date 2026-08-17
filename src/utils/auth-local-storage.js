@@ -80,7 +80,8 @@ export function readStoredModules() {
 
 export function writeStoredModules(modules) {
   const list = Array.isArray(modules) ? modules : []
-  localStorage.setItem(keys.modules, JSON.stringify(list))
+  void list
+  localStorage.removeItem(keys.modules)
 }
 
 export function readStoredPermissions() {
@@ -100,7 +101,8 @@ export function readStoredPermissions() {
 
 export function writeStoredPermissions(permissions) {
   const list = Array.isArray(permissions) ? permissions : []
-  localStorage.setItem(keys.permissions, JSON.stringify(list))
+  void list
+  localStorage.removeItem(keys.permissions)
 }
 
 export function readStoredSubtenants() {
