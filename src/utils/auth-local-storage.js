@@ -2,6 +2,7 @@ import { authStorageKeys as keys } from 'components/constants.js'
 import { clearSharedSessionInactivityState } from
   'src/utils/session-inactivity-sync.js'
 import {
+  AUTH_STORAGE_PACKED_PREFIX,
   decryptJsonFromStorage,
   encryptJsonForStorage,
 } from 'src/utils/auth-storage-crypto.js'
@@ -133,7 +134,7 @@ export function readStoredSubtenants() {
     return subtenantsMemory
   }
   const raw = localStorage.getItem(keys.subtenants)
-  if (!raw || String(raw).startsWith('enc.v1:')) {
+  if (!raw || String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
     return []
   }
   try {
@@ -143,14 +144,14 @@ export function readStoredSubtenants() {
   }
 }
 
-async function persistEncryptedSubtenants(payload) {
-  const packed = await encryptJsonForStorage(payload, readStoredToken())
+async function persistEncryptedValue(key, value) {
+  const packed = await encryptJsonForStorage(value, readStoredToken())
   if (!packed) {
-    localStorage.removeItem(keys.subtenants)
+    localStorage.removeItem(key)
 
     return
   }
-  localStorage.setItem(keys.subtenants, packed)
+  localStorage.setItem(key, packed)
 }
 
 export function writeStoredSubtenants(subtenants) {
@@ -161,7 +162,7 @@ export function writeStoredSubtenants(subtenants) {
 
     return
   }
-  void persistEncryptedSubtenants(payload)
+  void persistEncryptedValue(keys.subtenants, payload)
 }
 
 export async function hydrateStoredSubtenants() {
@@ -178,16 +179,33 @@ export async function hydrateStoredSubtenants() {
     await decryptJsonFromStorage(raw, readStoredToken()),
   )
   subtenantsMemory = parsed
-  if (parsed.length && !String(raw).startsWith('enc.v1:')) {
-    void persistEncryptedSubtenants(parsed)
+  if (parsed.length && !String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
+    void persistEncryptedValue(keys.subtenants, parsed)
   }
 
   return parsed
 }
 
+let activeSubtenantIdMemory = undefined
+
+function normalizeStoredActiveSubtenantId(value) {
+  if (value == null || value === '') {
+    return null
+  }
+  const id = Number(
+    typeof value === 'object' ? value.id ?? value.activeSubtenantId : value,
+  )
+
+  return Number.isFinite(id) ? id : null
+}
+
 export function readStoredActiveSubtenantId() {
+  if (activeSubtenantIdMemory !== undefined) {
+    return activeSubtenantIdMemory
+  }
   const raw = localStorage.getItem(keys.activeSubtenantId)
-  if (raw == null || raw === '') {
+  if (raw == null || raw === ''
+    || String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
     return null
   }
   const id = Number(raw)
@@ -197,11 +215,38 @@ export function readStoredActiveSubtenantId() {
 
 export function writeStoredActiveSubtenantId(id) {
   if (id == null || id === '') {
+    activeSubtenantIdMemory = null
     localStorage.removeItem(keys.activeSubtenantId)
 
     return
   }
-  localStorage.setItem(keys.activeSubtenantId, String(id))
+  const nextId = Number(id)
+  if (!Number.isFinite(nextId)) {
+    return
+  }
+  activeSubtenantIdMemory = nextId
+  void persistEncryptedValue(keys.activeSubtenantId, nextId)
+}
+
+export async function hydrateStoredActiveSubtenantId() {
+  if (activeSubtenantIdMemory !== undefined) {
+    return activeSubtenantIdMemory
+  }
+  const raw = localStorage.getItem(keys.activeSubtenantId)
+  if (raw == null || raw === '') {
+    activeSubtenantIdMemory = null
+
+    return null
+  }
+  const nextId = normalizeStoredActiveSubtenantId(
+    await decryptJsonFromStorage(raw, readStoredToken()),
+  )
+  activeSubtenantIdMemory = nextId
+  if (nextId != null && !String(raw).startsWith(AUTH_STORAGE_PACKED_PREFIX)) {
+    void persistEncryptedValue(keys.activeSubtenantId, nextId)
+  }
+
+  return nextId
 }
 
 export function readStoredTenantId() {
@@ -335,5 +380,6 @@ export function clearAuthLocalStorage() {
     sessionStorage.removeItem(k)
   })
   subtenantsMemory = null
+  activeSubtenantIdMemory = undefined
   clearSharedSessionInactivityState()
 }

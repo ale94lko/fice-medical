@@ -1,4 +1,5 @@
-const PACKED_PREFIX = 'enc.v1:'
+export const AUTH_STORAGE_PACKED_PREFIX = 'enc.v1:'
+const PACKED_PREFIX = AUTH_STORAGE_PACKED_PREFIX
 
 function bytesToBase64(bytes) {
   const chunk = 0x8000
