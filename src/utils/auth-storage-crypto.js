@@ -22,10 +22,10 @@ function base64ToBytes(value) {
   return bytes
 }
 
-async function aesKeyFromSecret(secret) {
+async function aesKeyFromMaterial(material) {
   const hash = await crypto.subtle.digest(
     'SHA-256',
-    new TextEncoder().encode(String(secret || '')),
+    new TextEncoder().encode(String(material || '')),
   )
 
   return crypto.subtle.importKey(
@@ -37,12 +37,12 @@ async function aesKeyFromSecret(secret) {
   )
 }
 
-export async function encryptJsonForStorage(value, secret) {
-  const keyText = String(secret || '')
+export async function encryptJsonForStorage(value, material) {
+  const keyText = String(material || '')
   if (!keyText || !globalThis.crypto?.subtle) {
     return ''
   }
-  const key = await aesKeyFromSecret(keyText)
+  const key = await aesKeyFromMaterial(keyText)
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const cipher = await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
@@ -56,7 +56,7 @@ export async function encryptJsonForStorage(value, secret) {
   return PACKED_PREFIX + bytesToBase64(packed)
 }
 
-export async function decryptJsonFromStorage(packed, secret) {
+export async function decryptJsonFromStorage(packed, material) {
   const raw = String(packed || '')
   if (!raw) {
     return null
@@ -68,7 +68,7 @@ export async function decryptJsonFromStorage(packed, secret) {
       return null
     }
   }
-  const keyText = String(secret || '')
+  const keyText = String(material || '')
   if (!keyText || !globalThis.crypto?.subtle) {
     return null
   }
@@ -76,7 +76,7 @@ export async function decryptJsonFromStorage(packed, secret) {
     const bytes = base64ToBytes(raw.slice(PACKED_PREFIX.length))
     const iv = bytes.slice(0, 12)
     const cipher = bytes.slice(12)
-    const key = await aesKeyFromSecret(keyText)
+    const key = await aesKeyFromMaterial(keyText)
     const plain = await crypto.subtle.decrypt(
       { name: 'AES-GCM', iv },
       key,
@@ -89,22 +89,19 @@ export async function decryptJsonFromStorage(packed, secret) {
   }
 }
 
-export function readAuthWrapSecret() {
-  if (typeof sessionStorage === 'undefined' || !globalThis.crypto?.getRandomValues) {
-    return ''
-  }
-  const existing = sessionStorage.getItem(AUTH_WRAP_STORAGE_KEY)
-  if (existing) {
-    return existing
-  }
-  const bytes = crypto.getRandomValues(new Uint8Array(32))
-  const secret = bytesToBase64(bytes)
-  sessionStorage.setItem(AUTH_WRAP_STORAGE_KEY, secret)
-
-  return secret
+export function readAuthWrapMaterial() {
+  return `${AUTH_WRAP_STORAGE_KEY}:${String(globalThis.location?.origin || 'app')}`
 }
 
-export function clearAuthWrapSecret() {
+export function readLegacyStoredWrapMaterial() {
+  if (typeof sessionStorage === 'undefined') {
+    return ''
+  }
+
+  return sessionStorage.getItem(AUTH_WRAP_STORAGE_KEY) || ''
+}
+
+export function clearAuthWrapMaterial() {
   if (typeof sessionStorage === 'undefined') {
     return
   }

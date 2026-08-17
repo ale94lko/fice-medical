@@ -4,10 +4,11 @@ import { clearSharedSessionInactivityState } from
 import {
   AUTH_STORAGE_PACKED_PREFIX,
   AUTH_WRAP_STORAGE_KEY,
-  clearAuthWrapSecret,
+  clearAuthWrapMaterial,
   decryptJsonFromStorage,
   encryptJsonForStorage,
-  readAuthWrapSecret,
+  readAuthWrapMaterial,
+  readLegacyStoredWrapMaterial,
 } from 'src/utils/auth-storage-crypto.js'
 
 let authStorageHydratePromise = null
@@ -24,7 +25,7 @@ function isPackedStorageValue(raw) {
 }
 
 async function persistEncryptedValue(store, key, value) {
-  const packed = await encryptJsonForStorage(value, readAuthWrapSecret())
+  const packed = await encryptJsonForStorage(value, readAuthWrapMaterial())
   if (!packed) {
     store.removeItem(key)
 
@@ -34,9 +35,16 @@ async function persistEncryptedValue(store, key, value) {
 }
 
 async function decryptStoredValue(raw) {
-  const fromWrap = await decryptJsonFromStorage(raw, readAuthWrapSecret())
+  const fromWrap = await decryptJsonFromStorage(raw, readAuthWrapMaterial())
   if (fromWrap != null) {
     return fromWrap
+  }
+  const legacyWrap = readLegacyStoredWrapMaterial()
+  if (legacyWrap) {
+    const fromLegacyWrap = await decryptJsonFromStorage(raw, legacyWrap)
+    if (fromLegacyWrap != null) {
+      return fromLegacyWrap
+    }
   }
   const legacyToken = typeof tokenMemory === 'string' && tokenMemory
     ? tokenMemory
@@ -541,6 +549,32 @@ async function hydrateAllAuthStorage() {
     hydrateStoredConfigData(),
     hydrateStoredUserInfo(),
   ])
+  if (tokenMemory) {
+    await persistEncryptedValue(sessionStorage, keys.token, tokenMemory)
+  }
+  if (refreshTokenMemory) {
+    await persistEncryptedValue(sessionStorage, keys.refresh, refreshTokenMemory)
+  }
+  if (Array.isArray(subtenantsMemory) && subtenantsMemory.length) {
+    await persistEncryptedValue(localStorage, keys.subtenants, subtenantsMemory)
+  }
+  if (activeSubtenantIdMemory != null) {
+    await persistEncryptedValue(
+      localStorage,
+      keys.activeSubtenantId,
+      activeSubtenantIdMemory,
+    )
+  }
+  if (tenantIdMemory != null) {
+    await persistEncryptedValue(localStorage, keys.tenantId, tenantIdMemory)
+  }
+  if (configDataMemory) {
+    await persistEncryptedValue(localStorage, keys.configData, configDataMemory)
+  }
+  if (userInfoMemory) {
+    await persistEncryptedValue(localStorage, keys.userInfo, userInfoMemory)
+  }
+  clearAuthWrapMaterial()
 }
 
 export function ensureAuthStorageHydrated() {
@@ -584,6 +618,6 @@ export function clearAuthLocalStorage() {
   userInfoMemory = undefined
   subtenantsMemory = null
   activeSubtenantIdMemory = undefined
-  clearAuthWrapSecret()
+  clearAuthWrapMaterial()
   clearSharedSessionInactivityState()
 }
