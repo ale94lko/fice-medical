@@ -2,6 +2,30 @@ function trimStr(value) {
   return String(value ?? '').trim()
 }
 
+function encodeStorageValue(value) {
+  const str = trimStr(value)
+  if (!str) {
+    return ''
+  }
+  try {
+    return btoa(unescape(encodeURIComponent(str)))
+  } catch {
+    return ''
+  }
+}
+
+function decodeStorageValue(value) {
+  const str = trimStr(value)
+  if (!str) {
+    return ''
+  }
+  try {
+    return decodeURIComponent(escape(atob(str)))
+  } catch {
+    return ''
+  }
+}
+
 function toNumberOrNull(value) {
   if (value == null || value === '') {
     return null
@@ -248,7 +272,7 @@ export function cacheGuestAppointmentSummary(meetingToken, payload = {}) {
     sessionStorage.setItem(
       `${GUEST_APPT_CACHE_PREFIX}${token}`,
       JSON.stringify({
-        clinicianDisplayName: clinicianDisplayName || null,
+        clinicianDisplayName: encodeStorageValue(clinicianDisplayName) || null,
       }),
     )
   } catch {
@@ -271,7 +295,7 @@ export function readCachedGuestAppointmentSummary(meetingToken) {
     const parsed = JSON.parse(raw)
     const appointmentSummary = null
     const clinicianDisplayName = trimStr(
-      parsed?.clinicianDisplayName,
+      decodeStorageValue(parsed?.clinicianDisplayName),
     ) || null
     if (!appointmentSummary && !clinicianDisplayName) {
       return null
