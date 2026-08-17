@@ -35,6 +35,16 @@ function normalizeServiceProcedure(row = {}) {
     suggestedFee: parseOptionalNumber(
       row.suggested_fee ?? row.suggestedFee,
     ),
+    units: parseOptionalNumber(row.units),
+    durationMinutes: parseOptionalNumber(
+      row.duration_minutes ?? row.durationMinutes,
+    ),
+    placeOfServiceCode: trim(
+      row.place_of_service_code ?? row.placeOfServiceCode,
+    ) || null,
+    renderingClinicianId: parseOptionalNumber(
+      row.rendering_clinician_id ?? row.renderingClinicianId,
+    ),
   }
 }
 
@@ -125,6 +135,12 @@ export function normalizeEncounter(raw) {
     ),
     placeOfServiceCode: trim(
       raw.place_of_service_code ?? raw.placeOfServiceCode,
+    ),
+    billingResponsibility: trim(
+      raw.billing_responsibility ?? raw.billingResponsibility,
+    ).toUpperCase() || null,
+    insuranceProfileId: parseOptionalNumber(
+      raw.insurance_profile_id ?? raw.insuranceProfileId,
     ),
     chiefComplaint: trim(
       raw.chief_complaint ?? raw.chiefComplaint,

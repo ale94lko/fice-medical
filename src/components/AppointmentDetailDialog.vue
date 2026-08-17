@@ -467,11 +467,14 @@ const clinicianHint = computed(() =>
 const statusMeta = computed(() => {
   const status = String(props.record?.status ?? '').toUpperCase()
 
-  if (status === appointmentStatuses.checkedIn) {
+  if (status === appointmentStatuses.confirmed
+    || status === appointmentStatuses.checkedIn) {
     return {
       icon: 'how_to_reg',
       tone: 'checked-in',
-      hintKey: 'appointmentDetailStatusCheckedInHint',
+      hintKey: status === appointmentStatuses.confirmed
+        ? 'appointmentDetailStatusConfirmedHint'
+        : 'appointmentDetailStatusCheckedInHint',
     }
   }
   if (status === appointmentStatuses.inProgress) {

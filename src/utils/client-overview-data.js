@@ -135,7 +135,7 @@ export function buildClientOverviewMissingItems(form, t) {
 
 export function buildClientOverviewSidebar(
   form,
-  t,
+  _t,
   appointmentDates = {},
 ) {
   const insurance = resolvePrimaryInsurance(
@@ -157,9 +157,9 @@ export function buildClientOverviewSidebar(
         missing: true,
       },
     billing: {
-      balance: '$0.00',
+      balance: appointmentDates.ledgerBalanceLabel || '—',
       lastStatement: '—',
-      paymentStatus: t('clientOverviewPaymentUpToDate'),
+      paymentStatus: '—',
     },
     dates: {
       nextAppointment: appointmentDates.nextAppointment ?? '—',

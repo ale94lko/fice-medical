@@ -48,6 +48,13 @@ export function isSuperbillHasSubmittedClaimError(error) {
     === 'SUPERBILL_HAS_SUBMITTED_CLAIM'
 }
 
+export function isSuperbillNotReadyError(error) {
+  const data = error?.response?.data
+
+  return String(data?.error_description ?? '')
+    === 'SUPERBILL_NOT_READY'
+}
+
 export function superbillNotReadyEvaluation(error) {
   const data = error?.response?.data?.data
   if (data == null || typeof data !== 'object') {

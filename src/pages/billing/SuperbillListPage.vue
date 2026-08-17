@@ -551,7 +551,7 @@ function readinessLabel(row) {
     })
   }
   if (row?.status === superbillStatuses.ready) {
-    return t('superbillStatusReady')
+    return t('billingQueueReadyForReview')
   }
 
   return t('superbillStatusNotReady')

@@ -3,57 +3,63 @@ import {
   appointmentTerminalStatuses,
 } from 'components/constants.js'
 
+function statusToken(status) {
+  return String(status ?? '').toUpperCase()
+}
+
+function isScheduledOrConfirmed(status) {
+  const s = statusToken(status)
+
+  return s === appointmentStatuses.scheduled
+    || s === appointmentStatuses.confirmed
+    || s === appointmentStatuses.pending
+    || s === appointmentStatuses.rescheduled
+}
+
 export function appointmentCanView() {
   return true
 }
 
 export function appointmentCanEdit(status) {
-  return !appointmentTerminalStatuses.has(String(status ?? '').toUpperCase())
+  return !appointmentTerminalStatuses.has(statusToken(status))
 }
 
 export function appointmentCanCancel(status) {
-  const s = String(status ?? '').toUpperCase()
-
-  return s === appointmentStatuses.pending
-    || s === appointmentStatuses.scheduled
-    || s === appointmentStatuses.rescheduled
+  return isScheduledOrConfirmed(status)
 }
 
 export function appointmentCanReschedule(status) {
-  const s = String(status ?? '').toUpperCase()
-
-  return s === appointmentStatuses.pending
-    || s === appointmentStatuses.scheduled
-    || s === appointmentStatuses.rescheduled
+  return isScheduledOrConfirmed(status)
 }
 
 export function appointmentCanCheckIn(status) {
-  return String(status ?? '').toUpperCase() === appointmentStatuses.scheduled
+  const s = statusToken(status)
+
+  return s === appointmentStatuses.scheduled
+    || s === appointmentStatuses.pending
 }
 
 export function appointmentCanStartEncounter(status) {
-  const s = String(status ?? '').toUpperCase()
+  const s = statusToken(status)
 
   return s === appointmentStatuses.scheduled
+    || s === appointmentStatuses.confirmed
     || s === appointmentStatuses.checkedIn
 }
 
 export function appointmentCanOpenWorkspace(status) {
-  return String(status ?? '').toUpperCase()
-    === appointmentStatuses.inProgress
+  return statusToken(status) === appointmentStatuses.inProgress
 }
 
 export function appointmentCanComplete(status) {
-  const s = String(status ?? '').toUpperCase()
-
-  return s === appointmentStatuses.checkedIn
-    || s === appointmentStatuses.inProgress
+  return statusToken(status) === appointmentStatuses.inProgress
 }
 
 export function appointmentCanNoShow(status) {
-  const s = String(status ?? '').toUpperCase()
+  const s = statusToken(status)
 
   return s === appointmentStatuses.scheduled
+    || s === appointmentStatuses.confirmed
     || s === appointmentStatuses.checkedIn
 }
 
@@ -82,6 +88,7 @@ export function appointmentCanDelete(appointment) {
 const appointmentStatusVariants = {
   [appointmentStatuses.pending]: 'pending',
   [appointmentStatuses.scheduled]: 'scheduled',
+  [appointmentStatuses.confirmed]: 'checked-in',
   [appointmentStatuses.checkedIn]: 'checked-in',
   [appointmentStatuses.inProgress]: 'in-progress',
   [appointmentStatuses.completed]: 'complete',
@@ -91,7 +98,7 @@ const appointmentStatusVariants = {
 }
 
 export function appointmentStatusVariant(status) {
-  const token = String(status ?? '').toUpperCase()
+  const token = statusToken(status)
 
   return appointmentStatusVariants[token] ?? 'other'
 }

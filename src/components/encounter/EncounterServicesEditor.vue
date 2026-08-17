@@ -112,7 +112,6 @@ import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { listBookableServiceProcedures } from
   'src/utils/appointment-api.js'
 import {
-  buildServiceLine,
   formatFeeLabel,
   formatServiceCatalogOptionLabel,
   formatServiceDurationSummary,
@@ -285,28 +284,21 @@ function syncLinesFromEncounter() {
   const list = Array.isArray(props.encounter?.serviceProcedures)
     ? props.encounter.serviceProcedures
     : []
-  lines.value = list.map((row) => {
-    const serviceId = row.serviceProcedureId ?? row.id
-    const fromCatalog = catalog.value.find(
-      item => Number(item.id) === Number(serviceId),
-    )
-    if (fromCatalog) {
-      return {
-        ...buildServiceLine(fromCatalog, row.durationMinutes),
-        defaultFee: row.suggestedFee ?? fromCatalog.defaultFee ?? null,
-      }
-    }
+  lines.value = list.map(row => {
+    const duration = row.durationMinutes ?? null
 
     return {
-      serviceId,
+      id: row.id,
+      serviceId: row.serviceProcedureId,
       name: row.name || '',
       cptCode: row.cptCode || '',
       hcpcsCode: row.hcpcsCode || '',
       defaultFee: row.suggestedFee ?? null,
-      minDurationMin: row.durationMinutes ?? null,
-      maxDurationMin: row.durationMinutes ?? null,
+      units: row.units ?? null,
+      minDurationMin: duration,
+      maxDurationMin: duration,
       fixedDuration: true,
-      durationMin: row.durationMinutes ?? null,
+      durationMin: duration,
     }
   })
 }
@@ -402,13 +394,14 @@ async function saveLines() {
   try {
     const updated = await patchEncounter(encounterId, {
       serviceProcedures: lines.value.map((line, index) => ({
+        id: line.id ?? undefined,
         serviceProcedureId: line.serviceId,
         name: line.name,
         cptCode: line.cptCode,
         hcpcsCode: line.hcpcsCode,
         suggestedFee: line.defaultFee,
         durationMinutes: line.durationMin,
-        units: 1,
+        units: line.units ?? undefined,
         displayOrder: index,
       })),
     })

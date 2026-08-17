@@ -1,4 +1,5 @@
 import {
+  claimDisplayStatuses,
   claimRequirementActions,
   claimStatuses,
 } from 'components/constants.js'
@@ -41,21 +42,27 @@ function parseOptionalBool(value) {
 
 export function claimStatusVariant(status) {
   if (status === claimStatuses.ready
-    || status === claimStatuses.accepted
-    || status === claimStatuses.paid) {
+    || status === claimDisplayStatuses.paid
+    || status === claimStatuses.accepted) {
     return 'completed'
   }
   if (status === claimStatuses.submitted
-    || status === claimStatuses.partiallyPaid) {
+    || status === claimDisplayStatuses.partiallyPaid
+    || status === claimDisplayStatuses.awaitingAdjudication) {
     return 'in-progress'
   }
   if (status === claimStatuses.rejected
-    || status === claimStatuses.denied
+    || status === claimDisplayStatuses.denied
     || status === claimStatuses.voided) {
     return 'cancelled'
   }
 
   return 'pending'
+}
+
+function resolveDisplayStatus(row, processingStatus) {
+  return trim(row.display_status ?? row.displayStatus).toUpperCase()
+    || processingStatus
 }
 
 function joinName(first, middle, last, fallback = '') {
@@ -298,6 +305,7 @@ function normalizeSubmission(raw = {}) {
 export function normalizeClaim(raw = {}) {
   const row = asObject(raw)
   const status = trim(row.status).toUpperCase() || claimStatuses.draft
+  const displayStatus = resolveDisplayStatus(row, status)
   const patient = normalizePerson(row.patient)
   const subscriber = normalizePerson(row.subscriber)
   const insurance = asObject(row.insurance)
@@ -321,7 +329,17 @@ export function normalizeClaim(raw = {}) {
     claimType: trim(row.claim_type ?? row.claimType).toUpperCase()
       || 'PROFESSIONAL',
     status,
-    statusVariant: claimStatusVariant(status),
+    displayStatus,
+    adjudicationStatus: trim(
+      row.adjudication_status ?? row.adjudicationStatus,
+    ).toUpperCase(),
+    denialStatus: trim(
+      row.denial_status ?? row.denialStatus,
+    ).toUpperCase(),
+    payerPaymentStatus: trim(
+      row.payer_payment_status ?? row.payerPaymentStatus,
+    ).toUpperCase(),
+    statusVariant: claimStatusVariant(displayStatus),
     billingResponsibility: trim(
       row.billing_responsibility ?? row.billingResponsibility,
     ).toUpperCase(),
@@ -463,22 +481,21 @@ export function normalizeClaim(raw = {}) {
     isSubmitted: status === claimStatuses.submitted,
     isAccepted: status === claimStatuses.accepted,
     isRejected: status === claimStatuses.rejected,
-    isPaid: status === claimStatuses.paid,
-    isPartiallyPaid: status === claimStatuses.partiallyPaid,
-    isDenied: status === claimStatuses.denied,
+    isPaid: displayStatus === claimDisplayStatuses.paid,
+    isPartiallyPaid:
+      displayStatus === claimDisplayStatuses.partiallyPaid,
+    isDenied: displayStatus === claimDisplayStatuses.denied,
     isVoided: status === claimStatuses.voided,
     isSubmittedLifecycle: status === claimStatuses.submitted
       || status === claimStatuses.accepted
-      || status === claimStatuses.rejected
-      || status === claimStatuses.paid
-      || status === claimStatuses.partiallyPaid
-      || status === claimStatuses.denied,
+      || status === claimStatuses.rejected,
   }
 }
 
 export function normalizeClaimWorkQueueItem(raw = {}) {
   const row = asObject(raw)
   const status = trim(row.status).toUpperCase() || claimStatuses.draft
+  const displayStatus = resolveDisplayStatus(row, status)
   const totalCharge = parseOptionalNumber(
     row.total_charge ?? row.totalCharge,
   )
@@ -514,7 +531,17 @@ export function normalizeClaimWorkQueueItem(raw = {}) {
     totalCharge,
     totalChargeLabel: formatSuperbillMoney(totalCharge),
     status,
-    statusVariant: claimStatusVariant(status),
+    displayStatus,
+    adjudicationStatus: trim(
+      row.adjudication_status ?? row.adjudicationStatus,
+    ).toUpperCase(),
+    denialStatus: trim(
+      row.denial_status ?? row.denialStatus,
+    ).toUpperCase(),
+    payerPaymentStatus: trim(
+      row.payer_payment_status ?? row.payerPaymentStatus,
+    ).toUpperCase(),
+    statusVariant: claimStatusVariant(displayStatus),
     blockingCount: parseOptionalNumber(
       row.blocking_count ?? row.blockingCount,
     ) ?? 0,

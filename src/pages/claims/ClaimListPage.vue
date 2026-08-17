@@ -240,6 +240,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
+  claimDisplayStatuses,
   claimStatuses,
   quasarNotifyTypes,
 } from 'components/constants.js'
@@ -488,19 +489,22 @@ function statusLabel(status) {
   if (status === claimStatuses.submitted) {
     return t('claimStatusSubmitted')
   }
+  if (status === claimDisplayStatuses.awaitingAdjudication) {
+    return t('claimDisplayAwaitingAdjudication')
+  }
   if (status === claimStatuses.accepted) {
     return t('claimStatusAccepted')
   }
   if (status === claimStatuses.rejected) {
     return t('claimStatusRejected')
   }
-  if (status === claimStatuses.paid) {
+  if (status === claimDisplayStatuses.paid) {
     return t('claimStatusPaid')
   }
-  if (status === claimStatuses.partiallyPaid) {
+  if (status === claimDisplayStatuses.partiallyPaid) {
     return t('claimStatusPartiallyPaid')
   }
-  if (status === claimStatuses.denied) {
+  if (status === claimDisplayStatuses.denied) {
     return t('claimStatusDenied')
   }
   if (status === claimStatuses.voided) {
@@ -511,21 +515,23 @@ function statusLabel(status) {
 }
 
 function readinessClass(row) {
+  const display = row?.displayStatus || row?.status
   if (row?.status === claimStatuses.ready
     && row?.issueKind !== 'SUBMISSION_READINESS') {
     return 'billing-queue-readiness--ready'
   }
   if (row?.status === claimStatuses.accepted
-    || row?.status === claimStatuses.paid) {
+    || display === claimDisplayStatuses.paid) {
     return 'billing-queue-readiness--ready'
   }
   if (row?.status === claimStatuses.submitted
-    || row?.status === claimStatuses.partiallyPaid) {
+    || display === claimDisplayStatuses.partiallyPaid
+    || display === claimDisplayStatuses.awaitingAdjudication) {
     return 'billing-queue-readiness--hold'
   }
   if (row?.status === claimStatuses.voided
     || row?.status === claimStatuses.rejected
-    || row?.status === claimStatuses.denied) {
+    || display === claimDisplayStatuses.denied) {
     return 'billing-queue-readiness--hold'
   }
   if ((row?.blockingCount ?? 0) > 0
@@ -550,7 +556,7 @@ function readinessLabel(row) {
     })
   }
 
-  return statusLabel(row?.status)
+  return statusLabel(row?.displayStatus || row?.status)
 }
 
 function readinessHint(row) {
@@ -575,7 +581,7 @@ function readinessHint(row) {
     return t('claimQueueReadyBody')
   }
 
-  return statusLabel(row?.status)
+  return statusLabel(row?.displayStatus || row?.status)
 }
 
 function tablePaginationFromMeta(paginationPayload, meta) {

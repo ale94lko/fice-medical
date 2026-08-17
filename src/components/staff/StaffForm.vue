@@ -167,6 +167,7 @@ import {
 } from 'src/utils/staff-npi-lookup.js'
 import { resolveTaxonomiesAgainstCatalog } from
   'src/utils/provider-taxonomy-api.js'
+import { fetchLicenseTypes } from 'src/utils/staff-license-api.js'
 import {
   emailTypeSelectOptions,
   phoneTypeSelectOptions,
@@ -491,6 +492,7 @@ async function onNpiLookupResult(result) {
     genderOptions: props.genderOptions,
     credentialOptions: props.credentialOptions,
     specialtyOptions: props.specialtyOptions,
+    licenseTypeOptions: await fetchLicenseTypes(),
     taxonomiesOverride: catalogTaxonomies,
   })
 

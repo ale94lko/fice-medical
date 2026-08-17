@@ -521,6 +521,31 @@ export function mergeClientRecordIntoEncounter(encounter, clientRaw) {
   }
 }
 
+function normalizeProcessingIssue(raw = {}) {
+  const status = String(raw.status ?? '').toUpperCase()
+  const processType = String(
+    raw.process_type ?? raw.processType ?? '',
+  ).toUpperCase()
+
+  return {
+    id: raw.id ?? null,
+    entityType: trim(raw.entity_type ?? raw.entityType),
+    entityId: raw.entity_id ?? raw.entityId ?? null,
+    processType,
+    status,
+    attemptCount: Number(raw.attempt_count ?? raw.attemptCount ?? 0),
+    lastAttemptAt: raw.last_attempt_at ?? raw.lastAttemptAt ?? null,
+    errorCategory: String(
+      raw.error_category ?? raw.errorCategory ?? '',
+    ).toUpperCase(),
+    userSafeMessage: trim(
+      raw.user_safe_message ?? raw.userSafeMessage,
+    ),
+    resolvedAt: raw.resolved_at ?? raw.resolvedAt ?? null,
+    isOpen: status === 'OPEN',
+  }
+}
+
 function normalizeWorkspaceSuperbill(raw) {
   if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
     return null
@@ -566,6 +591,9 @@ export function normalizeEncounterWorkspace(raw = {}) {
     generatedClinicalNote: normalizeGeneratedClinicalNote(
       body.generated_clinical_note ?? body.generatedClinicalNote,
     ),
+    processingIssues: asArray(
+      body.processing_issues ?? body.processingIssues,
+    ).map(normalizeProcessingIssue),
     sections: normalizeSections(body.sections),
     ...clinical,
   }

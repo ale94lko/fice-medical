@@ -897,6 +897,8 @@ export const staffLicenseTestIds = {
   expirationField: 'staff-license-field-expiration',
   validFromField: 'staff-license-field-valid-from',
   statusField: 'staff-license-field-status',
+  primaryToggle: 'staff-license-field-primary',
+  attachmentField: 'staff-license-field-attachment',
   saveButton: 'staff-license-btn-save',
   cancelButton: 'staff-license-btn-cancel',
   eligibility: 'staff-clinical-eligibility',

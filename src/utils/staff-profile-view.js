@@ -93,8 +93,14 @@ function formatLicenseItem(row, t) {
   const primary = row?.isPrimary
     ? ` · ${t('staffLicensePrimaryShort')}`
     : ''
+  const sourceValue = String(row?.source ?? '').trim().toUpperCase()
+  const source = sourceValue === 'NPI'
+    ? t('staffLicenseSourceNpi')
+    : sourceValue === 'MANUAL'
+      ? t('staffLicenseSourceManual')
+      : ''
   const head = [type, identifier, state].filter(Boolean).join(' · ')
-  const tail = [expiration, status].filter(Boolean).join(' · ')
+  const tail = [expiration, status, source].filter(Boolean).join(' · ')
   if (!head && !tail) {
     return ''
   }

@@ -197,7 +197,7 @@ const mobileCardLayout = {
   status: 'status',
   contact: null,
   identifier: null,
-  badges: ['state', 'expirationDate', 'isPrimary', 'attachment'],
+  badges: ['state', 'expirationDate', 'isPrimary', 'source', 'attachment'],
   hideEmpty: true,
 }
 
@@ -208,8 +208,8 @@ const columns = computed(() => [
     align: 'left',
     field: row => licenseTypeLabel(row),
     sortable: false,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
+    headerStyle: 'min-width: 180px',
+    style: 'min-width: 180px',
   },
   {
     name: 'identifier',
@@ -257,6 +257,15 @@ const columns = computed(() => [
     style: 'min-width: 120px',
   },
   {
+    name: 'source',
+    label: t('staffLicenseSourceLabel'),
+    align: 'left',
+    field: row => sourceLabel(row.source),
+    sortable: false,
+    headerStyle: 'min-width: 88px',
+    style: 'min-width: 88px',
+  },
+  {
     name: 'attachment',
     label: t('staffLicenseAttachmentLabel'),
     align: 'center',
@@ -278,7 +287,25 @@ const columns = computed(() => [
 ])
 
 function licenseTypeLabel(row) {
-  return row?.licenseTypeName || row?.type || '—'
+  const name = String(row?.licenseTypeName || row?.type || '').trim()
+  const abbreviation = String(row?.licenseTypeAbbreviation || '').trim()
+  if (name && abbreviation && name !== abbreviation) {
+    return `${name} (${abbreviation})`
+  }
+
+  return name || '—'
+}
+
+function sourceLabel(source) {
+  const value = String(source ?? '').trim().toUpperCase()
+  if (value === 'NPI') {
+    return t('staffLicenseSourceNpi')
+  }
+  if (value === 'MANUAL') {
+    return t('staffLicenseSourceManual')
+  }
+
+  return value || '—'
 }
 
 function statusLabel(status) {

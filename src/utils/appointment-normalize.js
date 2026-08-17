@@ -446,6 +446,12 @@ export function normalizeAppointment(raw) {
       row.telehealth_session_id ?? row.telehealthSessionId,
     ),
     notes: trim(row.notes) || null,
+    billingResponsibility: trim(
+      row.billing_responsibility ?? row.billingResponsibility,
+    ).toUpperCase() || null,
+    insuranceProfileId: parseOptionalNumber(
+      row.insurance_profile_id ?? row.insuranceProfileId,
+    ),
     checkedOut: resolveAppointmentCheckedOut(row),
     hasNote: resolveAppointmentHasNote(row),
     billed: resolveAppointmentBilled(row),

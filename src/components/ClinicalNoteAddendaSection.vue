@@ -25,6 +25,13 @@
       <p class="text-caption text-grey-7 q-mb-sm">
         {{ clinicianLabel(item) }}
       </p>
+      <p
+        v-if="item.reason"
+        class="text-caption text-grey-7 q-mb-sm">
+        {{ t('clinicalNoteAddendumReasonMeta', {
+          reason: item.reason,
+        }) }}
+      </p>
       <p class="text-body2 q-mb-sm clinical-note-addendum__body">
         {{ item.body || '—' }}
       </p>

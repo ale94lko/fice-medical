@@ -871,6 +871,8 @@ export const clinicalNoteStatuses = {
   draft: 'DRAFT',
   generated: 'GENERATED',
   signed: 'SIGNED',
+  amended: 'AMENDED',
+  voided: 'VOIDED',
 }
 
 export const clinicalNoteSoapMaxLength = 65535
@@ -1071,6 +1073,8 @@ export const permissionNames = {
   clinicalNoteTemplateDeactivate: 'CLINICAL_NOTE_TEMPLATE_DEACTIVATE',
   encounterNarrativeEdit: 'ENCOUNTER_NARRATIVE_EDIT',
   clinicalNoteRegenerate: 'CLINICAL_NOTE_REGENERATE',
+  retryEncounterProcessing: 'RETRY_ENCOUNTER_PROCESSING',
+  clinicalNoteVoid: 'CLINICAL_NOTE_VOID',
   viewClinicalResources: 'VIEW_CLINICAL_RESOURCES',
   manageClinicalResources: 'MANAGE_CLINICAL_RESOURCES',
   viewReferenceData: 'VIEW_REFERENCE_DATA',
@@ -1330,10 +1334,36 @@ export const claimStatuses = {
   submitted: 'SUBMITTED',
   accepted: 'ACCEPTED',
   rejected: 'REJECTED',
+  voided: 'VOIDED',
+}
+
+export const claimDisplayStatuses = {
+  draft: 'DRAFT',
+  ready: 'READY',
+  submitted: 'SUBMITTED',
+  awaitingAdjudication: 'ACCEPTED_AWAITING_ADJUDICATION',
+  rejected: 'REJECTED',
+  voided: 'VOIDED',
+  denied: 'DENIED',
   paid: 'PAID',
   partiallyPaid: 'PARTIALLY_PAID',
-  denied: 'DENIED',
-  voided: 'VOIDED',
+}
+
+export const claimAdjudicationStatuses = {
+  pending: 'PENDING',
+  adjudicated: 'ADJUDICATED',
+}
+
+export const claimDenialStatuses = {
+  none: 'NONE',
+  partial: 'PARTIAL',
+  full: 'FULL',
+}
+
+export const payerPaymentStatuses = {
+  none: 'NONE',
+  partial: 'PARTIAL',
+  paid: 'PAID',
 }
 
 export const denialCaseStatuses = {
@@ -1584,6 +1614,7 @@ export const telehealthChatBodyMaxLength = 4000
 export const appointmentStatuses = {
   pending: 'PENDING',
   scheduled: 'SCHEDULED',
+  confirmed: 'CONFIRMED',
   checkedIn: 'CHECKED_IN',
   inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
@@ -1881,6 +1912,9 @@ export const apiPaths = {
   encounterClinicalNoteRegenerate: id => `/encounters/v1/${
     encodeURIComponent(String(id ?? '').trim())
   }/clinical-note/regenerate`,
+  encounterProcessingRetry: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/processing/retry`,
   encounterComplete: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/complete`,

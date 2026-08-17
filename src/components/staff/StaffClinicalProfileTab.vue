@@ -208,6 +208,7 @@ import {
   deleteStaffLicense,
   fetchClinicalEligibility,
   fetchLicenseTypes,
+  isDuplicateStaffLicense,
   isPersistedStaffLicenseId,
   staffLicenseApiBody,
   updateStaffLicense,
@@ -404,6 +405,17 @@ function openEditLicense(row) {
 }
 
 async function onLicenseSave(license) {
+  if (isDuplicateStaffLicense(
+    license,
+    clinical.value.licenses,
+    license.id,
+  )) {
+    $q.notify({
+      type: 'negative',
+      message: t('staffLicenseDuplicate'),
+    })
+    return
+  }
   const previousId = license.id
   let persisted = license
   if (props.staffId) {

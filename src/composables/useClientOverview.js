@@ -3,6 +3,9 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
+import { useClientFinancialPermissions } from
+  'src/composables/useClientFinancialPermissions.js'
+import { getClientFinancialSummary } from 'src/utils/ledger-api.js'
 import { storeToRefs } from 'pinia'
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
 import { filterOverviewModulesByPermissions } from
@@ -25,11 +28,13 @@ export function useClientOverview(clientId) {
   const authStore = useAuthStore()
   const { permissions } = storeToRefs(authStore)
   const catalogs = useAddClientCatalogs(t)
+  const { canViewLedger, canViewFinancial } = useClientFinancialPermissions()
 
   const loading = ref(false)
   const form = ref(null)
   const rawClient = ref(null)
   const summaries = ref({})
+  const ledgerBalanceLabel = ref('')
 
   const visibleModules = computed(() =>
     filterOverviewModulesByPermissions(permissions.value),
@@ -66,6 +71,7 @@ export function useClientOverview(clientId) {
       {
         nextAppointment: header.value?.nextAppointment?.dateTime ?? '',
         lastVisit: header.value?.lastVisit?.date ?? '',
+        ledgerBalanceLabel: ledgerBalanceLabel.value,
       },
     )
   })
@@ -125,6 +131,15 @@ export function useClientOverview(clientId) {
         rawClient.value,
         t,
       )
+      ledgerBalanceLabel.value = ''
+      if (canViewLedger.value || canViewFinancial.value) {
+        try {
+          const summary = await getClientFinancialSummary(id)
+          ledgerBalanceLabel.value = summary?.currentBalanceLabel || ''
+        } catch {
+          ledgerBalanceLabel.value = ''
+        }
+      }
     } catch (error) {
       if (!isAuthSessionEndUIError(error)) {
         const msg = error?.response?.data?.message

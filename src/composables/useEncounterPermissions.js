@@ -50,9 +50,15 @@ export function useEncounterPermissions() {
   )
   const canGenerateSuperbill = computed(() =>
     hasAnyPermission(permissions.value, [
-      clientPermissionNames.completeEncounter,
+      permissionNames.retryEncounterProcessing,
       clientPermissionNames.manageEncounter,
-      permissionNames.superbillView,
+      permissionNames.superbillReview,
+    ]),
+  )
+  const canRetryEncounterProcessing = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.retryEncounterProcessing,
+      clientPermissionNames.manageEncounter,
     ]),
   )
   const canViewSuperbill = computed(() =>
@@ -69,6 +75,7 @@ export function useEncounterPermissions() {
     canReopenEncounter,
     canWaiveRequirement,
     canGenerateSuperbill,
+    canRetryEncounterProcessing,
     canViewSuperbill,
   }
 }

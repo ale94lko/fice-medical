@@ -137,10 +137,20 @@ export function extractTaxonomiesFromNpiLookup(lookup) {
   return mapTaxonomiesFromClinician(lookup?.clinician ?? lookup)
 }
 
-function mapLookupLicenses(apiLicenses, existingLicenses) {
-  const incoming = (apiLicenses ?? []).filter(
-    row => hasText(row?.identifier) || hasText(row?.type),
-  )
+function mapLookupLicenses(
+  apiLicenses,
+  existingLicenses,
+  licenseTypeOptions = [],
+) {
+  const incoming = (apiLicenses ?? []).filter(row => {
+    const source = String(row?.source ?? '').toUpperCase()
+    const type = String(row?.type ?? row?.license_type_code ?? '').trim()
+    if (type.toLowerCase() === 'npi') {
+      return false
+    }
+
+    return hasText(row?.identifier) && (hasText(type) || source === 'NPI')
+  })
   if (!incoming.length) {
     return existingLicenses
   }
@@ -152,16 +162,35 @@ function mapLookupLicenses(apiLicenses, existingLicenses) {
     return existingLicenses
   }
 
-  return incoming.map(row => normalizeStaffLicenseRow({
-    id: nextStaffLicenseId(),
-    type: row.type ?? '',
-    identifier: row.identifier ?? '',
-    state: row.state ?? '',
-    expiration_date: row.expiration_date ?? '',
-    status: row.status ?? 'Active',
-    attachment_file_id: null,
-    is_primary: row.is_primary,
-  }))
+  const mapped = incoming.map(row => {
+    const code = String(
+      row.license_type_code ?? row.licenseTypeCode ?? row.type ?? '',
+    ).trim()
+    const matched = (licenseTypeOptions ?? []).find(option =>
+      String(option?.code ?? '').toLowerCase() === code.toLowerCase()
+      || String(option?.value) === String(row.license_type_id
+        ?? row.licenseTypeId ?? ''))
+    if (!matched) {
+      return null
+    }
+
+    return normalizeStaffLicenseRow({
+      id: nextStaffLicenseId(),
+      licenseTypeId: matched.value,
+      licenseTypeCode: matched.code,
+      licenseTypeName: matched.label,
+      type: matched.label,
+      identifier: row.identifier ?? '',
+      state: row.state ?? '',
+      expiration_date: row.expiration_date ?? '',
+      status: row.status ?? 'Active',
+      attachment_file_id: null,
+      is_primary: row.is_primary ?? row.isPrimary,
+      source: 'NPI',
+    })
+  }).filter(Boolean)
+
+  return mapped.length ? mapped : existingLicenses
 }
 
 function resolveCatalogOrRaw(options, raw) {
@@ -218,6 +247,7 @@ export function prefillStaffFormFromNpiLookup(
     credentialOptions = [],
     specialtyOptions = [],
     genderOptions = [],
+    licenseTypeOptions = [],
     taxonomiesOverride = null,
   } = catalogOptions
 
@@ -312,6 +342,7 @@ export function prefillStaffFormFromNpiLookup(
       licenses: mapLookupLicenses(
         clinician.licenses,
         form.clinical?.licenses,
+        licenseTypeOptions,
       ),
     },
   }

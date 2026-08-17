@@ -61,6 +61,8 @@
           :can-waive-requirement="canWaiveRequirement"
           :narrative="workspace.narrative"
           :generated-note="generatedNoteForOverview"
+          :processing-issues="workspace.processingIssues"
+          :can-retry-processing="canRetryEncounterProcessing"
           @requirement-action="onRequirementAction"
           @quick-action="onQuickAction"
           @waive-requirement="onWaiveRequest"
@@ -68,6 +70,7 @@
           @generate-superbill="onGenerateSuperbill"
           @review-generated-note="generatedNoteOpen = true"
           @retry-generate="onRetryGenerate"
+          @retry-processing="onRetryProcessing"
         />
         <EncounterWorkspaceVisit
           v-else-if="activeTab === encounterWorkspaceTabs.visit"
@@ -196,6 +199,7 @@ import { useQuasar } from 'quasar'
 import {
   addClientTabKeys,
   clientPermissionNames,
+  clinicalNoteStatuses,
   encounterClinicalSubTabs,
   encounterRequirementPurposes,
   encounterStatuses,
@@ -249,6 +253,7 @@ import {
   fetchEncounterWorkspace,
   reopenEncounter,
   resumeEncounter,
+  retryEncounterProcessing,
   waitEncounterForResults,
   waiveEncounterRequirement,
 } from 'src/utils/encounter-api.js'
@@ -275,7 +280,6 @@ import {
 } from 'src/utils/superbill-api.js'
 import {
   regenerateClinicalNote,
-  retryGenerateClinicalNote,
 } from 'src/utils/encounter-narrative-api.js'
 import {
   addClinicalNoteAddendum,
@@ -329,6 +333,7 @@ const {
   canReopenEncounter: hasReopenEncounterPermission,
   canWaiveRequirement,
   canGenerateSuperbill,
+  canRetryEncounterProcessing,
   canViewSuperbill,
 } = useEncounterPermissions()
 
@@ -340,8 +345,17 @@ const encounterStatus = computed(() =>
   workspace.value?.encounter?.status,
 )
 
+const returnSuperbillId = computed(() =>
+  String(route.query.returnSuperbillId ?? '').trim(),
+)
+
+const billingViewOnly = computed(() =>
+  Boolean(returnSuperbillId.value),
+)
+
 const encounterIsOpen = computed(() =>
-  encounterStatus.value === encounterStatuses.inProgress,
+  !billingViewOnly.value
+  && encounterStatus.value === encounterStatuses.inProgress,
 )
 
 const canEditVisit = computed(() =>
@@ -377,7 +391,7 @@ const showCompleteButton = computed(() =>
 )
 
 const showGenerateSuperbill = computed(() =>
-  isEncounterCompleted(workspace.value?.encounter)
+  Boolean(openProcessingIssue('SUPERBILL_GENERATION'))
   && !workspace.value?.superbill?.id
   && canGenerateSuperbill.value,
 )
@@ -388,7 +402,8 @@ const showViewSuperbill = computed(() =>
 )
 
 const showCancelEncounter = computed(() =>
-  canCancelEncounter.value
+  !billingViewOnly.value
+  && canCancelEncounter.value
   && (
     encounterStatus.value === encounterStatuses.inProgress
     || encounterStatus.value === encounterStatuses.waitingForResults
@@ -397,7 +412,8 @@ const showCancelEncounter = computed(() =>
 )
 
 const canWaitForResults = computed(() =>
-  encounterStatus.value === encounterStatuses.inProgress
+  !billingViewOnly.value
+  && encounterStatus.value === encounterStatuses.inProgress
     && hasAnyPermission(authStore.permissions, [
       clientPermissionNames.waitEncounter,
       clientPermissionNames.manageEncounter,
@@ -405,7 +421,8 @@ const canWaitForResults = computed(() =>
 )
 
 const canResumeEncounter = computed(() =>
-  encounterStatus.value === encounterStatuses.readyToResume
+  !billingViewOnly.value
+  && encounterStatus.value === encounterStatuses.readyToResume
     && hasAnyPermission(authStore.permissions, [
       clientPermissionNames.resumeEncounter,
       clientPermissionNames.manageEncounter,
@@ -413,7 +430,8 @@ const canResumeEncounter = computed(() =>
 )
 
 const canReopen = computed(() =>
-  canReopenEncounter(workspace.value)
+  !billingViewOnly.value
+  && canReopenEncounter(workspace.value)
   && hasReopenEncounterPermission.value,
 )
 
@@ -429,6 +447,7 @@ const canEditNarrative = computed(() => {
     || status === encounterStatuses.readyToResume
 
   return open
+    && !billingViewOnly.value
     && (hasPermission(
       authStore.permissions,
       permissionNames.encounterNarrativeEdit,
@@ -440,35 +459,49 @@ const canEditNarrative = computed(() => {
 })
 
 const canSignGeneratedNote = computed(() =>
-  canSignClinicalNotes.value
+  !billingViewOnly.value
+  && canSignClinicalNotes.value
   && isEncounterCompleted(workspace.value?.encounter),
 )
 
-const canRegenerateGeneratedNote = computed(() =>
-  hasPermission(
-    authStore.permissions,
-    permissionNames.clinicalNoteRegenerate,
-  )
-  && isEncounterCompleted(workspace.value?.encounter)
-  && String(workspace.value?.generatedClinicalNote?.status ?? '')
-    .toUpperCase() !== 'SIGNED',
-)
+const canRegenerateGeneratedNote = computed(() => {
+  const status = String(
+    workspace.value?.generatedClinicalNote?.status ?? '',
+  ).toUpperCase()
+  const locked = status === clinicalNoteStatuses.signed
+    || status === clinicalNoteStatuses.amended
+    || status === clinicalNoteStatuses.voided
+
+  return !billingViewOnly.value
+    && hasPermission(
+      authStore.permissions,
+      permissionNames.clinicalNoteRegenerate,
+    )
+    && isEncounterCompleted(workspace.value?.encounter)
+    && !locked
+})
 
 const generatedNoteForOverview = computed(() => {
   const note = workspace.value?.generatedClinicalNote
   if (note?.id) {
     return note
   }
-  if (isEncounterCompleted(workspace.value?.encounter)
-    && workspace.value?.encounter?.clinicalNoteTemplateId) {
+  const issue = openProcessingIssue('CLINICAL_NOTE_GENERATION')
+  if (issue) {
     return {
       ...(note || {}),
       generationFailed: true,
+      userSafeMessage: issue.userSafeMessage,
     }
   }
 
   return note
 })
+
+function openProcessingIssue(processType) {
+  return (workspace.value?.processingIssues || []).find(issue =>
+    issue?.isOpen && issue.processType === processType)
+}
 
 const addendumClinicianOptions = computed(() => {
   const encounter = workspace.value?.encounter
@@ -934,7 +967,6 @@ async function onComplete() {
       message: t('encounterCompleteSuccess'),
     })
     await loadWorkspace()
-    await ensureGeneratedNote(id)
   } catch (error) {
     if (isAuthSessionEndUIError(error)) {
       return
@@ -1041,26 +1073,6 @@ async function onReopenConfirm(payload) {
     }
   } finally {
     actionBusy.value = false
-  }
-}
-
-async function ensureGeneratedNote(id) {
-  if (workspace.value?.generatedClinicalNote?.id) {
-    return
-  }
-  if (!workspace.value?.encounter?.clinicalNoteTemplateId) {
-    return
-  }
-  try {
-    const note = await retryGenerateClinicalNote(id)
-    if (note?.id && workspace.value) {
-      workspace.value = {
-        ...workspace.value,
-        generatedClinicalNote: note,
-      }
-    }
-  } catch {
-    // Generation can be retried from Overview.
   }
 }
 
@@ -1174,20 +1186,24 @@ async function onRegenerateGeneratedNote() {
 }
 
 async function onRetryGenerate() {
+  await onRetryProcessing('CLINICAL_NOTE_GENERATION')
+}
+
+async function onRetryProcessing(processType) {
   const id = workspace.value?.encounter?.id
-  if (id == null) {
+  if (id == null || !processType) {
+    return
+  }
+  if (!canRetryEncounterProcessing.value) {
     return
   }
   actionBusy.value = true
   try {
-    const note = await retryGenerateClinicalNote(id)
-    workspace.value = {
-      ...workspace.value,
-      generatedClinicalNote: note,
-    }
+    await retryEncounterProcessing(id, processType)
+    await loadWorkspace()
     $q.notify({
       type: quasarNotifyTypes.positive,
-      message: t('encounterGeneratedNoteGenerateSuccess'),
+      message: t('encounterProcessingRetrySuccess'),
     })
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
@@ -1195,7 +1211,7 @@ async function onRetryGenerate() {
         type: quasarNotifyTypes.negative,
         message: encounterApiErrorMessage(
           error,
-          t('clinicalNoteSaveError'),
+          t('encounterProcessingRetryError'),
         ),
       })
     }
@@ -1232,10 +1248,6 @@ function onViewSuperbill() {
     params: { id: String(id) },
   })
 }
-
-const returnSuperbillId = computed(() =>
-  String(route.query.returnSuperbillId ?? '').trim(),
-)
 
 function goBackToSuperbill() {
   if (!returnSuperbillId.value || !canViewSuperbill.value) {

@@ -62,9 +62,9 @@
           </p>
         </div>
         <ClinicalNoteAddendaSection
-          v-if="!unsigned"
+          v-if="signedOrAmended"
           :addenda="note?.addenda ?? []"
-          :can-add="canSign"
+          :can-add="canSign && !voided"
           :adding="busy"
           @add="emit('add-addendum')"
         />
@@ -142,11 +142,30 @@ const unsigned = computed(() => {
   const status = String(props.note?.status ?? '').toUpperCase()
 
   return status !== clinicalNoteStatuses.signed
+    && status !== clinicalNoteStatuses.amended
+    && status !== clinicalNoteStatuses.voided
+})
+const signedOrAmended = computed(() => {
+  const status = String(props.note?.status ?? '').toUpperCase()
+
+  return status === clinicalNoteStatuses.signed
+    || status === clinicalNoteStatuses.amended
+})
+const voided = computed(() => {
+  const status = String(props.note?.status ?? '').toUpperCase()
+
+  return status === clinicalNoteStatuses.voided
 })
 const statusLabel = computed(() => {
   const status = String(props.note?.status ?? '').toUpperCase()
   if (status === clinicalNoteStatuses.signed) {
     return t('clinicalNoteStatusSigned')
+  }
+  if (status === clinicalNoteStatuses.amended) {
+    return t('clinicalNoteStatusAmended')
+  }
+  if (status === clinicalNoteStatuses.voided) {
+    return t('clinicalNoteStatusVoided')
   }
   if (status === clinicalNoteStatuses.generated) {
     return t('clinicalNoteStatusGenerated')
@@ -155,6 +174,9 @@ const statusLabel = computed(() => {
   return t('clinicalNoteStatusDraft')
 })
 const statusVariant = computed(() => {
+  if (voided.value) {
+    return 'inactive'
+  }
   if (!unsigned.value) {
     return 'active'
   }

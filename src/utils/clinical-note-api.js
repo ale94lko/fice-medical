@@ -107,6 +107,7 @@ export async function addClinicalNoteAddendum(
     apiPaths.clientClinicalNoteAddenda(clientId, noteId),
     {
       body: addendum.body,
+      reason: addendum.reason,
       // eslint-disable-next-line camelcase
       signature_data: addendum.signatureData,
       // eslint-disable-next-line camelcase

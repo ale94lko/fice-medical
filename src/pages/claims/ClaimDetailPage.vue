@@ -15,7 +15,7 @@
                 }) }}
               </h1>
               <AdminTableStatusCell
-                :label="statusLabel(detail.status)"
+                :label="statusLabel(detail.displayStatus || detail.status)"
                 :variant="detail.statusVariant"
               />
               <span
@@ -430,8 +430,26 @@
             <dd>{{ formatWhen(detail.createdAt) }}</dd>
           </div>
           <div>
-            <dt>{{ t('claimColumnStatus') }}</dt>
-            <dd>{{ statusLabel(detail.status) }}</dd>
+            <dt>{{ t('claimProcessingStatus') }}</dt>
+            <dd>{{ processingStatusLabel(detail.status) }}</dd>
+          </div>
+          <div>
+            <dt>{{ t('claimDisplayStatus') }}</dt>
+            <dd>{{ statusLabel(detail.displayStatus || detail.status) }}</dd>
+          </div>
+          <div>
+            <dt>{{ t('claimAdjudicationDimension') }}</dt>
+            <dd>{{ adjudicationDimensionLabel(
+              detail.adjudicationStatus) }}</dd>
+          </div>
+          <div>
+            <dt>{{ t('claimDenialDimension') }}</dt>
+            <dd>{{ denialDimensionLabel(detail.denialStatus) }}</dd>
+          </div>
+          <div>
+            <dt>{{ t('claimPayerPaymentDimension') }}</dt>
+            <dd>{{ payerPaymentDimensionLabel(
+              detail.payerPaymentStatus) }}</dd>
           </div>
         </dl>
       </section>
@@ -610,7 +628,9 @@
           <dl class="superbill-detail__facts">
             <div>
               <dt>{{ t('claimColumnStatus') }}</dt>
-              <dd>{{ statusLabel(detail.status) }}</dd>
+              <dd>
+                {{ statusLabel(detail.displayStatus || detail.status) }}
+              </dd>
             </div>
             <div>
               <dt>{{ t('claimAdjBilled') }}</dt>
@@ -780,8 +800,14 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
 import {
+  claimAdjudicationStatuses,
+  claimDenialStatuses,
+  claimDisplayStatuses,
   claimRequirementActions,
   claimStatuses,
+  payerPaymentStatuses,
+  addClientCareCoordinationSubTabKeys,
+  addClientTabKeys,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import AdminTableStatusCell from
@@ -986,19 +1012,22 @@ function statusLabel(status) {
   if (status === claimStatuses.submitted) {
     return t('claimStatusSubmitted')
   }
+  if (status === claimDisplayStatuses.awaitingAdjudication) {
+    return t('claimDisplayAwaitingAdjudication')
+  }
   if (status === claimStatuses.accepted) {
     return t('claimStatusAccepted')
   }
   if (status === claimStatuses.rejected) {
     return t('claimStatusRejected')
   }
-  if (status === claimStatuses.paid) {
+  if (status === claimDisplayStatuses.paid) {
     return t('claimStatusPaid')
   }
-  if (status === claimStatuses.partiallyPaid) {
+  if (status === claimDisplayStatuses.partiallyPaid) {
     return t('claimStatusPartiallyPaid')
   }
-  if (status === claimStatuses.denied) {
+  if (status === claimDisplayStatuses.denied) {
     return t('claimStatusDenied')
   }
   if (status === claimStatuses.voided) {
@@ -1006,6 +1035,56 @@ function statusLabel(status) {
   }
 
   return t('claimStatusDraft')
+}
+
+function processingStatusLabel(status) {
+  if (status === claimStatuses.ready) {
+    return t('claimStatusReady')
+  }
+  if (status === claimStatuses.submitted) {
+    return t('claimStatusSubmitted')
+  }
+  if (status === claimStatuses.accepted) {
+    return t('claimStatusAccepted')
+  }
+  if (status === claimStatuses.rejected) {
+    return t('claimStatusRejected')
+  }
+  if (status === claimStatuses.voided) {
+    return t('claimStatusVoided')
+  }
+
+  return t('claimStatusDraft')
+}
+
+function adjudicationDimensionLabel(status) {
+  if (status === claimAdjudicationStatuses.adjudicated) {
+    return t('claimAdjudicationAdjudicated')
+  }
+
+  return t('claimAdjudicationPending')
+}
+
+function denialDimensionLabel(status) {
+  if (status === claimDenialStatuses.partial) {
+    return t('claimDenialPartial')
+  }
+  if (status === claimDenialStatuses.full) {
+    return t('claimDenialFull')
+  }
+
+  return t('claimDenialNone')
+}
+
+function payerPaymentDimensionLabel(status) {
+  if (status === payerPaymentStatuses.partial) {
+    return t('claimPayerPaymentPartial')
+  }
+  if (status === payerPaymentStatuses.paid) {
+    return t('claimPayerPaymentPaid')
+  }
+
+  return t('claimPayerPaymentNone')
 }
 
 function categoryLabel(category) {
@@ -1191,6 +1270,21 @@ function goToClientInsurance() {
   })
 }
 
+function goToClientAuthorizations() {
+  const id = clientChartKey(detail.value?.patient)
+  if (!id) {
+    return
+  }
+  void router.push({
+    name: 'EditClient',
+    params: { id },
+    query: {
+      tab: addClientTabKeys.careCoordination,
+      subTab: addClientCareCoordinationSubTabKeys.authorizations,
+    },
+  })
+}
+
 function goToProvider(sourceId) {
   if (!sourceId) {
     return
@@ -1204,6 +1298,10 @@ function goToProvider(sourceId) {
 function onRequirementAction(check) {
   if (check.action === claimRequirementActions.viewInsurance) {
     goToClientInsurance()
+    return
+  }
+  if (check.action === claimRequirementActions.viewAuthorization) {
+    goToClientAuthorizations()
     return
   }
   if (check.action === claimRequirementActions.viewClient) {

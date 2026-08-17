@@ -24,11 +24,37 @@
                 hide-bottom-space
                 emit-value
                 map-options
+                use-input
+                input-debounce="0"
                 :readonly="readonly"
-                :options="licenseTypeOptions"
+                :options="filteredLicenseTypes"
+                :placeholder="t('staffLicenseTypeSearchPlaceholder')"
                 :error="Boolean(errors.type)"
                 :error-message="errors.type"
                 :test-id="staffLicenseTestIds.typeField"
+                @filter="filterLicenseTypes"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('staffLicenseStateLabel')"
+              required>
+              <FormSelect
+                v-model="local.state"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                use-input
+                input-debounce="0"
+                :readonly="readonly"
+                :options="filteredStates"
+                :placeholder="t('staffLicenseStateSearchPlaceholder')"
+                :error="Boolean(errors.state)"
+                :error-message="errors.state"
+                :test-id="staffLicenseTestIds.stateField"
+                @filter="filterStates"
               />
             </AddClientLabeledField>
           </div>
@@ -43,35 +69,6 @@
                 :error="Boolean(errors.identifier)"
                 :error-message="errors.identifier"
                 :test-id="staffLicenseTestIds.numberField"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="t('staffLicenseStateLabel')"
-              required>
-              <FormSelect
-                v-model="local.state"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                :readonly="readonly"
-                :options="stateOptions"
-                :error="Boolean(errors.state)"
-                :error-message="errors.state"
-                :test-id="staffLicenseTestIds.stateField"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
-              :label="t('staffLicenseValidFromLabel')">
-              <ClientDateField
-                v-model="local.validFrom"
-                :readonly="readonly"
-                :close-label="t('close')"
-                :test-id="staffLicenseTestIds.validFromField"
               />
             </AddClientLabeledField>
           </div>
@@ -107,11 +104,23 @@
               />
             </AddClientLabeledField>
           </div>
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('staffLicenseValidFromLabel')">
+              <ClientDateField
+                v-model="local.validFrom"
+                :readonly="readonly"
+                :close-label="t('close')"
+                :test-id="staffLicenseTestIds.validFromField"
+              />
+            </AddClientLabeledField>
+          </div>
           <div class="col-12">
             <FormToggle
               v-model="local.isPrimary"
               :disable="readonly"
               :label="t('staffLicensePrimaryLabel')"
+              :test-id="staffLicenseTestIds.primaryToggle"
             />
           </div>
           <div class="col-12">
@@ -119,6 +128,7 @@
               v-model="attachmentFile"
               :label="t('staffLicenseAttachmentLabel')"
               :readonly="readonly"
+              :test-id="staffLicenseTestIds.attachmentField"
             />
           </div>
         </div>
@@ -201,6 +211,8 @@ const local = ref(createEmptyStaffLicense())
 const attachmentFile = ref(null)
 const errors = ref({})
 const saving = ref(false)
+const filteredLicenseTypes = ref([])
+const filteredStates = ref([])
 
 const dialogTitle = computed(() =>
   props.license?.id ? t('staffLicenseEditTitle') : t('staffLicenseAddTitle'),
@@ -214,6 +226,30 @@ const statusOptions = computed(() => [
   { label: t('staffLicenseStatusInactive'), value: 'Inactive' },
 ])
 
+const licenseTypeChoices = computed(() => {
+  const options = [...(props.licenseTypeOptions ?? [])]
+  const currentId = local.value?.licenseTypeId
+  if (currentId == null || currentId === '') {
+    return options
+  }
+  const exists = options.some(option =>
+    String(option?.value) === String(currentId))
+  if (exists) {
+    return options
+  }
+
+  return [
+    {
+      label: local.value.licenseTypeName
+        || local.value.type
+        || String(currentId),
+      value: currentId,
+      code: local.value.licenseTypeCode || '',
+    },
+    ...options,
+  ]
+})
+
 watch(open, visible => {
   if (!visible) {
     return
@@ -224,7 +260,45 @@ watch(open, visible => {
   }
   attachmentFile.value = null
   errors.value = {}
+  filteredLicenseTypes.value = licenseTypeChoices.value
+  filteredStates.value = props.stateOptions ?? []
 })
+
+watch(licenseTypeChoices, options => {
+  filteredLicenseTypes.value = options
+})
+
+function filterSelectOptions(options, needle) {
+  const query = String(needle ?? '').trim().toLowerCase()
+  if (!query) {
+    return options
+  }
+
+  return options.filter(option => {
+    const label = String(option?.label ?? '').toLowerCase()
+    const code = String(option?.code ?? option?.value ?? '').toLowerCase()
+
+    return label.includes(query) || code.includes(query)
+  })
+}
+
+function filterLicenseTypes(val, update) {
+  update(() => {
+    filteredLicenseTypes.value = filterSelectOptions(
+      licenseTypeChoices.value,
+      val,
+    )
+  })
+}
+
+function filterStates(val, update) {
+  update(() => {
+    filteredStates.value = filterSelectOptions(
+      props.stateOptions ?? [],
+      val,
+    )
+  })
+}
 
 function onCancel() {
   open.value = false

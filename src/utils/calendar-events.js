@@ -134,7 +134,8 @@ export function eventStatusClass(status) {
   if (normalized === appointmentStatuses.pending) {
     return 'calendar-event--pending'
   }
-  if (normalized === appointmentStatuses.checkedIn) {
+  if (normalized === appointmentStatuses.checkedIn
+    || normalized === appointmentStatuses.confirmed) {
     return 'calendar-event--checked-in'
   }
   if (normalized === appointmentStatuses.inProgress) {

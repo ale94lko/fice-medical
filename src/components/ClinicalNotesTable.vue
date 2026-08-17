@@ -237,6 +237,12 @@ function statusLabel(status) {
   if (status === clinicalNoteStatuses.signed) {
     return t('clinicalNoteStatusSigned')
   }
+  if (status === clinicalNoteStatuses.amended) {
+    return t('clinicalNoteStatusAmended')
+  }
+  if (status === clinicalNoteStatuses.voided) {
+    return t('clinicalNoteStatusVoided')
+  }
   if (status === clinicalNoteStatuses.generated) {
     return t('clinicalNoteStatusGenerated')
   }
@@ -248,13 +254,15 @@ function statusLabel(status) {
 }
 
 function statusVariant(status) {
-  if (status === clinicalNoteStatuses.signed) {
+  if (status === clinicalNoteStatuses.signed
+    || status === clinicalNoteStatuses.amended) {
     return 'active'
   }
   if (status === clinicalNoteStatuses.generated) {
     return 'pending'
   }
-  if (status === clinicalNoteStatuses.draft) {
+  if (status === clinicalNoteStatuses.draft
+    || status === clinicalNoteStatuses.voided) {
     return 'inactive'
   }
 

@@ -125,7 +125,10 @@ export function normalizeClinicalNoteSummary(
       || status === clinicalNoteStatuses.generated,
     encounterId: row?.encounter_id ?? row?.encounterId ?? null,
     isDraft: status === clinicalNoteStatuses.draft,
-    isSigned: status === clinicalNoteStatuses.signed,
+    isSigned: status === clinicalNoteStatuses.signed
+      || status === clinicalNoteStatuses.amended,
+    isAmended: status === clinicalNoteStatuses.amended,
+    isVoided: status === clinicalNoteStatuses.voided,
     isGenerated: status === clinicalNoteStatuses.generated
       || Boolean(row?.generated),
     addenda: normalizeClinicalNoteAddenda(row, clinicianOptions),
@@ -157,6 +160,7 @@ export function normalizeClinicalNoteAddenda(
       clinician,
       clinicianLabel,
       body: trim(item?.body),
+      reason: trim(item?.reason),
       signatureData:
         item?.signature_data ?? item?.signatureData ?? '',
       signedAt: item?.signed_at ?? item?.signedAt ?? null,

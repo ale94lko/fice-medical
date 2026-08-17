@@ -127,6 +127,48 @@
     </section>
 
     <section
+      v-if="openProcessingIssues.length"
+      class="encounter-workspace-card"
+      :data-testid="tid.processingIssues">
+      <div class="encounter-workspace-card__head">
+        <div>
+          <h2>{{ t('encounterProcessingTitle') }}</h2>
+          <p class="text-body2 text-grey-7 q-mb-none">
+            {{ t('encounterProcessingSubtitle') }}
+          </p>
+        </div>
+      </div>
+      <div
+        v-for="issue in openProcessingIssues"
+        :key="issue.processType"
+        class="encounter-workspace-checklist__item q-mb-sm">
+        <q-icon
+          name="warning"
+          color="warning"
+          size="22px"
+        />
+        <div class="encounter-workspace-checklist__body">
+          <strong>{{ processingLabel(issue) }}</strong>
+          <p class="text-body2 text-grey-7 q-mb-none">
+            {{ issue.userSafeMessage
+              || t('encounterProcessingFailedFallback') }}
+          </p>
+        </div>
+        <q-btn
+          v-if="canRetryProcessing"
+          no-caps
+          unelevated
+          color="primary"
+          class="app-btn-primary"
+          dense
+          :data-testid="tid.processingRetry(issue.processType)"
+          :label="t('encounterProcessingRetry')"
+          @click="emit('retry-processing', issue.processType)"
+        />
+      </div>
+    </section>
+
+    <section
       v-if="generatedNote || generationFailed"
       class="encounter-workspace-card"
       :data-testid="tid.generatedNote">
@@ -155,7 +197,7 @@
       </p>
       <div class="row q-gutter-sm">
         <q-btn
-          v-if="generationFailed"
+          v-if="generationFailed && canRetryProcessing"
           no-caps
           unelevated
           color="primary"
@@ -165,7 +207,7 @@
           @click="emit('retry-generate')"
         />
         <q-btn
-          v-else
+          v-else-if="!generationFailed"
           no-caps
           unelevated
           color="primary"
@@ -359,6 +401,14 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  processingIssues: {
+    type: Array,
+    default: () => [],
+  },
+  canRetryProcessing: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits([
@@ -369,6 +419,7 @@ const emit = defineEmits([
   'generate-superbill',
   'review-generated-note',
   'retry-generate',
+  'retry-processing',
 ])
 const { t } = useI18n()
 
@@ -378,17 +429,40 @@ const generationFailed = computed(() =>
   Boolean(props.generatedNote?.generationFailed),
 )
 
+const openProcessingIssues = computed(() =>
+  (props.processingIssues || []).filter(issue => issue?.isOpen),
+)
+
+function processingLabel(issue) {
+  if (issue?.processType === 'SUPERBILL_GENERATION') {
+    return t('encounterProcessingSuperbillFailed')
+  }
+  if (issue?.processType === 'CLINICAL_NOTE_GENERATION') {
+    return t('encounterProcessingNoteFailed')
+  }
+
+  return t('encounterProcessingFailedFallback')
+}
+
 const generatedUnsigned = computed(() => {
   const status = String(props.generatedNote?.status ?? '').toUpperCase()
 
   return Boolean(props.generatedNote?.id)
     && status !== clinicalNoteStatuses.signed
+    && status !== clinicalNoteStatuses.amended
+    && status !== clinicalNoteStatuses.voided
 })
 
 const generatedStatusLabel = computed(() => {
   const status = String(props.generatedNote?.status ?? '').toUpperCase()
   if (status === clinicalNoteStatuses.signed) {
     return t('clinicalNoteStatusSigned')
+  }
+  if (status === clinicalNoteStatuses.amended) {
+    return t('clinicalNoteStatusAmended')
+  }
+  if (status === clinicalNoteStatuses.voided) {
+    return t('clinicalNoteStatusVoided')
   }
   if (status === clinicalNoteStatuses.generated) {
     return t('clinicalNoteStatusGenerated')
@@ -399,8 +473,12 @@ const generatedStatusLabel = computed(() => {
 
 const generatedStatusVariant = computed(() => {
   const status = String(props.generatedNote?.status ?? '').toUpperCase()
-  if (status === clinicalNoteStatuses.signed) {
+  if (status === clinicalNoteStatuses.signed
+    || status === clinicalNoteStatuses.amended) {
     return 'active'
+  }
+  if (status === clinicalNoteStatuses.voided) {
+    return 'inactive'
   }
 
   return 'pending'

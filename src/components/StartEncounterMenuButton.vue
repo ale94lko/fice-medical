@@ -149,17 +149,15 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import {
-  appointmentStatuses,
-  appointmentTerminalStatuses,
-  encounterTypes,
-} from 'components/constants.js'
+import { encounterTypes } from 'components/constants.js'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import StartEncounterMenuList from
   'components/StartEncounterMenuList.vue'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { encounterTestIds } from 'src/test-ids/index.js'
 import { listClientAppointments } from 'src/utils/appointment-api.js'
+import { appointmentCanStartEncounter } from
+  'src/utils/appointment-actions.js'
 import {
   formatUtcTimeRange,
   localDayKeyFromUtc,
@@ -252,18 +250,11 @@ function appointmentMetaLabel(appt) {
 }
 
 function isSelectableTodayAppointment(appt) {
-  const status = String(appt?.status ?? '').toUpperCase()
   if (!appt?.appointmentId || !appt?.startAtUtc) {
     return false
   }
-  if (appointmentTerminalStatuses.has(status)) {
-    return false
-  }
-  if (status === appointmentStatuses.rescheduled) {
-    return false
-  }
 
-  return true
+  return appointmentCanStartEncounter(appt.status)
 }
 
 async function loadTodayAppointments() {

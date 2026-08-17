@@ -974,8 +974,10 @@ export default {
   staffLicenseDialogSubtitle:
     'Ingrese los datos de la licencia y adjunte un documento si aplica.',
   staffLicenseTypeLabel: 'Tipo de licencia',
+  staffLicenseTypeSearchPlaceholder: 'Buscar tipo de licencia...',
   staffLicenseIdentifierLabel: 'Número de licencia',
-  staffLicenseStateLabel: 'Estado',
+  staffLicenseStateLabel: 'Estado emisor',
+  staffLicenseStateSearchPlaceholder: 'Buscar estado...',
   staffLicenseExpirationLabel: 'Fecha de vencimiento',
   staffLicenseValidFromLabel: 'Válida desde',
   staffLicenseStatusLabel: 'Estado de la licencia',
@@ -984,16 +986,21 @@ export default {
   staffLicenseStatusInactive: 'Inactiva',
   staffLicensePrimaryLabel: 'Licencia principal',
   staffLicensePrimaryShort: 'Principal',
+  staffLicenseSourceLabel: 'Origen',
+  staffLicenseSourceNpi: 'NPI',
+  staffLicenseSourceManual: 'Manual',
   staffLicenseAttachmentLabel: 'Adjunto',
   staffLicenseDeleteTitle: 'Eliminar licencia',
   staffLicenseDeleteMessage:
     '¿Seguro que desea eliminar esta licencia?',
   staffLicenseTypeRequired: 'El tipo de licencia es obligatorio.',
   staffLicenseIdentifierRequired: 'El número de licencia es obligatorio.',
-  staffLicenseStateRequired: 'El estado es obligatorio.',
+  staffLicenseStateRequired: 'El estado emisor es obligatorio.',
   staffLicenseExpirationRequired:
     'La fecha de vencimiento es obligatoria.',
   staffLicenseStatusRequired: 'El estado de la licencia es obligatorio.',
+  staffLicenseDuplicate:
+    'Esta licencia ya está registrada para este clínico.',
   staffClinicalEligibilityTitle: 'Elegibilidad clínica',
   staffClinicalEligibilitySubtitle:
     'Indica si este miembro del personal puede realizar acciones '
@@ -1813,6 +1820,12 @@ export default {
     'Describa la enmienda o la información clínica adicional.',
   clinicalNoteAddendumBodyRequired:
     'El texto del addendum es obligatorio.',
+  clinicalNoteAddendumReason: 'Motivo',
+  clinicalNoteAddendumReasonPlaceholder:
+    '¿Por qué es necesaria esta enmienda?',
+  clinicalNoteAddendumReasonRequired:
+    'El motivo del addendum es obligatorio.',
+  clinicalNoteAddendumReasonMeta: 'Motivo: {reason}',
   clinicalNoteAddendumSignatureHint:
     'Firme abajo para autorizar este addendum.',
   clinicalNoteAddendumSign: 'Firmar addendum',
@@ -1826,6 +1839,8 @@ export default {
   clinicalNoteStatusDraft: 'Borrador',
   clinicalNoteStatusGenerated: 'Generada',
   clinicalNoteStatusSigned: 'Firmada',
+  clinicalNoteStatusAmended: 'Enmendada',
+  clinicalNoteStatusVoided: 'Anulada',
   clinicalNoteColDateTime: 'Fecha y hora',
   clinicalNoteColClinician: 'Clínico',
   clinicalNoteColSummary: 'Resumen',
@@ -2364,7 +2379,7 @@ export default {
   appointmentDetailCopiedNumber: 'Número de cita copiado.',
   appointmentDetailCopyError: 'No se pudo copiar el número de cita.',
   appointmentDetailStatusScheduledHint: 'La cita está programada',
-  appointmentDetailStatusConfirmedHint: 'La cita está programada',
+  appointmentDetailStatusConfirmedHint: 'La cita está confirmada',
   appointmentDetailStatusCheckedInHint: 'El cliente hizo check-in',
   appointmentDetailStatusCompletedHint: 'La cita ha sido completada',
   appointmentDetailStatusCancelledHint: 'La cita ha sido cancelada',
@@ -2400,7 +2415,7 @@ export default {
   appointmentActionCancel: 'Cancelar',
   appointmentActionDelete: 'Eliminar',
   appointmentActionReschedule: 'Reprogramar',
-  appointmentActionCheckIn: 'Check-in',
+  appointmentActionCheckIn: 'Confirmar',
   appointmentActionComplete: 'Completar',
   appointmentActionNoShow: 'No asistió',
   appointmentBookButton: 'Reservar cita',
@@ -2610,7 +2625,7 @@ export default {
     'Mostrando {from} a {to} de {total} citas',
   appointmentStatusPending: 'Pendiente',
   appointmentStatusScheduled: 'Programada',
-  appointmentStatusConfirmed: 'Programada',
+  appointmentStatusConfirmed: 'Confirmada',
   appointmentStatusCheckedIn: 'Check-in',
   appointmentStatusInProgress: 'En curso',
   appointmentStatusCompleted: 'Completada',
@@ -2623,7 +2638,7 @@ export default {
   appointmentEditSuccess: 'Cita actualizada correctamente.',
   appointmentCancelSuccess: 'Cita cancelada correctamente.',
   appointmentDeleteSuccess: 'Cita eliminada correctamente.',
-  appointmentCheckInSuccess: 'Check-in registrado correctamente.',
+  appointmentCheckInSuccess: 'Cita confirmada.',
   appointmentCompleteSuccess: 'Cita marcada como completada.',
   appointmentNoShowSuccess: 'Cita marcada como no asistió.',
   appointmentCancelConfirmTitle: '¿Cancelar cita?',
@@ -4901,6 +4916,16 @@ export default {
   encounterNarrativeIncomplete:
     '{count} campo obligatorio incompleto | '
     + '{count} campos obligatorios incompletos',
+  encounterProcessingTitle: 'Procesamiento del encounter',
+  encounterProcessingSubtitle:
+    'Generación de nota clínica y Superbill tras completar.',
+  encounterProcessingRetry: 'Reintentar',
+  encounterProcessingRetrySuccess: 'Reintento de procesamiento completado.',
+  encounterProcessingRetryError: 'No se pudo reintentar el procesamiento.',
+  encounterProcessingNoteFailed: 'Falló la generación de la nota clínica',
+  encounterProcessingSuperbillFailed: 'Falló la generación del Superbill',
+  encounterProcessingFailedFallback:
+    'Falló un proceso posterior. Puede reintentar.',
   encounterGeneratedNoteTitle: 'Nota clínica',
   encounterGeneratedNoteReady: 'Lista para revisar',
   encounterGeneratedNoteFailed:
@@ -4972,7 +4997,8 @@ export default {
   claimQueueSubmitted: 'Enviados',
   claimQueueSubmittedHint: 'Transmitidos, en espera de acuse.',
   claimQueueAccepted: 'Aceptados',
-  claimQueueAcceptedHint: 'Aceptados para procesamiento del pagador.',
+  claimQueueAcceptedHint:
+    'Aceptados y en espera de adjudicación del pagador.',
   claimQueueRejected: 'Rechazados',
   claimQueueRejectedHint: 'Rechazados antes de la adjudicación.',
   claimQueuePaid: 'Pagados',
@@ -5043,6 +5069,21 @@ export default {
   claimStatusPartiallyPaid: 'Pago parcial',
   claimStatusDenied: 'Denegado',
   claimStatusVoided: 'Anulado',
+  claimProcessingStatus: 'Estado de procesamiento',
+  claimDisplayStatus: 'Estado de visualización',
+  claimAdjudicationDimension: 'Adjudicación',
+  claimAdjudicationPending: 'Pendiente',
+  claimAdjudicationAdjudicated: 'Adjudicado',
+  claimDenialDimension: 'Denegación',
+  claimDenialNone: 'Ninguna',
+  claimDenialPartial: 'Parcial',
+  claimDenialFull: 'Total',
+  claimPayerPaymentDimension: 'Pago del pagador',
+  claimPayerPaymentNone: 'Ninguno',
+  claimPayerPaymentPartial: 'Parcial',
+  claimPayerPaymentPaid: 'Pagado',
+  claimDisplayAwaitingAdjudication:
+    'Aceptado — En espera de adjudicación',
   claimTitle: 'Claim {number}',
   claimReadiness: 'Preparación del Claim',
   claimReadinessReadyTitle: 'Este Claim está estructuralmente listo.',

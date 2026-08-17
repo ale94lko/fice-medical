@@ -209,11 +209,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import {
-  appointmentStatuses,
-  appointmentTerminalStatuses,
-  encounterTypes,
-} from 'components/constants.js'
+import { encounterTypes } from 'components/constants.js'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormField from 'components/FormField.vue'
 import FormSelect from 'components/FormSelect.vue'
@@ -221,6 +217,8 @@ import { useAuthStore } from 'src/stores/auth-store.js'
 import { encounterTestIds as tid, modalTestIds } from
   'src/test-ids/index.js'
 import { listClientAppointments } from 'src/utils/appointment-api.js'
+import { appointmentCanStartEncounter } from
+  'src/utils/appointment-actions.js'
 import {
   formatUtcTimeRange,
   localDayKeyFromUtc,
@@ -452,18 +450,11 @@ function applyTypePlaceDefaults(type) {
 }
 
 function isSelectableTodayAppointment(appt) {
-  const status = String(appt?.status ?? '').toUpperCase()
   if (!appt?.appointmentId || !appt?.startAtUtc) {
     return false
   }
-  if (appointmentTerminalStatuses.has(status)) {
-    return false
-  }
-  if (status === appointmentStatuses.rescheduled) {
-    return false
-  }
 
-  return true
+  return appointmentCanStartEncounter(appt.status)
 }
 
 function appointmentTimeLabel(appt) {

@@ -222,6 +222,7 @@ export function createEmptyStaffLicense() {
     licenseTypeId: null,
     licenseTypeCode: '',
     licenseTypeName: '',
+    licenseTypeAbbreviation: '',
     type: '',
     identifier: '',
     state: '',
@@ -230,6 +231,7 @@ export function createEmptyStaffLicense() {
     status: 'Active',
     attachmentFileId: null,
     isPrimary: false,
+    source: 'MANUAL',
   }
 }
 
@@ -359,6 +361,8 @@ export function normalizeStaffLicenseRow(row) {
     licenseTypeId: row.license_type_id ?? row.licenseTypeId ?? null,
     licenseTypeCode: row.license_type_code ?? row.licenseTypeCode ?? '',
     licenseTypeName: row.license_type_name ?? row.licenseTypeName ?? '',
+    licenseTypeAbbreviation:
+      row.license_type_abbreviation ?? row.licenseTypeAbbreviation ?? '',
     type: row.license_type_name
       ?? row.licenseTypeName
       ?? row.type
@@ -370,6 +374,7 @@ export function normalizeStaffLicenseRow(row) {
     status: row.status ?? 'Active',
     attachmentFileId: row.attachment_file_id ?? row.attachmentFileId ?? null,
     isPrimary: Boolean(row.is_primary ?? row.isPrimary),
+    source: String(row.source ?? 'MANUAL').trim().toUpperCase() || 'MANUAL',
   }
 }
 

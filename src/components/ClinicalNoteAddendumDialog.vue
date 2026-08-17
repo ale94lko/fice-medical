@@ -53,6 +53,23 @@
             </AddClientLabeledField>
           </div>
           <div class="col-12">
+            <AddClientLabeledField
+              :label="t('clinicalNoteAddendumReason')"
+              required
+              :test-id="tid.field('addendum-reason')">
+              <q-input
+                v-model="local.reason"
+                outlined
+                hide-bottom-space
+                :maxlength="255"
+                :placeholder="t('clinicalNoteAddendumReasonPlaceholder')"
+                :error="Boolean(errors.reason)"
+                :error-message="errors.reason"
+                :data-testid="tid.field('addendum-reason')"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12">
             <SubsectionHeading
               icon="draw"
               :title="t('clinicalNoteSectionSignature')"
@@ -164,6 +181,7 @@ function emptyAddendum() {
   return {
     clinicianId: null,
     body: '',
+    reason: '',
     signatureData: '',
   }
 }
@@ -214,6 +232,10 @@ function validate() {
     errors.body = t('clinicalNoteAddendumBodyRequired')
     valid = false
   }
+  if (!String(local.value.reason ?? '').trim()) {
+    errors.reason = t('clinicalNoteAddendumReasonRequired')
+    valid = false
+  }
   signatureCanvasRef.value?.flush?.()
   if (!String(local.value.signatureData ?? '').trim()) {
     errors.signatureData = t('clinicalNoteSignatureRequired')
@@ -240,6 +262,7 @@ function onSignConfirmed() {
   emit('sign', {
     clinicianId: local.value.clinicianId,
     body: String(local.value.body ?? '').trim(),
+    reason: String(local.value.reason ?? '').trim(),
     signatureData: local.value.signatureData,
   })
 }

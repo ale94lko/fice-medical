@@ -4,7 +4,10 @@ import {
   compactServices,
   dosRangeForPreset,
 } from 'src/utils/billing-work-queue.js'
-import { claimStatuses } from 'components/constants.js'
+import {
+  claimDisplayStatuses,
+  claimStatuses,
+} from 'components/constants.js'
 
 export const claimQueueTabs = {
   needsAttention: 'needsAttention',
@@ -40,13 +43,13 @@ export function claimQueueStatusParam(tab) {
     return claimStatuses.rejected
   }
   if (tab === claimQueueTabs.paid) {
-    return claimStatuses.paid
+    return claimDisplayStatuses.paid
   }
   if (tab === claimQueueTabs.partiallyPaid) {
-    return claimStatuses.partiallyPaid
+    return claimDisplayStatuses.partiallyPaid
   }
   if (tab === claimQueueTabs.denied) {
-    return claimStatuses.denied
+    return claimDisplayStatuses.denied
   }
 
   return undefined
@@ -84,8 +87,8 @@ export function claimQueueEmptyKey(tab) {
 export function claimWorkQueueRowClass(row) {
   if (row?.status === claimStatuses.draft
     || row?.status === claimStatuses.rejected
-    || row?.status === claimStatuses.denied
-    || row?.status === claimStatuses.partiallyPaid) {
+    || row?.displayStatus === claimDisplayStatuses.denied
+    || row?.displayStatus === claimDisplayStatuses.partiallyPaid) {
     return 'billing-queue-row billing-queue-row--attention'
   }
 

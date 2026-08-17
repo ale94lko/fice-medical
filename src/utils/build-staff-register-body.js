@@ -151,6 +151,9 @@ function mapClinicalProfile(clinical) {
       attachment_file_id:
         row.attachment_file_id ?? row.attachmentFileId ?? null,
       is_primary: Boolean(row.is_primary ?? row.isPrimary),
+      source: String(row.source ?? 'MANUAL').trim().toUpperCase() === 'NPI'
+        ? 'NPI'
+        : 'MANUAL',
     })),
     supervisor_id: mapSupervisorIdForApi(clinical.supervisorId),
   }

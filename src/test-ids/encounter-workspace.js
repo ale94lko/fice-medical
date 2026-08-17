@@ -34,6 +34,11 @@ export const encounterWorkspaceTestIds = {
   generatedNoteSign: 'encounter-generated-note-btn-sign',
   generatedNoteRegenerate: 'encounter-generated-note-btn-regenerate',
   generatedNoteRetry: 'encounter-generated-note-btn-retry',
+  processingIssues: 'encounter-processing-issues',
+  processingRetry: type => toTestId(
+    'encounter-processing-retry',
+    type,
+  ),
   viewSuperbill: 'encounter-workspace-view-superbill',
   generateSuperbill: 'encounter-workspace-generate-superbill',
   returnToBilling: 'encounter-workspace-return-billing',

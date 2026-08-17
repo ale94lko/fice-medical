@@ -321,6 +321,7 @@ export function isEncounterInvalidError(error) {
 
 function mapServiceProcedureToApi(row = {}) {
   const payload = {
+    id: resolveEncounterId(row.id),
     service_procedure_id: resolveEncounterId(
       row.serviceProcedureId ?? row.service_procedure_id,
     ),
@@ -328,6 +329,9 @@ function mapServiceProcedureToApi(row = {}) {
     name: trimOrNull(row.name),
     cpt_code: trimOrNull(row.cptCode ?? row.cpt_code),
     hcpcs_code: trimOrNull(row.hcpcsCode ?? row.hcpcs_code),
+  }
+  if (payload.id == null) {
+    delete payload.id
   }
   const fee = row.suggestedFee ?? row.suggested_fee
   if (fee != null && fee !== '') {
@@ -653,6 +657,20 @@ export async function completeEncounter(encounterId, clientId = null) {
   }
 
   return encounter
+}
+
+export async function retryEncounterProcessing(
+  encounterId,
+  processType,
+) {
+  const response = await apiInstance.post(
+    apiPaths.encounterProcessingRetry(encounterId),
+    {
+      process_type: processType,
+    },
+  )
+
+  return unwrapData(response.data)
 }
 
 export async function cancelEncounter(
