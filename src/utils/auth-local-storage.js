@@ -137,7 +137,8 @@ export function readStoredSubtenants() {
 
 export function writeStoredSubtenants(subtenants) {
   const list = Array.isArray(subtenants) ? subtenants : []
-  localStorage.setItem(keys.subtenants, JSON.stringify(list))
+  void list
+  localStorage.removeItem(keys.subtenants)
 }
 
 export function readStoredActiveSubtenantId() {
