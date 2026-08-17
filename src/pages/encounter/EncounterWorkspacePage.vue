@@ -130,6 +130,7 @@
         color="primary"
         class="app-btn-primary"
         :label="t('encounterWorkspaceRetry')"
+        :data-testid="tid.workspaceRetry"
         @click="loadWorkspace"
       />
     </div>
@@ -240,7 +241,7 @@ import EncounterWorkspaceTabs from
 import EncounterWorkspaceVisit from
   'components/encounter/EncounterWorkspaceVisit.vue'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { clientChartKey } from 'components/helpers.js'
 import {

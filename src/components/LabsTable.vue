@@ -131,6 +131,7 @@
             icon="science"
             :size="siteBreakpoints.SM"
             :aria-label="t('labActionCollect')"
+            :data-testid="tid.rowCollect(row.id)"
             @click="emit('collect', row)"
           >
           <q-tooltip
@@ -150,6 +151,7 @@
             icon="assignment_turned_in"
             :size="siteBreakpoints.SM"
             :aria-label="t('labActionEnterResults')"
+            :data-testid="tid.rowResults(row.id)"
             @click="emit('results', row)"
           >
           <q-tooltip
@@ -169,6 +171,7 @@
             icon="rate_review"
             :size="siteBreakpoints.SM"
             :aria-label="t('labActionReview')"
+            :data-testid="tid.rowReview(row.id)"
             @click="emit('review', row)"
           >
           <q-tooltip
@@ -212,6 +215,7 @@
             icon="cancel"
             :size="siteBreakpoints.SM"
             :aria-label="t('labCancelLab')"
+            :data-testid="tid.rowCancel(row.id)"
             @click="emit('cancel-lab', row)"
           >
           <q-tooltip

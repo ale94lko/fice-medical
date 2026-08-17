@@ -158,6 +158,7 @@
               size="lg"
               icon="lock"
               class="telehealth-lobby__join-btn full-width"
+              :data-testid="telehealthTestIds.lobbyJoin"
               :label="t('telehealthJoin')"
               :loading="joining"
               :disable="!nameTrimmed"
@@ -177,6 +178,7 @@
               outline
               color="white"
               class="telehealth-lobby__back-btn full-width"
+              :data-testid="telehealthTestIds.lobbyBack"
               :label="t('telehealthBackToApp')"
               :disable="joining"
               @click="$emit('back')"
@@ -208,6 +210,7 @@
             flat
             no-caps
             color="primary"
+            :data-testid="telehealthTestIds.lobbyDeviceClose"
             :label="t('close')"
           />
         </q-card-actions>
@@ -219,6 +222,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   initialName: { type: String, default: '' },

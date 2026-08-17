@@ -45,6 +45,7 @@
             :icon="adminTableActionIcons.view"
             :size="siteBreakpoints.SM"
             :aria-label="t('view')"
+            :data-testid="tid.rowView(row.id)"
             @click="emit('view', row)"
           >
           <q-tooltip
@@ -64,6 +65,7 @@
             :icon="adminTableActionIcons.edit"
             :size="siteBreakpoints.SM"
             :aria-label="t('edit')"
+            :data-testid="tid.rowEdit(row.id)"
             @click="emit('edit', row)"
           >
           <q-tooltip
@@ -83,6 +85,7 @@
             icon="delete"
             :size="siteBreakpoints.SM"
             :aria-label="t('delete')"
+            :data-testid="tid.rowDelete(row.id)"
             @click="emit('delete', row)"
           >
           <q-tooltip
@@ -114,6 +117,7 @@ import AdminQTable from 'components/AdminQTable.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { resolveClinicianOptionLabel } from 'src/utils/care-plan-orders.js'
+import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   rows: {

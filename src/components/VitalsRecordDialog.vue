@@ -2,12 +2,13 @@
   <q-dialog
     v-model="open"
     persistent
-    data-testid="add-client-vitals-record-dialog"
+    :data-testid="tid.vitalsRecordDialog"
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.vitalsRecordDialog"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -409,6 +410,7 @@
                                   no-caps
                                   flat
                                   color="primary"
+                                  :data-testid="tid.vitalsBtnTimePickerClose"
                                   :label="t('close')"
                                 />
                               </div>

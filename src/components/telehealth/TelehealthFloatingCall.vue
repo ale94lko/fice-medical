@@ -31,6 +31,7 @@
         }"
         color="primary"
         text-color="white"
+        :data-testid="telehealthTestIds.floatMute"
         :icon="webrtc.audioEnabled.value ? 'mic' : 'mic_off'"
         :aria-label="t('telehealthToggleMic')"
         @click="webrtc.toggleAudio()">
@@ -47,6 +48,7 @@
         }"
         color="primary"
         text-color="white"
+        :data-testid="telehealthTestIds.floatVideo"
         :icon="webrtc.videoEnabled.value ? 'videocam' : 'videocam_off'"
         :aria-label="t('telehealthToggleCam')"
         @click="webrtc.toggleVideo()">
@@ -60,6 +62,7 @@
         color="primary"
         text-color="white"
         class="telehealth-float__btn"
+        :data-testid="telehealthTestIds.floatRestore"
         icon="open_in_full"
         :aria-label="t('telehealthFloatRestore')"
         @click="onRestore">
@@ -80,6 +83,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useTelehealthSession } from
   'src/composables/useTelehealthSession.js'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const { t } = useI18n()
 const router = useRouter()

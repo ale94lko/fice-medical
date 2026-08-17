@@ -9,7 +9,9 @@
         class="admin-table-pagination__summary q-mb-none">
         {{ summaryText }}
       </p>
-      <div class="row items-center admin-table-pagination__controls">
+      <div
+        class="row items-center admin-table-pagination__controls"
+        :data-testid="adminTableTestIds.pagination">
         <q-select
           dense
           borderless
@@ -20,6 +22,7 @@
           :model-value="rowsPerPage"
           :options="rowsPerPageOptions"
           :disable="disable"
+          :data-testid="adminTableTestIds.rowsPerPage"
           :aria-label="t('rowsPerPage')"
           @update:model-value="emit('update:rowsPerPage', $event)"
         />
@@ -32,6 +35,7 @@
             icon="chevron_left"
             class="admin-table-pagination__nav-btn"
             :disable="disable || page <= 1"
+            :data-testid="adminTableTestIds.prevPage"
             :aria-label="t('adminTablePaginationPrev')"
             @click="emit('update:page', page - 1)"
           />
@@ -46,6 +50,7 @@
             icon="chevron_right"
             class="admin-table-pagination__nav-btn"
             :disable="disable || page >= pagesNumber"
+            :data-testid="adminTableTestIds.nextPage"
             :aria-label="t('adminTablePaginationNext')"
             @click="emit('update:page', page + 1)"
           />
@@ -60,6 +65,7 @@
           color="primary"
           size="sm"
           :disable="disable"
+          :data-testid="adminTableTestIds.pages"
           @update:model-value="emit('update:page', $event)"
         />
       </div>
@@ -71,6 +77,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
+import { adminTableTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   page: {

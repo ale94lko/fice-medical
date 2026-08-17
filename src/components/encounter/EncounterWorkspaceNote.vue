@@ -16,6 +16,7 @@
           color="primary"
           class="app-btn-primary"
           :label="t('encounterOpenNotes')"
+          :data-testid="tid.noteOpen"
           @click="emit('open-notes')"
         />
       </div>
@@ -31,7 +32,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 
 defineProps({
   sections: {

@@ -76,6 +76,7 @@
                 :icon="adminTableActionIcons.view"
                 :size="siteBreakpoints.SM"
                 :aria-label="t('carePlanActionView')"
+                :data-testid="tid.rowView(row.id)"
                 @click="emit('view', row)"
               >
           <q-tooltip
@@ -95,6 +96,7 @@
                 :icon="adminTableActionIcons.edit"
                 :size="siteBreakpoints.SM"
                 :aria-label="t('edit')"
+                :data-testid="tid.rowEdit(row.id)"
                 @click="emit('edit', row)"
               >
           <q-tooltip
@@ -114,6 +116,7 @@
                 icon="delete"
                 :size="siteBreakpoints.SM"
                 :aria-label="t('delete')"
+                :data-testid="tid.rowDelete(row.id)"
                 @click="emit('delete', row)"
               >
           <q-tooltip

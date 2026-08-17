@@ -2,12 +2,13 @@
   <q-dialog
     v-model="open"
     persistent
-    :data-testid="modalTestIds.dialog('consent-content-preview')"
+    :data-testid="modalTestIds.dialog(tid.contentPreviewDialog)"
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.contentPreviewDialog"
         @close="onClose">
         {{ title || t('consentContentPreviewTitle') }}
       </AppDialogHeader>
@@ -25,6 +26,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="modalTestIds.cancel(tid.contentPreviewDialog)"
           :label="t('close')"
           @click="onClose"
         />
@@ -37,7 +39,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
-import { modalTestIds } from 'src/test-ids/index.js'
+import {
+  consentVersionDialogTestIds as tid,
+  modalTestIds,
+} from 'src/test-ids/index.js'
 import { sanitizeHtml } from 'src/utils/sanitize-html.js'
 
 const props = defineProps({

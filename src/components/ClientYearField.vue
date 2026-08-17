@@ -45,6 +45,7 @@
                 no-caps
                 flat
                 color="primary"
+                :data-testid="calendarCloseTestId"
                 :label="closeLabel"
               />
             </div>
@@ -58,6 +59,7 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { toTestId } from 'src/utils/base.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -73,6 +75,12 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
+
+const calendarCloseTestId = computed(() => (
+  props.testId
+    ? toTestId(props.testId, 'calendar-close')
+    : undefined
+))
 
 const yearPopupRef = ref(null)
 const dateRef = ref(null)

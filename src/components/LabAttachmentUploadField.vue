@@ -80,6 +80,7 @@
           icon="delete"
           color="grey-7"
           :aria-label="t('delete')"
+          :data-testid="labTid.attachmentRemove"
           @click.stop="emit('remove', file.id)"
         />
         <q-btn
@@ -90,6 +91,7 @@
           icon="download"
           color="grey-7"
           :aria-label="t('labActionDownload')"
+          :data-testid="labTid.attachmentDownload"
           @click.stop="emit('download', file.id)"
         />
       </li>
@@ -111,6 +113,7 @@ import {
   labAttachmentMimeTypes,
   labMaxAttachmentBytes,
 } from 'components/constants.js'
+import { labTestIds as labTid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   attachments: {

@@ -7,6 +7,7 @@
     <q-card
       class="appointment-detail-dialog insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="appointment-detail"
         :close-label="t('close')"
         :info="t('appointmentDetailSubtitle')"
         @close="onClose">
@@ -46,6 +47,7 @@
                   size="sm"
                   icon="content_copy"
                   :aria-label="t('copy')"
+                  :data-testid="tid.copyNumber"
                   @click="copyAppointmentNumber"
                 />
               </div>
@@ -104,6 +106,7 @@
                   size="sm"
                   icon="content_copy"
                   :aria-label="t('telehealthCopyClientLink')"
+                  :data-testid="tid.copyInvite"
                   @click="onCopyInvite"
                 >
           <q-tooltip
@@ -298,6 +301,7 @@
             class="app-btn-outline"
             icon="print"
             :label="t('appointmentDetailPrint')"
+            :data-testid="tid.print"
             @click="onPrint"
           />
         </div>
@@ -307,6 +311,7 @@
             flat
             class="app-btn-outline"
             :label="t('close')"
+            :data-testid="tid.close"
             @click="onClose"
           />
           <q-btn
@@ -317,6 +322,7 @@
             class="app-btn-primary"
             icon="videocam"
             :label="t('telehealthJoinFromAppointment')"
+            :data-testid="tid.joinTelehealth"
             @click="onJoinStaffTelehealth"
           />
           <q-btn
@@ -327,6 +333,7 @@
             class="app-btn-primary"
             icon="person"
             :label="t('appointmentDetailViewClient')"
+            :data-testid="tid.viewClient"
             @click="onViewClient"
           />
         </div>
@@ -364,6 +371,7 @@ import {
   copyTelehealthInviteUrl,
 } from 'src/utils/telehealth-appointment-ui.js'
 import { clientChartKey } from 'components/helpers.js'
+import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },

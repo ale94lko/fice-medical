@@ -39,6 +39,7 @@
                 no-caps
                 flat
                 color="primary"
+                :data-testid="calendarCloseTestId"
                 :label="closeLabel"
               />
             </div>
@@ -58,7 +59,7 @@ import {
   startOfDay,
 } from 'src/utils/client-form.js'
 import { useAppDateTime } from 'src/composables/useAppDateTime.js'
-import { hasSelectValue } from 'src/utils/base.js'
+import { hasSelectValue, toTestId } from 'src/utils/base.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -77,6 +78,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const calendarCloseTestId = computed(() => (
+  props.testId
+    ? toTestId(props.testId, 'calendar-close')
+    : undefined
+))
 
 const { dateMask, datePlaceholder, datePickerMask } = useAppDateTime()
 const datePopupRef = ref(null)

@@ -5,9 +5,12 @@
     transition-show="scale"
     transition-hide="scale"
     @update:model-value="emit('update:modelValue', $event)">
-    <q-card class="insurance-dialog app-dialog-card">
+    <q-card
+      class="insurance-dialog app-dialog-card"
+      :data-testid="tid.previewDialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.previewDialog"
         @close="emit('update:modelValue', false)">
         {{ t('clinicalNoteTemplatePreview') }}
       </AppDialogHeader>
@@ -52,6 +55,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="tid.btn('close')"
           :label="t('close')"
           @click="emit('update:modelValue', false)"
         />
@@ -64,6 +68,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import { clinicalNoteTemplateDialogTestIds as tid } from
+  'src/test-ids/index.js'
 import { clinicalNoteSectionTypes as types } from
   'src/composables/useClinicalNoteTemplatePermissions.js'
 import {

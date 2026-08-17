@@ -6,6 +6,7 @@
         color="primary"
         :disable="readonly"
         :label="''"
+        :test-id="appointmentTestIds.recurrenceToggle"
       />
       <div class="appointment-recurrence-section__heading">
         <div class="appointment-recurrence-section__title">
@@ -32,6 +33,7 @@
               map-options
               :options="frequencyOptions"
               :readonly="readonly"
+              :data-testid="appointmentTestIds.field('recurrence-frequency')"
               :clearable="false">
               <template #prepend>
                 <q-icon name="calendar_month" size="18px" />
@@ -52,7 +54,9 @@
               hide-bottom-space
               type="number"
               min="1"
-              :readonly="readonly">
+              :readonly="readonly"
+              :data-testid="appointmentTestIds.field('recurrence-interval')"
+            >
               <template #append>
                 <span class="appointment-recurrence-section__unit">
                   {{ intervalUnitLabel }}
@@ -76,6 +80,7 @@
               map-options
               :options="endTypeOptions"
               :readonly="readonly"
+              :data-testid="appointmentTestIds.field('recurrence-ends')"
               :clearable="false">
               <template #prepend>
                 <q-icon name="flag" size="18px" />
@@ -99,6 +104,7 @@
               type="number"
               min="1"
               :readonly="readonly"
+              :data-testid="appointmentTestIds.field('recurrence-count')"
             />
             <p class="appointment-recurrence-section__hint">
               {{ t('appointmentRecurrenceCountHint') }}
@@ -118,6 +124,7 @@
               :error="Boolean(endDateError)"
               :error-message="endDateError"
               :close-label="t('close')"
+              :test-id="appointmentTestIds.field('recurrence-end-date')"
             />
           </AddClientLabeledField>
         </div>
@@ -141,6 +148,7 @@
             :disable="readonly"
             :options="daysPresetOptions"
             :placeholder="t('appointmentRecurrenceDaysPresetCustom')"
+            :test-id="appointmentTestIds.field('recurrence-days-preset')"
             @update:model-value="applyDaysPreset"
           />
           <div class="appointment-recurrence-section__days">
@@ -154,6 +162,7 @@
                   isDaySelected(day.value),
               }"
               :disabled="readonly"
+              :data-testid="appointmentTestIds.recurrenceDay(day.value)"
               @click="toggleDay(day.value)">
               <q-icon
                 :name="isDaySelected(day.value)
@@ -214,6 +223,7 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
+import { appointmentTestIds } from 'src/test-ids/index.js'
 import { apiDateToDisplay } from 'src/utils/app-datetime.js'
 import {
   addDaysToDayKey,

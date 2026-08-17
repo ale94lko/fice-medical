@@ -9,6 +9,7 @@
       class="insurance-dialog app-dialog-card app-dialog-card--lg"
       :data-testid="tid.generatedNote">
       <AppDialogHeader
+        test-id="encounter-generated-note"
         :close-label="t('close')"
         @close="emit('update:modelValue', false)">
         {{ note?.templateName || t('encounterGeneratedNoteTitle') }}
@@ -76,6 +77,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('close')"
+          :data-testid="tid.generatedNoteClose"
           @click="emit('update:modelValue', false)"
         />
         <q-btn
@@ -117,7 +119,7 @@ import SignatureCanvas from 'components/SignatureCanvas.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import { clinicalNoteStatuses } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },

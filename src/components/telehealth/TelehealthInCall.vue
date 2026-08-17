@@ -74,6 +74,7 @@
           }"
           color="primary"
           text-color="white"
+          :data-testid="telehealthTestIds.inCallMute"
           :icon="audioEnabled ? 'mic' : 'mic_off'"
           :aria-label="t('telehealthToggleMic')"
           @click="$emit('toggle-audio')">
@@ -92,6 +93,7 @@
           }"
           color="primary"
           text-color="white"
+          :data-testid="telehealthTestIds.inCallVideo"
           :icon="videoEnabled ? 'videocam' : 'videocam_off'"
           :aria-label="t('telehealthToggleCam')"
           @click="$emit('toggle-video')">
@@ -110,6 +112,7 @@
           }"
           color="primary"
           text-color="white"
+          :data-testid="telehealthTestIds.inCallSpeaker"
           :icon="speakerEnabled ? 'volume_up' : 'volume_off'"
           :aria-label="t('telehealthToggleSpeaker')"
           @click="$emit('toggle-speaker')">
@@ -128,6 +131,7 @@
           }"
           color="primary"
           text-color="white"
+          :data-testid="telehealthTestIds.inCallScreen"
           icon="screen_share"
           :aria-label="screenShareLabel"
           :disable="!canScreenShare"
@@ -149,6 +153,7 @@
           class="telehealth-room__control-btn"
           color="primary"
           text-color="white"
+          :data-testid="telehealthTestIds.inCallMinimize"
           icon="picture_in_picture_alt"
           :aria-label="t('telehealthMinimize')"
           @click="$emit('minimize')">
@@ -163,6 +168,7 @@
           unelevated
           class="telehealth-room__control-btn
             telehealth-room__control-btn--danger"
+          :data-testid="telehealthTestIds.inCallLeave"
           icon="call_end"
           :aria-label="t('telehealthLeave')"
           @click="$emit('leave')">
@@ -224,6 +230,7 @@
             'telehealth-room__menu-item--active':
               sidePanel === 'chat',
           }"
+          :data-testid="telehealthTestIds.inCallChat"
           :aria-label="t('telehealthChatTitle')"
           :aria-pressed="sidePanel === 'chat'"
           @click="toggleSide('chat')">
@@ -311,6 +318,7 @@ import TelehealthFilesPanel from './TelehealthFilesPanel.vue'
 import TelehealthMeetInfoPanel from './TelehealthMeetInfoPanel.vue'
 import TelehealthWaitingAdmitPanel from
   './TelehealthWaitingAdmitPanel.vue'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   localStream: { type: Object, default: null },

@@ -45,6 +45,7 @@
         no-caps
         color="primary"
         class="q-mt-sm"
+        :data-testid="clinicalResourceTestIds.documentRemove"
         :label="t('clinicalResourceDocumentRemove')"
         @click.stop="onRemove"
       />
@@ -71,6 +72,7 @@ import {
 } from 'components/constants.js'
 import { isClinicalResourceDocumentFileAllowed } from
   'src/utils/clinical-resource-validation.js'
+import { clinicalResourceTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

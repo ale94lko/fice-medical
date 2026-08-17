@@ -26,6 +26,7 @@
       outline
       color="white"
       class="full-width q-mt-sm"
+      :data-testid="telehealthTestIds.resendInvite"
       :label="t('telehealthResendInvite')"
       :loading="loading"
       :disable="useCustomEmail && !emailTrimmed"
@@ -37,6 +38,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   inviteEmail: { type: String, default: '' },

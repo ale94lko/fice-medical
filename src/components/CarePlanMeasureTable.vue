@@ -87,6 +87,7 @@
             :icon="adminTableActionIcons.view"
             :size="siteBreakpoints.SM"
             :aria-label="t('view')"
+            :data-testid="tid.rowView(row.id)"
             @click="emit('view', row)"
           >
           <q-tooltip
@@ -105,6 +106,7 @@
             icon="history"
             :size="siteBreakpoints.SM"
             :aria-label="t('carePlanMeasurementHistory')"
+            :data-testid="tid.rowHistory(row.id)"
             @click="emit('measurement-history', row)">
           <q-tooltip
             class="app-info-tooltip"
@@ -123,6 +125,7 @@
             icon="add_chart"
             :size="siteBreakpoints.SM"
             :aria-label="t('carePlanAddMeasurement')"
+            :data-testid="tid.rowAddMeasurement(row.id)"
             @click="emit('add-measurement', row)">
           <q-tooltip
             class="app-info-tooltip"
@@ -141,6 +144,7 @@
             :icon="adminTableActionIcons.edit"
             :size="siteBreakpoints.SM"
             :aria-label="t('edit')"
+            :data-testid="tid.rowEdit(row.id)"
             @click="emit('edit', row)"
           >
           <q-tooltip
@@ -160,6 +164,7 @@
             icon="delete"
             :size="siteBreakpoints.SM"
             :aria-label="t('delete')"
+            :data-testid="tid.rowDelete(row.id)"
             @click="emit('delete', row)"
           >
           <q-tooltip
@@ -192,6 +197,7 @@ import CarePlanProgressCell from 'components/CarePlanProgressCell.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
+import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   rows: {

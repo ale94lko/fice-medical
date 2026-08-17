@@ -6,6 +6,7 @@
       :color="cameraEnabled ? 'positive' : 'grey-8'"
       text-color="white"
       :icon="cameraEnabled ? 'videocam' : 'videocam_off'"
+      :data-testid="telehealthTestIds.deviceCamera"
       :aria-label="t('telehealthToggleCam')"
       @click="$emit('toggle-camera')">
       {{ t('telehealthCameraTest') }}
@@ -16,6 +17,7 @@
       :color="micEnabled ? 'positive' : 'grey-8'"
       text-color="white"
       :icon="micEnabled ? 'mic' : 'mic_off'"
+      :data-testid="telehealthTestIds.deviceMic"
       :aria-label="t('telehealthToggleMic')"
       @click="$emit('toggle-mic')">
       {{ t('telehealthMicTest') }}
@@ -26,6 +28,7 @@
       :color="speakerEnabled ? 'positive' : 'grey-8'"
       text-color="white"
       :icon="speakerEnabled ? 'volume_up' : 'volume_off'"
+      :data-testid="telehealthTestIds.deviceSpeaker"
       :aria-label="t('telehealthToggleSpeaker')"
       @click="$emit('toggle-speaker')">
       {{ t('telehealthSpeakerTest') }}
@@ -35,6 +38,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 defineProps({
   cameraEnabled: { type: Boolean, default: true },

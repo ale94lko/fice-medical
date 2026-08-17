@@ -24,6 +24,7 @@
             dense
             icon="help_outline"
             class="app-dialog-toolbar__info q-ml-xs"
+            :data-testid="changePasswordTestIds.info"
             :aria-label="t('changePasswordSubtitle')">
             <q-tooltip
               class="app-dialog-info-tooltip"

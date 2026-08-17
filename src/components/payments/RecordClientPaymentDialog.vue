@@ -5,7 +5,9 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader @close="onCancel">
+      <AppDialogHeader
+        test-id="client-payment-record"
+        @close="onCancel">
         {{ t('clientPaymentRecordTitle') }}
       </AppDialogHeader>
       <q-card-section
@@ -232,6 +234,7 @@
           class="app-btn-outline"
           :disable="submitting"
           :label="t('cancel')"
+          :data-testid="clientPaymentTestIds.recordCancel"
           @click="onCancel"
         />
         <q-btn
@@ -269,7 +272,8 @@ import {
   autoApplyObligations,
   selectedAllocations,
 } from 'src/utils/client-payment-normalize.js'
-import { clientFinancialTestIds } from 'src/test-ids/index.js'
+import { clientFinancialTestIds, clientPaymentTestIds } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

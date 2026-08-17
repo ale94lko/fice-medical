@@ -21,6 +21,7 @@
             color="primary"
             class="app-btn-outline"
             icon="add"
+            :data-testid="staffFormTestIds.addTaxonomy"
             :label="t('staffTaxonomyAddTitle')"
             @click="openAddDialog"
           />
@@ -102,6 +103,7 @@ import {
   ensureSinglePrimaryTaxonomy,
   mergeTaxonomyRowMeta,
 } from 'src/utils/staff-taxonomy-display.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

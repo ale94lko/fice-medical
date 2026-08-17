@@ -11,6 +11,7 @@
         icon="auto_awesome"
         :disable="saving"
         :aria-label="t('aiAssistantName')"
+        :data-testid="tid.diagnosesAi"
         @click="aiDialogOpen = true">
         <q-tooltip>{{ t('aiAssistantName') }}</q-tooltip>
       </q-btn>
@@ -103,6 +104,7 @@
                 :disable="saving"
                 :size="siteBreakpoints.SM"
                 :aria-label="t('delete')"
+                :data-testid="tid.diagnosesRemove(row._key)"
                 @click="removeRowByKey(row._key)"
               >
                 <q-tooltip
@@ -152,6 +154,8 @@ import { searchIcd10Cm, normalizeIcd10CodeKey } from
 import {
   resolveEncounterChiefComplaint,
 } from 'src/utils/encounter-completion-chief-complaint.js'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   encounter: {

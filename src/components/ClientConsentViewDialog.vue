@@ -59,6 +59,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="tid.viewClose"
           :label="t('close')"
           @click="onClose"
         />

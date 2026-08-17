@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="encounter-clinical-review"
         :close-label="t('close')"
         @close="onCancel">
         {{ title }}
@@ -30,6 +31,7 @@
           flat
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.clinicalReviewCancel"
           @click="onCancel"
         />
         <q-btn
@@ -39,6 +41,7 @@
           class="app-btn-primary"
           :loading="saving"
           :label="t('encounterReviewConfirm')"
+          :data-testid="tid.clinicalReviewConfirm"
           @click="onConfirm"
         />
       </q-card-actions>
@@ -51,6 +54,8 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormField from 'components/FormField.vue'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

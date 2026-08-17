@@ -27,7 +27,7 @@
           class="app-btn-outline"
           :label="t('encounterClinicalAllMedications')"
           :loading="allLoading"
-          data-testid="encounter-clinical-all-medications"
+          :data-testid="ewtid.clinicalAllMedications"
           @click="openAllRecords"
         />
       </div>
@@ -81,6 +81,7 @@
       transition-hide="scale">
       <q-card class="insurance-dialog app-dialog-card">
         <AppDialogHeader
+          test-id="encounter-clinical-medications-status"
           :close-label="t('close')"
           @close="statusDialogOpen = false">
           {{ t('medicationChangeStatusTitle') }}
@@ -111,6 +112,7 @@
             color="primary"
             class="app-btn-outline"
             :label="t('cancel')"
+            :data-testid="ewtid.medicationsCancel"
             @click="statusDialogOpen = false"
           />
           <q-btn
@@ -120,6 +122,7 @@
             class="app-btn-primary"
             :loading="saving"
             :label="t('medicationChangeStatusSave')"
+            :data-testid="ewtid.medicationsSave"
             @click="onConfirmStatusChange"
           />
         </q-card-actions>
@@ -197,7 +200,10 @@ import {
   mapCatalogItemsToSelectOptions,
 } from 'src/utils/catalogs.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
-import { medicationTestIds as tid } from 'src/test-ids/index.js'
+import {
+  encounterWorkspaceTestIds as ewtid,
+  medicationTestIds as tid,
+} from 'src/test-ids/index.js'
 
 const props = defineProps({
   clientId: {

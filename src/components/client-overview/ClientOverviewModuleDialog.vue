@@ -13,6 +13,7 @@
       <AppDialogHeader
         :close-label="t('close')"
         :info="summaryLabel || ''"
+        :test-id="clientOverviewTestIds.moduleDialog"
         @close="onClose">
         <div class="client-overview-module-dialog__title-wrap">
           <div
@@ -171,6 +172,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clientOverviewTestIds.moduleClose"
           :label="t('close')"
           @click="onClose"
         />
@@ -179,6 +181,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="clientOverviewTestIds.moduleOpen"
           :label="t('clientOverviewModuleDialogOpenRecord')"
           @click="emit('open-record')"
         />

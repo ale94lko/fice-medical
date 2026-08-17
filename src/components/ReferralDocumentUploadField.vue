@@ -54,6 +54,7 @@
           icon="delete"
           color="grey-7"
           :aria-label="t('delete')"
+          :data-testid="referralTid.attachmentRemove"
           @click.stop="emit('remove', file.id)"
         />
         <q-btn
@@ -63,6 +64,7 @@
           icon="download"
           color="grey-7"
           :aria-label="t('referralActionDownload')"
+          :data-testid="referralTid.attachmentDownload"
           @click.stop="emit('download', file.id)"
         />
       </li>
@@ -85,6 +87,7 @@ import {
   referralDocumentMimeTypes,
   referralMaxDocumentBytes,
 } from 'components/constants.js'
+import { referralTestIds as referralTid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   attachments: {

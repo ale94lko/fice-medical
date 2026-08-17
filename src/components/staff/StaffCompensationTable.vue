@@ -64,6 +64,7 @@
             class="app-btn-icon-action"
             icon="delete"
             :size="siteBreakpoints.SM"
+            :data-testid="staffFormTestIds.compensationRowDelete(row.id)"
             :aria-label="t('delete')"
             @click="emit('delete', row.id)"
           >
@@ -103,6 +104,7 @@ import AdminTableStatusCell from
 import { siteBreakpoints } from 'components/constants.js'
 import { formatStaffCompensationRateDisplay } from
   'src/utils/staff-form.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   rates: {

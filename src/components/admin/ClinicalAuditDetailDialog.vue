@@ -6,10 +6,11 @@
     transition-hide="scale">
     <q-card
       class="insurance-dialog clinical-audit-detail-dialog app-dialog-card"
-      data-testid="clinical-audit-detail-dialog">
+      :data-testid="clinicalAuditTestIds.detailDialog">
       <AppDialogHeader
         :close-label="t('close')"
         :info="t('clinicalAuditDetailSubtitle')"
+        :test-id="clinicalAuditTestIds.detailDialog"
         @close="onClose">
         {{ t('clinicalAuditDetailTitle') }}
       </AppDialogHeader>
@@ -181,6 +182,7 @@
                     color="primary"
                     icon="content_copy"
                     class="clinical-audit-detail-dialog__copy-btn"
+                    :data-testid="clinicalAuditTestIds.copyJsonBefore"
                     :label="t('clinicalAuditCopyJson')"
                     @click="copyJson('before')"
                   />
@@ -241,6 +243,7 @@
                     color="primary"
                     icon="content_copy"
                     class="clinical-audit-detail-dialog__copy-btn"
+                    :data-testid="clinicalAuditTestIds.copyJsonAfter"
                     :label="t('clinicalAuditCopyJson')"
                     @click="copyJson('after')"
                   />
@@ -295,6 +298,7 @@
           no-caps
           color="primary"
           class="app-btn-primary"
+          :data-testid="clinicalAuditTestIds.detailClose"
           :label="t('close')"
           @click="onClose"
         />
@@ -316,6 +320,7 @@ import {
   formatClinicalAuditJson,
   highlightClinicalAuditJsonLine,
 } from 'src/utils/clinical-audit-normalize.js'
+import { clinicalAuditTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

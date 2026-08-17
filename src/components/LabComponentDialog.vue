@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="family-medical-history-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="lab-component"
         :close-label="t('close')"
         :info="t('labComponentDialogSubtitle')"
         @close="onCancel">
@@ -234,6 +235,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.btn('cancel')"
           @click="onCancel"
         />
         <q-btn

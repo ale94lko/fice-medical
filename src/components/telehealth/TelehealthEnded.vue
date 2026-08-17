@@ -60,6 +60,7 @@
           unelevated
           color="primary"
           class="telehealth-ended__action-btn"
+          :data-testid="telehealthTestIds.endedComplete"
           :label="t('telehealthMarkCompleted')"
           :loading="completeLoading"
           @click="$emit('complete')"
@@ -70,6 +71,7 @@
           :outline="canComplete && !completed"
           :color="canComplete && !completed ? 'white' : 'primary'"
           class="telehealth-ended__action-btn"
+          :data-testid="telehealthTestIds.endedLeave"
           :label="t('telehealthBackToMeet')"
           @click="$emit('back-meet')"
         />
@@ -80,6 +82,7 @@
           color="white"
           class="telehealth-ended__action-btn
             telehealth-ended__action-btn--subtle"
+          :data-testid="telehealthTestIds.endedBack"
           :label="t('telehealthBackToApp')"
           @click="$emit('back-calendar')"
         />
@@ -91,6 +94,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   durationSeconds: { type: Number, default: null },

@@ -59,6 +59,7 @@
           class="app-btn-outline"
           icon="tune"
           :label="t('dashboardCustomize')"
+          :data-testid="dashboardTestIds.customize"
           @click="toggleEditMode"
         />
       </div>

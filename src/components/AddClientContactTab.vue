@@ -72,10 +72,11 @@
       persistent
       transition-show="scale"
       transition-hide="scale"
-      data-testid="guardian-signed-consent-dialog">
+      :data-testid="tid.guardianConsentDialog">
       <q-card class="insurance-dialog app-dialog-card">
         <AppDialogHeader
           :close-label="t('close')"
+          :test-id="tid.guardianConsentDialog"
           @close="dismissGuardianConsentAction">
           {{ guardianConsentTitle }}
         </AppDialogHeader>
@@ -119,6 +120,7 @@
                   class="app-btn-outline"
                   :disable="guardianConsentBusy || viewingConsentId != null"
                   :loading="viewingConsentId === item.id"
+                  :data-testid="tid.guardianConsentView(item.id)"
                   :label="t('guardianSignedConsentView')"
                   @click="onViewGuardianConsent(item)"
                 />
@@ -134,6 +136,7 @@
             outline
             color="primary"
             class="app-btn-outline"
+            :data-testid="tid.guardianConsentCancel"
             :label="t('cancel')"
             :disable="guardianConsentBusy"
             @click="dismissGuardianConsentAction"
@@ -143,6 +146,7 @@
             unelevated
             color="primary"
             class="app-btn-primary"
+            :data-testid="tid.guardianConsentConfirm"
             :label="guardianConsentConfirmText"
             :loading="guardianConsentBusy"
             :disable="guardianConsentBusy"

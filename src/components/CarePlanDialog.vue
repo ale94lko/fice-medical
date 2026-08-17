@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="care-plan"
         :close-label="t('close')"
         :info="dialogSubtitle"
         @close="onCancel">
@@ -232,6 +233,7 @@
                 color="primary"
                 class="app-btn-primary"
                 :label="t('carePlanRecordMeasurement')"
+                :data-testid="tid.btn('record-measurement')"
                 @click="emitRecordProgress(row)"
               />
             </div>
@@ -256,6 +258,7 @@
           flat
           class="app-btn-outline"
           :label="readonly ? t('close') : t('cancel')"
+          :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
           @click="onCancel"
         />
         <template v-if="!readonly">
@@ -267,6 +270,7 @@
             class="app-btn-outline"
             :loading="saving"
             :label="t('save')"
+            :data-testid="tid.btn('save')"
             @click="onSave(false)"
           />
           <q-btn
@@ -277,6 +281,7 @@
             class="app-btn-primary"
             :loading="saving"
             :label="t('carePlanSaveActivate')"
+            :data-testid="tid.btn('sign')"
             @click="onSave(true)"
           />
           <q-btn
@@ -287,6 +292,7 @@
             class="app-btn-primary"
             :loading="saving"
             :label="t('save')"
+            :data-testid="tid.btn('save')"
             @click="onSave(false)"
           />
         </template>

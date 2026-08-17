@@ -1,5 +1,7 @@
 <template>
-  <div class="consent-sign-page">
+  <div
+    class="consent-sign-page"
+    :data-testid="telehealthTestIds.signPage">
     <header class="consent-sign-page__topbar">
       <div class="consent-sign-page__brand">
         <q-icon name="verified_user" size="18px" />
@@ -59,6 +61,7 @@
             toggle-color="primary"
             color="grey-3"
             text-color="grey-9"
+            :data-testid="telehealthTestIds.signMode"
             :options="modeOptions"
           />
         </div>
@@ -121,6 +124,7 @@
               unelevated
               color="primary"
               class="app-btn-primary full-width"
+              :data-testid="telehealthTestIds.signSubmit"
               :label="t('clientConsentSignConfirm')"
               :loading="submitting"
               :disable="!canSign"
@@ -168,6 +172,7 @@
               unelevated
               color="negative"
               class="full-width"
+              :data-testid="telehealthTestIds.signDecline"
               :label="t('clientConsentDecline')"
               :loading="submitting"
               :disable="!canDecline"
@@ -208,6 +213,7 @@ import {
   consentTypeI18nKey,
 } from 'src/utils/consent-i18n.js'
 import { sanitizeHtml } from 'src/utils/sanitize-html.js'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const { t, te } = useI18n()
 const route = useRoute()

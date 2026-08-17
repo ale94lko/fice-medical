@@ -16,6 +16,7 @@
           :disable="!source.available"
           :label="source.label"
           :color="source.toggleColor || 'primary'"
+          :test-id="calendarTestIds.sourceToggle(source.id)"
           @update:model-value="emit('toggle-source', source.id, $event)"
         />
         <p
@@ -43,6 +44,7 @@ import { useI18n } from 'vue-i18n'
 import CalendarClinicianList from
   'components/calendar/CalendarClinicianList.vue'
 import FormToggle from 'components/FormToggle.vue'
+import { calendarTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   collapsed: { type: Boolean, default: false },

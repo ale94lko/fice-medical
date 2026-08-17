@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="lab-order"
         :close-label="t('close')"
         :info="dialogSubtitle"
         @close="onCancel">
@@ -361,6 +362,7 @@
             color="primary"
             class="app-btn-outline"
             :label="t('close')"
+            :data-testid="tid.btn('close')"
             @click="onCancel"
           />
         </template>
@@ -372,6 +374,7 @@
             class="app-btn-outline"
             :label="t('cancel')"
             :disable="saving"
+            :data-testid="tid.btn('cancel')"
             @click="onCancel"
           />
           <q-btn
@@ -394,6 +397,7 @@
             class="app-btn-outline"
             :label="t('cancel')"
             :disable="saving"
+            :data-testid="tid.btn('cancel')"
             @click="onCancel"
           />
           <q-btn

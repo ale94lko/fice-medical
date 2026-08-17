@@ -24,6 +24,7 @@
           class="app-btn-outline"
           :disable="saving"
           :label="card.action"
+          :data-testid="followUpActionTestId(card.key)"
           @click="openCard(card.key)"
         />
       </section>
@@ -92,7 +93,7 @@ import { useSiteStore } from 'src/stores/site-store.js'
 import { notifyBookedAppointment } from
   'src/utils/telehealth-appointment-ui.js'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 
 const props = defineProps({
   sections: {
@@ -157,6 +158,17 @@ const allCards = computed(() => [
 const cards = computed(() =>
   allCards.value.filter(card => card.canOpen),
 )
+
+function followUpActionTestId(key) {
+  if (key === 'appointments') {
+    return tid.followUpSchedule
+  }
+  if (key === 'referrals') {
+    return tid.followUpReferral
+  }
+
+  return tid.followUpOpen
+}
 
 function notifyError(error, fallbackKey) {
   if (isAuthSessionEndUIError(error)) {

@@ -7,6 +7,7 @@
     <q-card class="insurance-dialog app-dialog-card
       care-plan-measurement-history-dialog">
       <AppDialogHeader
+        test-id="care-plan-measurement-history"
         :close-label="t('close')"
         :info="t('carePlanMeasurementHistorySubtitle')"
         @close="onClose">
@@ -233,6 +234,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('close')"
+          :data-testid="tid.btn('close')"
           @click="onClose"
         />
       </q-card-actions>
@@ -250,6 +252,7 @@ import AdminTableClinicianAvatars from
   'components/admin-table/AdminTableClinicianAvatars.vue'
 import AdminQTable from 'components/AdminQTable.vue'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
+import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 import {
   buildOutcomeMeasureHistoryRows,
   measurementProgressTone,

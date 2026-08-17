@@ -74,6 +74,7 @@
                     size="xs"
                     icon="content_copy"
                     class="client-overview-header__copy-btn"
+                    :data-testid="clientOverviewAltTestIds.copyMrn"
                     :aria-label="t('clientOverviewCopyClientNumber')"
                     @click="copyClientNumber"
                   />
@@ -248,6 +249,7 @@
                       size="xs"
                       icon="content_copy"
                       class="client-overview-header__copy-btn"
+                      :data-testid="clientOverviewAltTestIds.copyMrn"
                       :aria-label="t('clientOverviewCopyClientNumber')"
                       @click="copyClientNumber"
                     />

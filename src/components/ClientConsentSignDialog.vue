@@ -200,8 +200,13 @@
           outline
           color="primary"
           class="app-btn-outline"
-          :label="secondaryLabel"
           :disable="busy"
+          :data-testid="
+            step === 'method' || step === 'secure_link_result'
+              ? tid.signCancel
+              : undefined
+          "
+          :label="secondaryLabel"
           @click="onSecondary"
         />
         <q-btn
@@ -210,6 +215,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="tid.signContinue"
           :label="methodPrimaryLabel"
           :loading="isSecureLink && sendingLink"
           :disable="!canGoNext || busy"
@@ -221,6 +227,9 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="
+            isInPersonDigital ? tid.signCapture : tid.signComplete
+          "
           :label="t('clientConsentSignConfirm')"
           :loading="saving"
           :disable="!canSubmitInPerson"
@@ -232,6 +241,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="tid.signCopyLink"
           :label="t('copy')"
           :disable="!secureLinkResult?.secureLinkUrl"
           @click="onCopyLink"

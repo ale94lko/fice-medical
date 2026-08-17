@@ -35,6 +35,7 @@
               dense
               icon="close"
               class="clinical-resources-quick-panel__close-btn"
+              :data-testid="clinicalResourceTestIds.quickPanelClose"
               :aria-label="t('close')"
               @click="closeMenu"
             />
@@ -79,6 +80,8 @@
                 dense
                 class="clinical-resources-quick-panel__item-action"
                 :icon="resolveItemActionIcon(item)"
+                :data-testid="clinicalResourceTestIds
+                  .quickPanelItemAction(item.id)"
                 :aria-label="resolveItemActionLabel(item)"
                 @click="onItemAction(item)"
               />

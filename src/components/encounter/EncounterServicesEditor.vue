@@ -70,6 +70,7 @@
                 :disable="saving"
                 :size="siteBreakpoints.SM"
                 :aria-label="t('delete')"
+                :data-testid="tid.servicesRemove(row.serviceId)"
                 @click="onRemoveRow(row)"
               >
                 <q-tooltip
@@ -122,6 +123,8 @@ import {
 } from 'src/utils/encounter-api.js'
 import { buildServiceLinesFromCatalog } from
   'src/composables/useAppointmentBooking.js'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   encounter: {

@@ -34,6 +34,7 @@
                 round
                 color="primary"
                 icon="content_copy"
+                :data-testid="telehealthTestIds.waitingCopyInvite"
                 :aria-label="t('telehealthCopy')"
                 @click="$emit('copy-invite')">
                 <q-tooltip>{{ t('telehealthCopy') }}</q-tooltip>
@@ -88,6 +89,7 @@
                 no-caps
                 unelevated
                 color="primary"
+                :data-testid="telehealthTestIds.admit(participant.id)"
                 :label="t('telehealthAdmit')"
                 :loading="loading"
                 @click="$emit('admit', participant.id)"
@@ -109,6 +111,7 @@
               color="primary"
               size="lg"
               class="telehealth-waiting__start-btn full-width"
+              :data-testid="telehealthTestIds.waitingStart"
               :label="t('telehealthStart')"
               :loading="loading"
               @click="$emit('start')"
@@ -119,6 +122,7 @@
               color="negative"
               size="lg"
               class="telehealth-waiting__leave-btn full-width"
+              :data-testid="telehealthTestIds.waitingLeave"
               :label="t('telehealthLeave')"
               @click="$emit('leave')"
             />
@@ -142,6 +146,7 @@ import TelehealthDeviceToggles from
   'components/telehealth/TelehealthDeviceToggles.vue'
 import TelehealthResendInviteFields from
   'components/telehealth/TelehealthResendInviteFields.vue'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 import {
   telehealthParticipantStatusLabel,
   telehealthRoleLabel,

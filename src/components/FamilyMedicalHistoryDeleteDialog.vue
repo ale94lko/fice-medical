@@ -4,9 +4,12 @@
     persistent
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="family-medical-history-dialog app-dialog-card">
+    <q-card
+      class="family-medical-history-dialog app-dialog-card"
+      :data-testid="tid.fmhDeleteDialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.fmhDeleteDialog"
         @close="onCancel">
         {{ t('fmhDeleteTitle') }}
       </AppDialogHeader>
@@ -31,6 +34,7 @@
               rows="3"
               counter
               maxlength="500"
+              :data-testid="tid.fmhDeleteReason"
             />
           </AddClientLabeledField>
         </template>
@@ -43,6 +47,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="tid.fmhDeleteCancel"
           :label="t('cancel')"
           @click="onCancel"
         />
@@ -52,6 +57,7 @@
           color="primary"
           class="app-btn-primary"
           :disable="requireDeletionReason && !hasDeletionReason"
+          :data-testid="tid.fmhDeleteConfirm"
           :label="t('confirm')"
           @click="onConfirm"
         />
@@ -65,6 +71,7 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

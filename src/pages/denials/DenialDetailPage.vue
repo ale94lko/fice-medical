@@ -302,7 +302,9 @@
       transition-hide="scale">
       <q-card class="insurance-dialog app-dialog-card
         app-dialog-card--sm">
-        <AppDialogHeader @close="correctOpen = false">
+        <AppDialogHeader
+          test-id="denial-detail-dialog-correct"
+          @close="correctOpen = false">
           {{ correctLabel }}
         </AppDialogHeader>
         <q-card-section class="app-dialog-card__body
@@ -339,6 +341,7 @@
             color="primary"
             class="app-btn-outline"
             :label="t('cancel')"
+            :data-testid="tid.dialogCancel('correct')"
             @click="correctOpen = false"
           />
           <q-btn
@@ -348,6 +351,7 @@
             class="app-btn-primary"
             :loading="actionBusy"
             :label="t('denialCreateClaim')"
+            :data-testid="tid.dialogConfirm('correct')"
             @click="onCorrect"
           />
         </q-card-actions>
@@ -361,7 +365,9 @@
       transition-hide="scale">
       <q-card class="insurance-dialog app-dialog-card
         app-dialog-card--sm">
-        <AppDialogHeader @close="appealOpen = false">
+        <AppDialogHeader
+          test-id="denial-detail-dialog-appeal"
+          @close="appealOpen = false">
           {{ t('denialCreateAppeal') }}
         </AppDialogHeader>
         <q-card-section class="app-dialog-card__body
@@ -392,6 +398,7 @@
             color="primary"
             class="app-btn-outline"
             :label="t('cancel')"
+            :data-testid="tid.dialogCancel('appeal')"
             @click="appealOpen = false"
           />
           <q-btn
@@ -401,6 +408,7 @@
             class="app-btn-primary"
             :loading="actionBusy"
             :label="t('denialCreateAppeal')"
+            :data-testid="tid.dialogConfirm('appeal')"
             @click="onCreateAppeal"
           />
         </q-card-actions>
@@ -414,7 +422,9 @@
       transition-hide="scale">
       <q-card class="insurance-dialog app-dialog-card
         app-dialog-card--sm">
-        <AppDialogHeader @close="resolveOpen = false">
+        <AppDialogHeader
+          test-id="denial-detail-dialog-resolve"
+          @close="resolveOpen = false">
           {{ t('denialResolve') }}
         </AppDialogHeader>
         <q-card-section class="app-dialog-card__body
@@ -457,6 +467,7 @@
             color="primary"
             class="app-btn-outline"
             :label="t('cancel')"
+            :data-testid="tid.dialogCancel('resolve')"
             @click="resolveOpen = false"
           />
           <q-btn
@@ -466,6 +477,7 @@
             class="app-btn-primary"
             :loading="actionBusy"
             :label="t('denialResolve')"
+            :data-testid="tid.dialogConfirm('resolve')"
             @click="onResolve"
           />
         </q-card-actions>

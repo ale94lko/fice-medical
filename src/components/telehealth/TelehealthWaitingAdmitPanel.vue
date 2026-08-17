@@ -30,6 +30,7 @@
         unelevated
         color="primary"
         dense
+        :data-testid="telehealthTestIds.admit(participant.id)"
         :label="t('telehealthAdmit')"
         :loading="loading"
         @click="$emit('admit', participant.id)"
@@ -40,6 +41,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 import {
   telehealthParticipantStatusLabel,
   telehealthRoleLabel,

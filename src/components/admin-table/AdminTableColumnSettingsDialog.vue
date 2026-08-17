@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="app-dialog-card app-dialog-card--sm">
       <AppDialogHeader
+        :test-id="adminTableTestIds.columnSettingsDialog"
         :close-label="t('close')"
         :info="t('adminTableColumnSettingsHint')"
         @close="onCancel">
@@ -41,6 +42,7 @@
                 :disable="isRequired(columnId)"
                 :label="columnLabel(columnId)"
                 class="admin-table-column-settings__toggle"
+                :test-id="adminTableTestIds.columnToggle(columnId)"
                 @update:model-value="value => onToggle(columnId, value)"
               />
             </div>
@@ -59,6 +61,7 @@
           no-caps
           flat
           class="app-btn-outline"
+          :data-testid="adminTableTestIds.columnSettingsReset"
           :label="t('reset')"
           @click="onReset"
         />
@@ -66,6 +69,7 @@
           no-caps
           flat
           class="app-btn-outline"
+          :data-testid="adminTableTestIds.columnSettingsCancel"
           :label="t('cancel')"
           @click="onCancel"
         />
@@ -74,6 +78,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="adminTableTestIds.columnSettingsSave"
           :label="t('save')"
           @click="onSave"
         />
@@ -87,6 +92,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormToggle from 'components/FormToggle.vue'
+import { adminTableTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

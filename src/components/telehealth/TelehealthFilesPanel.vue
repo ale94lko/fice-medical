@@ -35,6 +35,7 @@
             dense
             round
             icon="download"
+            :data-testid="telehealthTestIds.fileDownload(file.id)"
             :aria-label="t('telehealthDownload')"
             @click="$emit('download', file)">
             <q-tooltip>{{ t('telehealthDownload') }}</q-tooltip>
@@ -45,6 +46,7 @@
             dense
             round
             icon="delete"
+            :data-testid="telehealthTestIds.fileDelete(file.id)"
             :aria-label="t('delete')"
             @click="$emit('delete', file.id)">
             <q-tooltip>{{ t('delete') }}</q-tooltip>
@@ -64,6 +66,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 defineProps({
   files: { type: Array, default: () => [] },

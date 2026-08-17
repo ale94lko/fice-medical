@@ -15,6 +15,8 @@ export const aiTestIds = {
   commitConfirm: 'ai-commit-confirm',
   rejectDialog: 'ai-reject-dialog',
   rejectReason: 'ai-reject-reason',
+  rejectCancel: 'ai-reject-btn-cancel',
+  rejectConfirm: 'ai-reject-btn-confirm',
   notDocumentedWarning: 'ai-not-documented-warning',
   committedBadge: 'ai-committed-badge',
   featureBtn: feature => toTestId('ai-btn', feature),

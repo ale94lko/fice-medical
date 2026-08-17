@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="family-medical-history-dialog app-dialog-card">
       <AppDialogHeader
+        :test-id="staffFormTestIds.taxonomyDialog"
         :close-label="t('close')"
         :info="t('staffTaxonomyAddSubtitle')"
         @close="onCancel">
@@ -22,6 +23,7 @@
                 v-model="selectedCode"
                 :exclude-codes="excludeCodes"
                 :placeholder="t('staffPrimaryTaxonomyPlaceholder')"
+                :test-id="staffFormTestIds.taxonomyField('code')"
                 :error="Boolean(errorMessage)"
                 :error-message="errorMessage"
                 @select-option="onSelectOption"
@@ -31,6 +33,7 @@
           <div class="col-12">
             <FormToggle
               v-model="setAsPrimary"
+              :test-id="staffFormTestIds.taxonomyField('primary')"
               :label="t('staffTaxonomySetAsPrimaryLabel')"
             />
           </div>
@@ -43,6 +46,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="staffFormTestIds.taxonomyCancel"
           :label="t('cancel')"
           @click="onCancel"
         />
@@ -51,6 +55,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="staffFormTestIds.taxonomySave"
           :label="t('staffTaxonomyAddConfirm')"
           :disable="!selectedCode"
           @click="onSave"
@@ -67,6 +72,7 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormToggle from 'components/FormToggle.vue'
 import ProviderTaxonomySelect from 'components/ProviderTaxonomySelect.vue'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

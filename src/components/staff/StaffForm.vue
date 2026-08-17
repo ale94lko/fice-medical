@@ -16,6 +16,7 @@
             v-for="tab in visibleTabs"
             :key="tab.key"
             :name="tab.key"
+            :data-testid="staffFormTestIds.tab(tab.key)"
             :class="{ 'add-client-tab--active': activeTab === tab.key }">
             <span class="label row items-center no-wrap">
               <q-icon :name="tab.icon" size="18px" class="icon" />
@@ -118,6 +119,7 @@
               color="primary"
               icon="arrow_back"
               class="app-btn-outline nav-btn"
+              :data-testid="staffFormTestIds.previous"
               :label="t('previous')"
               @click="goPreviousTab"
             />
@@ -132,6 +134,7 @@
               icon-right="arrow_forward"
               class="app-btn-outline nav-btn"
               :class="{ 'q-ml-auto': !canGoPrevious }"
+              :data-testid="staffFormTestIds.next"
               :label="t('next')"
               @click="goNextTab"
             />
@@ -168,6 +171,7 @@ import {
 import { resolveTaxonomiesAgainstCatalog } from
   'src/utils/provider-taxonomy-api.js'
 import { fetchLicenseTypes } from 'src/utils/staff-license-api.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 import {
   emailTypeSelectOptions,
   phoneTypeSelectOptions,

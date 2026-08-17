@@ -25,6 +25,7 @@ export const consentVersionDialogTestIds = {
   field: name => toTestId('consent-version-field', name),
   save: 'consent-version-btn-save',
   preview: 'consent-version-btn-preview',
+  contentPreviewDialog: 'consent-content-preview',
 }
 
 export const clientConsentsTestIds = {
@@ -44,4 +45,15 @@ export const clientConsentsTestIds = {
   viewDialog: 'client-consent-view',
   signDialog: 'client-consent-sign',
   revokeDialog: 'client-consent-revoke',
+  assignCancel: 'client-consent-assign-btn-cancel',
+  assignSubmit: 'client-consent-assign-btn-submit',
+  viewClose: 'client-consent-view-btn-close',
+  signCancel: 'client-consent-sign-btn-cancel',
+  signContinue: 'client-consent-sign-btn-continue',
+  signCapture: 'client-consent-sign-btn-capture',
+  signComplete: 'client-consent-sign-btn-complete',
+  signCopyLink: 'client-consent-sign-btn-copy-link',
+  revokeCancel: 'client-consent-revoke-btn-cancel',
+  revokeSubmit: 'client-consent-revoke-btn-submit',
+  paperScanRemove: 'client-consent-paper-scan-btn-remove',
 }

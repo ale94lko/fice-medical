@@ -8,6 +8,7 @@
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.dialog"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -200,6 +201,7 @@
           class="app-btn-outline"
           :label="readonly ? t('close') : t('cancel')"
           :disable="saving"
+          :data-testid="modalTestIds.cancel(tid.dialog)"
           @click="onCancel"
         />
         <q-btn

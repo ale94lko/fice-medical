@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="care-plan-add-measurement"
         :close-label="t('close')"
         :info="t('carePlanAddMeasurementSubtitle')"
         @close="onCancel">
@@ -163,6 +164,7 @@
           flat
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.btn('cancel')"
           @click="onCancel"
         />
         <q-btn

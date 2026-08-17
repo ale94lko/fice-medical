@@ -28,6 +28,7 @@
           color="primary"
           class="app-btn-outline"
           :disable="cameraBusy"
+          :data-testid="tid.insuranceCardBtn('cancel-camera')"
           :label="t('cancel')"
           @click="cancelCamera"
         />
@@ -37,6 +38,7 @@
           color="primary"
           class="app-btn-primary"
           :disable="cameraBusy || !streamReady"
+          :data-testid="tid.insuranceCardBtn('capture')"
           :label="t('insuranceCardCapture')"
           @click="capturePhoto"
         />
@@ -81,6 +83,7 @@
           color="primary"
           class="app-btn-outline"
           icon="photo_camera"
+          :data-testid="tid.insuranceCardBtn('take-photo')"
           :label="t('insuranceCardTakePhoto')"
           @click="startCamera"
         />
@@ -91,6 +94,7 @@
           color="primary"
           class="app-btn-outline"
           icon="upload_file"
+          :data-testid="tid.insuranceCardBtn('upload-file')"
           :label="t('insuranceCardUploadFile')"
           @click="onBrowseClick"
         />
@@ -99,6 +103,7 @@
           dense
           no-caps
           color="primary"
+          :data-testid="tid.insuranceCardBtn('remove')"
           :label="t('insuranceCardRemove')"
           @click="onRemove"
         />
@@ -146,6 +151,7 @@
           color="primary"
           class="app-btn-outline"
           icon="photo_camera"
+          :data-testid="tid.insuranceCardBtn('take-photo')"
           :label="t('insuranceCardTakePhoto')"
           @click.stop="startCamera"
         />
@@ -156,6 +162,7 @@
           color="primary"
           class="app-btn-outline"
           icon="upload_file"
+          :data-testid="tid.insuranceCardBtn('upload-file')"
           :label="t('insuranceCardUploadFile')"
           @click.stop="onBrowseClick"
         />
@@ -196,6 +203,7 @@ import {
 } from './constants.js'
 import { useStoredFilePreview } from
   'src/composables/useStoredFilePreview.js'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

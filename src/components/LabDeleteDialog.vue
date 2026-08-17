@@ -12,6 +12,7 @@
           no-caps
           flat
           :label="t('cancel')"
+          :data-testid="tid.cancel('lab-delete')"
           @click="open = false"
         />
         <q-btn
@@ -19,7 +20,7 @@
           unelevated
           color="negative"
           :label="t('delete')"
-          :data-testid="tid.modalConfirm('lab-delete')"
+          :data-testid="tid.confirm('lab-delete')"
           @click="onConfirm"
         />
       </q-card-actions>

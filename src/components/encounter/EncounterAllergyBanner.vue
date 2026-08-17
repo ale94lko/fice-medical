@@ -18,6 +18,7 @@
       no-caps
       color="primary"
       :label="t('encounterViewAllAllergies')"
+      :data-testid="tid.allergyBannerViewAll"
       @click="emit('view-allergies')"
     />
   </div>
@@ -27,7 +28,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 
 const props = defineProps({
   items: {

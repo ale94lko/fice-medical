@@ -52,9 +52,12 @@
       persistent
       transition-show="scale"
       transition-hide="scale">
-      <q-card class="family-medical-history-dialog app-dialog-card">
+      <q-card
+        class="family-medical-history-dialog app-dialog-card"
+        :data-testid="serviceProcedureDialogTestIds.requirementDialog">
         <AppDialogHeader
           :close-label="t('close')"
+          :test-id="serviceProcedureDialogTestIds.requirementDialog"
           @close="formOpen = false">
           {{ formTitle }}
         </AppDialogHeader>
@@ -72,6 +75,8 @@
                   emit-value
                   map-options
                   :options="typeOptions"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('type')"
                 />
               </FormField>
             </div>
@@ -86,6 +91,8 @@
                   emit-value
                   map-options
                   :options="purposeOptions"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('purpose')"
                 />
               </FormField>
             </div>
@@ -100,6 +107,8 @@
                   emit-value
                   map-options
                   :options="severityOptions"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('severity')"
                 />
               </FormField>
             </div>
@@ -113,6 +122,8 @@
                   emit-value
                   map-options
                   :options="scopeOptions"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('scope')"
                 />
               </FormField>
             </div>
@@ -126,6 +137,8 @@
                   v-model="form.referenceId"
                   type="number"
                   :external-label="true"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('reference-id')"
                   :error="Boolean(formErrors.referenceId)"
                   :error-message="formErrors.referenceId"
                 />
@@ -138,6 +151,8 @@
                   v-model="form.displayOrder"
                   type="number"
                   :external-label="true"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('display-order')"
                 />
               </FormField>
             </div>
@@ -147,6 +162,8 @@
                 <TextInput
                   v-model="form.nameOverride"
                   :external-label="true"
+                  :test-id="serviceProcedureDialogTestIds
+                    .requirementField('name-override')"
                 />
               </FormField>
             </div>
@@ -175,6 +192,8 @@
             no-caps
             flat
             class="app-btn-outline"
+            :data-testid="serviceProcedureDialogTestIds
+              .btn('requirement-cancel')"
             :label="t('cancel')"
             @click="formOpen = false"
           />
@@ -184,6 +203,8 @@
             color="primary"
             class="app-btn-primary"
             :loading="saving"
+            :data-testid="serviceProcedureDialogTestIds
+              .btn('requirement-save')"
             :label="t('save')"
             @click="onSaveForm"
           />

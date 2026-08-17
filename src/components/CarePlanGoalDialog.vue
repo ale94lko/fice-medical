@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="care-plan-goal"
         :close-label="t('close')"
         :info="t('carePlanGoalSubtitle')"
         @close="onCancel">
@@ -140,6 +141,7 @@
               class="app-btn-outline"
               icon="add"
               :label="t('carePlanAddMeasure')"
+              :data-testid="tid.btn('add-measure')"
               @click="openMeasureDialog('add')"
             />
           </div>
@@ -173,6 +175,7 @@
               class="app-btn-outline"
               icon="add"
               :label="t('carePlanAddIntervention')"
+              :data-testid="tid.btn('add-intervention')"
               @click="openInterventionDialog('add')"
             />
           </div>
@@ -199,6 +202,7 @@
           flat
           class="app-btn-outline"
           :label="readonly ? t('close') : t('cancel')"
+          :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
           @click="onCancel"
         />
         <template v-if="!readonly">
@@ -208,6 +212,7 @@
             color="primary"
             class="app-btn-primary"
             :label="t('carePlanSaveGoal')"
+            :data-testid="tid.btn('save-goal')"
             @click="onSave"
           />
         </template>

@@ -69,6 +69,8 @@ export const layoutTestIds = {
   navRemittances: 'layout-nav-remittances',
   navPayments: 'layout-nav-payments',
   navDenials: 'layout-nav-denials',
+  collapseMenu: 'layout-btn-collapse-menu',
+  expandMenu: 'layout-btn-expand-menu',
 }
 
 export const superbillListTestIds = {
@@ -174,6 +176,17 @@ export const paymentListTestIds = {
   rowView: id => toTestId('payment-list-row-view', id),
 }
 
+export const clientPaymentTestIds = {
+  applyDialog: 'client-payment-apply-dialog',
+  applyAddLine: 'client-payment-apply-btn-add-line',
+  applyCancel: 'client-payment-apply-btn-cancel',
+  applySubmit: 'client-payment-apply-btn-submit',
+  reverseCancel: 'client-payment-reverse-btn-cancel',
+  reverseSubmit: 'client-payment-reverse-btn-submit',
+  recordCancel: 'client-payment-record-btn-cancel',
+  detailClose: 'client-payment-detail-btn-close',
+}
+
 export const remittanceIngestTestIds = {
   payload: 'remittance-ingest-payload',
   autoPost: 'remittance-ingest-auto-post',
@@ -197,6 +210,12 @@ export const denialDetailTestIds = {
   saveRootCause: 'denial-detail-save-root-cause',
   suggestedAction: 'denial-detail-suggested-action',
   reopenSource: 'denial-detail-reopen-source',
+  dialogCancel: name => toTestId('denial-detail-dialog', name, 'btn-cancel'),
+  dialogConfirm: name => toTestId(
+    'denial-detail-dialog',
+    name,
+    'btn-confirm',
+  ),
 }
 
 export const myProfileTestIds = {
@@ -216,6 +235,8 @@ export const documentGenerationTestIds = {
   trigger: type => toTestId('generate-document-btn', type),
   menuItem: type => toTestId('generate-document-menu', type),
   download: id => toTestId('generated-document-btn-download', id),
+  cancel: 'generate-document-btn-cancel',
+  refresh: 'generated-documents-btn-refresh',
 }
 
 export const sessionInactivityTestIds = {
@@ -231,6 +252,7 @@ export const forcedChangePasswordTestIds = {
   newPassword: 'forced-change-password-input-new',
   repeatPassword: 'forced-change-password-input-repeat',
   submit: 'forced-change-password-btn-submit',
+  info: 'forced-change-password-btn-info',
 }
 
 export const forcedMfaEnrollTestIds = {
@@ -249,11 +271,31 @@ export const changePasswordTestIds = {
   newPassword: 'change-password-input-new',
   repeatPassword: 'change-password-input-repeat',
   submit: 'change-password-btn-submit',
+  info: 'change-password-btn-info',
 }
 
 export const adminTableTestIds = {
   columnSettings: 'admin-table-btn-column-settings',
   pageActionsMenu: 'admin-list-page-btn-actions-menu',
+  pagination: 'admin-table-pagination',
+  rowsPerPage: 'admin-table-pagination-rows-per-page',
+  prevPage: 'admin-table-pagination-btn-prev',
+  nextPage: 'admin-table-pagination-btn-next',
+  pages: 'admin-table-pagination-pages',
+  columnSettingsDialog: 'admin-table-column-settings-dialog',
+  columnSettingsReset: 'admin-table-column-settings-btn-reset',
+  columnSettingsCancel: 'admin-table-column-settings-btn-cancel',
+  columnSettingsSave: 'admin-table-column-settings-btn-save',
+  columnToggle: id => toTestId(
+    'admin-table-column-settings-toggle',
+    id,
+  ),
+  contactCopy: value => toTestId('admin-table-contact-copy', value),
+}
+
+export const errorNotFoundTestIds = {
+  page: 'error-not-found-page',
+  goHome: 'error-not-found-btn-go-home',
 }
 
 export const userListTestIds = {
@@ -273,6 +315,7 @@ export const userListTestIds = {
 }
 
 export const userDialogTestIds = {
+  dialog: 'user-dialog',
   field: name => toTestId('user-dialog-field', name),
   btn: name => toTestId('user-dialog-btn', name),
   photoMenu: 'user-dialog-photo-menu',
@@ -329,6 +372,7 @@ export const clinicalResourceTestIds = {
   rowFavorite: id => toTestId('clinical-resource-list-row', id, 'btn-favorite'),
   rowPin: id => toTestId('clinical-resource-list-row', id, 'btn-pin'),
   detailDialog: 'clinical-resource-detail-dialog',
+  detailBtn: name => toTestId('clinical-resource-detail-btn', name),
   formField: name => toTestId('clinical-resource-form-field', name),
   breadcrumbResources: 'clinical-resource-breadcrumb-resources',
   quickPanelTrigger: 'clinical-resource-quick-panel-trigger',
@@ -336,7 +380,16 @@ export const clinicalResourceTestIds = {
   quickPanelSearch: 'clinical-resource-quick-panel-input-search',
   quickPanelBrowseAll: 'clinical-resource-quick-panel-btn-browse-all',
   quickPanelItem: id => toTestId('clinical-resource-quick-panel-item', id),
+  quickPanelClose: 'clinical-resource-quick-panel-btn-close',
+  quickPanelItemAction: id => toTestId(
+    'clinical-resource-quick-panel-item',
+    id,
+    'btn-action',
+  ),
+  documentRemove: 'clinical-resource-document-btn-remove',
 }
+
+export const clinicalResourceListTestIds = clinicalResourceTestIds
 
 export const clinicalResourceDialogTestIds = {
   dialog: 'clinical-resource-dialog',
@@ -357,7 +410,12 @@ export const serviceProcedureListTestIds = {
 
 export const serviceProcedureDialogTestIds = {
   dialog: 'service-procedure-dialog',
+  requirementDialog: 'service-procedure-requirement-dialog',
   field: name => toTestId('service-procedure-dialog-field', name),
+  requirementField: name => toTestId(
+    'service-procedure-requirement-field',
+    name,
+  ),
   btn: name => toTestId('service-procedure-dialog-btn', name),
   requirementRowEdit: id => toTestId(
     'service-procedure-dialog-req',
@@ -375,10 +433,36 @@ export const clinicalNoteTemplateListTestIds = {
   page: 'clinical-note-template-list-page',
   search: 'clinical-note-template-list-input-search',
   add: 'clinical-note-template-list-btn-add',
+  rowView: id => toTestId(
+    'clinical-note-template-list-row',
+    id,
+    'btn-view',
+  ),
+  rowEdit: id => toTestId(
+    'clinical-note-template-list-row',
+    id,
+    'btn-edit',
+  ),
+  rowDuplicate: id => toTestId(
+    'clinical-note-template-list-row',
+    id,
+    'btn-duplicate',
+  ),
+  rowActivate: id => toTestId(
+    'clinical-note-template-list-row',
+    id,
+    'btn-activate',
+  ),
+  rowDeactivate: id => toTestId(
+    'clinical-note-template-list-row',
+    id,
+    'btn-deactivate',
+  ),
 }
 
 export const clinicalNoteTemplateDialogTestIds = {
   dialog: 'clinical-note-template-dialog',
+  previewDialog: 'clinical-note-template-preview-dialog',
   field: name => toTestId('clinical-note-template-dialog-field', name),
   addSection: 'clinical-note-template-dialog-btn-add-section',
   moveUp: index => toTestId(
@@ -390,6 +474,11 @@ export const clinicalNoteTemplateDialogTestIds = {
     'clinical-note-template-dialog-section',
     index,
     'move-down',
+  ),
+  removeSection: index => toTestId(
+    'clinical-note-template-dialog-section',
+    index,
+    'remove',
   ),
   addStructuredField: index => toTestId(
     'clinical-note-template-dialog-section',
@@ -404,6 +493,17 @@ export const clinicalNoteTemplateDialogTestIds = {
     'remove',
   ),
   btn: name => toTestId('clinical-note-template-dialog-btn', name),
+}
+
+export const clinicalAuditTestIds = {
+  detailDialog: 'clinical-audit-detail-dialog',
+  detailClose: 'clinical-audit-detail-btn-close',
+  copyJsonBefore: 'clinical-audit-detail-btn-copy-before',
+  copyJsonAfter: 'clinical-audit-detail-btn-copy-after',
+  filtersDrawer: 'clinical-audit-filters-drawer',
+  filtersClear: 'clinical-audit-filters-btn-clear',
+  filtersApply: 'clinical-audit-filters-btn-apply',
+  filterField: name => toTestId('clinical-audit-filter-field', name),
 }
 
 export const screeningTemplateListTestIds = {
@@ -447,6 +547,18 @@ export const screeningTemplateDialogTestIds = {
   copyConfirm: 'screening-template-copy-confirm',
   copyConfirmBtn: name =>
     toTestId('screening-template-copy-confirm-btn', name),
+  addOption: (sIndex, qIndex) => toTestId(
+    'screening-template-dialog-question',
+    `${sIndex}-${qIndex}`,
+    'add-option',
+  ),
+  removeOption: (sIndex, qIndex, oIndex) => toTestId(
+    'screening-template-dialog-option',
+    `${sIndex}-${qIndex}-${oIndex}`,
+    'remove',
+  ),
+  viewToggle: 'screening-template-dialog-view-toggle',
+  previewClose: 'screening-template-preview-dialog-btn-close',
 }
 
 export const dashboardTestIds = {
@@ -503,6 +615,7 @@ export const staffListTestIds = {
   filtersClear: 'staff-list-filters-btn-clear',
   filtersApply: 'staff-list-filters-btn-apply',
   changeStatusDialog: 'staff-list-change-status-dialog',
+  changeStatusCancel: 'staff-list-change-status-btn-cancel',
   changeStatusConfirm: 'staff-list-change-status-btn-confirm',
   summaryTotal: 'staff-list-summary-total',
   summaryClinicians: 'staff-list-summary-clinicians',
@@ -526,6 +639,10 @@ export const clientOverviewTestIds = {
   moduleCard: id => toTestId('client-overview-module', id),
   moduleDialog: 'client-overview-module-dialog',
   allergiesDialogList: 'client-overview-allergies-dialog-list',
+  copyPhone: 'client-overview-btn-copy-phone',
+  copyClientNumber: 'client-overview-btn-copy-client-number',
+  moduleClose: 'client-overview-module-btn-close',
+  moduleOpen: 'client-overview-module-btn-open',
 }
 
 export const clientOverviewAltTestIds = {
@@ -552,6 +669,7 @@ export const clientOverviewAltTestIds = {
   modulesTab: key => toTestId('client-overview-alt-modules', key),
   sidebar: 'client-overview-alt-sidebar',
   viewAllActivity: 'client-overview-alt-btn-view-all-activity',
+  copyMrn: 'client-overview-alt-btn-copy-mrn',
 }
 
 export const clientBillingTestIds = {
@@ -635,6 +753,12 @@ export const clientPageTestIds = {
   profilePhotoCropZoom: 'client-page-profile-photo-crop-zoom',
   profilePhotoCropSave: 'client-page-profile-photo-crop-save',
   profilePhotoCropCancel: 'client-page-profile-photo-crop-cancel',
+  profilePhotoCropZoomOut: 'client-page-profile-photo-crop-zoom-out',
+  profilePhotoCropZoomIn: 'client-page-profile-photo-crop-zoom-in',
+  profilePhotoCameraCancel: 'client-page-profile-photo-camera-cancel',
+  profilePhotoCameraRetake: 'client-page-profile-photo-camera-retake',
+  profilePhotoCameraUse: 'client-page-profile-photo-camera-use',
+  profilePhotoCameraCapture: 'client-page-profile-photo-camera-capture',
 }
 
 export const addClientTestIds = {
@@ -670,6 +794,18 @@ export const addClientTestIds = {
   fmhBtnAdd: 'add-client-fmh-btn-add',
   fmhRowEdit: id => toTestId('add-client-fmh-row', id, 'btn-edit'),
   fmhRowDelete: id => toTestId('add-client-fmh-row', id, 'btn-delete'),
+  fmhDeleteDialog: 'add-client-fmh-delete-dialog',
+  fmhDeleteCancel: 'add-client-fmh-delete-btn-cancel',
+  fmhDeleteConfirm: 'add-client-fmh-delete-btn-confirm',
+  fmhDeleteReason: 'add-client-fmh-delete-field-reason',
+  guardianConsentDialog: 'add-client-guardian-consent-dialog',
+  guardianConsentView: id => toTestId(
+    'add-client-guardian-consent',
+    id,
+    'btn-view',
+  ),
+  guardianConsentCancel: 'add-client-guardian-consent-btn-cancel',
+  guardianConsentConfirm: 'add-client-guardian-consent-btn-confirm',
   assignedClinicianRowRemove: id => toTestId(
     'add-client-assigned-clinician-row',
     id,
@@ -685,11 +821,21 @@ export const addClientTestIds = {
   allergyBtnAdd: 'add-client-allergy-btn-add',
   allergyRowEdit: id => toTestId('add-client-allergy-row', id, 'btn-edit'),
   allergyRowDelete: id => toTestId('add-client-allergy-row', id, 'btn-delete'),
+  allergyDeleteDialog: 'add-client-allergy-delete-dialog',
+  allergyDeleteCancel: 'add-client-allergy-delete-btn-cancel',
+  allergyDeleteConfirm: 'add-client-allergy-delete-btn-confirm',
+  allergyDeleteReason: 'add-client-allergy-delete-field-reason',
+  insuranceCardBtn: name => toTestId(
+    'add-client-insurance-card-btn',
+    name,
+  ),
   vitalsField: name => toTestId('add-client-vitals-field', name),
   vitalsPainLevel: token => toTestId('add-client-vitals-pain', token),
   vitalsBtnSave: 'add-client-vitals-btn-save',
   vitalsBtnAdd: 'add-client-vitals-btn-add',
   vitalsBtnCancelEdit: 'add-client-vitals-btn-cancel-edit',
+  vitalsBtnTimePickerClose: 'add-client-vitals-btn-time-picker-close',
+  vitalsRecordDialog: 'add-client-vitals-record-dialog',
   vitalsRowEdit: id => toTestId('add-client-vitals-row', id, 'btn-edit'),
   vitalsRowDelete: id => toTestId('add-client-vitals-row', id, 'btn-delete'),
   insuranceField: name => toTestId('add-client-insurance-field', name),
@@ -738,6 +884,7 @@ export const screeningTestIds = {
   section: id => toTestId('screening-section', id),
   rowView: id => toTestId('screening-row', id, 'btn-view'),
   rowEdit: id => toTestId('screening-row', id, 'btn-edit'),
+  option: name => toTestId('screening-option', name),
 }
 
 export const labTestIds = {
@@ -746,6 +893,19 @@ export const labTestIds = {
   rowView: id => toTestId('lab-row', id, 'btn-view'),
   rowEdit: id => toTestId('lab-row', id, 'btn-edit'),
   rowDownload: id => toTestId('lab-row', id, 'btn-download'),
+  rowCollect: id => toTestId('lab-row', id, 'btn-collect'),
+  rowResults: id => toTestId('lab-row', id, 'btn-results'),
+  rowReview: id => toTestId('lab-row', id, 'btn-review'),
+  rowCancel: id => toTestId('lab-row', id, 'btn-cancel'),
+  rowDelete: id => toTestId('lab-row', id, 'btn-delete'),
+  componentRowEdit: id => toTestId('lab-component-row', id, 'btn-edit'),
+  componentRowDelete: id => toTestId(
+    'lab-component-row',
+    id,
+    'btn-delete',
+  ),
+  attachmentRemove: 'lab-attachment-btn-remove',
+  attachmentDownload: 'lab-attachment-btn-download',
 }
 
 export const pharmacyTestIds = {
@@ -770,9 +930,16 @@ export const carePlanTestIds = {
   field: name => toTestId('care-plan-field', name),
   rowView: id => toTestId('care-plan-row', id, 'btn-view'),
   rowEdit: id => toTestId('care-plan-row', id, 'btn-edit'),
+  rowDelete: id => toTestId('care-plan-row', id, 'btn-delete'),
   rowSign: id => toTestId('care-plan-row', id, 'btn-sign'),
   rowComplete: id => toTestId('care-plan-row', id, 'btn-complete'),
   rowArchive: id => toTestId('care-plan-row', id, 'btn-archive'),
+  rowHistory: id => toTestId('care-plan-row', id, 'btn-history'),
+  rowAddMeasurement: id => toTestId(
+    'care-plan-row',
+    id,
+    'btn-add-measurement',
+  ),
 }
 
 export const clinicalNoteTestIds = {
@@ -804,11 +971,33 @@ export const followUpTestIds = {
   rowView: id => toTestId('follow-up-row', id, 'btn-view'),
   rowComplete: id => toTestId('follow-up-row', id, 'btn-complete'),
   rowCancel: id => toTestId('follow-up-row', id, 'btn-cancel'),
+  rowRemove: id => toTestId('follow-up-row', id, 'btn-remove'),
 }
 
 export const appointmentTestIds = {
   btn: name => toTestId('appointment-btn', name),
   field: name => toTestId('appointment-field', name),
+  copyNumber: 'appointment-btn-copy-number',
+  copyInvite: 'appointment-btn-copy-invite',
+  print: 'appointment-btn-print',
+  close: 'appointment-btn-close',
+  joinTelehealth: 'appointment-btn-join-telehealth',
+  viewClient: 'appointment-btn-view-client',
+  availabilityPrev: 'appointment-availability-btn-prev',
+  availabilityNext: 'appointment-availability-btn-next',
+  availabilityRefresh: 'appointment-availability-btn-refresh',
+  availabilitySlot: key => toTestId(
+    'appointment-availability-slot',
+    key,
+  ),
+  spinner: name => toTestId('appointment-time-spinner', name),
+  serviceLineRemove: index => toTestId(
+    'appointment-service-line',
+    index,
+    'btn-remove',
+  ),
+  recurrenceToggle: 'appointment-field-repeat',
+  recurrenceDay: day => toTestId('appointment-recurrence-day', day),
   rowView: id => toTestId('appointment-row', id, 'btn-view'),
   rowEdit: id => toTestId('appointment-row', id, 'btn-edit'),
   rowCancel: id => toTestId('appointment-row', id, 'btn-cancel'),
@@ -827,6 +1016,8 @@ export const referralTestIds = {
   rowMore: id => toTestId('referral-row', id, 'btn-more'),
   rowSchedule: id => toTestId('referral-row', id, 'btn-schedule'),
   rowDelete: id => toTestId('referral-row', id, 'btn-delete'),
+  attachmentRemove: 'referral-attachment-btn-remove',
+  attachmentDownload: 'referral-attachment-btn-download',
 }
 
 export const authorizationTestIds = {
@@ -851,6 +1042,14 @@ export const calendarTestIds = {
   clinicianToggle: id => toTestId('calendar-clinician', id, 'toggle'),
   sourceToggle: id => toTestId('calendar-source', id, 'toggle'),
   event: id => toTestId('calendar-event', id),
+}
+
+export const signatureCanvasTestIds = {
+  clear: 'signature-canvas-btn-clear',
+}
+
+export const subtenantToolbarTestIds = {
+  picker: 'layout-subtenant-picker',
 }
 
 export const photoPreviewTestIds = {
@@ -901,6 +1100,8 @@ export const staffLicenseTestIds = {
   attachmentField: 'staff-license-field-attachment',
   saveButton: 'staff-license-btn-save',
   cancelButton: 'staff-license-btn-cancel',
+  rowEdit: id => toTestId('staff-license-row', id, 'btn-edit'),
+  rowDelete: id => toTestId('staff-license-row', id, 'btn-delete'),
   eligibility: 'staff-clinical-eligibility',
   eligibilityRow: code => toTestId(
     'staff-clinical-eligibility-row',
@@ -922,3 +1123,7 @@ export {
   consentVersionDialogTestIds,
   clientConsentsTestIds,
 } from 'src/test-ids/consents.js'
+
+export { staffFormTestIds } from 'src/test-ids/staff.js'
+
+export { telehealthTestIds } from 'src/test-ids/telehealth.js'

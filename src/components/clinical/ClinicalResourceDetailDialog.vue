@@ -7,7 +7,10 @@
     <q-card
       class="insurance-dialog clinical-resource-detail-dialog app-dialog-card"
       :data-testid="clinicalResourceTestIds.detailDialog">
-      <AppDialogHeader :close-label="t('close')" @close="onClose">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :test-id="clinicalResourceTestIds.detailDialog"
+        @close="onClose">
         {{ resource?.title || t('clinicalResourceDetailTitle') }}
       </AppDialogHeader>
 
@@ -41,6 +44,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clinicalResourceTestIds.detailBtn('close')"
           :label="t('close')"
           @click="onClose"
         />
@@ -51,6 +55,7 @@
           class="app-btn-primary"
           :loading="downloading"
           :disable="previewing"
+          :data-testid="clinicalResourceTestIds.detailBtn('download')"
           :label="t('clinicalResourceDownloadDocument')"
           @click="onDownload"
         />
@@ -61,6 +66,7 @@
           class="app-btn-outline"
           :loading="previewing"
           :disable="downloading"
+          :data-testid="clinicalResourceTestIds.detailBtn('preview')"
           :label="t('clinicalResourcePreviewDocument')"
           @click="onPreview"
         />

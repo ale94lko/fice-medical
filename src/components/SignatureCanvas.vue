@@ -13,6 +13,7 @@
         class="app-btn-outline signature-canvas__clear"
         :class="{ 'signature-canvas__clear--idle': !hasStroke }"
         icon="restart_alt"
+        :data-testid="signatureCanvasTestIds.clear"
         :disable="!hasStroke"
         :label="t('carePlanSignatureClear')"
         @click="clearPad"
@@ -55,6 +56,7 @@ import {
   watch,
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { signatureCanvasTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

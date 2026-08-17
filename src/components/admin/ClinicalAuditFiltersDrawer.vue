@@ -4,7 +4,7 @@
     persistent
     position="right"
     full-height
-    data-testid="clinical-audit-filters-drawer"
+    :data-testid="clinicalAuditTestIds.filtersDrawer"
     transition-show="slide-left"
     transition-hide="slide-right">
     <q-card
@@ -12,6 +12,7 @@
         insurance-dialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="clinicalAuditTestIds.filtersDrawer"
         @close="onCancel">
         {{ t('clinicalAuditFiltersTitle') }}
       </AppDialogHeader>
@@ -29,6 +30,7 @@
               hide-bottom-space
               emit-value
               map-options
+              :test-id="clinicalAuditTestIds.filterField('entity-type')"
               :placeholder="t('clinicalAuditFilterEntityType')"
             />
           </AddClientLabeledField>
@@ -42,6 +44,7 @@
               hide-bottom-space
               emit-value
               map-options
+              :test-id="clinicalAuditTestIds.filterField('action')"
               :placeholder="t('clinicalAuditFilterAction')"
             />
           </AddClientLabeledField>
@@ -51,6 +54,7 @@
               v-model="local.from"
               :close-label="t('close')"
               :error="dateRangeInvalid"
+              :test-id="clinicalAuditTestIds.filterField('from')"
               @update:model-value="onFromChange"
             />
           </AddClientLabeledField>
@@ -60,6 +64,7 @@
               v-model="local.to"
               :close-label="t('close')"
               :error="dateRangeInvalid"
+              :test-id="clinicalAuditTestIds.filterField('to')"
               :error-message="dateRangeErrorMessage"
               @update:model-value="onToChange"
             />
@@ -78,6 +83,7 @@
               fill-input
               hide-selected
               input-debounce="350"
+              :test-id="clinicalAuditTestIds.filterField('client')"
               :placeholder="t('clinicalAuditFilterClient')"
               @filter="onClientFilter"
               @update:model-value="onClientIdChange"
@@ -97,6 +103,7 @@
               fill-input
               hide-selected
               input-debounce="300"
+              :test-id="clinicalAuditTestIds.filterField('changed-by')"
               :placeholder="t('clinicalAuditFilterChangedBy')"
               @filter="onChangedByFilter"
               @update:model-value="onChangedByChange"
@@ -111,6 +118,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clinicalAuditTestIds.filtersClear"
           :label="t('clinicalAuditFiltersClear')"
           @click="onClear"
         />
@@ -119,7 +127,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
-          data-testid="clinical-audit-filters-btn-apply"
+          :data-testid="clinicalAuditTestIds.filtersApply"
           :disable="dateRangeInvalid"
           :label="t('clinicalAuditFiltersApply')"
           @click="onApply"
@@ -157,6 +165,7 @@ import { isClientListServerSearchQuery } from
 import { listTenantUsers } from 'src/utils/user-list-api.js'
 import { isUserListServerSearchQuery } from
   'src/utils/user-list-search.js'
+import { clinicalAuditTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

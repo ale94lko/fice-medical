@@ -15,6 +15,7 @@
         class="appointment-time-spinner__step"
         :disable="readonly"
         :aria-label="t('appointmentTimeSpinnerIncreaseHour')"
+        :data-testid="tid.spinner('hour-up')"
         @click="stepHour(1)"
       />
       <span class="appointment-time-spinner__value">
@@ -29,6 +30,7 @@
         class="appointment-time-spinner__step"
         :disable="readonly"
         :aria-label="t('appointmentTimeSpinnerDecreaseHour')"
+        :data-testid="tid.spinner('hour-down')"
         @click="stepHour(-1)"
       />
     </div>
@@ -43,6 +45,7 @@
         class="appointment-time-spinner__step"
         :disable="readonly"
         :aria-label="t('appointmentTimeSpinnerIncreaseMinute')"
+        :data-testid="tid.spinner('minute-up')"
         @click="stepMinute(1)"
       />
       <span class="appointment-time-spinner__value">
@@ -57,6 +60,7 @@
         class="appointment-time-spinner__step"
         :disable="readonly"
         :aria-label="t('appointmentTimeSpinnerDecreaseMinute')"
+        :data-testid="tid.spinner('minute-down')"
         @click="stepMinute(-1)"
       />
     </div>
@@ -71,6 +75,7 @@
         class="appointment-time-spinner__step"
         :disable="readonly"
         :aria-label="t('appointmentTimeSpinnerIncreasePeriod')"
+        :data-testid="tid.spinner('period-up')"
         @click="stepPeriod(1)"
       />
       <span class="appointment-time-spinner__value">
@@ -85,6 +90,7 @@
         class="appointment-time-spinner__step"
         :disable="readonly"
         :aria-label="t('appointmentTimeSpinnerDecreasePeriod')"
+        :data-testid="tid.spinner('period-down')"
         @click="stepPeriod(-1)"
       />
     </div>
@@ -95,6 +101,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { parseTime12h } from 'src/utils/client-vitals.js'
+import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },

@@ -20,6 +20,7 @@
           class="app-btn-primary"
           :loading="saving"
           :disable="saving || loading"
+          :data-testid="staffFormTestIds.save"
           :label="t('save')"
           @click="onSave"
         />
@@ -29,6 +30,7 @@
           color="primary"
           class="app-btn-outline"
           :disable="saving || loading"
+          :data-testid="staffFormTestIds.close"
           :label="t('close')"
           @click="onClose"
         />
@@ -102,6 +104,7 @@ import {
 import { fetchProviderTypes } from 'src/utils/staff-license-api.js'
 import { useRegisterUnsavedChanges } from
   'src/composables/useUnsavedChangesRegistry.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const route = useRoute()
 const router = useRouter()

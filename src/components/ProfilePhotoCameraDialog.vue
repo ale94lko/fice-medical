@@ -55,6 +55,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clientPageTestIds.profilePhotoCameraCancel"
           :disable="busy"
           :label="t('cancel')"
           @click="onCancel"
@@ -65,6 +66,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="clientPageTestIds.profilePhotoCameraRetake"
           :disable="busy"
           :label="t('profilePhotoCameraRetake')"
           @click="onRetake"
@@ -75,6 +77,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="clientPageTestIds.profilePhotoCameraUse"
           :disable="busy"
           :label="t('profilePhotoCameraUsePhoto')"
           @click="onUsePhoto"
@@ -85,6 +88,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="clientPageTestIds.profilePhotoCameraCapture"
           :disable="busy || !streamReady"
           :label="t('profilePhotoCameraCapture')"
           @click="onCapture"

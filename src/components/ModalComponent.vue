@@ -7,6 +7,7 @@
     transition-hide="scale">
     <q-card class="modal-card app-dialog-card">
       <AppDialogHeader
+        :test-id="dialogTestId"
         :close-label="closeLabel"
         @close="onCancel">
         {{ title }}

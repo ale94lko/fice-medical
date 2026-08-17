@@ -261,6 +261,7 @@
                 color="primary"
                 class="app-btn-primary"
                 icon="add"
+                :data-testid="staffListTestIds.addClinician"
                 :label="t('staffListAddClinician')"
                 @click="goAddClinician"
               />
@@ -271,6 +272,7 @@
                 color="primary"
                 class="app-btn-primary"
                 icon="add"
+                :data-testid="staffListTestIds.addStaff"
                 :label="t('staffListAddStaff')"
                 @click="goAddStaff"
               />

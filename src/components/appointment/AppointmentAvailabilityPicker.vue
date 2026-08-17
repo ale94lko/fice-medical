@@ -10,6 +10,7 @@
               dense
               icon="chevron_left"
               :disable="readonly"
+              :data-testid="tid.availabilityPrev"
               @click="emit('prev-month')"
             />
             <span class="text-subtitle2">{{ monthLabel }}</span>
@@ -19,6 +20,7 @@
               dense
               icon="chevron_right"
               :disable="readonly"
+              :data-testid="tid.availabilityNext"
               @click="emit('next-month')"
             />
           </div>
@@ -202,6 +204,7 @@
             icon="sync"
             :label="t('appointmentRefreshTimes')"
             :disable="readonly"
+            :data-testid="tid.availabilityRefresh"
             @click="emit('refresh')"
           />
         </template>
@@ -219,6 +222,7 @@
                 windowKey(window) === selectedWindowKey,
             }"
             :disable="readonly"
+            :data-testid="tid.availabilitySlot(windowKey(window))"
             @click="emit('select-window', window)">
             {{ formatWindowLabel(window) }}
           </q-btn>
@@ -230,6 +234,7 @@
             icon="sync"
             :label="t('appointmentRefreshTimes')"
             :disable="readonly"
+            :data-testid="tid.availabilityRefresh"
             @click="emit('refresh')"
           />
         </div>
@@ -253,6 +258,7 @@ import {
 import {
   formatUtcTimeRange,
 } from 'src/utils/appointment-datetime.js'
+import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   monthLabel: { type: String, default: '' },

@@ -67,6 +67,7 @@
           dense
           icon="delete"
           color="grey-7"
+          :data-testid="clientConsentsTestIds.paperScanRemove"
           :aria-label="t('delete')"
           @click.stop="onRemove"
         />
@@ -89,6 +90,7 @@ import {
   consentPaperScanMimeTypes,
   storedFileMaxBytes,
 } from 'components/constants.js'
+import { clientConsentsTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

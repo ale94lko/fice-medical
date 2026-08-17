@@ -117,6 +117,7 @@
           },
         ]"
         :disable="readonly"
+        :data-testid="tid.option(optionTestName(opt, optIndex))"
         @click="onChipToggle(opt)">
         <span class="preferred-chip-label">
           {{ optionLabel(opt) }}
@@ -146,6 +147,7 @@
           },
         ]"
         :disable="readonly"
+        :data-testid="tid.option(`${question.id}-${opt.value}`)"
         @click="emitString(opt.value)">
         <span class="preferred-chip-label">
           {{ opt.label }}
@@ -266,6 +268,13 @@ function onChipToggle(opt) {
       props.question?.options,
     ),
   )
+}
+
+function optionTestName(opt, optIndex) {
+  const value = optionValue(opt)
+  const suffix = value || optionKey(opt, optIndex)
+
+  return `${props.question?.id}-${suffix}`
 }
 </script>
 

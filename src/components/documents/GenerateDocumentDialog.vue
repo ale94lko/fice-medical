@@ -7,6 +7,7 @@
     :data-testid="documentGenerationTestIds.dialog">
     <q-card class="insurance-dialog app-dialog-card generate-document-dialog">
       <AppDialogHeader
+        test-id="generate-document"
         :close-label="t('close')"
         :info="t('generateDocumentDialogSubtitle')"
         @close="onCancel">
@@ -61,6 +62,7 @@
           class="app-btn-outline"
           :label="t('cancel')"
           :disable="generating"
+          :data-testid="documentGenerationTestIds.cancel"
           @click="onCancel"
         />
         <q-btn

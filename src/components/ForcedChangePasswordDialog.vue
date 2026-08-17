@@ -27,6 +27,7 @@
             dense
             icon="help_outline"
             class="app-dialog-toolbar__info q-ml-xs"
+            :data-testid="forcedChangePasswordTestIds.info"
             :aria-label="dialogSubtitle">
             <q-tooltip
               class="app-dialog-info-tooltip"

@@ -238,6 +238,7 @@
             color="primary"
             class="app-btn-outline"
             :label="t('cancel')"
+            :data-testid="tid.btn('cancel-status')"
             @click="statusDialogOpen = false"
           />
           <q-btn
@@ -247,6 +248,7 @@
             class="app-btn-primary"
             :loading="saving"
             :label="t('medicationChangeStatusSave')"
+            :data-testid="tid.btn('save-status')"
             @click="onConfirmStatusChange"
           />
         </q-card-actions>

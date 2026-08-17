@@ -10,6 +10,7 @@
       :data-testid="tid.dialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.dialog"
         @close="emit('update:modelValue', false)">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -286,6 +287,7 @@
                   icon="delete_outline"
                   color="negative"
                   :aria-label="t('delete')"
+                  :data-testid="tid.removeSection(index)"
                   @click="removeSection(index)"
                 />
               </div>
@@ -309,6 +311,7 @@
           color="primary"
           class="app-btn-outline"
           :label="readonly ? t('close') : t('cancel')"
+          :data-testid="tid.btn('cancel')"
           @click="emit('update:modelValue', false)"
         />
         <q-btn

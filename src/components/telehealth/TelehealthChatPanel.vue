@@ -26,6 +26,7 @@
             round
             size="sm"
             icon="delete"
+            :data-testid="telehealthTestIds.chatDelete(msg.id)"
             :aria-label="t('delete')"
             @click="$emit('delete', msg.id)">
             <q-tooltip>{{ t('delete') }}</q-tooltip>
@@ -63,6 +64,7 @@
         unelevated
         color="primary"
         icon="send"
+        :data-testid="telehealthTestIds.chatSend"
         :disable="!draftTrimmed"
         :aria-label="t('telehealthChatSend')"
         @click="onSend">
@@ -81,6 +83,7 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { telehealthChatBodyMaxLength } from 'components/constants.js'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 import {
   formatUtcTime,
   resolveBrowserTimeZone,

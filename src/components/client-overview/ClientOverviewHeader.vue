@@ -85,6 +85,7 @@
                       size="xs"
                       icon="content_copy"
                       class="client-overview-header__copy-btn"
+                      :data-testid="clientOverviewTestIds.copyClientNumber"
                       :aria-label="t('clientOverviewCopyClientNumber')"
                       @click="copyClientNumber"
                     />

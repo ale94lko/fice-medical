@@ -8,6 +8,7 @@
       class="insurance-dialog app-dialog-card
         encounter-clinical-all-records-dialog">
       <AppDialogHeader
+        test-id="encounter-clinical-all-records"
         :close-label="t('close')"
         @close="open = false">
         {{ title }}
@@ -48,6 +49,7 @@
           color="primary"
           class="app-btn-primary"
           :label="t('close')"
+          :data-testid="tid.allRecordsClose"
           @click="open = false"
         />
       </q-card-actions>
@@ -61,6 +63,8 @@ import { useI18n } from 'vue-i18n'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

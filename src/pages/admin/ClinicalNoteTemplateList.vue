@@ -59,6 +59,7 @@
             <q-btn
               flat round dense size="sm" icon="visibility"
               class="app-btn-icon-action"
+              :data-testid="tid.rowView(row.id)"
               :aria-label="t('view')"
               @click="viewRow(row)"
             />
@@ -66,6 +67,7 @@
               v-if="canEdit && !row.systemTemplate"
               flat round dense size="sm" icon="edit"
               class="app-btn-icon-action"
+              :data-testid="tid.rowEdit(row.id)"
               :aria-label="t('edit')"
               @click="editRow(row)"
             />
@@ -73,6 +75,7 @@
               v-if="canDuplicate"
               flat round dense size="sm" icon="content_copy"
               class="app-btn-icon-action"
+              :data-testid="tid.rowDuplicate(row.id)"
               :aria-label="t('clinicalNoteTemplateDuplicate')"
               @click="duplicateRow(row)"
             />
@@ -80,6 +83,7 @@
               v-if="canActivate && row.status !== 'ACTIVE'"
               flat round dense size="sm" icon="check_circle"
               color="positive" class="app-btn-icon-action"
+              :data-testid="tid.rowActivate(row.id)"
               :aria-label="t('clinicalNoteTemplateActivate')"
               @click="setStatus(row, 'ACTIVE')"
             />
@@ -88,6 +92,7 @@
                 && !row.systemTemplate"
               flat round dense size="sm" icon="block"
               color="warning" class="app-btn-icon-action"
+              :data-testid="tid.rowDeactivate(row.id)"
               :aria-label="t('clinicalNoteTemplateDeactivate')"
               @click="setStatus(row, 'INACTIVE')"
             />

@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog clinical-note-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="clinical-note"
         :close-label="t('close')"
         :info="dialogSubtitle"
         @close="onCancel">
@@ -73,6 +74,7 @@
                                   flat
                                   color="primary"
                                   :label="t('close')"
+                                  :data-testid="tid.btn('time-close')"
                                 />
                               </div>
                             </q-time>
@@ -242,6 +244,7 @@
           flat
           class="app-btn-outline"
           :label="readonly ? t('close') : t('cancel')"
+          :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
           @click="onCancel"
         />
         <template v-if="!readonly">

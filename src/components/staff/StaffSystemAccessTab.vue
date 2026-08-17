@@ -19,6 +19,7 @@
               v-model="systemUser.email"
               hide-bottom-space
               :external-label="false"
+              :test-id="staffFormTestIds.field('system-email')"
               :disable="emailReadonly"
               :placeholder="t('emailAddressPlaceholder')"
               :rules="emailReadonly ? [] : emailRules"
@@ -37,6 +38,7 @@
               hide-bottom-space
               type="password"
               :external-label="false"
+              :test-id="staffFormTestIds.field('system-password')"
               :placeholder="passwordPlaceholder"
               :rules="passwordRules"
             />
@@ -46,7 +48,12 @@
           v-if="isAddMode && !readonly"
           class="col-12 col-md-6">
           <AddClientLabeledField :label="t('userChangePasswordRequiredLabel')">
-            <FormToggle v-model="systemUser.changePasswordRequired" />
+            <FormToggle
+              v-model="systemUser.changePasswordRequired"
+              :test-id="staffFormTestIds.field(
+                'system-change-password-required',
+              )"
+            />
           </AddClientLabeledField>
         </div>
         <div
@@ -64,6 +71,7 @@
                   :loading="rolesLoading"
                   :options="roleOptions"
                   :rules="rolesRules"
+                  :test-id="staffFormTestIds.field('system-roles')"
                   :placeholder="t('userRolesPlaceholder')"
                 />
               </AddClientLabeledField>
@@ -83,6 +91,7 @@
                   :readonly="readonly"
                   :options="statusOptions"
                   :rules="statusRules"
+                  :test-id="staffFormTestIds.field('system-status')"
                   :placeholder="t('userStatusPlaceholder')"
                 />
               </AddClientLabeledField>
@@ -106,6 +115,7 @@
               :nodes="permissionTreeNodes"
               :readonly="readonly"
               :loading="permissionsLoading"
+              :test-id="staffFormTestIds.field('system-permissions')"
               :empty-label="t('userPermissionsEmpty')"
               :loading-label="t('userPermissionsLoading')"
             />
@@ -120,6 +130,7 @@
               type="textarea"
               rows="3"
               :readonly="readonly"
+              :data-testid="staffFormTestIds.field('system-description')"
               :maxlength="userDescriptionMaxLength"
               :placeholder="t('userDescriptionPlaceholder')"
             />
@@ -159,6 +170,7 @@ import { fetchTenantPermissionTreeNodes } from
 import { resolvePermissionIdsFromUserSelection } from
   'src/utils/user-register-payload.js'
 import { buildNewPasswordRules } from 'src/utils/password-validation.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

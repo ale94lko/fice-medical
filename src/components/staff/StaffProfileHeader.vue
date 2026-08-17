@@ -54,6 +54,7 @@
                       size="xs"
                       icon="content_copy"
                       class="client-overview-header__copy-btn"
+                      :data-testid="staffFormTestIds.copyEmail"
                       :aria-label="t('staffProfileCopyStaffNo')"
                       @click="copyStaffNo"
                     />
@@ -149,6 +150,7 @@
           color="primary"
           class="app-btn-primary"
           icon="edit"
+          :data-testid="staffFormTestIds.edit"
           :disable="loading"
           :label="t('edit')"
           @click="emit('edit')"
@@ -165,6 +167,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="staffFormTestIds.close"
           :disable="loading"
           :label="t('close')"
           @click="emit('close')"
@@ -185,6 +188,7 @@ import GenerateDocumentAction from
 import { documentTypes } from 'src/utils/document-generation-constants.js'
 import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   staffId: {

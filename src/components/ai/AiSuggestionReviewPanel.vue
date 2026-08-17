@@ -109,6 +109,7 @@
       transition-hide="scale">
       <q-card class="insurance-dialog app-dialog-card">
         <AppDialogHeader
+          :test-id="aiTestIds.rejectDialog"
           :close-label="t('close')"
           @close="rejectOpen = false">
           {{ t('aiRejectTitle') }}
@@ -136,6 +137,7 @@
             flat
             class="app-btn-outline"
             :label="t('cancel')"
+            :data-testid="aiTestIds.rejectCancel"
             @click="rejectOpen = false"
           />
           <q-btn
@@ -145,6 +147,7 @@
             class="app-btn-primary"
             :disable="!rejectReason.trim()"
             :label="t('aiReject')"
+            :data-testid="aiTestIds.rejectConfirm"
             @click="onReject"
           />
         </q-card-actions>
@@ -162,7 +165,7 @@ import ModalComponent from 'components/ModalComponent.vue'
 import AiSuggestionResultEditor from
   'components/ai/AiSuggestionResultEditor.vue'
 import { aiFeatures } from 'components/constants.js'
-import { aiTestIds } from 'src/test-ids/ai.js'
+import { aiTestIds } from 'src/test-ids/index.js'
 import {
   cloneAiResult,
   featureAllowsCommit,

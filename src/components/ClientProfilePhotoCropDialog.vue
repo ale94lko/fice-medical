@@ -56,6 +56,7 @@
               dense
               icon="remove"
               color="primary"
+              :data-testid="clientPageTestIds.profilePhotoCropZoomOut"
               :aria-label="t('clientProfilePhotoCropZoomOut')"
               :disable="zoom <= cropMinZoom || busy"
               @click="changeZoom(-0.1)"
@@ -82,6 +83,7 @@
               dense
               icon="add"
               color="primary"
+              :data-testid="clientPageTestIds.profilePhotoCropZoomIn"
               :aria-label="t('clientProfilePhotoCropZoomIn')"
               :disable="zoom >= cropMaxZoom || busy"
               @click="changeZoom(0.1)"

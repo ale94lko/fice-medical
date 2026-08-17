@@ -6,7 +6,10 @@
     <q-card
       class="insurance-dialog screening-template-preview-dialog app-dialog-card"
       :data-testid="screeningTemplateDialogTestIds.previewDialog">
-      <AppDialogHeader :close-label="t('close')" @close="open = false">
+      <AppDialogHeader
+        :close-label="t('close')"
+        :test-id="screeningTemplateDialogTestIds.previewDialog"
+        @close="open = false">
         {{ t('screeningTemplatePreviewTitle') }}
       </AppDialogHeader>
 
@@ -22,6 +25,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="screeningTemplateDialogTestIds.previewClose"
           :label="t('close')"
           @click="open = false"
         />

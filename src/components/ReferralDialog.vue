@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card referral-dialog">
       <AppDialogHeader
+        test-id="referral"
         :close-label="t('close')"
         :info="referralHeaderInfo"
         @close="onCancel">
@@ -372,6 +373,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('close')"
+          :data-testid="tid.btn('close')"
           @click="onCancel"
         />
         <q-btn

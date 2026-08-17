@@ -37,6 +37,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="staffListTestIds.changeStatusCancel"
           :label="t('cancel')"
           @click="onCancel"
         />

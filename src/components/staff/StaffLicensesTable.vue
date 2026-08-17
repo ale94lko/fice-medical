@@ -102,6 +102,7 @@
           class="app-btn-icon-action"
           :icon="adminTableActionIcons.edit"
           :size="siteBreakpoints.SM"
+          :data-testid="staffLicenseTestIds.rowEdit(row.id)"
           :aria-label="t('edit')"
           @click="emit('edit', row)"
         >
@@ -121,6 +122,7 @@
           class="app-btn-icon-action"
           icon="delete"
           :size="siteBreakpoints.SM"
+          :data-testid="staffLicenseTestIds.rowDelete(row.id)"
           :aria-label="t('delete')"
           @click="emit('delete', row)"
         >
@@ -161,6 +163,7 @@ import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
+import { staffLicenseTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   licenses: {

@@ -4,9 +4,10 @@
     persistent
     transition-show="scale"
     transition-hide="scale"
-    data-testid="encounter-reopen-dialog">
+    :data-testid="tid.reopenDialog">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="encounter-reopen"
         :close-label="t('close')"
         @close="onCancel">
         {{ t('encounterReopenTitle') }}
@@ -22,7 +23,7 @@
             type="textarea"
             outlined
             autogrow
-            data-testid="encounter-reopen-reason"
+            :data-testid="tid.reopenReason"
           />
         </FormField>
       </q-card-section>
@@ -32,6 +33,7 @@
           flat
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.reopenCancel"
           @click="onCancel"
         />
         <q-btn
@@ -42,7 +44,7 @@
           :disable="!reason.trim()"
           :loading="saving"
           :label="t('encounterReopenConfirm')"
-          data-testid="encounter-reopen-submit"
+          :data-testid="tid.reopenSubmit"
           @click="onConfirm"
         />
       </q-card-actions>
@@ -55,6 +57,8 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormField from 'components/FormField.vue'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

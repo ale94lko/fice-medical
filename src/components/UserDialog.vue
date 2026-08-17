@@ -4,10 +4,13 @@
     persistent
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="user-dialog app-dialog-card user-dialog">
+    <q-card
+      class="user-dialog app-dialog-card user-dialog"
+      :data-testid="tid.dialog">
       <AppDialogHeader
         :close-label="t('close')"
         :info="mode === 'add' ? t('userDialogAddSubtitle') : ''"
+        :test-id="tid.dialog"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -185,6 +188,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="tid.btn('cancel')"
           :label="readonly ? t('close') : t('cancel')"
           @click="onCancel"
         />

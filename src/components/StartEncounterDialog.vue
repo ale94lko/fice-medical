@@ -7,6 +7,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card start-encounter-dialog">
       <AppDialogHeader
+        test-id="start-encounter"
         :close-label="t('close')"
         @close="onCancel">
         {{ t('startEncounterTitle') }}
@@ -188,6 +189,7 @@
           class="app-btn-outline"
           :label="t('cancel')"
           :disable="saving"
+          :data-testid="ewTid.startCancel"
           @click="onCancel"
         />
         <q-btn
@@ -214,8 +216,11 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormField from 'components/FormField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import { useAuthStore } from 'src/stores/auth-store.js'
-import { encounterTestIds as tid, modalTestIds } from
-  'src/test-ids/index.js'
+import {
+  encounterTestIds as tid,
+  encounterWorkspaceTestIds as ewTid,
+  modalTestIds,
+} from 'src/test-ids/index.js'
 import { listClientAppointments } from 'src/utils/appointment-api.js'
 import { appointmentCanStartEncounter } from
   'src/utils/appointment-actions.js'

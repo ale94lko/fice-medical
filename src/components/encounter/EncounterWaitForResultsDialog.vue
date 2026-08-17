@@ -8,6 +8,7 @@
     <q-card
       class="insurance-dialog app-dialog-card app-dialog-card--sm">
       <AppDialogHeader
+        test-id="encounter-wait"
         :close-label="t('close')"
         @close="onCancel">
         {{ t('encounterWaitTitle') }}
@@ -89,6 +90,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.waitCancel"
           @click="onCancel"
         />
         <q-btn
@@ -114,7 +116,7 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { labStatuses } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 import {
   canWaitForLabResult,
   labStatusToken,

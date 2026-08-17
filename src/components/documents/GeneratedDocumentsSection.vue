@@ -16,6 +16,7 @@
         icon="refresh"
         :loading="loading"
         :aria-label="t('generatedDocumentsRefresh')"
+        :data-testid="documentGenerationTestIds.refresh"
         @click="loadFiles"
       />
     </header>

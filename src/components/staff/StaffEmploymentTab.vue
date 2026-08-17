@@ -173,6 +173,7 @@
             color="primary"
             class="app-btn-primary"
             icon="add"
+            :data-testid="staffFormTestIds.addCompensation"
             :label="t('staffCompensationAddRate')"
             @click="addCompensationRate"
           />
@@ -210,6 +211,7 @@ import {
   sanitizeStaffCompensationRateInput,
 } from 'src/utils/staff-form.js'
 import { staffStatusOptions } from 'src/utils/staff-status.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

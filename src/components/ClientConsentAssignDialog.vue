@@ -35,6 +35,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="tid.assignCancel"
           :label="t('cancel')"
           :disable="saving"
           @click="onCancel"
@@ -44,6 +45,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="tid.assignSubmit"
           :label="t('clientConsentAssignSubmit')"
           :loading="saving"
           :disable="!templateId"

@@ -103,6 +103,7 @@
           icon="close"
           class="appointment-service-lines__remove-btn"
           :aria-label="t('remove')"
+          :data-testid="tid.serviceLineRemove(index)"
           @click="emit('remove', index)"
         />
       </div>
@@ -121,6 +122,7 @@ import {
   formatServiceCatalogOptionLabel,
   formatServiceDurationSummary,
 } from 'src/utils/appointment-booking.js'
+import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   lines: { type: Array, default: () => [] },

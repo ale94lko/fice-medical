@@ -54,6 +54,7 @@
               icon="content_copy"
               class="client-overview-header__copy-btn"
               :aria-label="t('clientOverviewCopyClientNumber')"
+              :data-testid="tid.copyClient"
               @click="copyClientNumber"
             />
           </span>
@@ -220,6 +221,7 @@
               icon="content_copy"
               class="client-overview-header__copy-btn"
               :aria-label="t('clientOverviewCopyClientNumber')"
+              :data-testid="tid.copyClient"
               @click="copyClientNumber"
             />
           </span>
@@ -389,7 +391,7 @@ import {
 } from 'components/constants.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
 import { useViewportLayout } from

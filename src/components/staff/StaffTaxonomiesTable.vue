@@ -92,6 +92,7 @@
             class="app-btn-icon-action"
             icon="delete"
             :size="siteBreakpoints.SM"
+            :data-testid="staffFormTestIds.taxonomyRowDelete(row.code)"
             :aria-label="t('delete')"
             @click="emit('delete', row)"
           >
@@ -134,6 +135,7 @@ import {
   taxonomySpecialtyLabel,
   taxonomySpecialtyTone,
 } from 'src/utils/staff-taxonomy-display.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   taxonomies: {

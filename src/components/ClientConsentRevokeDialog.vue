@@ -36,6 +36,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="tid.revokeCancel"
           :label="t('cancel')"
           :disable="saving"
           @click="onCancel"
@@ -45,6 +46,7 @@
           unelevated
           color="primary"
           class="app-btn-primary"
+          :data-testid="tid.revokeSubmit"
           :label="t('clientConsentRevokeConfirm')"
           :loading="saving"
           :disable="!hasReason"

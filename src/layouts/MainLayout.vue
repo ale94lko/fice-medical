@@ -781,6 +781,7 @@
           dense
           flat
           icon="chevron_left"
+          :data-testid="layoutTestIds.collapseMenu"
           :aria-label="t('collapseMenu')"
           @click="collapseDrawerToMini" >
           <q-tooltip
@@ -799,6 +800,7 @@
           dense
           flat
           icon="chevron_right"
+          :data-testid="layoutTestIds.expandMenu"
           :aria-label="t('expandMenu')"
           @click="expandDrawer" >
           <q-tooltip

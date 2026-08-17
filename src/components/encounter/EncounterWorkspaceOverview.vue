@@ -65,6 +65,7 @@
               class="app-btn-primary"
               dense
               :label="item.actionLabel"
+              :data-testid="tid.overviewAction(item.code)"
               @click="emit('requirement-action', item)"
             />
             <q-btn
@@ -77,6 +78,7 @@
               dense
               color="grey-7"
               :label="t('encounterRequirementWaive')"
+              :data-testid="tid.overviewWaive(item.code)"
               @click="emit('waive-requirement', item)"
             />
           </div>
@@ -119,6 +121,7 @@
               class="app-btn-outline"
               dense
               :label="item.actionLabel"
+              :data-testid="tid.overviewOptional(item.code)"
               @click="emit('requirement-action', item)"
             />
           </div>
@@ -366,7 +369,7 @@ import {
   superbillStatuses,
 } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
-  'src/test-ids/encounter-workspace.js'
+  'src/test-ids/index.js'
 
 const props = defineProps({
   completion: {

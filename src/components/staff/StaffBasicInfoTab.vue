@@ -28,6 +28,7 @@
                   maxlength="10"
                   inputmode="numeric"
                   pattern="[0-9]*"
+                  :data-testid="staffFormTestIds.npiInput"
                   :readonly="readonly"
                   :disable="npiLoading"
                   :placeholder="t('staffNpiLookupPlaceholder')"
@@ -44,6 +45,7 @@
                   color="primary"
                   class="app-btn-primary staff-basic-info-tab__npi-search-btn"
                   icon="search"
+                  :data-testid="staffFormTestIds.npiSearch"
                   :disable="readonly || !canSearchNpi || npiLoading"
                   :label="t('search')"
                   @click="onNpiSearch"
@@ -219,6 +221,7 @@ import {
   resolveNpiLookupErrorMessage,
   sanitizeNpiDigits,
 } from 'src/utils/staff-npi-lookup.js'
+import { staffFormTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

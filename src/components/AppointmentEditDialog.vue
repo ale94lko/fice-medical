@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="appointment-edit"
         :close-label="t('close')"
         @close="onCancel">
         {{ t('appointmentEditTitle') }}
@@ -38,6 +39,7 @@
           flat
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.btn('cancel')"
           @click="onCancel"
         />
         <q-btn
@@ -47,6 +49,7 @@
           class="app-btn-primary"
           :loading="saving"
           :label="t('save')"
+          :data-testid="tid.btn('save')"
           @click="onSave"
         />
       </q-card-actions>

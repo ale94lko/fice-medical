@@ -12,6 +12,7 @@
           dense
           icon="help_outline"
           class="app-dialog-toolbar__info q-ml-xs"
+          :data-testid="resolvedInfoTestId"
           :aria-label="info">
           <q-tooltip
             class="app-dialog-info-tooltip"
@@ -32,6 +33,7 @@
       dense
       icon="close"
       class="app-dialog-toolbar__close"
+      :data-testid="resolvedCloseTestId"
       :aria-label="closeLabel"
       @click="emit('close')"
     />
@@ -39,7 +41,10 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { toTestId } from 'src/utils/base.js'
+
+const props = defineProps({
   closeLabel: {
     type: String,
     default: 'Close',
@@ -48,7 +53,26 @@ defineProps({
     type: String,
     default: '',
   },
+  testId: {
+    type: String,
+    default: 'dialog',
+  },
+  closeTestId: {
+    type: String,
+    default: '',
+  },
+  infoTestId: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['close'])
+
+const resolvedCloseTestId = computed(() =>
+  props.closeTestId || toTestId(props.testId, 'btn-close'),
+)
+const resolvedInfoTestId = computed(() =>
+  props.infoTestId || toTestId(props.testId, 'btn-info'),
+)
 </script>

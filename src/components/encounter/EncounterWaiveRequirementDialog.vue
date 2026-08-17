@@ -6,6 +6,7 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
+        test-id="encounter-waive"
         :close-label="t('close')"
         @close="onCancel">
         {{ t('encounterRequirementWaiveTitle') }}
@@ -23,7 +24,7 @@
             type="textarea"
             outlined
             autogrow
-            data-testid="encounter-waive-reason"
+            :data-testid="tid.waiveReason"
           />
         </FormField>
       </q-card-section>
@@ -33,6 +34,7 @@
           flat
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.waiveCancel"
           @click="onCancel"
         />
         <q-btn
@@ -43,6 +45,7 @@
           :disable="!canSubmit"
           :loading="saving"
           :label="t('encounterRequirementWaiveConfirm')"
+          :data-testid="tid.waiveSubmit"
           @click="onConfirm"
         />
       </q-card-actions>
@@ -55,6 +58,8 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormField from 'components/FormField.vue'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

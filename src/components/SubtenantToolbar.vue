@@ -9,6 +9,7 @@
       no-caps
       unelevated
       class="app-subtenant__pill app-subtenant__pill--interactive"
+      :data-testid="subtenantToolbarTestIds.picker"
       :aria-label="t('subtenantSwitcherAria')">
       <SubtenantPillContent
         :name="activeSubtenant.name"
@@ -98,6 +99,7 @@ import { hasUnsavedChanges } from
   'src/composables/useUnsavedChangesRegistry.js'
 import { resolveSubtenantSwitchRoute } from
   'src/utils/subtenant-switch-navigation.js'
+import { subtenantToolbarTestIds } from 'src/test-ids/index.js'
 
 const { t } = useI18n()
 const route = useRoute()

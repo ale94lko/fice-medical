@@ -10,6 +10,7 @@
       <AppDialogHeader
         :close-label="t('close')"
         :info="dialogSubtitle"
+        :test-id="screeningTemplateDialogTestIds.dialog"
         @close="onCancel">
         {{ dialogTitle }}
       </AppDialogHeader>
@@ -363,6 +364,8 @@
                         color="negative"
                         icon="close"
                         :aria-label="t('screeningTemplateRemoveOption')"
+                        :data-testid="screeningTemplateDialogTestIds
+                          .removeOption(sIndex, qIndex, oIndex)"
                         @click="removeOption(question, oIndex)"
                       />
                     </div>
@@ -376,6 +379,8 @@
                     color="primary"
                     icon="add"
                     :label="t('screeningTemplateAddOption')"
+                    :data-testid="screeningTemplateDialogTestIds
+                      .addOption(sIndex, qIndex)"
                     @click="addOption(question)"
                   />
                 </div>
@@ -409,6 +414,7 @@
           color="grey-3"
           text-color="grey-8"
           class="screening-template-dialog__view-toggle"
+          :data-testid="screeningTemplateDialogTestIds.viewToggle"
           :options="viewModeOptions"
         />
         <q-space />

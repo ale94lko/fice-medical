@@ -8,6 +8,7 @@
       class="family-medical-history-dialog insurance-dialog
         app-dialog-card encounter-diagnoses-ai-dialog">
       <AppDialogHeader
+        test-id="encounter-diagnoses-ai"
         :close-label="t('close')"
         @close="onCancel">
         {{ t('encounterDiagnosesAiDialogTitle') }}
@@ -62,7 +63,7 @@
                 icon="content_copy"
                 :disable="!canCopyChiefComplaint"
                 :label="t('encounterDiagnosesAiCopyChiefComplaint')"
-                data-testid="encounter-diagnoses-ai-copy-chief-complaint"
+                :data-testid="tid.diagnosesAiCopyChiefComplaint"
                 @click="copyFromChiefComplaint"
               />
             </div>
@@ -77,7 +78,7 @@
                 :error-message="clinicalTextError"
                 :placeholder="
                   t('encounterDiagnosesAiClinicalTextPlaceholder')"
-                data-testid="encounter-diagnoses-ai-clinical-text"
+                :data-testid="tid.diagnosesAiClinicalText"
                 @update:model-value="onClinicalTextInput"
               />
             </div>
@@ -101,6 +102,7 @@
                   ? t('encounterDiagnosesAiDeselectAll')
                   : t('encounterDiagnosesAiSelectAll')"
                 :disable="!selectableSuggestions.length"
+                :data-testid="tid.diagnosesAiSelectAll"
                 @click="toggleSelectAll"
               />
             </div>
@@ -183,6 +185,7 @@
           color="primary"
           class="app-btn-outline"
           :label="t('cancel')"
+          :data-testid="tid.diagnosesAiCancel"
           @click="onCancel"
         />
         <q-btn
@@ -193,6 +196,7 @@
           class="app-btn-outline"
           icon="auto_awesome"
           :label="t('encounterDiagnosesAiRegenerate')"
+          :data-testid="tid.diagnosesAiRegenerate"
           @click="onGenerate"
         />
         <q-btn
@@ -203,6 +207,7 @@
           class="app-btn-primary"
           icon="auto_awesome"
           :label="t('encounterDiagnosesAiGenerate')"
+          :data-testid="tid.diagnosesAiGenerate"
           @click="onGenerate"
         />
         <q-btn
@@ -213,6 +218,7 @@
           class="app-btn-primary"
           :disable="!selectedItems.length"
           :label="t('encounterDiagnosesAiInsert')"
+          :data-testid="tid.diagnosesAiApply"
           @click="onInsert"
         />
       </q-card-actions>
@@ -238,6 +244,8 @@ import { normalizeIcd10CodeKey } from 'src/utils/icd10-api.js'
 import {
   resolveEncounterChiefComplaint,
 } from 'src/utils/encounter-completion-chief-complaint.js'
+import { encounterWorkspaceTestIds as tid } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

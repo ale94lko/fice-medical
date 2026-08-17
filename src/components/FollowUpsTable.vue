@@ -188,6 +188,7 @@
             icon="delete"
             :size="siteBreakpoints.SM"
             :aria-label="t('followUpActionRemovePending')"
+            :data-testid="tid.rowRemove(row.id)"
             @click="emit('remove-pending', row)">
             <q-tooltip
               class="app-info-tooltip"

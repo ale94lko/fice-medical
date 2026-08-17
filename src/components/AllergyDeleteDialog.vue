@@ -4,9 +4,12 @@
     persistent
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="app-dialog-card app-dialog-card--sm">
+    <q-card
+      class="app-dialog-card app-dialog-card--sm"
+      :data-testid="tid.allergyDeleteDialog">
       <AppDialogHeader
         :close-label="t('close')"
+        :test-id="tid.allergyDeleteDialog"
         @close="onCancel">
         {{ t('allergyDeleteTitle') }}
       </AppDialogHeader>
@@ -31,6 +34,7 @@
               rows="3"
               counter
               maxlength="500"
+              :data-testid="tid.allergyDeleteReason"
             />
           </AddClientLabeledField>
         </template>
@@ -43,6 +47,7 @@
           outline
           color="primary"
           class="app-btn-outline"
+          :data-testid="tid.allergyDeleteCancel"
           :label="t('cancel')"
           @click="onCancel"
         />
@@ -52,6 +57,7 @@
           color="primary"
           class="app-btn-primary"
           :disable="requireDeletionReason && !hasDeletionReason"
+          :data-testid="tid.allergyDeleteConfirm"
           :label="t('confirm')"
           @click="onConfirm"
         />
@@ -65,6 +71,7 @@ import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { addClientTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

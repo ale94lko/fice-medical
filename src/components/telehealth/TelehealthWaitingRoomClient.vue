@@ -102,6 +102,7 @@
               size="lg"
               icon="call_end"
               class="telehealth-waiting__leave-btn full-width"
+              :data-testid="telehealthTestIds.waitingLeave"
               :label="t('telehealthLeave')"
               :loading="loading"
               @click="$emit('leave')"
@@ -123,6 +124,7 @@
 import { useI18n } from 'vue-i18n'
 import TelehealthSelfPreview from
   'components/telehealth/TelehealthSelfPreview.vue'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 defineProps({
   localStream: { type: Object, default: null },

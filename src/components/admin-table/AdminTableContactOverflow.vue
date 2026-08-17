@@ -62,6 +62,9 @@
             icon="content_copy"
             class="admin-contact-overflow__tip-copy
               app-btn-icon-action"
+            :data-testid="adminTableTestIds.contactCopy(
+              entryValue(entry),
+            )"
             :aria-label="t('adminContactCopy')"
             @click.stop="copyEntry(entry)"
           >
@@ -86,6 +89,7 @@ import { useQuasar, copyToClipboard } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
 import AdminTableHoverCard from
   'components/admin-table/AdminTableHoverCard.vue'
+import { adminTableTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   entries: {

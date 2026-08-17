@@ -73,6 +73,7 @@
             :icon="adminTableActionIcons.edit"
             :size="siteBreakpoints.SM"
             :aria-label="t('edit')"
+            :data-testid="tid.componentRowEdit(row.id)"
             @click="emit('edit', row)"
           >
           <q-tooltip
@@ -92,6 +93,7 @@
             icon="delete"
             :size="siteBreakpoints.SM"
             :aria-label="t('delete')"
+            :data-testid="tid.componentRowDelete(row.id)"
             @click="emit('delete', row)"
           >
           <q-tooltip
@@ -129,6 +131,7 @@ import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { formatReferenceRange } from 'src/utils/lab-orders.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
+import { labTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   rows: {

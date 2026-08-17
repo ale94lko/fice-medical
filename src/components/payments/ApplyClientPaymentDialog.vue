@@ -3,9 +3,12 @@
     v-model="open"
     persistent
     transition-show="scale"
-    transition-hide="scale">
+    transition-hide="scale"
+    :data-testid="tid.applyDialog">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader @close="onCancel">
+      <AppDialogHeader
+        test-id="client-payment-apply"
+        @close="onCancel">
         {{ t('clientPaymentApplyExisting') }}
       </AppDialogHeader>
       <q-card-section
@@ -25,6 +28,7 @@
               class="app-btn-outline"
               :disable="submitting || !obligations.length"
               :label="t('clientPaymentAutoApply')"
+              :data-testid="tid.applyAddLine"
               @click="onAutoApply"
             />
           </div>
@@ -94,6 +98,7 @@
           class="app-btn-outline"
           :disable="submitting"
           :label="t('cancel')"
+          :data-testid="tid.applyCancel"
           @click="onCancel"
         />
         <q-btn
@@ -104,6 +109,7 @@
           :loading="submitting"
           :disable="submitting"
           :label="t('clientPaymentApplyConfirm')"
+          :data-testid="tid.applySubmit"
           @click="onSubmit"
         />
       </q-card-actions>
@@ -122,6 +128,7 @@ import {
   selectedAllocations,
 } from 'src/utils/client-payment-normalize.js'
 import { formatLedgerMoney } from 'src/utils/ledger-normalize.js'
+import { clientPaymentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

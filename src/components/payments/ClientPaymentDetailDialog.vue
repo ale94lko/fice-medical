@@ -5,7 +5,9 @@
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
-      <AppDialogHeader @close="onClose">
+      <AppDialogHeader
+        test-id="client-payment-detail"
+        @close="onClose">
         {{ title }}
       </AppDialogHeader>
       <q-card-section
@@ -152,6 +154,7 @@
           color="primary"
           class="app-btn-primary"
           :label="t('close')"
+          :data-testid="clientPaymentTestIds.detailClose"
           @click="onClose"
         />
       </q-card-actions>
@@ -168,7 +171,8 @@ import {
   paymentMethodI18nKey,
   paymentStatusI18nKey,
 } from 'src/utils/client-payment-normalize.js'
-import { clientFinancialTestIds } from 'src/test-ids/index.js'
+import { clientFinancialTestIds, clientPaymentTestIds } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

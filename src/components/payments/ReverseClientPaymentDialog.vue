@@ -6,7 +6,9 @@
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card
       app-dialog-card--sm">
-      <AppDialogHeader @close="onCancel">
+      <AppDialogHeader
+        test-id="client-payment-reverse"
+        @close="onCancel">
         {{ t('clientPaymentReverseTitle') }}
       </AppDialogHeader>
       <q-card-section
@@ -35,6 +37,7 @@
           class="app-btn-outline"
           :disable="submitting"
           :label="t('cancel')"
+          :data-testid="clientPaymentTestIds.reverseCancel"
           @click="onCancel"
         />
         <q-btn
@@ -45,6 +48,7 @@
           :loading="submitting"
           :disable="submitting || !reason.trim()"
           :label="t('clientPaymentReverseConfirm')"
+          :data-testid="clientPaymentTestIds.reverseSubmit"
           @click="emit('confirm', reason.trim())"
         />
       </q-card-actions>
@@ -58,7 +62,8 @@ import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import FormField from 'components/FormField.vue'
 import TextInput from 'components/TextInput.vue'
-import { clientFinancialTestIds } from 'src/test-ids/index.js'
+import { clientFinancialTestIds, clientPaymentTestIds } from
+  'src/test-ids/index.js'
 
 const props = defineProps({
   modelValue: {

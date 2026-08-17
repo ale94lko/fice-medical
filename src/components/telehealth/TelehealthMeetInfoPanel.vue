@@ -51,6 +51,7 @@
           round
           color="primary"
           icon="content_copy"
+          :data-testid="telehealthTestIds.copyInvite"
           :aria-label="t('telehealthCopy')"
           @click="$emit('copy-invite')">
           <q-tooltip>{{ t('telehealthCopy') }}</q-tooltip>
@@ -92,6 +93,7 @@ import {
 } from 'src/utils/appointment-datetime.js'
 import TelehealthResendInviteFields from
   './TelehealthResendInviteFields.vue'
+import { telehealthTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
   meetingCode: { type: String, default: '' },
