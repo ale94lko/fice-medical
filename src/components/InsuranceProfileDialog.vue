@@ -167,6 +167,7 @@
               :required="subscriberRequired"
               :test-id="tid.insuranceField('subscriberName')">
               <q-input
+                ref="subscriberNameInputRef"
                 :model-value="local.subscriberName"
                 outlined
                 hide-bottom-space
@@ -176,6 +177,7 @@
                 :error="Boolean(fieldError('subscriberName'))"
                 :error-message="errorText('subscriberName')"
                 :data-testid="tid.insuranceField('subscriberName')"
+                @keydown="onSubscriberNameKeydown"
                 @update:model-value="onSubscriberNameInput"
               />
             </AddClientLabeledField>
@@ -421,6 +423,7 @@ import {
   insuranceStatusBadgeVariant,
   insuranceTypeOptions,
   isInsuranceProfileInactive,
+  isSubscriberNameKeyAllowed,
   isSubscriberNameRequired,
   normalizeInsuranceIdentifierFields,
   requiresGoldenCardMemberId,
@@ -494,6 +497,7 @@ const payerSearch = ref('')
 const saving = ref(false)
 /** Avoid clearing subscriber name while hydrating the dialog profile. */
 const skipSubscriberRelationshipSync = ref(false)
+const subscriberNameInputRef = ref(null)
 
 const priorityExcludeId = computed(() =>
   props.mode === 'add' ? null : (props.profile?.id ?? local.value?.id),
@@ -683,7 +687,9 @@ watch(
       local.value.relationshipToSubscriber
       === clientInsuranceRelationshipValues.self
     ) {
-      local.value.subscriberName = props.patientName
+      local.value.subscriberName = sanitizeSubscriberNameInput(
+        props.patientName,
+      )
     }
   },
 )
@@ -709,7 +715,9 @@ function syncSubscriberFromRelationship(previousRelationship) {
     local.value.relationshipToSubscriber
     === clientInsuranceRelationshipValues.self
   ) {
-    local.value.subscriberName = props.patientName
+    local.value.subscriberName = sanitizeSubscriberNameInput(
+      props.patientName,
+    )
 
     return
   }
@@ -764,11 +772,28 @@ function onMemberIdInput(value) {
   local.value.memberId = sanitizePlanMemberIdInput(value)
 }
 
+function onSubscriberNameKeydown(event) {
+  if (!isSubscriberNameKeyAllowed(event)) {
+    event.preventDefault()
+  }
+}
+
 function onSubscriberNameInput(value) {
   if (isSubscriberSelf.value) {
     return
   }
-  local.value.subscriberName = sanitizeSubscriberNameInput(value)
+  const next = sanitizeSubscriberNameInput(value)
+  local.value.subscriberName = next
+  if (String(value ?? '') === next) {
+    return
+  }
+  void nextTick(() => {
+    const root = subscriberNameInputRef.value?.$el
+    const el = root?.querySelector?.('input')
+    if (el && el.value !== next) {
+      el.value = next
+    }
+  })
 }
 
 function onMedicaidIdInput(value) {

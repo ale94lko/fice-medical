@@ -171,6 +171,7 @@ import FormToggle from 'components/FormToggle.vue'
 import InsuranceCardUploadField from 'components/InsuranceCardUploadField.vue'
 import TextInput from 'components/TextInput.vue'
 import { storedFileCategories } from 'components/constants.js'
+import { usStates } from 'src/data/us-geography.js'
 import { staffLicenseTestIds } from 'src/test-ids/index.js'
 import { createEmptyStaffLicense } from 'src/utils/staff-form.js'
 import { uploadStoredFile } from 'src/utils/stored-file-api.js'
@@ -250,6 +251,22 @@ const licenseTypeChoices = computed(() => {
   ]
 })
 
+const stateChoices = computed(() => {
+  const options = [...usStates]
+  const current = String(local.value?.state ?? '').trim()
+  if (!current) {
+    return options
+  }
+  const exists = options.some(option =>
+    option.value === current
+    || option.label.toLowerCase() === current.toLowerCase())
+  if (exists) {
+    return options
+  }
+
+  return [{ label: current, value: current }, ...options]
+})
+
 watch(open, visible => {
   if (!visible) {
     return
@@ -258,15 +275,38 @@ watch(open, visible => {
     ...createEmptyStaffLicense(),
     ...(props.license ?? {}),
   }
+  local.value.state = resolveIssuingStateValue(local.value.state)
   attachmentFile.value = null
   errors.value = {}
   filteredLicenseTypes.value = licenseTypeChoices.value
-  filteredStates.value = props.stateOptions ?? []
+  filteredStates.value = stateChoices.value
 })
 
 watch(licenseTypeChoices, options => {
   filteredLicenseTypes.value = options
 })
+
+watch(stateChoices, options => {
+  filteredStates.value = options
+})
+
+function resolveIssuingStateValue(raw) {
+  const current = String(raw ?? '').trim()
+  if (!current) {
+    return ''
+  }
+  const upper = current.toUpperCase()
+  const byValue = usStates.find(item => item.value === upper)
+  if (byValue) {
+    return byValue.value
+  }
+  const lower = current.toLowerCase()
+  const byLabel = usStates.find(
+    item => item.label.toLowerCase() === lower,
+  )
+
+  return byLabel?.value ?? current
+}
 
 function filterSelectOptions(options, needle) {
   const query = String(needle ?? '').trim().toLowerCase()
@@ -293,10 +333,7 @@ function filterLicenseTypes(val, update) {
 
 function filterStates(val, update) {
   update(() => {
-    filteredStates.value = filterSelectOptions(
-      props.stateOptions ?? [],
-      val,
-    )
+    filteredStates.value = filterSelectOptions(stateChoices.value, val)
   })
 }
 

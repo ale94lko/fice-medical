@@ -1,20 +1,20 @@
 <template>
   <div class="add-client-referrals-tab">
     <div
-      v-if="!hasClientId"
-      class="fmh-list-card q-pa-lg text-center">
-      <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
-      <p class="text-body1 text-grey-8 q-mb-none">
-        {{ t('referralSaveClientFirst') }}
-      </p>
-    </div>
-
-    <div
-      v-else-if="!canViewReferrals"
+      v-if="!canViewReferrals"
       class="fmh-list-card q-pa-lg text-center">
       <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
       <p class="text-body1 text-grey-8 q-mb-none">
         {{ t('referralNoPermission') }}
+      </p>
+    </div>
+
+    <div
+      v-else-if="!hasClientId && !hasIntakeDraft"
+      class="fmh-list-card q-pa-lg text-center">
+      <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
+      <p class="text-body1 text-grey-8 q-mb-none">
+        {{ t('referralSaveClientFirst') }}
       </p>
     </div>
 
@@ -30,7 +30,7 @@
         </div>
         <div class="col-auto">
           <q-btn
-            v-if="canAddReferrals"
+            v-if="canAddReferrals && hasClientId"
             no-caps
             unelevated
             color="primary"
@@ -112,6 +112,12 @@ import {
   uploadReferralFile,
 } from 'src/utils/referral-api.js'
 import {
+  buildFollowUpDraftFromReferral,
+  shouldCreateFollowUpFromReferral,
+  shouldRemoveFollowUpFromReferral,
+} from 'src/utils/referral-follow-up.js'
+import { isIntakeReferralDraft } from 'src/utils/referral-intake.js'
+import {
   mapReferralsListFromApi,
   normalizeReferralDetail,
 } from 'src/utils/referral-normalize.js'
@@ -119,11 +125,6 @@ import {
   cloneReferral,
   createEmptyReferral,
 } from 'src/utils/referral-orders.js'
-import {
-  buildFollowUpDraftFromReferral,
-  shouldCreateFollowUpFromReferral,
-  shouldRemoveFollowUpFromReferral,
-} from 'src/utils/referral-follow-up.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { referralTestIds as tid } from 'src/test-ids/index.js'
@@ -178,9 +179,23 @@ const referralsRaw = computed(() =>
   Array.isArray(props.referrals) ? props.referrals : [],
 )
 
-const referralRows = computed(() =>
-  mapReferralsListFromApi(referralsRaw.value),
+const hasIntakeDraft = computed(() =>
+  referralsRaw.value.some(isIntakeReferralDraft),
 )
+
+const referralRows = computed(() => {
+  const persisted = []
+  const drafts = []
+  referralsRaw.value.forEach(row => {
+    if (isIntakeReferralDraft(row)) {
+      drafts.push(row)
+    } else {
+      persisted.push(row)
+    }
+  })
+
+  return [...drafts, ...mapReferralsListFromApi(persisted)]
+})
 
 function findRawReferral(referralId) {
   return referralsRaw.value.find(
@@ -211,6 +226,9 @@ async function refreshClientReferrals() {
 }
 
 function openAdd() {
+  if (!hasClientId.value) {
+    return
+  }
   dialogMode.value = 'add'
   activeReferral.value = createEmptyReferral()
   dialogOpen.value = true
@@ -224,6 +242,9 @@ function openView(row) {
 }
 
 function openEdit(row) {
+  if (isIntakeReferralDraft(row) || !hasClientId.value) {
+    return
+  }
   dialogMode.value = 'edit'
   activeReferral.value = referralDetailFromRecord(row.id)
     ?? cloneReferral(row)
@@ -231,6 +252,9 @@ function openEdit(row) {
 }
 
 async function onSave(referral) {
+  if (!hasClientId.value || isIntakeReferralDraft(referral)) {
+    return
+  }
   const previous = cloneReferral(activeReferral.value ?? createEmptyReferral())
   saving.value = true
   try {
@@ -264,6 +288,9 @@ function onSchedule(row) {
 }
 
 function confirmDelete(row) {
+  if (isIntakeReferralDraft(row) || !hasClientId.value) {
+    return
+  }
   pendingActionReferral.value = row
   deleteDialogOpen.value = true
 }

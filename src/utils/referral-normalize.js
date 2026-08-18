@@ -27,6 +27,19 @@ function parseOptionalNumber(value) {
   return Number.isFinite(num) ? num : null
 }
 
+function parseOptionalId(value) {
+  if (value == null || value === '') {
+    return null
+  }
+  const numeric = parseOptionalNumber(value)
+  if (numeric != null) {
+    return numeric
+  }
+  const str = String(value).trim()
+
+  return str || null
+}
+
 function parseBool(value, fallback = false) {
   if (value == null || value === '') {
     return fallback
@@ -69,7 +82,7 @@ export function normalizeReferralSummary(raw) {
   )
 
   return {
-    id: parseOptionalNumber(row.id),
+    id: parseOptionalId(row.id),
     clientId: parseOptionalNumber(row.client_id ?? row.clientId),
     referralNumber: trim(row.referral_number ?? row.referralNumber),
     type,

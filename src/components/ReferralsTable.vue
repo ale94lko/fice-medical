@@ -198,12 +198,13 @@ import {
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { referralI18nKey } from 'src/utils/referral-i18n.js'
+import { isIntakeReferralDraft } from 'src/utils/referral-intake.js'
 import {
   formatReferralListDate,
   isReferralDeletable,
   isReferralSchedulable,
 } from 'src/utils/referral-normalize.js'
-import { referralI18nKey } from 'src/utils/referral-i18n.js'
 import { isReferralEditable } from 'src/utils/referral-orders.js'
 import {
   resolveReferralClinicianEntriesFromPartyLabel,
@@ -426,7 +427,9 @@ function partyClinicianEntries(row) {
 }
 
 function canEditRow(row) {
-  return props.canEdit && isReferralEditable(row)
+  return props.canEdit
+    && isReferralEditable(row)
+    && !isIntakeReferralDraft(row)
 }
 
 function canScheduleRow(row) {

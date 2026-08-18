@@ -87,9 +87,11 @@
       <q-td
         :props="scope"
         class="admin-data-table__secondary-cell">
-        <span class="vitals-history-table__ellipsis">
-          {{ clinicianLabel(scope.row.recordedBy) }}
-        </span>
+        <AdminTableClinicianAvatars
+          v-if="recordedByEntries(scope.row).length"
+          :entries="recordedByEntries(scope.row)"
+        />
+        <span v-else>—</span>
       </q-td>
     </template>
 
@@ -158,6 +160,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
 import VitalsHistoryStatusValue from
   'components/VitalsHistoryStatusValue.vue'
 import { siteBreakpoints } from 'components/constants.js'
@@ -165,6 +169,7 @@ import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { resolveBmiClassification } from 'src/utils/bmi-us.js'
+import { clinicianEntriesFromName } from 'src/utils/care-plan-orders.js'
 import {
   formatBmiDisplay,
   formatRecordedDateTimeDisplay,
@@ -298,8 +303,8 @@ const columns = computed(() => [
     align: 'left',
     field: row => row.recordedBy,
     sortable: false,
-    headerStyle: 'min-width: 120px',
-    style: 'min-width: 120px',
+    headerStyle: 'min-width: 140px',
+    style: 'min-width: 140px',
   },
   {
     name: 'actions',
@@ -380,11 +385,30 @@ function formatBloodPressure(row) {
   return `${row.systolic} / ${row.diastolic}`
 }
 
-function clinicianLabel(value) {
-  const match = props.clinicianOptions.find(
-    opt => String(opt.value) === String(value),
-  )
+function findRecordedByOption(row) {
+  const id = String(row?.recordedBy ?? '').trim()
+  if (!id) {
+    return null
+  }
 
-  return match?.label ?? value ?? '—'
+  return (props.clinicianOptions ?? []).find(
+    option => String(option?.value ?? '').trim() === id,
+  ) ?? null
+}
+
+function recordedByEntries(row) {
+  const option = findRecordedByOption(row)
+  const name = String(
+    option?.name || option?.label || '',
+  ).trim()
+  if (!name) {
+    return []
+  }
+
+  return clinicianEntriesFromName({
+    id: row?.recordedBy ?? option?.value ?? name,
+    name,
+    specialty: option?.specialty || '',
+  })
 }
 </script>

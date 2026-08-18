@@ -12,6 +12,8 @@ export const LETTERS_AND_SPACES_RE = /^[\p{L}\s]+$/u
  */
 export const PERSON_NAME_RE = /^[\p{L} '.-]+$/u
 
+export const PERSON_NAME_CHAR_RE = /^[\p{L} '.-]$/u
+
 export const NON_PERSON_NAME_CHARS_RE = /[^\p{L} '.-]/gu
 
 /** Same class for sanitizing while typing (strip disallowed chars). */

@@ -84,7 +84,7 @@ export function createEmptyAddClientForm() {
     [ck.idNumberMasked]: '',
     [ck.admissionDate]: todayDateUs(),
     [ck.referralSource]: null,
-    [ck.referralIntakeDate]: '',
+    [ck.referralIntakeDate]: todayDateUs(),
     [ck.referringProvider]: '',
     [ck.referringOrganization]: '',
     [ck.referralSourceDetails]: '',

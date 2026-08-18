@@ -19,6 +19,7 @@ import {
 import { findPayerById } from 'src/utils/insurance-payers.js'
 import {
   NON_PERSON_NAME_CHARS_RE,
+  PERSON_NAME_CHAR_RE,
   PERSON_NAME_RE,
 } from 'src/utils/text-input-chars.js'
 
@@ -339,6 +340,24 @@ export function sanitizeSubscriberNameInput(value) {
   return String(value ?? '')
     .replace(NON_PERSON_NAME_CHARS_RE, '')
     .slice(0, clientInsuranceMaxSubscriberNameLength)
+}
+
+export function isSubscriberNameKeyAllowed(event) {
+  if (!event) {
+    return true
+  }
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    return true
+  }
+  if (event.isComposing || event.key === 'Dead') {
+    return true
+  }
+  const key = String(event.key ?? '')
+  if (key.length !== 1) {
+    return true
+  }
+
+  return PERSON_NAME_CHAR_RE.test(key)
 }
 
 export function isValidSubscriberName(value) {
@@ -679,6 +698,9 @@ export function normalizeInsuranceIdentifierFields(profile) {
     return profile
   }
   profile.memberId = sanitizePlanMemberIdInput(profile.memberId)
+  profile.subscriberName = sanitizeSubscriberNameInput(
+    profile.subscriberName,
+  )
   profile.otherInsuranceId = sanitizePlanMemberIdInput(
     profile.otherInsuranceId,
   )

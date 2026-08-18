@@ -863,7 +863,7 @@
               <AddClientReferralsTab
                 v-if="subTab.key === CARE_COORDINATION_REFERRALS_SUB_TAB"
                 :client-id="props.clientId"
-                :referrals="clientReferrals"
+                :referrals="referralsForTab"
                 :clinician-options="assignedClinicianOptions"
                 @schedule-appointment="onReferralSchedule"
                 @create-follow-up="onReferralCreateFollowUp"
@@ -1196,6 +1196,7 @@ import {
   buildIntakeReferralFromForm,
   clearNonSelfReferralIntakeFields,
   isSelfReferredSource,
+  mergeIntakeReferralIntoList,
   shouldCreateIntakeReferral,
 } from 'src/utils/referral-intake.js'
 import { todayDateUs } from 'src/utils/client-form.js'
@@ -1473,15 +1474,13 @@ const isIntakeSelfReferred = computed(() =>
 
 watch(
   () => form.value[ck.referralSource],
-  (source, previous) => {
+  source => {
     if (isSelfReferredSource(source)) {
       clearNonSelfReferralIntakeFields(form.value)
 
       return
     }
-    const switchedFromSelf = source && isSelfReferredSource(previous)
-    const needsDefaultDate = !form.value[ck.referralIntakeDate]
-    if (switchedFromSelf && needsDefaultDate) {
+    if (!form.value[ck.referralIntakeDate]) {
       form.value[ck.referralIntakeDate] = todayDateUs()
     }
   },
@@ -1753,6 +1752,15 @@ const duplicateNavigateConfirmOpen = ref(false)
 const pendingSaveDestination = ref(null)
 const pendingScheduleReferral = ref(null)
 const intakeReferralCreated = ref(false)
+const referralsForTab = computed(() => mergeIntakeReferralIntoList(
+  clientReferrals.value,
+  form.value,
+  t,
+  {
+    alreadyCreated: intakeReferralCreated.value,
+    skip: isEditMode.value,
+  },
+))
 const duplicatePendingNavigateClientId = ref(null)
 const duplicateReviewOpen = ref(false)
 const duplicateReviewLoading = ref(false)
@@ -2223,11 +2231,6 @@ async function onNextFiltered() {
 
     return
   }
-  const idx = tabIndexInVisibleOrder(activeTab.value)
-  const nextTab = visibleTabOrder.value[idx + 1]
-  if (await persistIntakeReferralIfNeeded(nextTab)) {
-    return
-  }
   const ok = await validateCurrentTabAndUnlock()
   if (!ok) {
     return
@@ -2235,49 +2238,11 @@ async function onNextFiltered() {
   goNextTabFiltered()
 }
 
-async function onMainTabChange(nextTab) {
+function onMainTabChange(nextTab) {
   if (!nextTab || nextTab === activeTab.value) {
     return
   }
-  if (await persistIntakeReferralIfNeeded(nextTab)) {
-    return
-  }
   activeTab.value = nextTab
-}
-
-async function persistIntakeReferralIfNeeded(nextTab) {
-  if (isEditMode.value) {
-    return false
-  }
-  if (activeTab.value !== addClientTabKeys.basic) {
-    return false
-  }
-  if (!shouldCreateIntakeReferral(form.value)) {
-    return false
-  }
-  const ok = await validateCurrentTabAndUnlock()
-  if (!ok) {
-    return true
-  }
-  const destination = {
-    activeTab: nextTab || activeTab.value,
-    activeSubTab: firstSubTabKeyFor(nextTab),
-  }
-  if (duplicateSaveGateActive()) {
-    pendingSaveDestination.value = destination
-    duplicateSaveConfirmOpen.value = true
-
-    return true
-  }
-  await executeSave(destination)
-
-  return true
-}
-
-function firstSubTabKeyFor(tab) {
-  const subs = navigableSubTabKeysFor(tab)
-
-  return subs[0] || ''
 }
 
 async function onNext() {
