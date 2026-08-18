@@ -17,6 +17,59 @@
         ref="dialogBodyScrollRef"
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <div
+          v-if="transitionLabSummary"
+          class="fmh-list-card lab-order-summary-card q-pa-md q-mb-md"
+          :data-testid="tid.field('action-lab')">
+          <div class="row items-center no-wrap q-gutter-sm">
+            <q-icon
+              name="science"
+              size="22px"
+              color="primary"
+            />
+            <div class="text-subtitle2 text-weight-bold col">
+              {{ transitionLabSummary.name }}
+            </div>
+          </div>
+          <div class="row q-col-gutter-md q-mt-sm">
+            <div
+              v-for="field in transitionLabSummary.fields"
+              :key="field.key"
+              class="col-auto">
+              <div class="text-caption text-grey-7">
+                {{ field.label }}
+              </div>
+              <span
+                v-if="field.kind === 'category' && field.token"
+                class="lab-category-badge q-mt-xs"
+                :class="`lab-category-badge--${field.token}`">
+                {{ field.value }}
+              </span>
+              <span
+                v-else-if="field.kind === 'priority' && field.token"
+                class="labs-priority-badge q-mt-xs"
+                :class="`labs-priority-badge--${field.token}`">
+                {{ field.value }}
+              </span>
+              <div
+                v-else
+                class="text-body2 q-mt-xs"
+                :class="{
+                  'lab-order-summary-card__truncate': field.truncate,
+                }">
+                {{ field.value }}
+                <q-tooltip
+                  v-if="field.truncate && field.value !== '—'"
+                  class="app-info-tooltip"
+                  anchor="top middle"
+                  self="bottom middle"
+                  :offset="[0, 6]">
+                  {{ field.value }}
+                </q-tooltip>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
           v-if="showInfoSection"
           class="insurance-dialog__card-section">
           <SubsectionHeading
@@ -329,6 +382,7 @@
               :can-edit="canEditComponents"
               :can-delete="canEditComponents"
               :empty-label="t('labComponentsEmpty')"
+              @view="openComponentView"
               @edit="openComponentDialog"
               @delete="onDeleteComponent"
             />
@@ -349,6 +403,7 @@
             :test-id="tid.field('attachments')"
             @upload="onAttachmentUpload"
             @remove="onAttachmentRemove"
+            @preview="onAttachmentPreview"
             @download="onAttachmentDownload"
           />
         </div>
@@ -442,6 +497,7 @@
       v-model="componentDialogOpen"
       :component="editingComponent"
       :edit-mode="Boolean(editingComponent?.id)"
+      :readonly="componentDialogReadonly"
       :existing-components="visibleComponents"
       :min-result-date="componentResultMinDate"
       @save="onComponentSaved"
@@ -462,6 +518,11 @@
       v-model="labCancelOpen"
       @confirm="onConfirmCancelLab"
     />
+
+    <ClientAttachmentPreviewDialog
+      v-model="previewOpen"
+      :file="previewFile"
+    />
   </q-dialog>
 </template>
 
@@ -473,6 +534,8 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AddressSearchField from 'components/AddressSearchField.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import SubsectionHeading from './SubsectionHeading.vue'
+import ClientAttachmentPreviewDialog from
+  'components/ClientAttachmentPreviewDialog.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
@@ -582,10 +645,13 @@ const local = ref(createEmptyLabOrder())
 const errors = ref({})
 const testFilter = ref('')
 const componentDialogOpen = ref(false)
+const componentDialogReadonly = ref(false)
 const editingComponent = ref(null)
 const componentDeleteOpen = ref(false)
 const pendingDeleteComponentId = ref(null)
 const labCancelOpen = ref(false)
+const previewOpen = ref(false)
+const previewFile = ref(null)
 
 const isViewMode = computed(() => props.mode === 'view')
 const isAddMode = computed(() => props.mode === 'add')
@@ -853,6 +919,141 @@ const dialogTitle = computed(() => {
   return t('labAddTitle')
 })
 
+const specimenOptions = [
+  { label: 'Blood', value: 'blood' },
+  { label: 'Urine', value: 'urine' },
+  { label: 'Saliva', value: 'saliva' },
+  { label: 'Tissue', value: 'tissue' },
+]
+
+function dashOrValue(value) {
+  return String(value ?? '').trim() || '—'
+}
+
+function translatedEnumLabel(prefix, value) {
+  const token = String(value ?? '').trim()
+  if (!token) {
+    return '—'
+  }
+  const key = labI18nKey(prefix, token)
+  const translated = t(key)
+
+  return translated !== key ? translated : token
+}
+
+function resolvePriorityToken(priority) {
+  const token = String(priority ?? '').trim().toUpperCase()
+  if (token === labPriorities.stat) {
+    return 'stat'
+  }
+  if (token === labPriorities.urgent) {
+    return 'urgent'
+  }
+  if (token === labPriorities.routine) {
+    return 'routine'
+  }
+
+  return token ? 'routine' : ''
+}
+
+function resolveSpecimenLabel(value) {
+  const token = String(value ?? '').trim().toLowerCase()
+  if (!token) {
+    return '—'
+  }
+  const found = specimenOptions.find(option => option.value === token)
+
+  return found?.label || String(value).trim()
+}
+
+function resolveAbnormalLabel(lab) {
+  const manual = String(lab?.abnormalResultManual ?? '').trim()
+  if (manual === labAbnormalValues.yes) {
+    return t('yes')
+  }
+  if (manual === labAbnormalValues.no) {
+    return t('no')
+  }
+
+  return '—'
+}
+
+const transitionLabSummary = computed(() => {
+  if (!isTransitionMode.value) {
+    return null
+  }
+  const lab = local.value
+  const intent = transitionIntent.value
+  const category = lab.category
+  const priority = lab.priority
+  const fields = [
+    {
+      key: 'category',
+      kind: 'category',
+      label: t('labColCategory'),
+      value: translatedEnumLabel('labCategory', category),
+      token: String(category ?? '').trim().toLowerCase(),
+    },
+    {
+      key: 'priority',
+      kind: 'priority',
+      label: t('labPriority'),
+      value: translatedEnumLabel('labPriority', priority),
+      token: resolvePriorityToken(priority),
+    },
+    {
+      key: 'orderedDate',
+      kind: 'text',
+      label: t('labOrderedDate'),
+      value: dashOrValue(lab.orderedDate),
+    },
+  ]
+  if (intent === 'results' || intent === 'review') {
+    fields.push(
+      {
+        key: 'specimen',
+        kind: 'text',
+        label: t('labSpecimenType'),
+        value: resolveSpecimenLabel(lab.specimenType),
+      },
+      {
+        key: 'collectedDate',
+        kind: 'text',
+        label: t('labCollectedDate'),
+        value: dashOrValue(lab.collectedDate),
+      },
+      {
+        key: 'location',
+        kind: 'text',
+        label: t('labCollectionLocation'),
+        value: dashOrValue(lab.collectionLocation),
+        truncate: true,
+      },
+    )
+  }
+  if (intent === 'review') {
+    fields.push(
+      {
+        key: 'resultDate',
+        kind: 'text',
+        label: t('labResultDate'),
+        value: dashOrValue(lab.resultDate),
+      },
+      {
+        key: 'abnormal',
+        kind: 'text',
+        label: t('labAbnormalResult'),
+        value: resolveAbnormalLabel(lab),
+      },
+    )
+  }
+
+  return {
+    name: dashOrValue(lab.testName),
+    fields,
+  }
+})
+
 const dialogSubtitle = computed(() => {
   const intent = transitionIntent.value
   if (intent === 'collect') {
@@ -909,13 +1110,6 @@ const yesNoOptions = computed(() => [
   { label: t('no'), value: labAbnormalValues.no },
 ])
 
-const specimenOptions = [
-  { label: 'Blood', value: 'blood' },
-  { label: 'Urine', value: 'urine' },
-  { label: 'Saliva', value: 'saliva' },
-  { label: 'Tissue', value: 'tissue' },
-]
-
 const testOptions = computed(() => {
   const needle = testFilter.value.trim().toLowerCase()
   const base = LAB_TEST_OPTIONS.map(item => ({
@@ -938,6 +1132,9 @@ watch(
   ],
   ([isOpen], previous) => {
     if (!isOpen) {
+      previewOpen.value = false
+      previewFile.value = null
+
       return
     }
     // Only hydrate when the dialog opens or identity/mode/intent changes.
@@ -1199,6 +1396,13 @@ function onConfirmCancelLab(reason) {
 }
 
 function openComponentDialog(component = null) {
+  componentDialogReadonly.value = false
+  editingComponent.value = component
+  componentDialogOpen.value = true
+}
+
+function openComponentView(component) {
+  componentDialogReadonly.value = true
   editingComponent.value = component
   componentDialogOpen.value = true
 }
@@ -1285,12 +1489,31 @@ function onAttachmentRemove(attachmentId) {
   emit('remove-attachment', attachmentId)
 }
 
+function onAttachmentPreview(file) {
+  previewFile.value = file
+  previewOpen.value = true
+}
+
 function onAttachmentDownload(attachmentId) {
   emit('download-attachment', attachmentId)
 }
 </script>
 
 <style lang="scss" scoped>
+@import 'src/css/quasar.variables';
+
+.lab-order-summary-card {
+  background: $secondary-2;
+  border-color: rgba($primary, 0.16);
+}
+
+.lab-order-summary-card__truncate {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .lab-status-badge {
   display: inline-flex;
   align-items: center;
@@ -1324,5 +1547,79 @@ function onAttachmentDownload(attachmentId) {
 .lab-status-badge--cancelled {
   background: #fee2e2;
   color: #b91c1c;
+}
+
+.labs-priority-badge,
+.lab-category-badge {
+  display: inline-flex;
+  align-items: center;
+}
+
+.labs-priority-badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.labs-priority-badge--stat {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.labs-priority-badge--urgent {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.labs-priority-badge--routine {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.lab-category-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.lab-category-badge--blood_test {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.lab-category-badge--urine_test {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.lab-category-badge--imaging {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.lab-category-badge--microbiology {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.lab-category-badge--pathology {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.lab-category-badge--genetic {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.lab-category-badge--other {
+  background: #f1f5f9;
+  color: #475569;
 }
 </style>

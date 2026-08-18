@@ -150,7 +150,7 @@
           </q-tooltip>
         </q-btn>
         <q-btn
-          v-if="canDeleteRow()"
+          v-if="canDeleteRow(row)"
           flat
           round
           dense
@@ -200,6 +200,7 @@ import {
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import {
   formatReferralListDate,
+  isReferralDeletable,
   isReferralSchedulable,
 } from 'src/utils/referral-normalize.js'
 import { referralI18nKey } from 'src/utils/referral-i18n.js'
@@ -359,6 +360,9 @@ function priorityVariant(priority) {
   if (token === referralPriorities.urgent) {
     return 'pending'
   }
+  if (token === referralPriorities.low) {
+    return 'inactive'
+  }
 
   return 'other'
 }
@@ -429,7 +433,7 @@ function canScheduleRow(row) {
   return props.canSchedule && isReferralSchedulable(row)
 }
 
-function canDeleteRow() {
-  return props.canDelete
+function canDeleteRow(row) {
+  return props.canDelete && isReferralDeletable(row)
 }
 </script>

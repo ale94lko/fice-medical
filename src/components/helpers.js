@@ -213,12 +213,16 @@ export function normalizeLoginSubtenants(raw) {
       const photoFileId = Number.isFinite(photoId) && photoId > 0
         ? photoId
         : null
+      const billingAddress = String(
+        item.billing_address ?? item.billingAddress ?? '',
+      ).trim()
 
       return {
         id,
         name,
         code,
         photoFileId,
+        billingAddress,
       }
     })
     .filter(Boolean)

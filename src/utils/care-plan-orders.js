@@ -58,19 +58,20 @@ export function buildRecordedByClinicianEntries({
   recordedById = null,
 } = {}) {
   const name = String(recordedByName ?? '').trim()
-  if (!name) {
-    return []
-  }
   const id = recordedById != null && String(recordedById).trim() !== ''
     ? recordedById
-    : name
+    : null
+  const display = name || (id != null ? String(id) : '')
+  if (!display) {
+    return []
+  }
 
   return [{
-    id,
-    name,
-    personName: name,
-    initials: clinicianInitialsFromPersonName(name),
-    avatarStyle: clinicianAvatarStyle(id),
+    id: id ?? display,
+    name: display,
+    personName: display,
+    initials: clinicianInitialsFromPersonName(display),
+    avatarStyle: clinicianAvatarStyle(id ?? display),
   }]
 }
 
@@ -235,7 +236,59 @@ export function createEmptyCarePlanGoal() {
     outcomeMeasures: [],
     interventions: [],
     progress: { status: 'NOT_MEASURED', percent: null },
+    replacesGoalId: null,
+    replacedByGoalId: null,
+    replacesGoalTitle: '',
+    replaceReason: '',
+    discontinueReason: '',
   }
+}
+
+export function cloneGoalForReplace(goal) {
+  const source = goal ?? {}
+
+  return {
+    ...createEmptyCarePlanGoal(),
+    title: source.title || '',
+    description: source.description || '',
+    successCriteria: source.successCriteria || '',
+    priority: source.priority || carePlanPriorities.medium,
+    targetDate: source.targetDate || '',
+    replacesGoalId: source.id ?? null,
+    replacesGoalTitle: source.title || '',
+    replaceReason: '',
+    outcomeMeasures: (source.outcomeMeasures ?? []).map(measure => ({
+      ...createEmptyOutcomeMeasure(),
+      measureName: measure.measureName || '',
+      description: measure.description || '',
+      unit: measure.unit || '',
+      frequency: measure.frequency || '',
+      direction: measure.direction || carePlanProgressDirections.lowerIsBetter,
+      baseline: measure.baseline ?? null,
+      target: measure.target ?? null,
+      sourceType: carePlanOutcomeSourceTypes.manual,
+    })),
+  }
+}
+
+export function clinicianEntriesFromName({
+  id = null,
+  name = '',
+  specialty = '',
+} = {}) {
+  const display = String(name ?? '').trim()
+  if (!display) {
+    return []
+  }
+
+  return [{
+    id: id ?? display,
+    name: specialty ? `${display} - ${specialty}` : display,
+    personName: display,
+    specialty: String(specialty ?? '').trim(),
+    initials: clinicianInitialsFromPersonName(display),
+    avatarStyle: clinicianAvatarStyle(id ?? display),
+  }]
 }
 
 export function createEmptyCarePlan() {
@@ -333,13 +386,22 @@ export const CARE_PLAN_MEASURE_OPTIONS = [
 /** Units for outcome measures (select list, same UX as lab component Unit). */
 export const CARE_PLAN_MEASURE_UNIT_OPTIONS = [
   'score',
-  'mmHg',
   '%',
+  'mmHg',
   'lbs',
   'kg',
   'kg/m²',
   'mg/dL',
+  'g/dL',
+  'mmol/L',
+  'mcg',
+  'mg',
+  'mL',
   'count',
+  'sessions',
+  'minutes',
+  'hours',
+  'days',
 ]
 
 export function normalizeOutcomeMeasureName(name) {

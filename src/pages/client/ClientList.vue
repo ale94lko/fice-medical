@@ -275,7 +275,7 @@
 
     <AssignCliniciansDialog
       v-model="assignCliniciansOpen"
-      :client-id="assignClientId"
+      :client-ids="assignClientIds"
       @saved="onCliniciansAssigned"
     />
 
@@ -382,7 +382,7 @@ const loading = ref(false)
 const selected = ref([])
 const columnSettingsOpen = ref(false)
 const assignCliniciansOpen = ref(false)
-const assignClientId = ref(null)
+const assignClientIds = ref([])
 const changeStatusOpen = ref(false)
 const changeStatusTargetNumbers = ref([])
 const changeStatusClientName = ref('')
@@ -823,24 +823,30 @@ function openClientOverviewClassic(row) {
   })
 }
 
-function openAssignClinicians(row) {
-  const id = row?.id
-  if (id == null || id === '') {
+function clientNumbersFromRows(rows) {
+  const source = Array.isArray(rows) ? rows : [rows]
+
+  return source.map(clientChartKey).filter(Boolean)
+}
+
+function openAssignClinicians(rows) {
+  const ids = clientNumbersFromRows(rows)
+  if (!ids.length) {
     return
   }
-  assignClientId.value = id
+  assignClientIds.value = ids
   assignCliniciansOpen.value = true
 }
 
 function assignClinicians() {
-  if (selected.value.length !== 1) {
+  if (!selected.value.length) {
     $q.notify({
       type: quasarNotifyTypes.warning,
-      message: t('assignCliniciansSelectOne'),
+      message: t('assignCliniciansSelectClients'),
     })
     return
   }
-  openAssignClinicians(selected.value[0])
+  openAssignClinicians(selected.value)
 }
 
 function onCliniciansAssigned() {
@@ -923,7 +929,7 @@ const pageActions = computed(() => [
     icon: 'person_add',
     variant: 'outline',
     testId: clientListTestIds.assignClinicians,
-    disable: selected.value.length !== 1 || loading.value,
+    disable: !selected.value.length || loading.value,
     visible: canEditBasicInfo.value,
     onClick: assignClinicians,
   },

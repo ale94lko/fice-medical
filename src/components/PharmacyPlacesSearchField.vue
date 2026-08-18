@@ -98,6 +98,9 @@ import {
   isAddressPlaceSearchAvailable,
   searchPlaces,
 } from 'src/utils/address-places-search.js'
+import { clinicStateCodeFromAddress } from
+  'src/utils/photon-pharmacy.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 
 const props = defineProps({
   readonly: {
@@ -118,6 +121,7 @@ const emit = defineEmits(['select'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const query = ref('')
 const results = ref([])
@@ -129,6 +133,11 @@ const providerUsed = ref('')
 
 const available = computed(() => isAddressPlaceSearchAvailable())
 const queryTrimmed = computed(() => String(query.value ?? '').trim())
+const clinicState = computed(() =>
+  clinicStateCodeFromAddress(
+    authStore.activeSubtenant?.billingAddress,
+  ),
+)
 
 const showOsmAttribution = computed(
   () => providerUsed.value === 'photon'
@@ -172,6 +181,7 @@ async function onSearch() {
     const list = await searchPlaces({
       q,
       kind: 'pharmacy',
+      state: clinicState.value,
     })
     results.value = list
     providerUsed.value = list[0]?.provider || 'photon'

@@ -95,6 +95,7 @@
       :saving="signing"
       @submit="onSignSubmit"
       @secure-link-sent="onSecureLinkSent"
+      @portal-requested="onPortalRequested"
     />
     <ClientConsentRevokeDialog
       v-model="revokeOpen"
@@ -397,6 +398,14 @@ async function onSecureLinkSent() {
   $q.notify({
     type: quasarNotifyTypes.positive,
     message: t('clientConsentSecureLinkSuccess'),
+  })
+  await loadConsents()
+}
+
+async function onPortalRequested() {
+  $q.notify({
+    type: quasarNotifyTypes.positive,
+    message: t('clientConsentPortalRequestSuccess'),
   })
   await loadConsents()
 }

@@ -49,6 +49,16 @@
         </q-td>
       </template>
 
+      <template #body-cell-orderingClinician="scope">
+        <q-td :props="scope">
+          <AdminTableClinicianAvatars
+            v-if="scope.row.clinicianEntries?.length"
+            :entries="scope.row.clinicianEntries"
+          />
+          <span v-else>—</span>
+        </q-td>
+      </template>
+
       <template #body-cell-orderedDate="scope">
         <q-td
           :props="scope"
@@ -191,7 +201,7 @@
             :disable="!rowHasAttachments(row)"
             :data-testid="tid.rowDownload(row.id)"
             :size="siteBreakpoints.SM"
-            :aria-label="t('labActionDownload')"
+            :aria-label="t('labActionDownloadAttachment')"
             @click="emit('download', row)"
           >
           <q-tooltip
@@ -201,7 +211,7 @@
             :offset="[0, 6]">
             {{
               rowHasAttachments(row)
-                ? t('labActionDownload')
+                ? t('labActionDownloadAttachment')
                 : t('labNoAttachment')
             }}
           </q-tooltip>
@@ -244,6 +254,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
 import {
   labPriorities,
   siteBreakpoints,
@@ -312,6 +324,7 @@ const mobileCardLayout = {
   identifier: null,
   badges: [
     'category',
+    'orderingClinician',
     'orderedDate',
     'collectedDate',
     'resultDate',
@@ -358,6 +371,15 @@ const columns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
+  },
+  {
+    name: 'orderingClinician',
+    label: t('labColOrderingClinician'),
+    align: 'left',
+    field: row => row.orderingClinicianName,
+    sortable: false,
+    headerStyle: 'min-width: 100px',
+    style: 'min-width: 100px',
   },
   {
     name: 'orderedDate',

@@ -10,7 +10,7 @@
         assign-clinicians-dialog">
       <AppDialogHeader
         :close-label="t('close')"
-        :info="t('assignCliniciansSubtitle')"
+        :info="dialogSubtitle"
         @close="onCancel">
         {{ t('assignCliniciansTitle') }}
       </AppDialogHeader>
@@ -147,7 +147,7 @@
           <section class="assign-clinicians-dialog__pane">
             <div class="assign-clinicians-dialog__pane-head">
               <h3 class="assign-clinicians-dialog__pane-title">
-                {{ t('assignedClinicians') }}
+                {{ assignedPaneTitle }}
                 ({{ assigned.length }})
               </h3>
               <q-btn
@@ -168,7 +168,7 @@
               <div
                 v-if="!assigned.length"
                 class="assign-clinicians-dialog__empty">
-                <span>{{ t('assignedCliniciansEmpty') }}</span>
+                <span>{{ assignedEmptyLabel }}</span>
               </div>
               <div
                 v-for="item in assigned"
@@ -220,7 +220,7 @@
             </div>
             <div class="assign-clinicians-dialog__hint">
               <q-icon name="info" size="18px" />
-              <span>{{ t('assignCliniciansHint') }}</span>
+              <span>{{ hintLabel }}</span>
             </div>
           </section>
         </div>
@@ -288,6 +288,10 @@ const props = defineProps({
     type: [String, Number],
     default: null,
   },
+  clientIds: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'saved'])
@@ -298,6 +302,7 @@ const open = computed({
   set: value => emit('update:modelValue', value),
 })
 const clientId = toRef(props, 'clientId')
+const clientIds = toRef(props, 'clientIds')
 
 function onError(error, fallbackKey) {
   if (isAuthSessionEndUIError(error)) {
@@ -325,6 +330,8 @@ const {
   noSearchResults,
   pageFrom,
   pageTo,
+  isBatch,
+  clientCount,
   toggleAvailable,
   toggleAssigned,
   assignSelected,
@@ -334,9 +341,38 @@ const {
   save,
 } = useAssignClientClinicians({
   clientId,
+  clientIds,
   open,
   onError,
 })
+
+const dialogSubtitle = computed(() => {
+  if (isBatch.value) {
+    return t('assignCliniciansBatchSubtitle', {
+      count: clientCount.value,
+    })
+  }
+
+  return t('assignCliniciansSubtitle')
+})
+
+const assignedPaneTitle = computed(() =>
+  isBatch.value
+    ? t('assignCliniciansToAssign')
+    : t('assignedClinicians'),
+)
+
+const assignedEmptyLabel = computed(() =>
+  isBatch.value
+    ? t('assignCliniciansToAssignEmpty')
+    : t('assignedCliniciansEmpty'),
+)
+
+const hintLabel = computed(() =>
+  isBatch.value
+    ? t('assignCliniciansBatchHint')
+    : t('assignCliniciansHint'),
+)
 
 function onCancel() {
   open.value = false
@@ -347,7 +383,11 @@ async function onSave() {
   if (ok) {
     $q.notify({
       type: quasarNotifyTypes.positive,
-      message: t('assignCliniciansSaved'),
+      message: isBatch.value
+        ? t('assignCliniciansBatchSaved', {
+          count: clientCount.value,
+        })
+        : t('assignCliniciansSaved'),
     })
     emit('saved')
     open.value = false

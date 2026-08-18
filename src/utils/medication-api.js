@@ -109,10 +109,15 @@ export async function changeClientMedicationStatus(
   clientId,
   medicationId,
   status,
+  reason,
 ) {
+  const body = { status }
+  if (reason != null && String(reason).trim()) {
+    body.reason = String(reason).trim()
+  }
   const response = await apiInstance.patch(
     apiPaths.clientMedicationStatus(clientId, medicationId),
-    { status },
+    body,
   )
 
   return normalizeClientMedication(unwrapData(response.data))

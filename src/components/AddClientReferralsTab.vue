@@ -238,8 +238,8 @@ async function onSave(referral) {
       ? await updateClientReferral(clientId.value, referral)
       : await createClientReferral(clientId.value, referral)
     await refreshClientReferrals()
-    activeReferral.value = referralDetailFromRecord(saved.id) ?? saved
-    dialogMode.value = 'edit'
+    dialogOpen.value = false
+    activeReferral.value = null
     if (shouldCreateFollowUpFromReferral(saved, previous)) {
       emit('create-follow-up', buildFollowUpDraftFromReferral(saved))
     } else if (shouldRemoveFollowUpFromReferral(saved, previous)) {

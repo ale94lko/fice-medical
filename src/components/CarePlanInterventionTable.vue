@@ -28,10 +28,12 @@
       </template>
 
       <template #body-cell-clinician="scope">
-        <q-td
-          :props="scope"
-          class="admin-data-table__secondary-cell">
-          {{ clinicianLabel(scope.row) }}
+        <q-td :props="scope">
+          <AdminTableClinicianAvatars
+            v-if="clinicianEntries(scope.row).length"
+            :entries="clinicianEntries(scope.row)"
+          />
+          <span v-else>—</span>
         </q-td>
       </template>
 
@@ -114,9 +116,14 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
 import { siteBreakpoints } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
-import { resolveClinicianOptionLabel } from 'src/utils/care-plan-orders.js'
+import {
+  clinicianEntriesFromName,
+  resolveClinicianOptionLabel,
+} from 'src/utils/care-plan-orders.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -171,8 +178,8 @@ const columns = computed(() => [
     align: 'left',
     field: row => clinicianLabel(row),
     sortable: false,
-    headerStyle: 'min-width: 160px',
-    style: 'min-width: 160px',
+    headerStyle: 'min-width: 72px',
+    style: 'min-width: 72px',
   },
   {
     name: 'actions',
@@ -185,6 +192,21 @@ const columns = computed(() => [
     style: 'min-width: 110px',
   },
 ])
+
+function clinicianEntries(row) {
+  if (Array.isArray(row?.clinicianEntries) && row.clinicianEntries.length) {
+    return row.clinicianEntries
+  }
+  const name = clinicianLabel(row)
+  if (!name || name === '—') {
+    return []
+  }
+
+  return clinicianEntriesFromName({
+    id: row?.responsibleClinicianId ?? row?.responsible_clinician_id,
+    name,
+  })
+}
 
 function clinicianLabel(row) {
   const stored = String(

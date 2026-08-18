@@ -2254,6 +2254,32 @@ body.vp-mobile {
   }
 }
 
+.appointment-request-list-page,
+.portal-registration-list-page {
+  .admin-list-page__header {
+    margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
+  }
+
+  .admin-list-page__title {
+    font-size: 1.375rem;
+    line-height: 1.65rem;
+  }
+
+  .admin-list-page__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    margin-bottom: 0;
+  }
+
+  .admin-list-page__actions {
+    margin-top: 0;
+  }
+}
+
 .staff-list-summary {
   @media (min-width: 1440px) {
     display: flex;
@@ -2422,6 +2448,10 @@ body.vp-mobile {
   background: rgba($text-strong, 0.28) !important;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+.q-dialog.app-nested-dialog > .q-dialog__backdrop {
+  background: rgba($text-strong, 0.72) !important;
 }
 
 .app-dialog-toolbar {
@@ -4578,18 +4608,28 @@ body.vp-mobile {
   user-select: none;
 }
 
-.add-client-vitals-tab__level {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
+.add-client-vitals-tab__value-row {
+  align-items: flex-start;
+  flex-wrap: nowrap;
+
+  > .add-client-vitals-tab__value,
+  > .add-client-vitals-tab__level {
+    min-width: 0;
+  }
 }
 
-/* Mobile: value 50% + level 50%; BP sys/dia 25% each + level 50% */
+.add-client-vitals-tab__level {
+  display: flex;
+  align-items: flex-start;
+  align-self: flex-start;
+}
+
+/* Mobile: value 2/3 + level 1/3 */
 body.vp-mobile {
   .add-client-vitals-tab__value-row {
     display: flex;
     flex-wrap: nowrap;
-    align-items: center;
+    align-items: flex-start;
     margin-left: 0 !important;
     margin-right: 0 !important;
     gap: 8px;
@@ -4600,16 +4640,16 @@ body.vp-mobile {
     }
 
     > .add-client-vitals-tab__value {
-      flex: 0 0 calc(50% - 4px);
-      max-width: calc(50% - 4px);
-      width: calc(50% - 4px);
+      flex: 0 0 calc(66.666% - 4px);
+      max-width: calc(66.666% - 4px);
+      width: calc(66.666% - 4px);
       min-width: 0;
     }
 
     > .add-client-vitals-tab__level {
-      flex: 0 0 calc(50% - 4px);
-      max-width: calc(50% - 4px);
-      width: calc(50% - 4px);
+      flex: 0 0 calc(33.333% - 4px);
+      max-width: calc(33.333% - 4px);
+      width: calc(33.333% - 4px);
       min-width: 0;
     }
   }
@@ -4659,9 +4699,10 @@ body.vp-mobile {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 210px;
-  height: $app-input-height;
+  width: 100%;
+  max-width: 100%;
   min-height: $app-input-height;
+  height: $app-input-height;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.75rem;

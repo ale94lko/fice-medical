@@ -6,6 +6,9 @@ import {
   apiDateToDisplay,
   displayDateToApi,
 } from 'src/utils/app-datetime.js'
+import { todayDateUs } from 'src/utils/client-form.js'
+import { isCustomMedicationFrequency } from
+  'src/utils/medication-catalogs.js'
 
 function trimStr(value) {
   if (value == null) {
@@ -22,6 +25,78 @@ function toNumberOrNull(value) {
   const n = Number(value)
 
   return Number.isFinite(n) ? n : null
+}
+
+const MEDICATION_STRENGTH_UNITS =
+  'mcg|µg|mg|g|ml|l|iu|meq|mmol|unt|unit|%'
+
+export function formatReferenceMedicationLabel(name, genericName) {
+  const n = trimStr(name)
+  const g = trimStr(genericName)
+  if (!n) {
+    return g
+  }
+  if (!g) {
+    return n
+  }
+  const nLow = n.toLowerCase()
+  const gLow = g.toLowerCase()
+  if (nLow === gLow || nLow.includes(gLow) || gLow.includes(nLow)) {
+    return n
+  }
+  if (splitReferenceMedicationDisplay(n).detail) {
+    return n
+  }
+
+  return `${n} (${g})`
+}
+
+export function splitReferenceMedicationDisplay(name) {
+  const text = trimStr(name)
+  if (!text || text.includes(' / ')) {
+    return { title: text, detail: '' }
+  }
+  const pattern = new RegExp(
+    `^(.*?)\\s+(\\d[\\d.,]*\\s*(?:${MEDICATION_STRENGTH_UNITS})\\b.*)$`,
+    'i',
+  )
+  const match = text.match(pattern)
+  if (!match) {
+    return { title: text, detail: '' }
+  }
+  const title = trimStr(match[1])
+  const detail = trimStr(match[2])
+  if (title.length < 2) {
+    return { title: text, detail: '' }
+  }
+
+  return { title, detail }
+}
+
+export function toReferenceMedicationSelectOption(item) {
+  if (!item || item.id == null) {
+    return null
+  }
+  const name = trimStr(item.name)
+  const genericName = trimStr(item.genericName)
+  const split = splitReferenceMedicationDisplay(name)
+  let detail = split.detail
+  if (!detail && genericName) {
+    const nameLow = name.toLowerCase()
+    const genericLow = genericName.toLowerCase()
+    if (genericLow !== nameLow && !nameLow.includes(genericLow)) {
+      detail = genericName
+    }
+  }
+
+  return {
+    label: formatReferenceMedicationLabel(name, genericName),
+    value: item.id,
+    name,
+    genericName,
+    title: split.title || name,
+    detail,
+  }
 }
 
 export function normalizeReferenceMedication(raw) {
@@ -43,7 +118,7 @@ export function normalizeReferenceMedication(raw) {
     active: raw.active !== false,
     externalRxnorm: trimStr(raw.external_rxnorm ?? raw.externalRxnorm),
     externalNdc: trimStr(raw.external_ndc ?? raw.externalNdc) || null,
-    label: genericName ? `${name} (${genericName})` : name,
+    label: formatReferenceMedicationLabel(name, genericName),
   }
 }
 
@@ -112,9 +187,12 @@ export function normalizeClientMedication(raw) {
   const route = trimStr(raw.route)
   const routeLabel = trimStr(raw.route_label ?? raw.routeLabel) || route
   const frequency = trimStr(raw.frequency)
-  const frequencyLabel = trimStr(
-    raw.frequency_label ?? raw.frequencyLabel,
-  ) || frequency
+  const customFrequency = trimStr(
+    raw.custom_frequency ?? raw.customFrequency,
+  )
+  const frequencyLabel = customFrequency
+    || trimStr(raw.frequency_label ?? raw.frequencyLabel)
+    || frequency
   const status = trimStr(raw.status).toUpperCase()
     || medicationStatuses.active
 
@@ -137,6 +215,7 @@ export function normalizeClientMedication(raw) {
     routeLabel,
     frequency,
     frequencyLabel,
+    customFrequency,
     routeFrequencyDisplay: [routeLabel, frequencyLabel]
       .filter(Boolean)
       .join(' - ') || '—',
@@ -156,6 +235,14 @@ export function normalizeClientMedication(raw) {
     pharmacyMode: resolvePharmacyMode(raw, pharmacy),
     prescriberId: raw.prescriber_id ?? raw.prescriberId ?? null,
     prescriberName: trimStr(raw.prescriber_name ?? raw.prescriberName),
+    createdByUserId: raw.created_by_user_id ?? raw.createdByUserId
+      ?? raw.added_by_user_id ?? raw.addedByUserId ?? null,
+    addedByUserId: raw.added_by_user_id ?? raw.addedByUserId
+      ?? raw.created_by_user_id ?? raw.createdByUserId ?? null,
+    addedByName: trimStr(raw.added_by_name ?? raw.addedByName),
+    discontinuationReason: trimStr(
+      raw.discontinuation_reason ?? raw.discontinuationReason,
+    ),
     setPharmacyPreferred: false,
     createdAt: trimStr(raw.created_at ?? raw.createdAt),
     updatedAt: trimStr(raw.updated_at ?? raw.updatedAt),
@@ -196,14 +283,15 @@ export function createEmptyMedicationForm() {
     dosageUnit: null,
     route: null,
     frequency: null,
-    startDate: '',
+    customFrequency: '',
+    startDate: todayDateUs(),
     endDate: '',
     status: medicationStatuses.active,
     reasonDiagnosis: '',
     instructions: '',
     notes: '',
     pharmacyId: null,
-    pharmacyMode: pharmacyModeValues.preferred,
+    pharmacyMode: pharmacyModeValues.none,
     setPharmacyPreferred: false,
     prescriberId: null,
   }
@@ -226,35 +314,32 @@ export function createEmptyPharmacyForm() {
 }
 
 export function medicationToApiPayload(form) {
-  const mode = trimStr(form?.pharmacyMode).toUpperCase()
-    || pharmacyModeValues.none
   const pharmacyId = form?.pharmacyId != null && form.pharmacyId !== ''
     ? Number(form.pharmacyId)
     : null
+  const hasPharmacy = Number.isFinite(pharmacyId)
+  const frequency = trimStr(form?.frequency)
   /* eslint-disable camelcase -- API request body uses snake_case */
   const payload = {
     medication_id: Number(form?.medicationId),
     dosage: Number(form?.dosage),
     dosage_unit: trimStr(form?.dosageUnit),
     route: trimStr(form?.route),
-    frequency: trimStr(form?.frequency),
+    frequency,
+    custom_frequency: isCustomMedicationFrequency(frequency)
+      ? trimStr(form?.customFrequency) || null
+      : null,
     start_date: displayDateToApi(form?.startDate) || null,
     end_date: displayDateToApi(form?.endDate) || null,
     prescriber_id: Number(form?.prescriberId),
-    status: trimStr(form?.status).toUpperCase()
-      || medicationStatuses.active,
     reason_diagnosis: trimStr(form?.reasonDiagnosis) || null,
     instructions: trimStr(form?.instructions),
     notes: trimStr(form?.notes) || null,
-    pharmacy_mode: mode,
+    pharmacy_mode: hasPharmacy
+      ? pharmacyModeValues.selected
+      : pharmacyModeValues.none,
+    pharmacy_id: hasPharmacy ? pharmacyId : null,
     set_pharmacy_preferred: Boolean(form?.setPharmacyPreferred),
-  }
-  if (mode === pharmacyModeValues.selected && Number.isFinite(pharmacyId)) {
-    payload.pharmacy_id = pharmacyId
-  } else if (mode === pharmacyModeValues.preferred) {
-    payload.pharmacy_id = null
-  } else {
-    payload.pharmacy_id = null
   }
   /* eslint-enable camelcase */
 
@@ -283,6 +368,9 @@ export function medicationStatusVariant(status) {
   if (token === medicationStatuses.active) {
     return 'positive'
   }
+  if (token === medicationStatuses.scheduled) {
+    return 'info'
+  }
   if (token === medicationStatuses.completed) {
     return 'info'
   }
@@ -306,4 +394,38 @@ export function formatPharmacyAddress(pharmacy) {
   ].filter(Boolean).join(', ')
 
   return [line1, cityStateZip].filter(Boolean).join(', ')
+}
+
+export function resolveDefaultPrescriberOption(
+  clinicianOptions = [],
+  staffMember = null,
+) {
+  const options = Array.isArray(clinicianOptions) ? clinicianOptions : []
+  if (!options.length || !staffMember) {
+    return null
+  }
+  const staffId = Number(staffMember.id)
+  if (!Number.isFinite(staffId) || staffId <= 0) {
+    return null
+  }
+
+  return options.find(option =>
+    Number(option?.staffMemberId) === staffId,
+  ) ?? options.find(option => Number(option?.value) === staffId)
+    ?? null
+}
+
+export function filterMedicationsForList(
+  rows = [],
+  { showDiscontinued = false } = {},
+) {
+  const list = Array.isArray(rows) ? rows : []
+  if (showDiscontinued) {
+    return list
+  }
+
+  return list.filter(row =>
+    String(row?.status ?? '').toUpperCase()
+    !== medicationStatuses.discontinued,
+  )
 }

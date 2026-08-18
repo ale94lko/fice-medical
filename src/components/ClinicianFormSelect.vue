@@ -1,7 +1,7 @@
 <template>
   <q-select
     class="clinician-form-select"
-    :model-value="modelValue"
+    :model-value="selectModel"
     outlined
     hide-bottom-space
     emit-value
@@ -160,6 +160,17 @@ const hideSelected = computed(() => {
 
 const fillInput = computed(() => !props.multiple)
 
+const selectModel = computed(() => {
+  if (props.multiple) {
+    return props.modelValue
+  }
+  if (isEmpty(props.modelValue)) {
+    return null
+  }
+
+  return String(props.modelValue)
+})
+
 watch(
   () => props.options,
   options => {
@@ -221,7 +232,11 @@ function onUpdate(value) {
 
     return
   }
-  emit('update:modelValue', value)
+  const numeric = Number(value)
+  emit(
+    'update:modelValue',
+    Number.isFinite(numeric) ? numeric : value,
+  )
 }
 </script>
 

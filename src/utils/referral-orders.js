@@ -24,6 +24,7 @@ export function createEmptyReferral(overrides = {}) {
     email: '',
     reason: '',
     diagnosisProblem: '',
+    diagnoses: [],
     assignedClinicianId: null,
     followUpRequired: false,
     appointmentId: null,
@@ -31,6 +32,7 @@ export function createEmptyReferral(overrides = {}) {
     notes: '',
     closedAt: null,
     closedBy: null,
+    statusReason: '',
     documents: [],
     files: [],
     createdAt: null,
@@ -55,6 +57,9 @@ export function cloneReferral(referral) {
     documents: (referral.files ?? referral.documents ?? []).map(file => ({
       ...file,
     })),
+    diagnoses: Array.isArray(referral.diagnoses)
+      ? referral.diagnoses.map(item => ({ ...item }))
+      : [],
   }
 }
 

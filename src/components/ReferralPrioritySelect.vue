@@ -72,6 +72,7 @@ function labelFor(value) {
 }
 
 const options = [
+  referralPriorities.low,
   referralPriorities.routine,
   referralPriorities.urgent,
   referralPriorities.stat,
@@ -88,6 +89,9 @@ function dotClass(value) {
   if (token === referralPriorities.urgent) {
     return 'referral-priority-dot--high'
   }
+  if (token === referralPriorities.low) {
+    return 'referral-priority-dot--low'
+  }
 
   return 'referral-priority-dot--medium'
 }
@@ -101,6 +105,10 @@ function dotClass(value) {
   border-radius: 50%;
   margin-right: 8px;
   flex-shrink: 0;
+}
+
+.referral-priority-dot--low {
+  background: #64748b;
 }
 
 .referral-priority-dot--medium {

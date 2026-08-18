@@ -571,6 +571,13 @@ export const clientInsuranceCardMimeTypes = [
   'application/pdf',
 ]
 
+export const clientInsuranceCardExtensions = [
+  'png',
+  'jpg',
+  'jpeg',
+  'pdf',
+]
+
 export const clientAllergiesNkaStatus = 'NKA'
 
 export const clientAllergySeverityValues = {
@@ -732,9 +739,12 @@ export const screeningStatuses = {
 
 export const medicationStatuses = {
   active: 'ACTIVE',
+  scheduled: 'SCHEDULED',
   discontinued: 'DISCONTINUED',
   completed: 'COMPLETED',
 }
+
+export const medicationFrequencyOther = 'OTHER'
 
 export const pharmacyModeValues = {
   preferred: 'PREFERRED',
@@ -870,9 +880,11 @@ export const followUpReminderUnitValues = {
 export const followUpNotesMaxLength = 500
 
 export const carePlanStatuses = {
+  draft: 'DRAFT',
   active: 'ACTIVE',
   completed: 'COMPLETED',
   archived: 'ARCHIVED',
+  cancelled: 'CANCELLED',
 }
 
 export const clinicalNoteStatuses = {
@@ -888,7 +900,7 @@ export const clinicalNoteSoapMaxLength = 65535
 export const carePlanGoalStatuses = {
   inProgress: 'IN_PROGRESS',
   completed: 'COMPLETED',
-  cancelled: 'CANCELLED',
+  discontinued: 'DISCONTINUED',
 }
 
 export const carePlanProgressDirections = {
@@ -938,6 +950,7 @@ export const referralStatuses = {
 }
 
 export const referralPriorities = {
+  low: 'LOW',
   routine: 'ROUTINE',
   urgent: 'URGENT',
   stat: 'STAT',
@@ -996,7 +1009,7 @@ export const referralNotesMaxLength = 1000
 export const referralProviderNameMaxLength = 120
 export const referralOrganizationMaxLength = 160
 export const referralSpecialtyMaxLength = 80
-export const referralDiagnosisMaxLength = 250
+export const referralDiagnosisMaxLength = 2000
 
 export const referralMaxDocumentBytes = storedFileMaxBytes
 
@@ -1822,6 +1835,13 @@ export const apiPaths = {
   clientPortalInvitations: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/portal-invitations`,
+  portalAccounts: '/client/v1/portal-accounts',
+  portalAccountById: id => `/client/v1/portal-accounts/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
+  portalAccountLink: id => `/client/v1/portal-accounts/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/link`,
   clientClinicians: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/clinicians`,
@@ -1857,6 +1877,13 @@ export const apiPaths = {
   appointmentAvailability: '/appointments/v1/availability',
   appointmentAvailabilityRanges: '/appointments/v1/availability/ranges',
   appointmentPlacesOfService: '/appointments/v1/places-of-service',
+  appointmentRequests: '/appointments/v1/requests',
+  appointmentRequestReject: id => `/appointments/v1/requests/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/reject`,
+  appointmentRequestFulfill: id => `/appointments/v1/requests/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/fulfill`,
   placesOfServiceList: '/places-of-service/v1',
   appointmentBook: '/appointments/v1/book',
   appointmentCancel: id => `/appointments/v1/${encodeURIComponent(
@@ -2493,6 +2520,10 @@ export const apiPaths = {
     encodeURIComponent(String(clientId ?? '').trim())
   }/consents/${encodeURIComponent(String(consentId ?? '').trim())
   }/document/print`,
+  clientConsentPortalRequest: (clientId, consentId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/consents/${encodeURIComponent(String(consentId ?? '').trim())
+  }/portal-request`,
   consentPublicPreview: '/consents/v1/public/preview',
   consentPublicSign: '/consents/v1/public/sign',
   consentPublicDecline: '/consents/v1/public/decline',

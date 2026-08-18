@@ -1,11 +1,12 @@
 <template>
   <div class="signature-canvas">
-    <div class="signature-canvas__toolbar row items-center q-mb-sm">
+    <div
+      v-if="!readonly"
+      class="signature-canvas__toolbar row items-center q-mb-sm">
       <p class="text-body2 text-grey-7 col q-mb-none">
         {{ hint || t('carePlanSignatureHint') }}
       </p>
       <q-btn
-        v-if="!readonly"
         no-caps
         :outline="hasStroke"
         :flat="!hasStroke"
@@ -41,6 +42,11 @@
       <p
         v-if="!hasStroke && !readonly"
         class="signature-canvas__placeholder text-body2">
+        <q-icon
+          name="draw"
+          size="20px"
+          class="signature-canvas__placeholder-icon"
+        />
         {{ t('carePlanSignaturePlaceholder') }}
       </p>
     </div>
@@ -247,7 +253,7 @@ watch(
 
       return
     }
-    if (canvasRef.value && !hasStroke.value) {
+    if (!hasStroke.value || props.readonly) {
       loadImage(value)
     }
   },
@@ -367,5 +373,9 @@ defineExpose({
   color: $primary;
   font-weight: 500;
   opacity: 0.72;
+}
+
+.signature-canvas__placeholder-icon {
+  margin-right: 8px;
 }
 </style>

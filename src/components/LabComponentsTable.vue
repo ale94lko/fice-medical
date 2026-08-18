@@ -65,6 +65,26 @@
       <template #row-actions="{ row }">
         <div class="admin-table-row-actions">
           <q-btn
+            v-if="canView"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            :icon="adminTableActionIcons.view"
+            :size="siteBreakpoints.SM"
+            :aria-label="t('labActionView')"
+            :data-testid="tid.componentRowView(row.id)"
+            @click="emit('view', row)"
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionView') }}
+          </q-tooltip>
+        </q-btn>
+          <q-btn
             v-if="canEdit"
             flat
             round
@@ -104,11 +124,6 @@
             {{ t('delete') }}
           </q-tooltip>
         </q-btn>
-          <span
-            v-if="!canEdit && !canDelete"
-            class="text-grey-6">
-            —
-          </span>
         </div>
       </template>
     </AdminQTable>
@@ -142,6 +157,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  canView: {
+    type: Boolean,
+    default: true,
+  },
   canEdit: {
     type: Boolean,
     default: false,
@@ -152,7 +171,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['edit', 'delete'])
+const emit = defineEmits(['view', 'edit', 'delete'])
 
 const { t } = useI18n()
 
@@ -208,7 +227,7 @@ const columns = computed(() => {
       style: 'min-width: 100px',
     },
   ]
-  if (props.canEdit || props.canDelete) {
+  if (props.canView || props.canEdit || props.canDelete) {
     cols.push({
       name: 'actions',
       label: t('actions'),
@@ -216,8 +235,8 @@ const columns = computed(() => {
       field: row => row.id,
       sortable: false,
       required: true,
-      headerStyle: 'min-width: 96px',
-      style: 'min-width: 96px',
+      headerStyle: 'min-width: 132px',
+      style: 'min-width: 132px',
     })
   }
 

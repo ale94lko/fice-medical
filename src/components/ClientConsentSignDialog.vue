@@ -72,6 +72,21 @@
           {{ t('clientConsentSecureLinkNoPermission') }}
         </p>
         <p
+          v-else-if="portalRequestBlocked"
+          class="text-body2 text-negative q-mt-md q-mb-none">
+          {{ t('clientConsentPortalRequestNoPermission') }}
+        </p>
+        <p
+          v-else-if="portalSignerBlocked"
+          class="text-body2 text-negative q-mt-md q-mb-none">
+          {{ t('clientConsentPortalRequestClientOnly') }}
+        </p>
+        <p
+          v-else-if="isClientPortal"
+          class="text-body2 text-grey-7 q-mt-md q-mb-none">
+          {{ t('clientConsentPortalRequestHint') }}
+        </p>
+        <p
           v-else-if="guardianContactMissing"
           class="text-body2 text-negative q-mt-md q-mb-none">
           {{ t('clientConsentGuardianContactRequired') }}
@@ -159,7 +174,7 @@
       </q-card-section>
 
       <q-card-section
-        v-else
+        v-else-if="step === 'secure_link_result'"
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <p class="text-body2 text-positive q-mb-md">
           {{ t('clientConsentSecureLinkSuccess') }}
@@ -189,6 +204,30 @@
         </FormField>
       </q-card-section>
 
+      <q-card-section
+        v-else-if="step === 'portal_request_result'"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+        <p class="text-body2 text-positive q-mb-md">
+          {{ t('clientConsentPortalRequestSuccess') }}
+        </p>
+        <p
+          v-if="portalRequestResult?.emailSentTo"
+          class="text-body2 text-grey-7 q-mb-sm">
+          {{ t('clientConsentSecureLinkSentTo', {
+            email: portalRequestResult.emailSentTo,
+          }) }}
+        </p>
+        <FormField :label="t('clientConsentPortalUrl')">
+          <TextInput
+            :model-value="portalRequestResult?.portalUrl || ''"
+            outlined
+            dense
+            hide-bottom-space
+            readonly
+          />
+        </FormField>
+      </q-card-section>
+
       <q-card-actions
         align="right"
         class="app-dialog-card__actions"
@@ -202,7 +241,9 @@
           class="app-btn-outline"
           :disable="busy"
           :data-testid="
-            step === 'method' || step === 'secure_link_result'
+            step === 'method'
+              || step === 'secure_link_result'
+              || step === 'portal_request_result'
               ? tid.signCancel
               : undefined
           "
@@ -217,7 +258,7 @@
           class="app-btn-primary"
           :data-testid="tid.signContinue"
           :label="methodPrimaryLabel"
-          :loading="isSecureLink && sendingLink"
+          :loading="(isSecureLink || isClientPortal) && sendingLink"
           :disable="!canGoNext || busy"
           @click="onMethodPrimary"
         />
@@ -243,7 +284,7 @@
           class="app-btn-primary"
           :data-testid="tid.signCopyLink"
           :label="t('copy')"
-          :disable="!secureLinkResult?.secureLinkUrl"
+          :disable="!copyUrl"
           @click="onCopyLink"
         />
       </q-card-actions>
@@ -275,6 +316,7 @@ import {
   consentApiErrorMessage,
   printClientConsentDocument,
   sendClientConsentSecureLink,
+  requestClientConsentViaPortal,
 } from 'src/utils/consent-api.js'
 import {
   buildConsentSignatureMethodOptions,
@@ -300,7 +342,12 @@ const props = defineProps({
   canSendSecureLink: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['update:modelValue', 'submit', 'secure-link-sent'])
+const emit = defineEmits([
+  'update:modelValue',
+  'submit',
+  'secure-link-sent',
+  'portal-requested',
+])
 const { t, te } = useI18n()
 const $q = useQuasar()
 
@@ -324,6 +371,7 @@ const printing = ref(false)
 const secureLinkEmail = ref('')
 const sendingLink = ref(false)
 const secureLinkResult = ref(null)
+const portalRequestResult = ref(null)
 
 const allowedSignerTypes = computed(() => {
   const list = props.consent?.allowedSignerTypes
@@ -337,8 +385,9 @@ const signerOptions = computed(() => buildConsentSignerTypeOptions(
   allowedSignerTypes.value,
 ))
 
-const methodOptions = computed(
-  () => buildConsentSignatureMethodOptions(t, te),
+const methodOptions = computed(() =>
+  buildConsentSignatureMethodOptions(t, te).filter(item =>
+    item.value !== consentSignatureMethodValues.other),
 )
 
 const needsRelationship = computed(
@@ -379,12 +428,28 @@ const isSecureLink = computed(
   () => signatureMethod.value === consentSignatureMethodValues.secureLink,
 )
 
+const isClientPortal = computed(
+  () => signatureMethod.value
+    === consentSignatureMethodValues.clientPortal,
+)
+
 const methodUnavailable = computed(
-  () => !isInPersonSign.value && !isSecureLink.value,
+  () => !isInPersonSign.value
+    && !isSecureLink.value
+    && !isClientPortal.value,
 )
 
 const secureLinkBlocked = computed(
   () => isSecureLink.value && !props.canSendSecureLink,
+)
+
+const portalRequestBlocked = computed(
+  () => isClientPortal.value && !props.canSendSecureLink,
+)
+
+const portalSignerBlocked = computed(
+  () => isClientPortal.value
+    && signerType.value !== consentSignerTypeValues.client,
 )
 
 const canGoNext = computed(() => {
@@ -399,6 +464,9 @@ const canGoNext = computed(() => {
   }
   if (isSecureLink.value) {
     return props.canSendSecureLink
+  }
+  if (isClientPortal.value) {
+    return props.canSendSecureLink && !portalSignerBlocked.value
   }
 
   return false
@@ -439,6 +507,9 @@ const methodPrimaryLabel = computed(() => {
   if (isSecureLink.value) {
     return t('clientConsentSecureLinkSend')
   }
+  if (isClientPortal.value) {
+    return t('clientConsentPortalRequestSend')
+  }
 
   return t('next')
 })
@@ -448,6 +519,9 @@ const dialogTitle = computed(() => {
   if (step.value === 'secure_link_result') {
     return t('clientConsentSecureLinkTitle')
   }
+  if (step.value === 'portal_request_result') {
+    return t('clientConsentPortalRequestTitle')
+  }
   if (step.value === 'method') {
     return t('clientConsentSignMethodTitle')
   }
@@ -456,7 +530,9 @@ const dialogTitle = computed(() => {
 })
 
 const secondaryLabel = computed(() => {
-  if (step.value === 'method' || step.value === 'secure_link_result') {
+  if (step.value === 'method'
+    || step.value === 'secure_link_result'
+    || step.value === 'portal_request_result') {
     return t('cancel')
   }
 
@@ -534,6 +610,7 @@ function resetForm() {
   printing.value = false
   sendingLink.value = false
   secureLinkResult.value = null
+  portalRequestResult.value = null
   signerName.value = ''
   secureLinkEmail.value = ''
   applySignerDefaults()
@@ -581,7 +658,9 @@ function onCancel() {
 }
 
 function onSecondary() {
-  if (step.value === 'method' || step.value === 'secure_link_result') {
+  if (step.value === 'method'
+    || step.value === 'secure_link_result'
+    || step.value === 'portal_request_result') {
     onCancel()
 
     return
@@ -603,6 +682,11 @@ function onMethodPrimary() {
   }
   if (isSecureLink.value) {
     void onSendSecureLink()
+
+    return
+  }
+  if (isClientPortal.value) {
+    void onRequestPortal()
   }
 }
 
@@ -696,8 +780,43 @@ async function onSendSecureLink() {
   }
 }
 
+async function onRequestPortal() {
+  if (!props.clientId || !props.consent?.id) {
+    return
+  }
+  sendingLink.value = true
+  try {
+    portalRequestResult.value = await requestClientConsentViaPortal(
+      props.clientId,
+      props.consent.id,
+    )
+    step.value = 'portal_request_result'
+    emit('portal-requested', portalRequestResult.value)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: consentApiErrorMessage(
+          error,
+          t('clientConsentPortalRequestError'),
+        ),
+      })
+    }
+  } finally {
+    sendingLink.value = false
+  }
+}
+
+const copyUrl = computed(() => {
+  if (step.value === 'portal_request_result') {
+    return String(portalRequestResult.value?.portalUrl ?? '').trim()
+  }
+
+  return String(secureLinkResult.value?.secureLinkUrl ?? '').trim()
+})
+
 async function onCopyLink() {
-  const url = String(secureLinkResult.value?.secureLinkUrl ?? '').trim()
+  const url = copyUrl.value
   if (!url) {
     return
   }

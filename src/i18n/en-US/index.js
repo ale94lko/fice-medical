@@ -665,6 +665,7 @@ export default {
   dashboardWidgetPaymentsRecentLabel: 'Recent payments',
   dashboardWidgetRevenueTrendLabel: 'Revenue trend',
   calendar: 'Calendar',
+  appointmentRequestsNav: 'Appointment Requests',
   navBilling: 'Billing',
   navClaims: 'Claims',
   navRemittances: 'Remittances',
@@ -1012,6 +1013,28 @@ export default {
   moreActions: 'More actions',
   clientListError: 'Could not load the client list.',
   clientListEmpty: 'No clients registered yet.',
+  portalRegistrationsNav: 'Portal Registrations',
+  portalRegistrationsTitle: 'Portal Registrations',
+  portalRegistrationsSubtitle:
+    'Create client charts for people who signed up '
+    + 'from the Client Portal.',
+  portalRegistrationsSearchPlaceholder:
+    'Search by name, email or phone',
+  portalRegistrationsColumnName: 'Name',
+  portalRegistrationsColumnEmail: 'Email',
+  portalRegistrationsColumnDob: 'Date of birth',
+  portalRegistrationsColumnPhone: 'Phone',
+  portalRegistrationsColumnRegistered: 'Registered',
+  portalRegistrationsCreateClient: 'Create client',
+  portalRegistrationsEmpty:
+    'No portal sign-ups are waiting for a client chart.',
+  portalRegistrationsLoadError:
+    'Could not load portal registrations.',
+  portalRegistrationsUnnamed: 'Unnamed portal user',
+  portalAccountLoadError:
+    'Could not load the portal registration.',
+  portalAccountLinkError:
+    'Could not link this portal account to the client.',
   clientChangeStatusTitle: 'Change Status',
   clientChangeStatusMessage:
     'Choose a new status for this client.',
@@ -1548,6 +1571,7 @@ export default {
   labComponentsEmpty: 'No components added yet.',
   labColTestName: 'Lab / Test Name',
   labColCategory: 'Category',
+  labColOrderingClinician: 'Ordered by',
   labColOrderedDate: 'Ordered Date',
   labColCollectedDate: 'Collected Date',
   labColResultDate: 'Result Date',
@@ -1560,9 +1584,14 @@ export default {
   labColReferenceRange: 'Reference Range',
   labActionView: 'View',
   labActionDownload: 'Download',
+  labActionDownloadAttachment: 'Download Attachment',
+  labActionPreview: 'Preview',
   labComponentDialogTitle: 'Add Lab Component',
   labComponentDialogSubtitle:
     'Add a result component or analyte to this lab order.',
+  labComponentViewTitle: 'View Lab Component',
+  labComponentViewSubtitle:
+    'Notes, result date and time, and other component details.',
   labComponentName: 'Test Component / Analyte',
   labComponentNamePlaceholder: 'Search or select a component',
   labComponentValue: 'Value',
@@ -1671,6 +1700,18 @@ export default {
   carePlanActionSign: 'Sign care plan',
   carePlanActionMarkCompleted: 'Mark as completed',
   carePlanActionArchive: 'Archive',
+  carePlanActionCancel: 'Cancel care plan',
+  carePlanActionDiscontinueGoal: 'Discontinue goal',
+  carePlanActionReplaceGoal: 'Replace goal',
+  carePlanCancelTitle: 'Cancel Care Plan',
+  carePlanCancelMessage:
+    'This care plan will be cancelled and become read-only.',
+  carePlanCancelReasonLabel: 'Reason for cancellation',
+  carePlanArchiveTitle: 'Archive Care Plan',
+  carePlanArchiveMessage:
+    'This care plan will be archived and removed from the '
+    + 'operational workflow.',
+  carePlanArchiveReasonLabel: 'Archive reason',
   carePlanProgressNotMeasured: 'Not Measured',
   carePlanProgressAchieved: 'Achieved',
   carePlanProgressAllGoalsAchieved: 'All goals achieved',
@@ -1679,6 +1720,8 @@ export default {
   carePlanStatusActive: 'Active',
   carePlanStatusCompleted: 'Completed',
   carePlanStatusArchived: 'Archived',
+  carePlanStatusDraft: 'Draft',
+  carePlanStatusCancelled: 'Cancelled',
   carePlanPriorityLow: 'Low',
   carePlanPriorityMedium: 'Medium',
   carePlanPriorityHigh: 'High',
@@ -1808,7 +1851,21 @@ export default {
   carePlanGoalColTargetDate: 'Target Date',
   carePlanGoalStatusInProgress: 'In Progress',
   carePlanGoalStatusCompleted: 'Completed',
-  carePlanGoalStatusCancelled: 'Cancelled',
+  carePlanGoalStatusCancelled: 'Discontinued',
+  carePlanGoalStatusDiscontinued: 'Discontinued',
+  carePlanGoalReplaceTitle: 'Replace Goal',
+  carePlanGoalReplaceMessage:
+    'This goal will be discontinued and a new goal will be created '
+    + 'to replace it. The existing goal and its measurement history '
+    + 'will remain unchanged.',
+  carePlanGoalReplaceReasonLabel: 'Reason for replacement',
+  carePlanGoalDiscontinueTitle: 'Discontinue Goal',
+  carePlanGoalDiscontinueMessage:
+    'This goal will be discontinued and become read-only. '
+    + 'Its measurements and history will remain unchanged.',
+  carePlanGoalDiscontinueReasonLabel: 'Reason for discontinuation',
+  carePlanGoalReplacedBy: 'Replaced by: {title}',
+  carePlanGoalReplaces: 'Replaces: {title}',
   carePlanGoalAddTitle: 'Add Goal',
   carePlanGoalEditTitle: 'Edit Goal',
   carePlanGoalViewTitle: 'View Goal',
@@ -2133,6 +2190,17 @@ export default {
   referralCloseConfirmTitle: 'Close referral?',
   referralCloseConfirmMessage:
     'This referral will be marked as closed and cannot be edited.',
+  referralDeclineReasonTitle: 'Decline referral?',
+  referralDeclineReasonMessage:
+    'Please provide the reason this referral is being declined.',
+  referralDeclineReasonLabel: 'Reason for declining',
+  referralCloseReasonTitle: 'Close referral?',
+  referralCloseReasonMessage:
+    'Please provide the reason this referral is being closed.',
+  referralCloseReasonLabel: 'Reason for closing',
+  referralStatusReasonRequired:
+    'A reason is required to decline or close a referral.',
+  referralDiagnosesEmpty: 'No diagnoses added yet.',
   referralDeleteConfirmTitle: 'Delete referral?',
   referralDeleteConfirmMessage:
     'This referral will be removed from the active list.',
@@ -2171,6 +2239,7 @@ export default {
   referralPriorityRoutine: 'Medium',
   referralPriorityUrgent: 'High',
   referralPriorityStat: 'Urgent',
+  referralPriorityLow: 'Low',
   referralFollowUpRequired: 'Follow Up Required',
   referralFollowUpClinicianRequired:
     'Assigned clinician is required when follow up is required.',
@@ -2404,6 +2473,9 @@ export default {
   appointmentAvailabilityEmpty:
     'No available times for the selected criteria.',
   appointmentAvailabilityRequired: 'Select an available time.',
+  appointmentSelectedRangeTooShort:
+    'The selected time range ({range} min) is shorter than the '
+    + 'appointment duration ({duration} min).',
   appointmentAvailabilityDurationHint:
     'Showing available times for total duration of {count} min.',
   appointmentAvailabilityRangesHint:
@@ -2564,6 +2636,44 @@ export default {
   appointmentStatusRescheduled: 'Rescheduled',
   appointmentBookSuccess: 'Appointment booked successfully.',
   appointmentBookError: 'Could not book the appointment.',
+  appointmentRequestsTitle: 'Appointment Requests',
+  appointmentRequestsSubtitle:
+    'Review portal requests and schedule or decline them.',
+  appointmentRequestColumnClient: 'Client',
+  appointmentRequestColumnPreferredTime: 'Preferred time',
+  appointmentRequestColumnService: 'Service',
+  appointmentRequestColumnClinician: 'Clinician',
+  appointmentRequestColumnNotes: 'Notes',
+  appointmentRequestColumnStatus: 'Status',
+  appointmentRequestColumnRequested: 'Requested',
+  appointmentRequestStatusPending: 'Pending',
+  appointmentRequestStatusCancelled: 'Cancelled',
+  appointmentRequestStatusFulfilled: 'Scheduled',
+  appointmentRequestStatusRejected: 'Declined',
+  appointmentRequestSchedule: 'Schedule',
+  appointmentRequestDecline: 'Decline',
+  appointmentRequestDeclineTitle: 'Decline this request?',
+  appointmentRequestDeclineMessage:
+    'The client will no longer see this as an open request.',
+  appointmentRequestDeclineSuccess: 'Request declined.',
+  appointmentRequestDeclineError: 'Could not decline the request.',
+  appointmentRequestFulfillNeedClient:
+    'Create a client chart for this portal user '
+    + 'before you can schedule.',
+  appointmentRequestEmpty:
+    'No appointment requests for this filter.',
+  appointmentRequestLoadError:
+    'Could not load appointment requests.',
+  appointmentRequestFilterPending: 'Pending',
+  appointmentRequestFilterAll: 'All',
+  appointmentRequestFilterFulfilled: 'Scheduled',
+  appointmentRequestFilterRejected: 'Declined',
+  appointmentRequestFilterCancelled: 'Cancelled',
+  appointmentRequestTimeUnset: 'Not specified',
+  appointmentRequestSearchPlaceholder:
+    'Search by client, service or notes',
+  appointmentRequestNoClient: 'No client profile',
+  appointmentRequestCreateClient: 'Create client',
   appointmentRescheduleSuccess: 'Appointment rescheduled successfully.',
   appointmentEditSuccess: 'Appointment updated successfully.',
   appointmentCancelSuccess: 'Appointment cancelled successfully.',
@@ -2886,7 +2996,8 @@ export default {
   clientConsentSignatureMethod: 'Signature method',
   clientConsentSignMethodUnavailable:
     'This signature method is not available yet. '
-    + 'Choose In person (digital), In person (paper) or Secure link.',
+    + 'Choose In person (digital), In person (paper), '
+    + 'Client portal, or Secure link.',
   clientConsentGuardianContactRequired:
     'Add a Guardian contact with name and relationship in Contact '
     + 'before requesting a guardian signature.',
@@ -2929,6 +3040,20 @@ export default {
   clientConsentSecureLinkExpires: 'Expires {date}.',
   clientConsentSecureLinkCopied: 'Secure link copied.',
   clientConsentSecureLinkCopyError: 'Could not copy the secure link.',
+  clientConsentPortalRequestTitle: 'Request in Client Portal',
+  clientConsentPortalRequestHint:
+    'We will email the client a link to sign this form in the '
+    + 'Client Portal.',
+  clientConsentPortalRequestSend: 'Request signature',
+  clientConsentPortalRequestSuccess:
+    'The client can sign this consent in the Client Portal.',
+  clientConsentPortalRequestError:
+    'Could not request this consent in the Client Portal.',
+  clientConsentPortalRequestNoPermission:
+    'You do not have permission to request a portal signature.',
+  clientConsentPortalRequestClientOnly:
+    'Portal requests are available only when the signer is the client.',
+  clientConsentPortalUrl: 'Client Portal link',
   consentSignPublicBrand: 'Consent signature',
   consentSignPublicTitle: 'Consent',
   consentSignPublicModeSign: 'Sign',
@@ -3050,6 +3175,9 @@ export default {
   assignCliniciansTitle: 'Assign Clinicians',
   assignCliniciansSubtitle:
     'Select one or more clinicians to assign to this client.',
+  assignCliniciansBatchSubtitle:
+    'These clinicians will be added to {count} selected clients. '
+    + 'Existing assignments are kept.',
   assignCliniciansAvailable: 'Available Clinicians',
   assignCliniciansSearchPlaceholder:
     'Search clinicians by name, specialty or NPI...',
@@ -3059,6 +3187,12 @@ export default {
   assignCliniciansHint:
     'You can assign multiple clinicians. They will be available '
     + 'to this client for scheduling.',
+  assignCliniciansBatchHint:
+    'Selected clinicians will be added to every chosen client. '
+    + 'Current assignments are not removed.',
+  assignCliniciansToAssign: 'Clinicians to assign',
+  assignCliniciansToAssignEmpty:
+    'Move clinicians here to add them to the selected clients.',
   assignCliniciansEmptyAvailable: 'No clinicians available.',
   assignCliniciansEmptyAvailableHint:
     'Please create an active clinician before assigning one '
@@ -3068,6 +3202,8 @@ export default {
     'Try adjusting your search or filters.',
   assignCliniciansSave: 'Save Changes',
   assignCliniciansSaved: 'Clinicians assigned successfully.',
+  assignCliniciansBatchSaved:
+    'Clinicians added to {count} clients.',
   assignCliniciansSaveError:
     'Could not save clinician assignments.',
   assignCliniciansLoadError: 'Could not load clinicians.',
@@ -3076,6 +3212,8 @@ export default {
   assignCliniciansNpi: 'NPI {npi}',
   assignCliniciansSelectOne:
     'Select one client to assign clinicians.',
+  assignCliniciansSelectClients:
+    'Select at least one client to assign clinicians.',
   prefix: 'Prefix',
   prefixSelect: 'Select',
   firstName: 'First Name',
@@ -3494,11 +3632,14 @@ export default {
   vitalsUpdatedSuccess: 'Vitals entry updated.',
   vitalsSaveError: 'Could not save the vitals entry.',
   vitalsLoadError: 'Could not load vitals.',
-  vitalsDeleteUnavailable:
-    'Saved vitals cannot be deleted from this screen.',
   vitalsDeleteTitle: 'Delete Vitals',
   vitalsDeleteMessage:
     'Are you sure you want to delete this vitals entry?',
+  vitalsDeleteReasonHint:
+    'For audit purposes, please provide a reason for the deletion.',
+  vitalsDeleteReasonLabel: 'Reason for deletion',
+  vitalsDeletedSuccess: 'Vitals entry deleted.',
+  vitalsDeleteError: 'Could not delete the vitals entry.',
   vitalsColDateTime: 'Date & Time',
   vitalsColBloodPressure: 'Blood Pressure',
   vitalsColHeartRate: 'Heart Rate',
@@ -3600,6 +3741,9 @@ export default {
   insuranceReactivateMessage:
     'This insurance profile will be reactivated. Status will be set from the '
     + 'coverage dates (Active, Future, or rejected if already expired).',
+  insuranceReactivatePrioritySwapMessage:
+    'An active {priority} insurance already exists. It will be deactivated '
+    + 'so this profile can be activated.',
   insuranceReactivateConfirm: 'Reactivate',
   insuranceAddedSuccess: 'Insurance profile added.',
   insuranceUpdatedSuccess: 'Insurance profile updated.',
@@ -3616,6 +3760,9 @@ export default {
   insurancePriorityRequired: 'Insurance priority is required.',
   insurancePriorityDuplicate:
     'This client already has an active insurance with this priority.',
+  insuranceDuplicateCoverage:
+    'An insurance with the same payer/plan, type, member ID and program '
+    + 'identifiers already exists.',
   insuranceMaxActivePriorities:
     'Primary, Secondary and Tertiary are already active. '
     + 'Deactivate one before adding another profile.',
@@ -3629,6 +3776,9 @@ export default {
   insuranceSubscriberNameRequired: 'Subscriber name is required.',
   insuranceSubscriberNameMax:
     'Subscriber name must be at most 150 characters.',
+  insuranceSubscriberNameInvalid:
+    'Use letters, spaces, apostrophes, hyphens and periods only. '
+    + 'Numbers and special characters are not allowed.',
   insuranceMedicaidIdRequired: 'Medicaid Recipient ID is required.',
   insuranceMedicaidIdInvalid: 'Medicaid ID must be exactly 10 digits.',
   insuranceMedicareIdRequired: 'Medicare Member ID is required.',
@@ -3810,13 +3960,29 @@ export default {
   medicationSectionAdditional: 'Additional Information',
   medicationFieldMedication: 'Medication',
   medicationMedicationPlaceholder:
-    'Search medication or select from list',
+    'Type to search for a medication',
+  medicationMedicationHint:
+    'Type a medication name. Strength shows under each result.',
+  medicationSearchEmpty: 'No matching medications.',
   medicationGenericName: 'Generic Name',
   medicationDosage: 'Dosage',
-  medicationDosagePlaceholder: 'e.g. 500, 10, 0.25',
+  medicationDosagePlaceholder: 'e.g. 1',
+  medicationDosageHint:
+    'How much to take each time, not the product strength. '
+    + 'Example: 1 tablet. Strength (e.g. 125 mg) is in the '
+    + 'medication name.',
   medicationDosageUnit: 'Dosage Unit',
   medicationRoute: 'Route',
   medicationFrequency: 'Frequency',
+  medicationCustomFrequency: 'Custom Frequency',
+  medicationCustomFrequencyPlaceholder:
+    'Enter frequency instructions '
+    + '(e.g. Every Monday, Wednesday and Friday)',
+  medicationCustomFrequencyHint:
+    'Enter frequency instructions '
+    + '(e.g. Every Monday, Wednesday and Friday)',
+  medicationCustomFrequencyRequired:
+    'Custom frequency is required.',
   medicationStartDate: 'Start Date',
   medicationEndDate: 'End Date',
   medicationPrescriber: 'Prescriber',
@@ -3833,6 +3999,8 @@ export default {
     "Use client's preferred pharmacy",
   medicationPharmacyModeSelected: 'Select another pharmacy',
   medicationPharmacyModeNone: 'No pharmacy for this medication',
+  medicationPharmacyMissingWarning:
+    'No pharmacy is selected for this medication.',
   medicationPharmacySearchPlaceholder: 'Select pharmacy',
   medicationAddPharmacy: 'Add New Pharmacy',
   medicationSetPreferred:
@@ -3867,9 +4035,19 @@ export default {
   medicationActionView: 'View',
   medicationActionMore: 'More options',
   medicationActionChangeStatus: 'Change status',
+  medicationActionDiscontinue: 'Discontinue Medication',
+  medicationDiscontinueTitle: 'Discontinue medication?',
+  medicationDiscontinueMessage:
+    'This medication will be marked as discontinued.',
+  medicationDiscontinueReasonLabel: 'Reason for Discontinuation',
+  medicationDiscontinued: 'Medication discontinued.',
   medicationStatusActive: 'Active',
+  medicationStatusScheduled: 'Scheduled',
   medicationStatusCompleted: 'Completed',
   medicationStatusDiscontinued: 'Discontinued',
+  medicationShowDiscontinued: 'Show discontinued medications',
+  medicationShowDiscontinuedHint:
+    'Include medications that were discontinued.',
   medicationSelectUnit: 'Select unit',
   medicationSelectRoute: 'Select route',
   medicationSelectFrequency: 'Select frequency',
@@ -4299,6 +4477,10 @@ export default {
   notificationsMinutesAgo: '{n} min ago',
   notificationsHoursAgo: '{n} h ago',
   notificationsDaysAgo: '{n} d ago',
+  notificationsPortalRegistrationTitle:
+    'New Client Portal registration',
+  notificationsPortalProfileReadyTitle:
+    'Portal user ready for a client chart',
   encounterRenderingClinician: 'Rendering Clinician',
   encounterLocation: 'Location',
   encounterModeInPerson: 'In Person',

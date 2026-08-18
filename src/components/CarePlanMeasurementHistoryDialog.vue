@@ -2,6 +2,7 @@
   <q-dialog
     v-model="open"
     persistent
+    class="app-nested-dialog"
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card

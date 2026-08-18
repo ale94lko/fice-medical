@@ -14,6 +14,9 @@ function trim(value) {
   return String(value ?? '').trim()
 }
 
+const CM_PER_INCH = 2.54
+const KG_PER_LB = 0.45359237
+
 function parseOptionalNumber(value) {
   if (value == null || value === '') {
     return null
@@ -21,6 +24,24 @@ function parseOptionalNumber(value) {
   const n = Number(value)
 
   return Number.isFinite(n) ? n : null
+}
+
+function cmToInches(cm) {
+  const n = parseOptionalNumber(cm)
+  if (n == null || n <= 0) {
+    return null
+  }
+
+  return Math.round(n / CM_PER_INCH)
+}
+
+function kgToLbs(kg) {
+  const n = parseOptionalNumber(kg)
+  if (n == null || n <= 0) {
+    return null
+  }
+
+  return Math.round((n / KG_PER_LB) * 10) / 10
 }
 
 function unwrapList(data) {
@@ -113,6 +134,7 @@ export function vitalsEntryToApiPayload(entry, {
     blood_pressure_systolic: entry?.systolic ?? null,
     blood_pressure_diastolic: entry?.diastolic ?? null,
     heart_rate: entry?.heartRate ?? null,
+    respiratory_rate: entry?.respiratoryRate ?? null,
     temperature: entry?.temperature ?? null,
     oxygen_saturation: entry?.oxygenSaturation ?? null,
     pain_level: mapPainLevelToNumber(entry?.painLevel),
@@ -160,9 +182,18 @@ export function normalizeVitalRecord(raw) {
   const apiId = parseOptionalNumber(
     raw.id ?? raw.vital_id ?? raw.vitalId,
   )
+  const heightCm = parseOptionalNumber(
+    raw.height_cm ?? raw.heightCm,
+  )
   const height = parseOptionalNumber(raw.height)
+    ?? cmToInches(heightCm)
+  const weightKg = parseOptionalNumber(
+    raw.weight_kg ?? raw.weightKg,
+  )
   const weight = parseOptionalNumber(raw.weight)
-  const bmi = calculateBmiFromUs(weight, height)
+    ?? kgToLbs(weightKg)
+  const bmi = parseOptionalNumber(raw.bmi)
+    ?? calculateBmiFromUs(weight, height)
   const takenAt = trim(
     raw.taken_at_utc
     ?? raw.takenAtUtc
@@ -173,7 +204,9 @@ export function normalizeVitalRecord(raw) {
     takenAt,
   )
   const clinicianId = parseOptionalNumber(
-    raw.clinician_id ?? raw.clinicianId,
+    raw.clinician_id
+    ?? raw.clinicianId
+    ?? raw.clinician?.id,
   )
   const encounterId = parseOptionalNumber(
     raw.encounter_id ?? raw.encounterId,

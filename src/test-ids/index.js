@@ -43,8 +43,10 @@ export const layoutTestIds = {
   signOut: 'layout-menu-sign-out',
   navDashboard: 'layout-nav-dashboard',
   navCalendar: 'layout-nav-calendar',
+  navAppointmentRequests: 'layout-nav-appointment-requests',
   navClientMenu: 'layout-nav-client-menu',
   navClientList: 'layout-nav-client-list',
+  navPortalRegistrations: 'layout-nav-portal-registrations',
   navClientAdd: 'layout-nav-client-add',
   navPriorAuth: 'layout-nav-prior-authorization',
   navClientAssignment: 'layout-nav-client-assignment',
@@ -904,6 +906,7 @@ export const labTestIds = {
   rowReview: id => toTestId('lab-row', id, 'btn-review'),
   rowCancel: id => toTestId('lab-row', id, 'btn-cancel'),
   rowDelete: id => toTestId('lab-row', id, 'btn-delete'),
+  componentRowView: id => toTestId('lab-component-row', id, 'btn-view'),
   componentRowEdit: id => toTestId('lab-component-row', id, 'btn-edit'),
   componentRowDelete: id => toTestId(
     'lab-component-row',
@@ -912,6 +915,8 @@ export const labTestIds = {
   ),
   attachmentRemove: 'lab-attachment-btn-remove',
   attachmentDownload: 'lab-attachment-btn-download',
+  attachmentPreview: 'lab-attachment-btn-preview',
+  attachmentOpen: 'lab-attachment-btn-open',
 }
 
 export const pharmacyTestIds = {
@@ -928,7 +933,9 @@ export const medicationTestIds = {
   rowEdit: id => toTestId('medication-row', id, 'btn-edit'),
   rowMore: id => toTestId('medication-row', id, 'btn-more'),
   rowStatus: id => toTestId('medication-row', id, 'btn-status'),
+  rowDiscontinue: id => toTestId('medication-row', id, 'btn-discontinue'),
   rowDelete: id => toTestId('medication-row', id, 'btn-delete'),
+  showDiscontinued: 'medication-show-discontinued',
 }
 
 export const carePlanTestIds = {
@@ -940,6 +947,9 @@ export const carePlanTestIds = {
   rowSign: id => toTestId('care-plan-row', id, 'btn-sign'),
   rowComplete: id => toTestId('care-plan-row', id, 'btn-complete'),
   rowArchive: id => toTestId('care-plan-row', id, 'btn-archive'),
+  rowCancel: id => toTestId('care-plan-row', id, 'btn-cancel'),
+  rowDiscontinue: id => toTestId('care-plan-row', id, 'btn-discontinue'),
+  rowReplace: id => toTestId('care-plan-row', id, 'btn-replace'),
   rowHistory: id => toTestId('care-plan-row', id, 'btn-history'),
   rowAddMeasurement: id => toTestId(
     'care-plan-row',
@@ -1014,6 +1024,44 @@ export const appointmentTestIds = {
   rowNoShow: id => toTestId('appointment-row', id, 'btn-no-show'),
 }
 
+export const appointmentRequestListTestIds = {
+  page: 'appointment-request-list-page',
+  search: 'appointment-request-list-search',
+  statusFilter: 'appointment-request-list-status-filter',
+  refresh: 'appointment-request-list-refresh',
+  rowClient: id => toTestId(
+    'appointment-request-row',
+    id,
+    'btn-client',
+  ),
+  rowSchedule: id => toTestId(
+    'appointment-request-row',
+    id,
+    'btn-schedule',
+  ),
+  rowDecline: id => toTestId(
+    'appointment-request-row',
+    id,
+    'btn-decline',
+  ),
+  rowCreateClient: id => toTestId(
+    'appointment-request-row',
+    id,
+    'btn-create-client',
+  ),
+}
+
+export const portalRegistrationListTestIds = {
+  page: 'portal-registration-list-page',
+  search: 'portal-registration-list-search',
+  refresh: 'portal-registration-list-refresh',
+  rowCreate: id => toTestId(
+    'portal-registration-row',
+    id,
+    'btn-create',
+  ),
+}
+
 export const referralTestIds = {
   btn: name => toTestId('referral-btn', name),
   field: name => toTestId('referral-field', name),
@@ -1024,6 +1072,11 @@ export const referralTestIds = {
   rowDelete: id => toTestId('referral-row', id, 'btn-delete'),
   attachmentRemove: 'referral-attachment-btn-remove',
   attachmentDownload: 'referral-attachment-btn-download',
+  diagnosesRemove: key => toTestId(
+    'referral-diagnoses',
+    key,
+    'btn-remove',
+  ),
 }
 
 export const authorizationTestIds = {

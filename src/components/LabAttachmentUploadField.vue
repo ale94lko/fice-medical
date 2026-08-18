@@ -11,6 +11,7 @@
       {{ label }}
     </p>
     <div
+      v-if="!readonly"
       class="lab-attachment-upload__dropzone"
       :class="{
         'lab-attachment-upload__dropzone--error': Boolean(displayError),
@@ -30,14 +31,9 @@
       />
       <div class="lab-attachment-upload__copy">
         <p class="lab-attachment-upload__hint text-body2 q-mb-none">
-          {{
-            readonly
-              ? t('labAttachmentsReadonlyHint')
-              : t('labAttachmentsHint')
-          }}
+          {{ t('labAttachmentsHint') }}
         </p>
         <p
-          v-if="!readonly"
           class="lab-attachment-upload__formats text-caption
             text-grey-7 q-mb-none">
           {{ t('labAttachmentsFormats') }}
@@ -52,26 +48,57 @@
         @change="onFileInput"
       />
     </div>
-    <ul v-if="attachments.length" class="lab-attachment-upload__list">
+    <ul
+      v-if="attachments.length"
+      class="lab-attachment-upload__list"
+      :class="{
+        'lab-attachment-upload__list--flush': readonly,
+      }"
+      :data-testid="readonly ? testId : undefined">
       <li
         v-for="file in attachments"
         :key="file.id"
         class="lab-attachment-upload__item row items-center no-wrap">
-        <q-icon
-          name="attach_file"
-          size="18px"
-          class="lab-attachment-upload__file-icon"
-        />
-        <span class="lab-attachment-upload__name col text-body2">
-          {{ file.name }}
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
+        <button
+          v-if="readonly"
+          type="button"
+          class="lab-attachment-upload__open col row items-center
+            no-wrap"
+          :data-testid="labTid.attachmentOpen"
+          @click="emitPreview(file)">
+          <q-icon
+            name="attach_file"
+            size="18px"
+            class="lab-attachment-upload__file-icon"
+          />
+          <span class="lab-attachment-upload__name col text-body2">
             {{ file.name }}
-          </q-tooltip>
-        </span>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ file.name }}
+            </q-tooltip>
+          </span>
+        </button>
+        <template v-else>
+          <q-icon
+            name="attach_file"
+            size="18px"
+            class="lab-attachment-upload__file-icon"
+          />
+          <span class="lab-attachment-upload__name col text-body2">
+            {{ file.name }}
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ file.name }}
+            </q-tooltip>
+          </span>
+        </template>
         <q-btn
           v-if="!readonly"
           flat
@@ -83,17 +110,44 @@
           :data-testid="labTid.attachmentRemove"
           @click.stop="emit('remove', file.id)"
         />
-        <q-btn
-          v-else
-          flat
-          round
-          dense
-          icon="download"
-          color="grey-7"
-          :aria-label="t('labActionDownload')"
-          :data-testid="labTid.attachmentDownload"
-          @click.stop="emit('download', file.id)"
-        />
+        <template v-else>
+          <q-btn
+            flat
+            round
+            dense
+            icon="visibility"
+            color="grey-7"
+            :aria-label="t('labActionPreview')"
+            :data-testid="labTid.attachmentPreview"
+            @click.stop="emitPreview(file)"
+          >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('labActionPreview') }}
+            </q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="download"
+            color="grey-7"
+            :aria-label="t('labActionDownloadAttachment')"
+            :data-testid="labTid.attachmentDownload"
+            @click.stop="emit('download', file.id)"
+          >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('labActionDownloadAttachment') }}
+            </q-tooltip>
+          </q-btn>
+        </template>
       </li>
     </ul>
     <div
@@ -108,10 +162,11 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import {
   labAttachmentExtensions,
-  labAttachmentMimeTypes,
   labMaxAttachmentBytes,
+  quasarNotifyTypes,
 } from 'components/constants.js'
 import { labTestIds as labTid } from 'src/test-ids/index.js'
 
@@ -138,20 +193,24 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['upload', 'remove', 'download'])
+const emit = defineEmits(['upload', 'remove', 'preview', 'download'])
 
 const { t } = useI18n()
+const $q = useQuasar()
 
 const fileInputRef = ref(null)
 const dragActive = ref(false)
 const localError = ref('')
 
-const acceptAttr = computed(() => [
-  ...labAttachmentExtensions.map(ext => `.${ext}`),
-  ...labAttachmentMimeTypes,
-].join(','))
+const acceptAttr = computed(() =>
+  labAttachmentExtensions.map(ext => `.${ext}`).join(','),
+)
 
 const displayError = computed(() => props.error || localError.value)
+
+function emitPreview(file) {
+  emit('preview', file)
+}
 
 function fileExtension(fileName) {
   const name = String(fileName ?? '').trim().toLowerCase()
@@ -164,14 +223,9 @@ function fileExtension(fileName) {
 }
 
 function isAllowedLabAttachment(file) {
-  const type = String(file?.type ?? '').trim().toLowerCase()
   const ext = fileExtension(file?.name)
-  const extOk = Boolean(ext)
-    && labAttachmentExtensions.includes(ext)
-  const mimeOk = Boolean(type)
-    && labAttachmentMimeTypes.includes(type)
 
-  return extOk || mimeOk
+  return Boolean(ext) && labAttachmentExtensions.includes(ext)
 }
 
 function validateFile(file) {
@@ -199,6 +253,13 @@ function processFiles(fileList) {
     emit('upload', file)
   }
   localError.value = lastError
+  if (lastError) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: lastError,
+      position: 'top',
+    })
+  }
 }
 
 function onBrowseClick() {
@@ -281,21 +342,6 @@ function onDrop(event) {
   }
 }
 
-.lab-attachment-upload--readonly .lab-attachment-upload__dropzone {
-  cursor: default;
-
-  &:hover {
-    border-color: $border-subtle;
-    background: $surface;
-  }
-}
-
-.lab-attachment-upload--readonly
-  .lab-attachment-upload__dropzone--error:hover {
-  border-color: $negative;
-  background: rgba($negative, 0.06);
-}
-
 .lab-attachment-upload__icon {
   flex-shrink: 0;
 }
@@ -325,6 +371,24 @@ function onDrop(event) {
   margin: 8px 0 0;
   padding: 0;
   list-style: none;
+}
+
+.lab-attachment-upload__list--flush {
+  margin-top: 0;
+}
+
+.lab-attachment-upload__open {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  gap: 4px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
 }
 
 .lab-attachment-upload__item {

@@ -116,7 +116,7 @@
           </q-tooltip>
         </q-btn>
         <q-btn
-          v-if="canEdit && !row.apiId"
+          v-if="canEdit"
           flat
           round
           dense

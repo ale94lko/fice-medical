@@ -7,7 +7,10 @@ import {
   carePlanStatuses,
 } from 'components/constants.js'
 import { isoDateToUsDateString } from 'src/utils/client-form.js'
-import { refreshCarePlanProgress } from 'src/utils/care-plan-orders.js'
+import {
+  clinicianEntriesFromName,
+  refreshCarePlanProgress,
+} from 'src/utils/care-plan-orders.js'
 import { formatClinicianDisplayLabel } from 'src/utils/clinician-display.js'
 
 function trim(value) {
@@ -119,6 +122,12 @@ export function normalizeIntervention(raw) {
       row.responsible_clinician_id ?? row.responsibleClinicianId,
     ) ?? clinician.id,
     responsibleClinicianName: clinician.name,
+    clinicianEntries: clinicianEntriesFromName({
+      id: parseOptionalNumber(
+        row.responsible_clinician_id ?? row.responsibleClinicianId,
+      ) ?? clinician.id,
+      name: clinician.name,
+    }),
     notes: trim(row.notes),
   }
 }
@@ -139,6 +148,21 @@ export function normalizeCarePlanGoal(raw) {
     status: row.status ?? carePlanGoalStatuses.inProgress,
     priority: trim(row.priority) || 'medium',
     targetDate: isoDateToUsDateString(row.target_date ?? row.targetDate) ?? '',
+    completedAt: row.completed_at ?? row.completedAt ?? null,
+    completedBy: parseOptionalNumber(row.completed_by ?? row.completedBy),
+    discontinuedAt: row.discontinued_at ?? row.discontinuedAt ?? null,
+    discontinuedBy: parseOptionalNumber(
+      row.discontinued_by ?? row.discontinuedBy,
+    ),
+    discontinueReason: trim(
+      row.discontinue_reason ?? row.discontinueReason,
+    ),
+    replacedByGoalId: parseOptionalNumber(
+      row.replaced_by_goal_id ?? row.replacedByGoalId,
+    ),
+    replacesGoalId: parseOptionalNumber(
+      row.replaces_goal_id ?? row.replacesGoalId,
+    ),
     outcomeMeasures: measures,
     interventions,
     progress: normalizeProgress(row.progress),
@@ -211,7 +235,6 @@ export function carePlanToApiPayload(plan) {
     target_date: dateToApi(plan.targetDate),
     clinician_id: parseOptionalNumber(plan.clinicianId),
     priority: trim(plan.priority) || null,
-    status: plan.status ?? carePlanStatuses.active,
   }
 }
 
@@ -223,6 +246,9 @@ export function carePlanGoalToApiPayload(goal) {
     status: goal.status ?? carePlanGoalStatuses.inProgress,
     priority: trim(goal.priority) || null,
     target_date: dateToApi(goal.targetDate),
+    replaces_goal_id: parseOptionalNumber(goal.replacesGoalId),
+    replace_reason: trim(goal.replaceReason) || null,
+    discontinue_reason: trim(goal.discontinueReason) || null,
   }
 }
 

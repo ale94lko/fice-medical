@@ -96,9 +96,10 @@ export async function updateClientReferral(clientId, referral) {
   return normalizeReferralDetail(unwrapData(response.data))
 }
 
-export async function closeClientReferral(clientId, referralId) {
+export async function closeClientReferral(clientId, referralId, reason) {
   const response = await apiInstance.post(
     apiPaths.clientReferralClose(clientId, referralId),
+    { reason },
   )
 
   return normalizeReferralDetail(unwrapData(response.data))

@@ -17,6 +17,10 @@ import {
   startOfDay,
 } from 'src/utils/client-form.js'
 import { findPayerById } from 'src/utils/insurance-payers.js'
+import {
+  NON_PERSON_NAME_CHARS_RE,
+  PERSON_NAME_RE,
+} from 'src/utils/text-input-chars.js'
 
 /** Plan Member ID / Other Insurance ID */
 const PLAN_MEMBER_ID_RE = new RegExp(
@@ -102,6 +106,7 @@ export function createEmptyInsuranceProfile() {
     deactivationNotes: '',
     deactivatedAt: null,
     deactivatedBy: null,
+    deactivatedByName: null,
   }
 }
 
@@ -293,6 +298,21 @@ export function firstAvailableInsurancePriority(
   ) ?? null
 }
 
+export function findOccupyingInsuranceByPriority(
+  section,
+  priority,
+  excludeId = null,
+) {
+  const token = trimInsuranceField(priority)
+  if (!token) {
+    return null
+  }
+
+  return activeInsuranceProfiles(section, excludeId).find(
+    profile => profile.priority === token,
+  ) ?? null
+}
+
 export function areAllActiveInsurancePrioritiesTaken(section) {
   return Object.values(clientInsurancePriorityValues).every(
     value => isInsurancePriorityTaken(section, value),
@@ -313,6 +333,56 @@ export function requiresGoldenCardMemberId(insuranceType) {
 
 export function isSubscriberNameRequired(relationship) {
   return relationship !== clientInsuranceRelationshipValues.self
+}
+
+export function sanitizeSubscriberNameInput(value) {
+  return String(value ?? '')
+    .replace(NON_PERSON_NAME_CHARS_RE, '')
+    .slice(0, clientInsuranceMaxSubscriberNameLength)
+}
+
+export function isValidSubscriberName(value) {
+  const s = trimInsuranceField(value)
+  if (!s || s.length > clientInsuranceMaxSubscriberNameLength) {
+    return false
+  }
+
+  return PERSON_NAME_RE.test(s)
+}
+
+function combinedPayerPlanKey(profile) {
+  return [
+    trimInsuranceField(profile?.payerName),
+    trimInsuranceField(profile?.planName),
+  ].filter(Boolean).join(' ').toLowerCase()
+}
+
+export function insuranceCoverageIdentityKey(profile) {
+  return [
+    combinedPayerPlanKey(profile),
+    trimInsuranceField(profile?.insuranceType).toLowerCase(),
+    sanitizePlanMemberIdInput(profile?.memberId),
+    sanitizeMedicaidRecipientIdInput(profile?.medicaidRecipientId),
+    sanitizeMedicareMemberIdInput(profile?.medicareMemberId),
+    sanitizeGoldenCardMemberIdInput(profile?.goldenCardMemberId),
+    sanitizePlanMemberIdInput(profile?.otherInsuranceId),
+  ].join('|')
+}
+
+export function isInsuranceCoverageDuplicate(
+  section,
+  profile,
+  excludeId = null,
+) {
+  const key = insuranceCoverageIdentityKey(profile)
+
+  return visibleInsuranceProfiles(section).some(row => {
+    if (excludeId && row.id === excludeId) {
+      return false
+    }
+
+    return insuranceCoverageIdentityKey(row) === key
+  })
 }
 
 function digitsOnlyInput(value, maxLen) {
@@ -541,6 +611,13 @@ export function validateInsuranceProfile(
     errors.priority = 'insurancePriorityDuplicate'
   }
 
+  if (
+    !errors.payer
+    && isInsuranceCoverageDuplicate(section, profile, excludeId)
+  ) {
+    errors.payer = 'insuranceDuplicateCoverage'
+  }
+
   if (!isValidMemberId(profile.memberId)) {
     errors.memberId = 'insuranceMemberIdInvalid'
   }
@@ -573,11 +650,14 @@ export function validateInsuranceProfile(
 
   const subscriber = trimInsuranceField(profile.subscriberName)
   if (isSubscriberNameRequired(profile.relationshipToSubscriber)) {
-    if (
-      !subscriber
-      || subscriber.length > clientInsuranceMaxSubscriberNameLength
-    ) {
+    if (!subscriber) {
       errors.subscriberName = 'insuranceSubscriberNameRequired'
+    } else if (
+      subscriber.length > clientInsuranceMaxSubscriberNameLength
+    ) {
+      errors.subscriberName = 'insuranceSubscriberNameMax'
+    } else if (!isValidSubscriberName(subscriber)) {
+      errors.subscriberName = 'insuranceSubscriberNameInvalid'
     }
   } else if (
     subscriber.length > clientInsuranceMaxSubscriberNameLength
@@ -630,6 +710,7 @@ export function applyLocalInsuranceDeactivation(profile, detail = {}) {
   profile.deactivationNotes = trimInsuranceField(detail.notes)
   profile.deactivatedAt = new Date().toISOString()
   profile.deactivatedBy = null
+  profile.deactivatedByName = null
 }
 
 /**
@@ -640,6 +721,7 @@ export function applyLocalInsuranceReactivation(profile) {
   profile.deactivationNotes = ''
   profile.deactivatedAt = null
   profile.deactivatedBy = null
+  profile.deactivatedByName = null
   profile.status = deriveInsuranceStatusFromDates({
     ...profile,
     status: clientInsuranceStatusValues.ACTIVE,

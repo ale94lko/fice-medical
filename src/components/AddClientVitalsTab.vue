@@ -72,15 +72,15 @@
         @save="onRecordSave"
       />
 
-      <ModalComponent
+      <CarePlanReasonDialog
         v-model="deleteDialogOpen"
-        test-id="vitals-delete"
         :title="t('vitalsDeleteTitle')"
         :message="t('vitalsDeleteMessage')"
-        :confirm-text="t('remove')"
-        :cancel-text="t('cancel')"
+        :hint="t('vitalsDeleteReasonHint')"
+        :reason-label="t('vitalsDeleteReasonLabel')"
+        :confirm-label="t('delete')"
+        reason-field="vitals-delete-reason"
         @confirm="confirmDelete"
-        @cancel="deleteDialogOpen = false"
       />
     </template>
   </div>
@@ -94,7 +94,7 @@ import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
 import VitalsHistoryTable from 'components/VitalsHistoryTable.vue'
 import VitalsRecordDialog from 'components/VitalsRecordDialog.vue'
-import ModalComponent from 'components/ModalComponent.vue'
+import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import { quasarNotifyTypes } from 'components/constants.js'
 import {
   createEmptyVitalsDraft,
@@ -104,6 +104,7 @@ import {
 } from 'src/utils/client-vitals.js'
 import {
   createVital,
+  deleteVital,
   updateVital,
 } from 'src/utils/vitals-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -172,7 +173,7 @@ const saving = ref(false)
 const recordDialogOpen = ref(false)
 const editingEntry = ref(null)
 const deleteDialogOpen = ref(false)
-const deletingEntryId = ref(null)
+const deletingEntry = ref(null)
 
 const section = computed({
   get: () => props.modelValue,
@@ -334,24 +335,14 @@ function saveLocalOnly(id, normalized) {
 }
 
 function openDelete(row) {
-  if (row?.apiId != null && String(row.apiId).trim()) {
-    $q.notify({
-      type: quasarNotifyTypes.warning,
-      message: t('vitalsDeleteUnavailable'),
-      position: 'top',
-    })
-
+  if (!allowEdit.value) {
     return
   }
-  deletingEntryId.value = row.id
+  deletingEntry.value = row
   deleteDialogOpen.value = true
 }
 
-function confirmDelete() {
-  const id = deletingEntryId.value
-  if (!id) {
-    return
-  }
+function removeLocalEntry(id) {
   section.value = {
     ...section.value,
     entries: section.value.entries.filter(e => e.id !== id),
@@ -363,8 +354,31 @@ function confirmDelete() {
     editingEntry.value = null
     recordDialogOpen.value = false
   }
-  deletingEntryId.value = null
-  deleteDialogOpen.value = false
+}
+
+async function confirmDelete(reason) {
+  const row = deletingEntry.value
+  deletingEntry.value = null
+  const trimmedReason = String(reason ?? '').trim()
+  if (!row || !trimmedReason) {
+    return
+  }
+  const apiId = row.apiId
+  try {
+    if (
+      hasPatientId.value
+      && apiId != null
+      && String(apiId).trim()
+    ) {
+      await deleteVital(patientId.value, apiId, trimmedReason)
+    }
+    removeLocalEntry(row.id)
+    notifySuccess(t('vitalsDeletedSuccess'))
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error, 'vitalsDeleteError')
+    }
+  }
 }
 
 function applySaveValidation() {

@@ -738,6 +738,9 @@ export function mapInsuranceProfileFromApi(row) {
     deactivatedBy: String(
       row?.deactivated_by ?? row?.deactivatedBy ?? '',
     ).trim() || null,
+    deactivatedByName: String(
+      row?.deactivated_by_name ?? row?.deactivatedByName ?? '',
+    ).trim() || null,
   }
 }
 

@@ -21,9 +21,9 @@
             <AddClientLabeledField
               :label="t('vitalsBloodPressure')"
               required>
-              <div class="row q-col-gutter-sm items-center
+              <div class="row q-col-gutter-sm items-start
                 add-client-vitals-tab__value-row">
-                <div class="col add-client-vitals-tab__value">
+                <div class="col-8 add-client-vitals-tab__value">
                   <div class="row q-col-gutter-sm items-start
                     add-client-vitals-tab__bp-fields">
                     <div class="col">
@@ -63,7 +63,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-auto add-client-vitals-tab__level">
+                <div class="col-4 add-client-vitals-tab__level">
                   <span
                     class="add-client-vitals-tab__level-badge"
                     :class="`add-client-vitals-tab__level-badge--${
@@ -79,9 +79,9 @@
               :label="t('vitalsTemperature')"
               required
               spaced>
-              <div class="row q-col-gutter-sm items-center
+              <div class="row q-col-gutter-sm items-start
                 add-client-vitals-tab__value-row">
-                <div class="col add-client-vitals-tab__value">
+                <div class="col-8 add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.temperature"
                     outlined
@@ -101,7 +101,7 @@
                     </template>
                   </q-input>
                 </div>
-                <div class="col-auto add-client-vitals-tab__level">
+                <div class="col-4 add-client-vitals-tab__level">
                   <span
                     class="add-client-vitals-tab__level-badge"
                     :class="`add-client-vitals-tab__level-badge--${
@@ -116,9 +116,9 @@
             <AddClientLabeledField
               :label="t('vitalsOxygenSaturation')"
               spaced>
-              <div class="row q-col-gutter-sm items-center
+              <div class="row q-col-gutter-sm items-start
                 add-client-vitals-tab__value-row">
-                <div class="col add-client-vitals-tab__value">
+                <div class="col-8 add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.oxygenSaturation"
                     outlined
@@ -138,7 +138,7 @@
                     </template>
                   </q-input>
                 </div>
-                <div class="col-auto add-client-vitals-tab__level">
+                <div class="col-4 add-client-vitals-tab__level">
                   <span
                     class="add-client-vitals-tab__level-badge"
                     :class="`add-client-vitals-tab__level-badge--${
@@ -197,9 +197,9 @@
 
           <div class="col-12 col-md-6 add-client-vitals-tab__col">
             <AddClientLabeledField :label="t('vitalsHeartRate')" required>
-              <div class="row q-col-gutter-sm items-center
+              <div class="row q-col-gutter-sm items-start
                 add-client-vitals-tab__value-row">
-                <div class="col add-client-vitals-tab__value">
+                <div class="col-8 add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.heartRate"
                     outlined
@@ -219,7 +219,7 @@
                     </template>
                   </q-input>
                 </div>
-                <div class="col-auto add-client-vitals-tab__level">
+                <div class="col-4 add-client-vitals-tab__level">
                   <span
                     class="add-client-vitals-tab__level-badge"
                     :class="`add-client-vitals-tab__level-badge--${
@@ -232,9 +232,9 @@
               </div>
             </AddClientLabeledField>
             <AddClientLabeledField :label="t('vitalsRespiratoryRate')" spaced>
-              <div class="row q-col-gutter-sm items-center
+              <div class="row q-col-gutter-sm items-start
                 add-client-vitals-tab__value-row">
-                <div class="col add-client-vitals-tab__value">
+                <div class="col-8 add-client-vitals-tab__value">
                   <q-input
                     v-model="localDraft.respiratoryRate"
                     outlined
@@ -254,7 +254,7 @@
                     </template>
                   </q-input>
                 </div>
-                <div class="col-auto add-client-vitals-tab__level">
+                <div class="col-4 add-client-vitals-tab__level">
                   <span
                     class="add-client-vitals-tab__level-badge"
                     :class="`add-client-vitals-tab__level-badge--${
@@ -289,9 +289,9 @@
               </q-input>
             </AddClientLabeledField>
             <AddClientLabeledField :label="t('vitalsBmi')" spaced>
-              <div class="row q-col-gutter-sm items-center
+              <div class="row q-col-gutter-sm items-start
                 add-client-vitals-tab__value-row">
-                <div class="col add-client-vitals-tab__value">
+                <div class="col-8 add-client-vitals-tab__value">
                   <q-input
                     :model-value="bmiDisplay"
                     outlined
@@ -306,7 +306,7 @@
                     </template>
                   </q-input>
                 </div>
-                <div class="col-auto add-client-vitals-tab__level">
+                <div class="col-4 add-client-vitals-tab__level">
                   <span
                     class="add-client-vitals-tab__level-badge"
                     :class="`add-client-vitals-tab__level-badge--${

@@ -155,6 +155,17 @@ export async function fetchCliniciansListPage({
   return { items, pagination }
 }
 
+export function paginationTotalPages(pagination) {
+  const raw = pagination?.totalPages
+    ?? pagination?.total_pages
+    ?? 1
+  const totalPages = Number(raw)
+
+  return Number.isFinite(totalPages) && totalPages > 0
+    ? totalPages
+    : 1
+}
+
 /**
  * Fetches paginated clinician rows and maps them to q-select options.
  *
@@ -184,7 +195,7 @@ export async function fetchAllCliniciansSelectOptions({
       q,
     })
     all.push(...items)
-    totalPages = Number(pagination?.total_pages ?? 1) || 1
+    totalPages = paginationTotalPages(pagination)
     if (!items.length) {
       break
     }

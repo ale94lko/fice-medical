@@ -279,6 +279,21 @@ export async function sendClientConsentSecureLink(
   }
 }
 
+export async function requestClientConsentViaPortal(
+  clientId,
+  consentId,
+) {
+  const response = await apiInstance.post(
+    apiPaths.clientConsentPortalRequest(clientId, consentId),
+  )
+  const raw = unwrapData(response.data) || {}
+
+  return {
+    portalUrl: String(raw.portal_url ?? '').trim(),
+    emailSentTo: String(raw.email_sent_to ?? '').trim(),
+  }
+}
+
 export async function previewConsentPublic(form) {
   const response = await apiInstance.post(apiPaths.consentPublicPreview, {
     // eslint-disable-next-line camelcase -- API body

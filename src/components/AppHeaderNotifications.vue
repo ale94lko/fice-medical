@@ -84,7 +84,7 @@
           <q-item-section>
             <q-item-label
               class="app-header-notifications__item-title">
-              {{ item.title || t('notificationsFallbackTitle') }}
+              {{ itemTitle(item) }}
             </q-item-label>
             <q-item-label
               v-if="item.body"
@@ -161,6 +161,8 @@ import {
   quasarNotifyTypes,
   siteBreakpoints,
 } from 'src/components/constants.js'
+import { useClientPermissions } from
+  'src/composables/useClientPermissions.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
@@ -172,6 +174,9 @@ import {
 
 const POLL_MS = 60000
 const RESULTS_READY_TYPE = 'ENCOUNTER_RESULTS_READY'
+const PORTAL_REGISTRATION_TYPE = 'PORTAL_REGISTRATION'
+const PORTAL_PROFILE_READY_TYPE = 'PORTAL_PROFILE_READY'
+const PORTAL_ACCOUNT_ENTITY = 'PORTAL_ACCOUNT'
 const MINUTE_MS = 60 * 1000
 const HOUR_MS = 60 * MINUTE_MS
 const DAY_MS = 24 * HOUR_MS
@@ -179,6 +184,7 @@ const DAY_MS = 24 * HOUR_MS
 const { t } = useI18n()
 const $q = useQuasar()
 const router = useRouter()
+const { canAddClient } = useClientPermissions()
 const menuRef = ref(null)
 const items = ref([])
 const unreadCount = ref(0)
@@ -193,9 +199,28 @@ function emitUnreadCount() {
 }
 
 function itemIcon(item) {
-  return item?.type === RESULTS_READY_TYPE
-    ? 'science'
-    : 'notifications'
+  if (item?.type === RESULTS_READY_TYPE) {
+    return 'science'
+  }
+  if (
+    item?.type === PORTAL_REGISTRATION_TYPE
+    || item?.type === PORTAL_PROFILE_READY_TYPE
+  ) {
+    return 'person_add'
+  }
+
+  return 'notifications'
+}
+
+function itemTitle(item) {
+  if (item?.type === PORTAL_REGISTRATION_TYPE) {
+    return t('notificationsPortalRegistrationTitle')
+  }
+  if (item?.type === PORTAL_PROFILE_READY_TYPE) {
+    return t('notificationsPortalProfileReadyTitle')
+  }
+
+  return item?.title || t('notificationsFallbackTitle')
 }
 
 function itemTime(item) {
@@ -328,6 +353,17 @@ async function onOpen(item) {
     }
   }
   hideMenu()
+  if (item?.entityType === PORTAL_ACCOUNT_ENTITY) {
+    if (canAddClient.value && item.entityId != null) {
+      await router.push({
+        path: '/clients/add',
+        query: { portalAccountId: String(item.entityId) },
+      })
+      return
+    }
+    await router.push({ name: 'PortalRegistrations' })
+    return
+  }
   if (item?.entityType === 'ENCOUNTER' && item.entityId != null) {
     await router.push({
       name: 'EncounterWorkspace',

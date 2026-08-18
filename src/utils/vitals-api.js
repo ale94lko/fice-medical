@@ -68,8 +68,16 @@ export async function updateVital(clientId, vitalId, entry) {
   return resolveVitalFromResponse(data)
 }
 
+export async function deleteVital(clientId, vitalId, reason) {
+  await apiInstance.delete(
+    apiPaths.clientVitalById(clientId, vitalId),
+    { data: { reason } },
+  )
+}
+
 /** Aliases matching labs naming. */
 export const listPatientVitals = listVitals
 export const fetchPatientVital = fetchVital
 export const createPatientVital = createVital
 export const updatePatientVital = updateVital
+export const deletePatientVital = deleteVital

@@ -117,7 +117,7 @@
           </q-tooltip>
           </q-btn>
           <q-btn
-            v-if="!readonly"
+            v-if="canAddMeasurement"
             flat
             round
             dense
@@ -205,6 +205,10 @@ const props = defineProps({
     default: () => [],
   },
   readonly: {
+    type: Boolean,
+    default: false,
+  },
+  canAddMeasurement: {
     type: Boolean,
     default: false,
   },

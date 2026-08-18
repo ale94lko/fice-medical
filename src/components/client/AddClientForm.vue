@@ -24,7 +24,7 @@
     <div class="chrome">
       <div class="tabs-row">
         <q-tabs
-          v-model="activeTab"
+          :model-value="activeTab"
           dense
           no-caps
           outside-arrows
@@ -32,7 +32,8 @@
           class="add-client-tabs"
           active-color="white"
           indicator-color="transparent"
-          align="left">
+          align="left"
+          @update:model-value="onMainTabChange">
           <q-tab
             v-for="tab in mainTabs"
             :key="tab.key"
@@ -874,6 +875,8 @@
                 "
                 :client-id="props.clientId"
                 :appointments="clientAppointments"
+                :booking-referral="pendingScheduleReferral"
+                @booking-referral-consumed="pendingScheduleReferral = null"
               />
               <AddClientAuthorizationsTab
                 v-else-if="
@@ -1073,6 +1076,7 @@ import {
 } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 import TextInput from '../FormInput.vue'
 import ClientDateField from '../ClientDateField.vue'
 import AddClientLabeledField from '../AddClientLabeledField.vue'
@@ -1195,6 +1199,13 @@ import {
   shouldCreateIntakeReferral,
 } from 'src/utils/referral-intake.js'
 import { todayDateUs } from 'src/utils/client-form.js'
+import {
+  applyPortalAccountToAddClientForm,
+  getPortalAccount,
+  linkPortalAccount,
+  portalAccountApiErrorMessage,
+  portalAccountIdFromQuery,
+} from 'src/utils/portal-account-api.js'
 
 const props = defineProps({
   mode: {
@@ -1282,6 +1293,7 @@ const duplicateBannerTeleportReady = ref(false)
 
 const $q = useQuasar()
 const { t } = useI18n()
+const route = useRoute()
 const siteStore = useSiteStore()
 
 const clientScreenings = computed(() => {
@@ -1738,6 +1750,9 @@ function contactSubTabClass(subTab) {
 
 const duplicateSaveConfirmOpen = ref(false)
 const duplicateNavigateConfirmOpen = ref(false)
+const pendingSaveDestination = ref(null)
+const pendingScheduleReferral = ref(null)
+const intakeReferralCreated = ref(false)
 const duplicatePendingNavigateClientId = ref(null)
 const duplicateReviewOpen = ref(false)
 const duplicateReviewLoading = ref(false)
@@ -2129,6 +2144,10 @@ async function initializeAddClientForm() {
     return
   }
   resetForm()
+  await prefillPortalAccountIfNeeded()
+  if (!addClientFormMountAlive) {
+    return
+  }
   markPristine()
   await nextTick()
   if (!addClientFormMountAlive) {
@@ -2204,6 +2223,11 @@ async function onNextFiltered() {
 
     return
   }
+  const idx = tabIndexInVisibleOrder(activeTab.value)
+  const nextTab = visibleTabOrder.value[idx + 1]
+  if (await persistIntakeReferralIfNeeded(nextTab)) {
+    return
+  }
   const ok = await validateCurrentTabAndUnlock()
   if (!ok) {
     return
@@ -2211,11 +2235,57 @@ async function onNextFiltered() {
   goNextTabFiltered()
 }
 
+async function onMainTabChange(nextTab) {
+  if (!nextTab || nextTab === activeTab.value) {
+    return
+  }
+  if (await persistIntakeReferralIfNeeded(nextTab)) {
+    return
+  }
+  activeTab.value = nextTab
+}
+
+async function persistIntakeReferralIfNeeded(nextTab) {
+  if (isEditMode.value) {
+    return false
+  }
+  if (activeTab.value !== addClientTabKeys.basic) {
+    return false
+  }
+  if (!shouldCreateIntakeReferral(form.value)) {
+    return false
+  }
+  const ok = await validateCurrentTabAndUnlock()
+  if (!ok) {
+    return true
+  }
+  const destination = {
+    activeTab: nextTab || activeTab.value,
+    activeSubTab: firstSubTabKeyFor(nextTab),
+  }
+  if (duplicateSaveGateActive()) {
+    pendingSaveDestination.value = destination
+    duplicateSaveConfirmOpen.value = true
+
+    return true
+  }
+  await executeSave(destination)
+
+  return true
+}
+
+function firstSubTabKeyFor(tab) {
+  const subs = navigableSubTabKeysFor(tab)
+
+  return subs[0] || ''
+}
+
 async function onNext() {
   return onNextFiltered()
 }
 
-function onReferralSchedule() {
+function onReferralSchedule(row) {
+  pendingScheduleReferral.value = row || null
   activeSubTab.value = CARE_COORDINATION_APPOINTMENTS_SUB_TAB
   $q.notify({
     type: quasarNotifyTypes.info,
@@ -2286,7 +2356,55 @@ function matchChartKey(match) {
   return String(match?.clientNumber ?? '').trim()
 }
 
-function emitNavigateExistingClient(clientId) {
+async function linkPortalAccountIfNeeded(clientNumber) {
+  const accountId = portalAccountIdFromQuery(route.query)
+  const chartKey = String(clientNumber ?? '').trim()
+  if (!accountId || !chartKey) {
+    return
+  }
+  try {
+    await linkPortalAccount(accountId, { clientNumber: chartKey })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: portalAccountApiErrorMessage(
+          error,
+          t('portalAccountLinkError'),
+        ),
+        position: 'top',
+      })
+    }
+  }
+}
+
+async function prefillPortalAccountIfNeeded() {
+  const accountId = portalAccountIdFromQuery(route.query)
+  if (!accountId) {
+    return
+  }
+  try {
+    const account = await getPortalAccount(accountId)
+    if (!addClientFormMountAlive || !account) {
+      return
+    }
+    applyPortalAccountToAddClientForm(form.value, account)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: portalAccountApiErrorMessage(
+          error,
+          t('portalAccountLoadError'),
+        ),
+        position: 'top',
+      })
+    }
+  }
+}
+
+async function emitNavigateExistingClient(clientId) {
+  await linkPortalAccountIfNeeded(clientId)
   emit('navigate-existing', { clientId: String(clientId) })
 }
 
@@ -2348,7 +2466,7 @@ function onDuplicateOpenExistingRequest() {
 
     return
   }
-  emitNavigateExistingClient(chartKey)
+  void emitNavigateExistingClient(chartKey)
 }
 
 function onDuplicateNavigateConfirm() {
@@ -2356,7 +2474,7 @@ function onDuplicateNavigateConfirm() {
   duplicateNavigateConfirmOpen.value = false
   duplicatePendingNavigateClientId.value = null
   if (id != null && id !== '') {
-    emitNavigateExistingClient(id)
+    void emitNavigateExistingClient(id)
   }
 }
 
@@ -2368,7 +2486,9 @@ function onDuplicateSaveConfirm() {
     matchedClientIds: duplicateFilteredMatches.value.map(m => m.patientId),
     highestMatchPercentage: duplicateHighestMatchScore.value,
   })
-  void executeSave()
+  const destination = pendingSaveDestination.value
+  pendingSaveDestination.value = null
+  void executeSave(destination || {})
 }
 
 function applyMappedClientSections(mapped) {
@@ -2400,12 +2520,16 @@ async function createIntakeReferralAfterClientSave(clientId) {
   if (!clientId || !shouldCreateIntakeReferral(form.value)) {
     return
   }
+  if (intakeReferralCreated.value) {
+    return
+  }
 
   try {
     await createClientReferral(
       clientId,
       buildIntakeReferralFromForm(form.value, t),
     )
+    intakeReferralCreated.value = true
   } catch (referralError) {
     if (isAuthSessionEndUIError(referralError)) {
       return
@@ -2421,7 +2545,7 @@ async function createIntakeReferralAfterClientSave(clientId) {
   }
 }
 
-async function executeSave() {
+async function executeSave(destination = {}) {
   saving.value = true
   try {
     let savedClientId = props.clientId
@@ -2460,9 +2584,11 @@ async function executeSave() {
       message: saveSuccessMessage.value,
       position: 'top',
     })
+    await linkPortalAccountIfNeeded(savedClientId)
     emit('saved', {
       clientId: savedClientId,
-      activeTab: activeTab.value,
+      activeTab: destination.activeTab ?? activeTab.value,
+      activeSubTab: destination.activeSubTab ?? activeSubTab.value,
     })
     markPristine()
   } catch (error) {

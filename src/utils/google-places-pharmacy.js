@@ -78,8 +78,9 @@ function trimStr(value) {
 
 export function buildPharmacyPlacesQuery(filters = {}) {
   const freeform = trimStr(filters.q)
+  const state = trimStr(filters.state)
   if (freeform) {
-    return `${freeform} pharmacy`
+    return state ? `${freeform} ${state} pharmacy` : `${freeform} pharmacy`
   }
   const parts = [
     trimStr(filters.name),

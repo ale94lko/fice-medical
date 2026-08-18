@@ -66,6 +66,7 @@
       :saving="false"
       :clinician-options="clinicianOptions"
       @cancel="viewDialogOpen = false"
+      @download-attachment="onViewDownloadAttachment"
     />
   </section>
 </template>
@@ -73,16 +74,20 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import AddClientLabsTab from 'components/AddClientLabsTab.vue'
 import EncounterClinicalAllRecordsDialog from
   'components/encounter/EncounterClinicalAllRecordsDialog.vue'
 import LabOrderDialog from 'components/LabOrderDialog.vue'
 import LabsTable from 'components/LabsTable.vue'
 import { labTestIds as labTid } from 'src/test-ids/index.js'
+import { quasarNotifyTypes } from 'components/constants.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
+  downloadLabFile,
   fetchPatientLab,
   listPatientLabs,
+  triggerBlobDownload,
 } from 'src/utils/lab-api.js'
 import {
   cloneLab,
@@ -115,6 +120,7 @@ const props = defineProps({
 const emit = defineEmits(['changed'])
 
 const { t } = useI18n()
+const $q = useQuasar()
 const labsTabRef = ref(null)
 const labsModel = ref([])
 
@@ -164,6 +170,30 @@ async function openViewLab(row) {
     if (!isAuthSessionEndUIError(error)) {
       viewLab.value = cloneLab(row)
       viewDialogOpen.value = true
+    }
+  }
+}
+
+async function onViewDownloadAttachment(attachmentId) {
+  const clientId = String(props.clientId ?? '').trim()
+  const labId = viewLab.value?.id
+  if (!clientId || labId == null || attachmentId == null) {
+    return
+  }
+  try {
+    const { blob, fileName } = await downloadLabFile(
+      clientId,
+      labId,
+      attachmentId,
+    )
+    triggerBlobDownload(blob, fileName)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('labDownloadError'),
+        position: 'top',
+      })
     }
   }
 }

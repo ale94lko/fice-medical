@@ -28,7 +28,29 @@
             {{ t('medicationsSubtitle') }}
           </p>
         </div>
-        <div class="col-auto">
+        <div class="col-auto row items-center no-wrap q-gutter-md">
+          <div class="insurance-show-inactive row items-center no-wrap">
+            <span class="insurance-show-inactive__label text-body2">
+              {{ t('medicationShowDiscontinued') }}
+            </span>
+            <q-icon
+              name="info_outline"
+              size="16px"
+              class="insurance-show-inactive__info cursor-pointer"
+              :aria-label="t('medicationShowDiscontinuedHint')">
+              <q-tooltip
+                class="app-info-tooltip"
+                anchor="top middle"
+                self="bottom middle"
+                :offset="[0, 6]">
+                {{ t('medicationShowDiscontinuedHint') }}
+              </q-tooltip>
+            </q-icon>
+            <FormToggle
+              v-model="showDiscontinued"
+              :test-id="tid.showDiscontinued"
+            />
+          </div>
           <q-btn
             v-if="canAddMedications"
             no-caps
@@ -153,13 +175,14 @@
         class="medications-table-panel admin-table-panel--wide q-mt-md"
         :show-column-settings="false">
         <MedicationsTable
-          :rows="medicationRows"
+          :rows="displayMedicationRows"
           :empty-label="t('medicationListEmpty')"
           :can-edit="canEditMedications"
           :can-delete="canDeleteMedications"
+          :clinician-options="resolvedClinicianOptions"
           @view="openViewMedication"
           @edit="openEditMedication"
-          @change-status="openStatusChange"
+          @discontinue="openDiscontinueMedication"
           @delete="openDeleteMedication"
         />
       </AdminTablePanel>
@@ -201,59 +224,15 @@
       @cancel="consentDialogOpen = false"
     />
 
-    <q-dialog
-      v-model="statusDialogOpen"
-      persistent
-      transition-show="scale"
-      transition-hide="scale">
-      <q-card class="insurance-dialog app-dialog-card">
-        <AppDialogHeader
-          :close-label="t('close')"
-          @close="statusDialogOpen = false">
-          {{ t('medicationChangeStatusTitle') }}
-        </AppDialogHeader>
-        <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-          <p class="text-body2 text-grey-7 q-mt-none q-mb-md">
-            {{ t('medicationChangeStatusSubtitle') }}
-          </p>
-          <AddClientLabeledField
-            :label="t('status')"
-            required
-            :test-id="tid.field('status-change')">
-            <FormSelect
-              v-model="statusDraft"
-              outlined
-              hide-bottom-space
-              emit-value
-              map-options
-              :options="statusOptions"
-              :test-id="tid.field('status-change')"
-            />
-          </AddClientLabeledField>
-        </q-card-section>
-        <q-card-actions align="right" class="app-dialog-card__actions">
-          <q-btn
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            :label="t('cancel')"
-            :data-testid="tid.btn('cancel-status')"
-            @click="statusDialogOpen = false"
-          />
-          <q-btn
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            :loading="saving"
-            :label="t('medicationChangeStatusSave')"
-            :data-testid="tid.btn('save-status')"
-            @click="onConfirmStatusChange"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <CarePlanReasonDialog
+      v-model="discontinueDialogOpen"
+      :title="t('medicationDiscontinueTitle')"
+      :message="t('medicationDiscontinueMessage')"
+      :reason-label="t('medicationDiscontinueReasonLabel')"
+      :confirm-label="t('medicationActionDiscontinue')"
+      reason-field="discontinue-reason"
+      @confirm="onConfirmDiscontinue"
+    />
 
     <ModalComponent
       v-model="deleteDialogOpen"
@@ -268,23 +247,20 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import AppDialogHeader from 'components/AppDialogHeader.vue'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import FormSelect from 'components/FormSelect.vue'
+import FormToggle from 'components/FormToggle.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import MedicationsTable from 'components/MedicationsTable.vue'
 import MedicationDialog from 'components/MedicationDialog.vue'
 import PharmacyDialog from 'components/PharmacyDialog.vue'
 import PrescriptionConsentDialog from
   'components/PrescriptionConsentDialog.vue'
+import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import {
-  catalogNames,
   medicationStatuses,
-  pharmacyModeValues,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import { useClientMedicationPermissions } from
@@ -302,16 +278,17 @@ import {
 import {
   createEmptyMedicationForm,
   createEmptyPharmacyForm,
+  filterMedicationsForList,
   formatPharmacyAddress,
   mapMedicationsListFromApi,
   mapPharmaciesListFromApi,
   normalizePrescriptionConsent,
 } from 'src/utils/medication-normalize.js'
 import {
-  catalogItemsFromCatalog,
-  fetchCatalogsByNames,
-  mapCatalogItemsToSelectOptions,
-} from 'src/utils/catalogs.js'
+  MEDICATION_DOSAGE_UNIT_OPTIONS,
+  MEDICATION_FREQUENCY_OPTIONS,
+  MEDICATION_ROUTE_OPTIONS,
+} from 'src/utils/medication-catalogs.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { medicationTestIds as tid } from 'src/test-ids/index.js'
@@ -353,7 +330,7 @@ const {
 } = useClientMedicationPermissions()
 
 const saving = ref(false)
-const catalogsByName = ref({})
+const showDiscontinued = ref(false)
 
 const medicationDialogOpen = ref(false)
 const medicationDialogMode = ref('add')
@@ -366,9 +343,8 @@ const activePharmacy = ref(null)
 const consentDialogOpen = ref(false)
 const consentDialogMode = ref('view')
 
-const statusDialogOpen = ref(false)
-const statusDraft = ref(medicationStatuses.active)
-const statusTarget = ref(null)
+const discontinueDialogOpen = ref(false)
+const discontinueTarget = ref(null)
 
 const deleteDialogOpen = ref(false)
 const deleteTarget = ref(null)
@@ -396,6 +372,12 @@ const pharmacyRows = computed(() =>
   ),
 )
 
+const displayMedicationRows = computed(() =>
+  filterMedicationsForList(medicationRows.value, {
+    showDiscontinued: showDiscontinued.value,
+  }),
+)
+
 const preferredPharmacy = computed(
   () => pharmacyRows.value.find(row => row.preferred) ?? null,
 )
@@ -416,57 +398,9 @@ const consentRecord = computed(() =>
 
 const consentGiven = computed(() => Boolean(consentRecord.value?.consentGiven))
 
-const dosageUnitOptions = computed(() =>
-  catalogOptions(catalogNames.dosageUnit),
-)
-const routeOptions = computed(() =>
-  catalogOptions(catalogNames.medicationRoute),
-)
-const frequencyOptions = computed(() =>
-  catalogOptions(catalogNames.medicationFrequency),
-)
-
-const statusOptions = computed(() => [
-  {
-    label: t('medicationStatusActive'),
-    value: medicationStatuses.active,
-  },
-  {
-    label: t('medicationStatusCompleted'),
-    value: medicationStatuses.completed,
-  },
-  {
-    label: t('medicationStatusDiscontinued'),
-    value: medicationStatuses.discontinued,
-  },
-])
-
-function catalogOptions(name) {
-  const catalog = catalogsByName.value[name]
-  if (!catalog) {
-    return []
-  }
-
-  return mapCatalogItemsToSelectOptions(catalogItemsFromCatalog(catalog))
-}
-
-async function loadMedicationCatalogs() {
-  try {
-    catalogsByName.value = await fetchCatalogsByNames([
-      catalogNames.dosageUnit,
-      catalogNames.medicationRoute,
-      catalogNames.medicationFrequency,
-    ])
-  } catch (error) {
-    if (!isAuthSessionEndUIError(error)) {
-      $q.notify({
-        type: quasarNotifyTypes.negative,
-        message: t('medicationCatalogsError'),
-        position: 'top',
-      })
-    }
-  }
-}
+const dosageUnitOptions = computed(() => MEDICATION_DOSAGE_UNIT_OPTIONS)
+const routeOptions = computed(() => MEDICATION_ROUTE_OPTIONS)
+const frequencyOptions = computed(() => MEDICATION_FREQUENCY_OPTIONS)
 
 async function refreshClientMedications() {
   if (!hasClientId.value) {
@@ -507,9 +441,6 @@ function notifySuccess(key) {
 function openAddMedication() {
   medicationDialogMode.value = 'add'
   activeMedication.value = createEmptyMedicationForm()
-  if (!preferredPharmacy.value) {
-    activeMedication.value.pharmacyMode = pharmacyModeValues.none
-  }
   medicationDialogOpen.value = true
 }
 
@@ -545,10 +476,9 @@ function openConsent() {
   consentDialogOpen.value = true
 }
 
-function openStatusChange(row) {
-  statusTarget.value = row
-  statusDraft.value = row.status || medicationStatuses.active
-  statusDialogOpen.value = true
+function openDiscontinueMedication(row) {
+  discontinueTarget.value = row
+  discontinueDialogOpen.value = true
 }
 
 function openDeleteMedication(row) {
@@ -572,9 +502,6 @@ async function onSaveMedication({ form, addAnother }) {
     await refreshClientMedications()
     if (addAnother && medicationDialogMode.value === 'add') {
       activeMedication.value = createEmptyMedicationForm()
-      if (!preferredPharmacy.value) {
-        activeMedication.value.pharmacyMode = pharmacyModeValues.none
-      }
     } else {
       medicationDialogOpen.value = false
     }
@@ -623,8 +550,8 @@ async function onSaveConsent(payload) {
   }
 }
 
-async function onConfirmStatusChange() {
-  const row = statusTarget.value
+async function onConfirmDiscontinue(reason) {
+  const row = discontinueTarget.value
   if (!row?.id || !hasClientId.value || saving.value) {
     return
   }
@@ -633,11 +560,13 @@ async function onConfirmStatusChange() {
     await changeClientMedicationStatus(
       clientId.value,
       row.id,
-      statusDraft.value,
+      medicationStatuses.discontinued,
+      reason,
     )
-    notifySuccess('medicationStatusUpdated')
+    notifySuccess('medicationDiscontinued')
+    showDiscontinued.value = true
     await refreshClientMedications()
-    statusDialogOpen.value = false
+    discontinueDialogOpen.value = false
   } catch (error) {
     notifyError(error, 'medicationStatusError')
   } finally {
@@ -663,16 +592,6 @@ async function onConfirmDelete() {
   }
 }
 
-onMounted(() => {
-  loadMedicationCatalogs()
-})
-
-watch(
-  () => props.clientId,
-  () => {
-    loadMedicationCatalogs()
-  },
-)
 </script>
 
 <style lang="scss" scoped>

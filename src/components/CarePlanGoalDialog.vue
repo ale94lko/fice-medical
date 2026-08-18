@@ -2,6 +2,7 @@
   <q-dialog
     v-model="open"
     persistent
+    class="app-nested-dialog"
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
@@ -70,10 +71,11 @@
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12 col-md-4">
+            <div
+              v-if="showStatusField"
+              class="col-12 col-md-4">
               <AddClientLabeledField
                 :label="t('status')"
-                required
                 :test-id="tid.field('goal-status')">
                 <FormSelect
                   v-model="local.status"
@@ -81,7 +83,7 @@
                   hide-bottom-space
                   emit-value
                   map-options
-                  :readonly="readonly"
+                  readonly
                   :options="statusOptions"
                   :test-id="tid.field('goal-status')"
                 />
@@ -134,7 +136,7 @@
               :title="t('carePlanGoalSectionMeasures')"
             />
             <q-btn
-              v-if="!readonly"
+              v-if="!structureReadonly"
               no-caps
               outline
               color="primary"
@@ -150,7 +152,8 @@
             :show-column-settings="false">
             <MeasureTable
               :rows="local.outcomeMeasures"
-              :readonly="readonly"
+              :readonly="structureReadonly"
+              :can-add-measurement="canAddMeasurement"
               :empty-label="t('carePlanMeasuresEmpty')"
               @edit="row => openMeasureDialog('edit', row)"
               @view="row => openMeasureDialog('view', row)"
@@ -168,7 +171,7 @@
               :title="t('carePlanGoalSectionInterventions')"
             />
             <q-btn
-              v-if="!readonly"
+              v-if="canShowAddIntervention"
               no-caps
               outline
               color="primary"
@@ -185,7 +188,7 @@
             :show-column-settings="false">
             <InterventionTable
               :rows="local.interventions"
-              :readonly="readonly"
+              :readonly="structureReadonly"
               :clinician-options="clinicianOptions"
               :empty-label="t('carePlanInterventionsEmpty')"
               @edit="row => openInterventionDialog('edit', row)"
@@ -299,9 +302,23 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  canRecordMeasurement: {
+    type: Boolean,
+    default: false,
+  },
+  canAddIntervention: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['update:modelValue', 'save', 'cancel'])
+const emit = defineEmits([
+  'update:modelValue',
+  'save',
+  'cancel',
+  'record-progress',
+  'add-intervention',
+])
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -312,6 +329,14 @@ const open = computed({
 })
 
 const readonly = computed(() => props.mode === 'view')
+const structureReadonly = computed(() => readonly.value)
+const showStatusField = computed(() => props.mode !== 'add')
+const canAddMeasurement = computed(() =>
+  props.canRecordMeasurement || !readonly.value,
+)
+const canShowAddIntervention = computed(() =>
+  !structureReadonly.value || props.canAddIntervention,
+)
 const local = ref(createEmptyCarePlanGoal())
 const errors = reactive({})
 
@@ -441,6 +466,15 @@ function onMeasurementSaved(reading) {
   )
   local.value = refreshGoalProgress(local.value)
   measurementDialogOpen.value = false
+  if (props.canRecordMeasurement) {
+    emit('record-progress', {
+      goalId: local.value.id,
+      measureId,
+      currentValue: reading.currentValue,
+      measuredDate: reading.measuredDate,
+      notes: reading.notes,
+    })
+  }
 }
 
 function onMeasureSaved(measure, keepOpen) {
@@ -475,16 +509,25 @@ function openInterventionDialog(mode, row = null) {
 function onInterventionSaved(intervention) {
   const list = [...(local.value.interventions ?? [])]
   const index = list.findIndex(item => item.id === intervention.id)
-  if (index >= 0) {
-    list[index] = intervention
-  } else {
-    list.push({
+  const saved = index >= 0
+    ? intervention
+    : {
       ...intervention,
       id: intervention.id || nextCarePlanLocalId('intervention'),
-    })
+    }
+  if (index >= 0) {
+    list[index] = saved
+  } else {
+    list.push(saved)
   }
   local.value.interventions = list
   interventionDialogOpen.value = false
+  if (readonly.value && props.canAddIntervention) {
+    emit('add-intervention', {
+      goalId: local.value.id,
+      intervention: saved,
+    })
+  }
 }
 
 function removeIntervention(row) {

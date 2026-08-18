@@ -167,15 +167,16 @@
               :required="subscriberRequired"
               :test-id="tid.insuranceField('subscriberName')">
               <q-input
-                v-model="local.subscriberName"
+                :model-value="local.subscriberName"
                 outlined
                 hide-bottom-space
-                :readonly="readonly"
+                :readonly="readonly || isSubscriberSelf"
                 :placeholder="t('insuranceSubscriberPlaceholder')"
                 :maxlength="clientInsuranceMaxSubscriberNameLength"
                 :error="Boolean(fieldError('subscriberName'))"
                 :error-message="errorText('subscriberName')"
                 :data-testid="tid.insuranceField('subscriberName')"
+                @update:model-value="onSubscriberNameInput"
               />
             </AddClientLabeledField>
           </div>
@@ -336,12 +337,12 @@
               </AddClientLabeledField>
             </div>
             <div
-              v-if="local.deactivatedBy"
+              v-if="deactivatedByDisplay && deactivatedByDisplay !== '—'"
               class="col-12 col-md-6">
               <AddClientLabeledField
                 :label="t('insuranceDeactivatedBy')">
                 <p class="text-body2 q-mb-none">
-                  {{ local.deactivatedBy }}
+                  {{ deactivatedByDisplay }}
                 </p>
               </AddClientLabeledField>
             </div>
@@ -413,11 +414,12 @@ import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
   applyPayerSelection,
   buildInsurancePrioritySelectOptions,
+  deriveInsuranceStatusFromDates,
   firstAvailableInsurancePriority,
+  formatInsuranceDeactivationReason,
   insuranceRelationshipOptions,
   insuranceStatusBadgeVariant,
   insuranceTypeOptions,
-  formatInsuranceDeactivationReason,
   isInsuranceProfileInactive,
   isSubscriberNameRequired,
   normalizeInsuranceIdentifierFields,
@@ -429,6 +431,7 @@ import {
   sanitizeMedicaidRecipientIdInput,
   sanitizeMedicareMemberIdInput,
   sanitizePlanMemberIdInput,
+  sanitizeSubscriberNameInput,
   validateInsuranceProfile,
 } from 'src/utils/client-insurance.js'
 import {
@@ -514,7 +517,7 @@ const open = computed({
 const readonly = computed(() => props.mode === 'view')
 
 const showStatusBadge = computed(() =>
-  props.mode === 'view' || props.mode === 'edit',
+  Boolean(local.value?.status),
 )
 
 const statusBadgeVariant = computed(() =>
@@ -538,6 +541,15 @@ const deactivatedAtDisplay = computed(() => {
 const deactivationReasonDisplay = computed(() =>
   formatInsuranceDeactivationReason(local.value?.deactivationReason),
 )
+
+const deactivatedByDisplay = computed(() => {
+  const name = String(local.value?.deactivatedByName ?? '').trim()
+  if (name) {
+    return name
+  }
+
+  return String(local.value?.deactivatedBy ?? '').trim() || '—'
+})
 
 const dialogTestId = computed(() => {
   if (props.mode === 'view') {
@@ -576,6 +588,11 @@ const subscriberRequired = computed(() =>
   isSubscriberNameRequired(local.value.relationshipToSubscriber),
 )
 
+const isSubscriberSelf = computed(() =>
+  local.value.relationshipToSubscriber
+  === clientInsuranceRelationshipValues.self,
+)
+
 const medicaidRequired = computed(() =>
   requiresMedicaidRecipientId(local.value.insuranceType),
 )
@@ -611,6 +628,9 @@ watch(
       local.value.priority = firstAvailableInsurancePriority(
         props.section,
       )
+    }
+    if (!isInsuranceProfileInactive(local.value)) {
+      local.value.status = deriveInsuranceStatusFromDates(local.value)
     }
     syncPayerUiFromProfile()
     syncSubscriberFromRelationship()
@@ -665,6 +685,22 @@ watch(
     ) {
       local.value.subscriberName = props.patientName
     }
+  },
+)
+
+watch(
+  () => [
+    local.value?.policyEffectiveDate,
+    local.value?.policyExpirationDate,
+  ],
+  () => {
+    if (!props.modelValue || skipSubscriberRelationshipSync.value) {
+      return
+    }
+    if (isInsuranceProfileInactive(local.value)) {
+      return
+    }
+    local.value.status = deriveInsuranceStatusFromDates(local.value)
   },
 )
 
@@ -728,6 +764,13 @@ function onMemberIdInput(value) {
   local.value.memberId = sanitizePlanMemberIdInput(value)
 }
 
+function onSubscriberNameInput(value) {
+  if (isSubscriberSelf.value) {
+    return
+  }
+  local.value.subscriberName = sanitizeSubscriberNameInput(value)
+}
+
 function onMedicaidIdInput(value) {
   local.value.medicaidRecipientId = sanitizeMedicaidRecipientIdInput(
     value,
@@ -788,6 +831,7 @@ async function onSave() {
     ])
     emit('save', {
       ...local.value,
+      status: deriveInsuranceStatusFromDates(local.value),
       frontCardFile,
       backCardFile,
     })

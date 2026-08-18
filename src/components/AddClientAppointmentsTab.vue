@@ -203,8 +203,10 @@
       :client-id="clientId"
       mode="book"
       :saving="actionSaving"
+      :referral-id="bookingReferralId"
+      :initial-clinician-id="bookingClinicianId"
       @booked="onBook"
-      @cancel="bookDrawerOpen = false"
+      @cancel="onBookCancel"
     />
 
     <AppointmentBookDialog
@@ -253,7 +255,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -308,9 +310,13 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  bookingReferral: {
+    type: Object,
+    default: null,
+  },
 })
 
-const emit = defineEmits(['checked-in'])
+const emit = defineEmits(['checked-in', 'booking-referral-consumed'])
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -332,6 +338,8 @@ const actionSaving = ref(false)
 
 const bookDrawerOpen = ref(false)
 const rescheduleDrawerOpen = ref(false)
+const bookingReferralId = ref(null)
+const bookingClinicianId = ref(null)
 const detailOpen = ref(false)
 const editOpen = ref(false)
 const cancelDialogOpen = ref(false)
@@ -440,8 +448,34 @@ async function refreshClientAppointments() {
 }
 
 function openBookDrawer() {
+  bookingReferralId.value = null
+  bookingClinicianId.value = null
   bookDrawerOpen.value = true
 }
+
+function clearBookingReferral() {
+  bookingReferralId.value = null
+  bookingClinicianId.value = null
+  emit('booking-referral-consumed')
+}
+
+function onBookCancel() {
+  bookDrawerOpen.value = false
+  clearBookingReferral()
+}
+
+watch(
+  () => props.bookingReferral,
+  row => {
+    if (!row?.id || !hasClientId.value || !canBookAppointment.value) {
+      return
+    }
+    bookingReferralId.value = row.id
+    bookingClinicianId.value = row.assignedClinicianId ?? null
+    bookDrawerOpen.value = true
+  },
+  { immediate: true },
+)
 
 function openView(row) {
   activeAppointment.value = row
@@ -473,6 +507,7 @@ async function onBook(body) {
   try {
     const result = await bookAppointment(body)
     bookDrawerOpen.value = false
+    clearBookingReferral()
     const message = result.appointments?.length
       ? t('appointmentBookSeriesSuccess', {
         count: result.appointments.length,

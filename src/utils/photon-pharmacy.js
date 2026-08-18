@@ -9,7 +9,7 @@ function trimStr(value) {
   return String(value ?? '').trim()
 }
 
-function resolveUsStateCode(raw) {
+export function resolveUsStateCode(raw) {
   const token = trimStr(raw)
   if (!token) {
     return null
@@ -45,8 +45,9 @@ export function isPhotonConfigured() {
 
 export function buildPhotonPharmacyQuery(filters = {}) {
   const freeform = trimStr(filters.q)
+  const state = trimStr(filters.state)
   if (freeform) {
-    return freeform
+    return state ? `${freeform} ${state}` : freeform
   }
 
   return [
@@ -71,6 +72,29 @@ function hasStructuredFilters(filters = {}) {
  * Pull a US state code/name out of free text (prefers end-of-string).
  * @returns {{ code: string, remainder: string } | null}
  */
+export function clinicStateCodeFromAddress(text) {
+  return extractUsStateFromText(text)?.code ?? ''
+}
+
+export function pharmacyResultMatchesState(result, stateCode) {
+  const wanted = resolveUsStateCode(stateCode)
+  if (!wanted) {
+    return true
+  }
+  const fromDetails = resolveUsStateCode(result?.details?.state)
+  if (fromDetails) {
+    return fromDetails === wanted
+  }
+  const fromAddress = extractUsStateFromText(
+    result?.address || result?.formattedAddress || '',
+  )?.code
+  if (!fromAddress) {
+    return true
+  }
+
+  return fromAddress === wanted
+}
+
 export function extractUsStateFromText(text) {
   let rest = trimStr(text)
   if (!rest) {
@@ -504,13 +528,16 @@ async function collectPhotonBodies(tasks) {
  * Photon cannot filter pharmacies by city/ZIP via osm_tag alone.
  * Geocode the place, then bias pharmacy search with lat/lon.
  */
-async function searchPhotonPharmacyFreeform(query) {
+async function searchPhotonPharmacyFreeform(query, clinicState = '') {
   const q = trimStr(query)
   if (!q) {
     return { features: [] }
   }
 
   const inferred = inferPharmacySearchFiltersFromQuery(q)
+  if (!trimStr(inferred.state) && trimStr(clinicState)) {
+    inferred.state = trimStr(clinicState)
+  }
   const nameHint = trimStr(inferred.name)
   const location = {
     address: inferred.address,
@@ -592,7 +619,10 @@ async function runPhotonSearch(filters = {}, options = {}) {
         )
       }
     } else if (freeform) {
-      body = await searchPhotonPharmacyFreeform(freeform)
+      body = await searchPhotonPharmacyFreeform(
+        freeform,
+        trimStr(filters.state),
+      )
     } else {
       body = await searchPhotonApi(
         trimStr(filters.name),

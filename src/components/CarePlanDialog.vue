@@ -30,27 +30,11 @@
                   outlined
                   hide-bottom-space
                   counter
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :maxlength="carePlanNameMaxLength"
                   :placeholder="t('carePlanNamePlaceholder')"
                   :error="Boolean(errors.name)"
                   :error-message="errors.name"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('status')"
-                :test-id="tid.field('status')">
-                <FormSelect
-                  v-model="local.status"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  :readonly="readonly || local.signed"
-                  :options="statusOptions"
-                  :test-id="tid.field('status')"
                 />
               </AddClientLabeledField>
             </div>
@@ -61,7 +45,7 @@
                 :test-id="tid.field('start-date')">
                 <ClientDateField
                   v-model="local.startDate"
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :error="Boolean(errors.startDate)"
                   :error-message="errors.startDate"
                   :close-label="t('close')"
@@ -75,7 +59,7 @@
                 :test-id="tid.field('target-date')">
                 <ClientDateField
                   v-model="local.targetDate"
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :error="Boolean(errors.targetDate)"
                   :error-message="errors.targetDate"
                   :close-label="t('close')"
@@ -90,7 +74,7 @@
                 :test-id="tid.field('clinician')">
                 <ClinicianFormSelect
                   v-model="local.clinicianId"
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :options="clinicianOptions"
                   :placeholder="t('carePlanClinicianPlaceholder')"
                   :error="Boolean(errors.clinicianId)"
@@ -111,7 +95,7 @@
                   hide-bottom-space
                   emit-value
                   map-options
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :options="priorityOptions"
                   :test-id="tid.field('priority')"
                 />
@@ -136,7 +120,7 @@
                   outlined
                   hide-bottom-space
                   counter
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :maxlength="carePlanProblemMaxLength"
                   :placeholder="t('carePlanProblemPlaceholder')"
                   :error="Boolean(errors.problem)"
@@ -155,7 +139,7 @@
                   type="textarea"
                   autogrow
                   counter
-                  :readonly="readonly"
+                  :readonly="generalReadonly"
                   :maxlength="carePlanDescriptionMaxLength"
                   :placeholder="t('carePlanDescriptionPlaceholder')"
                 />
@@ -167,11 +151,14 @@
         <div class="insurance-dialog__card-section q-mt-lg">
           <CarePlanGoalsTable
             :goals="local.goals"
-            :readonly="readonly"
+            :plan="local"
+            :mode="mode"
             @add="openGoalDialog('add')"
             @view="row => openGoalDialog('view', row)"
             @edit="row => openGoalDialog('edit', row)"
             @delete="removeGoal"
+            @discontinue="openDiscontinueGoal"
+            @replace="openReplaceGoal"
           />
         </div>
 
@@ -183,9 +170,10 @@
             :title="t('carePlanSectionSignature')"
           />
           <SignatureCanvas
+            :key="signatureCanvasKey"
             ref="signatureCanvasRef"
             v-model="local.signature"
-            :readonly="readonly || local.signed"
+            :readonly="signatureReadonly"
             class="q-mt-md"
           />
           <p
@@ -203,7 +191,7 @@
         </div>
 
         <div
-          v-if="local.signed && measureRows.length"
+          v-if="isActive && local.signed && measureRows.length"
           class="insurance-dialog__card-section q-mt-lg">
           <SubsectionHeading
             icon="show_chart"
@@ -257,13 +245,12 @@
           no-caps
           flat
           class="app-btn-outline"
-          :label="readonly ? t('close') : t('cancel')"
-          :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
+          :label="closeActionLabel"
+          :data-testid="showSaveActions ? tid.btn('cancel') : tid.btn('close')"
           @click="onCancel"
         />
-        <template v-if="!readonly">
+        <template v-if="showSaveActions">
           <q-btn
-            v-if="canSign && !local.signed"
             no-caps
             outline
             color="primary"
@@ -274,7 +261,7 @@
             @click="onSave(false)"
           />
           <q-btn
-            v-if="canSign && !local.signed"
+            v-if="canActivatePlan"
             no-caps
             unelevated
             color="primary"
@@ -283,17 +270,6 @@
             :label="t('carePlanSaveActivate')"
             :data-testid="tid.btn('sign')"
             @click="onSave(true)"
-          />
-          <q-btn
-            v-else
-            no-caps
-            unelevated
-            color="primary"
-            class="app-btn-primary"
-            :loading="saving"
-            :label="t('save')"
-            :data-testid="tid.btn('save')"
-            @click="onSave(false)"
           />
         </template>
       </q-card-actions>
@@ -304,7 +280,20 @@
       :goal="activeGoal"
       :mode="goalDialogMode"
       :clinician-options="clinicianOptions"
+      :can-record-measurement="goalCanRecordMeasurement"
+      :can-add-intervention="goalCanAddIntervention"
       @save="onGoalSaved"
+      @record-progress="onGoalRecordProgress"
+      @add-intervention="onGoalAddIntervention"
+    />
+    <CarePlanReasonDialog
+      v-model="reasonDialogOpen"
+      :title="reasonDialogTitle"
+      :message="reasonDialogMessage"
+      :reason-label="reasonDialogLabel"
+      :confirm-label="reasonDialogConfirm"
+      :reason-field="reasonDialogField"
+      @confirm="onGoalReasonConfirm"
     />
   </q-dialog>
 </template>
@@ -322,25 +311,36 @@ import SubsectionHeading from 'components/SubsectionHeading.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
 import CarePlanGoalsTable from 'components/CarePlanGoalsTable.vue'
 import CarePlanGoalDialog from 'components/CarePlanGoalDialog.vue'
+import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
 import {
   carePlanDescriptionMaxLength,
+  carePlanGoalStatuses,
   carePlanNameMaxLength,
   carePlanProblemMaxLength,
   carePlanPriorities,
-  carePlanStatuses,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
   cloneCarePlan,
+  cloneGoalForReplace,
   createEmptyCarePlan,
   createEmptyCarePlanGoal,
+  isServerNumericId,
   nextCarePlanLocalId,
   refreshCarePlanProgress,
   resolveClinicianOptionLabel,
   resolveDefaultResponsibleClinicianOption,
 } from 'src/utils/care-plan-orders.js'
+import {
+  canAddCarePlanGoals,
+  canRecordGoalMeasurement,
+  isCarePlanActive,
+  isCarePlanDraft,
+  isCarePlanTerminal,
+  isGoalInProgress,
+} from 'src/utils/care-plan-lifecycle.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
@@ -382,6 +382,10 @@ const emit = defineEmits([
   'save',
   'cancel',
   'record-progress',
+  'save-goal',
+  'discontinue-goal',
+  'replace-goal',
+  'add-intervention',
 ])
 
 const { t } = useI18n()
@@ -396,15 +400,45 @@ const open = computed({
 const local = ref(createEmptyCarePlan())
 const errors = reactive({})
 
-const readonly = computed(() => props.mode === 'view'
-  || local.value.signed
-  || local.value.status === carePlanStatuses.completed
-  || local.value.status === carePlanStatuses.archived)
+const isDraft = computed(() => isCarePlanDraft(local.value.status))
+const isActive = computed(() => isCarePlanActive(local.value.status))
+const isTerminal = computed(() => isCarePlanTerminal(local.value.status))
+const readonly = computed(() => props.mode === 'view' || isTerminal.value)
+const isNewPlan = computed(() => !isServerNumericId(local.value.id))
+const generalReadonly = computed(() =>
+  props.mode === 'view'
+    || isTerminal.value
+    || (!isDraft.value && !isNewPlan.value),
+)
+const signatureReadonly = computed(() =>
+  props.mode === 'view'
+    || Boolean(local.value.signed)
+    || (!isDraft.value && !isNewPlan.value)
+    || isTerminal.value,
+)
+const persistImmediately = computed(() =>
+  isActive.value && isServerNumericId(local.value.id),
+)
+const showSaveActions = computed(() =>
+  props.mode !== 'view'
+    && !isTerminal.value
+    && (isDraft.value || isNewPlan.value),
+)
+const canActivatePlan = computed(() =>
+  props.canSign && showSaveActions.value && !local.value.signed,
+)
+const closeActionLabel = computed(() =>
+  showSaveActions.value ? t('cancel') : t('close'),
+)
 
 const goalDialogOpen = ref(false)
 const goalDialogMode = ref('add')
 const activeGoal = ref(null)
 const signatureCanvasRef = ref(null)
+const reasonDialogOpen = ref(false)
+const reasonDialogKind = ref('discontinue')
+const reasonTargetGoal = ref(null)
+const pendingReplaceReason = ref('')
 
 const dialogTitle = computed(() => {
   if (props.mode === 'view') {
@@ -425,13 +459,6 @@ const dialogSubtitle = computed(() => {
   return t('carePlanAddSubtitle')
 })
 
-const statusOptions = computed(() =>
-  Object.values(carePlanStatuses).map(value => ({
-    label: t(carePlanI18nKey('carePlanStatus', value)),
-    value,
-  })),
-)
-
 const priorityOptions = computed(() =>
   Object.values(carePlanPriorities).map(value => ({
     label: t(carePlanI18nKey('carePlanPriority', value)),
@@ -440,12 +467,72 @@ const priorityOptions = computed(() =>
 )
 
 const showSignatureSection = computed(
-  () => props.mode !== 'view' || local.value.signed || local.value.signature,
+  () => isDraft.value
+    || isNewPlan.value
+    || local.value.signed
+    || local.value.signature,
+)
+
+const goalCanRecordMeasurement = computed(() =>
+  canRecordGoalMeasurement(local.value, activeGoal.value),
+)
+
+const goalCanAddIntervention = computed(() =>
+  goalDialogMode.value === 'view'
+    && canAddCarePlanGoals(local.value, props.mode)
+    && isGoalInProgress(activeGoal.value?.status),
+)
+
+const reasonDialogTitle = computed(() => {
+  if (reasonDialogKind.value === 'replace') {
+    return t('carePlanGoalReplaceTitle')
+  }
+
+  return t('carePlanGoalDiscontinueTitle')
+})
+
+const reasonDialogMessage = computed(() => {
+  if (reasonDialogKind.value === 'replace') {
+    return t('carePlanGoalReplaceMessage')
+  }
+
+  return t('carePlanGoalDiscontinueMessage')
+})
+
+const reasonDialogLabel = computed(() => {
+  if (reasonDialogKind.value === 'replace') {
+    return t('carePlanGoalReplaceReasonLabel')
+  }
+
+  return t('carePlanGoalDiscontinueReasonLabel')
+})
+
+const reasonDialogConfirm = computed(() => {
+  if (reasonDialogKind.value === 'replace') {
+    return t('continue')
+  }
+
+  return t('carePlanActionDiscontinueGoal')
+})
+
+const reasonDialogField = computed(() => {
+  if (reasonDialogKind.value === 'replace') {
+    return 'replace-reason'
+  }
+
+  return 'discontinue-reason'
+})
+
+const signatureCanvasKey = computed(() =>
+  `${local.value.id ?? 'new'}-${local.value.signed ? '1' : '0'}`,
 )
 
 const measureRows = computed(() => {
   const rows = []
   for (const goal of local.value.goals ?? []) {
+    if (!isGoalInProgress(goal.status)) {
+      continue
+    }
     for (const measure of goal.outcomeMeasures ?? []) {
       rows.push({
         goal,
@@ -493,6 +580,7 @@ watch(
         onClinicianChange(local.value.clinicianId)
       }
       Object.keys(errors).forEach(key => delete errors[key])
+      syncActiveGoalFromPlan()
       void nextTick(() => {
         signatureCanvasRef.value?.resize?.()
       })
@@ -592,7 +680,10 @@ function onCancel() {
   open.value = false
 }
 
-function openGoalDialog(mode, row = null) {
+function openGoalDialog(mode, row = null, options = {}) {
+  if (!options.keepReplaceReason) {
+    pendingReplaceReason.value = ''
+  }
   goalDialogMode.value = mode
   if (row) {
     activeGoal.value = { ...row }
@@ -605,7 +696,19 @@ function openGoalDialog(mode, row = null) {
   goalDialogOpen.value = true
 }
 
-function onGoalSaved(goal) {
+function syncActiveGoalFromPlan() {
+  if (!goalDialogOpen.value || activeGoal.value?.id == null) {
+    return
+  }
+  const next = (local.value.goals ?? []).find(
+    item => String(item.id) === String(activeGoal.value.id),
+  )
+  if (next) {
+    activeGoal.value = { ...next }
+  }
+}
+
+function upsertLocalGoal(goal) {
   const list = [...(local.value.goals ?? [])]
   const index = list.findIndex(item => item.id === goal.id)
   if (index >= 0) {
@@ -615,6 +718,60 @@ function onGoalSaved(goal) {
   }
   local.value.goals = list
   local.value = refreshCarePlanProgress(local.value)
+}
+
+function applyLocalReplace(previous, nextGoal, reason) {
+  const newGoal = {
+    ...nextGoal,
+    id: nextGoal.id || nextCarePlanLocalId('goal'),
+    status: carePlanGoalStatuses.inProgress,
+    replacesGoalId: previous.id,
+    replacesGoalTitle: previous.title || '',
+    replaceReason: reason,
+  }
+  const updatedPrevious = {
+    ...previous,
+    status: carePlanGoalStatuses.discontinued,
+    discontinueReason: reason,
+    replacedByGoalId: newGoal.id,
+  }
+  local.value.goals = (local.value.goals ?? []).map(item =>
+    (item.id === previous.id ? updatedPrevious : item),
+  )
+  upsertLocalGoal(newGoal)
+}
+
+function onGoalSaved(goal) {
+  const replaceReason = String(
+    goal.replaceReason || pendingReplaceReason.value || '',
+  ).trim()
+  pendingReplaceReason.value = ''
+  if (goal.replacesGoalId && replaceReason) {
+    if (persistImmediately.value) {
+      emit('replace-goal', {
+        previousGoal: reasonTargetGoal.value,
+        goal: { ...goal, replaceReason },
+        replaceReason,
+      })
+    } else {
+      const previous = (local.value.goals ?? []).find(
+        item => String(item.id) === String(goal.replacesGoalId),
+      )
+      if (previous) {
+        applyLocalReplace(previous, goal, replaceReason)
+      } else {
+        upsertLocalGoal(goal)
+      }
+    }
+    goalDialogOpen.value = false
+    return
+  }
+  if (persistImmediately.value && !isServerNumericId(goal.id)) {
+    emit('save-goal', goal)
+    goalDialogOpen.value = false
+    return
+  }
+  upsertLocalGoal(goal)
   goalDialogOpen.value = false
 }
 
@@ -623,6 +780,50 @@ function removeGoal(row) {
     item => item.id !== row.id,
   )
   local.value = refreshCarePlanProgress(local.value)
+}
+
+function openDiscontinueGoal(row) {
+  reasonDialogKind.value = 'discontinue'
+  reasonTargetGoal.value = row
+  reasonDialogOpen.value = true
+}
+
+function openReplaceGoal(row) {
+  reasonDialogKind.value = 'replace'
+  reasonTargetGoal.value = row
+  reasonDialogOpen.value = true
+}
+
+function onGoalReasonConfirm(reason) {
+  const row = reasonTargetGoal.value
+  if (!row) {
+    return
+  }
+  if (reasonDialogKind.value === 'discontinue') {
+    if (persistImmediately.value) {
+      emit('discontinue-goal', { goal: row, reason })
+      return
+    }
+    upsertLocalGoal({
+      ...row,
+      status: carePlanGoalStatuses.discontinued,
+      discontinueReason: reason,
+    })
+    return
+  }
+  pendingReplaceReason.value = reason
+  openGoalDialog('add', {
+    ...cloneGoalForReplace(row),
+    replaceReason: reason,
+  }, { keepReplaceReason: true })
+}
+
+function onGoalRecordProgress(payload) {
+  emit('record-progress', payload)
+}
+
+function onGoalAddIntervention(payload) {
+  emit('add-intervention', payload)
 }
 
 function emitRecordProgress(row) {

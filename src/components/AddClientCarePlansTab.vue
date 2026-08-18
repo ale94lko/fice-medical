@@ -85,6 +85,10 @@
       @save="onSave"
       @cancel="dialogOpen = false"
       @record-progress="onRecordProgress"
+      @save-goal="onSaveGoal"
+      @discontinue-goal="onDiscontinueGoal"
+      @replace-goal="onReplaceGoal"
+      @add-intervention="onAddIntervention"
     />
 
     <AiGenerateDialog
@@ -116,7 +120,11 @@ import {
   apiErrorMessage,
   changeCarePlanStatus,
   createClientCarePlan,
+  createClientCarePlanIntervention,
+  discontinueClientCarePlanGoal,
+  fetchClientCarePlan,
   prepareCarePlanForSave,
+  saveClientCarePlanGoalTree,
   signClientCarePlan,
   updateClientCarePlan,
   updateOutcomeMeasureCurrentValue,
@@ -210,6 +218,24 @@ function planDetailFromRecord(planId) {
   return normalizeCarePlanDetail(raw)
 }
 
+async function loadPlanForDialog(row) {
+  if (isServerNumericId(row?.id) && clientId.value) {
+    try {
+      return await fetchClientCarePlan(clientId.value, row.id)
+    } catch (error) {
+      if (!isAuthSessionEndUIError(error)) {
+        $q.notify({
+          type: quasarNotifyTypes.negative,
+          message: apiErrorMessage(error) || t('carePlanListError'),
+          position: 'top',
+        })
+      }
+    }
+  }
+
+  return planDetailFromRecord(row?.id) || cloneCarePlan(row)
+}
+
 async function refreshClientCarePlans() {
   if (!hasClientId.value) {
     return
@@ -233,54 +259,26 @@ function openAdd() {
   dialogOpen.value = true
 }
 
-function openView(row) {
-  if (isServerNumericId(row.id)) {
-    const detail = planDetailFromRecord(row.id)
-    if (detail) {
-      activePlan.value = detail
-      dialogMode.value = 'view'
-      dialogOpen.value = true
-
-      return
-    }
-  }
-  activePlan.value = cloneCarePlan(row)
+async function openView(row) {
+  activePlan.value = await loadPlanForDialog(row)
   dialogMode.value = 'view'
   dialogOpen.value = true
 }
 
-function openEdit(row) {
+async function openEdit(row) {
   if (!canEditCarePlans.value) {
     return
   }
-  if (isServerNumericId(row.id)) {
-    const detail = planDetailFromRecord(row.id)
-    if (detail) {
-      activePlan.value = detail
-      dialogMode.value = 'edit'
-      dialogOpen.value = true
-
-      return
-    }
-  }
-  activePlan.value = cloneCarePlan(row)
+  activePlan.value = await loadPlanForDialog(row)
   dialogMode.value = 'edit'
   dialogOpen.value = true
 }
 
-function openSign(row) {
+async function openSign(row) {
   if (!canSignCarePlans.value) {
     return
   }
-  const detail = planDetailFromRecord(row.id)
-  if (detail) {
-    activePlan.value = detail
-    dialogMode.value = 'edit'
-    dialogOpen.value = true
-
-    return
-  }
-  activePlan.value = cloneCarePlan(row)
+  activePlan.value = await loadPlanForDialog(row)
   dialogMode.value = 'edit'
   dialogOpen.value = true
 }
@@ -343,12 +341,12 @@ async function onSave({ plan, activate }) {
   }
 }
 
-async function onChangeStatus(row, status) {
+async function onChangeStatus(row, status, reason = '') {
   if (!canEditCarePlans.value) {
     return
   }
   try {
-    await changeCarePlanStatus(clientId.value, row.id, status)
+    await changeCarePlanStatus(clientId.value, row.id, status, reason)
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('carePlanStatusUpdated'),
@@ -364,7 +362,138 @@ async function onChangeStatus(row, status) {
   }
 }
 
-async function onRecordProgress({ goalId, measureId, currentValue }) {
+async function reloadActivePlan() {
+  if (!activePlan.value?.id || !clientId.value) {
+    return
+  }
+  activePlan.value = await fetchClientCarePlan(
+    clientId.value,
+    activePlan.value.id,
+  )
+  await refreshClientCarePlans()
+}
+
+async function onSaveGoal(goal) {
+  if (!activePlan.value?.id) {
+    return
+  }
+  saving.value = true
+  try {
+    activePlan.value = await saveClientCarePlanGoalTree(
+      clientId.value,
+      activePlan.value.id,
+      goal,
+    )
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('carePlanSaved'),
+    })
+    await refreshClientCarePlans()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onDiscontinueGoal({ goal, reason }) {
+  if (!activePlan.value?.id || !goal?.id) {
+    return
+  }
+  saving.value = true
+  try {
+    await discontinueClientCarePlanGoal(
+      clientId.value,
+      activePlan.value.id,
+      goal,
+      reason,
+    )
+    await reloadActivePlan()
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('carePlanStatusUpdated'),
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onReplaceGoal({ goal, replaceReason }) {
+  if (!activePlan.value?.id) {
+    return
+  }
+  saving.value = true
+  try {
+    activePlan.value = await saveClientCarePlanGoalTree(
+      clientId.value,
+      activePlan.value.id,
+      { ...goal, replaceReason },
+    )
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('carePlanSaved'),
+    })
+    await refreshClientCarePlans()
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onAddIntervention({ goalId, intervention }) {
+  if (!activePlan.value?.id || !goalId) {
+    return
+  }
+  saving.value = true
+  try {
+    await createClientCarePlanIntervention(
+      clientId.value,
+      activePlan.value.id,
+      goalId,
+      intervention,
+    )
+    await reloadActivePlan()
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('carePlanSaved'),
+    })
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: apiErrorMessage(error) || t('carePlanSaveError'),
+      })
+    }
+  } finally {
+    saving.value = false
+  }
+}
+
+async function onRecordProgress({
+  goalId,
+  measureId,
+  currentValue,
+  measuredDate,
+  notes,
+}) {
   if (!activePlan.value?.id) {
     return
   }
@@ -376,6 +505,7 @@ async function onRecordProgress({ goalId, measureId, currentValue }) {
       goalId,
       measureId,
       currentValue,
+      { measuredDate, notes },
     )
     activePlan.value = updated
     $q.notify({

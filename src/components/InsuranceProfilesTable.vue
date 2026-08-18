@@ -121,7 +121,8 @@
             round
             dense
             class="app-btn-icon-action"
-            icon="toggle_off"
+            icon="block"
+            color="warning"
             :data-testid="tid.insuranceRowDeactivate(row.id)"
             :size="siteBreakpoints.SM"
             :aria-label="t('insuranceActionDeactivate')"
@@ -141,7 +142,8 @@
             round
             dense
             class="app-btn-icon-action"
-            icon="toggle_on"
+            icon="check_circle"
+            color="positive"
             :data-testid="tid.insuranceRowReactivate(row.id)"
             :size="siteBreakpoints.SM"
             :aria-label="t('insuranceActionReactivate')"

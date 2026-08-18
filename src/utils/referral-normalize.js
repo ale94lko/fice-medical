@@ -90,6 +90,9 @@ export function normalizeReferralSummary(raw) {
     diagnosisProblem: trim(
       row.diagnosis_problem ?? row.diagnosisProblem,
     ) || null,
+    diagnoses: parseReferralDiagnoses(
+      row.diagnosis_problem ?? row.diagnosisProblem,
+    ),
     assignedClinicianId: parseOptionalNumber(
       row.assigned_clinician_id ?? row.assignedClinicianId,
     ),
@@ -107,6 +110,7 @@ export function normalizeReferralSummary(raw) {
     notes: trim(row.notes) || null,
     closedAt: trim(row.closed_at ?? row.closedAt) || null,
     closedBy: parseOptionalNumber(row.closed_by ?? row.closedBy),
+    statusReason: trim(row.status_reason ?? row.statusReason) || null,
     files: mapStoredFilesList(row.files ?? row.documents ?? []),
     documents: mapStoredFilesList(row.files ?? row.documents ?? []),
     createdAt: trim(row.created_at ?? row.createdAt) || null,
@@ -124,8 +128,89 @@ export function normalizeReferralDetail(raw) {
   return normalizeReferralSummary(raw)
 }
 
+export function parseReferralDiagnoses(raw) {
+  const text = trim(raw)
+  if (!text) {
+    return []
+  }
+  if (text.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(text)
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map(item => normalizeDiagnosisItem(item))
+          .filter(Boolean)
+      }
+    } catch {
+      // Legacy free-text diagnosis.
+    }
+  }
+
+  return [{ code: '', description: text, label: text }]
+}
+
+function normalizeDiagnosisItem(item) {
+  if (item == null) {
+    return null
+  }
+  if (typeof item === 'string') {
+    const description = trim(item)
+    if (!description) {
+      return null
+    }
+
+    return { code: '', description, label: description }
+  }
+  const code = trim(item.code ?? item.icd10Code ?? item.icd10_code)
+  const description = trim(item.description ?? item.label)
+  if (!code && !description) {
+    return null
+  }
+  const label = code
+    ? (description ? `${code} — ${description}` : code)
+    : description
+
+  return { code, description, label }
+}
+
+export function serializeReferralDiagnoses(row) {
+  const list = Array.isArray(row?.diagnoses) && row.diagnoses.length
+    ? row.diagnoses
+    : parseReferralDiagnoses(row?.diagnosisProblem)
+  const normalized = list
+    .map(item => normalizeDiagnosisItem(item))
+    .filter(Boolean)
+  if (!normalized.length) {
+    return null
+  }
+
+  return JSON.stringify(normalized.map(item => ({
+    code: item.code || null,
+    description: item.description || null,
+  })))
+}
+
 export function mapReferralsListFromApi(rows = []) {
-  return (rows ?? []).map(normalizeReferralSummary)
+  return [...(rows ?? [])]
+    .map(normalizeReferralSummary)
+    .sort(compareReferralsDesc)
+}
+
+function compareReferralsDesc(a, b) {
+  const idA = Number(a?.id)
+  const idB = Number(b?.id)
+  if (Number.isFinite(idA) && Number.isFinite(idB) && idA !== idB) {
+    return idB - idA
+  }
+  const createdA = Date.parse(a?.createdAt ?? '') || 0
+  const createdB = Date.parse(b?.createdAt ?? '') || 0
+  if (createdA !== createdB) {
+    return createdB - createdA
+  }
+
+  return String(b?.referralDate ?? '').localeCompare(
+    String(a?.referralDate ?? ''),
+  )
 }
 
 function buildReferredPartyLabel(type, provider, organization) {
@@ -147,13 +232,16 @@ export function referralToApiPayload(referral) {
     priority: trim(row.priority).toUpperCase() || referralPriorities.routine,
     follow_up_required: Boolean(row.followUpRequired),
     notes: trim(row.notes) || null,
-    diagnosis_problem: trim(row.diagnosisProblem) || null,
-    assigned_clinician_id: row.assignedClinicianId ?? null,
+    diagnosis_problem: serializeReferralDiagnoses(row),
+    assigned_clinician_id: parseOptionalNumber(row.assignedClinicianId),
     phone: normalizePhoneDigits(row.phone) || null,
     email: trim(row.email) || null,
   }
   if (row.status) {
     payload.status = trim(row.status).toUpperCase()
+  }
+  if (trim(row.statusReason)) {
+    payload.status_reason = trim(row.statusReason)
   }
   if (type === referralTypes.incoming) {
     payload.source_category = trim(row.sourceCategory) || 'PROVIDER_REFERRAL'
@@ -183,6 +271,11 @@ export function formatReferralListDate(value) {
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+export function isReferralDeletable(row) {
+  return String(row?.status ?? '').toUpperCase()
+    === referralStatuses.pendingReview
 }
 
 export function isReferralSchedulable(row) {

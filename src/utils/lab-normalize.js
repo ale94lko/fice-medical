@@ -2,12 +2,16 @@ import {
   labAbnormalValues,
   labStatuses,
 } from 'components/constants.js'
+import { isoDateToUsDateString, usDateToIso } from 'src/utils/client-form.js'
+import {
+  clinicianInitialsFromPersonName,
+  formatClinicianPersonName,
+} from 'src/utils/clinician-display.js'
 import {
   cloneLab,
   computeLabAbnormalResult,
   sortLabsByOrderedDateDesc,
 } from 'src/utils/lab-orders.js'
-import { isoDateToUsDateString, usDateToIso } from 'src/utils/client-form.js'
 import {
   mapStoredFilesList,
   normalizeStoredFile,
@@ -102,6 +106,54 @@ function trimOrNull(value) {
   return text || null
 }
 
+function nestedOrderingClinician(raw = {}) {
+  const nested = raw.ordering_clinician ?? raw.orderingClinician
+  if (nested && typeof nested === 'object') {
+    return nested
+  }
+
+  return null
+}
+
+function resolveOrderingClinicianName(raw = {}) {
+  const explicit = String(
+    raw.ordering_clinician_name ?? raw.orderingClinicianName ?? '',
+  ).trim()
+  if (explicit) {
+    return explicit
+  }
+  const nested = nestedOrderingClinician(raw)
+  if (!nested) {
+    return ''
+  }
+
+  return formatClinicianPersonName(nested)
+}
+
+function resolveOrderingClinicianEntries(raw = {}, name = '') {
+  const nested = nestedOrderingClinician(raw)
+  const id = raw.ordering_clinician_id
+    ?? raw.orderingClinicianId
+    ?? nested?.id
+    ?? null
+  const personName = nested
+    ? formatClinicianPersonName(nested)
+    : String(name ?? '').trim()
+  const display = String(name || personName).trim()
+  if (!display) {
+    return []
+  }
+  const specialty = String(nested?.specialty ?? '').trim()
+
+  return [{
+    id: id ?? null,
+    name: specialty ? `${display} - ${specialty}` : display,
+    personName: personName || display,
+    specialty,
+    initials: clinicianInitialsFromPersonName(personName || display),
+  }]
+}
+
 export function normalizeLabFile(raw) {
   return normalizeStoredFile(raw)
 }
@@ -189,15 +241,18 @@ export function normalizeLabDetail(raw) {
     .map(normalizeLabComponent)
     .filter(c => c.id && !c.deletedAt)
   const files = mapStoredFilesList(l.files ?? l.attachments ?? [])
+  const orderingClinicianName = resolveOrderingClinicianName(l)
 
   return {
     ...summary,
     orderingClinicianId: String(
       l.ordering_clinician_id ?? l.orderingClinicianId ?? '',
     ).trim() || null,
-    orderingClinicianName: String(
-      l.ordering_clinician_name ?? l.orderingClinicianName ?? '',
-    ).trim() || null,
+    orderingClinicianName: orderingClinicianName || null,
+    clinicianEntries: resolveOrderingClinicianEntries(
+      l,
+      orderingClinicianName,
+    ),
     specimenType: String(
       l.specimen_type ?? l.specimenType ?? '',
     ).trim() || null,

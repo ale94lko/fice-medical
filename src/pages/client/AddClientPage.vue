@@ -108,19 +108,26 @@ function onNavigateExistingClient({ clientId } = {}) {
   router.push({ name: 'EditClient', params: { id } })
 }
 
-function onSaved({ clientId, activeTab } = {}) {
+function onSaved({ clientId, activeTab, activeSubTab } = {}) {
   const id = String(clientId ?? '').trim()
   if (!id) {
     return
   }
 
   const tab = String(activeTab ?? '').trim()
+  const subTab = String(activeSubTab ?? '').trim()
+  const query = {}
   if (tab) {
-    router.replace({ name: 'EditClient', params: { id }, query: { tab } })
-    return
+    query.tab = tab
   }
-
-  router.replace({ name: 'EditClient', params: { id } })
+  if (subTab) {
+    query.subTab = subTab
+  }
+  router.replace({
+    name: 'EditClient',
+    params: { id },
+    query,
+  })
 }
 </script>
 

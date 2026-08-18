@@ -31,6 +31,9 @@ export function mapReferralPriorityToFollowUpPriority(referralPriority) {
   if (token === referralPriorities.urgent) {
     return followUpPriorityValues.high
   }
+  if (token === referralPriorities.low) {
+    return followUpPriorityValues.low
+  }
 
   return followUpPriorityValues.medium
 }

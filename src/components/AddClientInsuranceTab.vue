@@ -173,7 +173,7 @@
     <ModalComponent
       v-model="reactivateDialogOpen"
       :title="t('insuranceReactivateTitle')"
-      :message="t('insuranceReactivateMessage')"
+      :message="reactivateMessage"
       :confirm-text="t('insuranceReactivateConfirm')"
       :cancel-text="t('cancel')"
       test-id="insurance-reactivate"
@@ -199,13 +199,14 @@ import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import {
-  areAllActiveInsurancePrioritiesTaken,
   applyLocalInsuranceDeactivation,
   applyLocalInsuranceReactivation,
+  areAllActiveInsurancePrioritiesTaken,
   canDeactivateInsuranceProfile,
   canReactivateInsuranceProfile,
   createEmptyInsuranceProfile,
   deriveInsuranceStatusFromDates,
+  findOccupyingInsuranceByPriority,
   insuranceRowHasPersistedApiId,
   isInsuranceProfileInactive,
   listInsuranceProfilesForDisplay,
@@ -260,6 +261,7 @@ const activeProfile = ref(null)
 const deactivateDialogOpen = ref(false)
 const reactivateDialogOpen = ref(false)
 const lifecycleProfile = ref(null)
+const occupyingPriorityProfile = ref(null)
 const lifecycleBusy = ref(false)
 const showInactiveInsurance = ref(false)
 
@@ -272,6 +274,17 @@ const displayProfiles = computed(() =>
 const canAddInsuranceProfile = computed(
   () => !areAllActiveInsurancePrioritiesTaken(section.value),
 )
+
+const reactivateMessage = computed(() => {
+  const occupying = occupyingPriorityProfile.value
+  if (occupying?.priority) {
+    return t('insuranceReactivatePrioritySwapMessage', {
+      priority: occupying.priority,
+    })
+  }
+
+  return t('insuranceReactivateMessage')
+})
 
 function toggleShowInactiveInsurance() {
   showInactiveInsurance.value = !showInactiveInsurance.value
@@ -366,13 +379,18 @@ function openReactivate(profile) {
     return
   }
   lifecycleProfile.value = profile
+  occupyingPriorityProfile.value = findOccupyingInsuranceByPriority(
+    section.value,
+    profile.priority,
+    profile.id,
+  )
   reactivateDialogOpen.value = true
 }
 
 function onDialogSave(profile) {
   const next = {
     ...profile,
-    status: profile.status || deriveInsuranceStatusFromDates(profile),
+    status: deriveInsuranceStatusFromDates(profile),
   }
   replaceProfileInSection(next)
   $q.notify({
@@ -434,6 +452,29 @@ async function onDeactivateConfirm({ reason, notes }) {
   }
 }
 
+async function deactivateOccupyingForSwap(occupying) {
+  const payload = {
+    reason: 'DUPLICATE_INSURANCE',
+    notes: null,
+  }
+  if (
+    hasPersistedClient()
+    && insuranceRowHasPersistedApiId(occupying)
+  ) {
+    const apiRow = await deactivateInsuranceProfileApi(
+      props.clientId,
+      occupying.apiId,
+      payload,
+    )
+    replaceProfileInSection(mergeLifecycleFromApi(occupying, apiRow))
+
+    return
+  }
+  const next = { ...occupying }
+  applyLocalInsuranceDeactivation(next, payload)
+  replaceProfileInSection(next)
+}
+
 async function onReactivateConfirm() {
   const profile = lifecycleProfile.value
   if (!profile) {
@@ -441,6 +482,11 @@ async function onReactivateConfirm() {
   }
   lifecycleBusy.value = true
   try {
+    const occupying = occupyingPriorityProfile.value
+    if (occupying) {
+      await deactivateOccupyingForSwap(occupying)
+      showInactiveInsurance.value = true
+    }
     if (
       hasPersistedClient()
       && insuranceRowHasPersistedApiId(profile)
@@ -457,6 +503,7 @@ async function onReactivateConfirm() {
     }
     reactivateDialogOpen.value = false
     lifecycleProfile.value = null
+    occupyingPriorityProfile.value = null
     $q.notify({
       type: quasarNotifyTypes.positive,
       message: t('insuranceReactivatedSuccess'),

@@ -33,9 +33,12 @@
                   use-input
                   fill-input
                   hide-selected
+                  hide-dropdown-icon
+                  clearable
                   input-debounce="300"
                   emit-value
                   map-options
+                  popup-content-class="medication-dialog__medication-menu"
                   :readonly="readonly"
                   :loading="medicationSearchLoading"
                   :options="medicationOptions"
@@ -44,9 +47,35 @@
                   :error-message="errors.medicationId"
                   :data-testid="tid.field('medication')"
                   @filter="onMedicationFilter"
-                  @update:model-value="onMedicationSelected"
-                />
+                  @update:model-value="onMedicationSelected">
+                  <template #option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section>
+                        <q-item-label
+                          class="medication-dialog__option-title">
+                          {{ scope.opt.title || scope.opt.label }}
+                        </q-item-label>
+                        <q-item-label
+                          v-if="scope.opt.detail"
+                          caption
+                          class="medication-dialog__option-detail">
+                          {{ scope.opt.detail }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template #no-option>
+                    <q-item>
+                      <q-item-section class="text-grey-7">
+                        {{ t('medicationSearchEmpty') }}
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
               </AddClientLabeledField>
+              <FormFieldHint v-if="!errors.medicationId">
+                {{ t('medicationMedicationHint') }}
+              </FormFieldHint>
             </div>
             <div class="col-12 col-md-6">
               <AddClientLabeledField
@@ -75,8 +104,22 @@
                   :placeholder="t('medicationDosagePlaceholder')"
                   :error="Boolean(errors.dosage)"
                   :error-message="errors.dosage"
-                  :data-testid="tid.field('dosage')"
-                />
+                  :data-testid="tid.field('dosage')">
+                  <template #append>
+                    <q-icon
+                      name="info_outline"
+                      size="20px"
+                      class="cursor-pointer text-grey-7">
+                      <q-tooltip
+                        class="app-info-tooltip"
+                        anchor="top middle"
+                        self="bottom middle"
+                        :offset="[0, 6]">
+                        {{ t('medicationDosageHint') }}
+                      </q-tooltip>
+                    </q-icon>
+                  </template>
+                </q-input>
               </AddClientLabeledField>
             </div>
             <div class="col-12 col-md-6">
@@ -91,7 +134,7 @@
                   emit-value
                   map-options
                   :readonly="readonly"
-                  :options="dosageUnitOptions"
+                  :options="resolvedDosageUnitOptions"
                   :placeholder="t('medicationSelectUnit')"
                   :error="Boolean(errors.dosageUnit)"
                   :error-message="errors.dosageUnit"
@@ -111,7 +154,7 @@
                   emit-value
                   map-options
                   :readonly="readonly"
-                  :options="routeOptions"
+                  :options="resolvedRouteOptions"
                   :placeholder="t('medicationSelectRoute')"
                   :error="Boolean(errors.route)"
                   :error-message="errors.route"
@@ -131,12 +174,45 @@
                   emit-value
                   map-options
                   :readonly="readonly"
-                  :options="frequencyOptions"
+                  :options="resolvedFrequencyOptions"
                   :placeholder="t('medicationSelectFrequency')"
                   :error="Boolean(errors.frequency)"
                   :error-message="errors.frequency"
                   :test-id="tid.field('frequency')"
                 />
+              </AddClientLabeledField>
+            </div>
+            <div
+              v-if="showCustomFrequency"
+              class="col-12">
+              <AddClientLabeledField
+                :label="t('medicationCustomFrequency')"
+                required
+                :test-id="tid.field('custom-frequency')">
+                <q-input
+                  v-model="local.customFrequency"
+                  outlined
+                  hide-bottom-space
+                  :readonly="readonly"
+                  :placeholder="t('medicationCustomFrequencyPlaceholder')"
+                  :error="Boolean(errors.customFrequency)"
+                  :error-message="errors.customFrequency"
+                  :data-testid="tid.field('custom-frequency')">
+                  <template #append>
+                    <q-icon
+                      name="info_outline"
+                      size="20px"
+                      class="cursor-pointer text-grey-7">
+                      <q-tooltip
+                        class="app-info-tooltip"
+                        anchor="top middle"
+                        self="bottom middle"
+                        :offset="[0, 6]">
+                        {{ t('medicationCustomFrequencyHint') }}
+                      </q-tooltip>
+                    </q-icon>
+                  </template>
+                </q-input>
               </AddClientLabeledField>
             </div>
           </div>
@@ -183,34 +259,15 @@
                 required
                 :test-id="tid.field('prescriber')">
                 <ClinicianFormSelect
+                  :key="prescriberSelectKey"
                   v-model="local.prescriberId"
                   :readonly="readonly"
-                  :options="clinicianOptions"
+                  :options="prescriberSelectOptions"
                   :placeholder="t('medicationPrescriberPlaceholder')"
                   :error="Boolean(errors.prescriberId)"
                   :error-message="errors.prescriberId"
                   :test-id="tid.field('prescriber')"
                   @update:model-value="onPrescriberChange"
-                />
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('status')"
-                required
-                :test-id="tid.field('status')">
-                <FormSelect
-                  v-model="local.status"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  :readonly="readonly"
-                  :options="statusOptions"
-                  :placeholder="t('medicationSelectStatus')"
-                  :error="Boolean(errors.status)"
-                  :error-message="errors.status"
-                  :test-id="tid.field('status')"
                 />
               </AddClientLabeledField>
             </div>
@@ -236,106 +293,61 @@
             icon="local_pharmacy"
             :title="t('medicationSectionPharmacy')"
           />
-          <div class="row q-col-gutter-md q-mt-sm q-mb-sm">
-            <div class="col-auto">
-              <q-radio
-                v-model="local.pharmacyMode"
-                :val="pharmacyModeValues.preferred"
-                :disable="readonly"
-                color="primary"
-                :label="t('medicationPharmacyModePreferred')"
-                :data-testid="tid.field('pharmacy-mode-preferred')"
-              />
-            </div>
-            <div class="col-auto">
-              <q-radio
-                v-model="local.pharmacyMode"
-                :val="pharmacyModeValues.selected"
-                :disable="readonly"
-                color="primary"
-                :label="t('medicationPharmacyModeSelected')"
-                :data-testid="tid.field('pharmacy-mode-selected')"
-              />
-            </div>
-            <div class="col-auto">
-              <q-radio
-                v-model="local.pharmacyMode"
-                :val="pharmacyModeValues.none"
-                :disable="readonly"
-                color="primary"
-                :label="t('medicationPharmacyModeNone')"
-                :data-testid="tid.field('pharmacy-mode-none')"
+          <p
+            v-if="!hasPharmacies"
+            class="text-body2 text-grey-7 q-mb-sm">
+            {{ t('medicationPharmacyModeNone') }}
+          </p>
+
+          <div
+            v-if="hasPharmacies"
+            class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <FormSelect
+                v-model="local.pharmacyId"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                clearable
+                :readonly="readonly"
+                :options="pharmacySelectOptions"
+                :placeholder="t('medicationPharmacySearchPlaceholder')"
+                :error="Boolean(errors.pharmacyId)"
+                :error-message="errors.pharmacyId"
+                :test-id="tid.field('pharmacy')"
               />
             </div>
           </div>
-
-          <div v-if="local.pharmacyMode === pharmacyModeValues.preferred">
-            <div
-              v-if="preferredPharmacy"
-              class="medication-dialog__pharmacy-card">
-              <div class="medication-dialog__pharmacy-card-header">
-                <q-icon name="local_pharmacy" size="20px" />
-                <span class="medication-dialog__pharmacy-name">
-                  {{ preferredPharmacy.name }}
-                </span>
-                <span class="medication-dialog__pharmacy-badge">
-                  {{ t('medicationPreferredBadge') }}
-                </span>
-              </div>
-              <p class="medication-dialog__pharmacy-detail">
-                {{ formatPharmacyAddress(preferredPharmacy) }}
-              </p>
-              <p
-                v-if="preferredPharmacy.phone"
-                class="medication-dialog__pharmacy-detail">
-                {{ preferredPharmacy.phone }}
-              </p>
-            </div>
-            <p v-else class="text-body2 text-grey-7 q-mb-none">
-              {{ t('medicationNoPreferredPharmacy') }}
-            </p>
-          </div>
-
-          <div v-else-if="local.pharmacyMode === pharmacyModeValues.selected">
-            <div class="row q-col-gutter-md">
-              <div class="col-12 col-md-6">
-                <FormSelect
-                  v-model="local.pharmacyId"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  :readonly="readonly"
-                  :options="pharmacySelectOptions"
-                  :placeholder="t('medicationPharmacySearchPlaceholder')"
-                  :error="Boolean(errors.pharmacyId)"
-                  :error-message="errors.pharmacyId"
-                  :test-id="tid.field('pharmacy')"
-                />
-              </div>
-            </div>
-            <q-btn
-              v-if="canAddPharmacy && !readonly"
-              flat
-              no-caps
-              dense
-              color="primary"
-              class="medication-dialog__add-pharmacy-link q-mt-sm"
-              icon="add"
-              :label="t('medicationAddPharmacy')"
-              :data-testid="tid.btn('add-pharmacy')"
-              @click="emit('add-pharmacy')"
+          <p
+            v-if="showPharmacyWarning"
+            class="text-warning text-caption q-mt-sm q-mb-none">
+            <q-icon name="warning" size="16px" class="q-mr-xs" />
+            {{ t('medicationPharmacyMissingWarning') }}
+          </p>
+          <q-btn
+            v-if="canAddPharmacy && !readonly"
+            flat
+            no-caps
+            dense
+            color="primary"
+            class="medication-dialog__add-pharmacy-link q-mt-sm"
+            icon="add"
+            :label="t('medicationAddPharmacy')"
+            :data-testid="tid.btn('add-pharmacy')"
+            @click="emit('add-pharmacy')"
+          />
+          <div
+            v-if="!readonly && showSetPreferred"
+            class="q-mt-sm">
+            <q-checkbox
+              v-model="local.setPharmacyPreferred"
+              :label="t('medicationSetPreferred')"
+              :data-testid="tid.field('set-preferred')"
             />
-            <div v-if="!readonly" class="q-mt-sm">
-              <q-checkbox
-                v-model="local.setPharmacyPreferred"
-                :label="t('medicationSetPreferred')"
-                :data-testid="tid.field('set-preferred')"
-              />
-              <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
-                {{ t('medicationSetPreferredHint') }}
-              </p>
-            </div>
+            <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+              {{ t('medicationSetPreferredHint') }}
+            </p>
           </div>
         </div>
 
@@ -432,26 +444,36 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import FormFieldHint from 'components/FormFieldHint.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import {
-  medicationStatuses,
-  pharmacyModeValues,
-} from 'components/constants.js'
-import {
   createEmptyMedicationForm,
-  formatPharmacyAddress,
+  resolveDefaultPrescriberOption,
+  toReferenceMedicationSelectOption,
 } from 'src/utils/medication-normalize.js'
+import {
+  isSelectedPharmacyPreferred,
+  resolveDefaultPharmacySelection,
+  shouldWarnMissingPharmacy,
+} from 'src/utils/medication-pharmacy.js'
+import {
+  isCustomMedicationFrequency,
+  MEDICATION_DOSAGE_UNIT_OPTIONS,
+  MEDICATION_FREQUENCY_OPTIONS,
+  MEDICATION_ROUTE_OPTIONS,
+  withCurrentCatalogOption,
+} from 'src/utils/medication-catalogs.js'
 import { searchReferenceMedications } from 'src/utils/medication-api.js'
+import { todayDateUs } from 'src/utils/client-form.js'
 import { medicationTestIds as tid } from 'src/test-ids/index.js'
 import {
   useValidationSaveFeedback,
 } from 'src/composables/useValidationSaveFeedback.js'
 import {
   resolveClinicianOptionLabel,
-  resolveDefaultResponsibleClinicianOption,
 } from 'src/utils/care-plan-orders.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 
@@ -521,9 +543,9 @@ function applyDefaultPrescriber() {
   if (props.mode !== 'add' || local.value.prescriberId) {
     return
   }
-  const option = resolveDefaultResponsibleClinicianOption(
+  const option = resolveDefaultPrescriberOption(
     props.clinicianOptions,
-    { staffMember: authStore.userInfo?.staffMember ?? null },
+    authStore.userInfo?.staffMember ?? null,
   )
   if (!option) {
     return
@@ -532,11 +554,21 @@ function applyDefaultPrescriber() {
   local.value.prescriberName = option.label || option.name || ''
 }
 
+function applyDefaultPharmacy() {
+  if (props.mode !== 'add' || local.value.pharmacyId) {
+    return
+  }
+  const next = resolveDefaultPharmacySelection(props.pharmacyOptions)
+  local.value.pharmacyMode = next.pharmacyMode
+  local.value.pharmacyId = next.pharmacyId
+  local.value.setPharmacyPreferred = false
+}
+
 function onPrescriberChange(id) {
   local.value.prescriberName = resolveClinicianOptionLabel(
     props.clinicianOptions,
     id,
-  )
+  ) || String(local.value.prescriberName ?? '').trim()
 }
 
 const dialogTitle = computed(() => {
@@ -558,20 +590,88 @@ const dialogSubtitle = computed(() => {
   return t('medicationAddSubtitle')
 })
 
-const statusOptions = computed(() => [
-  {
-    label: t('medicationStatusActive'),
-    value: medicationStatuses.active,
-  },
-  {
-    label: t('medicationStatusCompleted'),
-    value: medicationStatuses.completed,
-  },
-  {
-    label: t('medicationStatusDiscontinued'),
-    value: medicationStatuses.discontinued,
-  },
-])
+const hasPharmacies = computed(
+  () => (props.pharmacyOptions ?? []).length > 0,
+)
+
+const showCustomFrequency = computed(() =>
+  isCustomMedicationFrequency(local.value.frequency),
+)
+
+const resolvedDosageUnitOptions = computed(() =>
+  withCurrentCatalogOption(
+    props.dosageUnitOptions?.length
+      ? props.dosageUnitOptions
+      : MEDICATION_DOSAGE_UNIT_OPTIONS,
+    local.value.dosageUnit,
+    local.value.dosageUnitLabel,
+  ),
+)
+
+const resolvedRouteOptions = computed(() =>
+  withCurrentCatalogOption(
+    props.routeOptions?.length
+      ? props.routeOptions
+      : MEDICATION_ROUTE_OPTIONS,
+    local.value.route,
+    local.value.routeLabel,
+  ),
+)
+
+const resolvedFrequencyOptions = computed(() =>
+  withCurrentCatalogOption(
+    props.frequencyOptions?.length
+      ? props.frequencyOptions
+      : MEDICATION_FREQUENCY_OPTIONS,
+    local.value.frequency,
+    local.value.frequencyLabel,
+  ),
+)
+
+const prescriberSelectOptions = computed(() => {
+  const list = [...(props.clinicianOptions ?? [])]
+  const id = local.value.prescriberId
+  if (id == null || id === '') {
+    return list
+  }
+  if (list.some(option => String(option?.value) === String(id))) {
+    return list
+  }
+  const name = String(local.value.prescriberName ?? '').trim()
+    || String(id)
+
+  return [{
+    value: String(id),
+    label: name,
+    name,
+  }, ...list]
+})
+
+const prescriberSelectKey = computed(() =>
+  [
+    'prescriber',
+    String(local.value.prescriberId ?? ''),
+    String(prescriberSelectOptions.value.length),
+  ].join('-'),
+)
+
+const showPharmacyWarning = computed(() =>
+  shouldWarnMissingPharmacy(
+    props.pharmacyOptions,
+    local.value.pharmacyId,
+  ),
+)
+
+const showSetPreferred = computed(() => {
+  if (!local.value.pharmacyId) {
+    return false
+  }
+
+  return !isSelectedPharmacyPreferred(
+    props.pharmacyOptions,
+    local.value.pharmacyId,
+  )
+})
 
 const pharmacySelectOptions = computed(() =>
   (props.pharmacyOptions ?? []).map(pharmacy => ({
@@ -599,15 +699,13 @@ function currentMedicationOptions() {
   if (local.value.medicationId == null) {
     return []
   }
-  const name = local.value.medicationName
-  const generic = local.value.medicationGenericName
+  const option = toReferenceMedicationSelectOption({
+    id: local.value.medicationId,
+    name: local.value.medicationName,
+    genericName: local.value.medicationGenericName,
+  })
 
-  return [{
-    label: generic ? `${name} (${generic})` : name,
-    value: local.value.medicationId,
-    name,
-    genericName: generic,
-  }]
+  return option ? [option] : []
 }
 
 watch(
@@ -617,7 +715,11 @@ watch(
       return
     }
     local.value = buildLocalForm(props.medication)
+    if (!local.value.startDate) {
+      local.value.startDate = todayDateUs()
+    }
     applyDefaultPrescriber()
+    applyDefaultPharmacy()
     if (
       local.value.prescriberId
       && !String(local.value.prescriberName ?? '').trim()
@@ -647,13 +749,29 @@ watch(
   },
 )
 
+watch(
+  () => props.pharmacyOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applyDefaultPharmacy()
+  },
+)
+
+watch(
+  () => local.value.pharmacyId,
+  () => {
+    if (!showSetPreferred.value) {
+      local.value.setPharmacyPreferred = false
+    }
+  },
+)
+
 function mapMedicationOptions(list) {
-  return list.map(item => ({
-    label: item.label,
-    value: item.id,
-    name: item.name,
-    genericName: item.genericName,
-  }))
+  return list
+    .map(item => toReferenceMedicationSelectOption(item))
+    .filter(Boolean)
 }
 
 async function onMedicationFilter(val, update) {
@@ -708,6 +826,12 @@ function validateMedicationInfo(nextErrors) {
   if (!local.value.frequency) {
     nextErrors.frequency = t('medicationFrequencyRequired')
   }
+  if (
+    isCustomMedicationFrequency(local.value.frequency)
+    && !String(local.value.customFrequency ?? '').trim()
+  ) {
+    nextErrors.customFrequency = t('medicationCustomFrequencyRequired')
+  }
 }
 
 function validatePrescriptionDetails(nextErrors) {
@@ -724,31 +848,12 @@ function validatePrescriptionDetails(nextErrors) {
   if (!local.value.prescriberId) {
     nextErrors.prescriberId = t('medicationPrescriberRequired')
   }
-  if (!local.value.status) {
-    nextErrors.status = t('medicationStatusRequired')
-  }
-}
-
-function validatePharmacySelection(nextErrors) {
-  if (
-    local.value.pharmacyMode === pharmacyModeValues.selected
-    && local.value.pharmacyId == null
-  ) {
-    nextErrors.pharmacyId = t('medicationPharmacyRequired')
-  }
-  if (
-    local.value.pharmacyMode === pharmacyModeValues.preferred
-    && !props.preferredPharmacy
-  ) {
-    nextErrors.pharmacyMode = t('medicationPharmacyRequired')
-  }
 }
 
 function validate() {
   const nextErrors = {}
   validateMedicationInfo(nextErrors)
   validatePrescriptionDetails(nextErrors)
-  validatePharmacySelection(nextErrors)
   if (!String(local.value.instructions ?? '').trim()) {
     nextErrors.instructions = t('medicationInstructionsRequired')
   }
@@ -778,6 +883,13 @@ async function onSave() {
 
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
+
+.medication-dialog__option-title,
+.medication-dialog__option-detail {
+  white-space: normal;
+  line-height: 1.3;
+  word-break: break-word;
+}
 
 .medication-dialog__pharmacy-card {
   border: 1px solid $border-subtle;
@@ -818,5 +930,15 @@ async function onSave() {
 .medication-dialog__add-another {
   flex: 1 1 auto;
   text-align: left;
+}
+</style>
+
+<style lang="scss">
+.medication-dialog__medication-menu {
+  .q-item__label {
+    white-space: normal;
+    line-height: 1.3;
+    word-break: break-word;
+  }
 }
 </style>

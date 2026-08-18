@@ -79,6 +79,7 @@ export function createEmptyLabOrder() {
     category: null,
     orderingClinicianId: null,
     orderingClinicianName: null,
+    clinicianEntries: [],
     status: labStatuses.ordered,
     orderedDate: todayDateUs(),
     priority: labPriorities.routine,

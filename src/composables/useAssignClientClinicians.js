@@ -2,6 +2,7 @@ import { computed, ref, watch } from 'vue'
 import {
   listActiveCliniciansForAssignment,
   listClientClinicians,
+  mergeClientCliniciansForMany,
   replaceClientClinicians,
 } from 'src/utils/client-clinician-api.js'
 import {
@@ -20,8 +21,21 @@ function toggleId(ids, id) {
   return [...ids, id]
 }
 
+function normalizeClientNumbers(clientIds, clientId) {
+  const fromList = (Array.isArray(clientIds) ? clientIds : [])
+    .map(id => String(id ?? '').trim())
+    .filter(Boolean)
+  if (fromList.length) {
+    return fromList
+  }
+  const one = String(clientId ?? '').trim()
+
+  return one ? [one] : []
+}
+
 export function useAssignClientClinicians({
   clientId,
+  clientIds,
   open,
   onError,
 }) {
@@ -34,6 +48,12 @@ export function useAssignClientClinicians({
   const selectedAssigned = ref([])
   const search = ref('')
   const page = ref(1)
+
+  const resolvedClientIds = computed(() =>
+    normalizeClientNumbers(clientIds?.value, clientId?.value),
+  )
+
+  const isBatch = computed(() => resolvedClientIds.value.length > 1)
 
   const assignedIds = computed(() =>
     new Set(assigned.value.map(row => row.id)),
@@ -116,23 +136,35 @@ export function useAssignClientClinicians({
     selectedAssigned.value = []
   }
 
+  async function loadAssigned(available, ids) {
+    if (ids.length !== 1) {
+      assigned.value = []
+
+      return
+    }
+    try {
+      const assignedRows = await listClientClinicians(ids[0])
+      assigned.value = mergeAssignedClinicians(
+        assignedRows,
+        available,
+      )
+    } catch (error) {
+      onError(error, 'assignCliniciansLoadError')
+      assigned.value = []
+    }
+  }
+
   async function load() {
-    const id = String(clientId.value ?? '').trim()
-    if (!id) {
+    const ids = resolvedClientIds.value
+    if (!ids.length) {
       return
     }
     loading.value = true
     resetDraft()
     try {
-      const [assignedRows, available] = await Promise.all([
-        listClientClinicians(id),
-        listActiveCliniciansForAssignment(),
-      ])
+      const available = await listActiveCliniciansForAssignment()
       catalog.value = available
-      assigned.value = mergeAssignedClinicians(
-        assignedRows,
-        available,
-      )
+      await loadAssigned(available, ids)
       originalKey.value = idsKey(assigned.value.map(row => row.id))
     } catch (error) {
       onError(error, 'assignCliniciansLoadError')
@@ -166,19 +198,34 @@ export function useAssignClientClinicians({
     ),
   )
 
+  async function saveSingle(id) {
+    const saved = await replaceClientClinicians(
+      id,
+      assigned.value.map(row => row.id),
+    )
+    assigned.value = mergeAssignedClinicians(saved, catalog.value)
+    originalKey.value = idsKey(assigned.value.map(row => row.id))
+  }
+
+  async function saveBatch(ids) {
+    await mergeClientCliniciansForMany(
+      ids,
+      assigned.value.map(row => row.id),
+    )
+  }
+
   async function save() {
-    const id = String(clientId.value ?? '').trim()
-    if (!id || !hasChanges.value) {
+    const ids = resolvedClientIds.value
+    if (!ids.length || !hasChanges.value) {
       return false
     }
     saving.value = true
     try {
-      const saved = await replaceClientClinicians(
-        id,
-        assigned.value.map(row => row.id),
-      )
-      assigned.value = mergeAssignedClinicians(saved, catalog.value)
-      originalKey.value = idsKey(assigned.value.map(row => row.id))
+      if (ids.length === 1) {
+        await saveSingle(ids[0])
+      } else {
+        await saveBatch(ids)
+      }
 
       return true
     } catch (error) {
@@ -223,6 +270,8 @@ export function useAssignClientClinicians({
     noSearchResults,
     pageFrom,
     pageTo,
+    isBatch,
+    clientCount: computed(() => resolvedClientIds.value.length),
     toggleAvailable,
     toggleAssigned,
     assignSelected,

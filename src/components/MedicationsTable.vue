@@ -18,11 +18,6 @@
           <div class="medication-name">
             {{ scope.row.medicationName || '—' }}
           </div>
-          <div
-            v-if="scope.row.medicationGenericName"
-            class="medication-generic text-grey-7">
-            {{ scope.row.medicationGenericName }}
-          </div>
         </q-td>
       </template>
 
@@ -46,7 +41,11 @@
         <q-td
           :props="scope"
           class="admin-data-table__secondary-cell">
-          {{ scope.row.prescriberName || '—' }}
+          <AdminTableClinicianAvatars
+            v-if="prescriberEntries(scope.row).length"
+            :entries="prescriberEntries(scope.row)"
+          />
+          <span v-else>—</span>
         </q-td>
       </template>
 
@@ -105,76 +104,73 @@
             :aria-label="t('medicationActionView')"
             @click="emit('view', row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('medicationActionView') }}
-          </q-tooltip>
-        </q-btn>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('medicationActionView') }}
+            </q-tooltip>
+          </q-btn>
           <q-btn
-            v-if="canEdit"
             flat
             round
             dense
             class="app-btn-icon-action"
             :icon="adminTableActionIcons.edit"
+            :disable="!canEditRow(row)"
             :data-testid="tid.rowEdit(row.id)"
             :size="siteBreakpoints.SM"
             :aria-label="t('edit')"
-            @click="emit('edit', row)"
+            @click="onEdit(row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('edit') }}
-          </q-tooltip>
-        </q-btn>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('edit') }}
+            </q-tooltip>
+          </q-btn>
           <q-btn
-            v-if="canEdit || canDelete"
             flat
             round
             dense
             class="app-btn-icon-action"
-            icon="more_vert"
-            :data-testid="tid.rowMore(row.id)"
+            icon="block"
+            :disable="!canDiscontinueRow(row)"
+            :data-testid="tid.rowDiscontinue(row.id)"
             :size="siteBreakpoints.SM"
-            :aria-label="t('medicationActionMore')"
+            :aria-label="t('medicationActionDiscontinue')"
+            @click="onDiscontinue(row)"
           >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('medicationActionMore') }}
-          </q-tooltip>
-            <q-menu auto-close>
-              <q-list dense style="min-width: 180px">
-                <q-item
-                  v-if="canEdit"
-                  v-close-popup
-                  clickable
-                  :data-testid="tid.rowStatus(row.id)"
-                  @click="emit('change-status', row)">
-                  <q-item-section>
-                    {{ t('medicationActionChangeStatus') }}
-                  </q-item-section>
-                </q-item>
-                <q-item
-                  v-if="canDelete"
-                  v-close-popup
-                  clickable
-                  :data-testid="tid.rowDelete(row.id)"
-                  @click="emit('delete', row)">
-                  <q-item-section class="text-negative">
-                    {{ t('delete') }}
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('medicationActionDiscontinue') }}
+            </q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="delete_outline"
+            :disable="!canDelete"
+            :data-testid="tid.rowDelete(row.id)"
+            :size="siteBreakpoints.SM"
+            :aria-label="t('delete')"
+            @click="onDelete(row)"
+          >
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('delete') }}
+            </q-tooltip>
           </q-btn>
         </div>
       </template>
@@ -194,11 +190,14 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
+import AdminTableClinicianAvatars from
+  'components/admin-table/AdminTableClinicianAvatars.vue'
 import {
   medicationStatuses,
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { clinicianEntriesFromName } from 'src/utils/care-plan-orders.js'
 import { medicationTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -218,9 +217,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  clinicianOptions: {
+    type: Array,
+    default: () => [],
+  },
 })
 
-const emit = defineEmits(['view', 'edit', 'change-status', 'delete'])
+const emit = defineEmits(['view', 'edit', 'discontinue', 'delete'])
 
 const { t } = useI18n()
 
@@ -308,8 +311,8 @@ const columns = computed(() => [
     field: row => row.id,
     sortable: false,
     required: true,
-    headerStyle: 'min-width: 120px',
-    style: 'min-width: 120px',
+    headerStyle: 'min-width: 168px',
+    style: 'min-width: 168px',
   },
 ])
 
@@ -317,6 +320,9 @@ function statusClass(status) {
   const token = String(status ?? '').toUpperCase()
   if (token === medicationStatuses.active) {
     return 'active'
+  }
+  if (token === medicationStatuses.scheduled) {
+    return 'scheduled'
   }
   if (token === medicationStatuses.completed) {
     return 'completed'
@@ -333,6 +339,9 @@ function statusLabel(status) {
   if (token === medicationStatuses.active) {
     return t('medicationStatusActive')
   }
+  if (token === medicationStatuses.scheduled) {
+    return t('medicationStatusScheduled')
+  }
   if (token === medicationStatuses.completed) {
     return t('medicationStatusCompleted')
   }
@@ -341,6 +350,69 @@ function statusLabel(status) {
   }
 
   return status || '—'
+}
+
+function findClinicianOption(row) {
+  const id = String(row?.prescriberId ?? '').trim()
+  if (!id) {
+    return null
+  }
+
+  return (props.clinicianOptions ?? []).find(
+    option => String(option?.value ?? '').trim() === id,
+  ) ?? null
+}
+
+function prescriberEntries(row) {
+  const option = findClinicianOption(row)
+  const name = String(
+    option?.name || option?.label || row?.prescriberName || '',
+  ).trim()
+
+  return clinicianEntriesFromName({
+    id: row?.prescriberId ?? option?.value ?? name,
+    name,
+    specialty: option?.specialty || '',
+  })
+}
+
+function isDiscontinued(row) {
+  return String(row?.status ?? '').toUpperCase()
+    === medicationStatuses.discontinued
+}
+
+function isCompleted(row) {
+  return String(row?.status ?? '').toUpperCase()
+    === medicationStatuses.completed
+}
+
+function canEditRow(row) {
+  return props.canEdit && !isDiscontinued(row) && !isCompleted(row)
+}
+
+function canDiscontinueRow(row) {
+  return props.canEdit && !isDiscontinued(row) && !isCompleted(row)
+}
+
+function onEdit(row) {
+  if (!canEditRow(row)) {
+    return
+  }
+  emit('edit', row)
+}
+
+function onDiscontinue(row) {
+  if (!canDiscontinueRow(row)) {
+    return
+  }
+  emit('discontinue', row)
+}
+
+function onDelete(row) {
+  if (!props.canDelete) {
+    return
+  }
+  emit('delete', row)
 }
 </script>
 
@@ -376,6 +448,11 @@ function statusLabel(status) {
 .medication-status-badge--active {
   background: #dcfce7;
   color: #166534;
+}
+
+.medication-status-badge--scheduled {
+  background: #fef3c7;
+  color: #b45309;
 }
 
 .medication-status-badge--completed {

@@ -696,6 +696,7 @@ export default {
   dashboardWidgetPaymentsRecentLabel: 'Pagos recientes',
   dashboardWidgetRevenueTrendLabel: 'Tendencia de ingresos',
   calendar: 'Calendario',
+  appointmentRequestsNav: 'Solicitudes de cita',
   navBilling: 'Facturación',
   navClaims: 'Claims',
   navRemittances: 'Remesas',
@@ -1053,6 +1054,28 @@ export default {
   moreActions: 'Más acciones',
   clientListError: 'No se pudo cargar el listado de clientes.',
   clientListEmpty: 'No hay clientes registrados.',
+  portalRegistrationsNav: 'Altas del portal',
+  portalRegistrationsTitle: 'Altas del portal',
+  portalRegistrationsSubtitle:
+    'Cree fichas de cliente para quienes se registraron '
+    + 'desde el Client Portal.',
+  portalRegistrationsSearchPlaceholder:
+    'Buscar por nombre, correo o teléfono',
+  portalRegistrationsColumnName: 'Nombre',
+  portalRegistrationsColumnEmail: 'Correo',
+  portalRegistrationsColumnDob: 'Fecha de nacimiento',
+  portalRegistrationsColumnPhone: 'Teléfono',
+  portalRegistrationsColumnRegistered: 'Registro',
+  portalRegistrationsCreateClient: 'Crear cliente',
+  portalRegistrationsEmpty:
+    'No hay altas del portal pendientes de ficha.',
+  portalRegistrationsLoadError:
+    'No se pudieron cargar las altas del portal.',
+  portalRegistrationsUnnamed: 'Usuario del portal sin nombre',
+  portalAccountLoadError:
+    'No se pudo cargar el registro del portal.',
+  portalAccountLinkError:
+    'No se pudo vincular esta cuenta del portal al cliente.',
   clientChangeStatusTitle: 'Cambiar estado',
   clientChangeStatusMessage:
     'Elija un estado nuevo para este cliente.',
@@ -1604,6 +1627,7 @@ export default {
   labComponentsEmpty: 'Aún no hay componentes.',
   labColTestName: 'Laboratorio / Prueba',
   labColCategory: 'Categoría',
+  labColOrderingClinician: 'Ordenado por',
   labColOrderedDate: 'Fecha orden',
   labColCollectedDate: 'Fecha recolección',
   labColResultDate: 'Fecha resultado',
@@ -1616,9 +1640,14 @@ export default {
   labColReferenceRange: 'Rango de referencia',
   labActionView: 'Ver',
   labActionDownload: 'Descargar',
+  labActionDownloadAttachment: 'Descargar adjunto',
+  labActionPreview: 'Vista previa',
   labComponentDialogTitle: 'Agregar componente',
   labComponentDialogSubtitle:
     'Agregue un componente o analito a esta orden.',
+  labComponentViewTitle: 'Ver componente',
+  labComponentViewSubtitle:
+    'Notas, fecha y hora del resultado y demás datos del componente.',
   labComponentName: 'Componente / Analito',
   labComponentNamePlaceholder: 'Buscar o seleccionar componente',
   labComponentValue: 'Valor',
@@ -1735,6 +1764,17 @@ export default {
   carePlanActionSign: 'Firmar plan',
   carePlanActionMarkCompleted: 'Marcar como completado',
   carePlanActionArchive: 'Archivar',
+  carePlanActionCancel: 'Cancelar plan',
+  carePlanActionDiscontinueGoal: 'Discontinuar objetivo',
+  carePlanActionReplaceGoal: 'Reemplazar objetivo',
+  carePlanCancelTitle: 'Cancelar plan de cuidado',
+  carePlanCancelMessage:
+    'Este plan se cancelará y quedará en solo lectura.',
+  carePlanCancelReasonLabel: 'Motivo de cancelación',
+  carePlanArchiveTitle: 'Archivar plan de cuidado',
+  carePlanArchiveMessage:
+    'Este plan se archivará y se retirará del flujo operativo.',
+  carePlanArchiveReasonLabel: 'Motivo de archivo',
   carePlanProgressNotMeasured: 'Sin medición',
   carePlanProgressAchieved: 'Logrado',
   carePlanProgressAllGoalsAchieved: 'Todos los objetivos logrados',
@@ -1743,6 +1783,8 @@ export default {
   carePlanStatusActive: 'Activo',
   carePlanStatusCompleted: 'Completado',
   carePlanStatusArchived: 'Archivado',
+  carePlanStatusDraft: 'Borrador',
+  carePlanStatusCancelled: 'Cancelado',
   carePlanPriorityLow: 'Baja',
   carePlanPriorityMedium: 'Media',
   carePlanPriorityHigh: 'Alta',
@@ -1875,7 +1917,21 @@ export default {
   carePlanGoalColTargetDate: 'Fecha objetivo',
   carePlanGoalStatusInProgress: 'En progreso',
   carePlanGoalStatusCompleted: 'Completado',
-  carePlanGoalStatusCancelled: 'Cancelado',
+  carePlanGoalStatusCancelled: 'Discontinuado',
+  carePlanGoalStatusDiscontinued: 'Discontinuado',
+  carePlanGoalReplaceTitle: 'Reemplazar objetivo',
+  carePlanGoalReplaceMessage:
+    'Este objetivo se discontinuará y se creará uno nuevo para '
+    + 'reemplazarlo. El objetivo existente y su historial de '
+    + 'mediciones permanecerán sin cambios.',
+  carePlanGoalReplaceReasonLabel: 'Motivo del reemplazo',
+  carePlanGoalDiscontinueTitle: 'Discontinuar objetivo',
+  carePlanGoalDiscontinueMessage:
+    'Este objetivo se discontinuará y quedará en solo lectura. '
+    + 'Sus mediciones e historial permanecerán sin cambios.',
+  carePlanGoalDiscontinueReasonLabel: 'Motivo de discontinuación',
+  carePlanGoalReplacedBy: 'Reemplazado por: {title}',
+  carePlanGoalReplaces: 'Reemplaza: {title}',
   carePlanGoalAddTitle: 'Añadir objetivo',
   carePlanGoalEditTitle: 'Editar objetivo',
   carePlanGoalViewTitle: 'Ver objetivo',
@@ -2213,6 +2269,17 @@ export default {
   referralCloseConfirmTitle: '¿Cerrar referencia?',
   referralCloseConfirmMessage:
     'La referencia se marcará como cerrada y no podrá editarse.',
+  referralDeclineReasonTitle: '¿Rechazar referencia?',
+  referralDeclineReasonMessage:
+    'Indique el motivo por el que se rechaza esta referencia.',
+  referralDeclineReasonLabel: 'Motivo del rechazo',
+  referralCloseReasonTitle: '¿Cerrar referencia?',
+  referralCloseReasonMessage:
+    'Indique el motivo por el que se cierra esta referencia.',
+  referralCloseReasonLabel: 'Motivo del cierre',
+  referralStatusReasonRequired:
+    'Debe indicar un motivo para rechazar o cerrar la referencia.',
+  referralDiagnosesEmpty: 'Aún no hay diagnósticos.',
   referralDeleteConfirmTitle: '¿Eliminar referencia?',
   referralDeleteConfirmMessage:
     'La referencia se eliminará de la lista activa.',
@@ -2251,6 +2318,7 @@ export default {
   referralPriorityRoutine: 'Media',
   referralPriorityUrgent: 'Alta',
   referralPriorityStat: 'Urgente',
+  referralPriorityLow: 'Baja',
   referralFollowUpRequired: 'Requiere seguimiento',
   referralFollowUpClinicianRequired:
     'El clínico asignado es obligatorio cuando se requiere seguimiento.',
@@ -2490,6 +2558,9 @@ export default {
   appointmentAvailabilityEmpty:
     'No hay horarios disponibles para los criterios seleccionados.',
   appointmentAvailabilityRequired: 'Seleccione un horario disponible.',
+  appointmentSelectedRangeTooShort:
+    'El rango seleccionado ({range} min) es menor que la '
+    + 'duración de la cita ({duration} min).',
   appointmentAvailabilityDurationHint:
     'Mostrando horarios para duración total de {count} min.',
   appointmentAvailabilityRangesHint:
@@ -2653,6 +2724,45 @@ export default {
   appointmentStatusRescheduled: 'Reprogramada',
   appointmentBookSuccess: 'Cita reservada correctamente.',
   appointmentBookError: 'No se pudo reservar la cita.',
+  appointmentRequestsTitle: 'Solicitudes de cita',
+  appointmentRequestsSubtitle:
+    'Revise las solicitudes del portal y prográmelas o rechácelas.',
+  appointmentRequestColumnClient: 'Cliente',
+  appointmentRequestColumnPreferredTime: 'Horario preferido',
+  appointmentRequestColumnService: 'Servicio',
+  appointmentRequestColumnClinician: 'Clínico',
+  appointmentRequestColumnNotes: 'Notas',
+  appointmentRequestColumnStatus: 'Estado',
+  appointmentRequestColumnRequested: 'Solicitada',
+  appointmentRequestStatusPending: 'Pendiente',
+  appointmentRequestStatusCancelled: 'Cancelada',
+  appointmentRequestStatusFulfilled: 'Programada',
+  appointmentRequestStatusRejected: 'Rechazada',
+  appointmentRequestSchedule: 'Programar',
+  appointmentRequestDecline: 'Rechazar',
+  appointmentRequestDeclineTitle: '¿Rechazar esta solicitud?',
+  appointmentRequestDeclineMessage:
+    'El cliente ya no verá esta solicitud como abierta.',
+  appointmentRequestDeclineSuccess: 'Solicitud rechazada.',
+  appointmentRequestDeclineError:
+    'No se pudo rechazar la solicitud.',
+  appointmentRequestFulfillNeedClient:
+    'Cree una ficha de cliente para este usuario del portal '
+    + 'antes de poder programar.',
+  appointmentRequestEmpty:
+    'No hay solicitudes de cita para este filtro.',
+  appointmentRequestLoadError:
+    'No se pudieron cargar las solicitudes de cita.',
+  appointmentRequestFilterPending: 'Pendientes',
+  appointmentRequestFilterAll: 'Todas',
+  appointmentRequestFilterFulfilled: 'Programadas',
+  appointmentRequestFilterRejected: 'Rechazadas',
+  appointmentRequestFilterCancelled: 'Canceladas',
+  appointmentRequestTimeUnset: 'Sin especificar',
+  appointmentRequestSearchPlaceholder:
+    'Buscar por cliente, servicio o notas',
+  appointmentRequestNoClient: 'Sin ficha de cliente',
+  appointmentRequestCreateClient: 'Crear cliente',
   appointmentRescheduleSuccess: 'Cita reprogramada correctamente.',
   appointmentEditSuccess: 'Cita actualizada correctamente.',
   appointmentCancelSuccess: 'Cita cancelada correctamente.',
@@ -2984,7 +3094,8 @@ export default {
   clientConsentSignatureMethod: 'Método de firma',
   clientConsentSignMethodUnavailable:
     'Este método de firma aún no está disponible. '
-    + 'Elija En persona (digital), En persona (papel) o Enlace seguro.',
+    + 'Elija En persona (digital), En persona (papel), '
+    + 'Portal del cliente o Enlace seguro.',
   clientConsentGuardianContactRequired:
     'Agregue un contacto Guardian con nombre y relación en Contacto '
     + 'antes de solicitar la firma del tutor.',
@@ -3030,6 +3141,21 @@ export default {
   clientConsentSecureLinkCopied: 'Enlace seguro copiado.',
   clientConsentSecureLinkCopyError:
     'No se pudo copiar el enlace seguro.',
+  clientConsentPortalRequestTitle: 'Solicitar en el Client Portal',
+  clientConsentPortalRequestHint:
+    'Enviaremos al cliente un correo con el enlace para firmar este '
+    + 'formulario en el Client Portal.',
+  clientConsentPortalRequestSend: 'Solicitar firma',
+  clientConsentPortalRequestSuccess:
+    'El cliente puede firmar este consentimiento en el Client Portal.',
+  clientConsentPortalRequestError:
+    'No se pudo solicitar este consentimiento en el Client Portal.',
+  clientConsentPortalRequestNoPermission:
+    'No tiene permiso para solicitar una firma en el portal.',
+  clientConsentPortalRequestClientOnly:
+    'Las solicitudes al portal solo están disponibles cuando el '
+    + 'firmante es el cliente.',
+  clientConsentPortalUrl: 'Enlace del Client Portal',
   consentSignPublicBrand: 'Firma de consentimiento',
   consentSignPublicTitle: 'Consentimiento',
   consentSignPublicModeSign: 'Firmar',
@@ -3154,6 +3280,9 @@ export default {
   assignCliniciansTitle: 'Asignar clínicos',
   assignCliniciansSubtitle:
     'Seleccione uno o más clínicos para asignarlos a este cliente.',
+  assignCliniciansBatchSubtitle:
+    'Estos clínicos se añadirán a {count} clientes seleccionados. '
+    + 'Se conservan las asignaciones actuales.',
   assignCliniciansAvailable: 'Clínicos disponibles',
   assignCliniciansSearchPlaceholder:
     'Buscar clínicos por nombre, especialidad o NPI...',
@@ -3163,6 +3292,12 @@ export default {
   assignCliniciansHint:
     'Puede asignar varios clínicos. Estarán disponibles '
     + 'para este cliente en la programación.',
+  assignCliniciansBatchHint:
+    'Los clínicos seleccionados se añadirán a cada cliente elegido. '
+    + 'No se quitan las asignaciones actuales.',
+  assignCliniciansToAssign: 'Clínicos a asignar',
+  assignCliniciansToAssignEmpty:
+    'Pase clínicos aquí para añadirlos a los clientes seleccionados.',
   assignCliniciansEmptyAvailable: 'No hay clínicos disponibles.',
   assignCliniciansEmptyAvailableHint:
     'Cree un clínico activo antes de asignarlo a este cliente.',
@@ -3171,6 +3306,8 @@ export default {
     'Pruebe a ajustar la búsqueda o los filtros.',
   assignCliniciansSave: 'Guardar cambios',
   assignCliniciansSaved: 'Clínicos asignados correctamente.',
+  assignCliniciansBatchSaved:
+    'Clínicos añadidos a {count} clientes.',
   assignCliniciansSaveError:
     'No se pudieron guardar las asignaciones de clínicos.',
   assignCliniciansLoadError: 'No se pudieron cargar los clínicos.',
@@ -3179,6 +3316,8 @@ export default {
   assignCliniciansNpi: 'NPI {npi}',
   assignCliniciansSelectOne:
     'Seleccione un solo cliente para asignar clínicos.',
+  assignCliniciansSelectClients:
+    'Seleccione al menos un cliente para asignar clínicos.',
   prefix: 'Prefijo',
   prefixSelect: 'Seleccionar',
   firstName: 'Nombre',
@@ -3616,11 +3755,15 @@ export default {
   vitalsUpdatedSuccess: 'Signos vitales actualizados.',
   vitalsSaveError: 'No se pudo guardar el registro de signos vitales.',
   vitalsLoadError: 'No se pudieron cargar los signos vitales.',
-  vitalsDeleteUnavailable:
-    'Los signos vitales guardados no se pueden eliminar desde esta pantalla.',
   vitalsDeleteTitle: 'Eliminar signos vitales',
   vitalsDeleteMessage:
     '¿Seguro que desea eliminar este registro de signos vitales?',
+  vitalsDeleteReasonHint:
+    'Para fines de auditoría, indique el motivo de la eliminación.',
+  vitalsDeleteReasonLabel: 'Motivo de eliminación',
+  vitalsDeletedSuccess: 'Registro de signos vitales eliminado.',
+  vitalsDeleteError:
+    'No se pudo eliminar el registro de signos vitales.',
   vitalsColDateTime: 'Fecha y hora',
   vitalsColBloodPressure: 'Presión arterial',
   vitalsColHeartRate: 'Frecuencia cardíaca',
@@ -3726,6 +3869,9 @@ export default {
   insuranceReactivateMessage:
     'Este perfil de seguro se reactivará. El estado se calculará según las '
     + 'fechas de cobertura (Active, Future, o se rechazará si ya expiró).',
+  insuranceReactivatePrioritySwapMessage:
+    'Ya existe un seguro activo con prioridad {priority}. Se desactivará '
+    + 'para poder activar este perfil.',
   insuranceReactivateConfirm: 'Reactivar',
   insuranceAddedSuccess: 'Perfil de seguro agregado.',
   insuranceUpdatedSuccess: 'Perfil de seguro actualizado.',
@@ -3742,6 +3888,9 @@ export default {
   insurancePriorityRequired: 'La prioridad del seguro es obligatoria.',
   insurancePriorityDuplicate:
     'Este cliente ya tiene un seguro activo con esta prioridad.',
+  insuranceDuplicateCoverage:
+    'Ya existe un seguro con el mismo pagador/plan, tipo, member ID e '
+    + 'identificadores de programa.',
   insuranceMaxActivePriorities:
     'Primary, Secondary y Tertiary ya están activos. '
     + 'Desactive uno antes de agregar otro perfil.',
@@ -3757,6 +3906,9 @@ export default {
   insuranceSubscriberNameRequired: 'El nombre del titular es obligatorio.',
   insuranceSubscriberNameMax:
     'El nombre del titular debe tener como máximo 150 caracteres.',
+  insuranceSubscriberNameInvalid:
+    'Solo letras, espacios, apóstrofos, guiones y puntos. '
+    + 'No se admiten números ni caracteres especiales.',
   insuranceMedicaidIdRequired: 'El ID de beneficiario Medicaid es obligatorio.',
   insuranceMedicaidIdInvalid: 'El ID Medicaid debe ser exactamente 10 dígitos.',
   insuranceMedicareIdRequired: 'El ID de miembro Medicare es obligatorio.',
@@ -3946,13 +4098,30 @@ export default {
   medicationSectionAdditional: 'Información adicional',
   medicationFieldMedication: 'Medicamento',
   medicationMedicationPlaceholder:
-    'Busque un medicamento o selecciónelo de la lista',
+    'Escriba para buscar un medicamento',
+  medicationMedicationHint:
+    'Escriba el nombre del medicamento. '
+    + 'La potencia aparece bajo cada resultado.',
+  medicationSearchEmpty: 'No hay medicamentos coincidentes.',
   medicationGenericName: 'Nombre genérico',
   medicationDosage: 'Dosis',
-  medicationDosagePlaceholder: 'p. ej. 500, 10, 0.25',
+  medicationDosagePlaceholder: 'p. ej. 1',
+  medicationDosageHint:
+    'Cuánto tomar en cada toma, no la potencia del envase. '
+    + 'Ejemplo: 1 pastilla. La potencia (p. ej. 125 mg) va en el '
+    + 'nombre del medicamento.',
   medicationDosageUnit: 'Unidad de dosis',
   medicationRoute: 'Vía',
   medicationFrequency: 'Frecuencia',
+  medicationCustomFrequency: 'Frecuencia personalizada',
+  medicationCustomFrequencyPlaceholder:
+    'Introduzca las instrucciones de frecuencia '
+    + '(p. ej. Cada lunes, miércoles y viernes)',
+  medicationCustomFrequencyHint:
+    'Introduzca las instrucciones de frecuencia '
+    + '(p. ej. Cada lunes, miércoles y viernes)',
+  medicationCustomFrequencyRequired:
+    'La frecuencia personalizada es obligatoria.',
   medicationStartDate: 'Fecha de inicio',
   medicationEndDate: 'Fecha de fin',
   medicationPrescriber: 'Prescriptor',
@@ -3970,6 +4139,8 @@ export default {
     'Usar la farmacia preferida del cliente',
   medicationPharmacyModeSelected: 'Seleccionar otra farmacia',
   medicationPharmacyModeNone: 'Sin farmacia para este medicamento',
+  medicationPharmacyMissingWarning:
+    'No hay farmacia seleccionada para este medicamento.',
   medicationPharmacySearchPlaceholder: 'Seleccionar farmacia',
   medicationAddPharmacy: 'Añadir nueva farmacia',
   medicationSetPreferred:
@@ -4009,9 +4180,19 @@ export default {
   medicationActionView: 'Ver',
   medicationActionMore: 'Más opciones',
   medicationActionChangeStatus: 'Cambiar estado',
+  medicationActionDiscontinue: 'Discontinuar medicamento',
+  medicationDiscontinueTitle: '¿Discontinuar medicamento?',
+  medicationDiscontinueMessage:
+    'Este medicamento se marcará como discontinuado.',
+  medicationDiscontinueReasonLabel: 'Motivo de la discontinuación',
+  medicationDiscontinued: 'Medicamento discontinuado.',
   medicationStatusActive: 'Activo',
+  medicationStatusScheduled: 'Programado',
   medicationStatusCompleted: 'Completado',
   medicationStatusDiscontinued: 'Discontinuado',
+  medicationShowDiscontinued: 'Mostrar medicamentos discontinuados',
+  medicationShowDiscontinuedHint:
+    'Incluir medicamentos que fueron discontinuados.',
   medicationSelectUnit: 'Seleccionar unidad',
   medicationSelectRoute: 'Seleccionar vía',
   medicationSelectFrequency: 'Seleccionar frecuencia',
@@ -4465,6 +4646,10 @@ export default {
   notificationsMinutesAgo: 'Hace {n} min',
   notificationsHoursAgo: 'Hace {n} h',
   notificationsDaysAgo: 'Hace {n} d',
+  notificationsPortalRegistrationTitle:
+    'Nueva alta del Client Portal',
+  notificationsPortalProfileReadyTitle:
+    'Usuario del portal listo para ficha',
   encounterRenderingClinician: 'Clínico responsable',
   encounterLocation: 'Ubicación',
   encounterModeInPerson: 'Presencial',

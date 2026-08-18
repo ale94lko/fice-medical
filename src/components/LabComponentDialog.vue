@@ -8,9 +8,9 @@
       <AppDialogHeader
         test-id="lab-component"
         :close-label="t('close')"
-        :info="t('labComponentDialogSubtitle')"
+        :info="dialogSubtitle"
         @close="onCancel">
-        {{ t('labComponentDialogTitle') }}
+        {{ dialogTitle }}
       </AppDialogHeader>
 
       <q-card-section
@@ -26,14 +26,16 @@
                 v-model="local.componentName"
                 outlined
                 hide-bottom-space
-                use-input
+                :use-input="!readonly"
                 fill-input
-                hide-selected
+                :hide-selected="!readonly"
                 input-debounce="200"
                 emit-value
                 map-options
+                :hide-dropdown-icon="readonly"
                 :options="componentOptions"
                 :placeholder="t('labComponentNamePlaceholder')"
+                :readonly="readonly"
                 :error="Boolean(errors.componentName)"
                 :error-message="errorText('componentName')"
                 :data-testid="tid.field('component-name')"
@@ -52,6 +54,7 @@
                 outlined
                 hide-bottom-space
                 :placeholder="t('labComponentValuePlaceholder')"
+                :readonly="readonly"
                 :error="Boolean(errors.value)"
                 :error-message="errorText('value')"
                 :data-testid="tid.field('value')"
@@ -70,7 +73,9 @@
                 hide-bottom-space
                 emit-value
                 map-options
-                clearable
+                :clearable="!readonly"
+                :readonly="readonly"
+                :hide-dropdown-icon="readonly"
                 :options="unitOptions"
                 :error="Boolean(errors.unit)"
                 :error-message="errorText('unit')"
@@ -89,6 +94,7 @@
                     outlined
                     hide-bottom-space
                     type="number"
+                    :readonly="readonly"
                     :error="Boolean(errors.referenceRange)"
                     :data-testid="tid.field('ref-low')"
                     @update:model-value="onRangeChange"
@@ -104,6 +110,7 @@
                     outlined
                     hide-bottom-space
                     type="number"
+                    :readonly="readonly"
                     :error="Boolean(errors.referenceRange)"
                     :data-testid="tid.field('ref-high')"
                     @update:model-value="onRangeChange"
@@ -127,14 +134,18 @@
                 hide-bottom-space
                 emit-value
                 map-options
-                clearable
+                :clearable="!readonly"
+                :readonly="readonly"
+                :hide-dropdown-icon="readonly"
                 :options="flagOptions"
                 :test-id="tid.field('flag')"
                 @update:model-value="onFlagChange"
               />
             </AddClientLabeledField>
           </div>
-          <div class="col-12">
+          <div
+            v-if="!readonly"
+            class="col-12">
             <div class="lab-component-dialog__info text-body2">
               <q-icon
                 name="info"
@@ -151,6 +162,7 @@
               :test-id="tid.field('result-date')">
               <ClientDateField
                 v-model="local.resultDate"
+                :readonly="readonly"
                 :max-today="true"
                 :min-date="minResultDate || ''"
                 :error="Boolean(errors.resultDate)"
@@ -168,6 +180,7 @@
                 outlined
                 hide-bottom-space
                 mask="##:##:##"
+                :readonly="readonly"
                 :placeholder="t('labComponentResultTimePlaceholder')"
                 :data-testid="tid.field('result-time')"
                 @blur="onResultTimeBlur"
@@ -184,6 +197,7 @@
                 hide-bottom-space
                 type="textarea"
                 autogrow
+                :readonly="readonly"
                 :maxlength="labMaxComponentNotesLength"
                 :data-testid="tid.field('notes')"
               />
@@ -191,7 +205,9 @@
           </div>
         </div>
 
-        <div class="lab-component-dialog__preview q-mt-md q-pa-md">
+        <div
+          v-if="!readonly"
+          class="lab-component-dialog__preview q-mt-md q-pa-md">
           <p class="text-caption text-weight-medium q-mb-sm">
             {{ t('labComponentPreview') }}
           </p>
@@ -234,29 +250,31 @@
           outline
           color="primary"
           class="app-btn-outline"
-          :label="t('cancel')"
-          :data-testid="tid.btn('cancel')"
+          :label="readonly ? t('close') : t('cancel')"
+          :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
           @click="onCancel"
         />
-        <q-btn
-          v-if="!editMode"
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          :label="t('labComponentSaveAnother')"
-          :data-testid="tid.btn('save-another')"
-          @click="onSave(true)"
-        />
-        <q-btn
-          no-caps
-          unelevated
-          color="primary"
-          class="app-btn-primary"
-          :label="editMode ? t('save') : t('labComponentAdd')"
-          :data-testid="tid.btn('save')"
-          @click="onSave(false)"
-        />
+        <template v-if="!readonly">
+          <q-btn
+            v-if="!editMode"
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            :label="t('labComponentSaveAnother')"
+            :data-testid="tid.btn('save-another')"
+            @click="onSave(true)"
+          />
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            :label="editMode ? t('save') : t('labComponentAdd')"
+            :data-testid="tid.btn('save')"
+            @click="onSave(false)"
+          />
+        </template>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -308,6 +326,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  readonly: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['save', 'cancel'])
@@ -316,6 +338,18 @@ const open = defineModel({ type: Boolean, default: false })
 
 const { t } = useI18n()
 const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
+
+const dialogTitle = computed(() =>
+  props.readonly
+    ? t('labComponentViewTitle')
+    : t('labComponentDialogTitle'),
+)
+
+const dialogSubtitle = computed(() =>
+  props.readonly
+    ? t('labComponentViewSubtitle')
+    : t('labComponentDialogSubtitle'),
+)
 
 const dialogBodyScrollRef = ref(null)
 const local = ref(createEmptyLabComponent())
@@ -502,6 +536,9 @@ function onCancel() {
 }
 
 async function onSave(another) {
+  if (props.readonly) {
+    return
+  }
   errors.value = validateLabComponent(local.value, {
     existingComponents: props.existingComponents,
     excludeId: props.component?.id,

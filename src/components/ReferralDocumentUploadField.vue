@@ -36,6 +36,7 @@
         type="file"
         class="insurance-card-upload__input"
         :accept="acceptAttr"
+        :disabled="readonly"
         @change="onFileInput"
       />
     </div>
@@ -220,6 +221,7 @@ function onDrop(event) {
   &--disabled {
     cursor: default;
     opacity: 0.75;
+    pointer-events: none;
   }
 
   &--drag {

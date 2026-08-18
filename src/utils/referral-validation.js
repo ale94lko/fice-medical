@@ -1,4 +1,5 @@
 import {
+  referralStatuses,
   referralTypes,
 } from 'components/constants.js'
 import {
@@ -59,6 +60,16 @@ export function validateReferralForm(referral, t) {
       errors.referredToProvider = t('referralReferredToRequired')
     }
   }
+  const status = trim(referral?.status).toUpperCase()
+  if (
+    (
+      status === referralStatuses.declined
+      || status === referralStatuses.closed
+    )
+    && !trim(referral?.statusReason)
+  ) {
+    errors.status = t('referralStatusReasonRequired')
+  }
   if (referral?.followUpRequired) {
     if (!referral?.assignedClinicianId) {
       errors.assignedClinicianId = t('referralFollowUpClinicianRequired')
@@ -80,4 +91,27 @@ export function validateReferralForm(referral, t) {
 
 export function referralFormHasErrors(errors) {
   return Object.keys(errors ?? {}).length > 0
+}
+
+/** Visual order in ReferralDialog (incoming/outgoing sections). */
+export const REFERRAL_FORM_FIELD_ORDER = [
+  'type',
+  'referralDate',
+  'status',
+  'referringProvider',
+  'referredToProvider',
+  'phone',
+  'email',
+  'reason',
+  'assignedClinicianId',
+]
+
+export function firstReferralFormErrorKey(errors) {
+  const row = errors ?? {}
+  const ordered = REFERRAL_FORM_FIELD_ORDER.find(key => row[key])
+  if (ordered) {
+    return ordered
+  }
+
+  return Object.keys(row)[0] || null
 }

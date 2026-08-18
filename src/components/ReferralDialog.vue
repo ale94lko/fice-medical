@@ -18,7 +18,9 @@
         </span>
       </AppDialogHeader>
 
-      <q-card-section class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
+      <q-card-section
+        ref="dialogBodyRef"
+        class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
         <div class="referral-dialog__section">
           <SubsectionHeading
             icon="info"
@@ -65,7 +67,7 @@
                 required
                 :test-id="tid.field('status')">
                 <FormSelect
-                  v-model="local.status"
+                  :model-value="local.status"
                   outlined
                   hide-bottom-space
                   emit-value
@@ -75,6 +77,7 @@
                   :error="Boolean(errors.status)"
                   :error-message="errors.status"
                   :test-id="tid.field('status')"
+                  @update:model-value="onStatusChange"
                 />
               </AddClientLabeledField>
             </div>
@@ -107,23 +110,22 @@
                 required
                 :test-id="tid.field('referring-provider')">
                 <q-select
-                  v-model="local.referringProvider"
+                  :model-value="local.referringProvider"
                   outlined
                   hide-bottom-space
                   use-input
                   fill-input
                   hide-selected
                   input-debounce="0"
-                  emit-value
-                  map-options
-                  new-value-mode="add-unique"
                   :readonly="readonly"
-                  :options="providerOptions"
+                  :options="filteredProviderOptions"
                   :placeholder="t('referralReferringProviderPlaceholder')"
                   :error="Boolean(errors.referringProvider)"
                   :error-message="errors.referringProvider"
                   :data-testid="tid.field('referring-provider')"
-                  @new-value="onNewProvider"
+                  @filter="onProviderFilter"
+                  @input-value="onReferringProviderInput"
+                  @update:model-value="onReferringProviderSelect"
                 />
               </AddClientLabeledField>
             </div>
@@ -208,23 +210,22 @@
                 :label="t('referralReferredToProvider')"
                 :test-id="tid.field('referred-to-provider')">
                 <q-select
-                  v-model="local.referredToProvider"
+                  :model-value="local.referredToProvider"
                   outlined
                   hide-bottom-space
                   use-input
                   fill-input
                   hide-selected
                   input-debounce="0"
-                  emit-value
-                  map-options
-                  new-value-mode="add-unique"
                   :readonly="readonly"
-                  :options="providerOptions"
+                  :options="filteredProviderOptions"
                   :placeholder="t('referralReferredToProviderPlaceholder')"
                   :error="Boolean(errors.referredToProvider)"
                   :error-message="errors.referredToProvider"
                   :data-testid="tid.field('referred-to-provider')"
-                  @new-value="onNewProvider"
+                  @filter="onProviderFilter"
+                  @input-value="onReferredToProviderInput"
+                  @update:model-value="onReferredToProviderSelect"
                 />
               </AddClientLabeledField>
             </div>
@@ -287,24 +288,13 @@
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12">
               <AddClientLabeledField
                 :label="t('referralDiagnosisProblem')"
                 :test-id="tid.field('diagnosis')">
-                <q-select
-                  v-model="local.diagnosisProblem"
-                  outlined
-                  hide-bottom-space
-                  use-input
-                  fill-input
-                  hide-selected
-                  input-debounce="0"
-                  new-value-mode="add-unique"
+                <ReferralDiagnosesField
+                  v-model="local.diagnoses"
                   :readonly="readonly"
-                  :options="diagnosisOptions"
-                  :placeholder="t('referralDiagnosisPlaceholder')"
-                  :data-testid="tid.field('diagnosis')"
-                  @new-value="onNewDiagnosis"
                 />
               </AddClientLabeledField>
             </div>
@@ -344,23 +334,26 @@
           </div>
         </div>
 
-        <div class="referral-dialog__section q-mt-lg">
+        <div class="insurance-dialog__card-section q-mt-lg">
           <SubsectionHeading
             icon="attach_file"
-            :title="t('referralSectionDocumentsOptional')"
+            :title="t('labAttachmentsTitle')"
           />
-          <div class="q-mt-md">
-            <ReferralDocumentUploadField
-              :attachments="documentRows"
-              :readonly="readonly || !canUploadDocuments || !canUploadYet"
-              :uploading="documentUploading"
-              :hint="!canUploadYet ? t('referralDocumentsAfterSave') : ''"
-              :test-id="tid.field('documents')"
-              @upload="emit('upload-document', $event)"
-              @download="emit('download-document', $event)"
-              @remove="emit('delete-document', $event)"
-            />
-          </div>
+          <p
+            v-if="!canUploadYet"
+            class="text-caption text-grey-7 q-mb-none q-mt-sm">
+            {{ t('referralDocumentsAfterSave') }}
+          </p>
+          <LabAttachmentUploadField
+            class="q-mt-md"
+            :attachments="documentRows"
+            :readonly="attachmentsReadonly"
+            :test-id="tid.field('documents')"
+            @upload="onUploadDocument"
+            @remove="emit('delete-document', $event)"
+            @preview="onPreviewDocument"
+            @download="emit('download-document', $event)"
+          />
         </div>
       </q-card-section>
 
@@ -370,6 +363,7 @@
         <q-btn
           no-caps
           outline
+          type="button"
           color="primary"
           class="app-btn-outline"
           :label="t('close')"
@@ -380,6 +374,7 @@
           v-if="!readonly"
           no-caps
           unelevated
+          type="button"
           color="primary"
           class="app-btn-primary"
           :loading="saving"
@@ -389,12 +384,28 @@
         />
       </q-card-actions>
     </q-card>
+
+    <ClientAttachmentPreviewDialog
+      v-model="previewOpen"
+      :file="previewFile"
+    />
   </q-dialog>
+
+  <CarePlanReasonDialog
+    v-model="reasonOpen"
+    :title="reasonTitle"
+    :message="reasonMessage"
+    :reason-label="reasonLabel"
+    :confirm-label="t('save')"
+    reason-field="status-reason"
+    @confirm="onStatusReasonConfirm"
+  />
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormFieldLabel from 'components/FormFieldLabel.vue'
@@ -403,10 +414,16 @@ import ClientDateField from 'components/ClientDateField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import FormToggle from 'components/FormToggle.vue'
-import ReferralDocumentUploadField from
-  'components/ReferralDocumentUploadField.vue'
+import ClientAttachmentPreviewDialog from
+  'components/ClientAttachmentPreviewDialog.vue'
+import LabAttachmentUploadField from
+  'components/LabAttachmentUploadField.vue'
+import ReferralDiagnosesField from
+  'components/ReferralDiagnosesField.vue'
 import ReferralPrioritySelect from 'components/ReferralPrioritySelect.vue'
+import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import {
+  quasarNotifyTypes,
   referralOrganizationMaxLength,
   referralPriorities,
   referralReasonMaxLength,
@@ -421,6 +438,7 @@ import {
 } from 'src/utils/referral-orders.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
 import {
+  firstReferralFormErrorKey,
   referralFormHasErrors,
   validateReferralForm,
 } from 'src/utils/referral-validation.js'
@@ -468,17 +486,15 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const $q = useQuasar()
 const local = ref(createEmptyReferral())
 const errors = ref({})
-
-const diagnosisOptions = [
-  'Generalized Anxiety Disorder',
-  'Major Depressive Disorder',
-  'PTSD',
-  'ADHD',
-  'Bipolar Disorder',
-  'Substance Use Disorder',
-]
+const dialogBodyRef = ref(null)
+const filteredProviderOptions = ref([])
+const reasonOpen = ref(false)
+const pendingStatus = ref(null)
+const previewOpen = ref(false)
+const previewFile = ref(null)
 
 const open = computed({
   get: () => props.modelValue,
@@ -494,6 +510,11 @@ const statusReadonly = computed(() =>
   || local.value.status === referralStatuses.declined,
 )
 const canUploadYet = computed(() => Boolean(local.value.id))
+const attachmentsReadonly = computed(() =>
+  readonly.value
+  || !props.canUploadDocuments
+  || !canUploadYet.value,
+)
 
 const dialogTitle = computed(() => {
   if (props.mode === 'view') {
@@ -535,17 +556,39 @@ const statusOptions = computed(() =>
 )
 
 const providerOptions = computed(() =>
-  (props.clinicianOptions ?? []).map(option => ({
-    label: option.label,
-    value: option.label,
-  })),
+  (props.clinicianOptions ?? [])
+    .map(option => String(option.label ?? option.name ?? '').trim())
+    .filter(Boolean),
 )
+
+const reasonTitle = computed(() => (
+  pendingStatus.value === referralStatuses.declined
+    ? t('referralDeclineReasonTitle')
+    : t('referralCloseReasonTitle')
+))
+
+const reasonMessage = computed(() => (
+  pendingStatus.value === referralStatuses.declined
+    ? t('referralDeclineReasonMessage')
+    : t('referralCloseReasonMessage')
+))
+
+const reasonLabel = computed(() => (
+  pendingStatus.value === referralStatuses.declined
+    ? t('referralDeclineReasonLabel')
+    : t('referralCloseReasonLabel')
+))
 
 const documentRows = computed(() =>
   (local.value.files ?? local.value.documents ?? []).map(doc => ({
+    ...doc,
     id: doc.id,
     name: doc.originalFilename ?? doc.fileName ?? doc.name,
-    size: doc.fileSize,
+    originalFilename: doc.originalFilename ?? doc.fileName ?? doc.name,
+    contentType: doc.contentType
+      ?? doc.mimeType
+      ?? doc.mediaType
+      ?? '',
   })),
 )
 
@@ -553,15 +596,31 @@ watch(
   () => [props.modelValue, props.referral, props.mode],
   () => {
     if (!props.modelValue) {
+      previewOpen.value = false
+      previewFile.value = null
+
       return
     }
     local.value = cloneReferral(props.referral ?? createEmptyReferral())
+    if (!Array.isArray(local.value.diagnoses)) {
+      local.value.diagnoses = []
+    }
     if (!local.value.priority) {
       local.value.priority = referralPriorities.routine
     }
+    filteredProviderOptions.value = [...providerOptions.value]
     errors.value = {}
   },
   { immediate: true },
+)
+
+watch(
+  reasonOpen,
+  open => {
+    if (!open && pendingStatus.value) {
+      pendingStatus.value = null
+    }
+  },
 )
 
 function enumLabel(prefix, token) {
@@ -574,12 +633,70 @@ function enumLabel(prefix, token) {
   return token
 }
 
-function onNewProvider(value, done) {
-  done(value, 'add-unique')
+function onProviderFilter(val, update) {
+  update(() => {
+    const needle = String(val ?? '').trim().toLowerCase()
+    const list = providerOptions.value
+    filteredProviderOptions.value = needle
+      ? list.filter(label => label.toLowerCase().includes(needle))
+      : [...list]
+  })
 }
 
-function onNewDiagnosis(value, done) {
-  done(value, 'add-unique')
+function onReferringProviderInput(value) {
+  local.value.referringProvider = String(value ?? '')
+}
+
+function onReferringProviderSelect(value) {
+  local.value.referringProvider = String(value ?? '')
+}
+
+function onReferredToProviderInput(value) {
+  local.value.referredToProvider = String(value ?? '')
+}
+
+function onReferredToProviderSelect(value) {
+  local.value.referredToProvider = String(value ?? '')
+}
+
+function onStatusChange(next) {
+  const status = String(next ?? '').toUpperCase()
+  const current = String(local.value.status ?? '').toUpperCase()
+  if (status === current) {
+    return
+  }
+  if (
+    status === referralStatuses.declined
+    || status === referralStatuses.closed
+  ) {
+    pendingStatus.value = status
+    reasonOpen.value = true
+
+    return
+  }
+  local.value.status = status
+  local.value.statusReason = ''
+}
+
+function onStatusReasonConfirm(reason) {
+  if (!pendingStatus.value) {
+    return
+  }
+  local.value.status = pendingStatus.value
+  local.value.statusReason = String(reason ?? '').trim()
+  pendingStatus.value = null
+}
+
+function onUploadDocument(file) {
+  if (!canUploadYet.value || !file) {
+    return
+  }
+  emit('upload-document', file)
+}
+
+function onPreviewDocument(file) {
+  previewFile.value = file
+  previewOpen.value = true
 }
 
 function onPhoneInput(value) {
@@ -609,10 +726,76 @@ function onCancel() {
   open.value = false
 }
 
+function dialogBodyEl() {
+  const node = dialogBodyRef.value
+  if (!node) {
+    return null
+  }
+  if (node instanceof Element) {
+    return node
+  }
+
+  return node.$el ?? null
+}
+
+const REFERRAL_ERROR_FIELD_IDS = {
+  type: 'type',
+  referralDate: 'date',
+  status: 'status',
+  referringProvider: 'referring-provider',
+  referredToProvider: 'referred-to-provider',
+  phone: 'phone',
+  email: 'email',
+  reason: 'reason',
+  assignedClinicianId: 'clinician',
+}
+
+function nativeControl(field) {
+  return field?.querySelector?.(
+    'input:not([type="hidden"]), textarea, select, .q-field__native',
+  ) ?? null
+}
+
+function focusFirstInvalidField(nextErrors) {
+  const errorKey = firstReferralFormErrorKey(nextErrors)
+  const fieldName = REFERRAL_ERROR_FIELD_IDS[errorKey]
+  const root = dialogBodyEl()
+  if (!fieldName || !root?.querySelector) {
+    return
+  }
+  const field = root.querySelector(
+    `[data-testid="${tid.field(fieldName)}"]`,
+  )
+  if (!field) {
+    return
+  }
+  field.scrollIntoView({
+    block: 'center',
+    behavior: 'smooth',
+  })
+  const control = nativeControl(field)
+  if (control && typeof control.focus === 'function') {
+    control.focus({ preventScroll: true })
+  }
+}
+
 function onSave() {
   const nextErrors = validateReferralForm(local.value, t)
   errors.value = nextErrors
   if (referralFormHasErrors(nextErrors)) {
+    const errorKey = firstReferralFormErrorKey(nextErrors)
+    const firstError = errorKey ? nextErrors[errorKey] : null
+    if (firstError) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: firstError,
+        position: 'top',
+      })
+    }
+    void nextTick(() => {
+      focusFirstInvalidField(nextErrors)
+    })
+
     return
   }
   emit('save', cloneReferral(local.value))

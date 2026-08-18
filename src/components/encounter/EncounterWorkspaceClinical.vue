@@ -147,15 +147,15 @@
       />
     </EncounterClinicalAllRecordsDialog>
 
-    <ModalComponent
+    <CarePlanReasonDialog
       v-model="deleteDialogOpen"
-      test-id="encounter-vitals-delete"
       :title="t('vitalsDeleteTitle')"
       :message="t('vitalsDeleteMessage')"
-      :confirm-text="t('remove')"
-      :cancel-text="t('cancel')"
+      :hint="t('vitalsDeleteReasonHint')"
+      :reason-label="t('vitalsDeleteReasonLabel')"
+      :confirm-label="t('delete')"
+      reason-field="vitals-delete-reason"
       @confirm="confirmDeleteVitals"
-      @cancel="deleteDialogOpen = false"
     />
   </div>
 </template>
@@ -169,9 +169,9 @@ import {
   quasarNotifyTypes,
 } from 'components/constants.js'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
-import ModalComponent from 'components/ModalComponent.vue'
 import VitalsHistoryTable from 'components/VitalsHistoryTable.vue'
 import VitalsRecordDialog from 'components/VitalsRecordDialog.vue'
+import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import EncounterClinicalAllRecordsDialog from
   'components/encounter/EncounterClinicalAllRecordsDialog.vue'
 import EncounterClinicalAssessmentsPanel from
@@ -199,6 +199,7 @@ import {
 } from 'src/utils/encounter-api.js'
 import {
   createVital,
+  deleteVital,
   listVitals,
   updateVital,
 } from 'src/utils/vitals-api.js'
@@ -463,34 +464,40 @@ function openDeleteVitals(row) {
   if (!props.canEditVitals) {
     return
   }
-  if (row?.apiId != null && String(row.apiId).trim()) {
-    $q.notify({
-      type: quasarNotifyTypes.warning,
-      message: t('vitalsDeleteUnavailable'),
-      position: 'top',
-    })
-
-    return
-  }
   deletingEntry.value = row
   deleteDialogOpen.value = true
 }
 
-function confirmDeleteVitals() {
+async function confirmDeleteVitals(reason) {
   const row = deletingEntry.value
-  deleteDialogOpen.value = false
-  if (!row) {
+  deletingEntry.value = null
+  const trimmedReason = String(reason ?? '').trim()
+  if (!row || !trimmedReason) {
     return
   }
-  vitalsEntries.value = vitalsEntries.value.filter(
-    item => String(item.id) !== String(row.id),
-  )
-  if (editingEntry.value?.id === row.id) {
-    editingEntry.value = null
-    recordDialogOpen.value = false
+  const clientId = clientKey.value
+  const apiId = row.apiId
+  try {
+    if (clientId && apiId != null && String(apiId).trim()) {
+      await deleteVital(clientId, apiId, trimmedReason)
+    }
+    vitalsEntries.value = vitalsEntries.value.filter(
+      item => String(item.id) !== String(row.id),
+    )
+    allVitalsEntries.value = allVitalsEntries.value.filter(
+      item => String(item.id) !== String(row.id),
+    )
+    if (editingEntry.value?.id === row.id) {
+      editingEntry.value = null
+      recordDialogOpen.value = false
+    }
+    notifySuccess(t('vitalsDeletedSuccess'))
+    emit('changed')
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error, 'vitalsDeleteError')
+    }
   }
-  deletingEntry.value = null
-  emit('changed')
 }
 
 function upsertLocalEntry(entry) {

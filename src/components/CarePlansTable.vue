@@ -130,7 +130,7 @@
           </q-tooltip>
         </q-btn>
           <q-btn
-            v-if="canChangeStatus(row)"
+            v-if="canCompleteRow(row)"
             flat
             round
             dense
@@ -150,7 +150,7 @@
           </q-tooltip>
         </q-btn>
           <q-btn
-            v-if="canChangeStatus(row)"
+            v-if="canArchiveRow(row)"
             flat
             round
             dense
@@ -159,7 +159,7 @@
             :data-testid="tid.rowArchive(row.id)"
             :size="siteBreakpoints.SM"
             :aria-label="t('carePlanActionArchive')"
-            @click="emit('status', row, 'ARCHIVED')"
+            @click="requestStatus(row, 'ARCHIVED')"
           >
           <q-tooltip
             class="app-info-tooltip"
@@ -167,6 +167,26 @@
             self="bottom middle"
             :offset="[0, 6]">
             {{ t('carePlanActionArchive') }}
+          </q-tooltip>
+        </q-btn>
+          <q-btn
+            v-if="canCancelRow(row)"
+            flat
+            round
+            dense
+            class="app-btn-icon-action"
+            icon="cancel"
+            :data-testid="tid.rowCancel(row.id)"
+            :size="siteBreakpoints.SM"
+            :aria-label="t('carePlanActionCancel')"
+            @click="requestStatus(row, 'CANCELLED')"
+          >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('carePlanActionCancel') }}
           </q-tooltip>
         </q-btn>
         </div>
@@ -181,15 +201,26 @@
     <q-icon name="inbox" size="md" />
     <span>{{ emptyLabel }}</span>
   </div>
+
+  <CarePlanReasonDialog
+    v-model="reasonOpen"
+    :title="reasonTitle"
+    :message="reasonMessage"
+    :reason-label="reasonLabel"
+    :confirm-label="reasonConfirm"
+    :reason-field="reasonField"
+    @confirm="onReasonConfirm"
+  />
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import CarePlanProgressCell from 'components/CarePlanProgressCell.vue'
+import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import {
   carePlanProblemListDisplayMaxLength,
   carePlanStatuses,
@@ -198,6 +229,11 @@ import {
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
+import {
+  isCarePlanActive,
+  isCarePlanDraft,
+  isCarePlanTerminal,
+} from 'src/utils/care-plan-lifecycle.js'
 
 const props = defineProps({
   rows: {
@@ -277,8 +313,8 @@ const columns = computed(() => [
     field: row => row.id,
     sortable: false,
     required: true,
-    headerStyle: 'min-width: 180px',
-    style: 'min-width: 180px',
+    headerStyle: 'min-width: 240px',
+    style: 'min-width: 240px',
   },
 ])
 
@@ -314,6 +350,9 @@ function statusLabel(status) {
 }
 
 function statusVariant(status) {
+  if (status === carePlanStatuses.draft) {
+    return 'pending'
+  }
   if (status === carePlanStatuses.active) {
     return 'active'
   }
@@ -323,24 +362,82 @@ function statusVariant(status) {
   if (status === carePlanStatuses.archived) {
     return 'inactive'
   }
+  if (status === carePlanStatuses.cancelled) {
+    return 'cancelled'
+  }
 
   return 'other'
 }
 
 function canEditRow(row) {
-  return props.canEdit
-    && !row.signed
-    && row.status !== carePlanStatuses.completed
-    && row.status !== carePlanStatuses.archived
+  return props.canEdit && !isCarePlanTerminal(row.status)
 }
 
 function canSignRow(row) {
   return props.canSign
     && !row.signed
-    && row.status === carePlanStatuses.active
+    && (isCarePlanDraft(row.status)
+      || (isCarePlanActive(row.status) && !row.signed))
 }
 
-function canChangeStatus(row) {
-  return props.canEdit && row.status === carePlanStatuses.active
+function canCompleteRow(row) {
+  return props.canEdit && isCarePlanActive(row.status)
+}
+
+function canArchiveRow(row) {
+  return props.canEdit && isCarePlanActive(row.status)
+}
+
+function canCancelRow(row) {
+  return props.canEdit && !isCarePlanTerminal(row.status)
+}
+
+const reasonOpen = ref(false)
+const pendingRow = ref(null)
+const pendingStatus = ref('')
+
+const isArchiveReason = computed(
+  () => pendingStatus.value === carePlanStatuses.archived,
+)
+
+const reasonTitle = computed(() =>
+  isArchiveReason.value
+    ? t('carePlanArchiveTitle')
+    : t('carePlanCancelTitle'),
+)
+
+const reasonMessage = computed(() =>
+  isArchiveReason.value
+    ? t('carePlanArchiveMessage')
+    : t('carePlanCancelMessage'),
+)
+
+const reasonLabel = computed(() =>
+  isArchiveReason.value
+    ? t('carePlanArchiveReasonLabel')
+    : t('carePlanCancelReasonLabel'),
+)
+
+const reasonConfirm = computed(() =>
+  isArchiveReason.value
+    ? t('carePlanActionArchive')
+    : t('carePlanActionCancel'),
+)
+
+const reasonField = computed(() =>
+  isArchiveReason.value ? 'archive-reason' : 'cancel-reason',
+)
+
+function requestStatus(row, status) {
+  pendingRow.value = row
+  pendingStatus.value = status
+  reasonOpen.value = true
+}
+
+function onReasonConfirm(reason) {
+  if (!pendingRow.value || !pendingStatus.value) {
+    return
+  }
+  emit('status', pendingRow.value, pendingStatus.value, reason)
 }
 </script>

@@ -197,6 +197,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import {
+  clientInsuranceCardExtensions,
   clientInsuranceCardMimeTypes,
   clientInsuranceMaxCardFileBytes,
   quasarNotifyTypes,
@@ -243,7 +244,9 @@ const streamReady = ref(false)
 const stream = ref(null)
 const objectPreviewUrl = ref('')
 
-const acceptAttr = 'image/png,image/jpeg,.png,.jpg,.jpeg,.pdf'
+const acceptAttr = clientInsuranceCardExtensions
+  .map(ext => `.${ext}`)
+  .join(',')
 
 const storedFileId = computed(() => {
   const id = Number(props.modelValue?.fileId)
@@ -487,15 +490,47 @@ function onFileInput(event) {
   }
 }
 
+function fileExtension(fileName) {
+  const name = String(fileName ?? '').trim().toLowerCase()
+  const dot = name.lastIndexOf('.')
+  if (dot < 0 || dot === name.length - 1) {
+    return ''
+  }
+
+  return name.slice(dot + 1)
+}
+
+function isAllowedInsuranceCardFile(file) {
+  const ext = fileExtension(file?.name)
+  if (!ext || !clientInsuranceCardExtensions.includes(ext)) {
+    return false
+  }
+  const type = String(file?.type ?? '').trim().toLowerCase()
+  if (!type) {
+    return true
+  }
+
+  return clientInsuranceCardMimeTypes.includes(type)
+}
+
+function notifyCardError(message) {
+  localError.value = message
+  $q.notify({
+    type: quasarNotifyTypes.negative,
+    message,
+    position: 'top',
+  })
+}
+
 function assignFile(file) {
   localError.value = ''
-  if (!clientInsuranceCardMimeTypes.includes(file.type)) {
-    localError.value = t('insuranceCardFileType')
+  if (!file || !isAllowedInsuranceCardFile(file)) {
+    notifyCardError(t('insuranceCardFileType'))
 
     return
   }
   if (file.size > clientInsuranceMaxCardFileBytes) {
-    localError.value = t('insuranceCardFileSize')
+    notifyCardError(t('insuranceCardFileSize'))
 
     return
   }

@@ -2,6 +2,7 @@
   <q-dialog
     v-model="open"
     persistent
+    class="app-nested-dialog"
     transition-show="scale"
     transition-hide="scale">
     <q-card class="insurance-dialog app-dialog-card">
@@ -377,9 +378,10 @@ function onCancel() {
     }
 
     &--last {
-      font-size: 1.25rem;
-      font-weight: 700;
-      line-height: 1.2;
+      font-size: 1.5rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
     }
 
     &--none {

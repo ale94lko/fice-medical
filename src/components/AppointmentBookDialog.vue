@@ -396,6 +396,13 @@ const props = defineProps({
   appointment: { type: Object, default: null },
   saving: { type: Boolean, default: false },
   bookingHint: { type: Object, default: null },
+  initialServiceProcedureIds: {
+    type: Array,
+    default: () => [],
+  },
+  initialClinicianId: { type: [String, Number], default: null },
+  initialNotes: { type: String, default: '' },
+  referralId: { type: [String, Number], default: null },
 })
 
 const emit = defineEmits([
@@ -1144,6 +1151,34 @@ function addService(serviceId) {
   void onSchedulingInputsChanged()
 }
 
+function applyInitialRequestPrefill() {
+  const ids = (props.initialServiceProcedureIds ?? [])
+    .map(Number)
+    .filter(id => Number.isFinite(id) && id > 0)
+  const seen = new Set()
+  const nextIds = []
+  for (const id of ids) {
+    if (!seen.has(id) && serviceCatalog.value.some(row => row.id === id)) {
+      seen.add(id)
+      nextIds.push(id)
+    }
+  }
+  if (nextIds.length) {
+    serviceLines.value = buildServiceLinesFromCatalog(
+      serviceCatalog.value,
+      nextIds,
+    )
+  }
+  const clinicianId = Number(props.initialClinicianId)
+  if (Number.isFinite(clinicianId) && clinicianId > 0) {
+    draft.value.clinicianId = clinicianId
+  }
+  const notes = String(props.initialNotes ?? '').trim()
+  if (notes) {
+    draft.value.notes = notes
+  }
+}
+
 function removeService(index) {
   serviceLines.value = serviceLines.value.filter((_, i) => i !== index)
   void onSchedulingInputsChanged()
@@ -1243,6 +1278,18 @@ function validateDraft() {
   }
   if (!selectedWindow.value) {
     next.availability = t('appointmentAvailabilityRequired')
+  } else if (props.mode === 'book') {
+    const windowMinutes = selectedWindowDurationMinutes()
+    if (
+      Number.isFinite(windowMinutes)
+      && Number.isFinite(totalDurationMinutes.value)
+      && totalDurationMinutes.value > windowMinutes
+    ) {
+      next.availability = t('appointmentSelectedRangeTooShort', {
+        duration: totalDurationMinutes.value,
+        range: windowMinutes,
+      })
+    }
   }
   if (draft.value.notes.length > appointmentNotesMaxLength) {
     next.notes = t('appointmentNotesMaxLength', {
@@ -1304,6 +1351,24 @@ function buildRecurrencePayload() {
   /* eslint-enable camelcase */
 }
 
+function selectedWindowDurationMinutes() {
+  const window = selectedWindow.value
+  if (!window) {
+    return null
+  }
+  const fromField = Number(window.durationMin)
+  if (Number.isFinite(fromField) && fromField > 0) {
+    return fromField
+  }
+  const start = Date.parse(window.startAtUtc)
+  const end = Date.parse(window.endAtUtc)
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+    return null
+  }
+
+  return Math.round((end - start) / 60000)
+}
+
 function buildBookPayload() {
   /* eslint-disable camelcase -- API book payload */
   const payload = {
@@ -1329,6 +1394,11 @@ function buildBookPayload() {
 
   if (allowOverScheduleBlocks.value) {
     payload.allow_over_schedule_blocks = true
+  }
+
+  const referralId = Number(props.referralId)
+  if (Number.isFinite(referralId) && referralId > 0) {
+    payload.referral_id = referralId
   }
 
   return payload
@@ -1369,6 +1439,7 @@ watch(
     clearAvailability()
     resetClientSearchState()
     await loadFormOptions()
+    applyInitialRequestPrefill()
     void bootstrapClientPickerOptions()
     await onSchedulingInputsChanged()
   },

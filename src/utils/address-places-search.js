@@ -14,6 +14,7 @@ import {
 import {
   isPhotonConfigured,
   mapPhotonFeatureToPharmacyFields,
+  pharmacyResultMatchesState,
   searchPharmaciesWithPhoton,
   searchAddressesWithPhoton,
 } from 'src/utils/photon-pharmacy.js'
@@ -29,11 +30,27 @@ function withProvider(results, provider) {
   }))
 }
 
+function filterPlacesByClinicState(results, state) {
+  const token = String(state ?? '').trim()
+  if (!token) {
+    return results ?? []
+  }
+
+  return (results ?? []).filter(row =>
+    pharmacyResultMatchesState(row, token),
+  )
+}
+
 /**
- * @param {{ q?: string, kind?: 'address' | 'pharmacy' }} filters
+ * @param {{
+ *   q?: string,
+ *   kind?: 'address' | 'pharmacy',
+ *   state?: string,
+ * }} filters
  */
 export async function searchPlaces(filters = {}) {
   const kind = filters.kind === 'pharmacy' ? 'pharmacy' : 'address'
+  let results = []
   if (isGooglePlacesConfigured()) {
     try {
       const googleResults = withProvider(
@@ -43,16 +60,22 @@ export async function searchPlaces(filters = {}) {
         'google',
       )
       if (googleResults.length) {
-        return googleResults
+        results = googleResults
       }
     } catch {
       // Fall through to Photon.
     }
   }
+  if (!results.length) {
+    results = kind === 'pharmacy'
+      ? await searchPharmaciesWithPhoton(filters)
+      : await searchAddressesWithPhoton(filters)
+  }
+  if (kind !== 'pharmacy') {
+    return results
+  }
 
-  return kind === 'pharmacy'
-    ? searchPharmaciesWithPhoton(filters)
-    : searchAddressesWithPhoton(filters)
+  return filterPlacesByClinicState(results, filters.state)
 }
 
 /** @deprecated Use searchPlaces({ kind: 'pharmacy' }) */

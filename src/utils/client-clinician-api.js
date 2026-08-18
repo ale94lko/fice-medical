@@ -1,7 +1,8 @@
 /* eslint-disable camelcase -- API payloads use snake_case */
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
-import { fetchCliniciansListPage } from 'src/utils/clinicians-api.js'
+import { fetchCliniciansListPage, paginationTotalPages } from
+  'src/utils/clinicians-api.js'
 import {
   mapClinicianListRowToAssignment,
   normalizeAssignedClinician,
@@ -74,7 +75,7 @@ export async function listActiveCliniciansForAssignment() {
       status: 'ACTIVE',
     })
     all.push(...items)
-    totalPages = Number(pagination?.total_pages ?? 1) || 1
+    totalPages = paginationTotalPages(pagination)
     if (!items.length) {
       break
     }
@@ -82,6 +83,41 @@ export async function listActiveCliniciansForAssignment() {
   }
 
   return mapAvailableClinicians(all)
+}
+
+export async function mergeClientClinicians(clientId, clinicianIds) {
+  const current = await listClientClinicians(clientId)
+  const nextIds = [...new Set([
+    ...current.map(row => row.id),
+    ...(Array.isArray(clinicianIds) ? clinicianIds : []),
+  ])]
+
+  return replaceClientClinicians(clientId, nextIds)
+}
+
+export async function mergeClientCliniciansForMany(
+  clientIds,
+  clinicianIds,
+) {
+  const ids = (Array.isArray(clientIds) ? clientIds : [])
+    .map(id => String(id ?? '').trim())
+    .filter(Boolean)
+  const failures = []
+  for (const clientId of ids) {
+    try {
+      await mergeClientClinicians(clientId, clinicianIds)
+    } catch (error) {
+      failures.push({ clientId, error })
+    }
+  }
+  if (failures.length) {
+    const error = new Error('assign-clinicians-partial-failure')
+    error.failures = failures
+    error.savedCount = ids.length - failures.length
+    throw error
+  }
+
+  return ids.length
 }
 
 export function mapAvailableClinicians(rows) {

@@ -6,6 +6,14 @@
 /** Letters-only field (names, city-like text): letters + spaces. */
 export const LETTERS_AND_SPACES_RE = /^[\p{L}\s]+$/u
 
+/**
+ * Person / subscriber name: letters (incl. ñ and accents), spaces,
+ * apostrophe, hyphen and period. No digits or other symbols.
+ */
+export const PERSON_NAME_RE = /^[\p{L} '.-]+$/u
+
+export const NON_PERSON_NAME_CHARS_RE = /[^\p{L} '.-]/gu
+
 /** Same class for sanitizing while typing (strip disallowed chars). */
 export const NON_LETTERS_OR_SPACES_RE = /[^\p{L}\s]/gu
 

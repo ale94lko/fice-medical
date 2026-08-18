@@ -122,6 +122,28 @@
               {{ t('calendar') }}
             </q-tooltip>
           </q-item>
+          <q-item
+            v-if="showCalendarMenu"
+            clickable
+            v-ripple
+            to="/appointment-requests"
+            :data-testid="layoutTestIds.navAppointmentRequests"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="event_available" />
+            </q-item-section>
+            <q-item-section>
+              {{ t('appointmentRequestsNav') }}
+            </q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('appointmentRequestsNav') }}
+            </q-tooltip>
+          </q-item>
           <q-expansion-item
             v-if="accordionMenu && showClientMenu"
             v-model="clientMenuExpanded"
@@ -199,6 +221,28 @@
               :offset="[8, 0]"
               class="app-drawer-tooltip">
               {{ t('client') }}
+            </q-tooltip>
+          </q-item>
+          <q-item
+            v-if="showPortalRegistrationsNav"
+            clickable
+            v-ripple
+            to="/clients/portal-registrations"
+            :data-testid="layoutTestIds.navPortalRegistrations"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="person_search" />
+            </q-item-section>
+            <q-item-section>
+              {{ t('portalRegistrationsNav') }}
+            </q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('portalRegistrationsNav') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -1001,9 +1045,18 @@ const {
 } = useMainNavPermissions()
 const activeClass = computed(() => 'app-nav-item--active')
 
+const isPortalRegistrationsActive = computed(() =>
+  route.path.startsWith('/clients/portal-registrations'),
+)
+
 const isClientActive = computed(() => {
   return route.path.startsWith('/clients')
+    && !isPortalRegistrationsActive.value
 })
+
+const showPortalRegistrationsNav = computed(
+  () => showClientList.value || showClientAdd.value,
+)
 
 const isStaffActive = computed(() => route.path.startsWith('/staff'))
 

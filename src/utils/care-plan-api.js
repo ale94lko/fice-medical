@@ -1,11 +1,15 @@
 import { apiInstance } from 'boot/axios'
-import { apiPaths } from 'components/constants.js'
+import {
+  apiPaths,
+  carePlanGoalStatuses,
+} from 'components/constants.js'
 import {
   carePlanGoalToApiPayload,
   carePlanToApiPayload,
   interventionToApiPayload,
   mapCarePlansListFromApi,
   normalizeCarePlanDetail,
+  normalizeCarePlanGoal,
   normalizeCarePlanSummary,
   outcomeMeasureToApiPayload,
 } from 'src/utils/care-plan-normalize.js'
@@ -33,72 +37,138 @@ function parseOptionalNumber(value) {
   return Number.isFinite(num) ? num : null
 }
 
-async function syncCarePlanChildren(clientId, planId, plan) {
-  for (const goal of plan.goals ?? []) {
-    const goalPayload = carePlanGoalToApiPayload(goal)
-    let goalId = goal.id
-    if (isTemporaryCarePlanId(goalId)) {
-      const goalRes = await apiInstance.post(
-        apiPaths.clientCarePlanGoals(clientId, planId),
-        goalPayload,
+function resolveMappedId(id, idMap) {
+  if (id == null) {
+    return id
+  }
+  const mapped = idMap.get(String(id))
+
+  return mapped ?? id
+}
+
+async function persistGoalChildren(
+  clientId,
+  planId,
+  goalId,
+  goal,
+  createOnly,
+) {
+  for (const measure of goal.outcomeMeasures ?? []) {
+    const measurePayload = outcomeMeasureToApiPayload(measure)
+    if (isTemporaryCarePlanId(measure.id)) {
+      const measureRes = await apiInstance.post(
+        apiPaths.clientCarePlanOutcomeMeasures(
+          clientId,
+          planId,
+          goalId,
+        ),
+        measurePayload,
       )
-      goalId = unwrapData(goalRes.data)?.id ?? goalId
-      goal.id = goalId
-    } else {
+      measure.id = unwrapData(measureRes.data)?.id ?? measure.id
+    } else if (!createOnly) {
       await apiInstance.patch(
-        apiPaths.clientCarePlanGoalById(clientId, planId, goalId),
-        goalPayload,
+        apiPaths.clientCarePlanOutcomeMeasureById(
+          clientId,
+          planId,
+          goalId,
+          measure.id,
+        ),
+        measurePayload,
       )
     }
-    for (const measure of goal.outcomeMeasures ?? []) {
-      const measurePayload = outcomeMeasureToApiPayload(measure)
-      if (isTemporaryCarePlanId(measure.id)) {
-        const measureRes = await apiInstance.post(
-          apiPaths.clientCarePlanOutcomeMeasures(
-            clientId,
-            planId,
-            goalId,
-          ),
-          measurePayload,
-        )
-        measure.id = unwrapData(measureRes.data)?.id ?? measure.id
-      } else {
-        await apiInstance.patch(
-          apiPaths.clientCarePlanOutcomeMeasureById(
-            clientId,
-            planId,
-            goalId,
-            measure.id,
-          ),
-          measurePayload,
-        )
-      }
+  }
+  for (const intervention of goal.interventions ?? []) {
+    const interventionPayload = interventionToApiPayload(intervention)
+    if (isTemporaryCarePlanId(intervention.id)) {
+      const interventionRes = await apiInstance.post(
+        apiPaths.clientCarePlanInterventions(
+          clientId,
+          planId,
+          goalId,
+        ),
+        interventionPayload,
+      )
+      intervention.id = unwrapData(interventionRes.data)?.id
+        ?? intervention.id
+    } else if (!createOnly) {
+      await apiInstance.patch(
+        apiPaths.clientCarePlanInterventionById(
+          clientId,
+          planId,
+          goalId,
+          intervention.id,
+        ),
+        interventionPayload,
+      )
     }
-    for (const intervention of goal.interventions ?? []) {
-      const interventionPayload = interventionToApiPayload(intervention)
-      if (isTemporaryCarePlanId(intervention.id)) {
-        const interventionRes = await apiInstance.post(
-          apiPaths.clientCarePlanInterventions(
-            clientId,
-            planId,
-            goalId,
-          ),
-          interventionPayload,
-        )
-        intervention.id = unwrapData(interventionRes.data)?.id
-          ?? intervention.id
-      } else {
-        await apiInstance.patch(
-          apiPaths.clientCarePlanInterventionById(
-            clientId,
-            planId,
-            goalId,
-            intervention.id,
-          ),
-          interventionPayload,
-        )
-      }
+  }
+}
+
+async function persistGoalTree(
+  clientId,
+  planId,
+  goal,
+  idMap,
+  patchExisting,
+) {
+  const payload = carePlanGoalToApiPayload({
+    ...goal,
+    replacesGoalId: resolveMappedId(goal.replacesGoalId, idMap),
+  })
+  let goalId = goal.id
+  if (isTemporaryCarePlanId(goalId)) {
+    const goalRes = await apiInstance.post(
+      apiPaths.clientCarePlanGoals(clientId, planId),
+      payload,
+    )
+    const createdId = unwrapData(goalRes.data)?.id ?? goalId
+    idMap.set(String(goal.id), createdId)
+    goal.id = createdId
+    goalId = createdId
+  } else if (patchExisting) {
+    await apiInstance.patch(
+      apiPaths.clientCarePlanGoalById(clientId, planId, goalId),
+      payload,
+    )
+  }
+  await persistGoalChildren(
+    clientId,
+    planId,
+    goalId,
+    goal,
+    !patchExisting,
+  )
+
+  return goalId
+}
+
+async function syncCarePlanChildren(clientId, planId, plan) {
+  const idMap = new Map()
+  const goals = [...(plan.goals ?? [])]
+  const replacedIds = new Set(
+    goals
+      .filter(goal => goal.replacesGoalId)
+      .map(goal => String(goal.replacesGoalId)),
+  )
+  const newPlain = goals.filter(
+    goal => isTemporaryCarePlanId(goal.id) && !goal.replacesGoalId,
+  )
+  const newReplace = goals.filter(
+    goal => isTemporaryCarePlanId(goal.id) && goal.replacesGoalId,
+  )
+  const existing = goals.filter(goal => !isTemporaryCarePlanId(goal.id))
+
+  for (const goal of newPlain) {
+    await persistGoalTree(clientId, planId, goal, idMap, false)
+  }
+  for (const goal of newReplace) {
+    await persistGoalTree(clientId, planId, goal, idMap, false)
+  }
+  for (const goal of existing) {
+    if (replacedIds.has(String(goal.id))) {
+      continue
     }
+    await persistGoalTree(clientId, planId, goal, idMap, true)
   }
 
   return fetchClientCarePlan(clientId, planId)
@@ -168,10 +238,20 @@ export async function updateClientCarePlan(clientId, plan) {
   return syncCarePlanChildren(clientId, planId, plan)
 }
 
-export async function changeCarePlanStatus(clientId, planId, status) {
+export async function changeCarePlanStatus(
+  clientId,
+  planId,
+  status,
+  reason = '',
+) {
+  const body = { status }
+  const trimmed = String(reason ?? '').trim()
+  if (trimmed) {
+    body.reason = trimmed
+  }
   const response = await apiInstance.patch(
     apiPaths.clientCarePlanStatus(clientId, planId),
-    { status },
+    body,
   )
   const data = unwrapData(response.data)
 
@@ -186,6 +266,70 @@ export async function signClientCarePlan(clientId, planId, signature) {
   const data = unwrapData(response.data)
 
   return normalizeCarePlanDetail(data)
+}
+
+export async function createClientCarePlanGoal(clientId, planId, goal) {
+  const response = await apiInstance.post(
+    apiPaths.clientCarePlanGoals(clientId, planId),
+    carePlanGoalToApiPayload(goal),
+  )
+  const data = unwrapData(response.data)
+
+  return normalizeCarePlanGoal(data)
+}
+
+export async function updateClientCarePlanGoal(
+  clientId,
+  planId,
+  goalId,
+  goal,
+) {
+  const response = await apiInstance.patch(
+    apiPaths.clientCarePlanGoalById(clientId, planId, goalId),
+    carePlanGoalToApiPayload(goal),
+  )
+  const data = unwrapData(response.data)
+
+  return normalizeCarePlanGoal(data)
+}
+
+export async function saveClientCarePlanGoalTree(clientId, planId, goal) {
+  await persistGoalTree(
+    clientId,
+    planId,
+    { ...goal },
+    new Map(),
+    false,
+  )
+
+  return fetchClientCarePlan(clientId, planId)
+}
+
+export async function discontinueClientCarePlanGoal(
+  clientId,
+  planId,
+  goal,
+  reason,
+) {
+  return updateClientCarePlanGoal(clientId, planId, goal.id, {
+    ...goal,
+    status: carePlanGoalStatuses.discontinued,
+    discontinueReason: reason,
+  })
+}
+
+export async function createClientCarePlanIntervention(
+  clientId,
+  planId,
+  goalId,
+  intervention,
+) {
+  const response = await apiInstance.post(
+    apiPaths.clientCarePlanInterventions(clientId, planId, goalId),
+    interventionToApiPayload(intervention),
+  )
+
+  return unwrapData(response.data)
 }
 
 export async function updateOutcomeMeasureCurrentValue(

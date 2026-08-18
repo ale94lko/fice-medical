@@ -33,6 +33,22 @@ const routes = [
         },
       },
       {
+        path: 'appointment-requests',
+        name: 'AppointmentRequests',
+        component: () => import(
+          'pages/appointments/AppointmentRequestListPage.vue'
+        ),
+        meta: {
+          requiresAnyPermission: [
+            clientPermissionNames.viewAppointmentSlot,
+            clientPermissionNames.bookAppointment,
+            clientPermissionNames.cancelAppointment,
+            clientPermissionNames.rescheduleAppointment,
+            clientPermissionNames.manageAppointmentSlots,
+          ],
+        },
+      },
+      {
         path: 'clients',
         component: () => import('pages/client/ClientList.vue'),
         meta: {
@@ -44,6 +60,19 @@ const routes = [
         component: () => import('pages/client/AddClientPage.vue'),
         meta: {
           requiresPermission: permissionNames.addClient,
+        },
+      },
+      {
+        path: 'clients/portal-registrations',
+        name: 'PortalRegistrations',
+        component: () => import(
+          'pages/client/PortalRegistrationListPage.vue'
+        ),
+        meta: {
+          requiresAnyPermission: [
+            permissionNames.viewClient,
+            permissionNames.addClient,
+          ],
         },
       },
       {
