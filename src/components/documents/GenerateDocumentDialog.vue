@@ -106,6 +106,8 @@ import {
 } from 'src/utils/stored-file-api.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { documentGenerationTestIds } from 'src/test-ids/index.js'
+import { resolveActiveDisplayTimeZone } from
+  'src/utils/app-datetime.js'
 
 const props = defineProps({
   modelValue: {
@@ -212,6 +214,7 @@ async function onGenerate() {
       documentType: props.documentType,
       format: selectedFormat.value,
       locale: selectedLocale.value,
+      timezone: resolveActiveDisplayTimeZone(),
       context: props.context,
     })
     $q.notify({

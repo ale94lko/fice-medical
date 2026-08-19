@@ -328,7 +328,7 @@
       </q-card-section>
 
       <q-card-actions
-        align="between"
+        :align="isMobile ? 'between' : 'right'"
         class="app-dialog-card__actions appointment-book-dialog__actions">
         <q-btn
           no-caps
@@ -1801,6 +1801,7 @@ watch(
 
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
+@import 'src/css/viewport-layout';
 
 .appointment-book-dialog {
   &__body {
@@ -1823,17 +1824,20 @@ watch(
     flex-wrap: nowrap;
     gap: 8px;
 
-    .app-btn-outline {
+    .app-btn-outline,
+    .app-btn-primary {
       flex: 0 0 auto;
     }
 
-    .app-btn-primary {
-      flex: 1 1 auto;
-      min-width: 0;
+    @include viewport-mobile {
+      .app-btn-primary {
+        flex: 1 1 auto;
+        min-width: 0;
 
-      :deep(.q-btn__content) {
-        flex-wrap: nowrap;
-        white-space: nowrap;
+        :deep(.q-btn__content) {
+          flex-wrap: nowrap;
+          white-space: nowrap;
+        }
       }
     }
   }

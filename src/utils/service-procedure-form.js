@@ -134,6 +134,8 @@ export function createEmptyServiceProcedureForm() {
     minDurationMin: '',
     maxDurationMin: '',
     requiresAppointment: false,
+    showInClinic: true,
+    showInPortal: false,
     cptCode: '',
     hcpcsCode: '',
     defaultFee: '',
@@ -174,6 +176,12 @@ export function normalizeServiceProcedureFromApi(raw = {}) {
     requiresAppointment: Boolean(
       raw.requires_appointment ?? raw.requiresAppointment,
     ),
+    showInClinic: Boolean(
+      raw.show_in_clinic ?? raw.showInClinic ?? true,
+    ),
+    showInPortal: Boolean(
+      raw.show_in_portal ?? raw.showInPortal,
+    ),
     cptCode: trim(raw.cpt_code ?? raw.cptCode),
     hcpcsCode: trim(raw.hcpcs_code ?? raw.hcpcsCode),
     defaultFee: toFeeInputString(
@@ -206,6 +214,8 @@ export function buildServiceProcedureRequest(form = {}) {
     min_duration_min: parseOptionalPositiveInt(form.minDurationMin),
     max_duration_min: parseOptionalPositiveInt(form.maxDurationMin),
     requires_appointment: Boolean(form.requiresAppointment),
+    show_in_clinic: Boolean(form.showInClinic),
+    show_in_portal: Boolean(form.showInPortal),
     cpt_code: trim(form.cptCode) || null,
     hcpcs_code: trim(form.hcpcsCode) || null,
     default_fee: parseOptionalFee(form.defaultFee),
@@ -245,6 +255,8 @@ export function cloneServiceProcedureForm(form) {
       base.providerEligibilityMode,
     ),
     allowedProviderTypeIds: parseIdList(base.allowedProviderTypeIds),
+    showInClinic: Boolean(base.showInClinic),
+    showInPortal: Boolean(base.showInPortal),
   }
 }
 
@@ -257,6 +269,10 @@ export function validateServiceProcedureForm(form, t) {
 
   if (!parseCategory(form.category)) {
     errors.category = t('serviceProcedureCategoryRequired')
+  }
+
+  if (!form.showInClinic && !form.showInPortal) {
+    errors.showInClinic = t('serviceProcedureVisibilityRequired')
   }
 
   const allowedAuth = Object.values(authorizationRequirementValues)

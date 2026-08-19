@@ -22,7 +22,9 @@
       <q-card-section
         class="app-dialog-card__body appointment-detail-dialog__body
           q-px-lg q-pt-md q-pb-md">
-        <div class="appointment-detail-dialog__hero">
+        <div
+          class="appointment-detail-dialog__hero"
+          :class="heroGridClass">
           <div class="appointment-detail-dialog__hero-card">
             <div class="appointment-detail-dialog__hero-icon">
               <q-icon name="assignment" size="20px" />
@@ -73,6 +75,66 @@
               </p>
             </div>
           </div>
+
+          <button
+            v-if="showEncounterButton"
+            type="button"
+            class="appointment-detail-dialog__hero-card
+              appointment-detail-dialog__hero-card--action
+              appointment-detail-dialog__hero-card--encounter"
+            :disabled="encounterBusy"
+            :aria-busy="encounterBusy ? 'true' : 'false'"
+            :data-testid="tid.encounter"
+            @click="onEncounter"
+          >
+            <div
+              class="appointment-detail-dialog__hero-icon
+                appointment-detail-dialog__hero-icon--encounter">
+              <q-icon name="medical_services" size="20px" />
+            </div>
+            <div>
+              <p class="appointment-detail-dialog__hero-label">
+                {{ t('appointmentDetailEncounterLabel') }}
+              </p>
+              <p
+                class="appointment-detail-dialog__hero-status-title
+                  appointment-detail-dialog__hero-status-title--encounter">
+                {{ encounterHeroTitle }}
+              </p>
+              <p class="appointment-detail-dialog__hero-status-hint">
+                {{ encounterHeroHint }}
+              </p>
+            </div>
+          </button>
+
+          <button
+            v-if="showStaffTelehealthJoin"
+            type="button"
+            class="appointment-detail-dialog__hero-card
+              appointment-detail-dialog__hero-card--action
+              appointment-detail-dialog__hero-card--telehealth"
+            :data-testid="tid.joinTelehealth"
+            @click="onJoinStaffTelehealth"
+          >
+            <div
+              class="appointment-detail-dialog__hero-icon
+                appointment-detail-dialog__hero-icon--telehealth">
+              <q-icon name="videocam" size="20px" />
+            </div>
+            <div>
+              <p class="appointment-detail-dialog__hero-label">
+                {{ t('appointmentDetailTeleconsultLabel') }}
+              </p>
+              <p
+                class="appointment-detail-dialog__hero-status-title
+                  appointment-detail-dialog__hero-status-title--telehealth">
+                {{ t('appointmentDetailTeleconsultTitle') }}
+              </p>
+              <p class="appointment-detail-dialog__hero-status-hint">
+                {{ t('appointmentDetailTeleconsultHint') }}
+              </p>
+            </div>
+          </button>
         </div>
 
         <div
@@ -301,8 +363,7 @@
 
           <div
             v-if="showTelehealthSection"
-            class="appointment-detail-dialog__grid-cell
-              appointment-detail-dialog__grid-cell--telehealth">
+            class="appointment-detail-dialog__grid-cell">
             <div
               class="appointment-detail-dialog__cell-icon
                 appointment-detail-dialog__cell-icon--teal">
@@ -354,9 +415,11 @@
             class="appointment-detail-dialog__notes-body"
             :class="{
               'appointment-detail-dialog__notes-body--empty':
-                !detailRecord?.notes,
+                !hasAppointmentNotes,
             }">
-            {{ detailRecord?.notes || t('appointmentDetailNotesEmpty') }}
+            {{ hasAppointmentNotes
+              ? detailRecord.notes
+              : t('appointmentDetailNotesEmpty') }}
           </p>
         </section>
       </q-card-section>
@@ -385,29 +448,6 @@
         </div>
         <div class="appointment-detail-dialog__actions-right">
           <q-btn
-            v-if="showEncounterButton"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="medical_services"
-            :label="t('startEncounterButton')"
-            :loading="encounterBusy"
-            :data-testid="tid.encounter"
-            @click="onEncounter"
-          />
-          <q-btn
-            v-if="showStaffTelehealthJoin"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="videocam"
-            :label="t('telehealthJoinFromAppointment')"
-            :data-testid="tid.joinTelehealth"
-            @click="onJoinStaffTelehealth"
-          />
-          <q-btn
             no-caps
             outline
             color="primary"
@@ -417,7 +457,9 @@
             @click="onClose"
           />
           <q-btn
-            v-if="canViewClient && detailRecord?.clientId"
+            v-if="showViewClient
+              && canViewClient
+              && detailRecord?.clientId"
             no-caps
             unelevated
             color="primary"
@@ -491,6 +533,7 @@ import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
   record: { type: Object, default: null },
+  showViewClient: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -566,8 +609,35 @@ const showStaffTelehealthJoin = computed(() => {
 })
 
 const showEncounterButton = computed(() =>
-  canStartEncounter.value && Boolean(clientChartId.value),
+  canStartEncounter.value
+    && Boolean(clientChartId.value)
+    && !showTelehealthSection.value,
 )
+
+const heroGridClass = computed(() => {
+  const extras = Number(showEncounterButton.value)
+    + Number(showStaffTelehealthJoin.value)
+  if (extras === 2) {
+    return 'appointment-detail-dialog__hero--cols-4'
+  }
+  if (extras === 1) {
+    return 'appointment-detail-dialog__hero--cols-3'
+  }
+
+  return ''
+})
+
+const encounterHeroTitle = computed(() => (
+  hasActiveEncounter.value
+    ? t('appointmentDetailEncounterContinueTitle')
+    : t('appointmentDetailEncounterTitle')
+))
+
+const encounterHeroHint = computed(() => (
+  hasActiveEncounter.value
+    ? t('appointmentDetailEncounterContinueHint')
+    : t('appointmentDetailEncounterHint')
+))
 
 const placeOfServiceLabel = computed(() =>
   detailRecord.value?.placeOfServiceDisplayName
@@ -597,6 +667,10 @@ const durationLabel = computed(() => {
 
 const servicesSummary = computed(() =>
   formatAppointmentServicesSummary(detailRecord.value, t),
+)
+
+const hasAppointmentNotes = computed(() =>
+  String(detailRecord.value?.notes ?? '').trim().length > 0,
 )
 
 const clinicianHint = computed(() =>

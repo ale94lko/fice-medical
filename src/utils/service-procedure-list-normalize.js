@@ -59,6 +59,12 @@ export function mapServiceProcedureListItem(item, t) {
     [fk.requiresAppointment]: Boolean(
       item.requires_appointment ?? item.requiresAppointment,
     ),
+    [fk.showInClinic]: Boolean(
+      item.show_in_clinic ?? item.showInClinic ?? true,
+    ),
+    [fk.showInPortal]: Boolean(
+      item.show_in_portal ?? item.showInPortal,
+    ),
     [fk.cptCode]: String(item.cpt_code ?? item.cptCode ?? '').trim(),
     [fk.hcpcsCode]: String(item.hcpcs_code ?? item.hcpcsCode ?? '').trim(),
     [fk.defaultFee]: item.default_fee ?? item.defaultFee ?? null,
@@ -86,6 +92,12 @@ export function mapServiceProcedureListItem(item, t) {
       t,
     ),
     requiresAppointmentLabel: normalized[fk.requiresAppointment]
+      ? t('yes')
+      : t('no'),
+    showInClinicLabel: normalized[fk.showInClinic]
+      ? t('yes')
+      : t('no'),
+    showInPortalLabel: normalized[fk.showInPortal]
       ? t('yes')
       : t('no'),
     billableLabel: normalized[fk.billable]

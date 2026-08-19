@@ -222,6 +222,7 @@
     <AppointmentDetailDialog
       v-model="detailOpen"
       :record="activeAppointment"
+      :show-view-client="false"
     />
 
     <AppointmentEditDialog

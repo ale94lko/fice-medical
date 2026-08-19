@@ -35,6 +35,29 @@
             />
           </div>
         </div>
+        <div class="row items-center q-gutter-md q-mt-md">
+          <FormToggle
+            v-model="local.showInClinic"
+            :disable="readonly"
+            :label="t('serviceProcedureShowInClinicLabel')"
+            :test-id="serviceProcedureDialogTestIds.field(
+              'show-in-clinic',
+            )"
+          />
+          <FormToggle
+            v-model="local.showInPortal"
+            :disable="readonly"
+            :label="t('serviceProcedureShowInPortalLabel')"
+            :test-id="serviceProcedureDialogTestIds.field(
+              'show-in-portal',
+            )"
+          />
+        </div>
+        <p
+          v-if="errors.showInClinic"
+          class="text-negative text-caption q-mt-sm">
+          {{ errors.showInClinic }}
+        </p>
         <div class="row q-col-gutter-md q-mt-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField

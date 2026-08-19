@@ -115,6 +115,18 @@
           </q-td>
         </template>
 
+        <template #body-cell-showInClinic="scope">
+          <q-td :props="scope">
+            {{ scope.row.showInClinicLabel || '—' }}
+          </q-td>
+        </template>
+
+        <template #body-cell-showInPortal="scope">
+          <q-td :props="scope">
+            {{ scope.row.showInPortalLabel || '—' }}
+          </q-td>
+        </template>
+
         <template #body-cell-billable="scope">
           <q-td :props="scope">
             <AdminTableStatusCell
@@ -281,6 +293,8 @@ const mobileCardLayout = {
   badges: [
     col.duration,
     col.requiresAppointment,
+    col.showInClinic,
+    col.showInPortal,
     col.billable,
     col.codes,
   ],
@@ -328,6 +342,24 @@ const visibleColumns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',
+  },
+  {
+    name: col.showInClinic,
+    label: t('serviceProcedureShowInClinicShortLabel'),
+    align: 'left',
+    field: row => row.showInClinicLabel,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
+  },
+  {
+    name: col.showInPortal,
+    label: t('serviceProcedureShowInPortalShortLabel'),
+    align: 'left',
+    field: row => row.showInPortalLabel,
+    sortable: false,
+    headerStyle: 'min-width: 110px',
+    style: 'min-width: 110px',
   },
   {
     name: col.billable,

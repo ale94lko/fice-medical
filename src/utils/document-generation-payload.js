@@ -93,6 +93,7 @@ export function buildGenerateDocumentPayload({
   documentType,
   format,
   locale,
+  timezone,
   context = {},
 }) {
   const body = {
@@ -102,6 +103,10 @@ export function buildGenerateDocumentPayload({
   const localeToken = String(locale ?? '').trim()
   if (localeToken) {
     body.locale = localeToken
+  }
+  const timezoneToken = String(timezone ?? '').trim()
+  if (timezoneToken) {
+    body.timezone = timezoneToken
   }
 
   const fields = documentContextFields[body.documentType] ?? []

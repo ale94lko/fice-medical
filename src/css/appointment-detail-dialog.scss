@@ -71,20 +71,26 @@
     gap: 12px;
     margin-bottom: 16px;
 
-    &--with-telehealth {
-      grid-template-columns: 1fr 1fr 1fr;
+    &--cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    &--cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     @media (max-width: 899px) {
-      &--with-telehealth {
-        grid-template-columns: 1fr 1fr;
+      &--cols-3,
+      &--cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
     @media (max-width: 767px) {
       grid-template-columns: 1fr;
 
-      &--with-telehealth {
+      &--cols-3,
+      &--cols-4 {
         grid-template-columns: 1fr;
       }
     }
@@ -101,19 +107,55 @@
     min-width: 0;
   }
 
-  &__hero-card--telehealth {
-    border-color: rgba($primary, 0.28);
-    background: rgba($primary, 0.05);
-  }
+  &__hero-card--action {
+    appearance: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    border-color: $primary;
+    background: $primary;
+    color: $white;
+    box-shadow: 0 2px 8px rgba($primary, 0.28);
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
 
-  &__hero-icon--telehealth {
-    color: $primary;
-    background: rgba($primary, 0.12);
-  }
+    .appointment-detail-dialog__hero-label,
+    .appointment-detail-dialog__hero-status-hint {
+      color: rgba($white, 0.82);
+    }
 
-  &__hero-telehealth {
-    min-width: 0;
-    flex: 1 1 auto;
+    .appointment-detail-dialog__hero-status-title {
+      color: $white;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: color.adjust($primary, $lightness: -6%);
+      border-color: color.adjust($primary, $lightness: -6%);
+      box-shadow: 0 4px 14px rgba($primary, 0.38);
+      outline: none;
+    }
+
+    &:active:not(:disabled) {
+      box-shadow: 0 1px 4px rgba($primary, 0.28);
+    }
+
+    &:disabled {
+      cursor: wait;
+      opacity: 0.72;
+      box-shadow: none;
+    }
+
+    .appointment-detail-dialog__hero-icon {
+      background: $white;
+      color: $primary;
+    }
+
+    .q-icon {
+      color: $primary;
+    }
   }
 
   &__hero-card--status {
@@ -168,6 +210,12 @@
     flex-shrink: 0;
     background: rgba($primary, 0.1);
     color: $primary;
+
+    &--encounter,
+    &--telehealth {
+      background: $white;
+      color: $primary;
+    }
 
     &--status-scheduled {
       background: #dbeafe;
@@ -605,10 +653,6 @@
     vertical-align: middle;
   }
 
-  &__grid-cell--telehealth {
-    background: rgba($primary, 0.05);
-  }
-
   &__telehealth {
     min-width: 0;
     flex: 1 1 auto;
@@ -650,8 +694,10 @@
     word-break: break-word;
 
     &--empty {
+      font-size: 0.75rem;
       font-weight: 400;
-      color: $text-muted;
+      font-style: italic;
+      color: $text-hint;
     }
   }
 
