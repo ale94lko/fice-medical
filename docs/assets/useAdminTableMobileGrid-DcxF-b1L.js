@@ -1,0 +1,1 @@
+import{t as e}from"./useViewportLayout-BjfBsaxw.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
