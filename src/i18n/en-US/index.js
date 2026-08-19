@@ -2485,6 +2485,7 @@ export default {
   appointmentActionComplete: 'Complete',
   appointmentActionNoShow: 'No show',
   appointmentBookButton: 'Book Appointment',
+  appointmentBookButtonShort: 'Book',
   appointmentSectionInfo: 'Appointment Information',
   appointmentSectionClinical: 'Clinical Context',
   appointmentSectionScheduling: 'Select Date & Time',

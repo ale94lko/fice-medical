@@ -1,6 +1,111 @@
 <template>
+  <q-item
+    v-if="mismatch && isMenuItem"
+    v-close-popup
+    clickable
+    :data-testid="testIds.banner"
+    :aria-label="t('subtenantTimezoneLabel')"
+    @click="openPicker"
+  >
+    <q-item-section avatar>
+      <q-icon name="public" />
+    </q-item-section>
+    <q-item-section>
+      {{ t('subtenantTimezoneLabel') }}
+    </q-item-section>
+  </q-item>
+  <q-dialog
+    v-else-if="isDialog"
+    v-model="pickerOpen"
+    :data-testid="testIds.menu"
+  >
+    <q-card
+      v-if="mismatch"
+      class="timezone-mismatch-dialog app-dialog-card"
+    >
+      <div class="timezone-mismatch-menu__header">
+        <div
+          class="timezone-mismatch-menu__icon"
+          aria-hidden="true"
+        >
+          <q-icon name="public" size="20px" />
+        </div>
+        <div class="timezone-mismatch-menu__heading">
+          <p class="timezone-mismatch-menu__title">
+            {{ t('timezoneMismatchTitle') }}
+          </p>
+          <p class="timezone-mismatch-menu__lead">
+            {{ t('timezoneMismatchLead') }}
+          </p>
+        </div>
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          :aria-label="t('close')"
+          @click="closePicker"
+        />
+      </div>
+      <div class="timezone-mismatch-menu__body">
+        <div class="timezone-mismatch-menu__zones">
+          <button
+            type="button"
+            class="timezone-mismatch-menu__card"
+            :class="{
+              'timezone-mismatch-menu__card--active':
+                usingBrowser,
+            }"
+            :aria-pressed="usingBrowser ? 'true' : 'false'"
+            :data-testid="testIds.useDevice"
+            @click="onUseDevice"
+          >
+            <span class="timezone-mismatch-menu__label">
+              {{ t('timezoneMismatchDeviceLabel') }}
+            </span>
+            <span class="timezone-mismatch-menu__value">
+              {{ browserZone }}
+            </span>
+            <span
+              v-if="usingBrowser"
+              class="timezone-mismatch-menu__badge"
+            >
+              {{ t('timezoneMismatchInUse') }}
+            </span>
+          </button>
+          <button
+            type="button"
+            class="timezone-mismatch-menu__card"
+            :class="{
+              'timezone-mismatch-menu__card--active':
+                !usingBrowser,
+            }"
+            :aria-pressed="usingBrowser ? 'false' : 'true'"
+            :data-testid="testIds.keepClinic"
+            @click="onUseClinic"
+          >
+            <span class="timezone-mismatch-menu__label">
+              {{ t('timezoneMismatchClinicLabel') }}
+            </span>
+            <span class="timezone-mismatch-menu__value">
+              {{ clinicZone }}
+            </span>
+            <span
+              v-if="!usingBrowser"
+              class="timezone-mismatch-menu__badge"
+            >
+              {{ t('timezoneMismatchInUse') }}
+            </span>
+          </button>
+        </div>
+        <p class="timezone-mismatch-menu__hint">
+          {{ t('timezoneMismatchSessionHint') }}
+        </p>
+      </div>
+    </q-card>
+  </q-dialog>
   <div
-    v-if="mismatch"
+    v-else-if="mismatch"
     class="timezone-mismatch"
     @mouseenter="openMenu"
     @mouseleave="scheduleClose"
@@ -112,6 +217,10 @@ const props = defineProps({
     type: String,
     default: 'brand',
   },
+  variant: {
+    type: String,
+    default: 'trigger',
+  },
 })
 
 const CLOSE_MS = 180
@@ -123,7 +232,13 @@ const {
   browserZone,
   useBrowserZone,
   useClinicZone,
+  pickerOpen,
+  openPicker,
+  closePicker,
 } = useSessionDisplayTimezone()
+
+const isMenuItem = computed(() => props.variant === 'menuItem')
+const isDialog = computed(() => props.variant === 'dialog')
 
 const testIds = computed(() => {
   if (props.placement === 'encounter') {
@@ -133,6 +248,14 @@ const testIds = computed(() => {
       useDevice: layoutTestIds.timezoneBannerEncounterUseDevice,
       keepClinic:
         layoutTestIds.timezoneBannerEncounterKeepClinic,
+    }
+  }
+  if (isMenuItem.value || isDialog.value) {
+    return {
+      banner: layoutTestIds.headerOverflowTimezone,
+      menu: layoutTestIds.timezoneBannerMenu,
+      useDevice: layoutTestIds.timezoneBannerUseDevice,
+      keepClinic: layoutTestIds.timezoneBannerKeepClinic,
     }
   }
 

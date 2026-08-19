@@ -327,10 +327,13 @@
         </div>
       </q-card-section>
 
-      <q-card-actions align="right" class="app-dialog-card__actions">
+      <q-card-actions
+        align="between"
+        class="app-dialog-card__actions appointment-book-dialog__actions">
         <q-btn
           no-caps
-          flat
+          outline
+          color="primary"
           class="app-btn-outline"
           :label="t('cancel')"
           :data-testid="tid.btn('cancel')"
@@ -356,6 +359,7 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AppointmentAvailabilityPicker from
@@ -445,6 +449,7 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const authStore = useAuthStore()
 const { linkedStaffProfile } = storeToRefs(authStore)
@@ -568,11 +573,15 @@ const dialogSubtitle = computed(() =>
     : '',
 )
 
-const primaryButtonLabel = computed(() =>
-  props.mode === 'reschedule'
-    ? t('appointmentActionReschedule')
-    : t('appointmentBookButton'),
-)
+const primaryButtonLabel = computed(() => {
+  if (props.mode === 'reschedule') {
+    return t('appointmentActionReschedule')
+  }
+
+  return isMobile.value
+    ? t('appointmentBookButtonShort')
+    : t('appointmentBookButton')
+})
 
 const {
   rows: previewRows,
@@ -1808,6 +1817,25 @@ watch(
     border: 1px solid rgba($primary, 0.15);
     border-radius: 12px;
     padding: 16px;
+  }
+
+  &__actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+
+    .app-btn-outline {
+      flex: 0 0 auto;
+    }
+
+    .app-btn-primary {
+      flex: 1 1 auto;
+      min-width: 0;
+
+      :deep(.q-btn__content) {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+      }
+    }
   }
 }
 

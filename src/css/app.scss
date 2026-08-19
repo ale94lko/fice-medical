@@ -71,6 +71,18 @@
   border-bottom: 1px solid $border-subtle;
 }
 
+.timezone-mismatch-dialog {
+  width: min(400px, calc(100vw - 32px));
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.timezone-mismatch-dialog .timezone-mismatch-menu__header .q-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: $text-muted;
+}
+
 .timezone-mismatch-menu__icon {
   display: flex;
   align-items: center;
@@ -91,6 +103,7 @@
 
 .timezone-mismatch-menu__heading {
   min-width: 0;
+  flex: 1;
 }
 
 .timezone-mismatch-menu__title {
@@ -459,7 +472,8 @@ body.vp-mobile {
   .screening-template-list-page .admin-list-page__subtitle,
   .consent-template-list-page .admin-list-page__subtitle,
   .clinical-audit-list-page .admin-list-page__subtitle,
-  .clinical-resource-list-page .admin-list-page__subtitle {
+  .clinical-resource-list-page .admin-list-page__subtitle,
+  .appointment-request-list-page .admin-list-page__subtitle {
     display: none !important;
   }
 }

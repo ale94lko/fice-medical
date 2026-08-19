@@ -138,6 +138,8 @@
             class="app-header-mobile-overflow__separator"
           />
 
+          <TimezoneMismatchBanner variant="menuItem" />
+
           <q-item
             v-if="showClinical"
             v-close-popup
@@ -271,6 +273,8 @@
       </q-menu>
     </q-btn>
 
+    <TimezoneMismatchBanner variant="dialog" />
+
     <ModalComponent
       v-model="switchConfirmOpen"
       test-id="subtenant-switch-unsaved"
@@ -296,6 +300,8 @@ import ClinicalResourcesQuickPanel from
 import HeaderUserAvatar from 'components/HeaderUserAvatar.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
+import TimezoneMismatchBanner from
+  'components/TimezoneMismatchBanner.vue'
 import { useAuthStore } from 'stores/auth-store.js'
 import { hasUnsavedChanges } from
   'src/composables/useUnsavedChangesRegistry.js'

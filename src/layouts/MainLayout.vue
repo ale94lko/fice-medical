@@ -43,7 +43,6 @@
           />
         </template>
         <template v-else>
-          <TimezoneMismatchBanner />
           <AppHeaderMobileOverflow
             class="q-ml-xs"
             :show-clinical="showClinicalResourcesMenu"
@@ -756,8 +755,6 @@ import AppHeaderNotifications from
   'components/AppHeaderNotifications.vue'
 import AppHeaderMobileOverflow from
   'components/AppHeaderMobileOverflow.vue'
-import TimezoneMismatchBanner from
-  'components/TimezoneMismatchBanner.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'

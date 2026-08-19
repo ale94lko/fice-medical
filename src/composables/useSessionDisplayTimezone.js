@@ -9,6 +9,7 @@ import {
 } from 'src/utils/app-datetime.js'
 
 const tick = ref(0)
+const pickerOpen = ref(false)
 
 export function bumpDisplayTimezoneTick() {
   tick.value += 1
@@ -61,5 +62,12 @@ export function useSessionDisplayTimezone() {
     showBanner,
     useBrowserZone,
     useClinicZone,
+    pickerOpen,
+    openPicker() {
+      pickerOpen.value = true
+    },
+    closePicker() {
+      pickerOpen.value = false
+    },
   }
 }

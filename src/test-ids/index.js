@@ -24,6 +24,7 @@ export const layoutTestIds = {
   headerOverflowClinical: 'layout-header-overflow-clinical',
   headerOverflowNotifications:
     'layout-header-overflow-notifications',
+  headerOverflowTimezone: 'layout-header-overflow-timezone',
   notifications: 'layout-btn-notifications',
   notificationsMenu: 'layout-notifications-menu',
   notificationsLoading: 'layout-notifications-loading',
@@ -1054,6 +1055,7 @@ export const appointmentRequestListTestIds = {
   search: 'appointment-request-list-search',
   statusFilter: 'appointment-request-list-status-filter',
   refresh: 'appointment-request-list-refresh',
+  actionsMenu: 'appointment-request-list-btn-actions-menu',
   rowClient: id => toTestId(
     'appointment-request-row',
     id,

@@ -10,8 +10,10 @@
 
     <AdminListPageHeader
       :title="t('appointmentRequestsTitle')"
-      :subtitle="t('appointmentRequestsSubtitle')">
-      <template #actions>
+      :subtitle="isMobile ? '' : t('appointmentRequestsSubtitle')">
+      <template
+        v-if="!isMobile"
+        #actions>
         <q-btn
           no-caps
           outline
@@ -42,6 +44,7 @@
         </template>
       </q-input>
       <FormSelect
+        v-if="!isMobile"
         v-model="statusFilter"
         :options="statusFilterOptions"
         emit-value
@@ -53,6 +56,27 @@
         :test-id="tid.statusFilter"
         :aria-label="t('appointmentRequestColumnStatus')"
       />
+      <AdminListPageActions
+        v-if="isMobile"
+        :compact="true"
+        :actions="mobilePageActions"
+        :menu-test-id="tid.actionsMenu">
+        <template #menu-extra>
+          <FormSelect
+            v-model="statusFilter"
+            :options="statusFilterOptions"
+            emit-value
+            map-options
+            outlined
+            dense
+            hide-bottom-space
+            :clearable="false"
+            :disable="loading"
+            :test-id="tid.statusFilter"
+            :aria-label="t('appointmentRequestColumnStatus')"
+          />
+        </template>
+      </AdminListPageActions>
     </div>
 
     <AdminTablePanel
@@ -197,6 +221,8 @@ import {
   quasarNotifyTypes,
   siteBreakpoints,
 } from 'components/constants.js'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -211,6 +237,8 @@ import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
 import { useCalendarPermissions } from
@@ -243,6 +271,7 @@ import { appointmentRequestListTestIds as tid } from
 const { t } = useI18n()
 const $q = useQuasar()
 const router = useRouter()
+const { isMobile } = useViewportLayout()
 const { showGrid } = useAdminTableMobileGrid()
 const { canBookAppointment } = useCalendarPermissions()
 const { canAddClient } = useClientPermissions()
@@ -473,6 +502,17 @@ async function loadRows() {
     syncFooterPaginationBar()
   }
 }
+
+const mobilePageActions = computed(() => [
+  {
+    key: 'refresh',
+    label: t('claimQueueRefresh'),
+    icon: 'sync',
+    testId: tid.refresh,
+    disable: loading.value,
+    onClick: loadRows,
+  },
+])
 
 async function onBookAppointment(body) {
   const requestId = activeRequest.value?.id

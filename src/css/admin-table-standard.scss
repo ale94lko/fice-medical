@@ -1695,4 +1695,22 @@ body.vp-mobile {
       background: transparent;
     }
   }
+
+  .appointment-request-list-page {
+    .billing-queue-filters {
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    .billing-queue-filters__search {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .admin-list-page__actions {
+      flex: 0 0 auto;
+      margin-top: 0;
+      align-self: center;
+    }
+  }
 }

@@ -2567,6 +2567,7 @@ export default {
   appointmentActionComplete: 'Completar',
   appointmentActionNoShow: 'No asistió',
   appointmentBookButton: 'Reservar cita',
+  appointmentBookButtonShort: 'Reservar',
   appointmentSectionInfo: 'Información de la cita',
   appointmentSectionClinical: 'Contexto clínico',
   appointmentSectionScheduling: 'Seleccionar fecha y hora',
