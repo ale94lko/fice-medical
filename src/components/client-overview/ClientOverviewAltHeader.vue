@@ -150,6 +150,27 @@
                       </q-item-section>
                     </q-item>
 
+                    <q-item
+                      v-if="canViewPortalMessages"
+                      v-close-popup
+                      clickable
+                      :disable="loading"
+                      :data-testid="clientOverviewAltTestIds.messages"
+                      @click="openMessages">
+                      <q-item-section avatar>
+                        <q-icon
+                          name="chat"
+                          size="20px"
+                          color="primary"
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ t('clientOverviewMessages') }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+
                     <GenerateDocumentAction
                       v-if="clientId"
                       :document-type="documentTypes.clientProfile"
@@ -461,6 +482,18 @@
             :label="t('inviteToClientPortal')"
             @click="inviteToPortal"
           />
+          <q-btn
+            v-if="canViewPortalMessages"
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            icon="chat"
+            :data-testid="clientOverviewAltTestIds.messages"
+            :disable="loading"
+            :label="t('clientOverviewMessages')"
+            @click="openMessages"
+          />
           <GenerateDocumentAction
             v-if="clientId"
             :document-type="documentTypes.clientProfile"
@@ -499,6 +532,7 @@
 <script setup>
 import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useQuasar, copyToClipboard } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
 import AdminTableContactOverflow from
@@ -516,6 +550,10 @@ import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { usePortalMessagePermissions } from
+  'src/composables/usePortalMessagePermissions.js'
+import { clinicMessagesClientLocation } from
+  'src/utils/clinic-messages-route.js'
 import { inviteClientToPortal } from
   'src/utils/client-portal-invitation-api.js'
 
@@ -564,15 +602,25 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
+const router = useRouter()
 const {
   canEditAnyClientSection,
   canInviteToClientPortal,
 } = useClientPermissions()
+const { canView: canViewPortalMessages } =
+  usePortalMessagePermissions()
 const invitingPortal = ref(false)
 
 const encounterDialogOpen = ref(false)
 
 const isCompactHeader = computed(() => $q.screen.width < 900)
+
+function openMessages() {
+  if (!props.clientId) {
+    return
+  }
+  void router.push(clinicMessagesClientLocation(props.clientId))
+}
 
 async function inviteToPortal() {
   if (!props.clientId || invitingPortal.value) {

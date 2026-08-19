@@ -10,7 +10,7 @@
     <StaffProfileHeader
       v-if="profile"
       class="staff-profile-page__header"
-      :staff-id="route.params.id"
+      :staff-id="profile.id"
       :header="profile"
       :can-edit="canEditStaff"
       :loading="loading"

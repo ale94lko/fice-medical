@@ -198,6 +198,8 @@ export const appointmentRecurrenceEndTypeValues = {
   onDate: 'ON_DATE',
 }
 
+export const appointmentRecurrencePreviewDebounceMs = 500
+
 export const userRoleValues = {
   administrator: 'ADMINISTRATOR',
   clinician: 'CLINICIAN',
@@ -1074,6 +1076,8 @@ export const permissionNames = {
   changeStatusClient: 'CHANGE_STATUS_CLIENT',
   archiveClient: 'ARCHIVE_CLIENT',
   clientPortalInvite: 'CLIENT_PORTAL_INVITE',
+  viewPortalMessages: 'VIEW_PORTAL_MESSAGES',
+  sendPortalMessages: 'SEND_PORTAL_MESSAGES',
   viewClinicians: 'VIEW_CLINICIANS',
   editClinicians: 'EDIT_CLINICIANS',
   viewStaffMembers: 'VIEW_STAFF_MEMBERS',
@@ -1768,24 +1772,27 @@ export const apiPaths = {
   catalogsByNames: '/catalogs/v1/by-names',
   dashboard: '/dashboard/v1',
   dashboardConfig: '/dashboard/v1/config',
+  datetimeConfig: '/datetime-config/v1',
   staffList: '/staff/v1',
   staffWithoutSystemUser: '/staff/v1/without-system-user',
-  staffById: id => `/staff/v1/${encodeURIComponent(String(id ?? '').trim())}`,
-  staffStatus: id => `/staff/v1/${encodeURIComponent(
-    String(id ?? '').trim(),
+  staffById: code => `/staff/v1/${encodeURIComponent(
+    String(code ?? '').trim(),
+  )}`,
+  staffStatus: code => `/staff/v1/${encodeURIComponent(
+    String(code ?? '').trim(),
   )}/status`,
   staffNpiLookup: '/staff/v1/npi-lookup',
   specialties: '/staff/v1/specialties',
   licenseTypes: '/staff/v1/license-types',
   providerTypes: '/staff/v1/provider-types',
-  staffLicenses: staffId => `/staff/v1/${encodeURIComponent(
-    String(staffId ?? '').trim(),
+  staffLicenses: staffCode => `/staff/v1/${encodeURIComponent(
+    String(staffCode ?? '').trim(),
   )}/licenses`,
-  staffLicenseById: (staffId, licenseId) => `/staff/v1/${encodeURIComponent(
-    String(staffId ?? '').trim(),
+  staffLicenseById: (staffCode, licenseId) => `/staff/v1/${encodeURIComponent(
+    String(staffCode ?? '').trim(),
   )}/licenses/${encodeURIComponent(String(licenseId ?? '').trim())}`,
-  staffClinicalEligibility: staffId => `/staff/v1/${encodeURIComponent(
-    String(staffId ?? '').trim(),
+  staffClinicalEligibility: staffCode => `/staff/v1/${encodeURIComponent(
+    String(staffCode ?? '').trim(),
   )}/clinical-eligibility`,
   staffPositionIsClinical: code => `/staff/v1/positions/${encodeURIComponent(
     String(code ?? '').trim(),
@@ -1867,6 +1874,7 @@ export const apiPaths = {
     encodeURIComponent(String(id ?? '').trim())
   }/search`,
   appointmentsList: '/appointments/v1',
+  calendarViewConfig: '/appointments/v1/calendar-view-config',
   appointmentById: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}`,
@@ -1884,8 +1892,34 @@ export const apiPaths = {
   appointmentRequestFulfill: id => `/appointments/v1/requests/${
     encodeURIComponent(String(id ?? '').trim())
   }/fulfill`,
+  messagesInbox: '/messages/v1/inbox',
+  messagesByClient: clientId => `/messages/v1/client/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }`,
+  messagesConversation: id => `/messages/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }`,
+  messagesList: id => `/messages/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/messages`,
+  messagesSend: id => `/messages/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/messages`,
+  messagesFiles: id => `/messages/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/files`,
+  messagesRead: id => `/messages/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/read`,
+  messagesFile: (conversationId, fileId) => `/messages/v1/${
+    encodeURIComponent(String(conversationId ?? '').trim())
+  }/files/${encodeURIComponent(String(fileId ?? '').trim())}`,
   placesOfServiceList: '/places-of-service/v1',
   appointmentBook: '/appointments/v1/book',
+  appointmentBookPreview: '/appointments/v1/book/preview',
+  clinicianWorkingWeekdays: id => `/appointments/v1/clinicians/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/working-weekdays`,
   appointmentCancel: id => `/appointments/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/cancel`,

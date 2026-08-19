@@ -17,6 +17,28 @@ export default {
     'Tiene cambios sin guardar. Si cambia de sede ahora, saldrá de este '
     + 'registro y se perderán los cambios.',
   signOut: 'Cerrar sesión',
+  timezoneMismatchTitle: 'Zonas horarias distintas',
+  timezoneMismatchLead:
+    'Este dispositivo y la clínica no usan la misma zona horaria.',
+  timezoneMismatchDeviceLabel: 'Este dispositivo',
+  timezoneMismatchClinicLabel: 'Zona de la clínica',
+  timezoneMismatchInUse: 'En uso',
+  timezoneMismatchSessionHint:
+    'Esta elección solo dura mientras la sesión esté abierta.',
+  timezoneMismatchUseDevice: 'Ver horas del dispositivo',
+  timezoneMismatchKeepClinic: 'Seguir con la clínica',
+  timezoneMismatchRevertClinic: 'Volver a horas de clínica',
+  subtenantTimezoneLabel: 'Zona horaria',
+  subtenantDateFormatLabel: 'Formato de fecha',
+  subtenantTimeFormatLabel: 'Formato de hora',
+  subtenantFirstDayOfWeekLabel: 'Primer día de la semana',
+  subtenantTimezoneHint:
+    'Heredada de la organización; puedes cambiarla para esta sede.',
+  subtenantSectionDateTime: 'Fecha y hora',
+  timeFormat12h: '12 horas',
+  timeFormat24h: '24 horas',
+  firstDaySunday: 'Domingo',
+  firstDayMonday: 'Lunes',
   headerUserMyProfile: 'Mi perfil',
   headerUserSettings: 'Configuración',
   headerUserHelpSupport: 'Ayuda y soporte',
@@ -194,7 +216,6 @@ export default {
   notes: 'Notas',
   welcome: 'Bienvenido, {name}!',
   administration: 'Administración',
-  administrationGeneral: 'General',
   clinicalAuditListTitle: 'Auditoría clínica',
   clinicalAuditListSubtitle:
     'Revise los cambios de datos clínicos en clientes y módulos.',
@@ -697,7 +718,36 @@ export default {
   dashboardWidgetRevenueTrendLabel: 'Tendencia de ingresos',
   calendar: 'Calendario',
   appointmentRequestsNav: 'Solicitudes de cita',
+  portalMessagesNav: 'Mensajes',
+  portalMessagesTitle: 'Mensajes',
+  portalMessagesSubtitle:
+    'Mensajes seguros con clientes de esta sede.',
+  portalMessagesSearch: 'Buscar clientes',
+  portalMessagesEmptyInbox: 'Aún no hay conversaciones.',
+  portalMessagesSelectThread:
+    'Elige una conversación para leer y responder.',
+  portalMessagesEmptyThread: 'Aún no hay mensajes.',
+  portalMessagesPlaceholder: 'Escribe un mensaje',
+  portalMessagesSend: 'Enviar',
+  portalMessagesAttach: 'Adjuntar un archivo',
+  portalMessagesAttachment: 'Archivo',
+  portalMessagesYou: 'Tú',
+  portalMessagesClient: 'Cliente',
+  portalMessagesClinic: 'Clínica',
+  portalMessagesBack: 'Volver a la bandeja',
+  portalMessagesOpenClient: 'Abrir cliente',
+  portalMessagesOpenError:
+    'No se pudo abrir esta conversación.',
+  portalMessagesClientLoadError:
+    'No se pudieron cargar los datos del cliente.',
+  portalMessagesShowClient: 'Datos del cliente',
+  portalMessagesShowChat: 'Volver al chat',
+  portalMessagesUpcomingAppointments: 'Próximas citas',
+  portalMessagesNoUpcomingAppointments:
+    'No hay citas próximas.',
+  clientOverviewMessages: 'Mensajes',
   navBilling: 'Facturación',
+  navSuperbills: 'Superbills',
   navClaims: 'Claims',
   navRemittances: 'Remesas',
   navPayments: 'Pagos',
@@ -2474,6 +2524,18 @@ export default {
   appointmentDetailStatusPendingHint: 'La cita está pendiente de confirmación',
   appointmentDetailStatusInProgressHint: 'La cita está en curso',
   appointmentDetailStatusRescheduledHint: 'La cita fue reprogramada',
+  appointmentDetailClientLabel: 'Cliente',
+  appointmentDetailInsuranceLabel: 'Seguro (primario)',
+  appointmentDetailInsuranceEmpty: 'No hay seguro registrado.',
+  appointmentDetailInsurancePayer: 'Pagador',
+  appointmentDetailInsuranceServiceId: 'ID de servicio',
+  appointmentDetailInsuranceServiceIdHint:
+    'ID del plan, Medicaid, Medicare o Golden Card.',
+  appointmentDetailSubscriberNotClient: 'Titular (no es el cliente)',
+  appointmentDetailAgeYears: '{count} años',
+  appointmentDetailTelehealthVisit: 'Visita de telehealth',
+  appointmentDetailTelehealthJoinHint:
+    'Únase a la cita con el enlace de abajo.',
   appointmentEditTitle: 'Editar cita',
   appointmentSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar citas.',
@@ -2626,6 +2688,8 @@ export default {
   appointmentRecurrenceUnitWeeks: 'semana(s)',
   appointmentRecurrenceUnitMonths: 'mes(es)',
   appointmentRecurrenceDays: 'Días de la semana',
+  appointmentRecurrenceDaysRequired:
+    'Seleccione al menos un día de la semana.',
   appointmentRecurrenceDaysSelected:
     '{count} días seleccionados',
   appointmentRecurrenceDaysPresetNone: 'Ninguno',
@@ -2633,6 +2697,8 @@ export default {
   appointmentRecurrenceDaysPresetWeekdays: 'Lun–Vie',
   appointmentRecurrenceDaysPresetWeekend: 'Sáb–Dom',
   appointmentRecurrenceDaysPresetCustom: 'Personalizado',
+  appointmentRecurrenceDayClosed:
+    'Este día no es laborable.',
   appointmentRecurrenceEnds: 'Finaliza',
   appointmentRecurrenceEndsHint: 'Cuándo terminará la repetición.',
   appointmentRecurrenceCount: 'Número de citas',
@@ -2661,6 +2727,24 @@ export default {
   appointmentRecurrencePreviewMonthly:
     '{preview}: se programarán {count} cita(s) mensualmente,'
     + ' a partir de {startDate}.',
+  appointmentRecurrenceReviewTitle: 'Revisar serie',
+  appointmentRecurrenceReviewHint:
+    'Las tarjetas amarillas se movieron o no tienen hueco.',
+  appointmentRecurrenceOriginal: 'Original',
+  appointmentRecurrenceProposed: 'Propuesta',
+  appointmentRecurrenceProposedDate: 'Fecha',
+  appointmentRecurrenceProposedTime: 'Hora',
+  appointmentRecurrenceOverlapShort: 'Superponer',
+  appointmentRecurrenceResetOriginal: 'Restablecer hora original',
+  appointmentRecurrenceCalculating: 'Calculando horarios disponibles…',
+  appointmentRecurrenceAdjustmentSameDay: 'Hora más cercana del día.',
+  appointmentRecurrenceAdjustmentNextDay: 'Movida al día siguiente.',
+  appointmentRecurrenceAdjustmentUnavailable:
+    'Sin hueco. Cambie hora o superponga.',
+  appointmentRecurrenceReviewBack: 'Volver',
+  appointmentBookConfirmSeries: 'Reservar serie',
+  appointmentRecurrencePreviewError:
+    'No se pudo previsualizar las citas repetidas.',
   placeOfServiceOffice: 'Consultorio',
   placeOfServiceTelehealth: 'Telemedicina',
   placeOfServiceHome: 'Domicilio',
@@ -4296,7 +4380,7 @@ export default {
   telehealthCopyClientLink: 'Copiar enlace del cliente',
   telehealthOpenMeet: 'Abrir meet',
   telehealthInvitePending:
-    'El enlace del cliente está pendiente (falló la creación o el aviso).',
+    'No se pudo crear la visita de video. Abra la cita para reintentar.',
   telehealthSessionPending:
     'La sesión de teleconsulta aún no está lista para esta cita.',
   telehealthClientInviteHint:
@@ -4650,6 +4734,8 @@ export default {
     'Nueva alta del Client Portal',
   notificationsPortalProfileReadyTitle:
     'Usuario del portal listo para ficha',
+  notificationsPortalMessageTitle:
+    'Nuevo mensaje del Client Portal',
   encounterRenderingClinician: 'Clínico responsable',
   encounterLocation: 'Ubicación',
   encounterModeInPerson: 'Presencial',
@@ -4726,10 +4812,10 @@ export default {
     '{count} elementos requieren atención antes de facturar.',
   encounterBillingEmpty:
     'No hay comprobaciones de facturación en esta visita.',
-  superbillListTitle: 'Facturación',
+  superbillListTitle: 'Superbills',
   superbillListSubtitle:
     'Revise y gestione las visitas clínicas para facturar.',
-  billingWorkspaceTitle: 'Facturación',
+  billingWorkspaceTitle: 'Superbills',
   billingWorkspaceSubtitle:
     'Revise superbills y resuelva problemas de preparación.',
   billingReviewTitle: 'Revisión de facturación',

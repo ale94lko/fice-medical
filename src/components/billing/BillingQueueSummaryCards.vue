@@ -49,7 +49,7 @@ import { superbillListTestIds } from 'src/test-ids/index.js'
 const props = defineProps({
   active: {
     type: String,
-    default: billingQueueTabs.needsAttention,
+    default: billingQueueTabs.all,
   },
   counts: {
     type: Object,
@@ -61,6 +61,17 @@ const emit = defineEmits(['select'])
 const { t } = useI18n()
 
 const cards = computed(() => [
+  {
+    id: billingQueueTabs.all,
+    label: t('billingQueueAllSuperbills'),
+    description: t('billingQueueAllHint'),
+    count: props.counts.all ?? 0,
+    icon: 'description',
+    tone: 'teal',
+    testId: superbillListTestIds.queueTab(
+      billingQueueTabs.all,
+    ),
+  },
   {
     id: billingQueueTabs.needsAttention,
     label: t('billingQueueNeedsAttention'),
@@ -103,17 +114,6 @@ const cards = computed(() => [
     tone: 'green',
     testId: superbillListTestIds.queueTab(
       billingQueueTabs.reviewed,
-    ),
-  },
-  {
-    id: billingQueueTabs.all,
-    label: t('billingQueueAllSuperbills'),
-    description: t('billingQueueAllHint'),
-    count: props.counts.all ?? 0,
-    icon: 'description',
-    tone: 'teal',
-    testId: superbillListTestIds.queueTab(
-      billingQueueTabs.all,
     ),
   },
 ])

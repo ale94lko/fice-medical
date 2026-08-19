@@ -128,8 +128,12 @@ export async function loadStaffListView({
   }
 }
 
-export async function fetchStaffById(id) {
-  const response = await apiInstance.get(apiPaths.staffById(id))
+/**
+ * GET /staff/v1/{staffCode} — unique staff number, not the numeric id.
+ * @param {string} code
+ */
+export async function fetchStaffById(code) {
+  const response = await apiInstance.get(apiPaths.staffById(code))
 
   return readEnvelope(response)
 }
@@ -140,23 +144,23 @@ export async function createStaff(payload) {
   return readEnvelope(response)
 }
 
-export async function patchStaff(id, payload) {
-  const response = await apiInstance.patch(apiPaths.staffById(id), payload)
+export async function patchStaff(code, payload) {
+  const response = await apiInstance.patch(apiPaths.staffById(code), payload)
 
   return readEnvelope(response)
 }
 
-export async function patchStaffStatus(id, status) {
-  const response = await apiInstance.patch(apiPaths.staffStatus(id), {
+export async function patchStaffStatus(code, status) {
+  const response = await apiInstance.patch(apiPaths.staffStatus(code), {
     status,
   })
 
   return readEnvelope(response)
 }
 
-export async function patchStaffStatusBulk(ids, status) {
+export async function patchStaffStatusBulk(codes, status) {
   const results = await Promise.all(
-    ids.map(id => patchStaffStatus(id, status)),
+    codes.map(code => patchStaffStatus(code, status)),
   )
 
   return results

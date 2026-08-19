@@ -148,6 +148,7 @@ import AdminTableStatusCell from
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { hasPermission } from 'src/utils/auth-permissions.js'
@@ -220,12 +221,8 @@ function formatWhen(value) {
   if (!raw) {
     return '—'
   }
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
-    return raw
-  }
 
-  return date.toLocaleString()
+  return formatDateTime(raw) || raw
 }
 
 function openClaim(id) {

@@ -2,6 +2,7 @@ import {
   clientFieldKeys as ck,
 } from 'components/constants.js'
 import { isoDateToUsDateString } from 'src/utils/client-form.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -18,18 +19,12 @@ function formatTimestamp(raw) {
   if (!value) {
     return ''
   }
-  const asDate = new Date(value)
-  if (Number.isNaN(asDate.getTime())) {
-    return isoDateToUsDateString(value.slice(0, 10)) || value
+  const formatted = formatDateTime(value)
+  if (formatted) {
+    return formatted
   }
 
-  return asDate.toLocaleString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+  return isoDateToUsDateString(value.slice(0, 10)) || value
 }
 
 function readRawMeta(rawClient, ...keys) {

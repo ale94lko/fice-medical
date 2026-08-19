@@ -68,6 +68,7 @@
 import { useI18n } from 'vue-i18n'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
 import { formatClinicianDisplayLabel } from
   'src/utils/clinician-display.js'
@@ -95,11 +96,8 @@ function formatSignedDate(value) {
   if (!raw) {
     return '—'
   }
-  const date = new Date(raw)
 
-  return Number.isNaN(date.getTime())
-    ? raw
-    : date.toLocaleString()
+  return formatDateTime(raw) || raw
 }
 
 function clinicianLabel(item) {

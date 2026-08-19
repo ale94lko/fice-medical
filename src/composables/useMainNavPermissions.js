@@ -8,35 +8,16 @@ import {
 } from 'src/utils/auth-permissions.js'
 
 const administrationPermissions = [
-  permissionNames.viewConfig,
-  permissionNames.editConfig,
-  permissionNames.viewModules,
-  permissionNames.editModules,
-  permissionNames.viewPermissions,
-  permissionNames.editPermissions,
-  permissionNames.viewRoles,
-  permissionNames.addRole,
-  permissionNames.editRole,
   permissionNames.viewCatalog,
-  permissionNames.editCatalog,
-  permissionNames.viewPlans,
-  permissionNames.editPlans,
-  permissionNames.viewTenants,
-  permissionNames.viewAuditLog,
   permissionNames.viewClinicalAudit,
   permissionNames.viewSubtenants,
   permissionNames.manageScreeningTemplates,
   permissionNames.clinicalNoteTemplateView,
   permissionNames.clinicalNoteTemplateCreate,
   permissionNames.clinicalNoteTemplateEdit,
-  permissionNames.manageClinicalResources,
   permissionNames.consentView,
   permissionNames.consentCreate,
   permissionNames.consentEdit,
-]
-
-const humanResourcesPermissions = [
-  permissionNames.viewCredentials,
 ]
 
 const calendarPermissions = [
@@ -57,6 +38,13 @@ export function useMainNavPermissions() {
 
   const showCalendarMenu = computed(() =>
     hasAnyPermission(permissions.value, calendarPermissions),
+  )
+
+  const showPortalMessages = computed(() =>
+    hasAnyPermission(permissions.value, [
+      permissionNames.viewPortalMessages,
+      permissionNames.sendPortalMessages,
+    ]),
   )
 
   const showClientMenu = computed(() =>
@@ -106,26 +94,6 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.addTenantsUser),
   )
 
-  const showProvidersMenu = computed(() =>
-    hasPermission(permissions.value, permissionNames.viewClinicians),
-  )
-
-  const showHumanResourcesMenu = computed(() =>
-    hasAnyPermission(permissions.value, humanResourcesPermissions),
-  )
-
-  const showHrGeneral = computed(() =>
-    hasPermission(permissions.value, permissionNames.viewStaffMembers),
-  )
-
-  const showHrEmployees = computed(() =>
-    hasPermission(permissions.value, permissionNames.viewStaffMembers),
-  )
-
-  const showHrCredentials = computed(() =>
-    hasPermission(permissions.value, permissionNames.viewCredentials),
-  )
-
   const showAdminStaffList = computed(() =>
     hasPermission(permissions.value, permissionNames.viewStaffMembers),
   )
@@ -153,15 +121,16 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.denialView),
   )
 
-  const showAdministrationMenu = computed(() =>
-    hasAnyPermission(permissions.value, administrationPermissions),
+  const showBillingMenu = computed(() =>
+    showBilling.value
+      || showClaims.value
+      || showRemittances.value
+      || showPayments.value
+      || showDenials.value,
   )
 
-  const showAdminGeneral = computed(() =>
-    hasAnyPermission(permissions.value, [
-      permissionNames.viewConfig,
-      permissionNames.editConfig,
-    ]),
+  const showAdministrationMenu = computed(() =>
+    hasAnyPermission(permissions.value, administrationPermissions),
   )
 
   const showAdminUsers = computed(() =>
@@ -204,6 +173,7 @@ export function useMainNavPermissions() {
   return {
     showDashboard,
     showCalendarMenu,
+    showPortalMessages,
     showClientMenu,
     showClientList,
     showClientAdd,
@@ -212,19 +182,14 @@ export function useMainNavPermissions() {
     showStaffAddStaff,
     showUsersMenu,
     showUsersAdd,
-    showProvidersMenu,
-    showHumanResourcesMenu,
-    showHrGeneral,
-    showHrEmployees,
-    showHrCredentials,
     showAdminStaffList,
+    showBillingMenu,
     showBilling,
     showClaims,
     showRemittances,
     showPayments,
     showDenials,
     showAdministrationMenu,
-    showAdminGeneral,
     showAdminSubtenants,
     showAdminUsers,
     showServicesProcedures,

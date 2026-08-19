@@ -167,9 +167,8 @@ export function appointmentToCalendarEvent(appointment, options = {}) {
   const typeName = trim(appointment?.servicesLabel)
     || trim(appointment?.appointmentTypeName)
     || 'Appointment'
-  const title = clientName
-    ? `${clientName} – ${typeName}`
-    : typeName
+  const clientLabel = clientName || typeName
+  const title = clientLabel
   const timeZone = options.timeZone ?? resolveTenantTimeZone()
   const endAtUtc = resolveEventEndAtUtc(
     appointment.startAtUtc,
@@ -183,6 +182,7 @@ export function appointmentToCalendarEvent(appointment, options = {}) {
     kind: 'appointment',
     title,
     typeLabel: typeName,
+    clientLabel,
     startAtUtc: appointment.startAtUtc,
     endAtUtc,
     durationMin: appointment.durationMin,

@@ -99,6 +99,8 @@ export function buildServiceLine(service, durationMin = null) {
   return {
     serviceId: service.id,
     name: service.name,
+    category: service.category ?? '',
+    description: service.description ?? '',
     cptCode: service.cptCode ?? '',
     hcpcsCode: service.hcpcsCode ?? '',
     defaultFee: service.defaultFee ?? null,

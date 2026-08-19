@@ -52,6 +52,8 @@ import { clearClinicalResourceUserRolesCache } from
   '../utils/clinical-resource-user-roles.js'
 import { syncAppDateTimeConfigFromAuth } from
   '../utils/sync-app-datetime-config.js'
+import { clearSessionDisplayTimezone, bumpDisplayTimezoneTick } from
+  '../composables/useSessionDisplayTimezone.js'
 
 function resolveRestoredPasswordChangeMode(storedMode, userInfo) {
   if (
@@ -67,6 +69,7 @@ function resolveRestoredPasswordChangeMode(storedMode, userInfo) {
 }
 
 let authorizationHydratePromise = null
+let authorizationHydrated = false
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -173,6 +176,7 @@ export const useAuthStore = defineStore('auth', {
 
       this.activeSubtenantId = match?.id ?? list[0].id
       writeStoredActiveSubtenantId(this.activeSubtenantId)
+      void this.refreshDateTimeConfig()
     },
     setActiveSubtenant(id) {
       const nextId = Number(id)
@@ -185,6 +189,22 @@ export const useAuthStore = defineStore('auth', {
       }
       this.activeSubtenantId = nextId
       writeStoredActiveSubtenantId(nextId)
+      void this.refreshDateTimeConfig()
+    },
+    async refreshDateTimeConfig() {
+      try {
+        const response = await apiInstance.get(apiPaths.datetimeConfig)
+        const payload = response?.data?.data ?? response?.data
+        if (!payload || typeof payload !== typeNames.object) {
+          return
+        }
+        writeStoredConfigData(payload)
+        syncAppDateTimeConfigFromAuth(payload)
+        this.configData = payload
+        bumpDisplayTimezoneTick()
+      } catch {
+        // Keep login config_data if the endpoint is unavailable.
+      }
     },
     applyTokensFromApi(td) {
       if (!td) {
@@ -448,6 +468,9 @@ export const useAuthStore = defineStore('auth', {
           this.applySubtenants(subtenants, activeSubtenantId)
         } else if (activeSubtenantId != null) {
           this.activeSubtenantId = activeSubtenantId
+          void this.refreshDateTimeConfig()
+        } else {
+          void this.refreshDateTimeConfig()
         }
         writeStoredModules()
         writeStoredPermissions()
@@ -457,12 +480,13 @@ export const useAuthStore = defineStore('auth', {
       if (!this.token) {
         return
       }
-      if (hasAssignedPermissions(this.permissions)) {
+      if (authorizationHydrated) {
         return
       }
       if (!authorizationHydratePromise) {
         authorizationHydratePromise = this.loadAuthorizationFromApi()
           .finally(() => {
+            authorizationHydrated = true
             authorizationHydratePromise = null
           })
       }
@@ -484,6 +508,7 @@ export const useAuthStore = defineStore('auth', {
     },
     clearSession() {
       authorizationHydratePromise = null
+      authorizationHydrated = false
       this.token = null
       this.expireAt = null
       this.refreshToken = null
@@ -498,6 +523,7 @@ export const useAuthStore = defineStore('auth', {
       this.passwordChangeMode = null
       this.mustEnrollMfa = false
       syncAppDateTimeConfigFromAuth(null)
+      clearSessionDisplayTimezone()
       clearClinicalResourceUserRolesCache()
       clearAuthLocalStorage()
     },
@@ -522,7 +548,10 @@ export const useAuthStore = defineStore('auth', {
             this.mustChangePassword = false
             this.passwordChangeMode = null
             this.mustEnrollMfa = false
+            authorizationHydratePromise = null
+            authorizationHydrated = false
             syncAppDateTimeConfigFromAuth(null)
+            clearSessionDisplayTimezone()
             if (this.router) {
               this.router.push('/login')
             }

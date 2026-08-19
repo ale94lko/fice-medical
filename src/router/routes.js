@@ -1,5 +1,16 @@
 import { permissionNames, clientPermissionNames } from 'components/constants.js'
 
+const clinicMessagesPage = () => import(
+  'pages/messages/MessagesInboxPage.vue'
+)
+
+const clinicMessagesAccess = {
+  requiresAnyPermission: [
+    permissionNames.viewPortalMessages,
+    permissionNames.sendPortalMessages,
+  ],
+}
+
 const routes = [
   {
     path: '/',
@@ -47,6 +58,18 @@ const routes = [
             clientPermissionNames.manageAppointmentSlots,
           ],
         },
+      },
+      {
+        path: 'messages',
+        name: 'ClinicMessages',
+        component: clinicMessagesPage,
+        meta: clinicMessagesAccess,
+      },
+      {
+        path: 'messages/:conversationId',
+        name: 'ClinicMessagesThread',
+        component: clinicMessagesPage,
+        meta: clinicMessagesAccess,
       },
       {
         path: 'clients',

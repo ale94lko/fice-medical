@@ -44,7 +44,7 @@
               {{ event.startTimeLabel }}
             </span>
             <span class="calendar-month-view__event-title">
-              {{ event.typeLabel }}
+              {{ event.clientLabel || event.typeLabel }}
             </span>
           </button>
           <button
@@ -67,7 +67,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   buildMonthGridCells,
-  calendarWeekdayLabels,
+  calendarWeekdayLabelsForConfig,
 } from 'src/utils/calendar-grid.js'
 import {
   monthKeyFromDayKey,
@@ -83,7 +83,7 @@ const props = defineProps({
 const emit = defineEmits(['select-day', 'select-event'])
 
 const { t } = useI18n()
-const weekdayLabels = calendarWeekdayLabels
+const weekdayLabels = computed(() => calendarWeekdayLabelsForConfig())
 const todayKey = computed(() => todayLocalDayKey(props.timeZone))
 const cells = computed(() =>
   buildMonthGridCells(monthKeyFromDayKey(props.focusDayKey)),

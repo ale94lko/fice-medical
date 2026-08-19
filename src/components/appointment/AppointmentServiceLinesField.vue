@@ -7,8 +7,9 @@
       <AppointmentServiceSearchRow
         v-model="pendingServiceId"
         :options="filteredOptions"
-        :disable="readonly || !canAddMore"
-        :add-disable="readonly || !canAddMore || !pendingServiceId"
+        :disable="readonly || !canAddMore || loading"
+        :add-disable="readonly || !canAddMore || !pendingServiceId || loading"
+        :loading="loading"
         :placeholder="activeSearchPlaceholder"
         :test-id-prefix="testIdPrefix"
         @filter="onFilter"
@@ -24,8 +25,9 @@
       v-else-if="!readonly"
       v-model="pendingServiceId"
       :options="filteredOptions"
-      :disable="!canAddMore"
-      :add-disable="!canAddMore || !pendingServiceId"
+      :disable="!canAddMore || loading"
+      :add-disable="!canAddMore || !pendingServiceId || loading"
+      :loading="loading"
       :placeholder="activeSearchPlaceholder"
       :test-id-prefix="testIdPrefix"
       @filter="onFilter"
@@ -39,60 +41,69 @@
       class="appointment-service-lines__card q-mt-md">
       <div class="appointment-service-lines__card-row">
         <div class="appointment-service-lines__info">
-          <p class="appointment-service-lines__name">
-            {{ line.name }}
-          </p>
-          <p
-            v-if="lineMeta(line)"
-            class="appointment-service-lines__meta">
-            {{ lineMeta(line) }}
-          </p>
+          <span
+            v-if="lineCodeBadge(line)"
+            class="appointment-service-lines__cpt">
+            {{ lineCodeBadge(line) }}
+          </span>
+          <div class="appointment-service-lines__titles">
+            <p class="appointment-service-lines__name">
+              {{ line.name }}
+            </p>
+            <p
+              v-if="lineSubtitle(line)"
+              class="appointment-service-lines__meta">
+              {{ lineSubtitle(line) }}
+            </p>
+          </div>
         </div>
 
-        <div class="appointment-service-lines__field">
-          <AddClientLabeledField :label="t('appointmentDuration')">
-            <q-input
-              :model-value="line.durationMin"
-              outlined
-              hide-bottom-space
-              dense
-              type="number"
-              class="appointment-service-lines__duration-input"
-              :readonly="readonly || line.fixedDuration"
-              :disable="readonly || line.fixedDuration"
-              :data-testid="`${testIdPrefix}-duration-${line.serviceId}`"
-              @update:model-value="value => onDurationChange(index, value)">
-              <template #append>
-                <span class="appointment-service-lines__suffix">
-                  {{ t('appointmentDurationUnitMin') }}
-                </span>
-              </template>
-            </q-input>
-          </AddClientLabeledField>
-        </div>
+        <div class="appointment-service-lines__metrics">
+          <div class="appointment-service-lines__field">
+            <AddClientLabeledField :label="t('appointmentDuration')">
+              <q-input
+                :model-value="line.durationMin"
+                outlined
+                hide-bottom-space
+                dense
+                type="number"
+                class="appointment-service-lines__duration-input"
+                :readonly="readonly || line.fixedDuration"
+                :disable="readonly || line.fixedDuration"
+                :data-testid="`${testIdPrefix}-duration-${line.serviceId}`"
+                @update:model-value="value => onDurationChange(index, value)">
+                <template #append>
+                  <span class="appointment-service-lines__suffix">
+                    {{ t('appointmentDurationUnitMin') }}
+                  </span>
+                </template>
+              </q-input>
+            </AddClientLabeledField>
+          </div>
 
-        <div
-          class="appointment-service-lines__field
-            appointment-service-lines__field--fee">
-          <AddClientLabeledField
-            :label="t('serviceProcedureDefaultFeeLabel')">
-            <q-input
-              :model-value="displayFeeValue(line)"
-              outlined
-              hide-bottom-space
-              dense
-              inputmode="decimal"
-              :readonly="readonly"
-              :disable="readonly"
-              :data-testid="`${testIdPrefix}-fee-${line.serviceId}`"
-              @focus="onFeeFocus(line)"
-              @blur="onFeeBlur(index, line)"
-              @update:model-value="value => onFeeInput(line, value)">
-              <template #prepend>
-                <span class="appointment-service-lines__currency">$</span>
-              </template>
-            </q-input>
-          </AddClientLabeledField>
+          <div
+            class="appointment-service-lines__field
+              appointment-service-lines__field--fee">
+            <AddClientLabeledField
+              :label="t('serviceProcedureDefaultFeeLabel')">
+              <q-input
+                :model-value="displayFeeValue(line)"
+                outlined
+                hide-bottom-space
+                dense
+                inputmode="decimal"
+                :readonly="readonly"
+                :disable="readonly"
+                :data-testid="`${testIdPrefix}-fee-${line.serviceId}`"
+                @focus="onFeeFocus(line)"
+                @blur="onFeeBlur(index, line)"
+                @update:model-value="value => onFeeInput(line, value)">
+                <template #prepend>
+                  <span class="appointment-service-lines__currency">$</span>
+                </template>
+              </q-input>
+            </AddClientLabeledField>
+          </div>
         </div>
 
         <q-btn
@@ -100,7 +111,8 @@
           flat
           round
           dense
-          icon="close"
+          icon="delete"
+          color="primary"
           class="appointment-service-lines__remove-btn"
           :aria-label="t('remove')"
           :data-testid="tid.serviceLineRemove(index)"
@@ -122,11 +134,14 @@ import {
   formatServiceCatalogOptionLabel,
   formatServiceDurationSummary,
 } from 'src/utils/appointment-booking.js'
+import { serviceProcedureCategoryLabel } from
+  'src/utils/service-procedure-list-normalize.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
   lines: { type: Array, default: () => [] },
   catalog: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
   readonly: { type: Boolean, default: false },
   hideLabel: { type: Boolean, default: false },
   required: { type: Boolean, default: true },
@@ -219,23 +234,32 @@ function findOptionById(id) {
   ) ?? null
 }
 
-function formatOptionCaption(option) {
-  const parts = []
-  if (option.cptCode) {
-    parts.push(`CPT ${option.cptCode}`)
+function lineCodeBadge(line) {
+  const cpt = String(line?.cptCode ?? '').trim()
+  if (cpt) {
+    return `CPT ${cpt}`
   }
-  if (option.durationSummary) {
-    parts.push(option.durationSummary)
+  const hcpcs = String(line?.hcpcsCode ?? '').trim()
+  if (hcpcs) {
+    return `HCPCS ${hcpcs}`
   }
 
-  return parts.join(' · ')
+  return ''
 }
 
-function lineMeta(line) {
-  return formatOptionCaption({
-    cptCode: line.cptCode,
-    durationSummary: formatServiceDurationSummary(line, t),
-  })
+function lineSubtitle(line) {
+  const description = String(line?.description ?? '').trim()
+  if (description) {
+    return description
+  }
+  const category = String(line?.category ?? '').trim()
+  if (!category) {
+    return ''
+  }
+
+  const label = serviceProcedureCategoryLabel(category, t)
+
+  return label === '—' ? '' : label
 }
 
 function feeDraftKey(serviceId) {

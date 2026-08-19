@@ -5,6 +5,10 @@ export const calendarViewModes = {
   agenda: 'agenda',
 }
 
+export function isCalendarViewMode(value) {
+  return Object.values(calendarViewModes).includes(value)
+}
+
 export const calendarSourceIds = {
   myAppointments: 'my_appointments',
   clinicianAppointments: 'clinician_appointments',

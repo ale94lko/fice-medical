@@ -107,6 +107,81 @@
           <div
             class="subtenant-dialog__full
               subtenant-dialog__heading-wrap"
+            :data-testid="subtenantDialogTestIds.section('datetime')">
+            <SectionHeading
+              icon="schedule"
+              :title="t('subtenantSectionDateTime')"
+            />
+            <p class="text-body2 text-grey-7 q-mb-none">
+              {{ t('subtenantTimezoneHint') }}
+            </p>
+          </div>
+          <AddClientLabeledField
+            :label="t('subtenantTimezoneLabel')"
+            required>
+            <FormSelect
+              v-model="local.timezone"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              :options="timezoneOptions"
+              :readonly="readonly"
+              :test-id="subtenantDialogTestIds.field('timezone')"
+            />
+          </AddClientLabeledField>
+          <AddClientLabeledField
+            :label="t('subtenantDateFormatLabel')"
+            required>
+            <FormSelect
+              v-model="local.dateFormat"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              :options="dateFormatOptions"
+              :readonly="readonly"
+              :test-id="
+                subtenantDialogTestIds.field('date-format')
+              "
+            />
+          </AddClientLabeledField>
+          <AddClientLabeledField
+            :label="t('subtenantTimeFormatLabel')"
+            required>
+            <FormSelect
+              v-model="local.timeFormat"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              :options="timeFormatOptions"
+              :readonly="readonly"
+              :test-id="
+                subtenantDialogTestIds.field('time-format')
+              "
+            />
+          </AddClientLabeledField>
+          <AddClientLabeledField
+            :label="t('subtenantFirstDayOfWeekLabel')"
+            required>
+            <FormSelect
+              v-model="local.firstDayOfWeek"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              :options="firstDayOptions"
+              :readonly="readonly"
+              :test-id="
+                subtenantDialogTestIds.field('first-day')
+              "
+            />
+          </AddClientLabeledField>
+
+          <div
+            class="subtenant-dialog__full
+              subtenant-dialog__heading-wrap"
             :data-testid="subtenantDialogTestIds.section('legal')">
             <SectionHeading
               icon="account_balance"
@@ -281,6 +356,12 @@ import {
 } from 'src/utils/ein.js'
 import { subtenantDialogTestIds } from 'src/test-ids/index.js'
 import { clinicTypeSelectOptions } from 'src/utils/clinic-type.js'
+import {
+  DATE_FORMAT_OPTIONS,
+  FIRST_DAY_VALUES,
+  TIME_FORMAT_VALUES,
+  ianaTimezoneSelectOptions,
+} from 'src/utils/iana-timezones.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -300,6 +381,18 @@ const local = ref(createEmptySubtenantForm())
 const errors = ref({})
 const companyLogoCategory = storedFileCategories.companyLogo
 const clinicTypeOptions = computed(() => clinicTypeSelectOptions(t))
+const timezoneOptions = computed(() =>
+  ianaTimezoneSelectOptions(local.value.timezone),
+)
+const dateFormatOptions = DATE_FORMAT_OPTIONS
+const timeFormatOptions = computed(() => [
+  { label: t('timeFormat12h'), value: TIME_FORMAT_VALUES.h12 },
+  { label: t('timeFormat24h'), value: TIME_FORMAT_VALUES.h24 },
+])
+const firstDayOptions = computed(() => [
+  { label: t('firstDaySunday'), value: FIRST_DAY_VALUES.sunday },
+  { label: t('firstDayMonday'), value: FIRST_DAY_VALUES.monday },
+])
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const taxIdDisplay = computed(() => formatEinDisplay(local.value.taxId))

@@ -11,6 +11,11 @@ import {
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
 import { formatClientDisplayName } from 'src/utils/client-display-name.js'
 import {
+  formatDate,
+  formatDateTime,
+  formatTime,
+} from 'src/utils/app-datetime.js'
+import {
   isoDateToUsDateString,
   normalizeIdNumberMaskedDisplay,
   parseUsDateString,
@@ -188,16 +193,7 @@ function formatAppointmentUsDate(startAtUtc) {
     return '—'
   }
 
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
-    return isoDateToUsDateString(raw.slice(0, 10)) || raw
-  }
-
-  return date.toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-  })
+  return formatDate(raw) || isoDateToUsDateString(raw.slice(0, 10)) || raw
 }
 
 function formatAppointmentDateTimeLine(startAtUtc) {
@@ -205,23 +201,13 @@ function formatAppointmentDateTimeLine(startAtUtc) {
   if (!raw) {
     return '—'
   }
-
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
+  const datePart = formatDate(raw)
+  const timePart = formatTime(raw)
+  if (!datePart) {
     return isoDateToUsDateString(raw.slice(0, 10)) || raw
   }
 
-  const datePart = date.toLocaleDateString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-  })
-  const timePart = date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-
-  return `${datePart} • ${timePart}`
+  return timePart ? `${datePart} • ${timePart}` : datePart
 }
 
 function formatAppointmentDateTime(startAtUtc) {
@@ -229,23 +215,12 @@ function formatAppointmentDateTime(startAtUtc) {
   if (!raw) {
     return '—'
   }
-
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
-    return isoDateToUsDateString(raw.slice(0, 10)) || raw
+  const formatted = formatDateTime(raw)
+  if (formatted) {
+    return formatted.replace(' ', ' - ')
   }
 
-  const datePart = date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-  const timePart = date.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-
-  return `${datePart} - ${timePart}`
+  return isoDateToUsDateString(raw.slice(0, 10)) || raw
 }
 
 function formatAppointmentDate(startAtUtc) {

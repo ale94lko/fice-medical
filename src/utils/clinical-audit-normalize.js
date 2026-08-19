@@ -1,5 +1,9 @@
 import {
+  formatDate,
+  formatDateTime,
+  formatTime,
   getAppDateTimeConfig,
+  resolveActiveDisplayTimeZone,
   resolveIntlTimeZone,
 } from 'src/utils/app-datetime.js'
 
@@ -87,12 +91,8 @@ export function formatClinicalAuditDateTime(value) {
   if (!raw) {
     return '—'
   }
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
-    return raw
-  }
 
-  return date.toLocaleString()
+  return formatDateTime(raw) || raw
 }
 
 /** Detail header: "Aug 8, 2026 • 12:19:16 AM (UTC-04:00)". */
@@ -108,35 +108,17 @@ export function formatClinicalAuditDetailDateTime(value, timezone = '') {
 
   const config = getAppDateTimeConfig()
   const tzRaw = String(timezone || config.timezone || '').trim()
-  const timeZone = resolveIntlTimeZone(tzRaw || 'UTC')
+  const timeZone = String(timezone ?? '').trim()
+    ? resolveIntlTimeZone(tzRaw || 'UTC')
+    : resolveActiveDisplayTimeZone()
   let datePart
   let timePart
   try {
-    datePart = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    }).format(date)
-    timePart = new Intl.DateTimeFormat('en-US', {
-      timeZone,
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    }).format(date)
+    datePart = formatDate(date, timeZone)
+    timePart = formatTime(date, timeZone)
   } catch {
-    datePart = date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-    timePart = date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true,
-    })
+    datePart = formatDate(date)
+    timePart = formatTime(date)
   }
 
   return `${datePart} • ${timePart} (${tzRaw || timeZone})`

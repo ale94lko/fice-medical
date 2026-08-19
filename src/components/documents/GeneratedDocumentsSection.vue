@@ -74,6 +74,7 @@ import {
   listStoredFiles,
   triggerBlobDownload,
 } from 'src/utils/stored-file-api.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { documentGenerationTestIds } from 'src/test-ids/index.js'
 
@@ -116,12 +117,7 @@ function formatUploadedAt(value) {
     return '—'
   }
 
-  const date = new Date(token)
-  if (Number.isNaN(date.getTime())) {
-    return token
-  }
-
-  return date.toLocaleString()
+  return formatDateTime(token) || token
 }
 
 async function loadFiles() {

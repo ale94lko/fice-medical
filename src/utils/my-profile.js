@@ -121,7 +121,7 @@ export function buildMyProfileViewModel({
   }
 }
 
-export async function loadMyProfileData({ userId, staffId, t }) {
+export async function loadMyProfileData({ userId, staffCode, t }) {
   let userRecord = null
   let staffForm = null
 
@@ -129,13 +129,14 @@ export async function loadMyProfileData({ userId, staffId, t }) {
     userRecord = await fetchTenantUser(userId, t)
   }
 
-  const resolvedStaffId = staffId
-    ?? userRecord?.tenantStaffId
-    ?? userRecord?.staffMember?.id
-    ?? null
+  const resolvedStaffCode = String(
+    staffCode
+      ?? userRecord?.staffMember?.staffNo
+      ?? '',
+  ).trim()
 
-  if (resolvedStaffId != null) {
-    const staffData = await fetchStaffById(resolvedStaffId)
+  if (resolvedStaffCode) {
+    const staffData = await fetchStaffById(resolvedStaffCode)
     staffForm = createEmptyStaffForm(null, staffData)
   }
 

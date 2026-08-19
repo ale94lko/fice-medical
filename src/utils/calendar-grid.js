@@ -9,8 +9,26 @@ import {
 import {
   calendarViewModes,
 } from 'src/constants/calendar.js'
+import { getAppDateTimeConfig } from 'src/utils/app-datetime.js'
 
 export const calendarWeekdayLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+
+function weekdayStartOffset(date) {
+  const jsDay = date.getDay()
+  if (getAppDateTimeConfig().first_day_of_week === 'MONDAY') {
+    return (jsDay + 6) % 7
+  }
+
+  return jsDay
+}
+
+export function calendarWeekdayLabelsForConfig() {
+  if (getAppDateTimeConfig().first_day_of_week === 'MONDAY') {
+    return ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+  }
+
+  return calendarWeekdayLabels
+}
 
 export function buildMonthGridCells(monthKey) {
   const days = calendarDaysForMonth(monthKey)
@@ -24,7 +42,7 @@ export function buildMonthGridCells(monthKey) {
     Number(first.slice(5, 7)) - 1,
     Number(first.slice(8, 10)),
   )
-  const offset = firstDate.getDay()
+  const offset = weekdayStartOffset(firstDate)
   const cells = []
 
   for (let i = offset - 1; i >= 0; i -= 1) {
@@ -93,13 +111,13 @@ export function weekDayKeysContaining(anchorDayKey) {
     Number(match[2]) - 1,
     Number(match[3]),
   )
-  const sunday = new Date(date)
-  sunday.setDate(date.getDate() - date.getDay())
+  const start = new Date(date)
+  start.setDate(date.getDate() - weekdayStartOffset(date))
   const keys = []
 
   for (let i = 0; i < 7; i += 1) {
-    const day = new Date(sunday)
-    day.setDate(sunday.getDate() + i)
+    const day = new Date(start)
+    day.setDate(start.getDate() + i)
     keys.push(localDayKeyFromParts(
       day.getFullYear(),
       day.getMonth() + 1,
@@ -159,14 +177,22 @@ export function visibleRangeForView(viewMode, focusDayKey, timeZone) {
 }
 
 export function buildHourLabels(startHour, endHour) {
+  const is24h = getAppDateTimeConfig().time_format === '24h'
   const labels = []
   for (let hour = startHour; hour <= endHour; hour += 1) {
-    const period = hour >= 12 ? 'PM' : 'AM'
-    const display = hour % 12 === 0 ? 12 : hour % 12
-    labels.push({
-      hour,
-      label: `${display} ${period}`,
-    })
+    if (is24h) {
+      labels.push({
+        hour,
+        label: `${String(hour).padStart(2, '0')}:00`,
+      })
+    } else {
+      const period = hour >= 12 ? 'PM' : 'AM'
+      const display = hour % 12 === 0 ? 12 : hour % 12
+      labels.push({
+        hour,
+        label: `${display} ${period}`,
+      })
+    }
   }
 
   return labels

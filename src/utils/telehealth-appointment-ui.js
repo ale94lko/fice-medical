@@ -49,8 +49,8 @@ export function openTelehealthInviteUrl(url) {
 export function notifyBookedAppointment($q, t, result, baseMessage) {
   const appointment = pickBookedAppointment(result)
   if (appointment?.telemedicine) {
-    const inviteUrl = String(appointment.telehealthInviteUrl ?? '').trim()
-    if (!inviteUrl) {
+    const sessionId = appointment.telehealthSessionId
+    if (sessionId == null) {
       $q.notify({
         type: 'warning',
         message: `${baseMessage} ${t('telehealthInvitePending')}`,

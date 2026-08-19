@@ -2,31 +2,22 @@
  * UTC ↔ tenant-local display helpers for appointments.
  */
 import {
+  formatDate as formatAppDate,
+  formatTime as formatAppTime,
   getAppDateTimeConfig,
   localDayKeyFromLoginOffset,
   parseUtcOffsetMinutes,
-  resolveIntlTimeZone,
+  resolveActiveDisplayTimeZone,
+  resolveBrowserTimeZone,
 } from 'src/utils/app-datetime.js'
 import { parseUsDateString } from 'src/utils/client-form.js'
 
 /** Browser / OS local IANA zone (guest-facing displays). */
-export function resolveBrowserTimeZone() {
-  try {
-    // eslint-disable-next-line new-cap
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-  } catch {
-    return 'UTC'
-  }
-}
+export { resolveBrowserTimeZone }
 
-/** Tenant/clinic zone from app config (staff scheduling). */
+/** Tenant/clinic zone, or session browser override. */
 export function resolveTenantTimeZone() {
-  const configured = resolveIntlTimeZone(getAppDateTimeConfig().timezone)
-  if (configured) {
-    return configured
-  }
-
-  return resolveBrowserTimeZone()
+  return resolveActiveDisplayTimeZone()
 }
 
 function parseUtcDate(iso) {
@@ -40,31 +31,31 @@ function parseUtcDate(iso) {
 }
 
 export function formatUtcDateLong(iso, timeZone = resolveTenantTimeZone()) {
-  const date = parseUtcDate(iso)
-  if (!date) {
-    return ''
-  }
-
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date)
+  return formatAppDate(iso, timeZone)
 }
 
 export function formatUtcTime(iso, timeZone = resolveTenantTimeZone()) {
+  return formatAppTime(iso, timeZone)
+}
+
+export function localHmFromUtc(iso, timeZone = resolveTenantTimeZone()) {
   const date = parseUtcDate(iso)
   if (!date) {
     return ''
   }
-
-  return new Intl.DateTimeFormat('en-US', {
+  const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone,
-    hour: 'numeric',
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: true,
-  }).format(date)
+    hourCycle: 'h23',
+  }).formatToParts(date)
+  const hour = parts.find(part => part.type === 'hour')?.value ?? '00'
+  const minute = parts.find(part => part.type === 'minute')?.value
+    ?? '00'
+
+  return `${String(hour).padStart(2, '0')}:${
+    String(minute).padStart(2, '0')
+  }`
 }
 
 export function formatUtcTimeRange(

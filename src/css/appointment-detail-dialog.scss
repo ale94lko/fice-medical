@@ -4,7 +4,7 @@
 .appointment-detail-dialog {
   font-family: $typography-font-family;
 
-  &.insurance-dialog.app-dialog-card {
+  &.insurance-dialog.app-dialog-card:not(.app-dialog-card--sm) {
     max-width: 1040px;
   }
 
@@ -17,9 +17,9 @@
   }
 
   &__header-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     background: rgba($primary, 0.12);
     color: $primary;
     display: flex;
@@ -285,6 +285,177 @@
     color: $text-hint;
   }
 
+  &__people {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+    min-height: 96px;
+
+    @media (max-width: 767px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__person-card {
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    background: $surface;
+  }
+
+  &__person-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  &__avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $primary;
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+
+    .stored-file-avatar,
+    .stored-file-avatar__image,
+    .stored-file-avatar__preview-btn {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    &--shield {
+      background: rgba($primary, 0.12);
+      color: $primary;
+    }
+  }
+
+  &__person-kicker {
+    margin: 0 0 2px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: $text-muted;
+  }
+
+  &__person-name {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: $text-strong;
+    word-break: break-word;
+  }
+
+  &__facts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      color: $text-strong;
+    }
+
+    .q-icon {
+      margin-top: 2px;
+      color: $text-muted;
+      flex-shrink: 0;
+    }
+  }
+
+  &__empty {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: $text-muted;
+  }
+
+  &__insurance-grid {
+    margin: 0;
+    display: grid;
+    gap: 8px;
+
+    dt {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1.35;
+      color: $text-muted;
+    }
+
+    dd {
+      margin: 2px 0 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1.35;
+      color: $text-strong;
+      word-break: break-word;
+    }
+  }
+
+  &__subscriber {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: $radius-md;
+    background: rgba($info, 0.08);
+  }
+
+  &__subscriber-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: $text-muted;
+  }
+
+  &__subscriber-name {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: $text-strong;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: #6d28d9;
+    background: rgba(#8b5cf6, 0.12);
+  }
+
   &__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -419,38 +590,31 @@
     vertical-align: middle;
   }
 
-  &__lower {
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    gap: 16px;
-    margin-top: 16px;
-
-    @media (max-width: 899px) {
-      grid-template-columns: 1fr;
-    }
+  &__grid-cell--telehealth {
+    background: rgba($primary, 0.05);
   }
 
-  &__notes-card,
-  &__aside-card,
-  &__telehealth-card {
+  &__telehealth {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  &__link {
+    margin: 0;
+    min-width: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: $primary;
+    word-break: break-all;
+  }
+
+  &__notes-card {
+    margin-top: 16px;
     border: 1px solid $border-subtle;
     border-radius: $radius-md;
     padding: 14px 16px;
     background: $surface;
-  }
-
-  &__notes-card {
-    background: rgba($primary, 0.04);
-  }
-
-  &__telehealth-card {
-    background: rgba($primary, 0.04);
-  }
-
-  &__telehealth-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
   }
 
   &__section-heading {
@@ -466,50 +630,15 @@
 
   &__notes-body {
     margin: 0;
-    min-height: 120px;
     font-size: 0.875rem;
     line-height: 1.45;
     color: $text-strong;
     white-space: pre-wrap;
     word-break: break-word;
-  }
 
-  &__aside-list {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  &__aside-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  &__aside-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1rem;
-  }
-
-  &__aside-title {
-    margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.3;
-    font-weight: 700;
-    color: $text-strong;
-  }
-
-  &__aside-text {
-    margin: 2px 0 0;
-    font-size: 0.8125rem;
-    line-height: 1.4;
-    color: $text-muted;
+    &--empty {
+      color: $text-muted;
+    }
   }
 
   &__actions {

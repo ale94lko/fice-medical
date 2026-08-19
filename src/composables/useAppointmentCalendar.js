@@ -1,9 +1,16 @@
 import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { calendarSourceIds, calendarViewModes } from
-  'src/constants/calendar.js'
+import {
+  calendarSourceIds,
+  calendarViewModes,
+  isCalendarViewMode,
+} from 'src/constants/calendar.js'
 import { useCalendarEventSources } from
   'src/composables/useCalendarEventSources.js'
+import { useCalendarViewPreference } from
+  'src/composables/useCalendarViewPreference.js'
+import { endCalendarPageLoading } from
+  'src/composables/useCalendarPageLoading.js'
 import { listCalendarAppointments } from 'src/utils/appointment-api.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import {
@@ -42,14 +49,18 @@ export function useAppointmentCalendar() {
   )
   const { canSelectClinicianSources } = useCalendarPermissions()
   const viewMode = ref(calendarViewModes.week)
+  const { persistPreference, loadPreference } =
+    useCalendarViewPreference(viewMode)
   const focusDayKey = ref(todayLocalDayKey(timeZone.value))
   const sidebarMonthKey = ref(monthKeyFromDayKey(focusDayKey.value))
-  const loading = ref(false)
+  const loading = ref(true)
+  const viewReady = ref(false)
   const loadError = ref('')
   const rawEvents = ref([])
   const selectedEvent = ref(null)
   const detailOpen = ref(false)
   const scrollToNowKey = ref(0)
+  let allowEventReloads = false
 
   const sources = useCalendarEventSources()
 
@@ -112,7 +123,9 @@ export function useAppointmentCalendar() {
   })
 
   async function loadEvents() {
-    loading.value = true
+    if (!viewReady.value) {
+      loading.value = true
+    }
     loadError.value = ''
     const range = visibleRange.value
     /* eslint-disable camelcase -- API query params */
@@ -160,7 +173,25 @@ export function useAppointmentCalendar() {
       }
       rawEvents.value = []
     } finally {
+      if (viewReady.value) {
+        loading.value = false
+      }
+    }
+  }
+
+  async function bootCalendar() {
+    loading.value = true
+    try {
+      await Promise.all([
+        loadPreference(),
+        sources.loadClinicianOptions(),
+      ])
+      await loadEvents()
+    } finally {
       loading.value = false
+      viewReady.value = true
+      allowEventReloads = true
+      endCalendarPageLoading()
     }
   }
 
@@ -180,7 +211,11 @@ export function useAppointmentCalendar() {
   }
 
   function setViewMode(mode) {
+    if (!isCalendarViewMode(mode) || viewMode.value === mode) {
+      return
+    }
     viewMode.value = mode
+    persistPreference(mode)
   }
 
   function setFocusDay(dayKey) {
@@ -216,10 +251,15 @@ export function useAppointmentCalendar() {
       sources.enabledClinicianIds,
     ],
     () => {
+      if (!allowEventReloads) {
+        return
+      }
       void loadEvents()
     },
-    { deep: true, immediate: true },
+    { deep: true },
   )
+
+  void bootCalendar()
 
   return {
     timeZone,
@@ -227,6 +267,7 @@ export function useAppointmentCalendar() {
     focusDayKey,
     sidebarMonthKey,
     loading,
+    viewReady,
     loadError,
     displayEvents,
     eventsByDay,

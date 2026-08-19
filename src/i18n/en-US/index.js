@@ -17,6 +17,28 @@ export default {
     'You have unsaved changes. If you switch site now, you will leave '
     + 'this record and your changes will be lost.',
   signOut: 'Sign out',
+  timezoneMismatchTitle: 'Different timezones',
+  timezoneMismatchLead:
+    'Your device and this clinic do not use the same timezone.',
+  timezoneMismatchDeviceLabel: 'This device',
+  timezoneMismatchClinicLabel: 'Clinic timezone',
+  timezoneMismatchInUse: 'In use',
+  timezoneMismatchSessionHint:
+    'This choice lasts only while you are signed in.',
+  timezoneMismatchUseDevice: 'Show device times',
+  timezoneMismatchKeepClinic: 'Keep clinic times',
+  timezoneMismatchRevertClinic: 'Back to clinic times',
+  subtenantTimezoneLabel: 'Timezone',
+  subtenantDateFormatLabel: 'Date format',
+  subtenantTimeFormatLabel: 'Time format',
+  subtenantFirstDayOfWeekLabel: 'First day of week',
+  subtenantTimezoneHint:
+    'Inherited from the organization; you can change it for this site.',
+  subtenantSectionDateTime: 'Date & time',
+  timeFormat12h: '12-hour',
+  timeFormat24h: '24-hour',
+  firstDaySunday: 'Sunday',
+  firstDayMonday: 'Monday',
   headerUserMyProfile: 'My profile',
   headerUserSettings: 'Settings',
   headerUserHelpSupport: 'Help & support',
@@ -187,7 +209,6 @@ export default {
   notes: 'Notes',
   welcome: 'Welcome, {name}!',
   administration: 'Administration',
-  administrationGeneral: 'General',
   clinicalAuditListTitle: 'Clinical Audit',
   clinicalAuditListSubtitle:
     'Review clinical data changes across clients and modules.',
@@ -666,7 +687,36 @@ export default {
   dashboardWidgetRevenueTrendLabel: 'Revenue trend',
   calendar: 'Calendar',
   appointmentRequestsNav: 'Appointment Requests',
+  portalMessagesNav: 'Messages',
+  portalMessagesTitle: 'Messages',
+  portalMessagesSubtitle:
+    'Secure messages with clients at this location.',
+  portalMessagesSearch: 'Search clients',
+  portalMessagesEmptyInbox: 'No conversations yet.',
+  portalMessagesSelectThread:
+    'Select a conversation to read and reply.',
+  portalMessagesEmptyThread: 'No messages yet.',
+  portalMessagesPlaceholder: 'Write a message',
+  portalMessagesSend: 'Send',
+  portalMessagesAttach: 'Attach a file',
+  portalMessagesAttachment: 'Attachment',
+  portalMessagesYou: 'You',
+  portalMessagesClient: 'Client',
+  portalMessagesClinic: 'Clinic',
+  portalMessagesBack: 'Back to inbox',
+  portalMessagesOpenClient: 'Open client',
+  portalMessagesOpenError:
+    'Could not open this conversation.',
+  portalMessagesClientLoadError:
+    'Could not load client details.',
+  portalMessagesShowClient: 'Client details',
+  portalMessagesShowChat: 'Back to chat',
+  portalMessagesUpcomingAppointments: 'Upcoming appointments',
+  portalMessagesNoUpcomingAppointments:
+    'No upcoming appointments.',
+  clientOverviewMessages: 'Messages',
   navBilling: 'Billing',
+  navSuperbills: 'Superbills',
   navClaims: 'Claims',
   navRemittances: 'Remittances',
   navPayments: 'Payments',
@@ -2393,6 +2443,18 @@ export default {
   appointmentDetailStatusPendingHint: 'Appointment is pending confirmation',
   appointmentDetailStatusInProgressHint: 'Encounter is in progress',
   appointmentDetailStatusRescheduledHint: 'Appointment was rescheduled',
+  appointmentDetailClientLabel: 'Client',
+  appointmentDetailInsuranceLabel: 'Insurance (Primary)',
+  appointmentDetailInsuranceEmpty: 'No insurance on file.',
+  appointmentDetailInsurancePayer: 'Payer',
+  appointmentDetailInsuranceServiceId: 'Service ID',
+  appointmentDetailInsuranceServiceIdHint:
+    'Plan, Medicaid, Medicare, or Golden Card ID on file.',
+  appointmentDetailSubscriberNotClient: 'Subscriber (Not the client)',
+  appointmentDetailAgeYears: '{count} y/o',
+  appointmentDetailTelehealthVisit: 'Telehealth Visit',
+  appointmentDetailTelehealthJoinHint:
+    'Join your appointment using the link below.',
   appointmentEditTitle: 'Edit Appointment',
   appointmentSaveClientFirst:
     'Save the client first to create and manage appointments.',
@@ -2539,6 +2601,8 @@ export default {
   appointmentRecurrenceUnitWeeks: 'week(s)',
   appointmentRecurrenceUnitMonths: 'month(s)',
   appointmentRecurrenceDays: 'Days of week',
+  appointmentRecurrenceDaysRequired:
+    'Select at least one day of the week.',
   appointmentRecurrenceDaysSelected:
     '{count} days selected',
   appointmentRecurrenceDaysPresetNone: 'None',
@@ -2546,6 +2610,8 @@ export default {
   appointmentRecurrenceDaysPresetWeekdays: 'Mon–Fri',
   appointmentRecurrenceDaysPresetWeekend: 'Sat–Sun',
   appointmentRecurrenceDaysPresetCustom: 'Custom',
+  appointmentRecurrenceDayClosed:
+    'This day is not a working day.',
   appointmentRecurrenceEnds: 'Ends',
   appointmentRecurrenceEndsHint: 'When the repetition will end.',
   appointmentRecurrenceCount: 'Number of appointments',
@@ -2574,6 +2640,24 @@ export default {
   appointmentRecurrencePreviewMonthly:
     '{preview}: {count} appointment(s) will be scheduled monthly,'
     + ' starting from {startDate}.',
+  appointmentRecurrenceReviewTitle: 'Review series',
+  appointmentRecurrenceReviewHint:
+    'Yellow cards were moved or have no free slot.',
+  appointmentRecurrenceOriginal: 'Original',
+  appointmentRecurrenceProposed: 'Proposed',
+  appointmentRecurrenceProposedDate: 'Date',
+  appointmentRecurrenceProposedTime: 'Time',
+  appointmentRecurrenceOverlapShort: 'Overlap',
+  appointmentRecurrenceResetOriginal: 'Reset original time',
+  appointmentRecurrenceCalculating: 'Calculating available times…',
+  appointmentRecurrenceAdjustmentSameDay: 'Nearest time this day.',
+  appointmentRecurrenceAdjustmentNextDay: 'Moved to the next day.',
+  appointmentRecurrenceAdjustmentUnavailable:
+    'No slot. Change time or overlap.',
+  appointmentRecurrenceReviewBack: 'Back',
+  appointmentBookConfirmSeries: 'Book series',
+  appointmentRecurrencePreviewError:
+    'Could not preview the repeating appointments.',
   placeOfServiceOffice: 'Office',
   placeOfServiceTelehealth: 'Telehealth',
   placeOfServiceHome: 'Home',
@@ -4140,7 +4224,7 @@ export default {
   telehealthCopyClientLink: 'Copy client link',
   telehealthOpenMeet: 'Open meet',
   telehealthInvitePending:
-    'Client invite link is pending (meet creation or notification failed).',
+    'Video visit could not be created. Open the appointment to retry.',
   telehealthSessionPending:
     'Telehealth session is not ready yet for this appointment.',
   telehealthClientInviteHint:
@@ -4481,6 +4565,7 @@ export default {
     'New Client Portal registration',
   notificationsPortalProfileReadyTitle:
     'Portal user ready for a client chart',
+  notificationsPortalMessageTitle: 'New Client Portal message',
   encounterRenderingClinician: 'Rendering Clinician',
   encounterLocation: 'Location',
   encounterModeInPerson: 'In Person',
@@ -4554,10 +4639,10 @@ export default {
   encounterBillingAlert:
     '{count} items need attention before billing.',
   encounterBillingEmpty: 'No billing checks for this visit.',
-  superbillListTitle: 'Billing',
+  superbillListTitle: 'Superbills',
   superbillListSubtitle:
     'Review and manage clinical visits for billing.',
-  billingWorkspaceTitle: 'Billing',
+  billingWorkspaceTitle: 'Superbills',
   billingWorkspaceSubtitle:
     'Review superbills and resolve billing readiness issues.',
   billingReviewTitle: 'Billing Review',

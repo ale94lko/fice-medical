@@ -317,6 +317,7 @@ import {
   isValidClinicalNoteDateTime,
   normalizeClinicalNoteTime,
 } from 'src/utils/clinical-note-datetime.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
 import { resolveDefaultResponsibleClinicianOption } from
   'src/utils/care-plan-orders.js'
@@ -458,11 +459,8 @@ function formatSignedDate(value) {
   if (!raw) {
     return '—'
   }
-  const date = new Date(raw)
 
-  return Number.isNaN(date.getTime())
-    ? raw
-    : date.toLocaleString()
+  return formatDateTime(raw) || raw
 }
 
 function normalizeNoteTime() {

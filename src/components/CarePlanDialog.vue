@@ -341,6 +341,7 @@ import {
   isCarePlanTerminal,
   isGoalInProgress,
 } from 'src/utils/care-plan-lifecycle.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
@@ -609,12 +610,8 @@ function formatSignedDate(value) {
   if (!value) {
     return '—'
   }
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
 
-  return date.toLocaleString()
+  return formatDateTime(value) || value
 }
 
 function validate(activate) {

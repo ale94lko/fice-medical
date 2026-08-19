@@ -2,6 +2,7 @@
   <div
     v-if="activeSubtenant"
     class="app-subtenant">
+    <TimezoneMismatchBanner />
     <q-btn
       v-if="hasMultipleSubtenants"
       flat
@@ -93,6 +94,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from 'stores/auth-store.js'
 import SubtenantPillContent from 'components/SubtenantPillContent.vue'
+import TimezoneMismatchBanner from
+  'components/TimezoneMismatchBanner.vue'
 import StoredFileAvatar from 'components/StoredFileAvatar.vue'
 import ModalComponent from 'components/ModalComponent.vue'
 import { hasUnsavedChanges } from

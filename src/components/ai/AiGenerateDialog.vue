@@ -297,6 +297,7 @@ import {
   patchAiSuggestion,
   rejectAiSuggestion,
 } from 'src/utils/ai-api.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import {
   getCachedActiveEncounterId,
@@ -521,9 +522,7 @@ function formatEncounterLabel(row) {
   const type = row?.encounterType || row?.type || ''
   const status = row?.status || ''
   const date = row?.startedAt || row?.createdAt || ''
-  const dateLabel = date
-    ? new Date(date).toLocaleString()
-    : ''
+  const dateLabel = date ? formatDateTime(date) : ''
 
   return [id, type, status, dateLabel].filter(Boolean).join(' · ')
 }

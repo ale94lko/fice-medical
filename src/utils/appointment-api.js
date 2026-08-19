@@ -13,6 +13,8 @@ import {
   normalizeAppointment,
   normalizeRecurringSeries,
 } from 'src/utils/appointment-normalize.js'
+import { parseWorkingWeekdays }
+  from 'src/utils/working-weekdays.js'
 
 function unwrapList(body) {
   const root = body?.data ?? body
@@ -188,7 +190,7 @@ export async function listEligibleClinicians(
 
       return {
         label,
-        value: id,
+        value: String(id),
         name: label,
         specialty: String(row.specialty ?? '').trim(),
       }
@@ -253,6 +255,23 @@ export async function listAppointmentAvailabilityRanges(params = {}) {
   )
 
   return mapAvailabilityRangesResponse(unwrapData(response.data))
+}
+
+export async function previewRecurringAppointments(body) {
+  const response = await apiInstance.post(
+    apiPaths.appointmentBookPreview,
+    body,
+  )
+
+  return unwrapData(response.data)
+}
+
+export async function listClinicianWorkingWeekdays(clinicianId) {
+  const response = await apiInstance.get(
+    apiPaths.clinicianWorkingWeekdays(clinicianId),
+  )
+
+  return parseWorkingWeekdays(unwrapData(response.data))
 }
 
 export async function bookAppointment(body, idempotencyKey = null) {

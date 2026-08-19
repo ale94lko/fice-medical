@@ -1,5 +1,9 @@
 <template>
   <div class="app-active-encounter-host">
+    <TimezoneMismatchBanner
+      v-if="visible"
+      placement="encounter"
+    />
     <div
       v-if="visible"
       ref="shellRef"
@@ -185,6 +189,8 @@ import {
   quasarNotifyTypes,
 } from 'components/constants.js'
 import ModalComponent from 'components/ModalComponent.vue'
+import TimezoneMismatchBanner from
+  'components/TimezoneMismatchBanner.vue'
 import ActiveEncounterAutoCompleteDialog from
   'components/ActiveEncounterAutoCompleteDialog.vue'
 import EncounterCancelDialog from
@@ -559,6 +565,7 @@ async function onCancel(payload = {}) {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
+  gap: 6px;
 }
 
 .app-active-encounter {

@@ -389,6 +389,10 @@ import {
   encounterStatuses,
   quasarNotifyTypes,
 } from 'components/constants.js'
+import {
+  formatDate as formatAppDate,
+  formatTime as formatAppTime,
+} from 'src/utils/app-datetime.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/index.js'
@@ -916,33 +920,10 @@ function formatDob(value) {
 }
 
 function formatTime(value) {
-  if (!value) {
-    return ''
-  }
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  return date.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+  return formatAppTime(value)
 }
 
 function formatDate(value) {
-  if (!value) {
-    return ''
-  }
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) {
-    return ''
-  }
-
-  return date.toLocaleDateString([], {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  return formatAppDate(value)
 }
 </script>

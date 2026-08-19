@@ -432,6 +432,26 @@ export function buildWindowFromGridSelection({
   }
 }
 
+export function clipWindowToDuration(window, durationMin) {
+  if (!window?.startAtUtc) {
+    return window
+  }
+  const duration = Number(durationMin)
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return window
+  }
+  const startMs = Date.parse(window.startAtUtc)
+  if (!Number.isFinite(startMs)) {
+    return window
+  }
+
+  return {
+    ...window,
+    endAtUtc: new Date(startMs + duration * 60 * 1000).toISOString(),
+    durationMin: duration,
+  }
+}
+
 export function computeSelectedAppointmentStyle(
   window,
   durationMin,
@@ -442,13 +462,13 @@ export function computeSelectedAppointmentStyle(
     return null
   }
 
+  const clipped = clipWindowToDuration(window, durationMin) ?? window
   const tz = resolveTimeZone(timeZone)
-  const endAtUtc = window.endAtUtc
-    || new Date(
-      Date.parse(window.startAtUtc) + Number(durationMin) * 60 * 1000,
-    ).toISOString()
   const span = availabilityRangeMinuteSpan(
-    { startAtUtc: window.startAtUtc, endAtUtc },
+    {
+      startAtUtc: clipped.startAtUtc,
+      endAtUtc: clipped.endAtUtc,
+    },
     tz,
   )
 
@@ -563,6 +583,8 @@ export function calendarBlockToAppointmentRecord(block) {
   return {
     appointmentId: block.appointmentId,
     appointmentNumber: block.appointmentNumber,
+    clientId: block.clientId ?? null,
+    clientNumber: block.clientNumber ?? null,
     clientDisplayName: block.clientDisplayName,
     servicesLabel: block.servicesLabel,
     serviceProcedures: block.serviceProcedures ?? [],

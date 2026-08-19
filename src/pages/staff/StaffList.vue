@@ -334,6 +334,7 @@ import {
   siteBreakpoints,
   staffStatuses,
 } from 'components/constants.js'
+import { staffChartKey } from 'components/helpers.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageActions from
@@ -740,15 +741,25 @@ function goAddClinician() {
 }
 
 function viewRow(row) {
-  router.push({ name: 'StaffProfile', params: { id: row.id } })
+  const id = staffChartKey(row)
+  if (!id) {
+    return
+  }
+  router.push({ name: 'StaffProfile', params: { id } })
 }
 
 function editRow(row) {
-  router.push({ name: 'EditStaff', params: { id: row.id } })
+  const id = staffChartKey(row)
+  if (!id) {
+    return
+  }
+  router.push({ name: 'EditStaff', params: { id } })
 }
 
 function openBulkChangeStatus() {
-  changeStatusTargetIds.value = selected.value.map(row => row.id)
+  changeStatusTargetIds.value = selected.value
+    .map(staffChartKey)
+    .filter(Boolean)
   changeStatusOpen.value = true
 }
 
@@ -787,12 +798,13 @@ async function onConfirmChangeStatus(status) {
 
 async function confirmDeactivate() {
   const row = deactivatingRow.value
-  if (!row?.id) {
+  const code = staffChartKey(row)
+  if (!code) {
     return
   }
   loading.value = true
   try {
-    await patchStaffStatus(row.id, staffStatuses.inactive)
+    await patchStaffStatus(code, staffStatuses.inactive)
     deactivatingRow.value = null
     $q.notify({
       type: quasarNotifyTypes.positive,

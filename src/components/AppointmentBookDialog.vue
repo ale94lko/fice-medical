@@ -93,7 +93,16 @@
                 :label="t('appointmentPlaceOfService')"
                 required
                 :test-id="tid.field('place-of-service')">
+                <div
+                  v-if="catalogsLoading"
+                  class="form-field-loading-shell"
+                  role="status"
+                  :aria-label="t('appLoading')"
+                  :data-testid="tid.field('place-of-service-loading')">
+                  <q-spinner color="grey-7" size="24px" />
+                </div>
                 <FormSelect
+                  v-else
                   v-model="draft.placeOfServiceId"
                   outlined
                   hide-bottom-space
@@ -117,6 +126,7 @@
               <AppointmentServiceLinesField
                 :lines="serviceLines"
                 :catalog="serviceCatalog"
+                :loading="catalogsLoading"
                 @add="addService"
                 @remove="removeService"
                 @duration-change="onServiceDurationChange"
@@ -137,6 +147,7 @@
                 <ClinicianFormSelect
                   v-model="draft.clinicianId"
                   :options="clinicianOptions"
+                  :disable="mode === 'book' && !serviceLines.length"
                   :placeholder="t('appointmentClinicianPlaceholder')"
                   :error="Boolean(errors.clinicianId)"
                   :error-message="errors.clinicianId"
@@ -223,10 +234,20 @@
           v-if="mode === 'book'"
           v-model="draft"
           class="q-mt-lg"
-          :start-date-label="summaryDate"
           :start-day-key="selectedDayKey"
           :end-date-error="errors.endOnDate"
-        />
+          :days-of-week-error="errors.daysOfWeek"
+          :working-weekdays="workingWeekdays"
+        >
+          <template #occurrences>
+            <AppointmentRecurrencePreviewList
+              v-if="showRecurrencePreview"
+              :model-value="previewRows"
+              :loading="previewLoading"
+              :failed="previewFailed"
+            />
+          </template>
+        </AppointmentRecurrenceSection>
 
         <div
           v-if="summaryVisible"
@@ -339,6 +360,8 @@ import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AppointmentAvailabilityPicker from
   'components/appointment/AppointmentAvailabilityPicker.vue'
+import AppointmentRecurrencePreviewList from
+  'components/appointment/AppointmentRecurrencePreviewList.vue'
 import AppointmentRecurrenceSection from
   'components/appointment/AppointmentRecurrenceSection.vue'
 import AppointmentServiceLinesField from
@@ -357,6 +380,8 @@ import {
   buildServiceLinesFromCatalog,
   useAppointmentBooking,
 } from 'src/composables/useAppointmentBooking.js'
+import { useRecurrencePreview }
+  from 'src/composables/useRecurrencePreview.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import {
@@ -365,8 +390,13 @@ import {
   sumServiceLineDurations,
   sumSuggestedFees,
 } from 'src/utils/appointment-booking.js'
-import { listBookableServiceProcedures, listEligibleClinicians } from
-  'src/utils/appointment-api.js'
+import {
+  listBookableServiceProcedures,
+  listClinicianWorkingWeekdays,
+  listEligibleClinicians,
+} from 'src/utils/appointment-api.js'
+import { buildOccurrenceOverrides }
+  from 'src/utils/recurrence-preview.js'
 import { fetchAllCliniciansSelectOptions } from 'src/utils/clinicians-api.js'
 import { buildSupervisorSelectOptions } from
   'src/utils/clinician-supervisor.js'
@@ -388,6 +418,8 @@ import {
   CLIENT_LIST_SEARCH_MIN_LENGTH,
   isClientListServerSearchQuery,
 } from 'src/utils/client-list-search.js'
+import { CLINIC_DEFAULT_WEEKDAYS }
+  from 'src/utils/working-weekdays.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -425,6 +457,7 @@ const open = computed({
 const draft = ref(createDraft())
 const errors = ref({})
 const serviceCatalog = ref([])
+const catalogsLoading = ref(false)
 const serviceLines = ref([])
 const clinicianOptions = ref([])
 const allClinicianOptions = ref([])
@@ -443,6 +476,8 @@ const clientPickerSearchHasMore = ref(false)
 const clientPickerLoadingMore = ref(false)
 const clientPickerUserScrolled = ref(false)
 let clientPickerRequestId = 0
+const workingWeekdays = ref([...CLINIC_DEFAULT_WEEKDAYS])
+let workingWeekdaysSeq = 0
 
 const showClientPicker = computed(() =>
   props.mode === 'book' && !String(props.clientId ?? '').trim(),
@@ -516,14 +551,10 @@ const {
   shiftVisibleMonth,
 } = booking
 
-const schedulingLocked = computed(() => {
-  if (props.mode === 'book' && !resolvedClientId.value
-    && !resolvedSchedulingClinicianId.value) {
-    return true
-  }
-
-  return false
-})
+const schedulingLocked = computed(() =>
+  !serviceLines.value.length
+  || !resolvedSchedulingClinicianId.value,
+)
 
 const dialogTitle = computed(() =>
   props.mode === 'reschedule'
@@ -543,21 +574,67 @@ const primaryButtonLabel = computed(() =>
     : t('appointmentBookButton'),
 )
 
-const availabilityEmptyLabel = computed(() => {
-  if (!resolvedClientId.value && !resolvedSchedulingClinicianId.value) {
-    return t('appointmentSelectClientOrClinicianFirst')
+const {
+  rows: previewRows,
+  loading: previewLoading,
+  failed: previewFailed,
+  schedule: scheduleRecurrencePreview,
+  flush: flushRecurrencePreview,
+  reset: resetRecurrencePreview,
+} = useRecurrencePreview({
+  canLoad: canLoadRecurrencePreview,
+  buildPayload: () => buildBookPayload(false),
+})
+
+const showRecurrencePreview = computed(() =>
+  Boolean(draft.value.repeatAppointment)
+  && (
+    previewLoading.value
+    || previewFailed.value
+    || previewRows.value.length > 0
+  ),
+)
+
+const recurrencePreviewSignature = computed(() => {
+  if (!draft.value.repeatAppointment) {
+    return ''
   }
+  const rec = draft.value.recurrence ?? {}
+  const days = [...(rec.daysOfWeek ?? [])]
+    .map(Number)
+    .filter(Number.isFinite)
+    .sort((left, right) => left - right)
+    .join(',')
+
+  return [
+    selectedWindow.value?.startAtUtc ?? '',
+    selectedWindow.value?.clinicianId
+      ?? draft.value.clinicianId
+      ?? '',
+    resolvedClientId.value ?? '',
+    serviceProcedureIds.value.join(','),
+    totalDurationMinutes.value ?? '',
+    rec.frequency ?? '',
+    rec.intervalCount ?? '',
+    rec.endType ?? '',
+    rec.endAfterCount ?? '',
+    rec.endOnDate ?? '',
+    days,
+  ].join('|')
+})
+
+const availabilityEmptyLabel = computed(() => {
   if (!serviceLines.value.length) {
     return t('appointmentSelectServicesFirst')
+  }
+  if (!resolvedSchedulingClinicianId.value) {
+    return t('appointmentSelectClinicianFirst')
   }
   if (!draft.value.placeOfServiceId) {
     return t('appointmentSelectPlaceFirst')
   }
   if (!totalDurationMinutes.value) {
     return t('appointmentSelectDurationFirst')
-  }
-  if (!resolvedSchedulingClinicianId.value) {
-    return t('appointmentSelectClinicianFirst')
   }
 
   return t('appointmentAvailabilityEmpty')
@@ -587,7 +664,7 @@ const summaryClinician = computed(() => {
     return windowClinician
   }
   const match = clinicianOptions.value.find(
-    opt => opt.value === draft.value.clinicianId,
+    opt => Number(opt.value) === Number(draft.value.clinicianId),
   )
 
   return match?.name ?? match?.label ?? '—'
@@ -606,10 +683,17 @@ const supervisorOptions = computed(() => {
       || selected?.name
       || selected?.supervisorDisplayName
       || '',
-  }).map(option => ({
-    ...option,
-    value: Number(option.value),
-  })).filter(option => Number.isFinite(option.value))
+  }).map(option => {
+    const value = Number(option.value)
+    if (!Number.isFinite(value)) {
+      return null
+    }
+
+    return {
+      ...option,
+      value: String(value),
+    }
+  }).filter(Boolean)
 })
 
 const summarySupervisor = computed(() => {
@@ -667,7 +751,7 @@ function createDraft() {
     recurrence: {
       frequency: appointmentRecurrenceFrequencyValues.weekly,
       intervalCount: 1,
-      daysOfWeek: [],
+      daysOfWeek: [...CLINIC_DEFAULT_WEEKDAYS],
       endType: appointmentRecurrenceEndTypeValues.afterCount,
       endAfterCount: 10,
       endOnDate: '',
@@ -1016,43 +1100,137 @@ function onClientSelected(value) {
 }
 
 async function loadFormOptions() {
-  const [servicesResult, clinicianResult, placesResult] =
-    await Promise.allSettled([
-      listBookableServiceProcedures(),
-      fetchAllCliniciansSelectOptions(),
-      listActivePlacesOfService(),
-    ])
+  catalogsLoading.value = true
+  try {
+    const [servicesResult, clinicianResult, placesResult] =
+      await Promise.allSettled([
+        listBookableServiceProcedures(),
+        fetchAllCliniciansSelectOptions(),
+        listActivePlacesOfService(),
+      ])
 
-  serviceCatalog.value = servicesResult.status === 'fulfilled'
-    ? servicesResult.value
-    : []
-  clinicianOptions.value = clinicianResult.status === 'fulfilled'
-    ? clinicianResult.value
-      .map(option => ({
-        ...option,
-        value: Number(option.value),
-        supervisorId: option.supervisorId != null
-          ? Number(option.supervisorId)
-          : null,
-      }))
-      .filter(option => Number.isFinite(option.value))
-    : []
-  allClinicianOptions.value = clinicianOptions.value
-  placeOptions.value = placesResult.status === 'fulfilled'
-    ? placesResult.value
-    : []
-  if (
-    props.mode === 'book'
-    && !draft.value.placeOfServiceId
-    && placeOptions.value.length
-  ) {
-    draft.value.placeOfServiceId = resolveDefaultPlaceOfServiceId(
-      placeOptions.value,
-    )
+    serviceCatalog.value = servicesResult.status === 'fulfilled'
+      ? servicesResult.value
+      : []
+    clinicianOptions.value = clinicianResult.status === 'fulfilled'
+      ? clinicianResult.value
+        .map(option => {
+          const value = Number(option.value)
+          if (!Number.isFinite(value) || value <= 0) {
+            return null
+          }
+
+          return {
+            ...option,
+            value: String(value),
+            supervisorId: option.supervisorId != null
+              ? Number(option.supervisorId)
+              : null,
+          }
+        })
+        .filter(Boolean)
+      : []
+    allClinicianOptions.value = clinicianOptions.value
+    placeOptions.value = placesResult.status === 'fulfilled'
+      ? placesResult.value
+      : []
+    if (
+      props.mode === 'book'
+      && !draft.value.placeOfServiceId
+      && placeOptions.value.length
+    ) {
+      draft.value.placeOfServiceId = resolveDefaultPlaceOfServiceId(
+        placeOptions.value,
+      )
+    }
+  } finally {
+    catalogsLoading.value = false
   }
-  applyDefaultLinkedClinician()
-  applySupervisorFromSelectedClinician()
   await refreshEligibleClinicians()
+}
+
+function clinicianIdInOptions(options, id) {
+  const n = Number(id)
+  if (!Number.isFinite(n) || n <= 0) {
+    return false
+  }
+
+  return options.some(option => Number(option.value) === n)
+}
+
+function pickAutoClinicianId(options) {
+  if (clinicianIdInOptions(options, draft.value.clinicianId)) {
+    return Number(draft.value.clinicianId)
+  }
+  if (clinicianIdInOptions(options, props.initialClinicianId)) {
+    return Number(props.initialClinicianId)
+  }
+  const linkedId = resolveLinkedClinicianId(options)
+  if (linkedId != null) {
+    return linkedId
+  }
+  if (options.length !== 1) {
+    return null
+  }
+  const only = Number(options[0]?.value)
+
+  return Number.isFinite(only) && only > 0 ? only : null
+}
+
+function applyAutoClinician(options) {
+  if (props.mode !== 'book' || draft.value.clinicianId != null) {
+    return
+  }
+  const nextId = pickAutoClinicianId(options)
+  if (nextId == null) {
+    return
+  }
+  draft.value.clinicianId = nextId
+  applySupervisorFromSelectedClinician()
+}
+
+function mergeEligibleClinicianOptions(eligible) {
+  return (eligible ?? []).map(row => {
+    const match = allClinicianOptions.value.find(
+      option => Number(option.value) === Number(row.value),
+    )
+    if (!match) {
+      return {
+        ...row,
+        value: String(row.value),
+      }
+    }
+
+    return {
+      ...match,
+      value: String(match.value),
+    }
+  })
+}
+
+function ensureSelectedClinicianInOptions(options) {
+  if (clinicianIdInOptions(options, draft.value.clinicianId)) {
+    return options
+  }
+  const selected = allClinicianOptions.value.find(
+    option => Number(option.value) === Number(draft.value.clinicianId),
+  )
+  if (!selected) {
+    return options
+  }
+
+  return [selected, ...options]
+}
+
+function eligibilityHintForSelection(eligible) {
+  if (
+    draft.value.clinicianId != null
+    && !clinicianIdInOptions(eligible, draft.value.clinicianId)
+  ) {
+    return t('appointmentClinicianNotEligible')
+  }
+
+  return ''
 }
 
 async function refreshEligibleClinicians() {
@@ -1066,27 +1244,21 @@ async function refreshEligibleClinicians() {
   const dateOfService = selectedDayKey.value
     || todayLocalDayKey(timeZone)
   try {
-    const eligible = await listEligibleClinicians(ids, dateOfService)
-    clinicianOptions.value = eligible
-    if (!eligible.length) {
-      eligibilityHint.value = t('appointmentNoEligibleClinicians')
-    } else {
-      eligibilityHint.value = ''
-    }
-    const selectedId = Number(draft.value.clinicianId)
-    const stillEligible = eligible.some(
-      option => Number(option.value) === selectedId,
+    const eligible = mergeEligibleClinicianOptions(
+      await listEligibleClinicians(ids, dateOfService),
     )
-    if (draft.value.clinicianId != null && !stillEligible) {
-      draft.value.clinicianId = null
-      errors.value = {
-        ...errors.value,
-        clinicianId: t('appointmentClinicianNotEligible'),
-      }
+    if (!eligible.length) {
+      clinicianOptions.value = ensureSelectedClinicianInOptions([])
+      eligibilityHint.value = t('appointmentNoEligibleClinicians')
+
+      return
     }
+    clinicianOptions.value = ensureSelectedClinicianInOptions(eligible)
+    applyAutoClinician(eligible)
+    eligibilityHint.value = eligibilityHintForSelection(eligible)
   } catch {
-    clinicianOptions.value = allClinicianOptions.value
-    eligibilityHint.value = ''
+    clinicianOptions.value = ensureSelectedClinicianInOptions([])
+    eligibilityHint.value = t('appointmentNoEligibleClinicians')
   }
 }
 
@@ -1104,18 +1276,6 @@ function resolveLinkedClinicianId(options = clinicianOptions.value) {
   }
 
   return id
-}
-
-function applyDefaultLinkedClinician() {
-  if (props.mode !== 'book' || draft.value.clinicianId != null) {
-    return
-  }
-  const linkedId = resolveLinkedClinicianId()
-  if (linkedId == null) {
-    return
-  }
-  draft.value.clinicianId = linkedId
-  applySupervisorFromSelectedClinician()
 }
 
 function applySupervisorFromSelectedClinician() {
@@ -1227,15 +1387,19 @@ function onServiceFeeChange({ index, value }) {
 }
 
 async function onSchedulingInputsChanged() {
-  await refreshDurationPreview()
-  const canLoadClient = Boolean(resolvedClientId.value)
-  const canLoadClinician = Boolean(resolvedSchedulingClinicianId.value)
-    && serviceLines.value.length
-    && Boolean(totalDurationMinutes.value)
-  if (canLoadClient || canLoadClinician) {
-    await loadAvailability()
-    tryApplyBookingHint()
-  } else {
+  try {
+    await refreshEligibleClinicians()
+    await refreshDurationPreview()
+    const canLoad = Boolean(resolvedSchedulingClinicianId.value)
+      && serviceLines.value.length > 0
+      && Boolean(totalDurationMinutes.value)
+    if (canLoad) {
+      await loadAvailability()
+      tryApplyBookingHint()
+    } else {
+      clearAvailability()
+    }
+  } catch {
     clearAvailability()
   }
 }
@@ -1295,6 +1459,15 @@ function validateDraft() {
     next.notes = t('appointmentNotesMaxLength', {
       max: appointmentNotesMaxLength,
     })
+  }
+  if (
+    props.mode === 'book'
+    && draft.value.repeatAppointment
+    && draft.value.recurrence.frequency
+      === appointmentRecurrenceFrequencyValues.weekly
+    && !(draft.value.recurrence.daysOfWeek ?? []).length
+  ) {
+    next.daysOfWeek = t('appointmentRecurrenceDaysRequired')
   }
   if (
     props.mode === 'book'
@@ -1369,7 +1542,7 @@ function selectedWindowDurationMinutes() {
   return Math.round((end - start) / 60000)
 }
 
-function buildBookPayload() {
+function buildBookPayload(includeOccurrences = false) {
   /* eslint-disable camelcase -- API book payload */
   const payload = {
     start_at_utc: selectedWindow.value?.startAtUtc,
@@ -1396,6 +1569,12 @@ function buildBookPayload() {
     payload.allow_over_schedule_blocks = true
   }
 
+  if (includeOccurrences && previewRows.value.length) {
+    payload.occurrences = buildOccurrenceOverrides(
+      previewRows.value,
+    )
+  }
+
   const referralId = Number(props.referralId)
   if (Number.isFinite(referralId) && referralId > 0) {
     payload.referral_id = referralId
@@ -1403,6 +1582,49 @@ function buildBookPayload() {
 
   return payload
   /* eslint-enable camelcase */
+}
+
+function canLoadRecurrencePreview() {
+  if (!open.value || props.mode !== 'book') {
+    return false
+  }
+  if (!draft.value.repeatAppointment) {
+    return false
+  }
+  if (!selectedWindow.value?.startAtUtc) {
+    return false
+  }
+  if (!String(resolvedClientId.value ?? '').trim()) {
+    return false
+  }
+  if (!resolvedSchedulingClinicianId.value) {
+    return false
+  }
+  if (!serviceProcedureIds.value.length) {
+    return false
+  }
+  const rec = draft.value.recurrence ?? {}
+  if (
+    rec.frequency === appointmentRecurrenceFrequencyValues.weekly
+    && !(rec.daysOfWeek ?? []).length
+  ) {
+    return false
+  }
+  if (
+    rec.endType === appointmentRecurrenceEndTypeValues.onDate
+    && !String(rec.endOnDate ?? '').trim()
+  ) {
+    return false
+  }
+  const count = Number(rec.endAfterCount)
+  if (
+    rec.endType === appointmentRecurrenceEndTypeValues.afterCount
+    && !(count > 0)
+  ) {
+    return false
+  }
+
+  return true
 }
 
 async function onSubmit() {
@@ -1420,6 +1642,12 @@ async function onSubmit() {
 
     return
   }
+  if (draft.value.repeatAppointment) {
+    await flushRecurrencePreview()
+    emit('booked', buildBookPayload(true))
+
+    return
+  }
   emit('booked', buildBookPayload())
 }
 
@@ -1427,20 +1655,48 @@ async function reloadAvailability() {
   await onSchedulingInputsChanged()
 }
 
+async function loadWorkingWeekdays() {
+  const seq = workingWeekdaysSeq + 1
+  workingWeekdaysSeq = seq
+  const clinicianId = draft.value.clinicianId
+  if (clinicianId == null) {
+    workingWeekdays.value = [...CLINIC_DEFAULT_WEEKDAYS]
+
+    return
+  }
+  try {
+    const days = await listClinicianWorkingWeekdays(clinicianId)
+    if (seq !== workingWeekdaysSeq) {
+      return
+    }
+    workingWeekdays.value = days
+  } catch {
+    if (seq !== workingWeekdaysSeq) {
+      return
+    }
+    workingWeekdays.value = [...CLINIC_DEFAULT_WEEKDAYS]
+  }
+}
+
 watch(
   () => props.modelValue,
   async isOpen => {
     if (!isOpen) {
+      resetRecurrencePreview()
+
       return
     }
+    catalogsLoading.value = true
     draft.value = createDraft()
     serviceLines.value = []
     errors.value = {}
+    resetRecurrencePreview()
     clearAvailability()
     resetClientSearchState()
     await loadFormOptions()
     applyInitialRequestPrefill()
     void bootstrapClientPickerOptions()
+    await loadWorkingWeekdays()
     await onSchedulingInputsChanged()
   },
 )
@@ -1475,20 +1731,40 @@ watch(
     }
     applySupervisorFromSelectedClinician()
     clearSelectedWindow()
+    await loadWorkingWeekdays()
     await onSchedulingInputsChanged()
   },
 )
 
 watch(
-  () => [
-    serviceProcedureIds.value.join(','),
-    selectedDayKey.value,
-  ],
+  selectedDayKey,
   async() => {
     if (!open.value) {
       return
     }
     await refreshEligibleClinicians()
+  },
+)
+
+watch(
+  recurrencePreviewSignature,
+  () => {
+    if (!open.value || props.mode !== 'book') {
+      return
+    }
+    scheduleRecurrencePreview()
+  },
+)
+
+watch(
+  () => draft.value.recurrence.daysOfWeek,
+  days => {
+    if (!errors.value.daysOfWeek || !(days ?? []).length) {
+      return
+    }
+    const next = { ...errors.value }
+    delete next.daysOfWeek
+    errors.value = next
   },
 )
 

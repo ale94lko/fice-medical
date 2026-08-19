@@ -21,6 +21,7 @@ import {
 } from 'src/utils/appointment-datetime.js'
 import {
   blocksForLocalDay,
+  clipWindowToDuration,
   findFirstAvailableStartMinute,
   resolveBookingAtMinute,
   findScheduleBlockOverlapTypesAtMinute,
@@ -172,7 +173,10 @@ export function useAppointmentBooking(getFilters, options = {}) {
     selectedWindowKey.value = ''
     schedulingFieldError.value = ''
     schedulingNeedsOverlapping.value = true
-    schedulingFields.value = windowToSchedulingFields(window, timeZone)
+    schedulingFields.value = windowToSchedulingFields(
+      clipWindowToDuration(window, resolveDurationMinutes()) ?? window,
+      timeZone,
+    )
   }
 
   function handleUnresolvedBooking({
@@ -253,11 +257,6 @@ export function useAppointmentBooking(getFilters, options = {}) {
     }
 
     if (windowsByDay.value.has(dayKey)) {
-      return true
-    }
-
-    const filters = getFilters?.() ?? {}
-    if (filters.clientId && !filters.clinicianId) {
       return true
     }
 
@@ -501,7 +500,7 @@ export function useAppointmentBooking(getFilters, options = {}) {
       return true
     }
 
-    selectWindow(ranges[0])
+    selectWindow(clipWindowToDuration(ranges[0], durationMinutes))
 
     return true
   }
@@ -520,10 +519,12 @@ export function useAppointmentBooking(getFilters, options = {}) {
     if (!window) {
       return
     }
-    selectedWindowRef.value = window
-    selectedWindowKey.value = availabilityKey(window)
-    selectedDayKey.value = localDayKeyFromUtc(window.startAtUtc, timeZone)
-    schedulingFields.value = windowToSchedulingFields(window, timeZone)
+    const clipped = clipWindowToDuration(window, resolveDurationMinutes())
+      ?? window
+    selectedWindowRef.value = clipped
+    selectedWindowKey.value = availabilityKey(clipped)
+    selectedDayKey.value = localDayKeyFromUtc(clipped.startAtUtc, timeZone)
+    schedulingFields.value = windowToSchedulingFields(clipped, timeZone)
     schedulingFieldError.value = ''
     schedulingNeedsOverlapping.value = false
   }
@@ -579,13 +580,31 @@ export function useAppointmentBooking(getFilters, options = {}) {
 
       return null
     }
-    const preview = await fetchAppointmentDurationPreview(
-      serviceIds,
-      filters.durationMinutes ?? undefined,
-    )
-    durationPreview.value = preview
+    try {
+      const preview = await fetchAppointmentDurationPreview(
+        serviceIds,
+        filters.durationMinutes ?? undefined,
+      )
+      durationPreview.value = preview
 
-    return preview
+      return preview
+    } catch {
+      durationPreview.value = null
+
+      return null
+    }
+  }
+
+  function canQueryAvailability(filters) {
+    const serviceIds = filters.serviceProcedureIds ?? []
+    const durationMinutes = Number(
+      filters.durationMinutes ?? durationPreview.value?.default_duration_min,
+    )
+
+    return Boolean(filters.clinicianId)
+      && serviceIds.length > 0
+      && Number.isFinite(durationMinutes)
+      && durationMinutes > 0
   }
 
   async function loadAvailability() {
@@ -595,11 +614,8 @@ export function useAppointmentBooking(getFilters, options = {}) {
       filters.durationMinutes ?? durationPreview.value?.default_duration_min,
     )
     const hasClient = filters.clientId != null && filters.clientId !== ''
-    const canQueryClinician = Boolean(filters.clinicianId)
-      && serviceIds.length
-      && Number.isFinite(durationMinutes)
-      && durationMinutes > 0
-    if (!hasClient && !canQueryClinician) {
+    const canQueryClinician = canQueryAvailability(filters)
+    if (!canQueryClinician) {
       clearAvailability()
 
       return
@@ -661,6 +677,10 @@ export function useAppointmentBooking(getFilters, options = {}) {
         selectedDayKey.value = ''
         clearSelectedWindow()
       }
+    } catch {
+      availabilityWindows.value = []
+      availabilityBlocks.value = []
+      clearSelectedWindow()
     } finally {
       availabilityLoading.value = false
     }
@@ -694,14 +714,14 @@ export function useAppointmentBooking(getFilters, options = {}) {
       }
     }
 
-    if (isRangesPickerMode.value && Number.isFinite(minutesLocal)) {
-      const durationMinutes = Number(
-        getFilters?.()?.durationMinutes
-        ?? durationPreview.value?.default_duration_min,
-      )
+    const durationMinutes = resolveDurationMinutes()
+    const startMinutes = Number.isFinite(minutesLocal)
+      ? minutesLocal
+      : localMinutesFromUtc(best.startAtUtc, timeZone)
+    if (isRangesPickerMode.value && Number.isFinite(startMinutes)) {
       const result = resolveBookingAtMinute({
         dayKey,
-        minutesLocal,
+        minutesLocal: startMinutes,
         durationMin: durationMinutes,
         availableRanges: dayWindows,
         blocks: availabilityBlocks.value,
@@ -716,7 +736,7 @@ export function useAppointmentBooking(getFilters, options = {}) {
       }
     }
 
-    selectWindow(best)
+    selectWindow(clipWindowToDuration(best, durationMinutes))
 
     return true
   }

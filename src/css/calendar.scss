@@ -536,7 +536,7 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   &__hour-line {
     flex: 0 0 $calendar-hour-row-height;
     height: $calendar-hour-row-height;
-    border-top: 1px solid rgba($border-subtle, 0.9);
+    border-top: 1px solid rgba($dark, 0.12);
     border-bottom: none;
     box-sizing: border-box;
     pointer-events: none;

@@ -202,6 +202,7 @@ export function normalizeBookableServiceProcedure(raw) {
     cptCode: trim(row.cpt_code ?? row.cptCode),
     hcpcsCode: trim(row.hcpcs_code ?? row.hcpcsCode),
     defaultFee: parseOptionalNumber(row.default_fee ?? row.defaultFee),
+    description: trim(row.description),
     requiresAppointment: parseOptionalBool(
       row.requires_appointment ?? row.requiresAppointment,
     ),

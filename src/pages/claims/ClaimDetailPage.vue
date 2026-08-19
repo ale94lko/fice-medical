@@ -825,6 +825,7 @@ import { useSyncAppPageTitle } from
   'src/composables/useAppPageTitle.js'
 import { claimDetailTestIds as tid } from
   'src/test-ids/index.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { clientChartKey } from 'components/helpers.js'
 import {
@@ -1174,12 +1175,8 @@ function formatWhen(value) {
   if (!raw) {
     return '—'
   }
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
-    return raw
-  }
 
-  return date.toLocaleString()
+  return formatDateTime(raw) || raw
 }
 
 function historyActionLabel(action) {

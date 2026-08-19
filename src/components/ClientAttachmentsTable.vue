@@ -171,6 +171,10 @@ import {
   resolveClientFileSourceNavigation,
   storedFileCanPreview,
 } from 'src/utils/client-files-i18n.js'
+import {
+  apiDateToDisplay,
+  formatDateTime as formatDateTimeDisplay,
+} from 'src/utils/app-datetime.js'
 import { formatStoredFileUploadedBy } from
   'src/utils/stored-file-normalize.js'
 
@@ -317,12 +321,8 @@ function formatDateTime(value) {
   if (!token) {
     return '—'
   }
-  const date = new Date(token)
-  if (Number.isNaN(date.getTime())) {
-    return token
-  }
 
-  return date.toLocaleString()
+  return formatDateTimeDisplay(token) || token
 }
 
 function formatDateOnly(value) {
@@ -330,15 +330,11 @@ function formatDateOnly(value) {
   if (!token) {
     return '—'
   }
-  if (/^\d{4}-\d{2}-\d{2}/.test(token)) {
-    return token.slice(0, 10)
-  }
-  const date = new Date(token)
-  if (Number.isNaN(date.getTime())) {
-    return token
+  if (/^\d{4}-\d{2}-\d{2}/.test(token) && !token.includes('T')) {
+    return apiDateToDisplay(token.slice(0, 10)) || token.slice(0, 10)
   }
 
-  return date.toLocaleDateString()
+  return formatDateTimeDisplay(token) || token
 }
 
 function canPreview(row) {

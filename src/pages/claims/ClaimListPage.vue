@@ -244,6 +244,7 @@ import {
   claimStatuses,
   quasarNotifyTypes,
 } from 'components/constants.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
@@ -474,12 +475,8 @@ function formatActivity(value) {
   if (!raw) {
     return '—'
   }
-  const date = new Date(raw)
-  if (Number.isNaN(date.getTime())) {
-    return raw
-  }
 
-  return date.toLocaleString()
+  return formatDateTime(raw) || raw
 }
 
 function statusLabel(status) {

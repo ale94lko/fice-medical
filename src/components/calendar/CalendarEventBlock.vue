@@ -23,7 +23,7 @@
     <span
       ref="labelRef"
       class="calendar-event__label">
-      {{ event.typeLabel }}
+      {{ event.clientLabel || event.typeLabel }}
     </span>
   </button>
 </template>
@@ -118,6 +118,7 @@ onBeforeUnmount(() => {
 
 watch(
   () => [
+    props.event?.clientLabel,
     props.event?.typeLabel,
     props.event?.timeLabel,
     props.overlapLayout?.left,

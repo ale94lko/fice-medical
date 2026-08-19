@@ -110,6 +110,12 @@ function normalizeLoginConfigData(raw) {
     locale: String(raw.locale ?? '').trim(),
     // eslint-disable-next-line camelcase -- API field name
     date_format: String(raw.date_format ?? raw.dateFormat ?? '').trim(),
+    // eslint-disable-next-line camelcase -- API field name
+    time_format: String(raw.time_format ?? raw.timeFormat ?? '').trim(),
+    // eslint-disable-next-line camelcase -- API field name
+    first_day_of_week: String(
+      raw.first_day_of_week ?? raw.firstDayOfWeek ?? '',
+    ).trim(),
   }
 }
 
@@ -393,6 +399,15 @@ export function clientChartKey(client) {
   return String(
     client?.clientNumber
       ?? client?.client_number
+      ?? '',
+  ).trim()
+}
+
+export function staffChartKey(staff) {
+  return String(
+    staff?.staffNo
+      ?? staff?.staff_no
+      ?? staff?.code
       ?? '',
   ).trim()
 }

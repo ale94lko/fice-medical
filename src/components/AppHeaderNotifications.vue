@@ -153,7 +153,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -165,6 +165,9 @@ import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import { formatDate } from 'src/utils/app-datetime.js'
+import { clinicMessagesLocation } from
+  'src/utils/clinic-messages-route.js'
 import {
   deleteNotification,
   listNotifications,
@@ -176,7 +179,9 @@ const POLL_MS = 60000
 const RESULTS_READY_TYPE = 'ENCOUNTER_RESULTS_READY'
 const PORTAL_REGISTRATION_TYPE = 'PORTAL_REGISTRATION'
 const PORTAL_PROFILE_READY_TYPE = 'PORTAL_PROFILE_READY'
+const PORTAL_MESSAGE_TYPE = 'PORTAL_MESSAGE'
 const PORTAL_ACCOUNT_ENTITY = 'PORTAL_ACCOUNT'
+const SECURE_CONVERSATION_ENTITY = 'SECURE_CONVERSATION'
 const MINUTE_MS = 60 * 1000
 const HOUR_MS = 60 * MINUTE_MS
 const DAY_MS = 24 * HOUR_MS
@@ -202,6 +207,9 @@ function itemIcon(item) {
   if (item?.type === RESULTS_READY_TYPE) {
     return 'science'
   }
+  if (item?.type === PORTAL_MESSAGE_TYPE) {
+    return 'chat'
+  }
   if (
     item?.type === PORTAL_REGISTRATION_TYPE
     || item?.type === PORTAL_PROFILE_READY_TYPE
@@ -218,6 +226,9 @@ function itemTitle(item) {
   }
   if (item?.type === PORTAL_PROFILE_READY_TYPE) {
     return t('notificationsPortalProfileReadyTitle')
+  }
+  if (item?.type === PORTAL_MESSAGE_TYPE) {
+    return t('notificationsPortalMessageTitle')
   }
 
   return item?.title || t('notificationsFallbackTitle')
@@ -248,7 +259,7 @@ function itemTime(item) {
     })
   }
 
-  return date.toLocaleDateString()
+  return formatDate(date)
 }
 
 function notifyError(key) {
@@ -353,6 +364,17 @@ async function onOpen(item) {
     }
   }
   hideMenu()
+  await nextTick()
+  const isPortalMessage = item?.type === PORTAL_MESSAGE_TYPE
+    || item?.entityType === SECURE_CONVERSATION_ENTITY
+  if (isPortalMessage) {
+    try {
+      await router.push(clinicMessagesLocation(item.entityId))
+    } catch {
+      // Already on this conversation.
+    }
+    return
+  }
   if (item?.entityType === PORTAL_ACCOUNT_ENTITY) {
     if (canAddClient.value && item.entityId != null) {
       await router.push({

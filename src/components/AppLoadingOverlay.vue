@@ -202,8 +202,9 @@ watch(
       return
     }
 
-    await nextTick()
     startObservingContentRoot()
+    await nextTick()
+    readContentBounds()
   },
   { immediate: true },
 )

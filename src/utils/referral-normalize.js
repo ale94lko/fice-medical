@@ -9,6 +9,7 @@ import {
   parseUsDateString,
   usDateToIso,
 } from 'src/utils/client-form.js'
+import { formatDisplayDate } from 'src/utils/app-datetime.js'
 import {
   formatPhoneUs,
   normalizePhoneDigits,
@@ -279,11 +280,7 @@ export function formatReferralListDate(value) {
     return String(value ?? '').trim() || '—'
   }
 
-  return d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  return formatDisplayDate(d)
 }
 
 export function isReferralDeletable(row) {

@@ -18,6 +18,10 @@ import {
 import { canAccessRoute } from 'src/composables/useMainNavPermissions.js'
 import { clearSharedSessionInactivityState } from
   'src/utils/session-inactivity-sync.js'
+import {
+  beginCalendarPageLoading,
+  endCalendarPageLoading,
+} from 'src/composables/useCalendarPageLoading.js'
 
 function resolveSessionAccess(authStore) {
   let expireAt = new Date(authStore.expireAt)
@@ -82,7 +86,11 @@ export default defineRouter(function(/* { store, ssrContext } */) {
 
   let githubPagesRedirectHandled = false
 
-  Router.beforeEach(async(to) => {
+  Router.beforeEach(async(to, from) => {
+    if (to.name === 'Calendar' && from.name !== 'Calendar') {
+      beginCalendarPageLoading()
+    }
+
     if (!githubPagesRedirectHandled) {
       githubPagesRedirectHandled = true
       const stored = readGithubPagesStoredRedirect()
@@ -121,7 +129,14 @@ export default defineRouter(function(/* { store, ssrContext } */) {
     }
   })
 
+  Router.afterEach(to => {
+    if (to.name !== 'Calendar') {
+      endCalendarPageLoading()
+    }
+  })
+
   Router.onError((error, to) => {
+    endCalendarPageLoading()
     if (isStaleChunkLoadError(error)
       && reloadRouteAfterStaleChunk(to, Router)) {
       return

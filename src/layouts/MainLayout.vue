@@ -11,17 +11,19 @@
           :data-testid="layoutTestIds.menuToggle"
           @click="toggleLeftDrawer"
         />
-        <q-toolbar-title
-          v-if="!mobileView"
-          shrink>
-          FiCE Medical
-        </q-toolbar-title>
-        <q-toolbar-title
-          v-else
-          shrink
-          class="app-header__page-title">
-          {{ mobilePageTitle }}
-        </q-toolbar-title>
+        <div class="app-header__brand row items-center no-wrap">
+          <q-toolbar-title
+            v-if="!mobileView"
+            shrink>
+            FiCE Medical
+          </q-toolbar-title>
+          <q-toolbar-title
+            v-else
+            shrink
+            class="app-header__page-title">
+            {{ mobilePageTitle }}
+          </q-toolbar-title>
+        </div>
         <q-space />
         <ActiveEncounterHeaderChip />
         <SubtenantToolbar
@@ -40,13 +42,15 @@
             @logout="handleLogout"
           />
         </template>
-        <AppHeaderMobileOverflow
-          v-else
-          class="q-ml-xs"
-          :show-clinical="showClinicalResourcesMenu"
-          @change-password="handleChangePassword"
-          @logout="handleLogout"
-        />
+        <template v-else>
+          <TimezoneMismatchBanner />
+          <AppHeaderMobileOverflow
+            class="q-ml-xs"
+            :show-clinical="showClinicalResourcesMenu"
+            @change-password="handleChangePassword"
+            @logout="handleLogout"
+          />
+        </template>
       </q-toolbar>
     </q-header>
     <q-footer
@@ -142,6 +146,28 @@
               :offset="[8, 0]"
               class="app-drawer-tooltip">
               {{ t('appointmentRequestsNav') }}
+            </q-tooltip>
+          </q-item>
+          <q-item
+            v-if="showPortalMessages"
+            clickable
+            v-ripple
+            to="/messages"
+            :data-testid="layoutTestIds.navMessages"
+            :active-class="activeClass">
+            <q-item-section avatar>
+              <q-icon name="chat" />
+            </q-item-section>
+            <q-item-section>
+              {{ t('portalMessagesNav') }}
+            </q-item-section>
+            <q-tooltip
+              v-if="drawerShowsMiniTooltips"
+              anchor="center right"
+              self="center left"
+              :offset="[8, 0]"
+              class="app-drawer-tooltip">
+              {{ t('portalMessagesNav') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -420,235 +446,61 @@
             </q-tooltip>
           </q-item>
           <q-expansion-item
-            v-if="accordionMenu && showProvidersMenu"
-            v-model="providerMenu"
+            v-if="accordionMenu && showBillingMenu"
+            v-model="billingMenu"
             expand-separator
-            icon="monitor_heart"
-            label="Providers">
-            <AppDrawerSubNavItem icon="healing">TCM</AppDrawerSubNavItem>
-            <AppDrawerSubNavItem icon="health_and_safety">
-              CMHC
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem icon="psychology">
-              Psychiatrist
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem icon="local_hospital">PCP</AppDrawerSubNavItem>
-            <AppDrawerSubNavItem icon="medical_information">
-              Radiologist
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem icon="biotech">Laboratory</AppDrawerSubNavItem>
-            <AppDrawerSubNavItem icon="support_agent">RBT</AppDrawerSubNavItem>
-          </q-expansion-item>
-          <q-item
-            v-else-if="showProvidersMenu"
-            clickable
-            v-ripple>
-            <q-item-section avatar>
-              <q-icon name="monitor_heart" />
-            </q-item-section>
-            <q-item-section>Providers</q-item-section>
-            <q-item-section side>
-              <q-icon v-if="providerMenu" name="chevron_left" />
-              <q-icon v-else name="chevron_right" />
-            </q-item-section>
-            <q-menu
-              fit
-              anchor="top end"
-              self="top left"
-              class="app-drawer-submenu app-light-menu"
-              v-model="providerMenu">
-              <AppDrawerSubNavItem icon="healing">TCM</AppDrawerSubNavItem>
-              <AppDrawerSubNavItem icon="health_and_safety">
-                CMHC
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem icon="psychology">
-                Psychiatrist
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem icon="local_hospital">
-                PCP
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem icon="medical_information">
-                Radiologist
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem icon="biotech">
-                Laboratory
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem icon="support_agent">
-                RBT
-              </AppDrawerSubNavItem>
-            </q-menu>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips && !providerMenu"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              Providers
-            </q-tooltip>
-          </q-item>
-          <q-expansion-item
-            v-if="accordionMenu && showHumanResourcesMenu"
-            v-model="humanResourcesMenu"
-            expand-separator
-            icon="groups"
-            label="Human Resources">
+            icon="account_balance"
+            :label="t('navBilling')"
+            :data-testid="layoutTestIds.navBilling"
+            :header-class="isBillingActive ? activeClass : ''">
             <AppDrawerSubNavItem
-              v-if="showHrGeneral"
-              icon="tune">
-              General
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
-              v-if="showHrCredentials"
-              icon="admin_panel_settings">
-              Credentials and Roles
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
-              v-if="showHrCredentials"
-              icon="draw">
-              Signatures
+              v-for="item in billingNavItems"
+              :key="item.to"
+              :icon="item.icon"
+              :to="item.to"
+              :active-class="activeClass"
+              :test-id="item.testId">
+              {{ t(item.labelKey) }}
             </AppDrawerSubNavItem>
           </q-expansion-item>
           <q-item
-            v-else-if="showHumanResourcesMenu"
-            clickable
-            v-ripple>
-            <q-item-section avatar>
-              <q-icon name="groups" />
-            </q-item-section>
-            <q-item-section>Human Resources</q-item-section>
-            <q-item-section side>
-              <q-icon v-if="humanResourcesMenu" name="chevron_left" />
-              <q-icon v-else name="chevron_right" />
-            </q-item-section>
-            <q-menu
-              fit
-              anchor="top end"
-              self="top left"
-              class="app-drawer-submenu app-light-menu"
-              v-model="humanResourcesMenu">
-              <AppDrawerSubNavItem
-                v-if="showHrGeneral"
-                icon="tune">
-                General
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showHrCredentials"
-                icon="admin_panel_settings">
-                Credentials and Roles
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showHrCredentials"
-                icon="draw">
-                Signatures
-              </AppDrawerSubNavItem>
-            </q-menu>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips && !humanResourcesMenu"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              Human Resources
-            </q-tooltip>
-          </q-item>
-          <q-item
-            v-if="showBilling"
+            v-else-if="showBillingMenu"
             clickable
             v-ripple
-            to="/billing/superbills"
-            :data-testid="layoutTestIds.navBilling"
-            :active-class="activeClass">
+            :active="isBillingActive"
+            :active-class="activeClass"
+            :data-testid="layoutTestIds.navBilling">
             <q-item-section avatar>
               <q-icon name="account_balance" />
             </q-item-section>
             <q-item-section>{{ t('navBilling') }}</q-item-section>
+            <q-item-section side>
+              <q-icon v-if="billingMenu" name="chevron_left" />
+              <q-icon v-else name="chevron_right" />
+            </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="app-drawer-submenu app-light-menu"
+              v-model="billingMenu">
+              <AppDrawerSubNavItem
+                v-for="item in billingNavItems"
+                :key="item.to"
+                :icon="item.icon"
+                :to="item.to"
+                :active-class="activeClass"
+                :test-id="item.testId">
+                {{ t(item.labelKey) }}
+              </AppDrawerSubNavItem>
+            </q-menu>
             <q-tooltip
-              v-if="drawerShowsMiniTooltips"
+              v-if="drawerShowsMiniTooltips && !billingMenu"
               anchor="center right"
               self="center left"
               :offset="[8, 0]"
               class="app-drawer-tooltip">
               {{ t('navBilling') }}
-            </q-tooltip>
-          </q-item>
-          <q-item
-            v-if="showClaims"
-            clickable
-            v-ripple
-            to="/claims"
-            :data-testid="layoutTestIds.navClaims"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="receipt_long" />
-            </q-item-section>
-            <q-item-section>{{ t('navClaims') }}</q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('navClaims') }}
-            </q-tooltip>
-          </q-item>
-          <q-item
-            v-if="showRemittances"
-            clickable
-            v-ripple
-            to="/remittances"
-            :data-testid="layoutTestIds.navRemittances"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="account_balance_wallet" />
-            </q-item-section>
-            <q-item-section>{{ t('navRemittances') }}</q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('navRemittances') }}
-            </q-tooltip>
-          </q-item>
-          <q-item
-            v-if="showPayments"
-            clickable
-            v-ripple
-            to="/payments"
-            :data-testid="layoutTestIds.navPayments"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="payments" />
-            </q-item-section>
-            <q-item-section>{{ t('navPayments') }}</q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('navPayments') }}
-            </q-tooltip>
-          </q-item>
-          <q-item
-            v-if="showDenials"
-            clickable
-            v-ripple
-            to="/denials"
-            :data-testid="layoutTestIds.navDenials"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="report" />
-            </q-item-section>
-            <q-item-section>{{ t('navDenials') }}</q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('navDenials') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -705,11 +557,6 @@
               :active-class="activeClass"
               :test-id="layoutTestIds.navAdminClinicalAudit">
               {{ t('clinicalAuditListTitle') }}
-            </AppDrawerSubNavItem>
-            <AppDrawerSubNavItem
-              v-if="showAdminGeneral"
-              icon="tune">
-              {{ t('administrationGeneral') }}
             </AppDrawerSubNavItem>
           </q-expansion-item>
           <q-item
@@ -779,11 +626,6 @@
                 :active-class="activeClass"
                 :test-id="layoutTestIds.navAdminClinicalAudit">
                 {{ t('clinicalAuditListTitle') }}
-              </AppDrawerSubNavItem>
-              <AppDrawerSubNavItem
-                v-if="showAdminGeneral"
-                icon="tune">
-                {{ t('administrationGeneral') }}
               </AppDrawerSubNavItem>
             </q-menu>
             <q-tooltip
@@ -859,6 +701,12 @@
       </div>
     </q-drawer>
     <q-page-container id="app-content-root" class="app-content-root">
+      <AppLoadingOverlay
+        scope="content"
+        :showing="calendarPagePending"
+        :surface-opacity="1"
+        :message="t('appLoading')"
+      />
       <router-view :key="activeContentKey" />
     </q-page-container>
     <ModalComponent
@@ -908,12 +756,17 @@ import AppHeaderNotifications from
   'components/AppHeaderNotifications.vue'
 import AppHeaderMobileOverflow from
   'components/AppHeaderMobileOverflow.vue'
+import TimezoneMismatchBanner from
+  'components/TimezoneMismatchBanner.vue'
+import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
 import { useMainNavPermissions } from 'src/composables/useMainNavPermissions.js'
 import { useSessionInactivity } from 'src/composables/useSessionInactivity.js'
 import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import { useAppPageTitle } from 'src/composables/useAppPageTitle.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
+import { useCalendarPageLoading } from
+  'src/composables/useCalendarPageLoading.js'
 import { layoutTestIds } from 'src/test-ids/index.js'
 import { refreshClinicLogoOnPageLoad } from
   'src/utils/sync-auth-subtenants.js'
@@ -929,6 +782,7 @@ const {
 } = useViewportLayout()
 const { appPageTitle } = useAppPageTitle()
 const { footerPaginationState } = useAppFooterPagination()
+const { calendarPagePending } = useCalendarPageLoading()
 
 const mobilePageTitle = computed(
   () => appPageTitle.value || 'FiCE Medical',
@@ -987,8 +841,7 @@ const staffMenuExpanded = ref(false)
 const staffMenuPopup = ref(false)
 const usersMenuExpanded = ref(false)
 const usersMenuPopup = ref(false)
-const providerMenu = ref(false)
-const humanResourcesMenu = ref(false)
+const billingMenu = ref(false)
 const administrationMenu = ref(false)
 
 const drawerUsesMiniLayout = computed(
@@ -1014,6 +867,7 @@ const accordionMenu = computed(
 const {
   showDashboard,
   showCalendarMenu,
+  showPortalMessages,
   showClientMenu,
   showClientList,
   showClientAdd,
@@ -1022,18 +876,14 @@ const {
   showStaffAddStaff,
   showUsersMenu,
   showUsersAdd,
-  showProvidersMenu,
-  showHumanResourcesMenu,
-  showHrGeneral,
-  showHrCredentials,
   showAdminStaffList,
+  showBillingMenu,
   showBilling,
   showClaims,
   showRemittances,
   showPayments,
   showDenials,
   showAdministrationMenu,
-  showAdminGeneral,
   showAdminSubtenants,
   showAdminUsers,
   showServicesProcedures,
@@ -1072,6 +922,62 @@ const isAdministrationActive = computed(() =>
   route.path.startsWith('/administration')
     && !route.path.startsWith('/administration/users'),
 )
+
+const isBillingActive = computed(() => {
+  const path = route.path
+
+  return path.startsWith('/billing')
+    || path.startsWith('/claims')
+    || path.startsWith('/remittances')
+    || path.startsWith('/payments')
+    || path.startsWith('/denials')
+})
+
+const billingNavItems = computed(() => {
+  const items = []
+  if (showBilling.value) {
+    items.push({
+      icon: 'request_quote',
+      to: '/billing/superbills',
+      testId: layoutTestIds.navSuperbills,
+      labelKey: 'navSuperbills',
+    })
+  }
+  if (showClaims.value) {
+    items.push({
+      icon: 'receipt_long',
+      to: '/claims',
+      testId: layoutTestIds.navClaims,
+      labelKey: 'navClaims',
+    })
+  }
+  if (showRemittances.value) {
+    items.push({
+      icon: 'account_balance_wallet',
+      to: '/remittances',
+      testId: layoutTestIds.navRemittances,
+      labelKey: 'navRemittances',
+    })
+  }
+  if (showPayments.value) {
+    items.push({
+      icon: 'payments',
+      to: '/payments',
+      testId: layoutTestIds.navPayments,
+      labelKey: 'navPayments',
+    })
+  }
+  if (showDenials.value) {
+    items.push({
+      icon: 'report',
+      to: '/denials',
+      testId: layoutTestIds.navDenials,
+      labelKey: 'navDenials',
+    })
+  }
+
+  return items
+})
 
 const isActiveClass = (condition) => {
   return condition ? 'app-nav-item--active' : ''
@@ -1148,21 +1054,21 @@ function syncNavMenusFromRoute() {
   } else if (!isAdministrationActive.value) {
     administrationMenu.value = false
   }
+  if (accordionMenu.value && isBillingActive.value) {
+    billingMenu.value = true
+  } else if (!isBillingActive.value) {
+    billingMenu.value = false
+  }
   clientMenuPopup.value = false
   staffMenuPopup.value = false
   usersMenuPopup.value = false
-  if (!isClientActive.value) {
-    providerMenu.value = false
-    humanResourcesMenu.value = false
-  }
 }
 
 function closeMiniPopups() {
   clientMenuPopup.value = false
   staffMenuPopup.value = false
   usersMenuPopup.value = false
-  providerMenu.value = false
-  humanResourcesMenu.value = false
+  billingMenu.value = false
   administrationMenu.value = false
 }
 

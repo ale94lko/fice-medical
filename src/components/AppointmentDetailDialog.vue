@@ -22,11 +22,7 @@
       <q-card-section
         class="app-dialog-card__body appointment-detail-dialog__body
           q-px-lg q-pt-md q-pb-md">
-        <div class="appointment-detail-dialog__hero"
-          :class="{
-            'appointment-detail-dialog__hero--with-telehealth':
-              showTelehealthSection,
-          }">
+        <div class="appointment-detail-dialog__hero">
           <div class="appointment-detail-dialog__hero-card">
             <div class="appointment-detail-dialog__hero-icon">
               <q-icon name="assignment" size="20px" />
@@ -37,10 +33,10 @@
               </p>
               <div class="appointment-detail-dialog__hero-value-row">
                 <p class="appointment-detail-dialog__hero-value">
-                  {{ record?.appointmentNumber || '—' }}
+                  {{ detailRecord?.appointmentNumber || '—' }}
                 </p>
                 <q-btn
-                  v-if="record?.appointmentNumber"
+                  v-if="detailRecord?.appointmentNumber"
                   flat
                   round
                   dense
@@ -67,59 +63,135 @@
               <p
                 class="appointment-detail-dialog__hero-status-title"
                 :class="statusTitleClass">
-                {{ statusLabel(record?.status) }}
+                {{ statusLabel(detailRecord?.status) }}
               </p>
               <p class="appointment-detail-dialog__hero-status-hint">
                 {{ statusHint }}
               </p>
             </div>
           </div>
+        </div>
 
-          <div
-            v-if="showTelehealthSection"
-            class="appointment-detail-dialog__hero-card
-              appointment-detail-dialog__hero-card--telehealth">
-            <div
-              class="appointment-detail-dialog__hero-icon
-                appointment-detail-dialog__hero-icon--telehealth">
-              <q-icon name="videocam" size="20px" />
-            </div>
-            <div class="appointment-detail-dialog__hero-telehealth">
-              <p class="appointment-detail-dialog__hero-label">
-                {{ t('telehealthAppointmentSection') }}
-              </p>
-              <p
-                v-if="invitePending"
-                class="appointment-detail-dialog__hero-status-hint">
-                {{ t('telehealthInvitePending') }}
-              </p>
+        <div
+          class="appointment-detail-dialog__people relative-position">
+          <q-inner-loading :showing="extrasLoading">
+            <q-spinner color="grey-7" size="24px" />
+          </q-inner-loading>
+
+          <section
+            class="appointment-detail-dialog__person-card"
+            :data-testid="tid.clientCard">
+            <div class="appointment-detail-dialog__person-head">
               <div
-                v-else-if="telehealthInviteUrl"
-                class="appointment-detail-dialog__hero-value-row">
-                <p class="appointment-detail-dialog__hero-value">
-                  {{ t('telehealthClientInviteLabel') }}
+                class="appointment-detail-dialog__avatar"
+                aria-hidden="true">
+                <StoredFileAvatar
+                  v-if="clientHeader?.photoFileId"
+                  :file-id="clientHeader.photoFileId"
+                  spinner-size="28px">
+                  <template #placeholder>
+                    <span>
+                      {{ clientHeader?.clientInitials || '?' }}
+                    </span>
+                  </template>
+                </StoredFileAvatar>
+                <span v-else>
+                  {{ clientHeader?.clientInitials || '?' }}
+                </span>
+              </div>
+              <div>
+                <p class="appointment-detail-dialog__person-kicker">
+                  {{ t('appointmentDetailClientLabel') }}
                 </p>
-                <q-btn
-                  flat
-                  round
-                  dense
-                  size="sm"
-                  icon="content_copy"
-                  :aria-label="t('telehealthCopyClientLink')"
-                  :data-testid="tid.copyInvite"
-                  @click="onCopyInvite"
-                >
-          <q-tooltip
-            class="app-info-tooltip"
-            anchor="top middle"
-            self="bottom middle"
-            :offset="[0, 6]">
-            {{ t('telehealthCopyClientLink') }}
-          </q-tooltip>
-        </q-btn>
+                <p class="appointment-detail-dialog__person-name">
+                  {{ clientHeader?.fullName
+                    || detailRecord?.clientDisplayName
+                    || '—' }}
+                </p>
               </div>
             </div>
-          </div>
+            <ul class="appointment-detail-dialog__facts">
+              <li v-if="clientHeader?.dobAgeLine">
+                <q-icon name="event" size="16px" />
+                <span>{{ clientHeader.dobAgeLine }}</span>
+              </li>
+              <li v-if="clientHeader?.gender">
+                <q-icon
+                  :name="clientHeader.genderIcon || 'person'"
+                  size="16px"
+                />
+                <span>{{ clientHeader.gender }}</span>
+              </li>
+              <li v-if="clientHeader?.phone">
+                <q-icon name="phone" size="16px" />
+                <span>{{ clientHeader.phone }}</span>
+              </li>
+              <li v-if="clientHeader?.addressLine">
+                <q-icon name="place" size="16px" />
+                <span>{{ clientHeader.addressLine }}</span>
+              </li>
+            </ul>
+          </section>
+
+          <section
+            class="appointment-detail-dialog__person-card
+              appointment-detail-dialog__person-card--insurance"
+            :data-testid="tid.insuranceCard">
+            <div class="appointment-detail-dialog__person-head">
+              <div
+                class="appointment-detail-dialog__avatar
+                  appointment-detail-dialog__avatar--shield">
+                <q-icon name="verified_user" size="20px" />
+              </div>
+              <p class="appointment-detail-dialog__person-name">
+                {{ t('appointmentDetailInsuranceLabel') }}
+              </p>
+            </div>
+            <p
+              v-if="!insuranceView"
+              class="appointment-detail-dialog__empty">
+              {{ t('appointmentDetailInsuranceEmpty') }}
+            </p>
+            <template v-else>
+              <dl class="appointment-detail-dialog__insurance-grid">
+                <div>
+                  <dt>{{ t('appointmentDetailInsurancePayer') }}</dt>
+                  <dd>{{ insuranceView.payer || '—' }}</dd>
+                </div>
+                <div>
+                  <dt>{{ t('insuranceMemberId') }}</dt>
+                  <dd>{{ insuranceView.memberId || '—' }}</dd>
+                </div>
+                <div v-if="insuranceView.serviceId">
+                  <dt>
+                    {{ t('appointmentDetailInsuranceServiceId') }}
+                    <q-icon name="info" size="14px">
+                      <q-tooltip class="app-info-tooltip">
+                        {{ t('appointmentDetailInsuranceServiceIdHint') }}
+                      </q-tooltip>
+                    </q-icon>
+                  </dt>
+                  <dd>{{ insuranceView.serviceId }}</dd>
+                </div>
+              </dl>
+              <div
+                v-if="insuranceView.showSubscriber"
+                class="appointment-detail-dialog__subscriber">
+                <p class="appointment-detail-dialog__subscriber-title">
+                  <q-icon name="person" size="16px" />
+                  {{ t('appointmentDetailSubscriberNotClient') }}
+                </p>
+                <p class="appointment-detail-dialog__subscriber-name">
+                  {{ insuranceView.subscriberName || '—' }}
+                  <span
+                    v-if="insuranceView.relationship"
+                    class="appointment-detail-dialog__chip">
+                    {{ insuranceView.relationship }}
+                  </span>
+                </p>
+              </div>
+            </template>
+          </section>
         </div>
 
         <div class="appointment-detail-dialog__grid">
@@ -150,7 +222,7 @@
                 {{ t('appointmentDetailClinicianLabel') }}
               </p>
               <p class="appointment-detail-dialog__cell-value">
-                {{ record?.clinicianDisplayName || '—' }}
+                {{ detailRecord?.clinicianDisplayName || '—' }}
               </p>
               <p class="appointment-detail-dialog__cell-hint">
                 {{ clinicianHint }}
@@ -209,78 +281,78 @@
                 {{ t('appointmentDetailLocationLabel') }}
               </p>
               <p class="appointment-detail-dialog__cell-value">
-                {{ t('appointmentDetailLocationName') }}
+                {{ location.name }}
               </p>
               <p class="appointment-detail-dialog__cell-hint">
-                {{ t('appointmentDetailLocationAddress') }}
+                {{ location.address }}
               </p>
+            </div>
+          </div>
+
+          <div
+            v-if="showTelehealthSection"
+            class="appointment-detail-dialog__grid-cell
+              appointment-detail-dialog__grid-cell--telehealth">
+            <div
+              class="appointment-detail-dialog__cell-icon
+                appointment-detail-dialog__cell-icon--teal">
+              <q-icon name="videocam" />
+            </div>
+            <div class="appointment-detail-dialog__telehealth">
+              <p class="appointment-detail-dialog__cell-label">
+                {{ t('appointmentDetailTelehealthVisit') }}
+              </p>
+              <p
+                v-if="invitePending"
+                class="appointment-detail-dialog__cell-hint">
+                {{ t('telehealthInvitePending') }}
+              </p>
+              <template v-else-if="telehealthInviteUrl">
+                <p class="appointment-detail-dialog__cell-hint">
+                  {{ t('appointmentDetailTelehealthJoinHint') }}
+                </p>
+                <div class="appointment-detail-dialog__hero-value-row">
+                  <p class="appointment-detail-dialog__link">
+                    {{ telehealthInviteUrl }}
+                  </p>
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    size="sm"
+                    icon="content_copy"
+                    :aria-label="t('telehealthCopyClientLink')"
+                    :data-testid="tid.copyInvite"
+                    @click="onCopyInvite"
+                  >
+                    <q-tooltip
+                      class="app-info-tooltip"
+                      anchor="top middle"
+                      self="bottom middle"
+                      :offset="[0, 6]">
+                      {{ t('telehealthCopyClientLink') }}
+                    </q-tooltip>
+                  </q-btn>
+                </div>
+              </template>
             </div>
           </div>
         </div>
 
-        <div class="appointment-detail-dialog__lower">
-          <section class="appointment-detail-dialog__notes-card">
-            <h3 class="appointment-detail-dialog__section-heading">
-              <q-icon name="sticky_note_2" size="18px" />
-              {{ t('appointmentNotesOptional') }}
-            </h3>
-            <p class="appointment-detail-dialog__notes-body">
-              {{ record?.notes || t('appointmentDetailNotesEmpty') }}
-            </p>
-          </section>
-
-          <aside class="appointment-detail-dialog__aside-card">
-            <div class="appointment-detail-dialog__aside-list">
-              <div class="appointment-detail-dialog__aside-item">
-                <div
-                  class="appointment-detail-dialog__aside-icon
-                    appointment-detail-dialog__cell-icon--blue">
-                  <q-icon name="schedule" size="18px" />
-                </div>
-                <div>
-                  <p class="appointment-detail-dialog__aside-title">
-                    {{ t('appointmentDetailAsideCalendarTitle') }}
-                  </p>
-                  <p class="appointment-detail-dialog__aside-text">
-                    {{ t('appointmentDetailAsideCalendarText') }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="appointment-detail-dialog__aside-item">
-                <div
-                  class="appointment-detail-dialog__aside-icon
-                    appointment-detail-dialog__cell-icon--green">
-                  <q-icon name="notifications_none" size="18px" />
-                </div>
-                <div>
-                  <p class="appointment-detail-dialog__aside-title">
-                    {{ t('appointmentDetailAsideRemindersTitle') }}
-                  </p>
-                  <p class="appointment-detail-dialog__aside-text">
-                    {{ t('appointmentDetailAsideRemindersText') }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="appointment-detail-dialog__aside-item">
-                <div
-                  class="appointment-detail-dialog__aside-icon
-                    appointment-detail-dialog__cell-icon--purple">
-                  <q-icon name="info" size="18px" />
-                </div>
-                <div>
-                  <p class="appointment-detail-dialog__aside-title">
-                    {{ t('appointmentDetailAsideChangesTitle') }}
-                  </p>
-                  <p class="appointment-detail-dialog__aside-text">
-                    {{ t('appointmentDetailAsideChangesText') }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </aside>
-        </div>
+        <section class="appointment-detail-dialog__notes-card">
+          <h3 class="appointment-detail-dialog__section-heading">
+            <q-icon name="sticky_note_2" size="18px" />
+            {{ t('appointmentNotesOptional') }}
+          </h3>
+          <p
+            class="appointment-detail-dialog__notes-body"
+            :class="{
+              'appointment-detail-dialog__notes-body--empty':
+                !detailRecord?.notes,
+            }">
+            {{ detailRecord?.notes || t('appointmentDetailNotesEmpty') }}
+          </p>
+        </section>
       </q-card-section>
 
       <q-card-actions
@@ -307,26 +379,39 @@
         </div>
         <div class="appointment-detail-dialog__actions-right">
           <q-btn
+            v-if="showEncounterButton"
             no-caps
-            flat
+            outline
+            color="primary"
             class="app-btn-outline"
-            :label="t('close')"
-            :data-testid="tid.close"
-            @click="onClose"
+            icon="clinical_notes"
+            :label="t('startEncounterButton')"
+            :loading="encounterBusy"
+            :data-testid="tid.encounter"
+            @click="onEncounter"
           />
           <q-btn
             v-if="showStaffTelehealthJoin"
             no-caps
-            unelevated
+            outline
             color="primary"
-            class="app-btn-primary"
+            class="app-btn-outline"
             icon="videocam"
             :label="t('telehealthJoinFromAppointment')"
             :data-testid="tid.joinTelehealth"
             @click="onJoinStaffTelehealth"
           />
           <q-btn
-            v-if="canViewClient && record?.clientId"
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            :label="t('close')"
+            :data-testid="tid.close"
+            @click="onClose"
+          />
+          <q-btn
+            v-if="canViewClient && detailRecord?.clientId"
             no-caps
             unelevated
             color="primary"
@@ -340,16 +425,30 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <StartEncounterDialog
+    v-model="encounterDialogOpen"
+    :client-id="clientChartId"
+    :preset-appointment-id="appointmentId"
+    :preset-encounter-type="encounterTypes.scheduled"
+    :saving="encounterBusy"
+    @submit="onEncounterSubmit"
+  />
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { copyToClipboard, useQuasar } from 'quasar'
+import { storeToRefs } from 'pinia'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import StoredFileAvatar from 'components/StoredFileAvatar.vue'
+import StartEncounterDialog from 'components/StartEncounterDialog.vue'
 import {
   appointmentStatuses,
+  encounterTypes,
+  quasarNotifyTypes,
   telehealthRoles,
 } from 'components/constants.js'
 import {
@@ -360,6 +459,11 @@ import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
 import { useTelehealthPermissions } from
   'src/composables/useTelehealthPermissions.js'
+import { useAppointmentDetailExtras } from
+  'src/composables/useAppointmentDetailExtras.js'
+import { useActiveEncounter } from
+  'src/composables/useActiveEncounter.js'
+import { useAuthStore } from 'src/stores/auth-store.js'
 import GenerateDocumentAction from
   'components/documents/GenerateDocumentAction.vue'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
@@ -370,6 +474,11 @@ import {
 import {
   copyTelehealthInviteUrl,
 } from 'src/utils/telehealth-appointment-ui.js'
+import { formatAppointmentServicesSummary } from
+  'src/utils/appointment-detail-display.js'
+import { buildQuickStartEncounterPayload } from
+  'src/utils/start-encounter-quick.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { clientChartKey } from 'components/helpers.js'
 import { appointmentTestIds as tid } from 'src/test-ids/index.js'
 
@@ -383,6 +492,8 @@ const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const router = useRouter()
 const $q = useQuasar()
+const authStore = useAuthStore()
+const { linkedStaffProfile } = storeToRefs(authStore)
 const { canViewClient } = useClientPermissions()
 const {
   canCreateTelehealth,
@@ -394,24 +505,44 @@ const open = computed({
   set: value => emit('update:modelValue', value),
 })
 
+const {
+  detailRecord,
+  clientChartId,
+  clientHeader,
+  insuranceView,
+  location,
+  loading: extrasLoading,
+} = useAppointmentDetailExtras(open, toRef(props, 'record'))
+
+const {
+  canStartEncounter,
+  hasActiveEncounter,
+  activeEncounterId,
+  startEncounter,
+  actionBusy: encounterBusy,
+  refreshActiveEncounter,
+} = useActiveEncounter(clientChartId)
+
+const encounterDialogOpen = ref(false)
+
 const appointmentId = computed(() =>
-  props.record?.appointmentId ?? props.record?.id ?? null,
+  detailRecord.value?.appointmentId ?? detailRecord.value?.id ?? null,
 )
 
 const telehealthInviteUrl = computed(() =>
-  String(props.record?.telehealthInviteUrl ?? '').trim(),
+  String(detailRecord.value?.telehealthInviteUrl ?? '').trim(),
 )
 
 const telehealthSessionId = computed(() =>
-  props.record?.telehealthSessionId ?? null,
+  detailRecord.value?.telehealthSessionId ?? null,
 )
 
 const showTelehealthSection = computed(() =>
-  isTelemedicineAppointment(props.record),
+  isTelemedicineAppointment(detailRecord.value),
 )
 
 const invitePending = computed(() =>
-  showTelehealthSection.value && !telehealthInviteUrl.value,
+  showTelehealthSection.value && !telehealthSessionId.value,
 )
 
 const showStaffTelehealthJoin = computed(() => {
@@ -421,29 +552,36 @@ const showStaffTelehealthJoin = computed(() => {
   if (!(canJoinTelehealth.value || canCreateTelehealth.value)) {
     return false
   }
-  if (!canStartTelehealthForAppointmentStatus(props.record?.status)) {
+  if (!canStartTelehealthForAppointmentStatus(detailRecord.value?.status)) {
     return false
   }
 
   return showTelehealthSection.value
 })
 
+const showEncounterButton = computed(() =>
+  canStartEncounter.value && Boolean(clientChartId.value),
+)
+
 const placeOfServiceLabel = computed(() =>
-  props.record?.placeOfServiceDisplayName
-  || props.record?.placeOfServiceName
+  detailRecord.value?.placeOfServiceDisplayName
+  || detailRecord.value?.placeOfServiceName
   || '—',
 )
 
 const dateLabel = computed(() =>
-  formatUtcDateLong(props.record?.startAtUtc) || '—',
+  formatUtcDateLong(detailRecord.value?.startAtUtc) || '—',
 )
 
 const timeLabel = computed(() =>
-  formatUtcTimeRange(props.record?.startAtUtc, props.record?.endAtUtc) || '—',
+  formatUtcTimeRange(
+    detailRecord.value?.startAtUtc,
+    detailRecord.value?.endAtUtc,
+  ) || '—',
 )
 
 const durationLabel = computed(() => {
-  const minutes = Number(props.record?.durationMin)
+  const minutes = Number(detailRecord.value?.durationMin)
   if (!Number.isFinite(minutes) || minutes <= 0) {
     return ''
   }
@@ -451,89 +589,17 @@ const durationLabel = computed(() => {
   return t('appointmentDurationMinutes', { count: minutes })
 })
 
-const servicesSummary = computed(() => {
-  const lines = props.record?.serviceProcedures ?? []
-  if (lines.length) {
-    return lines
-      .map(line => {
-        const cpt = line.cptCode ? ` — CPT ${line.cptCode}` : ''
-
-        return `${line.name}${cpt}`
-      })
-      .join(', ')
-  }
-
-  return props.record?.appointmentTypeName || '—'
-})
+const servicesSummary = computed(() =>
+  formatAppointmentServicesSummary(detailRecord.value, t),
+)
 
 const clinicianHint = computed(() =>
-  props.record?.clinicianDisplayName
+  detailRecord.value?.clinicianDisplayName
     ? t('appointmentDetailClinicianHint')
     : t('appointmentDetailClinicianEmpty'),
 )
 
-const statusMeta = computed(() => {
-  const status = String(props.record?.status ?? '').toUpperCase()
-
-  if (status === appointmentStatuses.confirmed
-    || status === appointmentStatuses.checkedIn) {
-    return {
-      icon: 'how_to_reg',
-      tone: 'checked-in',
-      hintKey: status === appointmentStatuses.confirmed
-        ? 'appointmentDetailStatusConfirmedHint'
-        : 'appointmentDetailStatusCheckedInHint',
-    }
-  }
-  if (status === appointmentStatuses.inProgress) {
-    return {
-      icon: 'play_circle',
-      tone: 'in-progress',
-      hintKey: 'appointmentDetailStatusInProgressHint',
-    }
-  }
-  if (status === appointmentStatuses.completed) {
-    return {
-      icon: 'task_alt',
-      tone: 'completed',
-      hintKey: 'appointmentDetailStatusCompletedHint',
-    }
-  }
-  if (status === appointmentStatuses.cancelled) {
-    return {
-      icon: 'cancel',
-      tone: 'cancelled',
-      hintKey: 'appointmentDetailStatusCancelledHint',
-    }
-  }
-  if (status === appointmentStatuses.noShow) {
-    return {
-      icon: 'person_off',
-      tone: 'no-show',
-      hintKey: 'appointmentDetailStatusNoShowHint',
-    }
-  }
-  if (status === appointmentStatuses.pending) {
-    return {
-      icon: 'schedule',
-      tone: 'pending',
-      hintKey: 'appointmentDetailStatusPendingHint',
-    }
-  }
-  if (status === appointmentStatuses.rescheduled) {
-    return {
-      icon: 'update',
-      tone: 'rescheduled',
-      hintKey: 'appointmentDetailStatusRescheduledHint',
-    }
-  }
-
-  return {
-    icon: 'event_available',
-    tone: 'scheduled',
-    hintKey: 'appointmentDetailStatusScheduledHint',
-  }
-})
+const statusMeta = computed(() => resolveStatusMeta(detailRecord.value?.status))
 
 const statusCardClass = computed(() =>
   `appointment-detail-dialog__hero-card--status--${statusMeta.value.tone}`,
@@ -548,6 +614,74 @@ const statusTitleClass = computed(() =>
 )
 
 const statusHint = computed(() => t(statusMeta.value.hintKey))
+
+watch(open, isOpen => {
+  if (isOpen && clientChartId.value) {
+    void refreshActiveEncounter()
+  }
+})
+
+function resolveStatusMeta(status) {
+  const value = String(status ?? '').toUpperCase()
+  if (value === appointmentStatuses.confirmed
+    || value === appointmentStatuses.checkedIn) {
+    return {
+      icon: 'how_to_reg',
+      tone: 'checked-in',
+      hintKey: value === appointmentStatuses.confirmed
+        ? 'appointmentDetailStatusConfirmedHint'
+        : 'appointmentDetailStatusCheckedInHint',
+    }
+  }
+  if (value === appointmentStatuses.inProgress) {
+    return {
+      icon: 'play_circle',
+      tone: 'in-progress',
+      hintKey: 'appointmentDetailStatusInProgressHint',
+    }
+  }
+  if (value === appointmentStatuses.completed) {
+    return {
+      icon: 'task_alt',
+      tone: 'completed',
+      hintKey: 'appointmentDetailStatusCompletedHint',
+    }
+  }
+  if (value === appointmentStatuses.cancelled) {
+    return {
+      icon: 'cancel',
+      tone: 'cancelled',
+      hintKey: 'appointmentDetailStatusCancelledHint',
+    }
+  }
+  if (value === appointmentStatuses.noShow) {
+    return {
+      icon: 'person_off',
+      tone: 'no-show',
+      hintKey: 'appointmentDetailStatusNoShowHint',
+    }
+  }
+  if (value === appointmentStatuses.pending) {
+    return {
+      icon: 'schedule',
+      tone: 'pending',
+      hintKey: 'appointmentDetailStatusPendingHint',
+    }
+  }
+  if (value === appointmentStatuses.rescheduled) {
+    return {
+      icon: 'update',
+      tone: 'rescheduled',
+      hintKey: 'appointmentDetailStatusRescheduledHint',
+    }
+  }
+
+  return {
+    icon: 'event_available',
+    tone: 'scheduled',
+    hintKey: 'appointmentDetailStatusScheduledHint',
+  }
+}
 
 function statusLabel(status) {
   const key = `appointmentStatus${String(status ?? '')
@@ -585,7 +719,7 @@ async function onCopyInvite() {
 }
 
 function copyAppointmentNumber() {
-  const value = props.record?.appointmentNumber
+  const value = detailRecord.value?.appointmentNumber
   if (!value) {
     return
   }
@@ -610,7 +744,7 @@ function onPrint() {
 }
 
 function onViewClient() {
-  const record = props.record
+  const record = detailRecord.value
   const id = clientChartKey({
     id: record?.clientId,
     clientNumber: record?.clientNumber,
@@ -621,5 +755,64 @@ function onViewClient() {
 
   open.value = false
   void router.push({ path: `/clients/${id}` })
+}
+
+function onEncounter() {
+  if (hasActiveEncounter.value) {
+    const id = activeEncounterId.value
+      ?? detailRecord.value?.encounterId
+    open.value = false
+    if (id != null) {
+      void router.push({
+        name: 'EncounterWorkspace',
+        params: { id: String(id) },
+      })
+
+      return
+    }
+  }
+  encounterDialogOpen.value = true
+}
+
+async function onEncounterSubmit(form) {
+  try {
+    const payload = await buildQuickStartEncounterPayload({
+      encounterType: form?.encounterType,
+      appointmentId: form?.appointmentId ?? appointmentId.value,
+      staffMember: linkedStaffProfile.value,
+      clinicName: authStore.activeSubtenant?.name,
+    })
+    if (!payload || payload.error) {
+      $q.notify({
+        type: quasarNotifyTypes.warning,
+        message: t(payload?.error || 'activeEncounterActionError'),
+      })
+
+      return
+    }
+    const encounter = await startEncounter({
+      ...payload,
+      ...form,
+    })
+    encounterDialogOpen.value = false
+    open.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: t('startEncounterSuccess'),
+    })
+    if (encounter?.id != null) {
+      await router.push({
+        name: 'EncounterWorkspace',
+        params: { id: String(encounter.id) },
+      })
+    }
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('activeEncounterActionError'),
+      })
+    }
+  }
 }
 </script>

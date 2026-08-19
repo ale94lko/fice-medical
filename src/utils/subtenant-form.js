@@ -2,6 +2,7 @@ import {
   clinicTypeValues,
   subtenantStatusValues,
 } from 'components/constants.js'
+import { getAppDateTimeConfig } from 'src/utils/app-datetime.js'
 
 export const subtenantLegalBusinessNameMaxLength = 255
 
@@ -28,6 +29,8 @@ function parseOptionalPhotoFileId(raw) {
 }
 
 export function createEmptySubtenantForm() {
+  const cfg = getAppDateTimeConfig()
+
   return {
     id: null,
     name: '',
@@ -36,6 +39,10 @@ export function createEmptySubtenantForm() {
     status: subtenantStatusValues.active,
     clinicType: clinicTypeValues.primaryCare,
     photoFileId: null,
+    timezone: cfg.timezone,
+    dateFormat: cfg.date_format,
+    timeFormat: cfg.time_format,
+    firstDayOfWeek: cfg.first_day_of_week,
     legalBusinessName: '',
     taxId: '',
     billingEmail: '',
@@ -62,6 +69,17 @@ export function normalizeSubtenantFromApi(raw = {}) {
     clinicType: String(
       raw.clinic_type ?? raw.clinicType ?? '',
     ).trim() || clinicTypeValues.primaryCare,
+    timezone: String(raw.timezone ?? '').trim()
+      || getAppDateTimeConfig().timezone,
+    dateFormat: String(
+      raw.date_format ?? raw.dateFormat ?? '',
+    ).trim() || getAppDateTimeConfig().date_format,
+    timeFormat: String(
+      raw.time_format ?? raw.timeFormat ?? '',
+    ).trim() || getAppDateTimeConfig().time_format,
+    firstDayOfWeek: String(
+      raw.first_day_of_week ?? raw.firstDayOfWeek ?? '',
+    ).trim() || getAppDateTimeConfig().first_day_of_week,
     status: status === subtenantStatusValues.inactive
       ? subtenantStatusValues.inactive
       : subtenantStatusValues.active,
@@ -95,6 +113,13 @@ export function buildSubtenantRequest(form = {}) {
   // eslint-disable-next-line camelcase -- API body
   body.clinic_type = String(form.clinicType ?? '').trim()
     || clinicTypeValues.primaryCare
+  body.timezone = String(form.timezone ?? '').trim()
+  // eslint-disable-next-line camelcase -- API body
+  body.date_format = String(form.dateFormat ?? '').trim()
+  // eslint-disable-next-line camelcase -- API body
+  body.time_format = String(form.timeFormat ?? '').trim()
+  // eslint-disable-next-line camelcase -- API body
+  body.first_day_of_week = String(form.firstDayOfWeek ?? '').trim()
   const photoFileId = Number(form.photoFileId)
   if (Number.isFinite(photoFileId) && photoFileId > 0) {
     // eslint-disable-next-line camelcase -- API body

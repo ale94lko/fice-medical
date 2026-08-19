@@ -53,7 +53,7 @@
 import { computed } from 'vue'
 import {
   buildMonthGridCells,
-  calendarWeekdayLabels,
+  calendarWeekdayLabelsForConfig,
 } from 'src/utils/calendar-grid.js'
 import {
   formatMonthYear,
@@ -70,7 +70,7 @@ const props = defineProps({
 
 const emit = defineEmits(['select-day', 'prev-month', 'next-month'])
 
-const weekdayLabels = calendarWeekdayLabels
+const weekdayLabels = computed(() => calendarWeekdayLabelsForConfig())
 const todayKey = computed(() => todayLocalDayKey(props.timeZone))
 const monthLabel = computed(() =>
   formatMonthYear(props.monthKey, props.timeZone),

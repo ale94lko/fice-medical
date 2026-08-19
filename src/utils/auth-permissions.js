@@ -1,6 +1,7 @@
 const GRANULAR_PREFIXES = [
   'VIEW_', 'ADD_', 'EDIT_', 'DELETE_', 'CHANGE_', 'ARCHIVE_',
   'BOOK_', 'CANCEL_', 'RESCHEDULE_', 'MANAGE_', 'SIGN_',
+  'SEND_',
 ]
 
 export function isGranularPermissionToken(value) {

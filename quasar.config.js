@@ -34,6 +34,7 @@ function devApiProxy(target) {
     '/staff': { ...o },
     '/logout': { ...o },
     '/portal': { ...o },
+    '/messages/v1': { ...o },
     '/reference-data': { ...o },
     // Meet REST API
     '/meet': { ...o },

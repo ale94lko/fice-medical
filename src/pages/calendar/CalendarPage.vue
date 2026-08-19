@@ -4,11 +4,14 @@
     :data-testid="calendarTestIds.page">
     <AppLoadingOverlay
       scope="content"
-      :showing="loading"
+      :showing="!viewReady"
+      :surface-opacity="1"
       :message="t('appLoading')"
     />
 
-    <div class="calendar-page__shell">
+    <div
+      v-if="viewReady"
+      class="calendar-page__shell">
       <header class="calendar-page__header row no-wrap items-start">
         <div class="calendar-page__intro">
           <h1 class="calendar-page__title">{{ t('calendarPageTitle') }}</h1>
@@ -157,7 +160,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
@@ -229,7 +232,7 @@ const {
   viewMode,
   focusDayKey,
   sidebarMonthKey,
-  loading,
+  viewReady,
   loadError,
   eventsByDay,
   eventDayKeys,
@@ -257,7 +260,6 @@ const {
   cliniciansLoading,
   setSourceEnabled,
   toggleClinicianEnabled,
-  loadClinicianOptions,
 } = calendarSources
 
 const loadErrorLabel = computed(() => {
@@ -335,8 +337,4 @@ async function onBookAppointment(body) {
     bookSaving.value = false
   }
 }
-
-onMounted(() => {
-  void loadClinicianOptions()
-})
 </script>

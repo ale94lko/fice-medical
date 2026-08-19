@@ -130,13 +130,13 @@
         </div>
       </div>
 
-      <div
+      <AddClientLabeledField
         v-if="local.recurrence.frequency === frequencyWeekly"
-        class="q-mt-md">
-        <div class="appointment-recurrence-section__days-label">
-          {{ t('appointmentRecurrenceDays') }}
-        </div>
-        <div class="appointment-recurrence-section__days-row q-mt-sm">
+        class="q-mt-md"
+        required
+        :label="t('appointmentRecurrenceDays')"
+        :test-id="appointmentTestIds.field('recurrence-days')">
+        <div class="appointment-recurrence-section__days-row">
           <FormSelect
             :model-value="daysPreset"
             class="appointment-recurrence-section__days-preset"
@@ -148,30 +148,41 @@
             :disable="readonly"
             :options="daysPresetOptions"
             :placeholder="t('appointmentRecurrenceDaysPresetCustom')"
+            :error="Boolean(daysOfWeekError)"
             :test-id="appointmentTestIds.field('recurrence-days-preset')"
             @update:model-value="applyDaysPreset"
           />
           <div class="appointment-recurrence-section__days">
-            <button
+            <span
               v-for="day in weekdayOptions"
               :key="day.value"
-              type="button"
-              class="appointment-recurrence-section__day"
-              :class="{
-                'appointment-recurrence-section__day--selected':
-                  isDaySelected(day.value),
-              }"
-              :disabled="readonly"
-              :data-testid="appointmentTestIds.recurrenceDay(day.value)"
-              @click="toggleDay(day.value)">
-              <q-icon
-                :name="isDaySelected(day.value)
-                  ? 'check_box'
-                  : 'check_box_outline_blank'"
-                size="16px"
-              />
-              <span>{{ day.label }}</span>
-            </button>
+              class="appointment-recurrence-section__day-wrap">
+              <button
+                type="button"
+                class="appointment-recurrence-section__day"
+                :class="{
+                  'appointment-recurrence-section__day--selected':
+                    isDaySelected(day.value),
+                  'appointment-recurrence-section__day--closed':
+                    !isDayEnabled(day.value),
+                }"
+                :disabled="readonly || !isDayEnabled(day.value)"
+                :data-testid="
+                  appointmentTestIds.recurrenceDay(day.value)
+                "
+                @click="toggleDay(day.value)">
+                <q-icon
+                  :name="isDaySelected(day.value)
+                    ? 'check_box'
+                    : 'check_box_outline_blank'"
+                  size="16px"
+                />
+                <span>{{ day.label }}</span>
+              </button>
+              <q-tooltip v-if="!isDayEnabled(day.value)">
+                {{ t('appointmentRecurrenceDayClosed') }}
+              </q-tooltip>
+            </span>
           </div>
         </div>
         <div class="appointment-recurrence-section__days-count">
@@ -184,30 +195,17 @@
             }}
           </span>
         </div>
-      </div>
+        <p
+          v-if="daysOfWeekError"
+          class="form-field__error q-mt-sm"
+          :data-testid="appointmentTestIds.field(
+            'recurrence-days-error',
+          )">
+          {{ daysOfWeekError }}
+        </p>
+      </AddClientLabeledField>
 
-      <div class="appointment-recurrence-section__preview q-mt-md">
-        <q-icon name="event" size="18px" />
-        <div class="appointment-recurrence-section__preview-text">
-          <i18n-t
-            :keypath="previewKeypath"
-            tag="span"
-            scope="global">
-            <template #preview>
-              <strong>{{ t('appointmentRecurrencePreviewLabel') }}</strong>
-            </template>
-            <template #count>
-              <strong>{{ previewCount }}</strong>
-            </template>
-            <template #days>
-              <strong>{{ previewDaysLabel }}</strong>
-            </template>
-            <template #startDate>
-              <strong>{{ previewStartDate }}</strong>
-            </template>
-          </i18n-t>
-        </div>
-      </div>
+      <slot name="occurrences" />
     </div>
   </div>
 </template>
@@ -230,25 +228,28 @@ import {
   usDateStringToLocalDayKey,
 } from 'src/utils/appointment-datetime.js'
 import { parseUsDateString } from 'src/utils/client-form.js'
+import {
+  CLINIC_DEFAULT_WEEKDAYS,
+  isWorkingWeekday,
+  normalizeWeekdays,
+} from 'src/utils/working-weekdays.js'
 
 const DAYS_PRESET_NONE = 'none'
 const DAYS_PRESET_ALL = 'all'
 const DAYS_PRESET_WEEKDAYS = 'weekdays'
 const DAYS_PRESET_WEEKEND = 'weekend'
-
-const DAYS_PRESET_VALUES = {
-  [DAYS_PRESET_NONE]: [],
-  [DAYS_PRESET_ALL]: [1, 2, 3, 4, 5, 6, 7],
-  [DAYS_PRESET_WEEKDAYS]: [1, 2, 3, 4, 5],
-  [DAYS_PRESET_WEEKEND]: [6, 7],
-}
+const WEEKEND_DAYS = [6, 7]
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
   readonly: { type: Boolean, default: false },
-  startDateLabel: { type: String, default: '' },
   startDayKey: { type: String, default: '' },
   endDateError: { type: String, default: '' },
+  daysOfWeekError: { type: String, default: '' },
+  workingWeekdays: {
+    type: Array,
+    default: () => [...CLINIC_DEFAULT_WEEKDAYS],
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -346,6 +347,16 @@ const selectedDaysCount = computed(
   () => (local.value.recurrence.daysOfWeek ?? []).length,
 )
 
+const enabledWeekdays = computed(() => {
+  const days = normalizeWeekdays(props.workingWeekdays)
+
+  return days.length ? days : [...CLINIC_DEFAULT_WEEKDAYS]
+})
+
+const weekendPresetEnabled = computed(() =>
+  WEEKEND_DAYS.some(day => enabledWeekdays.value.includes(day)),
+)
+
 const daysPresetOptions = computed(() => [
   {
     label: t('appointmentRecurrenceDaysPresetNone'),
@@ -362,75 +373,31 @@ const daysPresetOptions = computed(() => [
   {
     label: t('appointmentRecurrenceDaysPresetWeekend'),
     value: DAYS_PRESET_WEEKEND,
+    disable: !weekendPresetEnabled.value,
   },
 ])
 
 const daysPreset = computed(() => {
   const current = normalizeDays(local.value.recurrence.daysOfWeek)
-  const match = Object.entries(DAYS_PRESET_VALUES).find(([, days]) =>
-    sameDays(current, days),
+  const presets = [
+    DAYS_PRESET_NONE,
+    DAYS_PRESET_ALL,
+    DAYS_PRESET_WEEKDAYS,
+    DAYS_PRESET_WEEKEND,
+  ]
+  const match = presets.find(preset =>
+    sameDays(current, daysForPreset(preset)),
   )
 
-  return match?.[0] ?? null
+  return match ?? null
 })
 
-const previewCount = computed(() => {
-  if (local.value.recurrence.endType === endAfterCount) {
-    return Number(local.value.recurrence.endAfterCount) || 0
-  }
-
-  return '—'
-})
-
-const previewStartDate = computed(() => {
-  const label = String(props.startDateLabel ?? '').trim()
-  if (label && label !== '—') {
-    return label
-  }
-
-  return t('appointmentRecurrencePreviewSelectedDate')
-})
-
-const previewKeypath = computed(() => {
-  const frequency = local.value.recurrence.frequency
-  if (frequency === frequencyDaily) {
-    return 'appointmentRecurrencePreviewDaily'
-  }
-  if (frequency === frequencyMonthly) {
-    return 'appointmentRecurrencePreviewMonthly'
-  }
-
-  return 'appointmentRecurrencePreviewWeekly'
-})
-
-const previewDaysLabel = computed(() => {
-  const selected = new Set(local.value.recurrence.daysOfWeek ?? [])
-  const labels = weekdayOptions.value
-    .filter(day => selected.has(day.value))
-    .map(day => day.label)
-
-  return formatListWithAnd(labels)
-})
-
-function formatListWithAnd(labels) {
-  if (!labels.length) {
-    return t('appointmentRecurrencePreviewNoDays')
-  }
-  if (labels.length === 1) {
-    return labels[0]
-  }
-  if (labels.length === 2) {
-    return t('appointmentRecurrencePreviewDayPair', {
-      first: labels[0],
-      second: labels[1],
-    })
-  }
-
-  return t('appointmentRecurrencePreviewDayList', {
-    list: labels.slice(0, -1).join(', '),
-    last: labels[labels.length - 1],
-  })
-}
+watch(
+  enabledWeekdays,
+  days => {
+    pruneClosedDays(days)
+  },
+)
 
 function normalizeDays(days) {
   return [...(days ?? [])]
@@ -449,12 +416,49 @@ function sameDays(left, right) {
   return a.every((value, index) => value === b[index])
 }
 
+function daysForPreset(preset) {
+  const enabled = enabledWeekdays.value
+  if (preset === DAYS_PRESET_NONE) {
+    return []
+  }
+  if (preset === DAYS_PRESET_ALL) {
+    return [...enabled]
+  }
+  if (preset === DAYS_PRESET_WEEKDAYS) {
+    return CLINIC_DEFAULT_WEEKDAYS.filter(day => enabled.includes(day))
+  }
+  if (preset === DAYS_PRESET_WEEKEND) {
+    return WEEKEND_DAYS.filter(day => enabled.includes(day))
+  }
+
+  return []
+}
+
+function pruneClosedDays(days) {
+  if (props.readonly) {
+    return
+  }
+  const enabled = new Set(days ?? [])
+  const current = local.value.recurrence.daysOfWeek ?? []
+  const next = current.filter(day => enabled.has(day))
+  if (next.length !== current.length) {
+    local.value.recurrence.daysOfWeek = next
+  }
+}
+
+function isDayEnabled(value) {
+  return isWorkingWeekday(value, enabledWeekdays.value)
+}
+
 function isDaySelected(value) {
   return (local.value.recurrence.daysOfWeek ?? []).includes(value)
 }
 
 function toggleDay(value) {
   if (props.readonly) {
+    return
+  }
+  if (!isDayEnabled(value) && !isDaySelected(value)) {
     return
   }
   const current = [...(local.value.recurrence.daysOfWeek ?? [])]
@@ -472,11 +476,10 @@ function applyDaysPreset(preset) {
   if (props.readonly) {
     return
   }
-  const days = DAYS_PRESET_VALUES[preset]
-  if (!days) {
+  if (preset === DAYS_PRESET_WEEKEND && !weekendPresetEnabled.value) {
     return
   }
-  local.value.recurrence.daysOfWeek = [...days]
+  local.value.recurrence.daysOfWeek = [...daysForPreset(preset)]
 }
 
 function isEndDateAfterStart(endDateUs, startDayKey) {
@@ -560,12 +563,6 @@ function clearInvalidEndDate() {
   white-space: nowrap;
 }
 
-.appointment-recurrence-section__days-label {
-  color: $text-strong;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
 .appointment-recurrence-section__days-row {
   display: flex;
   flex-wrap: wrap;
@@ -584,6 +581,10 @@ function clearInvalidEndDate() {
   flex-wrap: wrap;
   gap: 8px;
   min-width: 0;
+}
+
+.appointment-recurrence-section__day-wrap {
+  display: inline-flex;
 }
 
 .appointment-recurrence-section__day {
@@ -605,8 +606,12 @@ function clearInvalidEndDate() {
     color 0.15s ease;
 
   &:disabled {
-    cursor: default;
-    opacity: 0.7;
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  &--closed:not(&--selected) {
+    background: rgba($text-muted, 0.06);
   }
 
   &--selected {
@@ -623,22 +628,5 @@ function clearInvalidEndDate() {
   margin-top: 10px;
   color: $text-muted;
   font-size: 0.8125rem;
-}
-
-.appointment-recurrence-section__preview {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: $radius-md;
-  background: rgba($primary, 0.08);
-  color: $text-strong;
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-.appointment-recurrence-section__preview-text {
-  flex: 1 1 auto;
-  min-width: 0;
 }
 </style>

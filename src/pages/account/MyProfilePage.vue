@@ -238,7 +238,7 @@ async function loadProfile() {
   try {
     const { userRecord, staffForm } = await loadMyProfileData({
       userId,
-      staffId: userInfo.value?.staffMember?.id ?? null,
+      staffCode: userInfo.value?.staffMember?.staffNo ?? null,
       t,
     })
     profile.value = buildMyProfileViewModel({
