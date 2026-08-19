@@ -4,6 +4,7 @@ export const clientAttachmentsTestIds = {
   root: 'client-attachments',
   btnAdd: 'client-attachments-btn-add',
   btnRefresh: 'client-attachments-btn-refresh',
+  actionsMenu: 'client-attachments-btn-actions-menu',
   filterCategory: 'client-attachments-filter-category',
   filterEntityType: 'client-attachments-filter-entity-type',
   table: 'client-attachments-table',

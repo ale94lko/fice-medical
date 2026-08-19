@@ -28,7 +28,7 @@
                 <div
                   class="row q-col-gutter-sm
                     clinical-note-dialog__datetime-row">
-                  <div class="col-6">
+                  <div :class="isMobile ? 'col-12' : 'col-6'">
                     <ClientDateField
                       v-model="local.noteDate"
                       class="clinical-note-dialog__datetime-input"
@@ -40,7 +40,7 @@
                       :test-id="tid.field('date')"
                     />
                   </div>
-                  <div class="col-6">
+                  <div :class="isMobile ? 'col-12' : 'col-6'">
                     <q-input
                       v-model="local.noteTime"
                       outlined
@@ -197,14 +197,39 @@
         <div
           v-if="showSignatureSection"
           class="insurance-dialog__card-section q-mt-lg">
-          <SubsectionHeading
-            icon="draw"
-            :title="t('clinicalNoteSectionSignature')"
-          />
+          <div
+            class="clinical-note-dialog__signature-header
+              row items-center no-wrap">
+            <SubsectionHeading
+              class="col"
+              icon="draw"
+              :title="t('clinicalNoteSectionSignature')"
+            />
+            <q-btn
+              v-if="isMobile && !readonly"
+              no-caps
+              :outline="Boolean(local.signatureData)"
+              :flat="!local.signatureData"
+              :color="local.signatureData ? 'primary' : 'grey-5'"
+              class="app-btn-outline signature-canvas__clear
+                clinical-note-dialog__clear-signature"
+              :class="{
+                'clinical-note-dialog__clear-signature--idle':
+                  !local.signatureData,
+              }"
+              icon="restart_alt"
+              :data-testid="signatureCanvasTestIds.clear"
+              :disable="!local.signatureData"
+              :label="t('carePlanSignatureClear')"
+              @click="clearSignaturePad"
+            />
+          </div>
           <SignatureCanvas
             ref="signatureCanvasRef"
             v-model="local.signatureData"
             :readonly="readonly"
+            :show-clear="!isMobile"
+            :hint="t('clinicalNoteSignatureHint')"
             class="q-mt-md"
           />
           <p
@@ -238,26 +263,14 @@
         />
       </q-card-section>
 
-      <q-card-actions align="right" class="app-dialog-card__actions">
-        <q-btn
-          no-caps
-          flat
-          class="app-btn-outline"
-          :label="readonly ? t('close') : t('cancel')"
-          :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
-          @click="onCancel"
-        />
-        <template v-if="!readonly">
-          <q-btn
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            :loading="saving"
-            :data-testid="tid.btn('save-draft')"
-            :label="t('clinicalNoteSaveDraft')"
-            @click="onSaveDraft"
-          />
+      <q-card-actions
+        align="right"
+        class="app-dialog-card__actions"
+        :class="{
+          'clinical-note-dialog__actions--mobile':
+            isMobile && !readonly,
+        }">
+        <template v-if="isMobile && !readonly">
           <q-btn
             v-if="canSign"
             no-caps
@@ -269,6 +282,55 @@
             :label="t('clinicalNoteSign')"
             @click="requestSign"
           />
+          <q-btn
+            v-else
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline"
+            :loading="saving"
+            :data-testid="tid.btn('save-draft')"
+            :label="t('clinicalNoteSaveDraft')"
+            @click="onSaveDraft"
+          />
+          <AdminListPageActions
+            :compact="true"
+            :actions="mobileOverflowActions"
+            :menu-test-id="tid.btn('actions-menu')"
+          />
+        </template>
+        <template v-else>
+          <q-btn
+            no-caps
+            flat
+            class="app-btn-outline"
+            :label="readonly ? t('close') : t('cancel')"
+            :data-testid="readonly ? tid.btn('close') : tid.btn('cancel')"
+            @click="onCancel"
+          />
+          <template v-if="!readonly">
+            <q-btn
+              no-caps
+              outline
+              color="primary"
+              class="app-btn-outline"
+              :loading="saving"
+              :data-testid="tid.btn('save-draft')"
+              :label="t('clinicalNoteSaveDraft')"
+              @click="onSaveDraft"
+            />
+            <q-btn
+              v-if="canSign"
+              no-caps
+              unelevated
+              color="primary"
+              class="app-btn-primary"
+              :loading="saving"
+              :data-testid="tid.btn('sign')"
+              :label="t('clinicalNoteSign')"
+              @click="requestSign"
+            />
+          </template>
         </template>
       </q-card-actions>
     </q-card>
@@ -296,6 +358,8 @@ import {
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import ClientDateField from 'components/ClientDateField.vue'
 import ClinicalNoteAddendaSection from
   'components/ClinicalNoteAddendaSection.vue'
@@ -318,7 +382,10 @@ import {
   normalizeClinicalNoteTime,
 } from 'src/utils/clinical-note-datetime.js'
 import { formatDateTime } from 'src/utils/app-datetime.js'
-import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
+import { clinicalNoteTestIds as tid, signatureCanvasTestIds } from
+  'src/test-ids/index.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import { resolveDefaultResponsibleClinicianOption } from
   'src/utils/care-plan-orders.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
@@ -363,6 +430,7 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 const authStore = useAuthStore()
 
 const open = computed({
@@ -570,12 +638,40 @@ function onCancel() {
   open.value = false
 }
 
+function clearSignaturePad() {
+  signatureCanvasRef.value?.clear()
+}
+
 function onSaveDraft() {
   if (!validateDraft()) {
     return
   }
   emit('save-draft', buildPayload())
 }
+
+const mobileOverflowActions = computed(() => {
+  const actions = [
+    {
+      key: 'cancel',
+      label: t('cancel'),
+      icon: 'close',
+      testId: tid.btn('cancel'),
+      onClick: onCancel,
+    },
+  ]
+  if (props.canSign) {
+    actions.push({
+      key: 'saveDraft',
+      label: t('clinicalNoteSaveDraft'),
+      icon: 'save',
+      testId: tid.btn('save-draft'),
+      disable: props.saving,
+      onClick: onSaveDraft,
+    })
+  }
+
+  return actions
+})
 
 function requestSign() {
   if (!validateSign()) {
@@ -591,11 +687,42 @@ function onSignConfirmed() {
 </script>
 
 <style lang="scss" scoped>
+@import 'src/css/quasar.variables';
+
 .clinical-note-dialog__datetime-row {
   width: 100%;
 }
 
 .clinical-note-dialog__datetime-input {
   width: 100%;
+}
+
+.clinical-note-dialog__actions--mobile {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.clinical-note-dialog__signature-header {
+  gap: 8px;
+
+  .subsection-heading {
+    min-width: 0;
+  }
+}
+
+.clinical-note-dialog__clear-signature {
+  flex: 0 0 auto;
+  transition: opacity 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease, background-color 0.15s ease;
+
+  &--idle,
+  &.disabled,
+  &[disabled] {
+    opacity: 0.38;
+    color: $text-muted !important;
+    border-color: transparent !important;
+    background: transparent !important;
+  }
 }
 </style>

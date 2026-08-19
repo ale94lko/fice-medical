@@ -13,6 +13,8 @@
       :rows="rows"
       :columns="columns"
       :loading="loading"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout"
       @request="onRequest">
       <template #body-cell-fileName="scope">
         <q-td
@@ -161,6 +163,8 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
 import { siteBreakpoints } from 'components/constants.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { clientAttachmentsTestIds as tid } from
   'src/test-ids/index.js'
 import {
@@ -215,11 +219,29 @@ const emit = defineEmits([
 ])
 
 const { t, te } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const pagination = computed({
   get: () => props.pagination,
   set: value => emit('update:pagination', value),
 })
+
+const mobileCardLayout = {
+  title: 'fileName',
+  status: null,
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: [
+    'category',
+    'source',
+    'fileSize',
+    'documentDate',
+    'uploadedAt',
+    'uploadedBy',
+  ],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {

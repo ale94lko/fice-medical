@@ -19,16 +19,22 @@
     </div>
 
     <template v-else>
-      <div class="medications-header row items-start">
+      <div
+        class="medications-header row"
+        :class="isMobile ? 'items-center' : 'items-start'">
         <div class="col">
           <h2 class="medications-title">
             {{ t('medicationsTitle') }}
           </h2>
-          <p class="medications-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="medications-subtitle text-body2">
             {{ t('medicationsSubtitle') }}
           </p>
         </div>
-        <div class="col-auto row items-center no-wrap q-gutter-md">
+        <div
+          v-if="!isMobile"
+          class="col-auto row items-center no-wrap q-gutter-md">
           <div class="insurance-show-inactive row items-center no-wrap">
             <span class="insurance-show-inactive__label text-body2">
               {{ t('medicationShowDiscontinued') }}
@@ -64,6 +70,24 @@
             @click="openAddMedication"
           />
         </div>
+        <AdminListPageActions
+          v-if="isMobile"
+          :compact="true"
+          :actions="mobilePageActions"
+          :menu-test-id="tid.btn('actions-menu')">
+          <template #menu-extra>
+            <div class="insurance-show-inactive row items-center
+              no-wrap">
+              <FormToggle
+                v-model="showDiscontinued"
+                :test-id="tid.showDiscontinued"
+              />
+              <span class="insurance-show-inactive__label text-body2">
+                {{ t('medicationShowDiscontinued') }}
+              </span>
+            </div>
+          </template>
+        </AdminListPageActions>
       </div>
 
       <div class="medications-summary-cards q-mt-md">
@@ -250,6 +274,8 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FormToggle from 'components/FormToggle.vue'
 import ModalComponent from 'components/ModalComponent.vue'
@@ -265,6 +291,8 @@ import {
 } from 'components/constants.js'
 import { useClientMedicationPermissions } from
   'src/composables/useClientMedicationPermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import {
   apiErrorMessage,
   changeClientMedicationStatus,
@@ -318,6 +346,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const {
   canViewMedications,
@@ -443,6 +472,19 @@ function openAddMedication() {
   activeMedication.value = createEmptyMedicationForm()
   medicationDialogOpen.value = true
 }
+
+const mobilePageActions = computed(() => [
+  {
+    key: 'add',
+    label: t('medicationAdd'),
+    icon: 'add',
+    variant: 'primary',
+    testId: tid.btn('add'),
+    disable: saving.value,
+    visible: canAddMedications.value,
+    onClick: openAddMedication,
+  },
+])
 
 function openViewMedication(row) {
   medicationDialogMode.value = 'view'

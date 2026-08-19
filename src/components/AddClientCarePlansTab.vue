@@ -19,16 +19,22 @@
     </div>
 
     <template v-else>
-      <div class="care-plans-header row items-start">
+      <div
+        class="care-plans-header row"
+        :class="isMobile ? 'items-center' : 'items-start'">
         <div class="col">
           <h2 class="care-plans-title">
             {{ t('carePlansTitle') }}
           </h2>
-          <p class="care-plans-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="care-plans-subtitle text-body2">
             {{ t('carePlansSubtitle') }}
           </p>
         </div>
-        <div class="col-auto">
+        <div
+          v-if="!isMobile"
+          class="col-auto">
           <div class="row q-gutter-sm items-center">
             <q-btn
               v-if="canUseCarePlanDraft"
@@ -56,6 +62,12 @@
             />
           </div>
         </div>
+        <AdminListPageActions
+          v-if="isMobile"
+          :compact="true"
+          :actions="mobilePageActions"
+          :menu-test-id="tid.btn('actions-menu')"
+        />
       </div>
 
       <AdminTablePanel
@@ -105,6 +117,8 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import CarePlanDialog from 'components/CarePlanDialog.vue'
@@ -116,6 +130,8 @@ import {
 import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientCarePlanPermissions } from
   'src/composables/useClientCarePlanPermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import {
   apiErrorMessage,
   changeCarePlanStatus,
@@ -160,6 +176,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const {
   canViewCarePlans,
@@ -258,6 +275,30 @@ function openAdd() {
   activePlan.value = createEmptyCarePlan()
   dialogOpen.value = true
 }
+
+const mobilePageActions = computed(() => [
+  {
+    key: 'draftCarePlan',
+    label: t('aiBtnCarePlanDraft'),
+    icon: 'auto_awesome',
+    testId: aiTestIds.featureBtn('care-plan'),
+    disable: saving.value,
+    visible: canUseCarePlanDraft.value,
+    onClick: () => {
+      aiDialogOpen.value = true
+    },
+  },
+  {
+    key: 'add',
+    label: t('carePlanAdd'),
+    icon: 'add',
+    variant: 'primary',
+    testId: tid.btn('add'),
+    disable: saving.value,
+    visible: canAddCarePlans.value,
+    onClick: openAdd,
+  },
+])
 
 async function openView(row) {
   activePlan.value = await loadPlanForDialog(row)

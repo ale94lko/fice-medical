@@ -39,6 +39,14 @@
         </div>
 
         <div
+          v-else-if="hasScreeningCardsContent"
+          class="client-overview-module-dialog__screening-list-wrap">
+          <ClientOverviewScreeningsDialogList
+            :items="tableRows"
+          />
+        </div>
+
+        <div
           v-else-if="hasTableContent"
           class="fmh-list-card client-overview-module-dialog__table-card">
           <div
@@ -193,7 +201,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { addClientTabKeys } from 'components/constants.js'
+import { addClientClinicalSubTabKeys, addClientTabKeys } from
+  'components/constants.js'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import DialogFieldGrid from
   'components/client-overview/ClientOverviewModuleDialogFieldGrid.vue'
@@ -201,6 +210,9 @@ import DialogSectionTable from
   'components/client-overview/ClientOverviewModuleDialogSectionTable.vue'
 import ClientOverviewAllergiesDialogList from
   'components/client-overview/ClientOverviewAllergiesDialogList.vue'
+import ClientOverviewScreeningsDialogList from
+  'components/client-overview/ClientOverviewScreeningsDialogList.vue'
+import { useViewportLayout } from 'src/composables/useViewportLayout.js'
 import {
   clientListAllergySeverityBadgeClass as allergySeverityBadgeClass,
 } from 'src/utils/client-list-allergy-severity.js'
@@ -223,6 +235,7 @@ const emit = defineEmits([
 ])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 
 const dialogTitle = computed(() => {
   const labelKey = props.module?.labelKey
@@ -259,6 +272,17 @@ const isAllergiesModule = computed(
   () => props.module?.tabKey === addClientTabKeys.allergies,
 )
 
+const isScreeningsModule = computed(
+  () => props.module?.subTabKey
+    === addClientClinicalSubTabKeys.screenings,
+)
+
+const hasScreeningCardsContent = computed(
+  () => isMobile.value
+    && isScreeningsModule.value
+    && hasTableContent.value,
+)
+
 const isWideTable = computed(
   () => hasTableContent.value && tableColumns.value.length >= 6,
 )
@@ -270,6 +294,9 @@ const dialogCardClass = computed(() => {
       'client-overview-module-dialog--allergies',
       'client-overview-allergies-dialog',
     )
+  }
+  if (hasScreeningCardsContent.value) {
+    classes.push('client-overview-module-dialog--screenings')
   }
   if (isWideTable.value) {
     classes.push('client-overview-module-dialog--wide')

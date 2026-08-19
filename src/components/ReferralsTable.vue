@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
     <template #body-cell-referralDate="scope">
       <q-td
         :props="scope"
@@ -198,6 +200,8 @@ import {
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { referralI18nKey } from 'src/utils/referral-i18n.js'
 import { isIntakeReferralDraft } from 'src/utils/referral-intake.js'
 import {
@@ -241,15 +245,32 @@ const props = defineProps({
 const emit = defineEmits(['view', 'edit', 'schedule', 'delete'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
+
+const mobileCardLayout = {
+  title: 'referralNumber',
+  status: 'status',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: [
+    'type',
+    'priority',
+    'referralDate',
+    'referredByTo',
+    'reason',
+  ],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {
     name: 'referralDate',
     label: t('referralColDate'),
     align: 'left',
-    field: row => row.referralDate,
+    field: row => formatReferralListDate(row.referralDate),
     sortable: false,
     headerStyle: 'min-width: 120px',
     style: 'min-width: 120px',

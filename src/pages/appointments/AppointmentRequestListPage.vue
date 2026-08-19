@@ -593,7 +593,9 @@ onMounted(() => {
     page: tablePagination.value.page,
     rowsPerPage: tablePagination.value.rowsPerPage,
     rowsNumber: tablePagination.value.rowsNumber,
+    rowsPerPageChoices: [10, 20, 50],
     disable: loading.value,
+    perPageKey: 'adminTablePerPage',
     onPageChange,
     onRowsPerPageChange,
   })

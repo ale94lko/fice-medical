@@ -34,7 +34,7 @@
     </div>
 
     <p
-      v-if="hasUnsavedChanges"
+      v-if="hasUnsavedChanges && !isMobile"
       class="text-body2 text-grey-7 q-mb-md">
       {{ t('followUpPendingSaveHint') }}
     </p>
@@ -109,6 +109,8 @@ import { useClientFollowUpPermissions } from
   'src/composables/useClientFollowUpPermissions.js'
 import { useFollowUpReferenceSources } from
   'src/composables/useFollowUpReferenceSources.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import {
   applyLocalFollowUpCancel,
   applyLocalFollowUpComplete,
@@ -140,6 +142,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
+const { isMobile } = useViewportLayout()
 const $q = useQuasar()
 const {
   canViewFollowUps,

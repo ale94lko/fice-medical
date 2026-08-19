@@ -5130,6 +5130,11 @@ body.vp-mobile {
 
 .appointments-header {
   gap: 16px;
+  min-width: 0;
+
+  > .col {
+    min-width: 0;
+  }
 
   &__search {
     min-width: 220px;
@@ -5146,15 +5151,18 @@ body.vp-mobile {
   }
 
   &__actions--menu {
+    flex: 0 0 auto;
     flex-wrap: nowrap;
     align-items: flex-start;
     padding-top: 2px;
   }
 
   &__menu-btn {
-    min-width: 40px;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+    width: $app-button-height !important;
+    min-width: $app-button-height !important;
+    height: $app-button-height !important;
+    min-height: $app-button-height !important;
+    padding: 0 !important;
   }
 
   &__actions-menu {
@@ -5214,6 +5222,12 @@ body.vp-mobile {
 .insurance-show-inactive__label {
   color: $text-strong;
   white-space: nowrap;
+}
+
+.admin-list-page__actions-menu-extra .insurance-show-inactive__label {
+  white-space: normal;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .insurance-show-inactive__info {
@@ -5616,6 +5630,20 @@ body.vp-mobile {
   white-space: nowrap;
 }
 
+body.vp-mobile {
+  .vitals-history-table {
+    .admin-table-grid-card__body {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px 16px;
+    }
+
+    .admin-table-grid-card__field-row--recordedBy {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
 .vitals-history-status {
   display: inline-flex;
   align-items: center;
@@ -5718,7 +5746,7 @@ body.vp-mobile {
 }
 
 .add-client-care-plans-tab {
-  .care-plans-table__progress-cell {
+  .admin-data-table .q-table tbody .care-plans-table__progress-cell {
     height: auto !important;
     max-height: none !important;
     padding-top: 4px !important;
@@ -5728,6 +5756,16 @@ body.vp-mobile {
 
   .admin-data-table .q-table tbody tr:has(.care-plans-table__progress-cell) {
     height: auto !important;
+  }
+}
+
+body.vp-mobile {
+  .add-client-care-plans-tab {
+    .admin-table-grid-card__field-row--progress {
+      .care-plan-progress-cell {
+        width: 100%;
+      }
+    }
   }
 }
 

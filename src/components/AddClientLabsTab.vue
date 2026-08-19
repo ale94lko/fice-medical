@@ -12,12 +12,15 @@
     <template v-else>
       <div
         v-if="!hideHeader"
-        class="labs-header row items-start">
+        class="labs-header row"
+        :class="isMobile ? 'items-center' : 'items-start'">
         <div class="col">
           <h2 class="labs-title">
             {{ t('labsTitle') }}
           </h2>
-          <p class="labs-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="labs-subtitle text-body2">
             {{ t('labsSubtitle') }}
           </p>
         </div>
@@ -129,6 +132,8 @@ import {
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { useClientPermissions } from 'src/composables/useClientPermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 
 const {
   canAddLabs,
@@ -184,6 +189,7 @@ const labs = defineModel({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 
 const allowAdd = computed(() => {
   if (typeof props.canAdd === 'boolean') {

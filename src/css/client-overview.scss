@@ -1180,6 +1180,22 @@
     }
   }
 
+  &--screenings {
+    .client-overview-module-dialog__body {
+      max-height: none;
+      overflow-y: visible;
+    }
+
+    .client-overview-module-dialog__screening-list-wrap {
+      min-height: 236px;
+      max-height: min(56vh, 480px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 2px;
+    }
+  }
+
   &__title-wrap {
     display: flex;
     align-items: center;
@@ -1431,6 +1447,21 @@
     font-weight: 700;
     color: $table-text-secondary;
     line-height: 1.3;
+  }
+}
+
+.client-overview-screenings-dialog-list {
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  background: transparent;
+
+  .admin-table-grid-item {
+    padding: 0 0 10px !important;
+
+    &:last-child {
+      padding-bottom: 0 !important;
+    }
   }
 }
 

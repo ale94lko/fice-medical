@@ -7,6 +7,7 @@
         {{ hint || t('carePlanSignatureHint') }}
       </p>
       <q-btn
+        v-if="showClear"
         no-caps
         :outline="hasStroke"
         :flat="!hasStroke"
@@ -76,6 +77,10 @@ const props = defineProps({
   hint: {
     type: String,
     default: '',
+  },
+  showClear: {
+    type: Boolean,
+    default: true,
   },
   /** `default` (160px) or `tall` (220px) for tablet consent signing. */
   size: {
@@ -295,6 +300,15 @@ defineExpose({
 
 <style lang="scss" scoped>
 @import 'src/css/quasar.variables';
+
+.signature-canvas__toolbar {
+  width: 100%;
+}
+
+.signature-canvas__toolbar .text-body2 {
+  min-width: 0;
+  white-space: normal;
+}
 
 .signature-canvas__clear {
   transition: opacity 0.15s ease, color 0.15s ease,

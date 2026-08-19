@@ -26,16 +26,22 @@
     </template>
 
     <template v-else>
-      <div class="attachments-header row items-end q-col-gutter-md">
+      <div
+        class="attachments-header row"
+        :class="isMobile ? 'items-center' : 'items-end'">
         <div class="col">
           <h2 class="attachments-title">
             {{ t('clientAttachmentsTitle') }}
           </h2>
-          <p class="attachments-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="attachments-subtitle text-body2">
             {{ t('clientAttachmentsSubtitle') }}
           </p>
         </div>
-        <div class="col-auto">
+        <div
+          v-if="!isMobile"
+          class="col-auto">
           <div class="row q-gutter-sm items-center">
             <q-btn
               v-if="canUpload"
@@ -51,7 +57,9 @@
             />
           </div>
         </div>
-        <div class="col-auto">
+        <div
+          v-if="!isMobile"
+          class="col-auto">
           <FormField :label="t('clientAttachmentColCategory')">
             <FormSelect
               v-model="filterCategory"
@@ -67,7 +75,9 @@
             />
           </FormField>
         </div>
-        <div class="col-auto">
+        <div
+          v-if="!isMobile"
+          class="col-auto">
           <FormField :label="t('clientAttachmentColSource')">
             <FormSelect
               v-model="filterEntityType"
@@ -83,6 +93,46 @@
             />
           </FormField>
         </div>
+        <AdminListPageActions
+          v-if="isMobile"
+          :compact="true"
+          :actions="mobilePageActions"
+          :menu-test-id="tid.actionsMenu">
+          <template #menu-extra>
+            <div class="attachments-header__menu-filters">
+              <FormField :label="t('clientAttachmentColCategory')">
+                <FormSelect
+                  v-model="filterCategory"
+                  class="attachments-filter-select"
+                  outlined
+                  dense
+                  clearable
+                  emit-value
+                  map-options
+                  hide-bottom-space
+                  :options="categoryFilterOptions"
+                  :test-id="tid.filterCategory"
+                  @update:model-value="onFilterChange"
+                />
+              </FormField>
+              <FormField :label="t('clientAttachmentColSource')">
+                <FormSelect
+                  v-model="filterEntityType"
+                  class="attachments-filter-select"
+                  outlined
+                  dense
+                  clearable
+                  emit-value
+                  map-options
+                  hide-bottom-space
+                  :options="entityTypeFilterOptions"
+                  :test-id="tid.filterEntityType"
+                  @update:model-value="onFilterChange"
+                />
+              </FormField>
+            </div>
+          </template>
+        </AdminListPageActions>
       </div>
 
       <AdminTablePanel
@@ -131,6 +181,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import ClientAttachmentsTable from 'components/ClientAttachmentsTable.vue'
 import ClientAttachmentUploadDialog from
@@ -147,6 +199,8 @@ import {
 import { clientAttachmentsTestIds as tid } from 'src/test-ids/index.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { hasClientChartKey } from 'components/helpers.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import {
   CLIENT_ATTACHMENT_FILTER_CATEGORIES,
   CLIENT_ATTACHMENT_FILTER_ENTITY_TYPES,
@@ -185,6 +239,7 @@ const emit = defineEmits(['navigate-source'])
 
 const { t, te } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 
 const loading = ref(false)
 const uploading = ref(false)
@@ -231,6 +286,21 @@ const entityTypeFilterOptions = computed(() =>
     }
   }),
 )
+
+const mobilePageActions = computed(() => [
+  {
+    key: 'upload',
+    label: t('clientAttachmentUpload'),
+    icon: 'upload_file',
+    variant: 'primary',
+    testId: tid.btnAdd,
+    disable: loading.value || uploading.value,
+    visible: props.canUpload,
+    onClick: () => {
+      uploadOpen.value = true
+    },
+  },
+])
 
 function paginationTotal(pagination) {
   const total = Number(pagination?.total)
@@ -414,6 +484,15 @@ onMounted(() => {
   color: $text-strong;
 }
 
+.attachments-header {
+  gap: 16px;
+  min-width: 0;
+}
+
+.attachments-header > .col {
+  min-width: 0;
+}
+
 .attachments-subtitle {
   margin: 4px 0 0;
   color: $text-muted;
@@ -427,5 +506,17 @@ onMounted(() => {
 .attachments-filter-select :deep(.q-field) {
   width: 240px;
   max-width: 240px;
+}
+
+.attachments-header__menu-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.attachments-header__menu-filters .attachments-filter-select,
+.attachments-header__menu-filters .attachments-filter-select :deep(.q-field) {
+  width: 100%;
+  max-width: none;
 }
 </style>

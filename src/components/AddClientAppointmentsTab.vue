@@ -20,7 +20,7 @@
 
     <template v-else>
       <div
-        class="appointments-header row items-center q-col-gutter-md"
+        class="appointments-header row items-center"
         :class="{
           'justify-end': !showTitle && !showSubtitle,
         }">

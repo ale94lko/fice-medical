@@ -19,12 +19,16 @@
     </div>
 
     <template v-else>
-      <div class="referrals-header row items-start">
+      <div
+        class="referrals-header row"
+        :class="isMobile ? 'items-center' : 'items-start'">
         <div class="col">
           <h2 class="referrals-title">
             {{ t('referralsTitle') }}
           </h2>
-          <p class="referrals-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="referrals-subtitle text-body2">
             {{ t('referralsSubtitle') }}
           </p>
         </div>
@@ -102,6 +106,8 @@ import { useClientReferralPermissions } from
   'src/composables/useClientReferralPermissions.js'
 import { useClientAppointmentPermissions } from
   'src/composables/useClientAppointmentPermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import {
   apiErrorMessage,
   createClientReferral,
@@ -152,6 +158,7 @@ const emit = defineEmits([
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const {
   canViewReferrals,

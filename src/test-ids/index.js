@@ -663,6 +663,7 @@ export const clientOverviewTestIds = {
   moduleCard: id => toTestId('client-overview-module', id),
   moduleDialog: 'client-overview-module-dialog',
   allergiesDialogList: 'client-overview-allergies-dialog-list',
+  screeningsDialogList: 'client-overview-screenings-dialog-list',
   copyPhone: 'client-overview-btn-copy-phone',
   copyClientNumber: 'client-overview-btn-copy-client-number',
   moduleClose: 'client-overview-module-btn-close',

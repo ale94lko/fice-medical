@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-planName="scope">
         <q-td
           :props="scope"
@@ -227,6 +229,8 @@ import {
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { carePlanI18nKey } from 'src/utils/care-plan-i18n.js'
 import { carePlanTestIds as tid } from 'src/test-ids/index.js'
 import {
@@ -257,8 +261,19 @@ const props = defineProps({
 const emit = defineEmits(['view', 'edit', 'sign', 'status'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
+
+const mobileCardLayout = {
+  title: 'planName',
+  status: 'status',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: ['problem', 'progress', 'targetDate'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {

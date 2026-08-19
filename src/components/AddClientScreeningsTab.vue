@@ -24,7 +24,9 @@
           <h2 class="screenings-title">
             {{ t('screeningsTitle') }}
           </h2>
-          <p class="screenings-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="screenings-subtitle text-body2">
             {{ t('screeningsSubtitle') }}
           </p>
         </div>
@@ -84,6 +86,8 @@ import { useSiteStore } from 'src/stores/site-store.js'
 import { screeningTestIds as tid } from 'src/test-ids/index.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 
 const props = defineProps({
   patientId: {
@@ -110,6 +114,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const {
   canAddScreenings,

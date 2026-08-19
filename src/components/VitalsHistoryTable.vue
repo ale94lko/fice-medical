@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="rows.length"
-    class="admin-data-table__scroll">
+    class="admin-data-table__scroll vitals-history-table">
     <AdminQTable
       class="table admin-data-table admin-data-table--embedded
         admin-data-table--inline-column-settings"

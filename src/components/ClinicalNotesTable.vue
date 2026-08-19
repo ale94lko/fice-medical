@@ -10,7 +10,9 @@
       row-key="id"
       :rows="rows"
       :columns="columns"
-      :pagination="tablePagination">
+      :pagination="tablePagination"
+      :grid="showGrid"
+      :card-layout="mobileCardLayout">
       <template #body-cell-noteDateTime="scope">
         <q-td
           :props="scope"
@@ -155,6 +157,8 @@ import {
   siteBreakpoints,
 } from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
+import { useAdminTableMobileGrid } from
+  'src/composables/useAdminTableMobileGrid.js'
 import { clinicalNoteTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -183,8 +187,19 @@ const props = defineProps({
 const emit = defineEmits(['view', 'edit', 'delete', 'download'])
 
 const { t } = useI18n()
+const { showGrid } = useAdminTableMobileGrid()
 
 const tablePagination = { rowsPerPage: 0 }
+
+const mobileCardLayout = {
+  title: 'noteDateTime',
+  status: 'status',
+  subtitle: null,
+  contact: null,
+  identifier: null,
+  badges: ['clinician', 'summary'],
+  hideEmpty: true,
+}
 
 const columns = computed(() => [
   {

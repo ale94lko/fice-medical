@@ -15,7 +15,9 @@
           <h2 class="vitals-title">
             {{ t('vitalsHistoryTitle') }}
           </h2>
-          <p class="vitals-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="vitals-subtitle text-body2">
             {{ t('vitalsHistorySubtitle') }}
           </p>
         </div>
@@ -115,6 +117,8 @@ import {
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 
 const props = defineProps({
   modelValue: {
@@ -159,6 +163,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 const { canAddVitals, canEditVitals } = useClientPermissions()
 
 const allowAdd = computed(

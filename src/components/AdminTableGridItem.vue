@@ -60,7 +60,10 @@
         <div
           v-for="col in bodyFieldCols"
           :key="col.name"
-          class="admin-table-grid-card__field-row">
+          class="admin-table-grid-card__field-row"
+          :class="col.name
+            ? `admin-table-grid-card__field-row--${col.name}`
+            : ''">
           <div class="admin-table-grid-card__field-label">
             {{ fieldLabel(col) }}
           </div>

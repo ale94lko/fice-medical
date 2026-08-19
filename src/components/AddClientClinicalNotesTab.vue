@@ -19,16 +19,22 @@
     </div>
 
     <template v-else>
-      <div class="clinical-notes-header row items-start">
+      <div
+        class="clinical-notes-header row"
+        :class="isMobile ? 'items-center' : 'items-start'">
         <div class="col">
           <h2 class="clinical-notes-title">
             {{ t('clinicalNotesTitle') }}
           </h2>
-          <p class="clinical-notes-subtitle text-body2">
+          <p
+            v-if="!isMobile"
+            class="clinical-notes-subtitle text-body2">
             {{ t('clinicalNotesSubtitle') }}
           </p>
         </div>
-        <div class="col-auto">
+        <div
+          v-if="!isMobile"
+          class="col-auto">
           <div class="row q-gutter-sm items-center">
             <q-btn
               v-if="canUseScribe"
@@ -68,6 +74,12 @@
             />
           </div>
         </div>
+        <AdminListPageActions
+          v-if="isMobile"
+          :compact="true"
+          :actions="mobilePageActions"
+          :menu-test-id="tid.btn('actions-menu')"
+        />
       </div>
 
       <AdminTablePanel
@@ -149,6 +161,8 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import AdminListPageActions from
+  'components/admin-table/AdminListPageActions.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AiGenerateDialog from 'components/ai/AiGenerateDialog.vue'
 import ClinicalNoteDialog from 'components/ClinicalNoteDialog.vue'
@@ -166,6 +180,8 @@ import {
 import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { useClientClinicalNotePermissions } from
   'src/composables/useClientClinicalNotePermissions.js'
+import { useViewportLayout } from
+  'src/composables/useViewportLayout.js'
 import { useDocumentGenerationPermissions } from
   'src/composables/useDocumentGenerationPermissions.js'
 import {
@@ -220,6 +236,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const authStore = useAuthStore()
 const {
@@ -337,6 +354,37 @@ function openAdd() {
   activeNote.value = createEmptyClinicalNote()
   dialogOpen.value = true
 }
+
+const mobilePageActions = computed(() => [
+  {
+    key: 'soapDraft',
+    label: t('aiBtnSoapDraft'),
+    icon: 'auto_awesome',
+    testId: aiTestIds.featureBtn('soap-draft'),
+    disable: saving.value,
+    visible: canUseScribe.value,
+    onClick: () => openAiFeature(aiFeatures.soapDraft),
+  },
+  {
+    key: 'icd10',
+    label: t('aiBtnIcd10'),
+    icon: 'auto_awesome',
+    testId: aiTestIds.featureBtn('icd10'),
+    disable: saving.value,
+    visible: canUseCodingAssistant.value,
+    onClick: () => openAiFeature(aiFeatures.icd10Suggest),
+  },
+  {
+    key: 'add',
+    label: t('clinicalNoteAdd'),
+    icon: 'add',
+    variant: 'primary',
+    testId: tid.btn('add'),
+    disable: saving.value,
+    visible: canAddClinicalNotes.value,
+    onClick: openAdd,
+  },
+])
 
 function openView(row) {
   if (row.generated || row.isGenerated) {
