@@ -2613,7 +2613,7 @@ body.vp-mobile {
   }
 
   &:hover:not(.disabled) {
-    background: darken($ai-accent, 6%) !important;
+    background: color.adjust($ai-accent, $lightness: -6%) !important;
     color: $white !important;
   }
 }
