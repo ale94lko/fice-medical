@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import {
   calendarSourceIds,
@@ -61,6 +61,8 @@ export function useAppointmentCalendar() {
   const detailOpen = ref(false)
   const scrollToNowKey = ref(0)
   let allowEventReloads = false
+  let fetchedClinicianIds = new Set()
+  let eventsLoadSeq = 0
 
   const sources = useCalendarEventSources()
 
@@ -123,9 +125,10 @@ export function useAppointmentCalendar() {
   })
 
   async function loadEvents() {
-    if (!viewReady.value) {
-      loading.value = true
-    }
+    const seq = eventsLoadSeq + 1
+    eventsLoadSeq = seq
+    loading.value = true
+    await nextTick()
     loadError.value = ''
     const range = visibleRange.value
     /* eslint-disable camelcase -- API query params */
@@ -166,14 +169,21 @@ export function useAppointmentCalendar() {
         })
       }
 
+      if (seq !== eventsLoadSeq) {
+        return
+      }
       rawEvents.value = [...merged.values()]
+      fetchedClinicianIds = new Set(enabledClinicians)
     } catch (error) {
+      if (seq !== eventsLoadSeq) {
+        return
+      }
       if (!isAuthSessionEndUIError(error)) {
         loadError.value = 'calendarLoadError'
       }
       rawEvents.value = []
     } finally {
-      if (viewReady.value) {
+      if (seq === eventsLoadSeq) {
         loading.value = false
       }
     }
@@ -244,14 +254,26 @@ export function useAppointmentCalendar() {
   }
 
   watch(
-    [
-      viewMode,
-      focusDayKey,
-      sources.enabledSourceIds,
-      sources.enabledClinicianIds,
-    ],
+    [viewMode, focusDayKey, sources.enabledSourceIds],
     () => {
       if (!allowEventReloads) {
+        return
+      }
+      fetchedClinicianIds = new Set()
+      void loadEvents()
+    },
+    { deep: true },
+  )
+
+  watch(
+    sources.enabledClinicianIds,
+    () => {
+      if (!allowEventReloads) {
+        return
+      }
+      const missing = sources.enabledClinicianIds.value
+        .some(id => !fetchedClinicianIds.has(id))
+      if (!missing) {
         return
       }
       void loadEvents()

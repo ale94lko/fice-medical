@@ -60,6 +60,9 @@
               <q-icon :name="statusMeta.icon" size="20px" />
             </div>
             <div>
+              <p class="appointment-detail-dialog__hero-label">
+                {{ t('appointmentDetailStatusLabel') }}
+              </p>
               <p
                 class="appointment-detail-dialog__hero-status-title"
                 :class="statusTitleClass">
@@ -73,11 +76,11 @@
         </div>
 
         <div
-          class="appointment-detail-dialog__people relative-position">
-          <q-inner-loading :showing="extrasLoading">
-            <q-spinner color="grey-7" size="24px" />
-          </q-inner-loading>
-
+          class="appointment-detail-dialog__people relative-position"
+          :class="{
+            'appointment-detail-dialog__people--single':
+              !showInsuranceSection,
+          }">
           <section
             class="appointment-detail-dialog__person-card"
             :data-testid="tid.clientCard">
@@ -88,7 +91,7 @@
                 <StoredFileAvatar
                   v-if="clientHeader?.photoFileId"
                   :file-id="clientHeader.photoFileId"
-                  spinner-size="28px">
+                  spinner-size="22px">
                   <template #placeholder>
                     <span>
                       {{ clientHeader?.clientInitials || '?' }}
@@ -126,7 +129,9 @@
                 <q-icon name="phone" size="16px" />
                 <span>{{ clientHeader.phone }}</span>
               </li>
-              <li v-if="clientHeader?.addressLine">
+              <li
+                v-if="clientHeader?.addressLine"
+                class="appointment-detail-dialog__fact--wide">
                 <q-icon name="place" size="16px" />
                 <span>{{ clientHeader.addressLine }}</span>
               </li>
@@ -134,6 +139,7 @@
           </section>
 
           <section
+            v-if="showInsuranceSection"
             class="appointment-detail-dialog__person-card
               appointment-detail-dialog__person-card--insurance"
             :data-testid="tid.insuranceCard">
@@ -143,12 +149,14 @@
                   appointment-detail-dialog__avatar--shield">
                 <q-icon name="verified_user" size="20px" />
               </div>
-              <p class="appointment-detail-dialog__person-name">
-                {{ t('appointmentDetailInsuranceLabel') }}
-              </p>
+              <div>
+                <p class="appointment-detail-dialog__person-kicker">
+                  {{ t('appointmentDetailInsuranceLabel') }}
+                </p>
+              </div>
             </div>
             <p
-              v-if="!insuranceView"
+              v-if="!insuranceView || insuranceView.empty"
               class="appointment-detail-dialog__empty">
               {{ t('appointmentDetailInsuranceEmpty') }}
             </p>
@@ -162,7 +170,9 @@
                   <dt>{{ t('insuranceMemberId') }}</dt>
                   <dd>{{ insuranceView.memberId || '—' }}</dd>
                 </div>
-                <div v-if="insuranceView.serviceId">
+                <div
+                  v-if="insuranceView.serviceId"
+                  class="appointment-detail-dialog__insurance-pair--wide">
                   <dt>
                     {{ t('appointmentDetailInsuranceServiceId') }}
                     <q-icon name="info" size="14px">
@@ -177,18 +187,18 @@
               <div
                 v-if="insuranceView.showSubscriber"
                 class="appointment-detail-dialog__subscriber">
-                <p class="appointment-detail-dialog__subscriber-title">
-                  <q-icon name="person" size="16px" />
+                <q-icon name="person" size="16px" />
+                <span class="appointment-detail-dialog__subscriber-title">
                   {{ t('appointmentDetailSubscriberNotClient') }}
-                </p>
-                <p class="appointment-detail-dialog__subscriber-name">
+                </span>
+                <span class="appointment-detail-dialog__subscriber-name">
                   {{ insuranceView.subscriberName || '—' }}
-                  <span
-                    v-if="insuranceView.relationship"
-                    class="appointment-detail-dialog__chip">
-                    {{ insuranceView.relationship }}
-                  </span>
-                </p>
+                </span>
+                <span
+                  v-if="insuranceView.relationship"
+                  class="appointment-detail-dialog__chip">
+                  {{ insuranceView.relationship }}
+                </span>
               </div>
             </template>
           </section>
@@ -248,7 +258,7 @@
                   {{ durationLabel }}
                 </span>
               </p>
-              <p class="appointment-detail-dialog__cell-hint">
+              <p class="appointment-detail-dialog__cell-value">
                 {{ timeLabel }}
               </p>
             </div>
@@ -302,39 +312,35 @@
               <p class="appointment-detail-dialog__cell-label">
                 {{ t('appointmentDetailTelehealthVisit') }}
               </p>
-              <p
-                v-if="invitePending"
-                class="appointment-detail-dialog__cell-hint">
-                {{ t('telehealthInvitePending') }}
-              </p>
-              <template v-else-if="telehealthInviteUrl">
-                <p class="appointment-detail-dialog__cell-hint">
-                  {{ t('appointmentDetailTelehealthJoinHint') }}
+              <div class="appointment-detail-dialog__hero-value-row">
+                <p class="appointment-detail-dialog__cell-value">
+                  {{ t('appointmentDetailTelehealthViaPortal') }}
                 </p>
-                <div class="appointment-detail-dialog__hero-value-row">
-                  <p class="appointment-detail-dialog__link">
-                    {{ telehealthInviteUrl }}
-                  </p>
-                  <q-btn
-                    flat
-                    round
-                    dense
-                    size="sm"
-                    icon="content_copy"
-                    :aria-label="t('telehealthCopyClientLink')"
-                    :data-testid="tid.copyInvite"
-                    @click="onCopyInvite"
-                  >
-                    <q-tooltip
-                      class="app-info-tooltip"
-                      anchor="top middle"
-                      self="bottom middle"
-                      :offset="[0, 6]">
-                      {{ t('telehealthCopyClientLink') }}
-                    </q-tooltip>
-                  </q-btn>
-                </div>
-              </template>
+                <q-btn
+                  v-if="telehealthInviteUrl"
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  icon="content_copy"
+                  :aria-label="t('telehealthCopyClientLink')"
+                  :data-testid="tid.copyInvite"
+                  @click="onCopyInvite"
+                >
+                  <q-tooltip
+                    class="app-info-tooltip"
+                    anchor="top middle"
+                    self="bottom middle"
+                    :offset="[0, 6]">
+                    {{ t('telehealthCopyClientLink') }}
+                  </q-tooltip>
+                </q-btn>
+              </div>
+              <p class="appointment-detail-dialog__cell-hint">
+                {{ invitePending
+                  ? t('telehealthInvitePending')
+                  : t('appointmentDetailTelehealthJoinHint') }}
+              </p>
             </div>
           </div>
         </div>
@@ -384,7 +390,7 @@
             outline
             color="primary"
             class="app-btn-outline"
-            icon="clinical_notes"
+            icon="medical_services"
             :label="t('startEncounterButton')"
             :loading="encounterBusy"
             :data-testid="tid.encounter"
@@ -510,8 +516,8 @@ const {
   clientChartId,
   clientHeader,
   insuranceView,
+  showInsuranceSection,
   location,
-  loading: extrasLoading,
 } = useAppointmentDetailExtras(open, toRef(props, 'record'))
 
 const {

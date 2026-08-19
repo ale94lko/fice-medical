@@ -24,10 +24,7 @@ export default {
   timezoneMismatchClinicLabel: 'Clinic timezone',
   timezoneMismatchInUse: 'In use',
   timezoneMismatchSessionHint:
-    'This choice lasts only while you are signed in.',
-  timezoneMismatchUseDevice: 'Show device times',
-  timezoneMismatchKeepClinic: 'Keep clinic times',
-  timezoneMismatchRevertClinic: 'Back to clinic times',
+    'Click a timezone to show it. The page reloads.',
   subtenantTimezoneLabel: 'Timezone',
   subtenantDateFormatLabel: 'Date format',
   subtenantTimeFormatLabel: 'Time format',
@@ -2410,6 +2407,7 @@ export default {
   appointmentDetailSubtitle:
     'View complete information about this appointment.',
   appointmentDetailNumberLabel: 'Appointment Number',
+  appointmentDetailStatusLabel: 'Status',
   appointmentDetailTypeLabel: 'Type of Appointment',
   appointmentDetailServicesLabel: 'Services / Procedures',
   appointmentDetailClinicianLabel: 'Clinician',
@@ -2453,8 +2451,9 @@ export default {
   appointmentDetailSubscriberNotClient: 'Subscriber (Not the client)',
   appointmentDetailAgeYears: '{count} y/o',
   appointmentDetailTelehealthVisit: 'Telehealth Visit',
+  appointmentDetailTelehealthViaPortal: 'Client portal',
   appointmentDetailTelehealthJoinHint:
-    'Join your appointment using the link below.',
+    'The client joins this meeting from the client portal.',
   appointmentEditTitle: 'Edit Appointment',
   appointmentSaveClientFirst:
     'Save the client first to create and manage appointments.',

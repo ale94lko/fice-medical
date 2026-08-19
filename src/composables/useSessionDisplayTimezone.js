@@ -19,6 +19,13 @@ export function clearSessionDisplayTimezone() {
   bumpDisplayTimezoneTick()
 }
 
+function reloadForTimezoneChange() {
+  bumpDisplayTimezoneTick()
+  if (typeof window !== 'undefined') {
+    window.location.reload()
+  }
+}
+
 export function useSessionDisplayTimezone() {
   const mode = computed(() => {
     void tick.value
@@ -37,17 +44,12 @@ export function useSessionDisplayTimezone() {
 
   function useBrowserZone() {
     setSessionDisplayTzMode('browser')
-    bumpDisplayTimezoneTick()
+    reloadForTimezoneChange()
   }
 
-  function keepClinicZone() {
-    setSessionDisplayTzMode('dismissed')
-    bumpDisplayTimezoneTick()
-  }
-
-  function revertToClinicZone() {
+  function useClinicZone() {
     setSessionDisplayTzMode(null)
-    bumpDisplayTimezoneTick()
+    reloadForTimezoneChange()
   }
 
   return {
@@ -58,7 +60,6 @@ export function useSessionDisplayTimezone() {
     usingBrowser,
     showBanner,
     useBrowserZone,
-    keepClinicZone,
-    revertToClinicZone,
+    useClinicZone,
   }
 }

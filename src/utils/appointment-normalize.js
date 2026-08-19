@@ -312,6 +312,11 @@ function normalizeAvailabilityAppointmentBlock(raw) {
     appointmentId: appointment.appointmentId,
     appointmentNumber: appointment.appointmentNumber,
     clientDisplayName: appointment.clientDisplayName,
+    clientId: appointment.clientId,
+    clientNumber: appointment.clientNumber,
+    clientSummary: appointment.clientSummary,
+    insurance: appointment.insurance,
+    notes: appointment.notes,
     servicesLabel: appointment.servicesLabel,
     servicesCodesLabel: appointment.servicesCodesLabel,
     serviceProcedures: appointment.serviceProcedures,
@@ -469,6 +474,49 @@ export function normalizeAppointment(raw) {
     ),
     recurringSeries: normalizeRecurringSeries(
       row.recurring_series ?? row.recurringSeries,
+    ),
+    clientSummary: normalizeAppointmentClientSummary(
+      row.client_summary ?? row.clientSummary,
+    ),
+    insurance: normalizeAppointmentInsurance(row.insurance),
+  }
+}
+
+function normalizeAppointmentClientSummary(raw) {
+  if (raw == null || typeof raw !== 'object') {
+    return null
+  }
+
+  return {
+    initials: trim(raw.initials),
+    photoFileId: parseOptionalNumber(
+      raw.photo_file_id ?? raw.photoFileId,
+    ),
+    dob: trim(raw.dob),
+    age: parseOptionalNumber(raw.age),
+    ageUnit: trim(raw.age_unit ?? raw.ageUnit),
+    gender: trim(raw.gender ?? raw.sex),
+    phone: trim(raw.phone),
+    address: trim(raw.address),
+  }
+}
+
+function normalizeAppointmentInsurance(raw) {
+  if (raw == null || typeof raw !== 'object') {
+    return null
+  }
+
+  return {
+    id: parseOptionalNumber(raw.id),
+    payer: trim(raw.payer ?? raw.payer_plan_name ?? raw.payerPlanName),
+    memberId: trim(raw.member_id ?? raw.memberId),
+    serviceId: trim(raw.service_id ?? raw.serviceId),
+    subscriberName: trim(
+      raw.subscriber_name ?? raw.subscriberName,
+    ),
+    relationshipToSubscriber: trim(
+      raw.relationship_to_subscriber
+      ?? raw.relationshipToSubscriber,
     ),
   }
 }

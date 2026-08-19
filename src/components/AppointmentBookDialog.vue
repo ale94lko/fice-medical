@@ -513,7 +513,6 @@ const schedulingFilters = computed(() => ({
   excludeAppointmentId: props.mode === 'reschedule'
     ? props.appointment?.appointmentId ?? null
     : null,
-  placeOfServiceId: draft.value.placeOfServiceId,
 }))
 
 const booking = useAppointmentBooking(() => schedulingFilters.value)
@@ -546,6 +545,7 @@ const {
   scheduleBlockOverlapTypes,
   setAllowOverScheduleBlocks,
   refreshDurationPreview,
+  beginAvailabilityLoading,
   loadAvailability,
   applyBookingHint,
   shiftVisibleMonth,
@@ -1387,17 +1387,24 @@ function onServiceFeeChange({ index, value }) {
 }
 
 async function onSchedulingInputsChanged() {
+  const canLoad = Boolean(resolvedSchedulingClinicianId.value)
+    && serviceLines.value.length > 0
+    && Boolean(totalDurationMinutes.value)
+  if (canLoad) {
+    beginAvailabilityLoading()
+    await nextTick()
+  }
   try {
-    await refreshEligibleClinicians()
-    await refreshDurationPreview()
-    const canLoad = Boolean(resolvedSchedulingClinicianId.value)
-      && serviceLines.value.length > 0
-      && Boolean(totalDurationMinutes.value)
+    const pending = [refreshEligibleClinicians()]
     if (canLoad) {
-      await loadAvailability()
-      tryApplyBookingHint()
+      pending.push(refreshDurationPreview(), loadAvailability())
     } else {
+      pending.push(refreshDurationPreview())
       clearAvailability()
+    }
+    await Promise.all(pending)
+    if (canLoad) {
+      tryApplyBookingHint()
     }
   } catch {
     clearAvailability()
@@ -1696,8 +1703,10 @@ watch(
     await loadFormOptions()
     applyInitialRequestPrefill()
     void bootstrapClientPickerOptions()
-    await loadWorkingWeekdays()
-    await onSchedulingInputsChanged()
+    await Promise.all([
+      loadWorkingWeekdays(),
+      onSchedulingInputsChanged(),
+    ])
   },
 )
 
@@ -1707,18 +1716,6 @@ watch(
     if (!open.value || next === prev) {
       return
     }
-    clearSelectedWindow()
-    await onSchedulingInputsChanged()
-  },
-)
-
-watch(
-  () => draft.value.placeOfServiceId,
-  async(next, prev) => {
-    if (next === prev || props.mode !== 'book') {
-      return
-    }
-    clearSelectedWindow()
     await onSchedulingInputsChanged()
   },
 )
@@ -1731,8 +1728,10 @@ watch(
     }
     applySupervisorFromSelectedClinician()
     clearSelectedWindow()
-    await loadWorkingWeekdays()
-    await onSchedulingInputsChanged()
+    await Promise.all([
+      loadWorkingWeekdays(),
+      onSchedulingInputsChanged(),
+    ])
   },
 )
 

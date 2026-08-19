@@ -1,5 +1,5 @@
 <template>
-  <div class="appointment-availability-picker">
+  <div class="appointment-availability-picker relative-position">
     <div class="row q-col-gutter-md">
       <div class="col-12 col-md-5">
         <div class="appointment-availability-picker__calendar">
@@ -142,12 +142,7 @@
 
       <div class="col-12 col-md-7">
         <div
-          v-if="loading"
-          class="flex flex-center q-pa-lg">
-          <q-spinner color="primary" size="28px" />
-        </div>
-        <div
-          v-else-if="!selectedDayKey || !showDaySchedulePanel"
+          v-if="!selectedDayKey || !showDaySchedulePanel"
           class="q-pa-md">
           <p class="text-body2 text-grey-7 q-mb-none">
             {{ emptyLabel }}
@@ -240,6 +235,10 @@
         </div>
       </div>
     </div>
+
+    <q-inner-loading :showing="loading">
+      <q-spinner color="primary" size="32px" />
+    </q-inner-loading>
   </div>
 </template>
 
@@ -444,6 +443,8 @@ function onEndTimeSpinnerChange(value) {
 @import 'src/css/quasar.variables';
 
 .appointment-availability-picker {
+  min-height: 220px;
+
   &__weekdays {
     margin-bottom: 4px;
   }

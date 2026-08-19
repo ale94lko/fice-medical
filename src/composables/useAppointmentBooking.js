@@ -74,6 +74,7 @@ export function useAppointmentBooking(getFilters, options = {}) {
   const schedulingFieldError = ref('')
   const schedulingNeedsOverlapping = ref(false)
   const allowOverScheduleBlocks = ref(false)
+  let availabilityLoadSeq = 0
 
   const isRangesPickerMode = computed(() =>
     pickerMode.value === appointmentAvailabilityPickerModes.ranges,
@@ -607,7 +608,13 @@ export function useAppointmentBooking(getFilters, options = {}) {
       && durationMinutes > 0
   }
 
+  function beginAvailabilityLoading() {
+    availabilityLoading.value = true
+  }
+
   async function loadAvailability() {
+    const seq = availabilityLoadSeq + 1
+    availabilityLoadSeq = seq
     const filters = getFilters?.() ?? {}
     const serviceIds = filters.serviceProcedureIds ?? []
     const durationMinutes = Number(
@@ -616,7 +623,10 @@ export function useAppointmentBooking(getFilters, options = {}) {
     const hasClient = filters.clientId != null && filters.clientId !== ''
     const canQueryClinician = canQueryAvailability(filters)
     if (!canQueryClinician) {
-      clearAvailability()
+      if (seq === availabilityLoadSeq) {
+        clearAvailability()
+        availabilityLoading.value = false
+      }
 
       return
     }
@@ -640,22 +650,27 @@ export function useAppointmentBooking(getFilters, options = {}) {
 
     availabilityLoading.value = true
     try {
+      let nextWindows = []
+      let nextBlocks = []
       if (isRangesPickerMode.value) {
         const { availableRanges, blocks } =
           await listAppointmentAvailabilityRanges({
             ...query,
             limit: appointmentAvailabilityRangesLimit,
           })
-        availabilityWindows.value = availableRanges
-        availabilityBlocks.value = blocks
+        nextWindows = availableRanges
+        nextBlocks = blocks
       } else {
-        const windows = await listAppointmentAvailability({
+        nextWindows = await listAppointmentAvailability({
           ...query,
           limit: 50,
         })
-        availabilityWindows.value = windows
-        availabilityBlocks.value = []
       }
+      if (seq !== availabilityLoadSeq) {
+        return
+      }
+      availabilityWindows.value = nextWindows
+      availabilityBlocks.value = nextBlocks
       const firstWindowDay = [...windowsByDay.value.keys()].sort()[0] ?? ''
       const todayKey = todayLocalDayKey(timeZone)
       const keepDay = previousDay
@@ -678,11 +693,16 @@ export function useAppointmentBooking(getFilters, options = {}) {
         clearSelectedWindow()
       }
     } catch {
+      if (seq !== availabilityLoadSeq) {
+        return
+      }
       availabilityWindows.value = []
       availabilityBlocks.value = []
       clearSelectedWindow()
     } finally {
-      availabilityLoading.value = false
+      if (seq === availabilityLoadSeq) {
+        availabilityLoading.value = false
+      }
     }
   }
 
@@ -785,6 +805,7 @@ export function useAppointmentBooking(getFilters, options = {}) {
     commitSchedulingStartTime,
     commitSchedulingEndTime,
     refreshDurationPreview,
+    beginAvailabilityLoading,
     loadAvailability,
     applyBookingHint,
     shiftVisibleMonth,

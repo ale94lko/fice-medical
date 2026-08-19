@@ -91,7 +91,12 @@
           />
         </div>
 
-        <section class="calendar-page__main col">
+        <section class="calendar-page__main col relative-position">
+          <AppLoadingOverlay
+            compact
+            :showing="viewReady && loading"
+            :message="t('appLoading')"
+          />
           <q-banner
             v-if="loadError"
             dense
@@ -233,6 +238,7 @@ const {
   focusDayKey,
   sidebarMonthKey,
   viewReady,
+  loading,
   loadError,
   eventsByDay,
   eventDayKeys,

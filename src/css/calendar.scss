@@ -137,6 +137,7 @@ $calendar-time-grid-height: $calendar-hour-count * $calendar-hour-row-height;
   }
 
   &__main {
+    position: relative;
     display: flex;
     flex-direction: column;
     flex: 1 1 0;

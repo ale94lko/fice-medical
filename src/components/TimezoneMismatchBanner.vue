@@ -43,12 +43,16 @@
       </div>
       <div class="timezone-mismatch-menu__body">
         <div class="timezone-mismatch-menu__zones">
-          <div
+          <button
+            type="button"
             class="timezone-mismatch-menu__card"
             :class="{
               'timezone-mismatch-menu__card--active':
                 usingBrowser,
             }"
+            :aria-pressed="usingBrowser ? 'true' : 'false'"
+            :data-testid="testIds.useDevice"
+            @click="onUseDevice"
           >
             <span class="timezone-mismatch-menu__label">
               {{ t('timezoneMismatchDeviceLabel') }}
@@ -62,13 +66,17 @@
             >
               {{ t('timezoneMismatchInUse') }}
             </span>
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
             class="timezone-mismatch-menu__card"
             :class="{
               'timezone-mismatch-menu__card--active':
                 !usingBrowser,
             }"
+            :aria-pressed="usingBrowser ? 'false' : 'true'"
+            :data-testid="testIds.keepClinic"
+            @click="onUseClinic"
           >
             <span class="timezone-mismatch-menu__label">
               {{ t('timezoneMismatchClinicLabel') }}
@@ -82,46 +90,11 @@
             >
               {{ t('timezoneMismatchInUse') }}
             </span>
-          </div>
+          </button>
         </div>
         <p class="timezone-mismatch-menu__hint">
           {{ t('timezoneMismatchSessionHint') }}
         </p>
-      </div>
-      <div class="timezone-mismatch-menu__actions">
-        <q-btn
-          v-if="usingBrowser"
-          outline
-          dense
-          no-caps
-          color="primary"
-          class="app-btn-outline"
-          :label="t('timezoneMismatchRevertClinic')"
-          :data-testid="testIds.revert"
-          @click="onRevert"
-        />
-        <template v-else>
-          <q-btn
-            unelevated
-            dense
-            no-caps
-            color="primary"
-            class="app-btn-primary"
-            :label="t('timezoneMismatchUseDevice')"
-            :data-testid="testIds.useDevice"
-            @click="onUseDevice"
-          />
-          <q-btn
-            outline
-            dense
-            no-caps
-            color="primary"
-            class="app-btn-outline timezone-mismatch-menu__keep"
-            :label="t('timezoneMismatchKeepClinic')"
-            :data-testid="testIds.keepClinic"
-            @click="onKeepClinic"
-          />
-        </template>
       </div>
     </q-menu>
   </div>
@@ -149,8 +122,7 @@ const {
   clinicZone,
   browserZone,
   useBrowserZone,
-  keepClinicZone,
-  revertToClinicZone,
+  useClinicZone,
 } = useSessionDisplayTimezone()
 
 const testIds = computed(() => {
@@ -161,7 +133,6 @@ const testIds = computed(() => {
       useDevice: layoutTestIds.timezoneBannerEncounterUseDevice,
       keepClinic:
         layoutTestIds.timezoneBannerEncounterKeepClinic,
-      revert: layoutTestIds.timezoneBannerEncounterRevert,
     }
   }
 
@@ -170,7 +141,6 @@ const testIds = computed(() => {
     menu: layoutTestIds.timezoneBannerMenu,
     useDevice: layoutTestIds.timezoneBannerUseDevice,
     keepClinic: layoutTestIds.timezoneBannerKeepClinic,
-    revert: layoutTestIds.timezoneBannerRevert,
   }
 })
 
@@ -197,11 +167,6 @@ function scheduleClose() {
   }, CLOSE_MS)
 }
 
-function closeMenu() {
-  clearCloseTimer()
-  menuOpen.value = false
-}
-
 function toggleMenu() {
   clearCloseTimer()
   menuOpen.value = !menuOpen.value
@@ -211,12 +176,7 @@ function onUseDevice() {
   useBrowserZone()
 }
 
-function onKeepClinic() {
-  keepClinicZone()
-  closeMenu()
-}
-
-function onRevert() {
-  revertToClinicZone()
+function onUseClinic() {
+  useClinicZone()
 }
 </script>

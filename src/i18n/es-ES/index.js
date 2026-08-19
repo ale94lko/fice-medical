@@ -24,10 +24,7 @@ export default {
   timezoneMismatchClinicLabel: 'Zona de la clínica',
   timezoneMismatchInUse: 'En uso',
   timezoneMismatchSessionHint:
-    'Esta elección solo dura mientras la sesión esté abierta.',
-  timezoneMismatchUseDevice: 'Ver horas del dispositivo',
-  timezoneMismatchKeepClinic: 'Seguir con la clínica',
-  timezoneMismatchRevertClinic: 'Volver a horas de clínica',
+    'Pulse una zona para mostrarla. La página se recarga.',
   subtenantTimezoneLabel: 'Zona horaria',
   subtenantDateFormatLabel: 'Formato de fecha',
   subtenantTimeFormatLabel: 'Formato de hora',
@@ -2491,6 +2488,7 @@ export default {
   appointmentDetailSubtitle:
     'Consulte la información completa de esta cita.',
   appointmentDetailNumberLabel: 'Número de cita',
+  appointmentDetailStatusLabel: 'Estado',
   appointmentDetailTypeLabel: 'Tipo de cita',
   appointmentDetailServicesLabel: 'Servicios / Procedimientos',
   appointmentDetailClinicianLabel: 'Clínico',
@@ -2534,8 +2532,9 @@ export default {
   appointmentDetailSubscriberNotClient: 'Titular (no es el cliente)',
   appointmentDetailAgeYears: '{count} años',
   appointmentDetailTelehealthVisit: 'Visita de telehealth',
+  appointmentDetailTelehealthViaPortal: 'Portal del cliente',
   appointmentDetailTelehealthJoinHint:
-    'Únase a la cita con el enlace de abajo.',
+    'El cliente se une a esta reunión desde el portal del cliente.',
   appointmentEditTitle: 'Editar cita',
   appointmentSaveClientFirst:
     'Guarde el cliente primero para crear y gestionar citas.',
