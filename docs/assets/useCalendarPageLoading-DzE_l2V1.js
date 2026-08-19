@@ -1,0 +1,1 @@
+import{g as e,vn as t}from"./runtime-core.esm-bundler-8hW84IlS.js";var n=t(!1);function r(){n.value=!0}function i(){n.value=!1}function a(){return{calendarPagePending:e(()=>n.value)}}export{i as n,a as r,r as t};
