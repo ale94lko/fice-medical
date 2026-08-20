@@ -1,0 +1,1 @@
+import{g as e}from"./runtime-core.esm-bundler-8hW84IlS.js";import{D as t,T as n,gl as r,t as i}from"./auth-store-BAk3Pcv5.js";function a(){let a=i(),o=e(()=>a.permissions);return{canView:e(()=>t(o.value,r.viewPortalMessages)),canSend:e(()=>t(o.value,r.sendPortalMessages)),canAccess:e(()=>n(o.value,[r.viewPortalMessages,r.sendPortalMessages]))}}export{a as t};
