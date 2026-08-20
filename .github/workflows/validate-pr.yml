@@ -1,0 +1,22 @@
+name: Validate PR Metadata
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: PR & Branch Standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR Metadata
+        uses: ale94lko/pr-metadata-validator@v1
+        with:
+          validate_branch: 'true'
+          validate_title: 'true'
+          require_ticket: 'true'
+          allowed_prefixes: 'feature, bugfix, hotfix, release, chore'
