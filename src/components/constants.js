@@ -2763,22 +2763,24 @@ export const apiPaths = {
   )}/favorite`,
 }
 
+export const authStorageNamespace = 'fice-medical.auth'
+
 export const authStorageKeys = {
-  token: 'token',
-  expireAt: 'expireAt',
-  expireAtLegacy: 'expiresAt',
-  refresh: 'refreshToken',
-  refreshLegacy: 'refresh_token',
-  modules: 'modules',
-  permissions: 'permissions',
-  subtenants: 'subtenants',
-  activeSubtenantId: 'activeSubtenantId',
-  tenantId: 'tenantId',
-  configData: 'configData',
-  userInfo: 'userInfo',
-  mustChangePassword: 'mustChangePassword',
-  passwordChangeMode: 'passwordChangeMode',
-  mustEnrollMfa: 'mustEnrollMfa',
+  token: `${authStorageNamespace}.token`,
+  expireAt: `${authStorageNamespace}.expireAt`,
+  expireAtLegacy: `${authStorageNamespace}.expiresAt`,
+  refresh: `${authStorageNamespace}.refreshToken`,
+  refreshLegacy: `${authStorageNamespace}.refresh_token`,
+  modules: `${authStorageNamespace}.modules`,
+  permissions: `${authStorageNamespace}.permissions`,
+  subtenants: `${authStorageNamespace}.subtenants`,
+  activeSubtenantId: `${authStorageNamespace}.activeSubtenantId`,
+  tenantId: `${authStorageNamespace}.tenantId`,
+  configData: `${authStorageNamespace}.configData`,
+  userInfo: `${authStorageNamespace}.userInfo`,
+  mustChangePassword: `${authStorageNamespace}.mustChangePassword`,
+  passwordChangeMode: `${authStorageNamespace}.passwordChangeMode`,
+  mustEnrollMfa: `${authStorageNamespace}.mustEnrollMfa`,
 }
 
 export const passwordChangeModes = {

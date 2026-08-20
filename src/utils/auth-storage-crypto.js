@@ -1,6 +1,6 @@
 export const AUTH_STORAGE_PACKED_PREFIX = 'enc.v1:'
 const PACKED_PREFIX = AUTH_STORAGE_PACKED_PREFIX
-export const AUTH_WRAP_STORAGE_KEY = 'fice.auth.wrap.v1'
+export const AUTH_WRAP_STORAGE_KEY = 'fice-medical.auth.wrap.v1'
 
 function bytesToBase64(bytes) {
   const chunk = 0x8000

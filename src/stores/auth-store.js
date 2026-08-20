@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { apiInstance } from 'boot/axios'
-import { apiPaths, permissionNames, passwordChangeModes, typeNames }
-  from 'components/constants.js'
+import {
+  apiPaths,
+  authStorageKeys,
+  permissionNames,
+  passwordChangeModes,
+  typeNames,
+} from 'components/constants.js'
 import {
   hasAnyPermission,
   hasAssignedPermissions,
@@ -534,7 +539,7 @@ export const useAuthStore = defineStore('auth', {
       this._initialized = true
       if (typeof window !== typeNames.undefined) {
         window.addEventListener('storage', event => {
-          if (event.key === 'token' && event.newValue === null) {
+          if (event.key === authStorageKeys.token && event.newValue === null) {
             this.token = null
             this.expireAt = null
             this.refreshToken = null
