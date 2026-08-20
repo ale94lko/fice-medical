@@ -19,7 +19,9 @@ export function normalizeClinicalAuditItem(raw) {
 
   return {
     id,
-    clientId: raw.client_id ?? raw.clientId ?? null,
+    clientNumber: String(
+      raw.client_number ?? raw.clientNumber ?? '',
+    ).trim() || null,
     clientName: String(
       raw.client_name ?? raw.clientName ?? '',
     ).trim(),
@@ -225,8 +227,8 @@ function clinicalAuditSortValue(row, sortBy) {
     return clinicalAuditDisplayLabel(row?.changedByName, row?.changedBy)
       .toLowerCase()
   }
-  if (key === 'clientId') {
-    return clinicalAuditDisplayLabel(row?.clientName, row?.clientId)
+  if (key === 'clientNumber' || key === 'clientId') {
+    return clinicalAuditDisplayLabel(row?.clientName, row?.clientNumber)
       .toLowerCase()
   }
   if (key === 'entityId') {

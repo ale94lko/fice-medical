@@ -71,6 +71,143 @@ export const LAB_COMPONENT_OPTIONS = [
   },
 ]
 
+const FALLBACK_LAB_UNITS = ['g/dL', 'K/uL', '%', 'mg/dL']
+
+function parseOptionalBound(value) {
+  if (value == null || value === '') {
+    return null
+  }
+  const n = Number(value)
+  if (!Number.isFinite(n)) {
+    return null
+  }
+
+  return n
+}
+
+function asAliasList(value) {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .map(item => String(item ?? '').trim())
+    .filter(Boolean)
+}
+
+export function mapLabComponentDefinitionFromApi(raw) {
+  const item = raw ?? {}
+  const name = String(item.name ?? '').trim()
+
+  return {
+    id: item.id ?? null,
+    name,
+    aliases: asAliasList(item.aliases),
+    category: String(item.category ?? '').trim() || null,
+    clinicalKey: String(
+      item.clinical_key ?? item.clinicalKey ?? '',
+    ).trim() || null,
+    defaultUnit: String(
+      item.default_unit ?? item.defaultUnit ?? '',
+    ).trim() || null,
+    referenceRangeLow: parseOptionalBound(
+      item.reference_range_low ?? item.referenceRangeLow,
+    ),
+    referenceRangeHigh: parseOptionalBound(
+      item.reference_range_high ?? item.referenceRangeHigh,
+    ),
+    active: item.active !== false,
+    displayOrder: Number(item.display_order ?? item.displayOrder) || 0,
+  }
+}
+
+export function findLabComponentDefinition(definitions, name) {
+  const needle = String(name ?? '').trim().toLowerCase()
+  if (!needle) {
+    return null
+  }
+
+  return (definitions ?? []).find(item => {
+    if (String(item?.name ?? '').trim().toLowerCase() === needle) {
+      return true
+    }
+
+    return asAliasList(item?.aliases).some(
+      alias => alias.toLowerCase() === needle,
+    )
+  }) ?? null
+}
+
+export function labComponentSelectOptions(definitions) {
+  if (Array.isArray(definitions) && definitions.length) {
+    return definitions
+      .filter(item => item?.name)
+      .map(item => ({
+        label: item.name,
+        value: item.name,
+        aliases: asAliasList(item.aliases),
+      }))
+  }
+
+  return LAB_COMPONENT_OPTIONS.map(item => ({
+    label: item.label,
+    value: item.value,
+    aliases: [],
+  }))
+}
+
+export function labUnitSelectOptions(definitions, extraUnits = []) {
+  const seen = new Set()
+  const options = []
+
+  const add = unit => {
+    const value = String(unit ?? '').trim()
+    if (!value || seen.has(value)) {
+      return
+    }
+    seen.add(value)
+    options.push({ label: value, value })
+  }
+
+  FALLBACK_LAB_UNITS.forEach(add)
+  ;(extraUnits ?? []).forEach(add)
+  ;(definitions ?? []).forEach(item => add(item?.defaultUnit))
+
+  return options
+}
+
+export function componentDerivedFields(name, definitions) {
+  const trimmed = String(name ?? '').trim()
+  if (!trimmed) {
+    return {
+      componentName: '',
+      clinicalKey: null,
+      unit: null,
+      referenceRangeLow: null,
+      referenceRangeHigh: null,
+    }
+  }
+  const definition = findLabComponentDefinition(definitions, trimmed)
+  if (definition) {
+    return {
+      componentName: definition.name,
+      clinicalKey: definition.clinicalKey
+        || resolveClinicalKeyForComponent(definition.name),
+      unit: definition.defaultUnit ?? null,
+      referenceRangeLow: definition.referenceRangeLow ?? null,
+      referenceRangeHigh: definition.referenceRangeHigh ?? null,
+    }
+  }
+
+  return {
+    componentName: trimmed,
+    clinicalKey: resolveClinicalKeyForComponent(trimmed),
+    unit: null,
+    referenceRangeLow: null,
+    referenceRangeHigh: null,
+  }
+}
+
 export function createEmptyLabOrder() {
   return {
     id: '',
@@ -206,31 +343,43 @@ function isPresentNumber(value) {
   return Number.isFinite(n)
 }
 
+export function hasAnyReferenceBound(low, high) {
+  return isPresentNumber(low) || isPresentNumber(high)
+}
+
 export function suggestFlagFromReference(value, low, high) {
   const num = Number(value)
-  if (
-    !Number.isFinite(num)
-    || !isPresentNumber(low)
-    || !isPresentNumber(high)
-  ) {
+  if (!Number.isFinite(num) || !hasAnyReferenceBound(low, high)) {
     return null
   }
+  const hasLow = isPresentNumber(low)
+  const hasHigh = isPresentNumber(high)
   const lowN = Number(low)
   const highN = Number(high)
-  if (num < lowN) {
-    const span = highN - lowN
-    if (span > 0 && num < lowN - span * 0.25) {
-      return labFlags.criticalLow
+  if (hasLow && hasHigh) {
+    if (num < lowN) {
+      const span = highN - lowN
+      if (span > 0 && num < lowN - span * 0.25) {
+        return labFlags.criticalLow
+      }
+
+      return labFlags.low
+    }
+    if (num > highN) {
+      const span = highN - lowN
+      if (span > 0 && num > highN + span * 0.25) {
+        return labFlags.criticalHigh
+      }
+
+      return labFlags.high
     }
 
+    return labFlags.normal
+  }
+  if (hasLow && num < lowN) {
     return labFlags.low
   }
-  if (num > highN) {
-    const span = highN - lowN
-    if (span > 0 && num > highN + span * 0.25) {
-      return labFlags.criticalHigh
-    }
-
+  if (hasHigh && num > highN) {
     return labFlags.high
   }
 
@@ -302,7 +451,11 @@ export function formatReferenceRange(low, high, unit) {
   return u ? `${range} ${u}` : range
 }
 
-export function resolveClinicalKeyForComponent(name) {
+export function resolveClinicalKeyForComponent(name, definitions = []) {
+  const definition = findLabComponentDefinition(definitions, name)
+  if (definition?.clinicalKey) {
+    return definition.clinicalKey
+  }
   const needle = String(name ?? '').trim().toLowerCase()
   const found = LAB_COMPONENT_OPTIONS.find(
     item => item.value.toLowerCase() === needle

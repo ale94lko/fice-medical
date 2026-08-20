@@ -132,7 +132,7 @@
                     <GenerateDocumentAction
                       v-if="clientId"
                       :document-type="documentTypes.clientProfile"
-                      :context="{ clientId }"
+                      :context="documentContext"
                       :label="t('generateDocumentFaceSheet')"
                       icon="contact_page"
                       @generated="emit('document-generated')">
@@ -473,7 +473,7 @@
           <GenerateDocumentAction
             v-if="clientId"
             :document-type="documentTypes.clientProfile"
-            :context="{ clientId }"
+            :context="documentContext"
             :label="t('generateDocumentFaceSheet')"
             icon="contact_page"
             button-class="app-btn-outline"
@@ -662,6 +662,10 @@ const { canView: canViewPortalMessages } =
   usePortalMessagePermissions()
 const invitingPortal = ref(false)
 
+const documentContext = computed(() => ({
+  clientNumber: props.header?.clientNumber ?? props.clientId,
+}))
+
 const encounterDialogOpen = ref(false)
 
 const showPortalOverflow = computed(() =>
@@ -674,7 +678,9 @@ function openMessages() {
   if (!props.clientId) {
     return
   }
-  void router.push(clinicMessagesClientLocation(props.clientId))
+  void router.push(clinicMessagesClientLocation(
+    props.header?.clientNumber ?? props.clientId,
+  ))
 }
 
 async function inviteToPortal() {

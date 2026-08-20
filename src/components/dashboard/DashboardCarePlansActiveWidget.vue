@@ -353,7 +353,7 @@ function clientLabel(item) {
   if (name) {
     return name
   }
-  const id = item?.client_id ?? item?.clientId
+  const id = item?.client_number ?? item?.clientNumber
   if (id == null || id === '') {
     return ''
   }

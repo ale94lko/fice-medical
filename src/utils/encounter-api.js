@@ -111,7 +111,7 @@ function persistOpenEncounters() {
         continue
       }
       rows.push({
-        clientId: id,
+        clientNumber: id,
         encounter,
       })
     }
@@ -138,7 +138,12 @@ export function restoreToolbarOpenEncounters() {
     }
     for (const row of rows) {
       const encounter = row?.encounter
-      const key = clientKey(row?.clientId ?? encounter?.clientId)
+      const key = clientKey(
+        row?.clientNumber
+        ?? encounter?.clientNumber
+        ?? row?.clientId
+        ?? encounter?.clientId,
+      )
       if (!key || !isEncounterOpen(encounter)) {
         continue
       }
@@ -190,8 +195,8 @@ export function setCachedActiveEncounter(clientId, encounter) {
 }
 
 function cacheOpenEncounter(encounter) {
-  const key = encounter?.clientId
-  if (key == null) {
+  const key = clientKey(encounter?.clientNumber)
+  if (!key) {
     return encounter
   }
   if (isEncounterOpen(encounter)) {
@@ -380,7 +385,12 @@ function trimOrNull(value) {
 
 export function encounterCreateToApiPayload(form = {}) {
   const payload = {
-    client_id: resolveEncounterId(form.clientId ?? form.client_id),
+    client_number: clientKey(
+      form.clientNumber
+      ?? form.client_number
+      ?? form.clientId
+      ?? form.client_id,
+    ),
     clinician_id: resolveEncounterId(
       form.clinicianId ?? form.clinician_id,
     ),
@@ -433,7 +443,7 @@ export function encounterCreateToApiPayload(form = {}) {
 
 export function encounterClientStartToApiPayload(form = {}) {
   const payload = encounterCreateToApiPayload(form)
-  delete payload.client_id
+  delete payload.client_number
   delete payload.appointment_id
 
   return payload

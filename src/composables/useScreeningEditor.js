@@ -28,7 +28,8 @@ import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
-import { calculateScreeningScore, deriveScreeningRiskLevel }
+import { calculateScreeningScore, deriveScreeningRiskLevel,
+  interpretScreeningScore }
   from 'src/utils/screening-scores.js'
 import { buildSectionStatusList } from 'src/utils/screening-section-status.js'
 
@@ -157,6 +158,21 @@ export function useScreeningEditor(getContext) {
   const scoreSummary = computed(() =>
     calculateScreeningScore(ctx().template, answers),
   )
+
+  const interpretationSummary = computed(() => {
+    const screening = ctx().screening ?? {}
+    if (screening.interpretationLabel) {
+      return {
+        code: screening.interpretationCode,
+        label: screening.interpretationLabel,
+      }
+    }
+
+    return interpretScreeningScore(
+      ctx().template,
+      scoreSummary.value.score,
+    )
+  })
 
   const riskLevel = computed(() =>
     deriveScreeningRiskLevel(ctx().template, answers),
@@ -367,6 +383,7 @@ export function useScreeningEditor(getContext) {
     answerProgress,
     completionPercent,
     scoreSummary,
+    interpretationSummary,
     riskLevel,
     sectionStatuses,
     onSaveDraft,

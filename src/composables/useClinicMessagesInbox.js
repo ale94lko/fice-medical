@@ -32,8 +32,8 @@ import {
 
 const POLL_MS = 15000
 
-function routeClientId(route) {
-  return String(route.query.clientId ?? '').trim()
+function routeClientNumber(route) {
+  return String(route.query.clientNumber ?? '').trim()
 }
 
 function lastMessageId(messages) {
@@ -118,11 +118,11 @@ export function useClinicMessagesInbox() {
   }
 
   async function syncFromRoute() {
-    const clientId = routeClientId(route)
-    if (clientId) {
+    const clientNumber = routeClientNumber(route)
+    if (clientNumber) {
       try {
         const conversation = await getStaffConversationForClient(
-          clientId,
+          clientNumber,
         )
         if (!conversation?.id) {
           return
@@ -280,7 +280,7 @@ export function useClinicMessagesInbox() {
     () => [
       route.params.conversationId,
       route.query.conversationId,
-      route.query.clientId,
+      route.query.clientNumber,
     ],
     () => {
       void syncFromRoute()

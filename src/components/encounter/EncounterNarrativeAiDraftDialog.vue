@@ -108,7 +108,7 @@
           class="app-btn-outline"
           icon="refresh"
           :label="t('narrativeAiTryAgain')"
-          :disable="generating || providerInputMissing"
+          :disable="generateDisabled"
           :data-testid="tid.narrativeAiTryAgain"
           @click="generateDraft"
         />
@@ -120,7 +120,7 @@
           class="app-btn-primary"
           icon="auto_awesome"
           :loading="generating"
-          :disable="generating || providerInputMissing"
+          :disable="generateDisabled"
           :label="t('narrativeAiDraftWithAi')"
           :data-testid="tid.narrativeAiGenerate"
           @click="generateDraft"
@@ -167,6 +167,8 @@ import {
 } from 'src/utils/ai-api.js'
 import { isAuthSessionEndUIError } from
   'src/utils/api-session-error.js'
+import { isAssessmentSummaryField } from
+  'src/utils/assessment-summary.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -176,6 +178,7 @@ const props = defineProps({
   encounterDiagnosisId: { type: [String, Number], default: null },
   diagnosisLabel: { type: String, default: '' },
   providerInputRequired: { type: Boolean, default: false },
+  hasCompletedAssessments: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['update:modelValue', 'use-draft'])
@@ -202,7 +205,23 @@ const providerInputMissing = computed(() =>
     && !String(providerInput.value || '').trim(),
 )
 
+const assessmentSummaryBlocked = computed(() =>
+  isAssessmentSummaryField(props.field)
+    && !props.hasCompletedAssessments,
+)
+
+const generateDisabled = computed(() =>
+  generating.value
+    || providerInputMissing.value
+    || assessmentSummaryBlocked.value,
+)
+
 const dialogHint = computed(() => {
+  if (isAssessmentSummaryField(props.field)) {
+    return t('narrativeAiDialogHintAssessmentSummary', {
+      label: props.field?.fieldLabel || '',
+    })
+  }
   if (props.diagnosisLabel) {
     return t('narrativeAiDialogHintPlan', {
       label: props.field?.fieldLabel || '',
@@ -241,14 +260,17 @@ watch(
     props.modelValue,
     props.field?.templateSectionId,
     props.encounterDiagnosisId,
+    assessmentSummaryBlocked.value,
   ],
   () => {
     if (props.modelValue) {
       providerInput.value = ''
-      errorMessage.value = ''
       suggestion.value = null
       replaceConfirmOpen.value = false
-      insufficientContext.value = false
+      insufficientContext.value = assessmentSummaryBlocked.value
+      errorMessage.value = assessmentSummaryBlocked.value
+        ? t('narrativeAiNoCompletedAssessments')
+        : ''
     }
   },
 )
@@ -257,6 +279,12 @@ async function generateDraft() {
   const encounterId = props.encounterId
   const field = props.field
   if (encounterId == null || !field?.templateSectionId) {
+    return
+  }
+  if (assessmentSummaryBlocked.value) {
+    errorMessage.value = t('narrativeAiNoCompletedAssessments')
+    insufficientContext.value = true
+
     return
   }
   if (providerInputMissing.value) {
@@ -283,10 +311,20 @@ async function generateDraft() {
     suggestion.value = null
     insufficientContext.value = false
     if (!isAuthSessionEndUIError(error)) {
-      errorMessage.value = aiApiErrorMessage(
+      const apiMessage = aiApiErrorMessage(
         error,
         t('narrativeAiGenerateError'),
       )
+      if (apiMessage.toLowerCase().includes(
+        'no completed assessments',
+      )) {
+        insufficientContext.value = true
+        errorMessage.value = t(
+          'narrativeAiNoCompletedAssessments',
+        )
+      } else {
+        errorMessage.value = apiMessage
+      }
     }
   } finally {
     generating.value = false

@@ -75,7 +75,7 @@ export function normalizeDenialCase(raw = {}) {
     claimLineId: parseOptionalNumber(row.claim_line_id ?? row.claimLineId),
     procedureCode: trim(row.procedure_code ?? row.procedureCode),
     serviceName: trim(row.service_name ?? row.serviceName),
-    clientId: parseOptionalNumber(row.client_id ?? row.clientId),
+    clientNumber: trim(row.client_number ?? row.clientNumber),
     clientName: trim(row.client_name ?? row.clientName),
     payerName: trim(row.payer_name ?? row.payerName),
     dateOfService: row.date_of_service ?? row.dateOfService ?? null,

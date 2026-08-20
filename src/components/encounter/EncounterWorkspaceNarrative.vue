@@ -49,7 +49,20 @@
             :label="field.fieldLabel"
             :required="field.required">
           <div
-            v-if="isReviewOfSystemsSection(field)"
+            v-if="isClinicalNoteAssessmentSection(field)"
+            :data-testid="tid.narrativeField(field.fieldKey)">
+            <EncounterNarrativeAssessmentField
+              :field="field"
+              :can-view="canViewScreenings"
+              :can-add="canAddScreenings"
+              :can-edit="canEditScreenings"
+              @complete="openAssessment(field, 'create')"
+              @view="openAssessment(field, 'view')"
+              @edit="openAssessment(field, 'edit')"
+            />
+          </div>
+          <div
+            v-else-if="isReviewOfSystemsSection(field)"
             :data-testid="tid.narrativeField(field.fieldKey)">
             <EncounterReviewOfSystemsFields
               :field="field"
@@ -169,13 +182,28 @@
       :encounter-diagnosis-id="aiDraftDiagnosisId"
       :diagnosis-label="aiDraftDiagnosisLabel"
       :provider-input-required="aiDraftRequiresProviderInput"
+      :has-completed-assessments="hasCompletedAssessments"
       @use-draft="onUseAiDraft"
+    />
+    <ScreeningDialog
+      v-if="clientId"
+      v-model="assessmentDialogOpen"
+      :patient-id="clientId"
+      :screening-id="assessmentDialogId"
+      :client-screenings="screenings"
+      :mode="assessmentDialogMode"
+      :readonly="assessmentDialogReadonly"
+      :clinician-options="clinicianOptions"
+      :initial-template-id="assessmentInitialTemplateId"
+      :lock-template="assessmentLockTemplate"
+      @saved="onAssessmentSaved"
+      @closed="onAssessmentClosed"
     />
   </div>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
@@ -189,8 +217,12 @@ import EncounterMentalStatusExamFields from
   'components/encounter/EncounterMentalStatusExamFields.vue'
 import EncounterAssessmentPlanFields from
   'components/encounter/EncounterAssessmentPlanFields.vue'
+import EncounterNarrativeAssessmentField from
+  'components/encounter/EncounterNarrativeAssessmentField.vue'
 import EncounterNarrativeAiDraftDialog from
   'components/encounter/EncounterNarrativeAiDraftDialog.vue'
+import ScreeningDialog from 'components/ScreeningDialog.vue'
+import { screeningStatuses } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
 import {
@@ -210,20 +242,31 @@ import {
 } from 'src/utils/assessment-plan.js'
 import { groupNarrativeFields } from
   'src/utils/clinical-note-narrative-group.js'
+import { isClinicalNoteAssessmentSection } from
+  'src/utils/clinical-note-assessment-section.js'
+import { fetchAllCliniciansSelectOptions } from
+  'src/utils/clinicians-api.js'
 import { isAdditionalNotesSection } from
   'src/utils/additional-notes.js'
+import { isAssessmentSummaryField } from
+  'src/utils/assessment-summary.js'
 import { fieldAllowsNarrativeAi, fieldRequiresProviderInput } from
   'src/utils/narrative-ai-assistance.js'
 
 const props = defineProps({
   encounterId: { type: [String, Number], default: null },
+  clientId: { type: [String, Number], default: null },
   narrative: { type: Object, default: null },
   diagnoses: { type: Array, default: () => [] },
+  screenings: { type: Array, default: () => [] },
   canEdit: { type: Boolean, default: false },
   canUseAiDraft: { type: Boolean, default: false },
+  canViewScreenings: { type: Boolean, default: false },
+  canAddScreenings: { type: Boolean, default: false },
+  canEditScreenings: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['saved', 'go-to-visit'])
+const emit = defineEmits(['saved', 'go-to-visit', 'assessment-changed'])
 const { t } = useI18n()
 const $q = useQuasar()
 const fields = ref([])
@@ -234,6 +277,13 @@ const aiDraftField = ref(null)
 const aiDraftDiagnosisId = ref(null)
 const aiDraftDiagnosisLabel = ref('')
 const aiDraftPlanText = ref('')
+const clinicianOptions = ref([])
+const assessmentDialogOpen = ref(false)
+const assessmentDialogId = ref(null)
+const assessmentDialogMode = ref('create')
+const assessmentDialogReadonly = ref(false)
+const assessmentInitialTemplateId = ref(null)
+const assessmentLockTemplate = ref(false)
 let saveTimer = null
 let flashTimer = null
 
@@ -248,6 +298,13 @@ const headingHint = computed(() => {
 
 const fieldGroups = computed(() => groupNarrativeFields(fields.value))
 
+const hasCompletedAssessments = computed(() =>
+  (props.screenings ?? []).some(row =>
+    String(row.status ?? '').toLowerCase()
+      === screeningStatuses.completed,
+  ),
+)
+
 function fieldPlaceholder(field) {
   const text = String(field?.placeholder || '').trim()
   if (text) {
@@ -256,15 +313,59 @@ function fieldPlaceholder(field) {
   if (isAdditionalNotesSection(field)) {
     return t('clinicalNoteAdditionalNotesPlaceholder')
   }
+  if (isAssessmentSummaryField(field)) {
+    return t('clinicalNoteAssessmentSummaryPlaceholder')
+  }
 
   return ''
 }
 
 function canDraftWithAi(field) {
+  if (isAssessmentSummaryField(field) && !props.canViewScreenings) {
+    return false
+  }
+
   return props.canEdit
     && props.canUseAiDraft
+    && !isClinicalNoteAssessmentSection(field)
     && fieldAllowsNarrativeAi(field)
 }
+
+function openAssessment(field, mode) {
+  if (!field) {
+    return
+  }
+  assessmentDialogMode.value = mode === 'create' ? 'create' : 'edit'
+  assessmentDialogReadonly.value = mode === 'view'
+  assessmentLockTemplate.value = mode === 'create'
+  assessmentInitialTemplateId.value = mode === 'create'
+    ? field.assessmentTemplateId
+    : null
+  assessmentDialogId.value = mode === 'create'
+    ? null
+    : field.screeningId
+  assessmentDialogOpen.value = true
+}
+
+function onAssessmentSaved() {
+  emit('assessment-changed')
+}
+
+function onAssessmentClosed() {
+  assessmentDialogOpen.value = false
+}
+
+async function loadClinicians() {
+  try {
+    clinicianOptions.value = await fetchAllCliniciansSelectOptions()
+  } catch {
+    clinicianOptions.value = []
+  }
+}
+
+onMounted(() => {
+  void loadClinicians()
+})
 
 const aiDraftCurrentText = computed(() => {
   if (isAssessmentPlanSection(aiDraftField.value)) {

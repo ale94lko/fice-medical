@@ -117,11 +117,17 @@
         <EncounterWorkspaceNarrative
           v-else-if="activeTab === encounterWorkspaceTabs.narrative"
           :encounter-id="workspace.encounter.id"
+          :client-id="chartClientKey"
           :narrative="workspace.narrative"
           :diagnoses="workspace.encounter.diagnoses"
+          :screenings="workspace.screenings"
           :can-edit="canEditNarrative"
           :can-use-ai-draft="canUseNarrativeAiDraft"
+          :can-view-screenings="canViewScreenings"
+          :can-add-screenings="canAddScreeningsHere"
+          :can-edit-screenings="canEditScreeningsHere"
           @saved="onNarrativeSaved"
+          @assessment-changed="onNarrativeAssessmentChanged"
           @go-to-visit="activeTab = encounterWorkspaceTabs.visit"
         />
         <EncounterWorkspaceFollowUp
@@ -277,6 +283,7 @@ import {
 import { hasAnyPermission, hasPermission } from
   'src/utils/auth-permissions.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
+import { useSiteStore } from 'src/stores/site-store.js'
 import { resolveRequirementActionTarget } from
   'src/utils/encounter-requirement-actions.js'
 import {
@@ -325,6 +332,7 @@ const authStore = useAuthStore()
 const loading = ref(false)
 const actionBusy = ref(false)
 const workspace = ref(null)
+const siteStore = useSiteStore()
 const chartClientKey = computed(() =>
   clientChartKey(workspace.value?.encounter),
 )
@@ -345,6 +353,7 @@ const { canSignClinicalNotes } = useClientClinicalNotePermissions()
 const {
   canAddVitals,
   canEditVitals,
+  canViewScreenings,
   canAddScreenings,
   canEditScreenings,
   canAddLabs,
@@ -644,6 +653,12 @@ async function loadWorkspace() {
   loadError.value = ''
   try {
     workspace.value = await fetchEncounterWorkspace(id)
+    const encounter = workspace.value?.encounter
+    if (encounter) {
+      siteStore.putClientDetailInSource({
+        clientNumber: encounter.clientNumber,
+      })
+    }
   } catch (error) {
     workspace.value = null
     if (!isAuthSessionEndUIError(error)) {
@@ -1048,7 +1063,7 @@ async function onComplete() {
   try {
     await completeEncounter(
       id,
-      workspace.value.encounter.clientId,
+      chartClientKey.value,
     )
     $q.notify({
       type: quasarNotifyTypes.positive,
@@ -1119,7 +1134,7 @@ async function onCancelConfirm(payload) {
   try {
     await cancelEncounter(
       id,
-      workspace.value.encounter.clientId,
+      chartClientKey.value,
       payload,
     )
     cancelOpen.value = false
@@ -1186,6 +1201,11 @@ function onNarrativeSaved(saved) {
   void refreshGeneratedNote()
 }
 
+function onNarrativeAssessmentChanged() {
+  void refreshNarrative()
+  onClinicalDataChanged()
+}
+
 async function refreshGeneratedNote() {
   const id = workspace.value?.encounter?.id
   if (id == null || !workspace.value?.generatedClinicalNote?.id) {
@@ -1209,8 +1229,8 @@ async function refreshGeneratedNote() {
 
 async function onSignGeneratedNote(signatureData) {
   const note = workspace.value?.generatedClinicalNote
-  const clientId = workspace.value?.encounter?.clientId
-  if (note?.id == null || clientId == null) {
+  const clientId = chartClientKey.value
+  if (note?.id == null || !clientId) {
     return
   }
   actionBusy.value = true
@@ -1246,8 +1266,8 @@ function openGeneratedAddendum() {
 
 async function onAddendumSign(payload) {
   const note = workspace.value?.generatedClinicalNote
-  const clientId = workspace.value?.encounter?.clientId
-  if (note?.id == null || clientId == null) {
+  const clientId = chartClientKey.value
+  if (note?.id == null || !clientId) {
     return
   }
   actionBusy.value = true

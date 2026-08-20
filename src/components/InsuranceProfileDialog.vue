@@ -849,7 +849,7 @@ async function onSave() {
   saving.value = true
   try {
     const clientId = String(props.clientId ?? '').trim()
-    const uploadOpts = clientId ? { clientId } : {}
+    const uploadOpts = clientId ? { clientNumber: clientId } : {}
     const [frontCardFile, backCardFile] = await Promise.all([
       resolveInsuranceCardAttachment(local.value.frontCardFile, uploadOpts),
       resolveInsuranceCardAttachment(local.value.backCardFile, uploadOpts),

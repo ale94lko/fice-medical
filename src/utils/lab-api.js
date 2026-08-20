@@ -10,6 +10,8 @@ import {
   normalizeLabDetail,
   normalizeLabFile,
 } from 'src/utils/lab-normalize.js'
+import { mapLabComponentDefinitionFromApi } from
+  'src/utils/lab-orders.js'
 import { extractDownloadFileName } from
   'src/utils/http-headers.js'
 import { attachEncounterId } from 'src/utils/encounter-api.js'
@@ -32,6 +34,19 @@ export async function listPatientLabs(patientId) {
   const list = Array.isArray(data) ? data : data?.items ?? []
 
   return mapClientLabsListFromApi(list)
+}
+
+export async function listLabComponentDefinitions({
+  activeOnly = true,
+} = {}) {
+  const response = await apiInstance.get(
+    apiPaths.labComponentDefinitions,
+    { params: { 'active_only': activeOnly } },
+  )
+  const data = unwrapData(response.data)
+  const items = Array.isArray(data) ? data : data?.items ?? []
+
+  return items.map(mapLabComponentDefinitionFromApi)
 }
 
 export async function fetchPatientLab(patientId, labId) {

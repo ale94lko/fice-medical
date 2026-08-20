@@ -221,7 +221,7 @@ async function onCropConfirm(file) {
     const uploaded = await uploadStoredFile(
       file,
       props.fileCategory,
-      clientId ? { clientId } : {},
+      clientId ? { clientNumber: clientId } : {},
     )
     emit('update:fileId', uploaded.id)
     cropDialogOpen.value = false

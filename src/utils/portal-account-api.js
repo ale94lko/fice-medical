@@ -149,7 +149,6 @@ export async function getPortalAccount(accountId) {
 }
 
 export async function linkPortalAccount(accountId, {
-  clientId = null,
   clientNumber = null,
 } = {}) {
   const id = asId(accountId)
@@ -157,9 +156,6 @@ export async function linkPortalAccount(accountId, {
     throw new Error('portal account id is required')
   }
   const body = {}
-  if (asId(clientId)) {
-    body['client_id'] = asId(clientId)
-  }
   const chartKey = trim(clientNumber)
   if (chartKey) {
     body['client_number'] = chartKey

@@ -44,7 +44,7 @@ export function useClientProgressiveMatch(form, isEnabled) {
   const filteredMatches = computed(() => {
     const discard = discardedPatientIds.value
 
-    return rawMatches.value.filter(m => !discard.has(m.patientId))
+    return rawMatches.value.filter(m => !discard.has(String(m.patientId)))
   })
 
   const hasActiveMatches = computed(
@@ -69,7 +69,7 @@ export function useClientProgressiveMatch(form, isEnabled) {
 
   function discardMatch(patientId) {
     const next = new Set(discardedPatientIds.value)
-    next.add(Number(patientId))
+    next.add(String(patientId))
     discardedPatientIds.value = next
   }
 

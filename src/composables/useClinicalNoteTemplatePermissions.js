@@ -72,6 +72,7 @@ export const clinicalNoteDataSources = [
   'SURGICAL_HISTORY',
   'FAMILY_HISTORY',
   'SOCIAL_HISTORY',
+  'TOBACCO_STATUS',
   'ALLERGIES',
   'ENCOUNTER_QUALITY_MEASURES',
 ]

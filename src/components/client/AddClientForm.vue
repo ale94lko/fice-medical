@@ -2467,7 +2467,9 @@ function onDuplicateSaveConfirm() {
   emitClientDuplicateAudit('CREATE_NEW_CLIENT_DESPITE_DUPLICATES', {
     actionTaken: 'Create New Client Anyway',
     newClientDataSummary: summarizeNewClientDataForAudit(form.value),
-    matchedClientIds: duplicateFilteredMatches.value.map(m => m.patientId),
+    matchedClientIds: duplicateFilteredMatches.value.map(
+      m => m.clientNumber || m.patientId,
+    ),
     highestMatchPercentage: duplicateHighestMatchScore.value,
   })
   const destination = pendingSaveDestination.value

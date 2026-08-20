@@ -433,7 +433,7 @@ async function onUploadSubmit(payload) {
   uploading.value = true
   try {
     await uploadStoredFile(payload.file, payload.category, {
-      clientId: props.clientId,
+      clientNumber: props.clientId,
       entityType: storedFileEntityTypes.client,
     })
     uploadOpen.value = false

@@ -1381,6 +1381,7 @@ export default {
   screeningStatusInProgress: 'En progreso',
   screeningCompletionLabel: '{percent}% completado',
   screeningOverallScore: 'Puntuación global',
+  screeningInterpretation: 'Interpretación',
   screeningRiskLevel: 'Nivel de riesgo',
   screeningRiskLevelLow: 'Bajo',
   screeningRiskLevelModerate: 'Moderado',
@@ -1456,6 +1457,8 @@ export default {
   clinicalNoteAdditionalNotesPlaceholder:
     'Ingrese cualquier nota clínica adicional relevante para este '
     + 'encounter...',
+  clinicalNoteAssessmentSummaryPlaceholder:
+    'Resuma los Assessments completados de este Encounter.',
   clinicalNoteAdditionalNotesHint:
     'Use este campo para notas complementarias que no correspondan '
     + 'a Chief Complaint, Diagnoses, Vitals, Medications, Allergies, '
@@ -1540,6 +1543,8 @@ export default {
     'Antecedentes quirúrgicos',
   'clinicalNoteDataSource_FAMILY_HISTORY': 'Antecedentes familiares',
   'clinicalNoteDataSource_SOCIAL_HISTORY': 'Historia social',
+  'clinicalNoteDataSource_TOBACCO_STATUS':
+    'Estado de tabaquismo / tabaco',
   'clinicalNoteDataSource_ALLERGIES': 'Alergias',
   'clinicalNoteDataSource_ENCOUNTER_QUALITY_MEASURES':
     'Medidas HEDIS abordadas',
@@ -1622,8 +1627,40 @@ export default {
   screeningTemplateQuestionHelpLabel: 'Texto de ayuda',
   screeningTemplateQuestionRequiredLabel: 'Obligatoria',
   screeningTemplateOptionsLabel: 'Opciones',
-  screeningTemplateOptionPlaceholder: 'Valor de la opción',
-  screeningTemplateRemoveOption: 'Eliminar opción',
+  screeningTemplateOptionLabel: 'Opción',
+  screeningTemplateOptionPlaceholder: 'Etiqueta de la opción',
+  screeningTemplateOptionScore: 'Puntuación',
+  screeningTemplateOptionScorePlaceholder: 'Opcional',
+  screeningTemplateOptionDecision: 'Valor de decisión',
+  screeningTemplateOptionDecisionPlaceholder: 'Código opcional',
+  screeningTemplateOptionMeaning: 'Significado clínico',
+  screeningTemplateOptionMeaningPlaceholder: 'Interpretación opcional',
+  screeningTemplateOptionScoreInvalid:
+    'La puntuación de la opción debe ser numérica si se indica.',
+  screeningTemplateScoringSection: 'Puntuación / Interpretación',
+  screeningTemplateScoringHint:
+    'Rangos opcionales que se usan al completar este assessment. '
+    + 'Déjalos vacíos si el assessment no se puntúa.',
+  screeningTemplateAddRange: 'Agregar rango',
+  screeningTemplateRemoveRange: 'Quitar rango',
+  screeningTemplateRangeMin: 'Puntuación mín.',
+  screeningTemplateRangeMax: 'Puntuación máx.',
+  screeningTemplateRangeCode: 'Código',
+  screeningTemplateRangeLabel: 'Etiqueta',
+  screeningTemplateRangeMinMaxRequired:
+    'Cada rango de interpretación necesita puntuación mínima y máxima.',
+  screeningTemplateRangeMinGreaterThanMax:
+    'La puntuación mínima no puede ser mayor que la máxima.',
+  screeningTemplateRangeCodeLabelRequired:
+    'Cada rango de interpretación necesita código y etiqueta.',
+  screeningTemplateRangeDuplicateCode:
+    'Los códigos de interpretación deben ser únicos.',
+  screeningTemplateRangeOverlap:
+    'Los rangos de interpretación no pueden solaparse.',
+  screeningTemplateRangesNeedScores:
+    'Añade al menos una puntuación de opción antes de definir '
+    + 'rangos de interpretación.',
+  screeningTemplateRemoveOption: 'Quitar opción',
   screeningTemplateAddOption: 'Agregar opción',
   screeningTemplateAddQuestion: 'Agregar pregunta',
   screeningTemplateNameRequired: 'El nombre es obligatorio.',
@@ -5553,11 +5590,18 @@ export default {
   encounterNarrativeConflict:
     'Este campo fue actualizado por otro usuario. '
     + 'Recargue e intente de nuevo.',
+  encounterNarrativeCompleteAssessment: 'Completar assessment',
+  encounterNarrativeAssessmentNotCompleted:
+    'Assessment no completado',
   narrativeAiDraftWithAi: 'Redactar con IA',
   narrativeAiDialogTitle: 'Borrador narrativo de IA',
   narrativeAiDialogHint:
     'Borrador sugerido para {label}. Revíselo antes de que pase '
       + 'a ser la narrativa guardada.',
+  narrativeAiDialogHintAssessmentSummary:
+    'Resumen de Assessments del Encounter para {label}. '
+      + 'La IA redacta solo a partir de Assessments completados. '
+      + 'Revíselo antes de que pase a ser la narrativa guardada.',
   narrativeAiDialogHintPlan:
     'Borrador sugerido para {label} — {diagnosis}. La IA reescribe '
       + 'decisiones que usted ya indicó. No determina el tratamiento.',
@@ -5588,6 +5632,9 @@ export default {
     'No hay información suficiente para un borrador fundamentado. '
       + 'Añada notas del proveedor u otro contexto clínico e '
       + 'intente de nuevo.',
+  narrativeAiNoCompletedAssessments:
+    'No hay Assessments completados en este Encounter. '
+      + 'Complete un Assessment antes de generar el resumen.',
   narrativeAiEmptyDraft:
     'El asistente no devolvió un borrador. Intente de nuevo o '
       + 'escriba la narrativa manualmente.',
@@ -5609,6 +5656,8 @@ export default {
   'narrativeAiContextSource_ALLERGIES': 'Alergias',
   'narrativeAiContextSource_VITALS': 'Signos vitales',
   'narrativeAiContextSource_SCREENINGS': 'Evaluaciones',
+  'narrativeAiContextSource_ASSESSMENT_RESULTS':
+    'Resultados de Assessments',
   'narrativeAiContextSource_DIAGNOSTIC_STUDIES':
     'Estudios diagnósticos',
   'narrativeAiContextSource_FOLLOW_UP': 'Seguimiento',

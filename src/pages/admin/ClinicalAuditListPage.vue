@@ -58,11 +58,11 @@
           </q-td>
         </template>
 
-        <template #body-cell-clientId="scope">
+        <template #body-cell-clientNumber="scope">
           <q-td :props="scope" class="admin-data-table__secondary-cell">
             {{ clinicalAuditDisplayLabel(
               scope.row.clientName,
-              scope.row.clientId,
+              scope.row.clientNumber,
             ) }}
           </q-td>
         </template>
@@ -191,7 +191,7 @@ const mobileCardLayout = {
     column: 'entityId',
     labelKey: 'adminTableCardNoLabel',
   },
-  badges: ['createdAt', 'changedBy', 'clientId'],
+  badges: ['createdAt', 'changedBy', 'clientNumber'],
   hideEmpty: true,
 }
 
@@ -243,10 +243,10 @@ const visibleColumns = computed(() => [
     style: 'min-width: 110px',
   },
   {
-    name: 'clientId',
+    name: 'clientNumber',
     label: t('clinicalAuditColClientId'),
     align: 'left',
-    field: row => clinicalAuditDisplayLabel(row.clientName, row.clientId),
+    field: row => clinicalAuditDisplayLabel(row.clientName, row.clientNumber),
     sortable: true,
     headerStyle: 'min-width: 100px',
     style: 'min-width: 100px',
@@ -343,7 +343,7 @@ async function loadRows(paginationPayload) {
       action: filters.action,
       from: filters.from,
       to: filters.to,
-      clientId: filters.clientId,
+      clientNumber: filters.clientNumber,
       changedBy: filters.changedBy,
     })
     rows.value = sortClinicalAuditRows(

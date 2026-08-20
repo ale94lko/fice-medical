@@ -233,10 +233,7 @@
         <GenerateDocumentAction
           v-if="readonly && local.id && clientId"
           :document-type="documentTypes.carePlan"
-          :context="{
-            clientId,
-            carePlanId: local.id,
-          }"
+          :context="documentContext"
           flat
           :label="t('generateDocumentAction')"
           button-class="app-btn-outline q-mr-sm"
@@ -400,6 +397,11 @@ const open = computed({
 
 const local = ref(createEmptyCarePlan())
 const errors = reactive({})
+
+const documentContext = computed(() => ({
+  clientNumber: props.clientId,
+  carePlanId: local.value.id,
+}))
 
 const isDraft = computed(() => isCarePlanDraft(local.value.status))
 const isActive = computed(() => isCarePlanActive(local.value.status))

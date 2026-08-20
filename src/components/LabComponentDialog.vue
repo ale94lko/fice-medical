@@ -32,6 +32,7 @@
                 input-debounce="200"
                 emit-value
                 map-options
+                :clearable="!readonly"
                 :hide-dropdown-icon="readonly"
                 :options="componentOptions"
                 :placeholder="t('labComponentNamePlaceholder')"
@@ -292,14 +293,18 @@ import {
   labMaxComponentNotesLength,
 } from 'components/constants.js'
 import {
-  LAB_COMPONENT_OPTIONS,
+  componentDerivedFields,
   createEmptyLabComponent,
   formatLabResultTimeInput,
   formatReferenceRange,
+  hasAnyReferenceBound,
+  labComponentSelectOptions,
+  labUnitSelectOptions,
   resolveClinicalKeyForComponent,
   suggestFlagFromReference,
   validateLabComponent,
 } from 'src/utils/lab-orders.js'
+import { listLabComponentDefinitions } from 'src/utils/lab-api.js'
 import { labTestIds as tid } from 'src/test-ids/index.js'
 import { labI18nKey } from 'src/utils/lab-i18n.js'
 import { useValidationSaveFeedback } from
@@ -356,13 +361,13 @@ const local = ref(createEmptyLabComponent())
 const errors = ref({})
 const componentFilter = ref('')
 const flagTouched = ref(false)
+const catalog = ref([])
+const skipInitialPrefill = ref(false)
+const preserveSavedSnapshot = ref(false)
 
-const unitOptions = [
-  { label: 'g/dL', value: 'g/dL' },
-  { label: 'K/uL', value: 'K/uL' },
-  { label: '%', value: '%' },
-  { label: 'mg/dL', value: 'mg/dL' },
-]
+const unitOptions = computed(() =>
+  labUnitSelectOptions(catalog.value, [local.value?.unit]),
+)
 
 const flagOptions = computed(() =>
   Object.values(labFlags).map(value => ({
@@ -392,9 +397,8 @@ const takenComponentNames = computed(() => {
 
 const componentOptions = computed(() => {
   const needle = componentFilter.value.trim().toLowerCase()
-  const base = LAB_COMPONENT_OPTIONS.map(item => ({
-    label: item.label,
-    value: item.value,
+  const base = labComponentSelectOptions(catalog.value).map(item => ({
+    ...item,
     disable: takenComponentNames.value.has(
       String(item.value).trim().toLowerCase(),
     ),
@@ -403,9 +407,15 @@ const componentOptions = computed(() => {
     return base
   }
 
-  return base.filter(
-    item => item.label.toLowerCase().includes(needle),
-  )
+  return base.filter(item => {
+    if (item.label.toLowerCase().includes(needle)) {
+      return true
+    }
+
+    return (item.aliases ?? []).some(alias =>
+      String(alias).toLowerCase().includes(needle),
+    )
+  })
 })
 
 const previewRange = computed(() =>
@@ -427,6 +437,11 @@ watch(
       // Do not lock auto-flag on edit; recalc when value/range change.
       flagTouched.value = false
       componentFilter.value = ''
+      skipInitialPrefill.value = Boolean(
+        String(props.component?.componentName ?? '').trim(),
+      )
+      preserveSavedSnapshot.value = skipInitialPrefill.value
+      loadCatalog()
     }
   },
   { immediate: true },
@@ -445,11 +460,56 @@ function onComponentFilter(val, update) {
 }
 
 function onComponentSelected(name) {
-  local.value.clinicalKey = resolveClinicalKeyForComponent(name)
+  const next = String(name ?? '').trim()
+  const keepSnapshot = skipInitialPrefill.value
+    && next
+    && next.toLowerCase() === String(
+      props.component?.componentName ?? '',
+    ).trim().toLowerCase()
+  skipInitialPrefill.value = false
+  if (keepSnapshot) {
+    if (!local.value.clinicalKey) {
+      local.value.clinicalKey = resolveClinicalKeyForComponent(
+        next,
+        catalog.value,
+      )
+    }
+
+    return
+  }
+  applyComponentDerivedDefaults(name)
+}
+
+function applyComponentDerivedDefaults(name) {
+  const derived = componentDerivedFields(name, catalog.value)
+  local.value.componentName = derived.componentName
+  local.value.clinicalKey = derived.clinicalKey
+  local.value.unit = derived.unit
+  local.value.referenceRangeLow = derived.referenceRangeLow
+  local.value.referenceRangeHigh = derived.referenceRangeHigh
+  flagTouched.value = false
+  applySuggestedFlag()
+}
+
+async function loadCatalog() {
+  try {
+    catalog.value = await listLabComponentDefinitions()
+  } catch {
+    catalog.value = []
+  }
+  if (
+    !preserveSavedSnapshot.value
+    && String(local.value.componentName ?? '').trim()
+  ) {
+    applyComponentDerivedDefaults(local.value.componentName)
+  }
 }
 
 function onValueChange() {
-  if (hasBothReferenceRanges()) {
+  if (hasAnyReferenceBound(
+    local.value.referenceRangeLow,
+    local.value.referenceRangeHigh,
+  )) {
     flagTouched.value = false
   }
   applySuggestedFlag()
@@ -461,16 +521,6 @@ function normalizeRangeValue(value) {
   }
 
   return value
-}
-
-function hasBothReferenceRanges() {
-  const low = local.value.referenceRangeLow
-  const high = local.value.referenceRangeHigh
-
-  return low != null && high != null
-    && low !== '' && high !== ''
-    && Number.isFinite(Number(low))
-    && Number.isFinite(Number(high))
 }
 
 function onRangeChange() {
@@ -485,15 +535,21 @@ function onRangeChange() {
     delete next.referenceRange
     errors.value = next
   }
-  if (hasBothReferenceRanges()) {
+  if (hasAnyReferenceBound(
+    local.value.referenceRangeLow,
+    local.value.referenceRangeHigh,
+  )) {
     flagTouched.value = false
   }
   applySuggestedFlag()
 }
 
 function applySuggestedFlag() {
-  if (!hasBothReferenceRanges()) {
-    // Without Low+High, Flag is manual only — never auto-assign.
+  const hasRange = hasAnyReferenceBound(
+    local.value.referenceRangeLow,
+    local.value.referenceRangeHigh,
+  )
+  if (!hasRange) {
     if (!flagTouched.value) {
       local.value.flag = null
     }
@@ -552,6 +608,7 @@ async function onSave(another) {
   if (!local.value.clinicalKey) {
     local.value.clinicalKey = resolveClinicalKeyForComponent(
       local.value.componentName,
+      catalog.value,
     )
   }
   emit('save', { ...local.value }, another)
@@ -559,6 +616,9 @@ async function onSave(another) {
     local.value = createEmptyLabComponent()
     errors.value = {}
     flagTouched.value = false
+    skipInitialPrefill.value = false
+    preserveSavedSnapshot.value = false
+    componentFilter.value = ''
 
     return
   }

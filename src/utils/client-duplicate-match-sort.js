@@ -51,7 +51,9 @@ function compareWithinConfidenceTier(a, b) {
     return score
   }
 
-  return (b.patientId ?? 0) - (a.patientId ?? 0)
+  return String(b.clientNumber ?? '').localeCompare(
+    String(a.clientNumber ?? ''),
+  )
 }
 
 export function sortDuplicateMatches(matches) {

@@ -32,12 +32,25 @@ export const additionalNotesContextSources = [
 
 export const planFieldKey = 'PLAN'
 
+export const preventivePlanFieldKey = 'PREVENTIVE_PLAN'
+
+export const intervalHpiFieldKey = 'INTERVAL_HPI'
+
+export const clinicalAssessmentFieldKey = 'CLINICAL_ASSESSMENT'
+
+export const interventionsFieldKey = 'INTERVENTIONS'
+
+export const patientResponseFieldKey = 'PATIENT_RESPONSE'
+
 export const planNarrativeAiContextSources = [
   'PROVIDER_INPUT',
   'ENCOUNTER_DIAGNOSES',
   'ACTIVE_MEDICATIONS',
   'ALLERGIES',
 ]
+
+export { assessmentSummaryContextSources } from
+  'src/utils/assessment-summary.js'
 
 export const narrativeAiProviderInputRequired = 'REQUIRED'
 export const narrativeAiProviderInputOptional = 'OPTIONAL'
@@ -53,6 +66,7 @@ export const narrativeAiContextSources = [
   'ALLERGIES',
   'VITALS',
   'SCREENINGS',
+  'ASSESSMENT_RESULTS',
   'DIAGNOSTIC_STUDIES',
   'FOLLOW_UP',
   'PROVIDER_INPUT',
@@ -119,6 +133,54 @@ export function isPlanNarrativeField(field = {}) {
   return key === 'plan' || key === 'plan_documentation'
 }
 
+export function isPreventivePlanField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'preventive_plan'
+}
+
+export function isIntervalHpiField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'interval_hpi' || key === 'subjective'
+}
+
+export function isClinicalAssessmentField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'clinical_assessment'
+}
+
+export function isInterventionsField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'interventions'
+}
+
+export function isPatientResponseField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'patient_response'
+}
+
+export { isAssessmentSummaryField } from
+  'src/utils/assessment-summary.js'
+
 export function fieldAllowsNarrativeAi(field = {}) {
   const type = String(field.sectionType || '').toUpperCase()
   const allowedType = type === 'NARRATIVE_FIELD'
@@ -136,7 +198,12 @@ export function fieldAllowsNarrativeAi(field = {}) {
 }
 
 export function fieldRequiresProviderInput(field = {}) {
-  if (isAssessmentPlanSection(field) || isPlanNarrativeField(field)) {
+  if (isAssessmentPlanSection(field)
+    || isPlanNarrativeField(field)
+    || isPreventivePlanField(field)
+    || isClinicalAssessmentField(field)
+    || isInterventionsField(field)
+    || isPatientResponseField(field)) {
     return true
   }
   if (field.aiProviderInputRequired === true) {

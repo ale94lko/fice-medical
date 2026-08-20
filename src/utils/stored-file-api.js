@@ -48,8 +48,9 @@ export async function uploadStoredFile(file, category, opts = {}) {
   const formData = new FormData()
   formData.append('file', file)
   const params = new URLSearchParams({ category })
-  if (opts.clientId != null && opts.clientId !== '') {
-    params.set('client_id', String(opts.clientId))
+  const clientNumber = opts.clientNumber ?? opts.clientId
+  if (clientNumber != null && clientNumber !== '') {
+    params.set('client_number', String(clientNumber))
   }
   if (opts.clinicianId != null && opts.clinicianId !== '') {
     params.set('clinician_id', String(opts.clinicianId))
@@ -122,9 +123,10 @@ export async function listStoredFiles(params = {}) {
     // eslint-disable-next-line camelcase -- query param for API
     queryParams.entity_id = Number(params.entityId)
   }
-  if (params.clientId != null && params.clientId !== '') {
+  const clientNumber = params.clientNumber ?? params.clientId
+  if (clientNumber != null && clientNumber !== '') {
     // eslint-disable-next-line camelcase -- query param for API
-    queryParams.client_id = String(params.clientId)
+    queryParams.client_number = String(clientNumber)
   }
   if (params.page != null) {
     queryParams.page = Number(params.page)
@@ -149,10 +151,10 @@ export async function listStoredFiles(params = {}) {
 
 /**
  * Aggregated client chart files (cross-module).
- * GET /client/v1/{clientId}/files
+ * GET /client/v1/{clientNumber}/files
  */
-export async function listClientFiles(clientId, params = {}) {
-  const id = String(clientId ?? '').trim()
+export async function listClientFiles(clientNumber, params = {}) {
+  const id = String(clientNumber ?? '').trim()
   if (!id) {
     throw new Error('Invalid client id')
   }

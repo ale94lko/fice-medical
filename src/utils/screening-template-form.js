@@ -3,7 +3,8 @@ import {
   screeningTemplateStatusValues,
 } from 'components/constants.js'
 import { normalizeScreeningTemplate } from 'src/utils/screening-normalize.js'
-import { optionLabel } from 'src/utils/screening-template-metadata.js'
+import { normalizeTemplateOption } from
+  'src/utils/screening-template-metadata.js'
 
 const OPTION_FIELD_TYPES = new Set([
   screeningFieldTypes.select,
@@ -34,6 +35,25 @@ export function normalizeTemplateStatusValue(status) {
   return allowed.includes(upper)
     ? upper
     : screeningTemplateStatusValues.active
+}
+
+export function createEmptyOptionForm() {
+  return {
+    label: '',
+    value: '',
+    score: '',
+    decisionValue: '',
+    clinicalMeaning: '',
+  }
+}
+
+export function createEmptyInterpretationRange() {
+  return {
+    minScore: '',
+    maxScore: '',
+    code: '',
+    label: '',
+  }
 }
 
 export function createEmptyQuestionForm() {
@@ -67,6 +87,7 @@ export function createEmptyScreeningTemplateForm() {
     status: screeningTemplateStatusValues.active,
     version: 1,
     inUse: false,
+    interpretationRanges: [],
     sections: [createEmptySectionForm()],
   }
 }
@@ -85,6 +106,38 @@ function resolveTemplateInUse(raw = {}) {
   return Number.isFinite(count) && count > 0
 }
 
+function optionFormFromNormalized(option) {
+  const normalized = normalizeTemplateOption(option)
+  if (!normalized) {
+    return createEmptyOptionForm()
+  }
+
+  return {
+    label: normalized.label || '',
+    value: normalized.value === normalized.label
+      ? ''
+      : (normalized.value || ''),
+    score: normalized.score == null ? '' : String(normalized.score),
+    decisionValue: normalized.decisionValue || '',
+    clinicalMeaning: normalized.clinicalMeaning || '',
+  }
+}
+
+function rangeFormFromNormalized(range) {
+  const row = range ?? {}
+
+  return {
+    minScore: row.minScore == null && row.min_score == null
+      ? ''
+      : String(row.minScore ?? row.min_score),
+    maxScore: row.maxScore == null && row.max_score == null
+      ? ''
+      : String(row.maxScore ?? row.max_score),
+    code: trim(row.code),
+    label: trim(row.label),
+  }
+}
+
 function questionFormFromNormalized(question) {
   return {
     key: nextKey('q'),
@@ -93,7 +146,9 @@ function questionFormFromNormalized(question) {
     helpText: question.helpText ?? '',
     fieldType: question.fieldType,
     required: Boolean(question.required),
-    options: (question.options ?? []).map(optionLabel).filter(Boolean),
+    options: (question.options ?? [])
+      .map(optionFormFromNormalized)
+      .filter(option => trim(option.label)),
   }
 }
 
@@ -119,6 +174,12 @@ export function screeningTemplateFormFromApi(raw = {}) {
     status: normalizeTemplateStatusValue(raw.status ?? normalized.status),
     version: normalized.version,
     inUse: resolveTemplateInUse(raw),
+    interpretationRanges: (
+      normalized.interpretationRanges
+      ?? raw.interpretation_ranges
+      ?? raw.interpretationRanges
+      ?? []
+    ).map(rangeFormFromNormalized),
     sections: sections.length ? sections : [createEmptySectionForm()],
   }
 }
@@ -128,7 +189,9 @@ function questionHasContent(question) {
     return true
   }
 
-  return (question.options ?? []).some(option => trim(option))
+  return (question.options ?? []).some(option =>
+    trim(option?.label ?? option),
+  )
 }
 
 function sectionHasContent(section) {
@@ -156,16 +219,77 @@ export function cloneScreeningTemplateForm(form) {
   return {
     ...createEmptyScreeningTemplateForm(),
     ...base,
+    interpretationRanges: (base.interpretationRanges ?? []).map(range => ({
+      ...createEmptyInterpretationRange(),
+      ...range,
+    })),
     sections: (base.sections ?? []).map(section => ({
       ...section,
       key: section.key ?? nextKey('s'),
       questions: (section.questions ?? []).map(question => ({
         ...question,
         key: question.key ?? nextKey('q'),
-        options: [...(question.options ?? [])],
+        options: (question.options ?? []).map(option => (
+          typeof option === 'object' && option != null
+            ? { ...createEmptyOptionForm(), ...option }
+            : { ...createEmptyOptionForm(), label: trim(option) }
+        )),
       })),
     })),
   }
+}
+
+function optionHasLabel(option) {
+  return Boolean(trim(option?.label ?? option))
+}
+
+function parseOptionalScore(value) {
+  const text = trim(value)
+  if (!text) {
+    return null
+  }
+  const n = Number(text)
+  if (!Number.isFinite(n)) {
+    return undefined
+  }
+
+  return n
+}
+
+function buildOptionRequest(option) {
+  const label = trim(option?.label ?? option)
+  if (!label) {
+    return null
+  }
+  const score = parseOptionalScore(option?.score)
+  const decisionValue = trim(option?.decisionValue)
+  const clinicalMeaning = trim(option?.clinicalMeaning)
+  const value = trim(option?.value)
+  if (
+    score == null
+    && !decisionValue
+    && !clinicalMeaning
+    && (!value || value === label)
+  ) {
+    return label
+  }
+  /* eslint-disable camelcase -- API payload uses snake_case */
+  const payload = { label }
+  if (value && value !== label) {
+    payload.value = value
+  }
+  if (score != null) {
+    payload.score = score
+  }
+  if (decisionValue) {
+    payload.decision_value = decisionValue
+  }
+  if (clinicalMeaning) {
+    payload.clinical_meaning = clinicalMeaning
+  }
+  /* eslint-enable camelcase */
+
+  return payload
 }
 
 function buildQuestionRequest(question, index) {
@@ -181,11 +305,29 @@ function buildQuestionRequest(question, index) {
   /* eslint-enable camelcase */
   if (fieldTypeRequiresOptions(fieldType)) {
     payload.options = (question.options ?? [])
-      .map(option => trim(option))
+      .map(buildOptionRequest)
       .filter(Boolean)
   }
 
   return payload
+}
+
+function buildInterpretationRangeRequest(range) {
+  const minText = trim(range?.minScore)
+  const maxText = trim(range?.maxScore)
+  const code = trim(range?.code)
+  const label = trim(range?.label)
+  if (!minText && !maxText && !code && !label) {
+    return null
+  }
+  /* eslint-disable camelcase -- API payload uses snake_case */
+  return {
+    min_score: minText === '' ? null : Number(minText),
+    max_score: maxText === '' ? null : Number(maxText),
+    code: code || null,
+    label: label || null,
+  }
+  /* eslint-enable camelcase */
 }
 
 function buildSectionRequest(section, index) {
@@ -209,6 +351,11 @@ export function buildScreeningTemplateRequest(form = {}, options = {}) {
   }
   if (includeStructure) {
     body.sections = (form.sections ?? []).map(buildSectionRequest)
+    /* eslint-disable camelcase -- API payload uses snake_case */
+    body.interpretation_ranges = (form.interpretationRanges ?? [])
+      .map(buildInterpretationRangeRequest)
+      .filter(Boolean)
+    /* eslint-enable camelcase */
   }
 
   return body
@@ -220,9 +367,15 @@ function validateQuestion(question, t) {
     errors.label = t('screeningTemplateQuestionLabelRequired')
   }
   if (fieldTypeRequiresOptions(question.fieldType)) {
-    const options = (question.options ?? []).map(trim).filter(Boolean)
+    const options = (question.options ?? []).filter(optionHasLabel)
     if (!options.length) {
       errors.options = t('screeningTemplateOptionsRequired')
+    }
+    const invalidScore = (question.options ?? []).some(option =>
+      parseOptionalScore(option?.score) === undefined,
+    )
+    if (invalidScore) {
+      errors.options = t('screeningTemplateOptionScoreInvalid')
     }
   }
 
@@ -267,9 +420,80 @@ export function validateScreeningTemplateForm(form, t, options = {}) {
         errors.sections[section.key] = sectionErrors
       }
     })
+    const rangeError = validateInterpretationRanges(
+      form.interpretationRanges,
+      t,
+    )
+    if (rangeError) {
+      errors.fields.interpretationRanges = rangeError
+    } else if (
+      hasConfiguredInterpretationRanges(form.interpretationRanges)
+      && !formHasScoredOption(form)
+    ) {
+      errors.fields.interpretationRanges = t(
+        'screeningTemplateRangesNeedScores',
+      )
+    }
   }
 
   return errors
+}
+
+function optionHasNumericScore(option) {
+  return parseOptionalScore(option?.score) != null
+}
+
+function questionHasScoredOption(question) {
+  return (question.options ?? []).some(optionHasNumericScore)
+}
+
+function formHasScoredOption(form) {
+  return (form?.sections ?? []).some(section =>
+    (section.questions ?? []).some(questionHasScoredOption),
+  )
+}
+
+function hasConfiguredInterpretationRanges(ranges) {
+  return (ranges ?? [])
+    .map(buildInterpretationRangeRequest)
+    .filter(Boolean)
+    .length > 0
+}
+
+function validateInterpretationRanges(ranges, t) {
+  const rows = (ranges ?? [])
+    .map(buildInterpretationRangeRequest)
+    .filter(Boolean)
+  if (!rows.length) {
+    return ''
+  }
+  const codes = new Set()
+  const ordered = []
+  for (const row of rows) {
+    if (!Number.isFinite(row.min_score) || !Number.isFinite(row.max_score)) {
+      return t('screeningTemplateRangeMinMaxRequired')
+    }
+    if (row.min_score > row.max_score) {
+      return t('screeningTemplateRangeMinGreaterThanMax')
+    }
+    if (!row.code || !row.label) {
+      return t('screeningTemplateRangeCodeLabelRequired')
+    }
+    const codeKey = String(row.code).toUpperCase()
+    if (codes.has(codeKey)) {
+      return t('screeningTemplateRangeDuplicateCode')
+    }
+    codes.add(codeKey)
+    ordered.push(row)
+  }
+  ordered.sort((a, b) => a.min_score - b.min_score)
+  for (let i = 1; i < ordered.length; i += 1) {
+    if (ordered[i - 1].max_score >= ordered[i].min_score) {
+      return t('screeningTemplateRangeOverlap')
+    }
+  }
+
+  return ''
 }
 
 export function screeningTemplateFormHasErrors(errors) {

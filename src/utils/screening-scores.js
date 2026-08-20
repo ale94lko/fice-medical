@@ -19,6 +19,28 @@ const MODERATE_RISK_LABELS = [
   'moderate',
 ]
 
+export function interpretScreeningScore(template, score) {
+  const ranges = template?.interpretationRanges ?? []
+  if (!ranges.length || score == null || !Number.isFinite(Number(score))) {
+    return null
+  }
+  const n = Number(score)
+  const match = ranges.find(range =>
+    Number.isFinite(range.minScore)
+    && Number.isFinite(range.maxScore)
+    && n >= range.minScore
+    && n <= range.maxScore,
+  )
+  if (!match) {
+    return null
+  }
+
+  return {
+    code: match.code,
+    label: match.label,
+  }
+}
+
 export function calculateScreeningScore(template, answersMap) {
   let score = 0
   let maxScore = 0

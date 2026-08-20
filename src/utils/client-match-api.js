@@ -145,10 +145,10 @@ function normalizeMatchRow(raw) {
   if (!raw || typeof raw !== 'object') {
     return null
   }
-  const patientId = raw.client_id ?? raw.clientId
-    ?? raw.patient_id ?? raw.patientId
-  const idNum = Number(patientId)
-  if (!Number.isFinite(idNum)) {
+  const clientNumber = String(
+    raw.client_number ?? raw.clientNumber ?? '',
+  ).trim()
+  if (!clientNumber) {
     return null
   }
 
@@ -172,12 +172,10 @@ function normalizeMatchRow(raw) {
   ])
 
   return {
-    patientId: idNum,
-    clientNumber: String(
-      raw.client_number ?? raw.clientNumber ?? '',
-    ).trim(),
+    patientId: clientNumber,
+    clientNumber,
     fullName: String(raw.full_name ?? raw.fullName ?? '').trim()
-      || `Client #${idNum}`,
+      || clientNumber,
     dateOfBirth: String(raw.date_of_birth ?? raw.dateOfBirth ?? '').trim(),
     matchConfidence: String(raw.match_confidence ?? raw.matchConfidence ?? '')
       .trim(),

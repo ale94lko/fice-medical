@@ -27,13 +27,13 @@ export const documentEntityTypes = {
 }
 
 export const documentContextFields = {
-  [documentTypes.clientProfile]: ['clientId'],
+  [documentTypes.clientProfile]: ['clientNumber'],
   [documentTypes.userProfile]: ['userId'],
   [documentTypes.staffProfile]: ['staffId'],
-  [documentTypes.carePlan]: ['clientId', 'carePlanId'],
-  [documentTypes.clinicalNote]: ['clientId', 'clinicalNoteId'],
+  [documentTypes.carePlan]: ['clientNumber', 'carePlanId'],
+  [documentTypes.clinicalNote]: ['clientNumber', 'clinicalNoteId'],
   [documentTypes.appointmentSummary]: ['appointmentId'],
-  [documentTypes.screeningReport]: ['clientId', 'screeningId'],
+  [documentTypes.screeningReport]: ['clientNumber', 'screeningId'],
 }
 
 export const documentFormatOptions = [

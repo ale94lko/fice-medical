@@ -1332,6 +1332,7 @@ export default {
   screeningStatusInProgress: 'In Progress',
   screeningCompletionLabel: '{percent}% Complete',
   screeningOverallScore: 'Overall Score',
+  screeningInterpretation: 'Interpretation',
   screeningRiskLevel: 'Risk Level',
   screeningRiskLevelLow: 'Low',
   screeningRiskLevelModerate: 'Moderate',
@@ -1404,6 +1405,8 @@ export default {
   clinicalNoteAdditionalNotesLabel: 'Additional Notes',
   clinicalNoteAdditionalNotesPlaceholder:
     'Enter any additional clinical notes relevant to this encounter...',
+  clinicalNoteAssessmentSummaryPlaceholder:
+    'Summarize completed Assessments for this Encounter.',
   clinicalNoteAdditionalNotesHint:
     'Use this for supplementary notes that do not belong in Chief '
     + 'Complaint, Diagnoses, Vitals, Medications, Allergies, Medical '
@@ -1484,6 +1487,8 @@ export default {
   'clinicalNoteDataSource_SURGICAL_HISTORY': 'Surgical history',
   'clinicalNoteDataSource_FAMILY_HISTORY': 'Family history',
   'clinicalNoteDataSource_SOCIAL_HISTORY': 'Social history',
+  'clinicalNoteDataSource_TOBACCO_STATUS':
+    'Smoking / tobacco status',
   'clinicalNoteDataSource_ALLERGIES': 'Allergies',
   'clinicalNoteDataSource_ENCOUNTER_QUALITY_MEASURES':
     'HEDIS Measures Addressed',
@@ -1565,7 +1570,39 @@ export default {
   screeningTemplateQuestionHelpLabel: 'Help text',
   screeningTemplateQuestionRequiredLabel: 'Required',
   screeningTemplateOptionsLabel: 'Options',
-  screeningTemplateOptionPlaceholder: 'Option value',
+  screeningTemplateOptionLabel: 'Option',
+  screeningTemplateOptionPlaceholder: 'Option label',
+  screeningTemplateOptionScore: 'Score',
+  screeningTemplateOptionScorePlaceholder: 'Optional',
+  screeningTemplateOptionDecision: 'Decision value',
+  screeningTemplateOptionDecisionPlaceholder: 'Optional code',
+  screeningTemplateOptionMeaning: 'Clinical meaning',
+  screeningTemplateOptionMeaningPlaceholder: 'Optional interpretation',
+  screeningTemplateOptionScoreInvalid:
+    'Option scores must be numeric when provided.',
+  screeningTemplateScoringSection: 'Scoring / Interpretation',
+  screeningTemplateScoringHint:
+    'Optional ranges used when this assessment is completed. '
+    + 'Leave empty for assessments that are not scored.',
+  screeningTemplateAddRange: 'Add range',
+  screeningTemplateRemoveRange: 'Remove range',
+  screeningTemplateRangeMin: 'Min score',
+  screeningTemplateRangeMax: 'Max score',
+  screeningTemplateRangeCode: 'Code',
+  screeningTemplateRangeLabel: 'Label',
+  screeningTemplateRangeMinMaxRequired:
+    'Each interpretation range needs a min and max score.',
+  screeningTemplateRangeMinGreaterThanMax:
+    'Min score cannot be greater than max score.',
+  screeningTemplateRangeCodeLabelRequired:
+    'Each interpretation range needs a code and label.',
+  screeningTemplateRangeDuplicateCode:
+    'Interpretation range codes must be unique.',
+  screeningTemplateRangeOverlap:
+    'Interpretation ranges cannot overlap.',
+  screeningTemplateRangesNeedScores:
+    'Add at least one option score before defining '
+    + 'interpretation ranges.',
   screeningTemplateRemoveOption: 'Remove option',
   screeningTemplateAddOption: 'Add option',
   screeningTemplateAddQuestion: 'Add question',
@@ -5360,11 +5397,18 @@ export default {
   encounterNarrativeConflict:
     'This narrative field was updated by another user. '
     + 'Reload and try again.',
+  encounterNarrativeCompleteAssessment: 'Complete Assessment',
+  encounterNarrativeAssessmentNotCompleted:
+    'Assessment not completed',
   narrativeAiDraftWithAi: 'Draft with AI',
   narrativeAiDialogTitle: 'AI Narrative Draft',
   narrativeAiDialogHint:
     'Suggested draft for {label}. Review it before it becomes '
       + 'saved Narrative.',
+  narrativeAiDialogHintAssessmentSummary:
+    'Suggested Encounter Assessment Summary for {label}. '
+      + 'The AI drafts from completed Assessments only. '
+      + 'Review it before it becomes saved Narrative.',
   narrativeAiDialogHintPlan:
     'Suggested draft for {label} — {diagnosis}. The AI rewrites '
       + 'decisions you already supplied. It does not determine '
@@ -5396,6 +5440,9 @@ export default {
     'Unable to generate a meaningful draft from the available '
       + 'information. Add provider notes or additional clinical '
       + 'context and try again.',
+  narrativeAiNoCompletedAssessments:
+    'No completed Assessments are available for this Encounter. '
+      + 'Complete an Assessment before generating a summary.',
   narrativeAiEmptyDraft:
     'The assistant did not return a draft. Try again or write '
       + 'the Narrative manually.',
@@ -5415,6 +5462,8 @@ export default {
   'narrativeAiContextSource_ALLERGIES': 'Allergies',
   'narrativeAiContextSource_VITALS': 'Vitals',
   'narrativeAiContextSource_SCREENINGS': 'Screenings',
+  'narrativeAiContextSource_ASSESSMENT_RESULTS':
+    'Assessment results',
   'narrativeAiContextSource_DIAGNOSTIC_STUDIES':
     'Diagnostic Studies',
   'narrativeAiContextSource_FOLLOW_UP': 'Follow Up',

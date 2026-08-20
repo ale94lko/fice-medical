@@ -58,6 +58,30 @@ export function normalizeEncounterNarrative(raw = {}) {
           ?? field.aiProviderInputRequired,
       ),
       version: field.version ?? 0,
+      assessmentTemplateId:
+        field.assessment_template_id
+        ?? field.assessmentTemplateId
+        ?? null,
+      assessmentTemplateName:
+        field.assessment_template_name
+        ?? field.assessmentTemplateName
+        ?? '',
+      screeningId: field.screening_id ?? field.screeningId ?? null,
+      screeningStatus: String(
+        field.screening_status ?? field.screeningStatus ?? '',
+      ).toLowerCase(),
+      screeningTotalScore:
+        field.screening_total_score
+        ?? field.screeningTotalScore
+        ?? null,
+      screeningInterpretationCode:
+        field.screening_interpretation_code
+        ?? field.screeningInterpretationCode
+        ?? null,
+      screeningInterpretationLabel:
+        field.screening_interpretation_label
+        ?? field.screeningInterpretationLabel
+        ?? '',
     })),
   }
 }
@@ -121,15 +145,18 @@ export async function saveEncounterNarrative(encounterId, fields) {
   const response = await apiInstance.put(
     apiPaths.encounterNarrative(encounterId),
     {
-      fields: fields.map(field => ({
-        template_section_id: field.templateSectionId,
-        field_key: field.fieldKey,
-        value_text: field.valueText ?? null,
-        value_json: field.valueJson || null,
-        version: field.version ?? 0,
-        ai_suggestion_id: field.aiSuggestionId || null,
-        ai_modified_after: field.aiModifiedAfter === true,
-      })),
+      fields: fields
+        .filter(field => String(field.sectionType || '')
+          .toUpperCase() !== 'ASSESSMENT')
+        .map(field => ({
+          template_section_id: field.templateSectionId,
+          field_key: field.fieldKey,
+          value_text: field.valueText ?? null,
+          value_json: field.valueJson || null,
+          version: field.version ?? 0,
+          ai_suggestion_id: field.aiSuggestionId || null,
+          ai_modified_after: field.aiModifiedAfter === true,
+        })),
     },
   )
 

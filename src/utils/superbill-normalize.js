@@ -485,9 +485,8 @@ export function normalizeWorkQueueItem(raw = {}) {
       row.client_dob ?? row.clientDob,
     ),
     client: {
-      id: parseOptionalNumber(row.client_id ?? row.clientId),
-      fullName: clientName,
       clientNumber,
+      fullName: clientName,
     },
     dateOfService: trim(row.date_of_service ?? row.dateOfService),
     dateOfServiceDisplay: apiDateToDisplay(

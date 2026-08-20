@@ -58,6 +58,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ScreeningDialogSection from 'components/ScreeningDialogSection.vue'
 import ScreeningDynamicField from 'components/ScreeningDynamicField.vue'
+import { optionLabel } from 'src/utils/screening-template-metadata.js'
 
 const props = defineProps({
   template: {
@@ -80,7 +81,7 @@ function toPreviewQuestion(question) {
     fieldType: question.fieldType,
     required: Boolean(question.required),
     options: (question.options ?? []).filter(
-      option => String(option ?? '').trim() !== '',
+      option => optionLabel(option) !== '',
     ),
   }
 }

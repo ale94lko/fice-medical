@@ -6,7 +6,7 @@ export function createEmptyClinicalAuditFilters() {
     action: null,
     from: '',
     to: '',
-    clientId: null,
+    clientNumber: null,
     clientOption: null,
     changedBy: null,
     changedByOption: null,
@@ -23,7 +23,7 @@ export function cloneClinicalAuditFilters(filters = {}) {
     action: source.action ?? null,
     from: String(source.from ?? '').trim(),
     to: String(source.to ?? '').trim(),
-    clientId: source.clientId ?? null,
+    clientNumber: source.clientNumber ?? source.clientId ?? null,
     clientOption: source.clientOption
       ? { ...source.clientOption }
       : null,
@@ -49,7 +49,7 @@ export function countActiveClinicalAuditFilters(filters = {}) {
   if (f.to) {
     count += 1
   }
-  if (f.clientId != null && String(f.clientId).trim() !== '') {
+  if (f.clientNumber != null && String(f.clientNumber).trim() !== '') {
     count += 1
   }
   if (f.changedBy != null && String(f.changedBy).trim() !== '') {

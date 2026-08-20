@@ -2696,6 +2696,7 @@ export const apiPaths = {
   patientLabs: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/labs`,
+  labComponentDefinitions: '/lab-component-definitions/v1',
   patientLabById: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,

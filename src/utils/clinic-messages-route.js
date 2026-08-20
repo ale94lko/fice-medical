@@ -27,15 +27,15 @@ export function clinicMessagesLocation(conversationId) {
   }
 }
 
-export function clinicMessagesClientLocation(clientId) {
-  const id = String(clientId ?? '').trim()
+export function clinicMessagesClientLocation(clientNumber) {
+  const id = String(clientNumber ?? '').trim()
   if (!id) {
     return { name: 'ClinicMessages' }
   }
 
   return {
     name: 'ClinicMessages',
-    query: { clientId: id },
+    query: { clientNumber: id },
   }
 }
 

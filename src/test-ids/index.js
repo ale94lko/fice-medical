@@ -579,6 +579,11 @@ export const screeningTemplateDialogTestIds = {
     `${sIndex}-${qIndex}-${oIndex}`,
     'remove',
   ),
+  addRange: 'screening-template-dialog-btn-add-range',
+  removeRange: index =>
+    toTestId('screening-template-dialog-range', index, 'remove'),
+  rangeField: (index, name) =>
+    toTestId('screening-template-dialog-range', index, name),
   viewToggle: 'screening-template-dialog-view-toggle',
   previewClose: 'screening-template-preview-dialog-btn-close',
 }

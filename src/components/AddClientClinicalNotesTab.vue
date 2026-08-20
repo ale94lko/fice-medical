@@ -589,7 +589,7 @@ async function onExport(row) {
   }
 
   exportContext.value = {
-    clientId: clientId.value,
+    clientNumber: clientId.value,
     clinicalNoteId: row.id,
   }
   exportDialogOpen.value = true

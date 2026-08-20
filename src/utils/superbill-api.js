@@ -69,7 +69,7 @@ export async function listSuperbills({
   from,
   to,
   q,
-  clientId,
+  clientNumber,
   includeVoided,
   limit = 20,
   page = 1,
@@ -91,9 +91,9 @@ export async function listSuperbills({
   if (q) {
     params.q = q
   }
-  const id = String(clientId ?? '').trim()
+  const id = String(clientNumber ?? '').trim()
   if (id) {
-    params['client_id'] = id
+    params['client_number'] = id
   }
   if (includeVoided) {
     params['include_voided'] = true

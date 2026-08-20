@@ -27,7 +27,9 @@ export async function resolveInsuranceCardAttachment(value, opts = {}) {
     const uploaded = await uploadStoredFile(
       value.file,
       storedFileCategories.insuranceDocument,
-      opts.clientId ? { clientId: opts.clientId } : {},
+      opts.clientNumber || opts.clientId
+        ? { clientNumber: opts.clientNumber || opts.clientId }
+        : {},
     )
     const fileId = parsePositiveFileId(uploaded?.id)
     if (fileId == null) {

@@ -114,7 +114,7 @@ async function loadBills({ force = false } = {}) {
   loading.value = true
   try {
     const result = await listSuperbills({
-      clientId: id,
+      clientNumber: id,
       includeVoided: true,
       limit: 100,
     })

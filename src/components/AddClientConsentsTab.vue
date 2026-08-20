@@ -366,7 +366,7 @@ async function onSignSubmit(payload) {
       const uploaded = await uploadStoredFile(
         payload.paperFile,
         storedFileCategories.consentForm,
-        { clientId: props.clientId },
+        { clientNumber: props.clientId },
       )
       signPayload = {
         signerName: payload.signerName,

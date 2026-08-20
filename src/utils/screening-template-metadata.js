@@ -56,6 +56,8 @@ export function normalizeTemplateOption(raw, index = 0) {
       value: label,
       score: null,
       clinicalValue: null,
+      decisionValue: null,
+      clinicalMeaning: null,
     }
   }
   if (typeof raw !== 'object') {
@@ -72,7 +74,13 @@ export function normalizeTemplateOption(raw, index = 0) {
     raw.value ?? raw.code ?? raw.key ?? tokenFromLabel(label) ?? index,
   ).trim()
   const score = optionalNumber(
-    raw.score ?? raw.clinical_value ?? raw.clinicalValue,
+    raw.score,
+  )
+  const decisionValue = optionalString(
+    raw.decision_value ?? raw.decisionValue,
+  )
+  const clinicalMeaning = optionalString(
+    raw.clinical_meaning ?? raw.clinicalMeaning,
   )
 
   return {
@@ -80,6 +88,8 @@ export function normalizeTemplateOption(raw, index = 0) {
     value: value || label,
     score,
     clinicalValue: score,
+    decisionValue,
+    clinicalMeaning,
   }
 }
 
@@ -166,6 +176,32 @@ export function optionKey(option, index = 0) {
   const value = optionValue(option)
 
   return value || `opt-${index}`
+}
+
+export function normalizeInterpretationRange(raw) {
+  const row = raw ?? {}
+  const minScore = optionalNumber(row.min_score ?? row.minScore)
+  const maxScore = optionalNumber(row.max_score ?? row.maxScore)
+  const code = optionalString(row.code)
+  const label = optionalString(row.label)
+  if (
+    minScore == null
+    && maxScore == null
+    && !code
+    && !label
+  ) {
+    return null
+  }
+
+  return { minScore, maxScore, code, label }
+}
+
+export function normalizeInterpretationRangeList(raw) {
+  if (!Array.isArray(raw)) {
+    return []
+  }
+
+  return raw.map(normalizeInterpretationRange).filter(Boolean)
 }
 
 export function optionClinicalScore(option) {

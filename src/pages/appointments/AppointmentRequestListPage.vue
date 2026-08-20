@@ -97,7 +97,7 @@
             :props="scope"
             class="admin-data-table__primary-cell">
             <button
-              v-if="scope.row.clientId"
+              v-if="scope.row.clientNumber"
               type="button"
               class="admin-data-table__link"
               :data-testid="tid.rowClient(scope.row.id)"
@@ -418,12 +418,13 @@ function openCreateClient(row) {
 }
 
 function openClient(row) {
-  if (!row?.clientId) {
+  const number = String(row?.clientNumber ?? '').trim()
+  if (!number) {
     return
   }
   void router.push({
     name: 'ClientOverview',
-    params: { id: row.clientId },
+    params: { id: number },
   })
 }
 

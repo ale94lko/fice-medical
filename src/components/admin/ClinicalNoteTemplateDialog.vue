@@ -220,7 +220,11 @@
                       v-model="section.aiProviderInputRequired"
                       :disable="readonly
                         || isAssessmentPlanSection(section)
-                        || isPlanNarrativeField(section)"
+                        || isPlanNarrativeField(section)
+                        || isPreventivePlanField(section)
+                        || isClinicalAssessmentField(section)
+                        || isInterventionsField(section)
+                        || isPatientResponseField(section)"
                       :label="t(
                         'clinicalNoteTemplateAiProviderInputRequired',
                       )"
@@ -478,7 +482,15 @@ import {
   parseNarrativeSectionGroup,
 } from 'src/utils/clinical-note-narrative-group.js'
 import {
+  assessmentSummaryContextSources,
+  hpiProblemsChronicContextSources,
+  isAssessmentSummaryField,
+  isClinicalAssessmentField,
+  isIntervalHpiField,
+  isInterventionsField,
+  isPatientResponseField,
   isPlanNarrativeField,
+  isPreventivePlanField,
   narrativeAiContextSources,
   planNarrativeAiContextSources,
 } from 'src/utils/narrative-ai-assistance.js'
@@ -664,11 +676,45 @@ function onAiAssistance(section) {
     return
   }
   if (isAssessmentPlanSection(section)
-    || isPlanNarrativeField(section)) {
+    || isPlanNarrativeField(section)
+    || isPreventivePlanField(section)
+    || isClinicalAssessmentField(section)) {
     section.aiProviderInputRequired = true
     if (!Array.isArray(section.aiContextSources)
       || !section.aiContextSources.length) {
       section.aiContextSources = [...planNarrativeAiContextSources]
+    }
+
+    return
+  }
+  if (isInterventionsField(section)
+    || isPatientResponseField(section)) {
+    section.aiProviderInputRequired = true
+    if (!Array.isArray(section.aiContextSources)
+      || !section.aiContextSources.length) {
+      section.aiContextSources = ['PROVIDER_INPUT']
+    }
+
+    return
+  }
+  if (isIntervalHpiField(section)) {
+    section.aiProviderInputRequired = false
+    if (!Array.isArray(section.aiContextSources)
+      || !section.aiContextSources.length) {
+      section.aiContextSources = [
+        ...hpiProblemsChronicContextSources,
+      ]
+    }
+
+    return
+  }
+  if (isAssessmentSummaryField(section)) {
+    section.aiProviderInputRequired = false
+    if (!Array.isArray(section.aiContextSources)
+      || !section.aiContextSources.length) {
+      section.aiContextSources = [
+        ...assessmentSummaryContextSources,
+      ]
     }
 
     return

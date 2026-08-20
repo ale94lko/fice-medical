@@ -37,6 +37,25 @@ export const encounterWorkspaceTestIds = {
     'encounter-narrative-ai-draft',
     key,
   ),
+  narrativeAssessment: key => toTestId(
+    'encounter-narrative-assessment',
+    key,
+  ),
+  narrativeAssessmentComplete: key => toTestId(
+    'encounter-narrative-assessment',
+    key,
+    'btn-complete',
+  ),
+  narrativeAssessmentView: key => toTestId(
+    'encounter-narrative-assessment',
+    key,
+    'btn-view',
+  ),
+  narrativeAssessmentEdit: key => toTestId(
+    'encounter-narrative-assessment',
+    key,
+    'btn-edit',
+  ),
   narrativeApAiDraft: id => toTestId(
     'encounter-narrative-ap-ai-draft',
     id,

@@ -133,7 +133,7 @@ async function loadFiles() {
       category: storedFileCategories.generatedDocument,
       entityType: props.entityType,
       entityId: entityId.value,
-      clientId: props.clientId,
+      clientNumber: props.clientId,
       page: 0,
       limit: 20,
     })

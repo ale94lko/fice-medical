@@ -11,8 +11,17 @@ function parsePositiveId(value) {
   return id
 }
 
+function parseClientNumber(value) {
+  const token = String(value ?? '').trim()
+  if (!token) {
+    return null
+  }
+
+  return token
+}
+
 const CONTEXT_FIELD_MAP = {
-  clientId: 'clientId',
+  clientNumber: 'clientNumber',
   userId: 'userId',
   staffId: 'staffId',
   carePlanId: 'carePlanId',
@@ -23,7 +32,7 @@ const CONTEXT_FIELD_MAP = {
 
 const REQUIRED_FIELD_MAP = {
   // eslint-disable-next-line camelcase -- API field names
-  client_id: 'clientId',
+  client_number: 'clientNumber',
   // eslint-disable-next-line camelcase -- API field names
   user_id: 'userId',
   // eslint-disable-next-line camelcase -- API field names
@@ -36,6 +45,14 @@ const REQUIRED_FIELD_MAP = {
   appointment_id: 'appointmentId',
   // eslint-disable-next-line camelcase -- API field names
   screening_id: 'screeningId',
+}
+
+function resolveContextValue(field, contextKey, context) {
+  if (field === 'client_number' || contextKey === 'clientNumber') {
+    return parseClientNumber(context[contextKey])
+  }
+
+  return parsePositiveId(context[contextKey])
 }
 
 export function normalizeDocumentTypeInfo(raw) {
@@ -80,7 +97,7 @@ export function validateDocumentGenerationContext(
 
   required.forEach(field => {
     const contextKey = REQUIRED_FIELD_MAP[field] ?? field
-    const value = parsePositiveId(context[contextKey])
+    const value = resolveContextValue(field, contextKey, context)
     if (value == null) {
       missing.push(field)
     }
@@ -111,7 +128,7 @@ export function buildGenerateDocumentPayload({
 
   const fields = documentContextFields[body.documentType] ?? []
   fields.forEach(field => {
-    const value = parsePositiveId(context[field])
+    const value = resolveContextValue(field, field, context)
     if (value != null) {
       body[CONTEXT_FIELD_MAP[field] ?? field] = value
     }

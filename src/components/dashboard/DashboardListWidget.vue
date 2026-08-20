@@ -106,7 +106,7 @@ function rowKey(row, index) {
   return String(
     row?.id
       ?? row?.appointment_id
-      ?? row?.client_id
+      ?? row?.client_number
       ?? row?.resource_id
       ?? index,
   )

@@ -105,6 +105,20 @@
                   </div>
                 </div>
               </div>
+              <div
+                v-if="interpretationLabel"
+                class="col-auto">
+                <div
+                  class="screening-dialog__metric
+                    screening-dialog__metric--score">
+                  <div class="screening-dialog__metric-label">
+                    {{ t('screeningInterpretation') }}
+                  </div>
+                  <div class="screening-dialog__metric-value">
+                    {{ interpretationLabel }}
+                  </div>
+                </div>
+              </div>
               <div class="col-auto">
                 <div
                   class="screening-dialog__metric"
@@ -232,12 +246,9 @@
         align="right"
         class="app-dialog-card__actions">
         <GenerateDocumentAction
-          v-if="!ui.canEditDraft && screening.id"
+          v-if="!ui.canEditDraft && screening.id && patientId"
           :document-type="documentTypes.screeningReport"
-          :context="{
-            clientId: patientId,
-            screeningId: screening.id,
-          }"
+          :context="documentContext"
           flat
           :label="t('generateDocumentAction')"
           button-class="app-btn-outline q-mr-sm"
@@ -368,6 +379,14 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  initialTemplateId: {
+    type: [String, Number],
+    default: null,
+  },
+  lockTemplate: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'saved', 'closed'])
@@ -396,6 +415,11 @@ const screening = reactive({
   assignedClinicianId: null,
 })
 
+const documentContext = computed(() => ({
+  clientNumber: props.patientId,
+  screeningId: screening.id,
+}))
+
 const headerForm = reactive({
   templateId: null,
   clinicianId: null,
@@ -414,7 +438,9 @@ const editor = useScreeningEditor(() => ({
 const ui = useScreeningEditorUi(editor)
 
 const canEditTemplate = computed(
-  () => !props.readonly && !screening.id,
+  () => !props.readonly
+    && !screening.id
+    && !props.lockTemplate,
 )
 
 const canEditMeta = computed(
@@ -444,6 +470,9 @@ const completionLabel = computed(() =>
 )
 
 const scoreDisplay = computed(() => {
+  if (screening.totalScore != null && screening.totalScore !== '') {
+    return String(screening.totalScore)
+  }
   const { score, maxScore } = ui.scoreSummary
   if (!maxScore) {
     return '—'
@@ -451,6 +480,10 @@ const scoreDisplay = computed(() => {
 
   return `${score} / ${maxScore}`
 })
+
+const interpretationLabel = computed(() =>
+  ui.interpretationSummary?.label || '',
+)
 
 const riskLevelLabel = computed(() => {
   const labels = {
@@ -509,6 +542,9 @@ function resetState() {
     status: screeningStatuses.draft,
     screeningDate: todayDateUs(),
     assignedClinicianId: null,
+    totalScore: null,
+    interpretationCode: null,
+    interpretationLabel: null,
   })
   Object.assign(headerForm, {
     templateId: null,
@@ -665,6 +701,13 @@ watch(open, async isOpen => {
   const id = String(props.screeningId ?? '').trim()
   if (id) {
     await loadExistingScreening(id)
+
+    return
+  }
+  const templateId = Number(props.initialTemplateId)
+  if (Number.isFinite(templateId) && templateId > 0) {
+    headerForm.templateId = templateId
+    await onTemplateSelected(templateId)
   }
 })
 

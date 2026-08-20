@@ -28,7 +28,7 @@
               <GenerateDocumentAction
                 :document-type="documentTypes.clientProfile"
                 :options="clientOverviewGenerateDocumentOptions"
-                :context="{ clientId }"
+                :context="documentContext"
                 dense
                 size="sm"
                 :label="t('generateDocumentAction')"
@@ -445,6 +445,10 @@ const emit = defineEmits([
 const { t } = useI18n()
 const $q = useQuasar()
 const { canEditAnyClientSection } = useClientPermissions()
+
+const documentContext = computed(() => ({
+  clientNumber: props.header?.clientNumber ?? props.clientId,
+}))
 
 function copyClientNumber() {
   copyToClipboard(props.header.clientNumber)

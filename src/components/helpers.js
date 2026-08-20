@@ -403,6 +403,18 @@ export function clientChartKey(client) {
   ).trim()
 }
 
+/**
+ * Chart key for nested client paths. Always the public client number.
+ */
+export function parseClientRecordId(value) {
+  return clientChartKey({ clientNumber: value })
+}
+
+export function resolveClientRecordId(chartKey, source = null) {
+  return clientChartKey(source)
+    || String(chartKey ?? '').trim()
+}
+
 export function staffChartKey(staff) {
   return String(
     staff?.staffNo

@@ -94,7 +94,9 @@ export function resolveGeneratedNoteEditSource(section = {}) {
     || sourceType === 'SURGICAL_HISTORY'
     || sourceType === 'FAMILY_HISTORY'
     || sourceType === 'SOCIAL_HISTORY'
-    || key.includes('history')) {
+    || sourceType === 'TOBACCO_STATUS'
+    || key.includes('history')
+    || key.includes('tobacco')) {
     return {
       moduleKey: 'familyMedicalHistory',
       tab: addClientTabKeys.familyMedicalHistory,

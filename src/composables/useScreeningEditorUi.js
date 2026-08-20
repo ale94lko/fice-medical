@@ -47,5 +47,8 @@ export function useScreeningEditorUi(editor) {
     get scoreSummary() {
       return readEditor(editor, 'scoreSummary')
     },
+    get interpretationSummary() {
+      return readEditor(editor, 'interpretationSummary')
+    },
   })
 }

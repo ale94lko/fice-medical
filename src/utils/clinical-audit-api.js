@@ -45,6 +45,7 @@ function trimOrEmpty(value) {
 const SORT_BY_TO_API = {
   createdAt: 'created_at',
   changedBy: 'changed_by_name',
+  clientNumber: 'client_name',
   clientId: 'client_name',
   entityId: 'entity_name',
   action: 'action',
@@ -68,9 +69,9 @@ function buildListQueryParams(params = {}) {
     limit,
   }
 
-  const clientId = trimOrEmpty(params.clientId)
-  if (clientId) {
-    query.client_id = clientId
+  const clientNumber = trimOrEmpty(params.clientNumber ?? params.clientId)
+  if (clientNumber) {
+    query.client_number = clientNumber
   }
   const entityType = trimOrEmpty(params.entityType)
   if (entityType) {

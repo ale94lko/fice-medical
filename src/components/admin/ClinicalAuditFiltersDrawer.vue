@@ -72,7 +72,7 @@
 
           <AddClientLabeledField :label="t('clinicalAuditFilterClient')">
             <FormSelect
-              v-model="local.clientId"
+              v-model="local.clientNumber"
               :options="clientFilterOptions"
               clearable
               outlined
@@ -86,7 +86,7 @@
               :test-id="clinicalAuditTestIds.filterField('client')"
               :placeholder="t('clinicalAuditFilterClient')"
               @filter="onClientFilter"
-              @update:model-value="onClientIdChange"
+              @update:model-value="onClientNumberChange"
             />
           </AddClientLabeledField>
 
@@ -259,13 +259,14 @@ function buildClientOptionLabel(row) {
 }
 
 function mapRowToClientOption(row) {
-  if (!row || row.id == null) {
+  const clientNumber = String(row?.[ck.clientNumber] ?? '').trim()
+  if (!clientNumber && row?.id == null) {
     return null
   }
 
   return {
     label: buildClientOptionLabel(row),
-    value: row.id,
+    value: clientNumber || String(row.id),
   }
 }
 
@@ -402,7 +403,7 @@ function onChangedByFilter(val, update, abort) {
   })()
 }
 
-function onClientIdChange(value) {
+function onClientNumberChange(value) {
   if (value == null || value === '') {
     selectedClientOption.value = null
     local.value.clientOption = null

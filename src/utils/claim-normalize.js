@@ -518,7 +518,7 @@ export function normalizeClaimWorkQueueItem(raw = {}) {
     superbillNumber: trim(
       row.superbill_number ?? row.superbillNumber,
     ),
-    clientId: parseOptionalNumber(row.client_id ?? row.clientId),
+    clientNumber: trim(row.client_number ?? row.clientNumber),
     clientName,
     dateOfService: trim(row.date_of_service ?? row.dateOfService),
     dateOfServiceDisplay: apiDateToDisplay(

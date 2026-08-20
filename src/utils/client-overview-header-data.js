@@ -26,6 +26,23 @@ function trim(value) {
   return String(value ?? '').trim()
 }
 
+function numericRecordId(form, rawClient) {
+  const candidates = [
+    form?.[ck.id],
+    rawClient?.id,
+    rawClient?.client_id,
+    rawClient?.clientId,
+  ]
+  for (const value of candidates) {
+    const id = Number(value)
+    if (Number.isFinite(id) && id > 0) {
+      return id
+    }
+  }
+
+  return null
+}
+
 function formatClientName(form, options) {
   return formatClientDisplayName(form, options) || '—'
 }
@@ -339,6 +356,7 @@ export function buildClientOverviewHeaderData(
       prefixSelectOptions,
       suffixSelectOptions,
     }),
+    recordId: numericRecordId(form, rawClient),
     clientNumber: trim(form?.[ck.clientNumber]),
     photoFileId: form?.[ck.photoFileId] ?? null,
     clientInitials: clientInitialsFromForm(form),

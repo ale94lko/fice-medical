@@ -27,6 +27,7 @@
                 hide-bottom-space
                 emit-value
                 map-options
+                :clearable="false"
                 :options="formatOptions"
                 :loading="typesLoading"
                 :disable="typesLoading || !formatOptions.length"
@@ -45,6 +46,7 @@
                 hide-bottom-space
                 emit-value
                 map-options
+                :clearable="false"
                 :options="localeOptions"
                 :placeholder="t('generateDocumentLocalePlaceholder')"
                 :test-id="documentGenerationTestIds.locale"

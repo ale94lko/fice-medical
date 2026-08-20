@@ -291,7 +291,7 @@ export function humanizeWidgetFieldKey(key) {
 export function resolveDashboardNavigation(widget, item = null) {
   const row = item && typeof item === 'object' ? item : null
   if (row) {
-    // Appointment rows often include client_id; prefer opening details.
+    // Appointment rows open details; client rows use client_number.
     const appointmentId = trimString(
       row.appointment_id ?? row.appointmentId,
     )

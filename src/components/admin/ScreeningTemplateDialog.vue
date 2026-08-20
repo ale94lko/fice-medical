@@ -123,6 +123,104 @@
           class="insurance-dialog__card-section q-mt-lg">
           <div class="row items-center justify-between q-mb-sm">
             <SubsectionHeading
+              icon="calculate"
+              :title="t('screeningTemplateScoringSection')"
+            />
+            <q-btn
+              v-if="!structureLocked"
+              no-caps
+              outline
+              dense
+              color="primary"
+              class="app-btn-outline"
+              icon="add"
+              :label="t('screeningTemplateAddRange')"
+              :data-testid="screeningTemplateDialogTestIds.addRange"
+              @click="addInterpretationRange"
+            />
+          </div>
+          <p class="text-body2 text-grey-7 q-mb-md">
+            {{ t('screeningTemplateScoringHint') }}
+          </p>
+          <p
+            v-if="errors.fields.interpretationRanges"
+            class="text-negative text-caption q-mb-sm">
+            {{ errors.fields.interpretationRanges }}
+          </p>
+          <div
+            v-for="(range, rIndex) in local.interpretationRanges"
+            :key="rIndex"
+            class="row q-col-gutter-sm q-mb-sm items-end">
+            <div class="col-6 col-md-2">
+              <AddClientLabeledField
+                :label="t('screeningTemplateRangeMin')">
+                <TextInput
+                  v-model="range.minScore"
+                  :external-label="true"
+                  :readonly="structureLocked"
+                  :test-id="screeningTemplateDialogTestIds
+                    .rangeField(rIndex, 'min')"
+                />
+              </AddClientLabeledField>
+            </div>
+            <div class="col-6 col-md-2">
+              <AddClientLabeledField
+                :label="t('screeningTemplateRangeMax')">
+                <TextInput
+                  v-model="range.maxScore"
+                  :external-label="true"
+                  :readonly="structureLocked"
+                  :test-id="screeningTemplateDialogTestIds
+                    .rangeField(rIndex, 'max')"
+                />
+              </AddClientLabeledField>
+            </div>
+            <div class="col-12 col-md-3">
+              <AddClientLabeledField
+                :label="t('screeningTemplateRangeCode')">
+                <TextInput
+                  v-model="range.code"
+                  :external-label="true"
+                  :readonly="structureLocked"
+                  :test-id="screeningTemplateDialogTestIds
+                    .rangeField(rIndex, 'code')"
+                />
+              </AddClientLabeledField>
+            </div>
+            <div class="col-12 col-md">
+              <AddClientLabeledField
+                :label="t('screeningTemplateRangeLabel')">
+                <TextInput
+                  v-model="range.label"
+                  :external-label="true"
+                  :readonly="structureLocked"
+                  :test-id="screeningTemplateDialogTestIds
+                    .rangeField(rIndex, 'label')"
+                />
+              </AddClientLabeledField>
+            </div>
+            <div v-if="!structureLocked" class="col-auto">
+              <q-btn
+                flat
+                dense
+                round
+                size="sm"
+                color="negative"
+                icon="close"
+                :aria-label="t('screeningTemplateRemoveRange')"
+                :data-testid="screeningTemplateDialogTestIds
+                  .removeRange(rIndex)"
+                @click="removeInterpretationRange(rIndex)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-show="viewMode === 'editor'"
+          class="insurance-dialog__card-section q-mt-lg">
+          <div class="row items-center justify-between q-mb-sm">
+            <SubsectionHeading
               icon="list_alt"
               :title="t('screeningTemplateSectionStructure')"
             />
@@ -344,30 +442,89 @@
                   <div
                     v-for="(option, oIndex) in question.options"
                     :key="oIndex"
-                    class="row items-center q-col-gutter-sm q-mb-xs no-wrap">
-                    <div class="col">
-                      <TextInput
-                        :model-value="option"
-                        :external-label="true"
-                        :readonly="structureLocked"
-                        :placeholder="t('screeningTemplateOptionPlaceholder')"
-                        @update:model-value="value =>
-                          setOption(question, oIndex, value)"
-                      />
-                    </div>
-                    <div v-if="!structureLocked" class="col-auto">
-                      <q-btn
-                        flat
-                        dense
-                        round
-                        size="sm"
-                        color="negative"
-                        icon="close"
-                        :aria-label="t('screeningTemplateRemoveOption')"
-                        :data-testid="screeningTemplateDialogTestIds
-                          .removeOption(sIndex, qIndex, oIndex)"
-                        @click="removeOption(question, oIndex)"
-                      />
+                    class="screening-template-dialog__option q-mb-sm">
+                    <div class="row q-col-gutter-sm">
+                      <div class="col-12 col-md-6">
+                        <AddClientLabeledField
+                          :label="t('screeningTemplateOptionLabel')">
+                          <TextInput
+                            :model-value="option.label"
+                            :external-label="true"
+                            :readonly="structureLocked"
+                            :placeholder="t(
+                              'screeningTemplateOptionPlaceholder')"
+                            @update:model-value="value =>
+                              setOptionField(
+                                question, oIndex, 'label', value)"
+                          />
+                        </AddClientLabeledField>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <AddClientLabeledField
+                          :label="t('screeningTemplateOptionScore')">
+                          <TextInput
+                            :model-value="option.score"
+                            :external-label="true"
+                            :readonly="structureLocked"
+                            :placeholder="t(
+                              'screeningTemplateOptionScorePlaceholder')"
+                            @update:model-value="value =>
+                              setOptionField(
+                                question, oIndex, 'score', value)"
+                          />
+                        </AddClientLabeledField>
+                      </div>
+                      <div class="col-6 col-md-3">
+                        <AddClientLabeledField
+                          :label="t('screeningTemplateOptionDecision')">
+                          <TextInput
+                            :model-value="option.decisionValue"
+                            :external-label="true"
+                            :readonly="structureLocked"
+                            :placeholder="t(
+                              'screeningTemplateOptionDecisionPlaceholder')"
+                            @update:model-value="value =>
+                              setOptionField(
+                                question,
+                                oIndex,
+                                'decisionValue',
+                                value)"
+                          />
+                        </AddClientLabeledField>
+                      </div>
+                      <div class="col-12 col-md">
+                        <AddClientLabeledField
+                          :label="t('screeningTemplateOptionMeaning')">
+                          <TextInput
+                            :model-value="option.clinicalMeaning"
+                            :external-label="true"
+                            :readonly="structureLocked"
+                            :placeholder="t(
+                              'screeningTemplateOptionMeaningPlaceholder')"
+                            @update:model-value="value =>
+                              setOptionField(
+                                question,
+                                oIndex,
+                                'clinicalMeaning',
+                                value)"
+                          />
+                        </AddClientLabeledField>
+                      </div>
+                      <div v-if="!structureLocked" class="col-auto">
+                        <q-btn
+                          flat
+                          dense
+                          round
+                          size="sm"
+                          color="negative"
+                          icon="close"
+                          class="q-mt-lg"
+                          :aria-label="t('screeningTemplateRemoveOption')"
+                          :data-testid="screeningTemplateDialogTestIds
+                            .removeOption(sIndex, qIndex, oIndex)"
+                          @click="removeOption(question, oIndex)"
+                        />
+                      </div>
                     </div>
                   </div>
                   <q-btn
@@ -513,6 +670,8 @@ import {
 } from 'src/composables/useScreeningTemplatePermissions.js'
 import {
   cloneScreeningTemplateForm,
+  createEmptyInterpretationRange,
+  createEmptyOptionForm,
   createEmptyQuestionForm,
   createEmptyScreeningTemplateForm,
   createEmptySectionForm,
@@ -748,20 +907,41 @@ function moveQuestion(section, index, delta) {
 function onFieldTypeChange(question, value) {
   question.fieldType = value
   if (fieldTypeRequiresOptions(value) && !question.options.length) {
-    question.options = ['']
+    question.options = [createEmptyOptionForm()]
   }
 }
 
 function addOption(question) {
-  question.options.push('')
+  question.options.push(createEmptyOptionForm())
 }
 
-function setOption(question, index, value) {
-  question.options[index] = value
+function setOptionField(question, index, field, value) {
+  const current = question.options[index]
+  const next = typeof current === 'object' && current != null
+    ? { ...current }
+    : createEmptyOptionForm()
+  if (typeof current !== 'object' || current == null) {
+    next.label = String(current ?? '')
+  }
+  next[field] = value
+  question.options[index] = next
 }
 
 function removeOption(question, index) {
   question.options.splice(index, 1)
+}
+
+function addInterpretationRange() {
+  if (!Array.isArray(local.value.interpretationRanges)) {
+    local.value.interpretationRanges = []
+  }
+  local.value.interpretationRanges.push(
+    createEmptyInterpretationRange(),
+  )
+}
+
+function removeInterpretationRange(index) {
+  local.value.interpretationRanges.splice(index, 1)
 }
 
 function onCancel() {
@@ -838,9 +1018,11 @@ function onSave() {
     background: rgba($primary, 0.02);
   }
 
-  &__options {
-    border-left: 2px solid rgba($primary, 0.16);
-    padding-left: 12px;
+  &__option {
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    padding: 8px 10px;
+    background: $surface;
   }
 }
 

@@ -158,7 +158,7 @@ function formatCell(value) {
 function rowKey(row, index) {
   return String(
     row?.id
-      ?? row?.client_id
+      ?? row?.client_number
       ?? row?.appointment_id
       ?? index,
   )

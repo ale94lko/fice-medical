@@ -3,9 +3,11 @@ import { isoDateToUsDateString } from 'src/utils/client-form.js'
 import { clinicianInitialsFromPersonName } from
   'src/utils/clinician-display.js'
 import {
+  normalizeInterpretationRangeList,
   normalizeQuestionClinicalMetadata,
   normalizeSectionClinicalMetadata,
   normalizeTemplateOptionList,
+  optionalNumber,
 } from 'src/utils/screening-template-metadata.js'
 
 export function normalizeTemplateQuestion(question) {
@@ -59,6 +61,9 @@ export function normalizeScreeningTemplate(template) {
     category: String(t.category ?? '').trim() || null,
     status: String(t.status ?? 'active').trim().toLowerCase(),
     version: Number(t.version ?? 1),
+    interpretationRanges: normalizeInterpretationRangeList(
+      t.interpretation_ranges ?? t.interpretationRanges,
+    ),
     sections,
   }
 }
@@ -131,6 +136,19 @@ export function normalizeScreeningRecord(record) {
       || screeningDateRaw,
     completedAt: a.completed_at ?? a.completedAt ?? null,
     createdAt: a.created_at ?? a.createdAt ?? null,
+    totalScore: optionalNumber(a.total_score ?? a.totalScore),
+    interpretationCode: String(
+      a.interpretation_code ?? a.interpretationCode ?? '',
+    ).trim() || null,
+    interpretationLabel: String(
+      a.interpretation_label ?? a.interpretationLabel ?? '',
+    ).trim() || null,
+    decisionValues: Array.isArray(a.decision_values ?? a.decisionValues)
+      ? (a.decision_values ?? a.decisionValues)
+        .map(item => String(item ?? '').trim())
+        .filter(Boolean)
+      : [],
+    findings: Array.isArray(a.findings) ? a.findings : [],
     weight: parseMeasurementField(a.weight),
     height: parseMeasurementField(a.height),
     bmi: parseMeasurementField(a.bmi),

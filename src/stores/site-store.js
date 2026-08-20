@@ -277,14 +277,16 @@ export const useSiteStore = defineStore('site', {
       if (!client || typeof client !== 'object') {
         return null
       }
-      const id = String(client.id ?? client.client_id ?? '').trim()
-      if (!id) {
-        return null
-      }
-      this.clientListSourceById[id] = client
       const code = String(
         client.clientNumber ?? client.client_number ?? '',
       ).trim()
+      const id = String(client.id ?? client.client_id ?? '').trim()
+      if (!code && !id) {
+        return null
+      }
+      if (id) {
+        this.clientListSourceById[id] = client
+      }
       if (code) {
         this.clientListSourceById[code] = client
       }

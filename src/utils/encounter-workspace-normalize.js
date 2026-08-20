@@ -434,7 +434,10 @@ function enrichEncounter(rawEncounter, workspace = {}) {
 
   return {
     ...encounter,
-    clientId: encounter.clientId ?? workspaceClient?.id ?? null,
+    clientId: encounter.clientNumber
+      ?? workspaceClient?.clientNumber
+      ?? encounter.clientId
+      ?? null,
     clientDisplayName,
     encounterMode: trim(
       row.encounter_mode ?? row.encounterMode ?? row.mode,
@@ -516,7 +519,9 @@ export function mergeClientRecordIntoEncounter(encounter, clientRaw) {
 
   return {
     ...encounter,
-    clientId: workspaceClient?.id ?? encounter.clientId,
+    clientId: workspaceClient?.clientNumber
+      ?? encounter.clientNumber
+      ?? encounter.clientId,
     clientDisplayName: name || encounter.clientDisplayName,
     clientNumber: number || encounter.clientNumber,
     clientDobDisplay: dobDisplay || encounter.clientDobDisplay,
