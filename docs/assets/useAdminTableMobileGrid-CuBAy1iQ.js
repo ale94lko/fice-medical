@@ -1,0 +1,1 @@
+import{t as e}from"./useViewportLayout-CJS1cMhH.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
