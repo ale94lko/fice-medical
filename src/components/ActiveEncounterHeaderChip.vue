@@ -1,9 +1,5 @@
 <template>
   <div class="app-active-encounter-host">
-    <TimezoneMismatchBanner
-      v-if="visible"
-      placement="encounter"
-    />
     <div
       v-if="visible"
       ref="shellRef"
@@ -105,45 +101,72 @@
             </div>
           </div>
 
-          <q-list class="app-active-encounter-menu__list">
-            <q-item
-              v-if="canCompleteEncounter && !isPaused"
-              v-close-popup
-              clickable
-              :disable="busy"
-              :data-testid="tid.complete"
-              @click="confirmCompleteOpen = true">
-              <q-item-section avatar>
-                <q-icon name="check_circle" color="primary" />
-              </q-item-section>
-              <q-item-section>
-                {{ t('activeEncounterComplete') }}
-              </q-item-section>
-            </q-item>
-            <q-separator
-              v-if="canCompleteEncounter && !isPaused
-                && canCancelEncounter"
-              class="app-active-encounter-menu__separator"
-            />
-            <q-item
-              v-if="canCancelEncounter"
-              v-close-popup
-              clickable
-              class="app-active-encounter-menu__cancel-item"
-              :disable="busy"
-              :data-testid="tid.cancel"
-              @click="confirmCancelOpen = true">
-              <q-item-section avatar>
-                <q-icon
-                  name="cancel"
-                  class="app-active-encounter-menu__cancel-icon"
-                />
-              </q-item-section>
-              <q-item-section class="app-active-encounter-menu__cancel-label">
-                {{ t('activeEncounterCancel') }}
-              </q-item-section>
-            </q-item>
-          </q-list>
+          <div class="app-active-encounter-menu__actions">
+            <div class="app-active-encounter-menu__actions-row">
+              <q-btn
+                v-if="showCancelButton"
+                outline
+                no-caps
+                no-wrap
+                color="negative"
+                class="app-btn-outline"
+                :disable="busy || actionBusy"
+                :label="t('encounterCancel')"
+                :data-testid="tid.cancel"
+                v-close-popup
+                @click="confirmCancelOpen = true"
+              />
+              <q-btn
+                v-if="showWaitButton"
+                unelevated
+                no-caps
+                no-wrap
+                color="warning"
+                class="app-btn-primary"
+                :disable="busy || actionBusy"
+                :loading="waitLabsLoading"
+                :label="t('encounterWait')"
+                :data-testid="tid.wait"
+                v-close-popup
+                @click="onWaitClick"
+              />
+              <q-btn
+                v-if="showCompleteButton"
+                unelevated
+                no-caps
+                no-wrap
+                color="primary"
+                class="app-btn-primary"
+                :disable="!canCompleteNow || busy || actionBusy
+                  || completionLoading"
+                :loading="completionLoading"
+                :label="t('encounterComplete')"
+                :data-testid="tid.complete"
+                v-close-popup="canCompleteNow && !busy && !actionBusy"
+                @click="onCompleteClick"
+              />
+              <q-btn
+                v-else-if="showResumeButton"
+                unelevated
+                no-caps
+                no-wrap
+                color="primary"
+                class="app-btn-primary"
+                :disable="busy || actionBusy"
+                :loading="busy || actionBusy"
+                :label="t('encounterResume')"
+                :data-testid="tid.resume"
+                v-close-popup
+                @click="onResume"
+              />
+            </div>
+            <p
+              v-if="completeBlockedHint"
+              class="app-active-encounter-menu__hint"
+              :data-testid="tid.completeHint">
+              {{ completeBlockedHint }}
+            </p>
+          </div>
         </q-menu>
       </q-btn>
     </div>
@@ -161,6 +184,12 @@
       v-model="confirmCancelOpen"
       :saving="busy || actionBusy"
       @confirm="onCancel"
+    />
+    <EncounterWaitForResultsDialog
+      v-model="waitOpen"
+      :labs="waitLabs"
+      :saving="busy || actionBusy"
+      @confirm="onWaitConfirm"
     />
     <ActiveEncounterAutoCompleteDialog
       v-model="autoCompleteOpen"
@@ -185,17 +214,19 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import {
   clientPermissionNames,
+  encounterStatuses,
   encounterTypes,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import ModalComponent from 'components/ModalComponent.vue'
-import TimezoneMismatchBanner from
-  'components/TimezoneMismatchBanner.vue'
 import ActiveEncounterAutoCompleteDialog from
   'components/ActiveEncounterAutoCompleteDialog.vue'
 import EncounterCancelDialog from
   'components/encounter/EncounterCancelDialog.vue'
-import { hasPermission } from 'src/utils/auth-permissions.js'
+import EncounterWaitForResultsDialog from
+  'components/encounter/EncounterWaitForResultsDialog.vue'
+import { hasAnyPermission, hasPermission } from
+  'src/utils/auth-permissions.js'
 import { useAuthStore } from 'src/stores/auth-store.js'
 import { useSiteStore } from 'src/stores/site-store.js'
 import { encounterTestIds as tid } from 'src/test-ids/index.js'
@@ -213,15 +244,27 @@ import {
   cancelEncounter,
   completeEncounter,
   encounterApiErrorMessage,
+  fetchEncounterRequirements,
+  fetchEncounterWorkspace,
   isEncounterConflictError,
   isEncounterInvalidError,
+  resumeEncounter,
   toolbarActiveEncounter,
+  waitEncounterForResults,
 } from 'src/utils/encounter-api.js'
 import {
   isEncounterOpen,
   isEncounterReadyToResume,
   isEncounterWaiting,
 } from 'src/utils/encounter-normalize.js'
+import {
+  hasEncounterChiefComplaint,
+  withChiefComplaintRequirement,
+} from 'src/utils/encounter-completion-chief-complaint.js'
+import { formatMissingNarrativeRequirements } from
+  'src/utils/encounter-requirements-normalize.js'
+import { parseCompletionRequirementsError } from
+  'src/utils/encounter-workspace-normalize.js'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -242,7 +285,13 @@ const {
 const busy = ref(false)
 const confirmCompleteOpen = ref(false)
 const confirmCancelOpen = ref(false)
+const waitOpen = ref(false)
+const waitLabs = ref([])
+const waitLabsLoading = ref(false)
 const loadingClientName = ref(false)
+const completionSnapshot = ref(null)
+const completionLoading = ref(false)
+const completionFetchFailed = ref(false)
 const shellRef = ref(null)
 const svgWidth = ref(120)
 const svgHeight = ref(38)
@@ -348,21 +397,97 @@ const canViewClient = computed(() =>
   ),
 )
 
-const showActionMenu = computed(() =>
-  canCompleteEncounter.value || canCancelEncounter.value,
+const activeEntry = computed(() => toolbarActiveEncounter.value)
+
+const activeEncounter = computed(() => activeEntry.value?.encounter ?? null)
+
+const encounterStatus = computed(() =>
+  String(activeEncounter.value?.status ?? '').toUpperCase(),
 )
+
+const isPaused = computed(() => {
+  const encounter = activeEncounter.value
+
+  return isEncounterWaiting(encounter)
+    || isEncounterReadyToResume(encounter)
+})
+
+const showCompleteButton = computed(() =>
+  canCompleteEncounter.value
+  && encounterStatus.value === encounterStatuses.inProgress,
+)
+
+const showCancelButton = computed(() =>
+  canCancelEncounter.value
+  && (
+    encounterStatus.value === encounterStatuses.inProgress
+    || encounterStatus.value === encounterStatuses.waitingForResults
+    || encounterStatus.value === encounterStatuses.readyToResume
+  ),
+)
+
+const showWaitButton = computed(() =>
+  encounterStatus.value === encounterStatuses.inProgress
+  && hasAnyPermission(authStore.permissions, [
+    clientPermissionNames.waitEncounter,
+    clientPermissionNames.manageEncounter,
+  ]),
+)
+
+const showResumeButton = computed(() =>
+  isEncounterReadyToResume(activeEncounter.value)
+  && hasAnyPermission(authStore.permissions, [
+    clientPermissionNames.resumeEncounter,
+    clientPermissionNames.manageEncounter,
+  ]),
+)
+
+const showActionMenu = computed(() =>
+  showCompleteButton.value
+  || showCancelButton.value
+  || showWaitButton.value
+  || showResumeButton.value,
+)
+
+const completion = computed(() =>
+  withChiefComplaintRequirement(
+    completionSnapshot.value,
+    activeEncounter.value,
+    {
+      label: t('encounterNotesSection'),
+      description: '',
+      actionLabel: t('encounterChiefComplaintRequirementAction'),
+      addServiceAction: t('encounterAddService'),
+    },
+  ),
+)
+
+const canCompleteNow = computed(() =>
+  showCompleteButton.value
+  && !completionLoading.value
+  && !completionFetchFailed.value
+  && completionSnapshot.value != null
+  && completion.value?.canComplete === true,
+)
+
+const completeBlockedHint = computed(() => {
+  if (!showCompleteButton.value || canCompleteNow.value) {
+    return ''
+  }
+  if (completionLoading.value) {
+    return ''
+  }
+  if (!hasEncounterChiefComplaint(activeEncounter.value)) {
+    return t('encounterChiefComplaintRequiredToComplete')
+  }
+
+  return t('encounterCompleteRequirementsMissing')
+})
 
 const visible = computed(() =>
   canView.value
   && isEncounterOpen(toolbarActiveEncounter.value?.encounter),
 )
-
-const isPaused = computed(() => {
-  const encounter = toolbarActiveEncounter.value?.encounter
-
-  return isEncounterWaiting(encounter)
-    || isEncounterReadyToResume(encounter)
-})
 
 watch(visible, (isVisible) => {
   if (!isVisible) {
@@ -375,13 +500,15 @@ watch(visible, (isVisible) => {
   })
 }, { immediate: true })
 
+watch(() => activeEncounter.value?.id, () => {
+  completionSnapshot.value = null
+  completionFetchFailed.value = false
+  waitLabs.value = []
+})
+
 onBeforeUnmount(() => {
   unbindShellObserver()
 })
-
-const activeEntry = computed(() => toolbarActiveEncounter.value)
-
-const activeEncounter = computed(() => activeEntry.value?.encounter ?? null)
 
 const chiefComplaint = computed(() =>
   String(activeEncounter.value?.chiefComplaint ?? '').trim(),
@@ -458,7 +585,7 @@ const encounterMetaLabel = computed(() => {
   return t('activeEncounterToolbarMeta', { type })
 })
 
-async function onMenuBeforeShow() {
+async function loadClientDisplayName() {
   const chartKey = clientChartKey(activeEncounter.value)
   if (!chartKey || !canViewClient.value) {
     return
@@ -479,6 +606,33 @@ async function onMenuBeforeShow() {
   } finally {
     loadingClientName.value = false
   }
+}
+
+async function loadCompletionSnapshot() {
+  const id = activeEncounter.value?.id
+  if (id == null || !showCompleteButton.value) {
+    return
+  }
+  completionLoading.value = true
+  completionFetchFailed.value = false
+  try {
+    completionSnapshot.value = await fetchEncounterRequirements(id)
+  } catch (error) {
+    completionSnapshot.value = null
+    completionFetchFailed.value = true
+    if (isAuthSessionEndUIError(error)) {
+      return
+    }
+  } finally {
+    completionLoading.value = false
+  }
+}
+
+async function onMenuBeforeShow() {
+  await Promise.all([
+    loadClientDisplayName(),
+    loadCompletionSnapshot(),
+  ])
 }
 
 function goToWorkspace() {
@@ -515,9 +669,62 @@ function notifySuccess(message) {
   })
 }
 
+function onCompleteClick() {
+  if (!canCompleteNow.value || busy.value || actionBusy.value) {
+    return
+  }
+  confirmCompleteOpen.value = true
+}
+
+function applyMissingCompletionRequirements(missing) {
+  completionSnapshot.value = {
+    ...(completionSnapshot.value || {}),
+    canComplete: false,
+    missingRequirements: missing.missingRequirements,
+    requirements: missing.requirements.length
+      ? missing.requirements
+      : completionSnapshot.value?.requirements,
+    optionalActions: missing.optionalActions?.length
+      ? missing.optionalActions
+      : completionSnapshot.value?.optionalActions,
+  }
+}
+
+function notifyMissingCompletionRequirements(missing) {
+  const missingRows = missing.missingRequirements || []
+  const narrativeMessage = formatMissingNarrativeRequirements(
+    t,
+    missingRows,
+  )
+  const onlyNarrativeMissing = missingRows.length > 0
+    && missingRows.every(row =>
+      String(row.type).toUpperCase() === 'NARRATIVE')
+  $q.notify({
+    type: quasarNotifyTypes.warning,
+    message: onlyNarrativeMissing && narrativeMessage
+      ? narrativeMessage
+      : t('encounterCompleteRequirementsMissing'),
+  })
+}
+
 async function onComplete() {
   const entry = toolbarActiveEncounter.value
   if (!entry?.encounter?.id || !canCompleteEncounter.value) {
+    return
+  }
+  if (!canCompleteNow.value) {
+    confirmCompleteOpen.value = false
+
+    return
+  }
+  if (!hasEncounterChiefComplaint(entry.encounter)) {
+    confirmCompleteOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('encounterChiefComplaintRequiredToComplete'),
+      position: 'top',
+    })
+
     return
   }
   busy.value = true
@@ -525,6 +732,80 @@ async function onComplete() {
     await completeEncounter(entry.encounter.id, entry.clientId)
     confirmCompleteOpen.value = false
     notifySuccess(t('activeEncounterCompleteSuccess'))
+  } catch (error) {
+    if (isAuthSessionEndUIError(error)) {
+      return
+    }
+    const missing = parseCompletionRequirementsError(error)
+    if (missing) {
+      confirmCompleteOpen.value = false
+      applyMissingCompletionRequirements(missing)
+      notifyMissingCompletionRequirements(missing)
+
+      return
+    }
+    notifyError(error)
+  } finally {
+    busy.value = false
+  }
+}
+
+async function onWaitClick() {
+  const id = activeEncounter.value?.id
+  if (id == null || !showWaitButton.value) {
+    return
+  }
+  waitLabsLoading.value = true
+  busy.value = true
+  try {
+    const workspace = await fetchEncounterWorkspace(id)
+    waitLabs.value = workspace?.labs ?? []
+    waitOpen.value = true
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      notifyError(error)
+    }
+  } finally {
+    waitLabsLoading.value = false
+    busy.value = false
+  }
+}
+
+async function onWaitConfirm(payload) {
+  const entry = toolbarActiveEncounter.value
+  if (!entry?.encounter?.id || !showWaitButton.value) {
+    return
+  }
+  busy.value = true
+  try {
+    await waitEncounterForResults(entry.encounter.id, payload)
+    waitOpen.value = false
+    notifySuccess(t('encounterWaitSuccess'))
+  } catch (error) {
+    if (isAuthSessionEndUIError(error)) {
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: encounterApiErrorMessage(
+        error,
+        t('encounterWaitError'),
+      ),
+    })
+  } finally {
+    busy.value = false
+  }
+}
+
+async function onResume() {
+  const entry = toolbarActiveEncounter.value
+  if (!entry?.encounter?.id || !showResumeButton.value) {
+    return
+  }
+  busy.value = true
+  try {
+    await resumeEncounter(entry.encounter.id)
+    notifySuccess(t('encounterResumeSuccess'))
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       notifyError(error)

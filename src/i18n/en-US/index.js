@@ -285,6 +285,9 @@ export default {
   clinicalAuditEntityAppointment: 'Appointment',
   clinicalAuditEntityInsurance: 'Insurance',
   clinicalAuditEntityFamilyMedicalHistory: 'Family medical history',
+  clinicalAuditEntityMedicalHistory: 'Medical history',
+  clinicalAuditEntitySocialHistory: 'Social history',
+  clinicalAuditEntityEncounterNarrative: 'Encounter narrative',
   clinicalAuditEntityStoredFile: 'Stored file',
   clinicalAuditEntityAuthSession: 'Auth session',
   clinicalAuditEntityAiSuggestion: 'AI suggestion',
@@ -689,6 +692,7 @@ export default {
   dashboardWidgetPaymentsRecentLabel: 'Recent payments',
   dashboardWidgetRevenueTrendLabel: 'Revenue trend',
   calendar: 'Calendar',
+  navPortal: 'Portal',
   appointmentRequestsNav: 'Appointment Requests',
   portalMessagesNav: 'Messages',
   portalMessagesTitle: 'Messages',
@@ -1066,7 +1070,7 @@ export default {
   moreActions: 'More actions',
   clientListError: 'Could not load the client list.',
   clientListEmpty: 'No clients registered yet.',
-  portalRegistrationsNav: 'Portal Registrations',
+  portalRegistrationsNav: 'Portal Registration',
   portalRegistrationsTitle: 'Portal Registrations',
   portalRegistrationsSubtitle:
     'Create client charts for people who signed up '
@@ -1181,7 +1185,9 @@ export default {
   clientOverviewNoAllergies: 'No allergies documented',
   clientOverviewNoKnownAllergies: 'No known allergies confirmed',
   clientOverviewFamilyHistoryDocumented: '{count} documented',
-  clientOverviewNoFamilyHistory: 'No family history documented',
+  clientOverviewNoFamilyHistory: 'No medical history documented',
+  clientOverviewNoSignificantMedicalHistory:
+    'No significant medical history confirmed',
   clientOverviewVitalsDocumented: '{count} recorded',
   clientOverviewNoVitals: 'No vitals recorded',
   clientOverviewLabsDocumented: '{count} documented',
@@ -1295,7 +1301,7 @@ export default {
     '{name} is now the preferred point of contact.',
   responsibleForPaymentsChanged:
     '{name} is now responsible for payments.',
-  tabFamilyMedicalHistory: 'Family Medical History',
+  tabFamilyMedicalHistory: 'Medical History',
   tabAllergies: 'Allergies',
   tabInsurance: 'Insurance',
   tabClinical: 'Clinical',
@@ -1303,7 +1309,7 @@ export default {
   tabFinancial: 'Financial',
   tabFinancials: 'Financial',
   tabDocuments: 'Documents',
-  subTabFamilyHistory: 'Family History',
+  subTabFamilyHistory: 'Medical History',
   subTabScreenings: 'Screenings',
   screeningsTitle: 'Screenings',
   screeningsSubtitle:
@@ -1378,18 +1384,48 @@ export default {
     + 'note is generated from an encounter.',
   clinicalNoteTemplateSectionsTitle: 'Sections',
   clinicalNoteTemplateAddSection: 'Add Section',
+  clinicalNoteTemplateAddAdditionalNotes: 'Add Additional Notes',
   clinicalNoteTemplateSectionLabel: 'Label',
   clinicalNoteTemplateSectionType: 'Type',
   clinicalNoteTemplateDataSource: 'Data source',
   clinicalNoteTemplateShowWhenEmpty: 'Show when empty',
   clinicalNoteTemplateInputType: 'Input type',
   clinicalNoteTemplatePlaceholder: 'Placeholder',
+  clinicalNoteTemplateSectionGroup: 'Group',
   clinicalNoteTemplateAssessment: 'Assessment template',
   clinicalNoteTemplateRequired: 'Required',
+  clinicalNoteTemplateAiAssistance: 'AI Assistance',
+  clinicalNoteTemplateAiContextSources: 'AI context sources',
+  clinicalNoteTemplateAiContextHint:
+    'Only these FiCE sources are sent when drafting this field. '
+      + 'Billing and insurance data are never included.',
+  clinicalNoteTemplateAiProviderInputRequired:
+    'Provider Input required',
+  clinicalNoteAdditionalNotesLabel: 'Additional Notes',
+  clinicalNoteAdditionalNotesPlaceholder:
+    'Enter any additional clinical notes relevant to this encounter...',
+  clinicalNoteAdditionalNotesHint:
+    'Use this for supplementary notes that do not belong in Chief '
+    + 'Complaint, Diagnoses, Vitals, Medications, Allergies, Medical '
+    + 'History, Assessment & Plan, Diagnostic Studies, or Follow Up.',
   clinicalNoteTemplateHideWhenEmpty: 'Hide when empty',
   clinicalNoteTemplateStructuredFieldsHint:
     'Define the structured fields the clinician completes in '
     + 'Narrative during the encounter.',
+  clinicalNoteTemplateStructuredDefinition: 'Structured definition',
+  clinicalNoteTemplateRosHint:
+    'Review of Systems uses FiCE-defined body systems. Systems and '
+    + 'status options cannot be customized.',
+  clinicalNoteTemplatePeHint:
+    'Physical Examination uses FiCE-defined examination areas. '
+    + 'Areas and status options cannot be customized.',
+  clinicalNoteTemplateMseHint:
+    'Mental Status Examination uses FiCE-defined fields. Fields '
+    + 'and option lists cannot be customized.',
+  clinicalNoteTemplateApHint:
+    'Assessment & Plan reuses Encounter Diagnoses. Document a '
+    + 'Plan for each diagnosis. Diagnoses are not configured here.',
+  clinicalNoteStructuredCustom: 'Custom fields',
   clinicalNoteTemplateStructuredFieldLabel: 'Field label',
   clinicalNoteTemplateAddStructuredField: 'Add field',
   clinicalNoteTemplateMoveUp: 'Move up',
@@ -1419,9 +1455,20 @@ export default {
     'Uses the linked screening/assessment result.',
   clinicalNotePreviewStructured:
     'Structured fields completed during the encounter.',
+  clinicalNotePreviewRos:
+    'Review of Systems completed during the encounter.',
+  clinicalNotePreviewPe:
+    'Physical Examination completed during the encounter.',
+  clinicalNotePreviewMse:
+    'Mental Status Examination completed during the encounter.',
+  clinicalNotePreviewAp:
+    'Assessment & Plan completed for Encounter Diagnoses.',
   clinicalNotePreviewStructuredFields: 'Fields: {fields}',
   'clinicalNoteDataSource_ENCOUNTER_SUMMARY': 'Encounter summary',
+  'clinicalNoteDataSource_ENCOUNTER_INFO':
+    'Patient / visit information',
   'clinicalNoteDataSource_REASON_FOR_VISIT': 'Reason for visit',
+  'clinicalNoteDataSource_CHIEF_COMPLAINT': 'Chief complaint',
   'clinicalNoteDataSource_SERVICES': 'Services',
   'clinicalNoteDataSource_DIAGNOSES': 'Diagnoses',
   'clinicalNoteDataSource_VITALS': 'Vitals',
@@ -1431,6 +1478,15 @@ export default {
   'clinicalNoteDataSource_REFERRALS': 'Referrals',
   'clinicalNoteDataSource_PROVIDER': 'Provider information',
   'clinicalNoteDataSource_MEDICATION_CHANGES': 'Medication changes',
+  'clinicalNoteDataSource_DIAGNOSTIC_STUDIES':
+    'Diagnostic Studies',
+  'clinicalNoteDataSource_MEDICAL_HISTORY': 'Medical history',
+  'clinicalNoteDataSource_SURGICAL_HISTORY': 'Surgical history',
+  'clinicalNoteDataSource_FAMILY_HISTORY': 'Family history',
+  'clinicalNoteDataSource_SOCIAL_HISTORY': 'Social history',
+  'clinicalNoteDataSource_ALLERGIES': 'Allergies',
+  'clinicalNoteDataSource_ENCOUNTER_QUALITY_MEASURES':
+    'HEDIS Measures Addressed',
   'clinicalNoteInputType_SHORT_TEXT': 'Short text',
   'clinicalNoteInputType_LONG_TEXT': 'Long text',
   'clinicalNoteInputType_RICH_TEXT': 'Rich text',
@@ -2078,6 +2134,7 @@ export default {
   no: 'No',
   subTabVitals: 'Vitals',
   subTabLabs: 'Labs',
+  subTabDiagnosticStudies: 'Diagnostic Studies',
   subTabCarePlans: 'Care Plans',
   subTabClinicalNotes: 'Clinical Notes',
   subTabAppointments: 'Appointments',
@@ -2228,9 +2285,101 @@ export default {
   insuranceNoPermission:
     'You do not have permission to view insurance profiles.',
   fmhNoPermission:
-    'You do not have permission to view family medical history.',
+    'You do not have permission to view medical history.',
   vitalsNoPermission: 'You do not have permission to view vital signs.',
   labsNoPermission: 'You do not have permission to view lab orders.',
+  dsNoPermission:
+    'You do not have permission to view diagnostic studies.',
+  dsTitle: 'Diagnostic Studies',
+  dsSubtitle:
+    'Order diagnostic studies and document existing results.',
+  dsOrder: 'Order Diagnostic Study',
+  dsExisting: 'Document Existing Result',
+  dsSaveClientFirst:
+    'Save the client first to manage diagnostic studies.',
+  dsListEmpty: 'No diagnostic studies yet.',
+  dsListEmptyHint:
+    'Order a diagnostic study or document an existing result.',
+  dsListError: 'Could not load diagnostic studies.',
+  dsSaveError: 'Could not save the diagnostic study.',
+  dsSaved: 'Diagnostic study saved successfully.',
+  dsOrderedSuccess: 'Diagnostic study ordered successfully.',
+  dsExistingSuccess: 'Existing diagnostic result documented.',
+  dsCompletedSuccess: 'Diagnostic study marked as completed.',
+  dsResultSuccess: 'Diagnostic study result recorded.',
+  dsReviewedSuccess: 'Diagnostic study result reviewed.',
+  dsCancelledSuccess: 'Diagnostic study cancelled.',
+  dsDeletedSuccess: 'Diagnostic study deleted.',
+  dsDownloadError: 'Could not download the source document.',
+  dsStaleUpdate:
+    'This diagnostic study was updated by another user. Reload and try again.',
+  dsOrderTitle: 'Order Diagnostic Study',
+  dsOrderSubtitle:
+    'Create a new diagnostic study order for this encounter.',
+  dsExistingTitle: 'Document Existing Result',
+  dsExistingSubtitle:
+    'Document a diagnostic study performed outside FiCE.',
+  dsCompleteTitle: 'Mark Study Completed',
+  dsResultTitle: 'Add Result',
+  dsReviewTitle: 'Review Result',
+  dsViewTitle: 'View Diagnostic Study',
+  dsEditTitle: 'Edit Diagnostic Study',
+  dsCancelTitle: 'Cancel Diagnostic Study',
+  dsCancelMessage:
+    'Cancel this ordered diagnostic study? Result status remains pending.',
+  dsDeleteTitle: 'Delete Diagnostic Study',
+  dsDeleteMessage:
+    'Delete this diagnostic study? The source document is not deleted.',
+  dsSaveStudy: 'Save Study',
+  dsSaveAndAddAnother: 'Save & Add Another',
+  dsSectionStudy: 'Study Information',
+  dsSectionFindings: 'Findings and Interpretation',
+  dsSectionDocument: 'Source Document (Optional)',
+  dsStudyName: 'Study / Test',
+  dsStudyNamePlaceholder:
+    'e.g., Abdominal Ultrasound, Mammogram, Chest X-Ray',
+  dsStudyNameRequired: 'Study / Test is required.',
+  dsStudyType: 'Study Type',
+  dsStudyTypePlaceholder: 'Select type...',
+  dsReason: 'Reason / Indication',
+  dsReasonPlaceholder: 'Why this study is being ordered...',
+  dsStudyDate: 'Study Date',
+  dsStudyDateRequired: 'Study Date is required.',
+  dsResultDate: 'Result Date',
+  dsFindings: 'Findings / Result',
+  dsFindingsPlaceholder: 'Enter findings or result...',
+  dsFindingsRequired: 'Findings / Result is required.',
+  dsInterpretation: 'Provider Interpretation / Comment',
+  dsInterpretationPlaceholder:
+    'Enter interpretation or comment (optional)...',
+  dsMarkAsReviewed: 'Mark as Reviewed',
+  dsDocumentBrowse: 'Browse',
+  dsNoDocumentSelected: 'No document selected.',
+  dsColStudy: 'Study / Test',
+  dsColType: 'Type',
+  dsColOrderedDate: 'Ordered Date',
+  dsColStudyDate: 'Study Date',
+  dsColStatus: 'Status',
+  dsColResultStatus: 'Result Status',
+  dsStatusOrdered: 'Ordered',
+  dsStatusCompleted: 'Completed',
+  dsStatusCancelled: 'Cancelled',
+  dsResultStatusPending: 'Pending',
+  dsResultStatusAvailable: 'Available',
+  dsResultStatusReviewed: 'Reviewed',
+  dsTypeUltrasound: 'Ultrasound',
+  dsTypeMammography: 'Mammography',
+  dsTypeXRay: 'X-Ray',
+  dsTypeCt: 'CT',
+  dsTypeMri: 'MRI',
+  dsTypeOther: 'Other',
+  dsActionView: 'View',
+  dsActionComplete: 'Mark Completed',
+  dsActionAddResult: 'Add Result',
+  dsActionReview: 'Review Result',
+  dsActionDownload: 'Download',
+  dsActionCancel: 'Cancel',
+  dsActionDelete: 'Delete',
   screeningsNoPermission: 'You do not have permission to view screenings.',
   referralListEmpty: 'No referrals have been recorded yet.',
   referralLoadError: 'Unable to load referrals.',
@@ -2442,7 +2591,6 @@ export default {
   appointmentDetailAsideChangesTitle: 'Need to make changes?',
   appointmentDetailAsideChangesText:
     'You can reschedule or cancel this appointment.',
-  appointmentDetailPrint: 'Print',
   appointmentDetailViewClient: 'View Client',
   appointmentDetailCopiedNumber: 'Appointment number copied.',
   appointmentDetailCopyError: 'Could not copy the appointment number.',
@@ -3559,32 +3707,96 @@ export default {
   duplicateEmail: 'This email address is already listed.',
   countryMax: 'Maximum {max} characters',
   notesMax: 'Maximum {max} characters',
-  fmhAddSectionTitle: 'Add Family Medical History',
+  fmhAddSectionTitle: 'Add Medical History',
   fmhPersonalSectionTitle: 'Personal Medical History',
+  fmhSurgicalSectionTitle: 'Surgical History',
   fmhFamilySectionTitle: 'Family Medical History',
+  fmhSocialSectionTitle: 'Social History',
+  fmhHistoryType: 'History Type',
+  fmhHistoryTypePersonal: 'Personal',
+  fmhHistoryTypeFamily: 'Family',
+  fmhHistoryTypeSurgical: 'Surgical',
+  fmhHistoryTypeRequired: 'Select a history type',
   fmhFamilyRelationship: 'Family Relationship',
-  fmhRelationshipTooltip: 'Select the client or a blood relative.',
+  fmhRelationshipTooltip:
+    'Select a blood relative for family medical history.',
   fmhMedicalConditions: 'Medical Condition(s)',
+  fmhMedicalConditionEvent: 'Medical Condition / Event',
+  fmhProcedureSurgery: 'Procedure / Surgery',
+  fmhConditionPlaceholder:
+    'Search or enter medical condition / event',
+  fmhProcedurePlaceholder: 'Search or enter procedure / surgery',
+  fmhNote: 'Note',
+  fmhNotePlaceholder: 'Add note (optional)',
   fmhAdd: 'Add',
   fmhAddHint:
-    'Complete both fields and click {add} to save the family history entry.',
+    'Complete the required fields and click {add} to save the entry.',
   fmhColRelationship: 'Family Relationship',
   fmhColConditions: 'Conditions with a family history',
+  fmhColConditionDiagnosis: 'Condition / Diagnosis',
+  fmhColConditionEvent: 'Condition / Event',
+  fmhColProcedure: 'Procedure / Surgery',
+  fmhColNotes: 'Notes',
   fmhPersonalEmpty: 'No personal medical history entries yet.',
+  fmhSurgicalEmpty: 'No surgical history entries yet.',
   fmhFamilyEmpty: 'No family medical history entries yet.',
+  fmhNoSignificantPersonal: 'No significant personal medical history',
+  fmhNoSignificantPersonalHint:
+    'Confirm that the client has no significant personal medical history.',
+  fmhNoSignificantPersonalConfirmed:
+    'No significant personal medical history confirmed',
+  fmhNoSignificantPersonalUncheck:
+    'Uncheck "No significant personal medical history" to add '
+    + 'personal medical history information.',
+  fmhNoSurgicalHistory: 'No surgical history',
+  fmhNoSurgicalHistoryHint:
+    'Confirm that the client has no surgical history.',
+  fmhNoSurgicalHistoryConfirmed: 'No surgical history confirmed',
+  fmhNoSurgicalHistoryUncheck:
+    'Uncheck "No surgical history" to add surgical history information.',
+  fmhNoSignificantFamily: 'No significant family medical history',
+  fmhNoSignificantFamilyHint:
+    'Confirm that the client has no significant family medical history.',
+  fmhNoSignificantFamilyConfirmed:
+    'No significant family medical history confirmed',
+  fmhNoSignificantFamilyUncheck:
+    'Uncheck "No significant family medical history" to add '
+    + 'family medical history information.',
+  fmhNegativePersonalTitle: 'Remove personal medical history?',
+  fmhNegativePersonalMessage:
+    'Confirming no significant personal medical history will remove '
+    + 'the existing personal medical history entries.',
+  fmhNegativeSurgicalTitle: 'Remove surgical history?',
+  fmhNegativeSurgicalMessage:
+    'Confirming no surgical history will remove the existing '
+    + 'surgical history entries.',
+  fmhNegativeFamilyTitle: 'Remove family medical history?',
+  fmhNegativeFamilyMessage:
+    'Confirming no significant family medical history will remove '
+    + 'the existing family medical history entries.',
+  fmhNegativeConfirmContinue: 'Remove entries and continue',
   fmhBothRequired:
     'Select a family relationship and enter at least one medical condition.',
   fmhRelationshipRequired: 'Select a family relationship',
   fmhConditionsRequired: 'Enter at least one medical condition.',
+  fmhProcedureRequired: 'Enter a procedure or surgery.',
   fmhRelationshipMax: 'Maximum {max} characters',
   fmhConditionsInvalid:
     'Letters and numbers only, maximum {max} characters',
+  fmhProcedureInvalid:
+    'Letters and numbers only, maximum {max} characters',
+  fmhNotesInvalid:
+    'Letters and numbers only, maximum {max} characters',
   fmhDuplicateEntry:
-    'This family relationship and condition combination already exists.',
-  fmhAddedSuccess: 'Family medical history entry added.',
-  fmhUpdatedSuccess: 'Family medical history entry updated.',
-  fmhDeletedSuccess: 'Family medical history entry deleted.',
-  fmhEditTitle: 'Edit Family Medical History',
+    'This history type, relationship and condition combination '
+    + 'already exists.',
+  fmhAddedSuccess: 'Medical history entry added.',
+  fmhUpdatedSuccess: 'Medical history entry updated.',
+  fmhDeletedSuccess: 'Medical history entry deleted.',
+  fmhEditTitle: 'Edit Medical History',
+  fmhEditPersonalTitle: 'Edit Personal Medical History',
+  fmhEditFamilyTitle: 'Edit Family Medical History',
+  fmhEditSurgicalTitle: 'Edit Surgical History',
   fmhDeleteTitle: 'Confirm Delete',
   fmhDeleteMessage: 'Are you sure you want to delete the selected item?',
   fmhDeleteMessageBold:
@@ -3593,6 +3805,74 @@ export default {
     'For audit purposes, please provide a reason for the deletion.',
   fmhDeleteReasonLabel: 'Reason for deletion',
   fmhDeleteReasonRequired: 'A reason for deletion is required.',
+  fmhSocialTobacco: 'Tobacco / Smoking Status',
+  fmhSocialAlcohol: 'Alcohol Use',
+  fmhSocialSubstance: 'Illicit Drugs / Substance Use',
+  fmhSocialCaffeine: 'Caffeine Use',
+  fmhSocialEmployment: 'Employment Status',
+  fmhSocialDiet: 'Diet',
+  fmhSocialUnknown: 'Unknown',
+  fmhSocialTobaccoNever: 'Never smoker',
+  fmhSocialTobaccoCurrent: 'Current smoker',
+  fmhSocialTobaccoFormer: 'Former smoker',
+  fmhSocialTobaccoCurrentSmokeless: 'Current smokeless tobacco user',
+  fmhSocialTobaccoFormerSmokeless: 'Former smokeless tobacco user',
+  fmhSocialTobaccoOther: 'Other tobacco use',
+  fmhSocialTobaccoNotesCurrent: 'Add tobacco use details',
+  fmhSocialTobaccoNotesFormer: 'Add former tobacco use details',
+  fmhSocialTobaccoNotesSmokeless: 'Add smokeless tobacco details',
+  fmhSocialTobaccoNotesOther: 'Add tobacco use details',
+  fmhSocialTobaccoNotesDefault: 'Add tobacco use details',
+  fmhSocialAlcoholNever: 'Never / No alcohol use',
+  fmhSocialAlcoholCurrent: 'Current alcohol use',
+  fmhSocialAlcoholSocial: 'Social alcohol use',
+  fmhSocialAlcoholFormer: 'Former alcohol use',
+  fmhSocialAlcoholOther: 'Other',
+  fmhSocialAlcoholNotesCurrent: 'Add alcohol use details',
+  fmhSocialAlcoholNotesSocial: 'Add alcohol use details',
+  fmhSocialAlcoholNotesFormer: 'Add former alcohol use details',
+  fmhSocialAlcoholNotesOther: 'Add alcohol use details',
+  fmhSocialAlcoholNotesDefault: 'Add alcohol use details',
+  fmhSocialSubstanceNever: 'Never / No illicit drug use',
+  fmhSocialSubstanceCurrent: 'Current use',
+  fmhSocialSubstanceFormer: 'Former use',
+  fmhSocialSubstanceOther: 'Other',
+  fmhSocialSubstanceNotesCurrent: 'Add substance use details',
+  fmhSocialSubstanceNotesFormer: 'Add former substance use details',
+  fmhSocialSubstanceNotesOther: 'Add substance use details',
+  fmhSocialSubstanceNotesDefault: 'Add substance use details',
+  fmhSocialCaffeineNone: 'No caffeine use',
+  fmhSocialCaffeineUses: 'Uses caffeine',
+  fmhSocialCaffeineFormer: 'Former caffeine use',
+  fmhSocialCaffeineNotesUses: 'Add caffeine use details',
+  fmhSocialCaffeineNotesFormer: 'Add former caffeine use details',
+  fmhSocialCaffeineNotesDefault: 'Add caffeine use details',
+  fmhSocialEmploymentEmployed: 'Employed',
+  fmhSocialEmploymentSelf: 'Self-employed',
+  fmhSocialEmploymentUnemployed: 'Unemployed',
+  fmhSocialEmploymentStudent: 'Student',
+  fmhSocialEmploymentRetired: 'Retired',
+  fmhSocialEmploymentDisabled: 'Disabled / Unable to work',
+  fmhSocialEmploymentHomemaker: 'Homemaker',
+  fmhSocialEmploymentOther: 'Other',
+  fmhSocialEmploymentNotesEmployed: 'Occupation / employment details',
+  fmhSocialEmploymentNotesSelf: 'Occupation / employment details',
+  fmhSocialEmploymentNotesStudent: 'School or program details',
+  fmhSocialEmploymentNotesDisabled: 'Work limitation details',
+  fmhSocialEmploymentNotesOther: 'Employment details',
+  fmhSocialEmploymentNotesDefault: 'Occupation / employment details',
+  fmhSocialDietRegular: 'Regular diet / No restrictions',
+  fmhSocialDietVegetarian: 'Vegetarian',
+  fmhSocialDietVegan: 'Vegan',
+  fmhSocialDietTherapeutic: 'Therapeutic / Medically prescribed diet',
+  fmhSocialDietRestricted: 'Restricted diet',
+  fmhSocialDietOther: 'Other',
+  fmhSocialDietNotesVegetarian: 'Specify dietary details',
+  fmhSocialDietNotesVegan: 'Specify dietary details',
+  fmhSocialDietNotesTherapeutic: 'Specify dietary restrictions',
+  fmhSocialDietNotesRestricted: 'Specify dietary restrictions',
+  fmhSocialDietNotesOther: 'Specify dietary details',
+  fmhSocialDietNotesDefault: 'Specify dietary restrictions',
   allergiesAddSectionTitle: 'Allergies',
   allergiesExistingTitle: 'Existing Allergies',
   allergiesExistingEmpty: 'No allergies recorded yet.',
@@ -3707,6 +3987,9 @@ export default {
   vitalsBmiObesity1: 'Obesity Class 1',
   vitalsBmiObesity2: 'Obesity Class 2',
   vitalsBmiObesity3: 'Obesity Class 3',
+  vitalsBsa: 'BSA',
+  vitalsUnitBsa: 'm²',
+  vitalsBsaHint: 'Calculated automatically (Mosteller formula)',
   vitalsPainLevel: 'Pain Level',
   vitalsPainMild: '0-2 Mild',
   vitalsPainModerate: '3-6 Moderate',
@@ -3744,6 +4027,7 @@ export default {
   vitalsColTemperature: 'Temperature',
   vitalsColSpO2: 'SpO₂',
   vitalsColBmi: 'BMI',
+  vitalsColBsa: 'BSA',
   vitalsColRecordedBy: 'Recorded By',
   vitalsFieldRequired: 'This field is required.',
   vitalsFieldInvalid: 'Enter a valid value.',
@@ -4512,6 +4796,7 @@ export default {
   aiPromptIcd10: 'ICD-10 suggestion',
   aiPromptClinicalSummary: 'Clinical summary',
   aiPromptCarePlan: 'Care plan draft',
+  aiPromptNarrativeDraft: 'Clinical narrative drafting',
   aiConfigLoadError: 'Could not load AI configuration.',
   aiConfigSaveError: 'Could not save AI configuration.',
   aiConfigSaved: 'AI configuration saved.',
@@ -5009,6 +5294,34 @@ export default {
     'Lab orders recorded for this encounter only.',
   encounterClinicalLabsEmpty:
     'No lab orders recorded for this encounter yet.',
+  encounterClinicalDiagnosticStudies: 'Diagnostic Studies',
+  encounterClinicalDiagnosticStudiesHint:
+    'Diagnostic studies ordered or documented for this encounter.',
+  encounterClinicalDiagnosticStudiesEmpty:
+    'No diagnostic studies yet.',
+  encounterClinicalQualityMeasures: 'Quality Measures',
+  encounterClinicalQualityMeasuresHint:
+    'HEDIS measures addressed during this encounter.',
+  encounterClinicalQualityMeasuresNote:
+    'Marking a measure as addressed documents that it was handled '
+      + 'during this visit. It does not mean the official HEDIS '
+      + 'measure is met.',
+  encounterClinicalQualityMeasuresEmpty:
+    'No HEDIS measures are configured for this clinic.',
+  encounterClinicalQualityMeasuresLoadError:
+    'Could not load quality measures.',
+  encounterClinicalQualityMeasuresSaveError:
+    'Could not update the addressed measure.',
+  encounterClinicalQualityMeasuresAddressedBy:
+    'Addressed By: {name}',
+  encounterClinicalQualityMeasuresAddressedAt:
+    'Addressed At: {date}',
+  encounterClinicalQualityMeasuresAddressedByAt:
+    'Addressed By: {name} · Addressed At: {date}',
+  encounterClinicalAllDiagnosticStudies:
+    'All Diagnostic Studies',
+  encounterClinicalAllDiagnosticStudiesTitle:
+    'All client diagnostic studies',
   encounterClinicalAllVitals: 'All Vitals',
   encounterClinicalAllAssessments: 'All Screenings',
   encounterClinicalAllMedications: 'All Medications',
@@ -5028,18 +5341,248 @@ export default {
   encounterProgressNote: 'Progress Note',
   encounterNarrativeTitle: 'Narrative',
   encounterNarrativeHint:
-    'Complete the narrative information for this visit.',
+    'Complete the clinical narrative defined by the Primary Service '
+    + 'Clinical Note Template. Additional services do not add '
+    + 'separate narrative sections.',
+  encounterNarrativeHintWithTemplate:
+    '{name}. Complete the clinical narrative defined by this '
+    + 'Primary Service template. Additional services do not add '
+    + 'separate narrative sections.',
   encounterNarrativeEmpty:
     'This template has no narrative fields for this encounter.',
   encounterNarrativeNoTemplate:
-    'No clinical note template is configured for this encounter.',
+    'Configuration issue: the Primary Service does not have a '
+    + 'Clinical Note Template, so this encounter has no Clinical '
+    + 'Narrative.',
+  encounterNarrativeGroupHpi: 'History of Present Illness',
   encounterNarrativeSaved: 'Saved',
   encounterNarrativeSaveError: 'Could not save narrative.',
   encounterNarrativeConflict:
     'This narrative field was updated by another user. '
     + 'Reload and try again.',
+  narrativeAiDraftWithAi: 'Draft with AI',
+  narrativeAiDialogTitle: 'AI Narrative Draft',
+  narrativeAiDialogHint:
+    'Suggested draft for {label}. Review it before it becomes '
+      + 'saved Narrative.',
+  narrativeAiDialogHintPlan:
+    'Suggested draft for {label} — {diagnosis}. The AI rewrites '
+      + 'decisions you already supplied. It does not determine '
+      + 'treatment.',
+  narrativeAiCurrentNarrative: 'Current Narrative',
+  narrativeAiProviderInput: 'Provider Input',
+  narrativeAiProviderInputPlaceholder:
+    'Optional notes. They do not become the Narrative until you '
+      + 'use the draft.',
+  narrativeAiProviderInputHint:
+    'Provider Input stays separate from the saved Narrative.',
+  narrativeAiProviderInputRequiredPlaceholder:
+    'Enter the clinical decisions already made. The AI will not '
+      + 'invent a Plan.',
+  narrativeAiProviderInputRequiredHint:
+    'Provider Input is required for Plan. It stays separate from '
+      + 'the saved Narrative.',
+  narrativeAiProviderInputRequiredError:
+    'Add the clinical actions you already decided before '
+      + 'generating a Plan draft.',
+  narrativeAiSuggestedDraft: 'AI Suggested Draft',
+  narrativeAiUseDraft: 'Use Draft',
+  narrativeAiTryAgain: 'Try Again',
+  narrativeAiDiscard: 'Discard',
+  narrativeAiGenerateError:
+    'Unable to generate a draft right now. You can try again or '
+      + 'continue documenting manually.',
+  narrativeAiInsufficientContext:
+    'Unable to generate a meaningful draft from the available '
+      + 'information. Add provider notes or additional clinical '
+      + 'context and try again.',
+  narrativeAiEmptyDraft:
+    'The assistant did not return a draft. Try again or write '
+      + 'the Narrative manually.',
+  narrativeAiReplaceConfirmTitle: 'Replace current Narrative?',
+  narrativeAiReplaceConfirmMessage:
+    'Use Draft will replace the text currently in the editor. '
+      + 'The saved Narrative is not changed until you save.',
+  'narrativeAiContextSource_CHIEF_COMPLAINT': 'Chief Complaint',
+  'narrativeAiContextSource_ENCOUNTER_DIAGNOSES':
+    'Encounter Diagnoses',
+  'narrativeAiContextSource_MEDICAL_HISTORY': 'Medical History',
+  'narrativeAiContextSource_SURGICAL_HISTORY': 'Surgical History',
+  'narrativeAiContextSource_FAMILY_HISTORY': 'Family History',
+  'narrativeAiContextSource_SOCIAL_HISTORY': 'Social History',
+  'narrativeAiContextSource_ACTIVE_MEDICATIONS':
+    'Active Medications',
+  'narrativeAiContextSource_ALLERGIES': 'Allergies',
+  'narrativeAiContextSource_VITALS': 'Vitals',
+  'narrativeAiContextSource_SCREENINGS': 'Screenings',
+  'narrativeAiContextSource_DIAGNOSTIC_STUDIES':
+    'Diagnostic Studies',
+  'narrativeAiContextSource_FOLLOW_UP': 'Follow Up',
+  'narrativeAiContextSource_PROVIDER_INPUT': 'Provider Input',
   encounterNarrativeIncomplete:
     '{count} required field incomplete | {count} required fields incomplete',
+  encounterNarrativeRosIncomplete: 'Review of Systems incomplete',
+  encounterNarrativePeIncomplete: 'Physical Examination incomplete',
+  encounterNarrativeMseIncomplete:
+    'Mental Status Examination incomplete',
+  encounterNarrativeApIncomplete: 'Assessment & Plan incomplete',
+  encounterNarrativeApIncompleteDetail:
+    'Assessment & Plan incomplete — {count} diagnosis requires a '
+    + 'Plan | Assessment & Plan incomplete — {count} diagnoses '
+    + 'require a Plan',
+  rosDefaultLabel: 'Review of Systems',
+  rosSelectStatus: 'Select status',
+  rosStatusNegative: 'Negative',
+  rosStatusPositive: 'Positive',
+  rosStatusNotReviewed: 'Not Reviewed',
+  rosDetails: 'Details',
+  rosDetailsPlaceholder: 'Describe relevant symptoms or findings',
+  rosProgress: '{completed} of {total} systems completed',
+  rosRequiresAttention: 'Requires attention:',
+  rosStatusRequiredShort: '{system} — Status required',
+  rosDetailsRequiredShort: '{system} — Details required',
+  rosDetailsRequired:
+    'Details are required when {system} is marked as Positive.',
+  rosSystemConstitutional: 'Constitutional',
+  rosSystemEyes: 'Eyes',
+  rosSystemEntMouth: 'ENT / Mouth',
+  rosSystemCardiovascular: 'Cardiovascular',
+  rosSystemRespiratory: 'Respiratory',
+  rosSystemGastrointestinal: 'Gastrointestinal',
+  rosSystemGenitourinary: 'Genitourinary',
+  rosSystemMusculoskeletal: 'Musculoskeletal',
+  rosSystemSkin: 'Skin / Integumentary',
+  rosSystemNeurologic: 'Neurologic',
+  rosSystemPsychiatric: 'Psychiatric',
+  rosSystemEndocrine: 'Endocrine',
+  rosSystemHematologic: 'Hematologic / Lymphatic',
+  rosSystemAllergic: 'Allergic / Immunologic',
+  peDefaultLabel: 'Physical Examination',
+  peSelectStatus: 'Select status',
+  peStatusNormal: 'Normal',
+  peStatusAbnormal: 'Abnormal',
+  peStatusNotExamined: 'Not Examined',
+  peStatusDeferred: 'Deferred',
+  peFindings: 'Findings',
+  peFindingsPlaceholder: 'Describe relevant examination findings',
+  peReason: 'Reason',
+  peReasonPlaceholder: 'Reason for deferring (optional)',
+  peProgress: '{completed} of {total} areas completed',
+  peStatusRequiredShort: '{area} — Status required',
+  peFindingsRequiredShort: '{area} — Findings required',
+  peFindingsRequired:
+    'Findings are required when {area} is marked as Abnormal.',
+  peAreaConstitutional: 'Constitutional / General',
+  peAreaEyes: 'Eyes',
+  peAreaEntMouth: 'ENT / Mouth',
+  peAreaNeck: 'Neck',
+  peAreaCardiovascular: 'Cardiovascular',
+  peAreaRespiratory: 'Respiratory',
+  peAreaGastrointestinal: 'Gastrointestinal / Abdomen',
+  peAreaGenitourinary: 'Genitourinary',
+  peAreaMusculoskeletal: 'Musculoskeletal',
+  peAreaSkin: 'Skin',
+  peAreaNeurologic: 'Neurologic',
+  peAreaPsychiatric: 'Psychiatric',
+  peAreaLymphatic: 'Lymphatic',
+  peAreaBreast: 'Breast',
+  mseDefaultLabel: 'Mental Status Examination',
+  mseSelect: 'Select',
+  mseDetails: 'Details',
+  mseDetailsPlaceholder: 'Describe the finding',
+  mseProgress: '{completed} of {total} fields completed',
+  mseValueRequiredShort: '{field} — Value required',
+  mseDetailsRequiredShort: '{field} — Details required',
+  mseDetailsRequired:
+    'Details are required when {field} is set to Other.',
+  mseFieldAppearance: 'Appearance',
+  mseFieldBehavior: 'Behavior',
+  mseFieldSpeech: 'Speech',
+  mseFieldMood: 'Mood',
+  mseFieldAffect: 'Affect',
+  mseFieldThoughtProcess: 'Thought Process',
+  mseFieldThoughtContent: 'Thought Content',
+  mseFieldPerception: 'Perception',
+  mseFieldOrientation: 'Orientation',
+  mseFieldAttention: 'Attention / Concentration',
+  mseFieldMemory: 'Memory',
+  mseFieldInsight: 'Insight',
+  mseFieldJudgment: 'Judgment',
+  mseOptOther: 'Other',
+  mseOptNotAssessed: 'Not Assessed',
+  mseOptWellGroomed: 'Well Groomed',
+  mseOptAppropriate: 'Appropriate',
+  mseOptDisheveled: 'Disheveled',
+  mseOptPoorHygiene: 'Poor Hygiene',
+  mseOptCooperative: 'Cooperative',
+  mseOptCalm: 'Calm',
+  mseOptGuarded: 'Guarded',
+  mseOptAgitated: 'Agitated',
+  mseOptRestless: 'Restless',
+  mseOptWithdrawn: 'Withdrawn',
+  mseOptHostile: 'Hostile',
+  mseOptNormal: 'Normal',
+  mseOptRapid: 'Rapid',
+  mseOptPressured: 'Pressured',
+  mseOptSlow: 'Slow',
+  mseOptSoft: 'Soft',
+  mseOptLoud: 'Loud',
+  mseOptMinimal: 'Minimal',
+  mseOptMute: 'Mute',
+  mseOptEuthymic: 'Euthymic',
+  mseOptAnxious: 'Anxious',
+  mseOptDepressed: 'Depressed',
+  mseOptIrritable: 'Irritable',
+  mseOptElevated: 'Elevated',
+  mseOptAngry: 'Angry',
+  mseOptSad: 'Sad',
+  mseOptCongruent: 'Congruent',
+  mseOptRestricted: 'Restricted',
+  mseOptFlat: 'Flat',
+  mseOptBlunted: 'Blunted',
+  mseOptLabile: 'Labile',
+  mseOptLinear: 'Linear',
+  mseOptLogical: 'Logical',
+  mseOptGoalDirected: 'Goal Directed',
+  mseOptCircumstantial: 'Circumstantial',
+  mseOptTangential: 'Tangential',
+  mseOptDisorganized: 'Disorganized',
+  mseOptFlightOfIdeas: 'Flight of Ideas',
+  mseOptSuicidalIdeation: 'Suicidal Ideation',
+  mseOptHomicidalIdeation: 'Homicidal Ideation',
+  mseOptDelusional: 'Delusional',
+  mseOptObsessive: 'Obsessive',
+  mseOptParanoid: 'Paranoid',
+  mseOptNoPerceptualDisturbance: 'No Perceptual Disturbance',
+  mseOptAuditoryHallucinations: 'Auditory Hallucinations',
+  mseOptVisualHallucinations: 'Visual Hallucinations',
+  mseOptOtherHallucinations: 'Other Hallucinations',
+  mseOptOrientedX4: 'Oriented ×4',
+  mseOptOrientedX3: 'Oriented ×3',
+  mseOptPartiallyOriented: 'Partially Oriented',
+  mseOptDisoriented: 'Disoriented',
+  mseOptIntact: 'Intact',
+  mseOptMildlyImpaired: 'Mildly Impaired',
+  mseOptImpaired: 'Impaired',
+  mseOptRecentMemoryImpaired: 'Recent Memory Impaired',
+  mseOptRemoteMemoryImpaired: 'Remote Memory Impaired',
+  mseOptRecentAndRemoteImpaired:
+    'Recent and Remote Memory Impaired',
+  mseOptGood: 'Good',
+  mseOptFair: 'Fair',
+  mseOptPoor: 'Poor',
+  apDefaultLabel: 'Assessment & Plan',
+  apPlan: 'Plan',
+  apPlanPlaceholder:
+    'Document the clinical plan for this diagnosis',
+  apProgress: '{completed} of {total} diagnoses addressed',
+  apEmptyDiagnoses:
+    'No diagnoses have been added to this Encounter.',
+  apGoToVisit: 'Go to Visit',
+  apPrimaryDiagnosis: 'Primary Diagnosis',
+  apPlanRequired:
+    'A Plan is required for {description} ({code}).',
+  apPlanRequiredShort: '{code} — {description}',
   encounterProcessingTitle: 'Encounter Processing',
   encounterProcessingSubtitle:
     'Downstream Clinical Note and Superbill generation after completion.',
@@ -5058,7 +5601,18 @@ export default {
   encounterGeneratedNoteRetry: 'Retry generation',
   encounterGeneratedNoteReview: 'Review Clinical Note',
   encounterGeneratedNoteRegenerate: 'Regenerate Clinical Note',
+  encounterGeneratedNoteRegenerateShort: 'Regenerate Note',
   encounterGeneratedNoteSource: 'Source: {source}',
+  encounterGeneratedNoteEditSource: 'Edit Source',
+  encounterGeneratedNoteBack: 'Back to Encounter',
+  encounterGeneratedNoteStaleTitle:
+    'Clinical documentation has changed since this note was generated.',
+  encounterGeneratedNoteStaleBody:
+    'Regenerate the Clinical Note before signing.',
+  encounterGeneratedNoteDateOfService: 'Date of Service: {date}',
+  encounterGeneratedNoteProvider: 'Provider: {name}',
+  encounterGeneratedNoteSignedBy: 'Signed By: {name}',
+  encounterGeneratedNoteSignedAt: 'Signed At: {date}',
   encounterGeneratedNoteSignSuccess: 'Clinical note signed.',
   encounterGeneratedNoteRegenerateSuccess: 'Clinical note regenerated.',
   encounterGeneratedNoteGenerateSuccess: 'Clinical note generated.',
@@ -5083,6 +5637,7 @@ export default {
   encounterCompleteError: 'Could not complete the encounter.',
   encounterCompleteRequirementsMissing:
     'Complete the required items before finishing this encounter.',
+  encounterNarrativeSectionRequired: '{label} is required.',
   encounterCancelTitle: 'Cancel encounter',
   encounterCancelHint:
     'This will cancel the open visit. Clinical data already '

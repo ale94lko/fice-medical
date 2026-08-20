@@ -238,6 +238,7 @@ export const addClientClinicalSubTabKeys = {
   clinicalNotes: 'clinicalNotes',
   carePlans: 'carePlans',
   labs: 'labs',
+  diagnosticStudies: 'diagnosticStudies',
   medications: 'medications',
 }
 
@@ -608,6 +609,29 @@ export const familyMedicalHistoryMaxRelationshipLength = 25
 
 export const familyMedicalHistoryMaxConditionsLength = 500
 
+export const familyMedicalHistoryMaxNotesLength = 500
+
+export const medicalHistoryTypeValues = {
+  personal: 'personal',
+  family: 'family',
+  surgical: 'surgical',
+}
+
+export const medicalHistoryTypeOptions = [
+  {
+    labelKey: 'fmhHistoryTypePersonal',
+    value: medicalHistoryTypeValues.personal,
+  },
+  {
+    labelKey: 'fmhHistoryTypeFamily',
+    value: medicalHistoryTypeValues.family,
+  },
+  {
+    labelKey: 'fmhHistoryTypeSurgical',
+    value: medicalHistoryTypeValues.surgical,
+  },
+]
+
 export const clientFamilyRelationshipValues = {
   self: 'Self',
   father: 'Father',
@@ -632,6 +656,11 @@ export const clientFamilyRelationshipValues = {
 export const clientFamilyRelationshipOptions = Object.values(
   clientFamilyRelationshipValues,
 ).map(value => ({ label: value, value }))
+
+export const clientFamilyOnlyRelationshipOptions =
+  clientFamilyRelationshipOptions.filter(
+    option => option.value !== familyMedicalHistorySelfValue,
+  )
 
 export const clientAgeUnitOptions = [
   { labelKey: 'ageUnitYears', value: clientAgeUnitValues.years },
@@ -810,6 +839,42 @@ export const labPriorities = {
   routine: 'ROUTINE',
   stat: 'STAT',
   urgent: 'URGENT',
+}
+
+export const diagnosticStudyStatuses = {
+  ordered: 'ORDERED',
+  completed: 'COMPLETED',
+  cancelled: 'CANCELLED',
+}
+
+export const diagnosticStudyResultStatuses = {
+  pending: 'PENDING',
+  available: 'AVAILABLE',
+  reviewed: 'REVIEWED',
+}
+
+export const diagnosticStudyTypes = {
+  ultrasound: 'ULTRASOUND',
+  mammography: 'MAMMOGRAPHY',
+  xRay: 'X_RAY',
+  ct: 'CT',
+  mri: 'MRI',
+  other: 'OTHER',
+}
+
+export const diagnosticStudySources = {
+  orderedInFice: 'ORDERED_IN_FICE',
+  externalExisting: 'EXTERNAL_EXISTING',
+}
+
+export const diagnosticStudyDialogModes = {
+  order: 'order',
+  existing: 'existing',
+  complete: 'complete',
+  result: 'result',
+  review: 'review',
+  view: 'view',
+  edit: 'edit',
 }
 
 export const labFlags = {
@@ -1204,6 +1269,13 @@ export const clientPermissionNames = {
   editLabsClient: 'EDIT_LABS_CLIENT',
   reviewLabsClient: 'REVIEW_LABS_CLIENT',
   deleteLabsClient: 'DELETE_LABS_CLIENT',
+  viewDiagnosticStudiesClient: 'VIEW_DIAGNOSTIC_STUDIES_CLIENT',
+  addDiagnosticStudiesClient: 'ADD_DIAGNOSTIC_STUDIES_CLIENT',
+  editDiagnosticStudiesClient: 'EDIT_DIAGNOSTIC_STUDIES_CLIENT',
+  reviewDiagnosticStudiesClient:
+    'REVIEW_DIAGNOSTIC_STUDIES_CLIENT',
+  deleteDiagnosticStudiesClient:
+    'DELETE_DIAGNOSTIC_STUDIES_CLIENT',
   viewScreenings: 'VIEW_SCREENINGS',
   addScreenings: 'ADD_SCREENINGS',
   editScreenings: 'EDIT_SCREENINGS',
@@ -1291,6 +1363,7 @@ export const aiFeatures = {
   chartChat: 'CHART_CHAT',
   assistantRouter: 'ASSISTANT_ROUTER',
   freeText: 'FREE_TEXT',
+  clinicalNarrativeDrafting: 'CLINICAL_NARRATIVE_DRAFTING',
 }
 
 export const aiSuggestionStatuses = {
@@ -1540,6 +1613,8 @@ export const encounterClinicalSubTabs = {
   medications: 'medications',
   carePlans: 'care-plans',
   labs: 'labs',
+  diagnosticStudies: 'diagnostic-studies',
+  qualityMeasures: 'quality-measures',
 }
 
 export const encounterRequirementPurposes = {
@@ -1984,6 +2059,13 @@ export const apiPaths = {
   encounterNarrative: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/narrative`,
+  encounterQualityMeasures: id => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/quality-measures`,
+  encounterQualityMeasureByCode: (id, code) => `/encounters/v1/${
+    encodeURIComponent(String(id ?? '').trim())
+  }/quality-measures/${encodeURIComponent(String(code ?? '').trim())
+  }`,
   encounterClinicalNote: id => `/encounters/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/clinical-note`,
@@ -2183,6 +2265,9 @@ export const apiPaths = {
   aiSuggestIcd10: encounterId => `/ai/v1/encounters/${encodeURIComponent(
     String(encounterId ?? '').trim(),
   )}/suggest-icd10`,
+  aiNarrativeDraft: encounterId => `/ai/v1/encounters/${encodeURIComponent(
+    String(encounterId ?? '').trim(),
+  )}/narrative-draft`,
   aiCarePlanDraft: clientId => `/ai/v1/clients/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/care-plan-draft`,
@@ -2462,6 +2547,47 @@ export const apiPaths = {
   clientLabById: (clientId, labId) => `/client/v1/${
     encodeURIComponent(String(clientId ?? '').trim())
   }/labs/${encodeURIComponent(String(labId ?? '').trim())}`,
+  clientDiagnosticStudies: clientId => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies`,
+  clientDiagnosticStudyById: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}`,
+  clientDiagnosticStudyExisting: clientId => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/existing`,
+  clientDiagnosticStudyComplete: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}/complete`,
+  clientDiagnosticStudyResult: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}/result`,
+  clientDiagnosticStudyReview: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}/review`,
+  clientDiagnosticStudyCancel: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}/cancel`,
+  clientDiagnosticStudySourceDocument: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}/source-document`,
+  clientDiagnosticStudySourceDownload: (clientId, studyId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/diagnostic-studies/${encodeURIComponent(
+    String(studyId ?? '').trim(),
+  )}/source-document/download`,
   clientVitals: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/vitals`,

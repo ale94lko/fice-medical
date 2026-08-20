@@ -108,6 +108,9 @@ export function normalizeEncounterRequirement(row = {}) {
       ?? item.actionCode,
     ),
     completed: satisfied,
+    missingSectionLabels: asArray(
+      item.missing_section_labels ?? item.missingSectionLabels,
+    ).map(trim).filter(Boolean),
   }
 }
 
@@ -117,13 +120,74 @@ function sortByDisplayOrder(items) {
 }
 
 /**
+ * One Encounter uses one Narrative requirement. Extra per-service
+ * Narrative rows from older configs are dropped.
+ */
+export function collapseDuplicateNarrativeRequirements(items = []) {
+  const list = Array.isArray(items) ? items : []
+  const narratives = list.filter(item => item?.type === 'NARRATIVE')
+  if (narratives.length <= 1) {
+    return list
+  }
+  const preferred = narratives.find(item => item.scope === 'ENCOUNTER')
+    || narratives[0]
+  const next = []
+  let inserted = false
+  for (const item of list) {
+    if (item?.type !== 'NARRATIVE') {
+      next.push(item)
+      continue
+    }
+    if (inserted) {
+      continue
+    }
+    next.push(preferred)
+    inserted = true
+  }
+
+  return next
+}
+
+/**
+ * Clinician-readable messages for missing required Narrative sections.
+ * Uses template labels; does not expose section types or field keys.
+ */
+export function formatMissingNarrativeRequirements(t, items = []) {
+  const labels = []
+  const rows = Array.isArray(items) ? items : []
+  for (const item of rows) {
+    if (String(item?.type ?? '').toUpperCase() !== 'NARRATIVE') {
+      continue
+    }
+    const fromApi = Array.isArray(item.missingSectionLabels)
+      ? item.missingSectionLabels
+      : []
+    for (const label of fromApi) {
+      const text = trim(label)
+      if (text) {
+        labels.push(text)
+      }
+    }
+  }
+  if (!labels.length || typeof t !== 'function') {
+    return ''
+  }
+
+  return labels
+    .map(label => t('encounterNarrativeSectionRequired', { label }))
+    .join(' ')
+}
+
+/**
  * Normalize GET /encounters/v1/{id}/requirements payload
  * (or workspace.completion / billing_readiness slices).
  */
 export function normalizeEncounterRequirementsSnapshot(raw = {}) {
   const body = asObject(raw)
-  const requirements = sortByDisplayOrder(
-    asArray(body.requirements).map(normalizeEncounterRequirement),
+  const requirements = collapseDuplicateNarrativeRequirements(
+    sortByDisplayOrder(
+      asArray(body.requirements).map(normalizeEncounterRequirement),
+    ),
   )
   const optionalActions = sortByDisplayOrder(
     asArray(

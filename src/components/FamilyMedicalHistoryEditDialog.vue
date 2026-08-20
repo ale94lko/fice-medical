@@ -15,9 +15,12 @@
         ref="dialogBodyScrollRef"
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-sm">
         <div class="row q-col-gutter-md q-col-gutter-lg-md">
-          <div class="col-12 col-md-6">
+          <div
+            v-if="isFamily"
+            class="col-12 col-md-6">
             <AddClientLabeledField
               :label="t('fmhFamilyRelationship')"
+              required
               :test-id="tid.fmhField('relationship')">
               <FormSelect
                 v-model="localRelationship"
@@ -45,17 +48,36 @@
               </FormSelect>
             </AddClientLabeledField>
           </div>
-          <div class="col-12 col-md-6">
+          <div
+            :class="isFamily ? 'col-12' : 'col-12 col-md-6'">
             <AddClientLabeledField
-              :label="t('fmhMedicalConditions')"
+              :label="conditionLabel"
+              required
               :test-id="tid.fmhField('conditions')">
               <q-input
                 v-model="localConditions"
                 outlined
                 hide-bottom-space
                 :data-testid="tid.fmhField('conditions')"
+                :placeholder="conditionPlaceholder"
                 :error="Boolean(conditionsError)"
                 :error-message="conditionsError"
+                maxlength="500"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('fmhNote')"
+              :test-id="tid.fmhField('notes')">
+              <q-input
+                v-model="localNotes"
+                outlined
+                hide-bottom-space
+                :data-testid="tid.fmhField('notes')"
+                :placeholder="t('fmhNotePlaceholder')"
+                :error="Boolean(notesError)"
+                :error-message="notesError"
                 maxlength="500"
               />
             </AddClientLabeledField>
@@ -95,9 +117,16 @@ import FormSelect from 'components/FormSelect.vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
+  familyMedicalHistoryMaxConditionsLength,
+  familyMedicalHistoryMaxNotesLength,
+  familyMedicalHistoryMaxRelationshipLength,
+  medicalHistoryTypeValues,
+} from 'components/constants.js'
+import {
   isDuplicateFamilyMedicalHistoryEntry,
+  normalizeMedicalHistoryType,
   trimFamilyMedicalField,
-  validateFamilyMedicalHistoryForAdd,
+  validateMedicalHistoryDraftForAdd,
 } from 'src/utils/client-family-medical-history.js'
 import {
   addClientTestIds as tid,
@@ -137,17 +166,51 @@ const { notifyAndScrollToValidationErrors } = useValidationSaveFeedback()
 const dialogBodyScrollRef = ref(null)
 const localRelationship = ref('')
 const localConditions = ref('')
+const localNotes = ref('')
 const relationshipError = ref('')
 const conditionsError = ref('')
+const notesError = ref('')
 const open = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
 })
 
-const dialogTitle = computed(() =>
-  props.mode === 'edit'
-    ? t('fmhEditTitle')
-    : t('fmhEditTitle'),
+const historyType = computed(() =>
+  normalizeMedicalHistoryType(
+    props.entry?.historyType,
+    props.entry?.familyRelationship,
+  ),
+)
+
+const isFamily = computed(
+  () => historyType.value === medicalHistoryTypeValues.family,
+)
+
+const isSurgical = computed(
+  () => historyType.value === medicalHistoryTypeValues.surgical,
+)
+
+const dialogTitle = computed(() => {
+  if (isSurgical.value) {
+    return t('fmhEditSurgicalTitle')
+  }
+  if (isFamily.value) {
+    return t('fmhEditFamilyTitle')
+  }
+
+  return t('fmhEditPersonalTitle')
+})
+
+const conditionLabel = computed(() =>
+  isSurgical.value
+    ? t('fmhProcedureSurgery')
+    : t('fmhMedicalConditionEvent'),
+)
+
+const conditionPlaceholder = computed(() =>
+  isSurgical.value
+    ? t('fmhProcedurePlaceholder')
+    : t('fmhConditionPlaceholder'),
 )
 
 const dialogTestId = modalTestIds.dialog('fmh-edit')
@@ -162,8 +225,10 @@ watch(
     }
     relationshipError.value = ''
     conditionsError.value = ''
+    notesError.value = ''
     localRelationship.value = props.entry?.familyRelationship ?? ''
     localConditions.value = props.entry?.medicalConditions ?? ''
+    localNotes.value = props.entry?.notes ?? ''
   },
 )
 
@@ -171,26 +236,44 @@ function onCancel() {
   open.value = false
 }
 
-async function onSave() {
+function applyDraftErrors(result) {
   relationshipError.value = ''
   conditionsError.value = ''
-  const result = validateFamilyMedicalHistoryForAdd(
-    localRelationship.value,
-    localConditions.value,
-  )
+  notesError.value = ''
+  if (result.relationship) {
+    relationshipError.value = t(
+      result.relationship,
+      result.relationship === 'fmhRelationshipMax'
+        ? { max: familyMedicalHistoryMaxRelationshipLength }
+        : {},
+    )
+  }
+  if (result.conditions) {
+    conditionsError.value = t(
+      result.conditions,
+      result.conditions === 'fmhConditionsInvalid'
+        || result.conditions === 'fmhProcedureInvalid'
+        ? { max: familyMedicalHistoryMaxConditionsLength }
+        : {},
+    )
+  }
+  if (result.notes) {
+    notesError.value = t(
+      result.notes,
+      { max: familyMedicalHistoryMaxNotesLength },
+    )
+  }
+}
+
+async function onSave() {
+  const result = validateMedicalHistoryDraftForAdd({
+    historyType: historyType.value,
+    familyRelationship: localRelationship.value,
+    medicalConditions: localConditions.value,
+    notes: localNotes.value,
+  })
   if (!result.ok) {
-    if (result.relationship) {
-      relationshipError.value = t(
-        result.relationship,
-        result.relationship === 'fmhRelationshipMax' ? { max: 25 } : {},
-      )
-    }
-    if (result.conditions) {
-      conditionsError.value = t(
-        result.conditions,
-        result.conditions === 'fmhConditionsInvalid' ? { max: 500 } : {},
-      )
-    }
+    applyDraftErrors(result)
     await notifyAndScrollToValidationErrors(dialogBodyScrollRef)
 
     return
@@ -203,6 +286,7 @@ async function onSave() {
       localRelationship.value,
       localConditions.value,
       excludeId,
+      historyType.value,
     )
   ) {
     conditionsError.value = t('fmhDuplicateEntry')
@@ -212,10 +296,11 @@ async function onSave() {
   }
 
   emit('save', {
+    historyType: historyType.value,
     familyRelationship: trimFamilyMedicalField(localRelationship.value),
     medicalConditions: trimFamilyMedicalField(localConditions.value),
+    notes: trimFamilyMedicalField(localNotes.value),
   })
   open.value = false
 }
 </script>
-

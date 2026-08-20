@@ -63,17 +63,30 @@
               icon="view_agenda"
               :title="t('clinicalNoteTemplateSectionsTitle')"
             />
-            <q-btn
+            <div
               v-if="!readonly"
-              no-caps
-              outline
-              color="primary"
-              class="app-btn-outline"
-              icon="add"
-              :label="t('clinicalNoteTemplateAddSection')"
-              :data-testid="tid.addSection"
-              @click="addSection"
-            />
+              class="row items-center q-gutter-sm">
+              <q-btn
+                no-caps
+                outline
+                color="primary"
+                class="app-btn-outline"
+                icon="add"
+                :label="t('clinicalNoteTemplateAddSection')"
+                :data-testid="tid.addSection"
+                @click="addSection"
+              />
+              <q-btn
+                no-caps
+                outline
+                color="primary"
+                class="app-btn-outline"
+                icon="note_add"
+                :label="t('clinicalNoteTemplateAddAdditionalNotes')"
+                :data-testid="tid.addAdditionalNotes"
+                @click="addAdditionalNotes"
+              />
+            </div>
           </div>
 
           <div
@@ -161,7 +174,23 @@
                       />
                     </AddClientLabeledField>
                   </div>
-                  <div class="col-12 col-md-8">
+                  <div class="col-12 col-md-4">
+                    <AddClientLabeledField
+                      :label="t('clinicalNoteTemplateSectionGroup')">
+                      <FormSelect
+                        v-model="section.sectionGroup"
+                        outlined
+                        hide-bottom-space
+                        emit-value
+                        map-options
+                        clearable
+                        :options="narrativeGroupOptions"
+                        :readonly="readonly"
+                        :test-id="tid.field('section-group-' + index)"
+                      />
+                    </AddClientLabeledField>
+                  </div>
+                  <div class="col-12 col-md-4">
                     <AddClientLabeledField
                       :label="t('clinicalNoteTemplatePlaceholder')">
                       <TextInput
@@ -170,6 +199,57 @@
                         :readonly="readonly"
                       />
                     </AddClientLabeledField>
+                  </div>
+                </div>
+                <div
+                  v-if="showsNarrativeAiConfig(section)"
+                  class="row q-col-gutter-sm q-mt-sm">
+                  <div class="col-12 col-md-6">
+                    <FormToggle
+                      v-model="section.aiAssistance"
+                      :disable="readonly"
+                      :label="t('clinicalNoteTemplateAiAssistance')"
+                      :test-id="tid.field('ai-assistance-' + index)"
+                      @update:model-value="onAiAssistance(section)"
+                    />
+                  </div>
+                  <div
+                    v-if="section.aiAssistance"
+                    class="col-12 col-md-6">
+                    <FormToggle
+                      v-model="section.aiProviderInputRequired"
+                      :disable="readonly
+                        || isAssessmentPlanSection(section)
+                        || isPlanNarrativeField(section)"
+                      :label="t(
+                        'clinicalNoteTemplateAiProviderInputRequired',
+                      )"
+                      :test-id="tid.field(
+                        'ai-provider-input-' + index,
+                      )"
+                    />
+                  </div>
+                  <div
+                    v-if="section.aiAssistance"
+                    class="col-12">
+                    <AddClientLabeledField
+                      :label="t('clinicalNoteTemplateAiContextSources')">
+                      <FormSelect
+                        v-model="section.aiContextSources"
+                        outlined
+                        hide-bottom-space
+                        emit-value
+                        map-options
+                        multiple
+                        use-chips
+                        :options="aiContextSourceOptions"
+                        :readonly="readonly"
+                        :test-id="tid.field('ai-sources-' + index)"
+                      />
+                    </AddClientLabeledField>
+                    <p class="text-caption text-grey-7 q-mt-xs q-mb-none">
+                      {{ t('clinicalNoteTemplateAiContextHint') }}
+                    </p>
                   </div>
                 </div>
                 <div
@@ -192,6 +272,36 @@
                 <div
                   v-if="section.sectionType === types.structuredSection"
                   class="q-mt-sm">
+                  <div class="row q-col-gutter-sm q-mb-sm">
+                    <div class="col-12 col-md-6">
+                      <AddClientLabeledField
+                        :label="t(
+                          'clinicalNoteTemplateStructuredDefinition',
+                        )"
+                        required>
+                        <FormSelect
+                          :model-value="section.structuredDefinition
+                            || 'CUSTOM'"
+                          outlined
+                          hide-bottom-space
+                          emit-value
+                          map-options
+                          :options="structuredDefinitionOptions"
+                          :readonly="readonly"
+                          @update:model-value="onStructuredDefinition(
+                            section,
+                            $event,
+                          )"
+                        />
+                      </AddClientLabeledField>
+                    </div>
+                  </div>
+                  <p
+                    v-if="isManagedStructuredDefinition(section)"
+                    class="text-body2 text-grey-7 q-mb-sm">
+                    {{ managedStructuredHint(section) }}
+                  </p>
+                  <template v-else>
                   <p class="text-body2 text-grey-7 q-mb-sm">
                     {{ t('clinicalNoteTemplateStructuredFieldsHint') }}
                   </p>
@@ -238,6 +348,7 @@
                       />
                     </div>
                   </div>
+                  </template>
                 </div>
                 <div class="row items-center q-gutter-md q-mt-sm">
                   <FormToggle
@@ -248,7 +359,8 @@
                     :label="t('clinicalNoteTemplateRequired')"
                   />
                   <FormToggle
-                    v-if="section.sectionType === types.assessment
+                    v-if="section.sectionType === types.narrativeField
+                      || section.sectionType === types.assessment
                       || section.sectionType === types.structuredSection"
                     :model-value="section.showWhenEmpty !== false"
                     :disable="readonly"
@@ -256,6 +368,11 @@
                     @update:model-value="section.showWhenEmpty = $event"
                   />
                 </div>
+                <p
+                  v-if="isAdditionalNotesSection(section)"
+                  class="text-body2 text-grey-7 q-mb-none q-mt-sm">
+                  {{ t('clinicalNoteAdditionalNotesHint') }}
+                </p>
               </div>
               <div class="col-auto">
                 <q-btn
@@ -352,6 +469,28 @@ import {
   parseStructuredSectionFields,
   serializeStructuredSectionConfig,
 } from 'src/utils/clinical-note-template-api.js'
+import {
+  isAdditionalNotesSection,
+  nextAdditionalNotesSectionKey,
+} from 'src/utils/additional-notes.js'
+import {
+  narrativeSectionGroupHpi,
+  parseNarrativeSectionGroup,
+} from 'src/utils/clinical-note-narrative-group.js'
+import {
+  isPlanNarrativeField,
+  narrativeAiContextSources,
+  planNarrativeAiContextSources,
+} from 'src/utils/narrative-ai-assistance.js'
+import {
+  parseStructuredDefinition,
+  reviewOfSystemsDefinition,
+} from 'src/utils/review-of-systems.js'
+import { physicalExamDefinition } from 'src/utils/physical-exam.js'
+import { mentalStatusExamDefinition } from
+  'src/utils/mental-status-exam.js'
+import { assessmentPlanDefinition, isAssessmentPlanSection } from
+  'src/utils/assessment-plan.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -390,6 +529,11 @@ function emptySection() {
     placeholder: '',
     assessmentTemplateId: null,
     configurationJson: '',
+    sectionGroup: '',
+    aiAssistance: false,
+    aiContextSources: [],
+    aiProviderInputRequired: false,
+    structuredDefinition: 'CUSTOM',
     structuredFields: [emptyStructuredField()],
     sectionKey: '',
     active: true,
@@ -410,6 +554,20 @@ function cloneTemplate(source) {
         structuredFields: parseStructuredSectionFields(
           section.configurationJson,
         ),
+        structuredDefinition: parseStructuredDefinition(
+          section.configurationJson,
+        ),
+        sectionGroup: section.sectionGroup
+          || parseNarrativeSectionGroup(section.configurationJson),
+        aiAssistance: Boolean(section.aiAssistance),
+        aiContextSources: Array.isArray(section.aiContextSources)
+          ? [...section.aiContextSources]
+          : [],
+        aiProviderInputRequired: Boolean(
+          section.aiProviderInputRequired,
+        )
+          || (Boolean(section.aiAssistance)
+            && isAssessmentPlanSection(section)),
       }
     })
     : [emptySection()]
@@ -480,9 +638,63 @@ const inputOptions = computed(() => clinicalNoteInputTypes.map(value => ({
   label: t(`clinicalNoteInputType_${value}`),
   value,
 })))
+const narrativeGroupOptions = computed(() => [
+  {
+    label: t('encounterNarrativeGroupHpi'),
+    value: narrativeSectionGroupHpi,
+  },
+])
+const aiContextSourceOptions = computed(() =>
+  narrativeAiContextSources.map(value => ({
+    label: t(`narrativeAiContextSource_${value}`),
+    value,
+  })),
+)
+
+function showsNarrativeAiConfig(section) {
+  return section.sectionType === types.narrativeField
+    || isAssessmentPlanSection(section)
+}
+
+function onAiAssistance(section) {
+  if (!section.aiAssistance) {
+    section.aiContextSources = []
+    section.aiProviderInputRequired = false
+
+    return
+  }
+  if (isAssessmentPlanSection(section)
+    || isPlanNarrativeField(section)) {
+    section.aiProviderInputRequired = true
+    if (!Array.isArray(section.aiContextSources)
+      || !section.aiContextSources.length) {
+      section.aiContextSources = [...planNarrativeAiContextSources]
+    }
+
+    return
+  }
+  if (!Array.isArray(section.aiContextSources)
+    || !section.aiContextSources.length) {
+    section.aiContextSources = ['PROVIDER_INPUT']
+  }
+}
 
 function addSection() {
   local.value.sections.push(emptySection())
+}
+
+function addAdditionalNotes() {
+  const section = emptySection()
+  section.label = t('clinicalNoteAdditionalNotesLabel')
+  section.sectionType = types.narrativeField
+  section.inputType = 'LONG_TEXT'
+  section.required = false
+  section.showWhenEmpty = false
+  section.placeholder = t('clinicalNoteAdditionalNotesPlaceholder')
+  section.sectionKey = nextAdditionalNotesSectionKey(
+    local.value.sections,
+  )
+  local.value.sections.push(section)
 }
 
 function removeSection(index) {
@@ -518,6 +730,101 @@ function onSectionTypeChange(section) {
     && !section.structuredFields?.length) {
     section.structuredFields = [emptyStructuredField()]
   }
+  if (section.sectionType === types.structuredSection
+    && !section.structuredDefinition) {
+    section.structuredDefinition = 'CUSTOM'
+  }
+  if (section.sectionType !== types.narrativeField
+    && !isAssessmentPlanSection(section)) {
+    section.sectionGroup = ''
+    section.aiAssistance = false
+    section.aiContextSources = []
+    section.aiProviderInputRequired = false
+  }
+}
+
+const structuredDefinitionOptions = computed(() => [
+  {
+    label: t('clinicalNoteStructuredCustom'),
+    value: 'CUSTOM',
+  },
+  {
+    label: t('rosDefaultLabel'),
+    value: reviewOfSystemsDefinition,
+  },
+  {
+    label: t('peDefaultLabel'),
+    value: physicalExamDefinition,
+  },
+  {
+    label: t('mseDefaultLabel'),
+    value: mentalStatusExamDefinition,
+  },
+  {
+    label: t('apDefaultLabel'),
+    value: assessmentPlanDefinition,
+  },
+])
+
+function isManagedStructuredDefinition(section) {
+  return section.structuredDefinition === reviewOfSystemsDefinition
+    || section.structuredDefinition === physicalExamDefinition
+    || section.structuredDefinition === mentalStatusExamDefinition
+    || section.structuredDefinition === assessmentPlanDefinition
+}
+
+function managedStructuredHint(section) {
+  if (section.structuredDefinition === assessmentPlanDefinition) {
+    return t('clinicalNoteTemplateApHint')
+  }
+  if (section.structuredDefinition === mentalStatusExamDefinition) {
+    return t('clinicalNoteTemplateMseHint')
+  }
+  if (section.structuredDefinition === physicalExamDefinition) {
+    return t('clinicalNoteTemplatePeHint')
+  }
+
+  return t('clinicalNoteTemplateRosHint')
+}
+
+function onStructuredDefinition(section, value) {
+  section.structuredDefinition = value || 'CUSTOM'
+  if (value !== assessmentPlanDefinition) {
+    section.aiAssistance = false
+    section.aiContextSources = []
+    section.aiProviderInputRequired = false
+  }
+  if (value === reviewOfSystemsDefinition) {
+    if (!String(section.label || '').trim()) {
+      section.label = t('rosDefaultLabel')
+    }
+
+    return
+  }
+  if (value === physicalExamDefinition) {
+    if (!String(section.label || '').trim()) {
+      section.label = t('peDefaultLabel')
+    }
+
+    return
+  }
+  if (value === mentalStatusExamDefinition) {
+    if (!String(section.label || '').trim()) {
+      section.label = t('mseDefaultLabel')
+    }
+
+    return
+  }
+  if (value === assessmentPlanDefinition) {
+    if (!String(section.label || '').trim()) {
+      section.label = t('apDefaultLabel')
+    }
+
+    return
+  }
+  if (!section.structuredFields?.length) {
+    section.structuredFields = [emptyStructuredField()]
+  }
 }
 
 function addStructuredField(section) {
@@ -539,9 +846,7 @@ function onSave() {
 
     return {
       ...section,
-      configurationJson: serializeStructuredSectionConfig(
-        section.structuredFields,
-      ),
+      configurationJson: serializeStructuredSectionConfig(section),
     }
   })
   emit('save', { ...local.value, sections })

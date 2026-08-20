@@ -26,10 +26,19 @@
     <template #body-cell-medicalConditions="scope">
       <q-td
         :props="scope"
-        class="admin-data-table__secondary-cell
-          family-medical-history-table__conditions">
+        :class="conditionCellClass">
         <span class="family-medical-history-table__ellipsis">
           {{ scope.row.medicalConditions || '—' }}
+        </span>
+      </q-td>
+    </template>
+
+    <template #body-cell-notes="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        <span class="family-medical-history-table__ellipsis">
+          {{ scope.row.notes || '—' }}
         </span>
       </q-td>
     </template>
@@ -99,7 +108,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminQTable from 'components/AdminQTable.vue'
-import { siteBreakpoints } from 'components/constants.js'
+import {
+  medicalHistoryTypeValues,
+  siteBreakpoints,
+} from 'components/constants.js'
 import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
@@ -113,6 +125,10 @@ const props = defineProps({
   emptyLabel: {
     type: String,
     default: '',
+  },
+  variant: {
+    type: String,
+    default: medicalHistoryTypeValues.family,
   },
   canEdit: {
     type: Boolean,
@@ -133,35 +149,76 @@ const tablePagination = { rowsPerPage: 0 }
 
 const rows = computed(() => props.entries ?? [])
 
+const isFamily = computed(
+  () => props.variant === medicalHistoryTypeValues.family,
+)
+
+const isSurgical = computed(
+  () => props.variant === medicalHistoryTypeValues.surgical,
+)
+
+const conditionLabel = computed(() => {
+  if (isSurgical.value) {
+    return t('fmhColProcedure')
+  }
+  if (isFamily.value) {
+    return t('fmhColConditionEvent')
+  }
+
+  return t('fmhColConditionDiagnosis')
+})
+
+const conditionCellClass = computed(() => {
+  if (isFamily.value) {
+    return 'admin-data-table__secondary-cell '
+      + 'family-medical-history-table__conditions'
+  }
+
+  return 'admin-data-table__primary-cell '
+    + 'family-medical-history-table__conditions'
+})
+
 /** Same compact card hierarchy as Insurance / Allergies (mobile). */
-const mobileCardLayout = {
-  title: 'familyRelationship',
+const mobileCardLayout = computed(() => ({
+  title: isFamily.value ? 'familyRelationship' : 'medicalConditions',
   status: null,
   subtitle: null,
   contact: null,
   identifier: null,
-  badges: ['medicalConditions'],
+  badges: isFamily.value
+    ? ['medicalConditions', 'notes']
+    : ['notes'],
   hideEmpty: true,
-}
+}))
 
-const columns = computed(() => [
-  {
-    name: 'familyRelationship',
-    label: t('fmhColRelationship'),
-    align: 'left',
-    field: row => row.familyRelationship,
-    sortable: false,
-    headerStyle: 'min-width: 140px',
-    style: 'min-width: 140px',
-  },
-  {
+const columns = computed(() => {
+  const cols = []
+  if (isFamily.value) {
+    cols.push({
+      name: 'familyRelationship',
+      label: t('fmhColRelationship'),
+      align: 'left',
+      field: row => row.familyRelationship,
+      sortable: false,
+      headerStyle: 'min-width: 140px',
+      style: 'min-width: 140px',
+    })
+  }
+  cols.push({
     name: 'medicalConditions',
-    label: t('fmhColConditions'),
+    label: conditionLabel.value,
     align: 'left',
     field: row => row.medicalConditions,
     sortable: false,
-  },
-  {
+  })
+  cols.push({
+    name: 'notes',
+    label: t('fmhColNotes'),
+    align: 'left',
+    field: row => row.notes,
+    sortable: false,
+  })
+  cols.push({
     name: 'actions',
     label: t('actions'),
     align: 'center',
@@ -170,6 +227,8 @@ const columns = computed(() => [
     required: true,
     headerStyle: 'min-width: 96px',
     style: 'min-width: 96px',
-  },
-])
+  })
+
+  return cols
+})
 </script>

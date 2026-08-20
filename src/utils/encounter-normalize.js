@@ -45,6 +45,7 @@ function normalizeServiceProcedure(row = {}) {
     renderingClinicianId: parseOptionalNumber(
       row.rendering_clinician_id ?? row.renderingClinicianId,
     ),
+    isPrimary: parseOptionalBool(row.is_primary ?? row.isPrimary),
   }
 }
 

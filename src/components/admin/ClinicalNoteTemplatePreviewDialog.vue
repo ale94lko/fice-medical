@@ -75,6 +75,8 @@ import { clinicalNoteSectionTypes as types } from
 import {
   parseStructuredSectionFields,
 } from 'src/utils/clinical-note-template-api.js'
+import { parseStructuredDefinition } from
+  'src/utils/review-of-systems.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -117,6 +119,26 @@ function previewBody(section) {
   }
 
   if (section.sectionType === types.structuredSection) {
+    if (parseStructuredDefinition(section.configurationJson)
+      === 'REVIEW_OF_SYSTEMS'
+      || section.structuredDefinition === 'REVIEW_OF_SYSTEMS') {
+      return t('clinicalNotePreviewRos')
+    }
+    if (parseStructuredDefinition(section.configurationJson)
+      === 'PHYSICAL_EXAM'
+      || section.structuredDefinition === 'PHYSICAL_EXAM') {
+      return t('clinicalNotePreviewPe')
+    }
+    if (parseStructuredDefinition(section.configurationJson)
+      === 'MENTAL_STATUS_EXAM'
+      || section.structuredDefinition === 'MENTAL_STATUS_EXAM') {
+      return t('clinicalNotePreviewMse')
+    }
+    if (parseStructuredDefinition(section.configurationJson)
+      === 'ASSESSMENT_PLAN'
+      || section.structuredDefinition === 'ASSESSMENT_PLAN') {
+      return t('clinicalNotePreviewAp')
+    }
     const rawFields = Array.isArray(section.structuredFields)
       && section.structuredFields.length
       ? section.structuredFields

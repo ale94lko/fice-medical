@@ -25,6 +25,7 @@
           </q-toolbar-title>
         </div>
         <q-space />
+        <TimezoneMismatchBanner v-if="!mobileView" />
         <ActiveEncounterHeaderChip />
         <SubtenantToolbar
           v-if="!mobileView"
@@ -125,50 +126,6 @@
               {{ t('calendar') }}
             </q-tooltip>
           </q-item>
-          <q-item
-            v-if="showCalendarMenu"
-            clickable
-            v-ripple
-            to="/appointment-requests"
-            :data-testid="layoutTestIds.navAppointmentRequests"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="event_available" />
-            </q-item-section>
-            <q-item-section>
-              {{ t('appointmentRequestsNav') }}
-            </q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('appointmentRequestsNav') }}
-            </q-tooltip>
-          </q-item>
-          <q-item
-            v-if="showPortalMessages"
-            clickable
-            v-ripple
-            to="/messages"
-            :data-testid="layoutTestIds.navMessages"
-            :active-class="activeClass">
-            <q-item-section avatar>
-              <q-icon name="chat" />
-            </q-item-section>
-            <q-item-section>
-              {{ t('portalMessagesNav') }}
-            </q-item-section>
-            <q-tooltip
-              v-if="drawerShowsMiniTooltips"
-              anchor="center right"
-              self="center left"
-              :offset="[8, 0]"
-              class="app-drawer-tooltip">
-              {{ t('portalMessagesNav') }}
-            </q-tooltip>
-          </q-item>
           <q-expansion-item
             v-if="accordionMenu && showClientMenu"
             v-model="clientMenuExpanded"
@@ -248,26 +205,70 @@
               {{ t('client') }}
             </q-tooltip>
           </q-item>
+          <q-expansion-item
+            v-if="accordionMenu && showPortalMenu"
+            v-model="portalMenuExpanded"
+            expand-separator
+            icon="language"
+            :label="t('navPortal')"
+            :data-testid="layoutTestIds.navPortalMenu"
+            :header-class="isPortalActive ? activeClass : ''">
+            <AppDrawerSubNavItem
+              v-for="item in portalNavItems"
+              :key="item.to"
+              :icon="item.icon"
+              :to="item.to"
+              :active-class="activeClass"
+              :test-id="item.testId">
+              {{ t(item.labelKey) }}
+            </AppDrawerSubNavItem>
+          </q-expansion-item>
           <q-item
-            v-if="showPortalRegistrationsNav"
-            clickable
+            v-else-if="showPortalMenu"
             v-ripple
-            to="/clients/portal-registrations"
-            :data-testid="layoutTestIds.navPortalRegistrations"
-            :active-class="activeClass">
+            clickable
+            :active="isPortalActive"
+            :active-class="activeClass"
+            :data-testid="layoutTestIds.navPortalMenu">
             <q-item-section avatar>
-              <q-icon name="person_search" />
+              <q-icon name="language" />
             </q-item-section>
-            <q-item-section>
-              {{ t('portalRegistrationsNav') }}
+            <q-item-section>{{ t('navPortal') }}</q-item-section>
+            <q-item-section side>
+              <q-icon
+                v-if="portalMenuPopup"
+                name="chevron_left"
+                :class="isActiveClass(isPortalActive)"
+              />
+              <q-icon
+                v-else
+                name="chevron_right"
+                :class="isActiveClass(isPortalActive)"
+              />
             </q-item-section>
+            <q-menu
+              fit
+              anchor="top end"
+              self="top left"
+              class="app-drawer-submenu app-light-menu"
+              v-model="portalMenuPopup">
+              <AppDrawerSubNavItem
+                v-for="item in portalNavItems"
+                :key="item.to"
+                :icon="item.icon"
+                :to="item.to"
+                :active-class="activeClass"
+                :test-id="item.testId">
+                {{ t(item.labelKey) }}
+              </AppDrawerSubNavItem>
+            </q-menu>
             <q-tooltip
-              v-if="drawerShowsMiniTooltips"
+              v-if="drawerShowsMiniTooltips && !portalMenuPopup"
               anchor="center right"
               self="center left"
               :offset="[8, 0]"
               class="app-drawer-tooltip">
-              {{ t('portalRegistrationsNav') }}
+              {{ t('navPortal') }}
             </q-tooltip>
           </q-item>
           <q-expansion-item
@@ -750,6 +751,8 @@ import ClinicalResourcesQuickPanel from
 import SubtenantToolbar from 'components/SubtenantToolbar.vue'
 import ActiveEncounterHeaderChip from
   'components/ActiveEncounterHeaderChip.vue'
+import TimezoneMismatchBanner from
+  'components/TimezoneMismatchBanner.vue'
 import AppHeaderUserMenu from 'components/AppHeaderUserMenu.vue'
 import AppHeaderNotifications from
   'components/AppHeaderNotifications.vue'
@@ -834,6 +837,8 @@ const drawerOverlayBreakpoint = drawerMobileMaxPx + 1
 
 const clientMenuExpanded = ref(false)
 const clientMenuPopup = ref(false)
+const portalMenuExpanded = ref(false)
+const portalMenuPopup = ref(false)
 const staffMenuExpanded = ref(false)
 const staffMenuPopup = ref(false)
 const usersMenuExpanded = ref(false)
@@ -864,7 +869,9 @@ const accordionMenu = computed(
 const {
   showDashboard,
   showCalendarMenu,
+  showPortalMenu,
   showPortalMessages,
+  showPortalRegistrationsNav,
   showClientMenu,
   showClientList,
   showClientAdd,
@@ -896,14 +903,16 @@ const isPortalRegistrationsActive = computed(() =>
   route.path.startsWith('/clients/portal-registrations'),
 )
 
+const isPortalActive = computed(() =>
+  route.path.startsWith('/messages')
+    || isPortalRegistrationsActive.value
+    || route.path.startsWith('/appointment-requests'),
+)
+
 const isClientActive = computed(() => {
   return route.path.startsWith('/clients')
     && !isPortalRegistrationsActive.value
 })
-
-const showPortalRegistrationsNav = computed(
-  () => showClientList.value || showClientAdd.value,
-)
 
 const isStaffActive = computed(() => route.path.startsWith('/staff'))
 
@@ -928,6 +937,36 @@ const isBillingActive = computed(() => {
     || path.startsWith('/remittances')
     || path.startsWith('/payments')
     || path.startsWith('/denials')
+})
+
+const portalNavItems = computed(() => {
+  const items = []
+  if (showPortalMessages.value) {
+    items.push({
+      icon: 'chat',
+      to: '/messages',
+      testId: layoutTestIds.navMessages,
+      labelKey: 'portalMessagesNav',
+    })
+  }
+  if (showPortalRegistrationsNav.value) {
+    items.push({
+      icon: 'person_search',
+      to: '/clients/portal-registrations',
+      testId: layoutTestIds.navPortalRegistrations,
+      labelKey: 'portalRegistrationsNav',
+    })
+  }
+  if (showCalendarMenu.value) {
+    items.push({
+      icon: 'event_available',
+      to: '/appointment-requests',
+      testId: layoutTestIds.navAppointmentRequests,
+      labelKey: 'appointmentRequestsNav',
+    })
+  }
+
+  return items
 })
 
 const billingNavItems = computed(() => {
@@ -1023,6 +1062,7 @@ function onDrawerMouseEnter() {
 function onDrawerMouseLeave() {
   drawerHoverExpanded.value = false
   clientMenuPopup.value = false
+  portalMenuPopup.value = false
   staffMenuPopup.value = false
   usersMenuPopup.value = false
   if (!sidebarExpanded.value) {
@@ -1035,6 +1075,11 @@ function syncNavMenusFromRoute() {
     clientMenuExpanded.value = true
   } else if (!isClientActive.value) {
     clientMenuExpanded.value = false
+  }
+  if (accordionMenu.value && isPortalActive.value) {
+    portalMenuExpanded.value = true
+  } else if (!isPortalActive.value) {
+    portalMenuExpanded.value = false
   }
   if (accordionMenu.value && isStaffActive.value) {
     staffMenuExpanded.value = true
@@ -1057,12 +1102,14 @@ function syncNavMenusFromRoute() {
     billingMenu.value = false
   }
   clientMenuPopup.value = false
+  portalMenuPopup.value = false
   staffMenuPopup.value = false
   usersMenuPopup.value = false
 }
 
 function closeMiniPopups() {
   clientMenuPopup.value = false
+  portalMenuPopup.value = false
   staffMenuPopup.value = false
   usersMenuPopup.value = false
   billingMenu.value = false
@@ -1073,6 +1120,9 @@ function hideAllMenu() {
   closeMiniPopups()
   if (!isClientActive.value) {
     clientMenuExpanded.value = false
+  }
+  if (!isPortalActive.value) {
+    portalMenuExpanded.value = false
   }
   if (!isStaffActive.value) {
     staffMenuExpanded.value = false
@@ -1130,6 +1180,10 @@ watch(mobileView, (isMobile) => {
 })
 
 watch(isClientActive, () => {
+  syncNavMenusFromRoute()
+})
+
+watch(isPortalActive, () => {
   syncNavMenusFromRoute()
 })
 

@@ -60,9 +60,11 @@
           :show-view-superbill="showViewSuperbill"
           :can-waive-requirement="canWaiveRequirement"
           :narrative="workspace.narrative"
+          :diagnoses="workspace.encounter.diagnoses"
           :generated-note="generatedNoteForOverview"
           :processing-issues="workspace.processingIssues"
           :can-retry-processing="canRetryEncounterProcessing"
+          :can-regenerate="canRegenerateGeneratedNote"
           @requirement-action="onRequirementAction"
           @quick-action="onQuickAction"
           @waive-requirement="onWaiveRequest"
@@ -71,11 +73,13 @@
           @review-generated-note="generatedNoteOpen = true"
           @retry-generate="onRetryGenerate"
           @retry-processing="onRetryProcessing"
+          @regenerate-generated-note="onRegenerateGeneratedNote"
         />
         <EncounterWorkspaceVisit
           v-else-if="activeTab === encounterWorkspaceTabs.visit"
           :encounter="workspace.encounter"
-          :can-edit="canEditVisit"
+          :can-edit="canEditVisitDocumentation"
+          :can-edit-services="canEditVisitServices"
           @services-saved="onVisitFieldsSaved"
           @diagnoses-saved="onVisitFieldsSaved"
           @chief-complaint-saved="onVisitFieldsSaved"
@@ -88,6 +92,7 @@
           :medications="workspace.medications"
           :care-plans="workspace.carePlans"
           :labs="workspace.labs"
+          :diagnostic-studies="workspace.diagnosticStudies"
           :client-id="chartClientKey"
           :encounter-id="workspace.encounter.id"
           :encounter-open="encounterIsOpen"
@@ -97,6 +102,12 @@
           :can-edit-screenings="canEditScreeningsHere"
           :can-add-labs="canAddLabsHere"
           :can-edit-labs="canEditLabsHere"
+          :can-add-diagnostic-studies="canAddDiagnosticStudies"
+          :can-edit-diagnostic-studies="canEditDiagnosticStudies"
+          :can-delete-diagnostic-studies="
+            canDeleteDiagnosticStudies
+          "
+          :can-edit-quality-measures="canEditQualityMeasures"
           :patient-dob="workspace.encounter.clientDateOfBirth"
           :patient-age="workspace.encounter.clientAge"
           :patient-age-unit="workspace.encounter.clientAgeUnit || 'years'"
@@ -107,8 +118,11 @@
           v-else-if="activeTab === encounterWorkspaceTabs.narrative"
           :encounter-id="workspace.encounter.id"
           :narrative="workspace.narrative"
+          :diagnoses="workspace.encounter.diagnoses"
           :can-edit="canEditNarrative"
+          :can-use-ai-draft="canUseNarrativeAiDraft"
           @saved="onNarrativeSaved"
+          @go-to-visit="activeTab = encounterWorkspaceTabs.visit"
         />
         <EncounterWorkspaceFollowUp
           v-else
@@ -170,9 +184,11 @@
       :busy="actionBusy"
       :can-sign="canSignGeneratedNote"
       :can-regenerate="canRegenerateGeneratedNote"
+      :can-correct-sources="allowPreSignatureCorrection"
       @sign="onSignGeneratedNote"
       @regenerate="onRegenerateGeneratedNote"
       @add-addendum="openGeneratedAddendum"
+      @edit-source="onEditGeneratedNoteSource"
     />
 
     <ClinicalNoteAddendumDialog
@@ -271,6 +287,9 @@ import {
   markEncounterTimerResumed,
 } from 'src/utils/encounter-session-watch.js'
 import {
+  formatMissingNarrativeRequirements,
+} from 'src/utils/encounter-requirements-normalize.js'
+import {
   canReopenEncounter,
   isEncounterCompleted,
   parseCompletionRequirementsError,
@@ -280,6 +299,8 @@ import {
   superbillApiErrorMessage,
 } from 'src/utils/superbill-api.js'
 import {
+  fetchEncounterNarrative,
+  fetchGeneratedClinicalNote,
   regenerateClinicalNote,
 } from 'src/utils/encounter-narrative-api.js'
 import {
@@ -292,6 +313,8 @@ import { useClientPermissions } from
   'src/composables/useClientPermissions.js'
 import { useEncounterPermissions } from
   'src/composables/useEncounterPermissions.js'
+import { useAiPermissions } from
+  'src/composables/useAiPermissions.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -326,6 +349,9 @@ const {
   canEditScreenings,
   canAddLabs,
   canEditLabs,
+  canAddDiagnosticStudies,
+  canEditDiagnosticStudies,
+  canDeleteDiagnosticStudies,
 } = useClientPermissions()
 const {
   canManageEncounter,
@@ -337,6 +363,7 @@ const {
   canRetryEncounterProcessing,
   canViewSuperbill,
 } = useEncounterPermissions()
+const { canUseScribe } = useAiPermissions()
 
 const encounterId = computed(() =>
   String(route.params.id ?? '').trim(),
@@ -359,24 +386,47 @@ const encounterIsOpen = computed(() =>
   && encounterStatus.value === encounterStatuses.inProgress,
 )
 
-const canEditVisit = computed(() =>
+const generatedNoteUnsigned = computed(() => {
+  const status = String(
+    workspace.value?.generatedClinicalNote?.status ?? '',
+  ).toUpperCase()
+
+  return Boolean(workspace.value?.generatedClinicalNote?.id)
+    && status === clinicalNoteStatuses.generated
+})
+
+const allowPreSignatureCorrection = computed(() =>
+  !billingViewOnly.value
+  && encounterStatus.value === encounterStatuses.completed
+  && generatedNoteUnsigned.value,
+)
+
+const documentationWritable = computed(() =>
+  encounterIsOpen.value || allowPreSignatureCorrection.value,
+)
+
+const canEditVisitServices = computed(() =>
   encounterIsOpen.value && canManageEncounter.value,
 )
 
+const canEditVisitDocumentation = computed(() =>
+  documentationWritable.value && canManageEncounter.value,
+)
+
 const canAddVitalsHere = computed(() =>
-  encounterIsOpen.value && canAddVitals.value,
+  documentationWritable.value && canAddVitals.value,
 )
 
 const canEditVitalsHere = computed(() =>
-  encounterIsOpen.value && canEditVitals.value,
+  documentationWritable.value && canEditVitals.value,
 )
 
 const canAddScreeningsHere = computed(() =>
-  encounterIsOpen.value && canAddScreenings.value,
+  documentationWritable.value && canAddScreenings.value,
 )
 
 const canEditScreeningsHere = computed(() =>
-  encounterIsOpen.value && canEditScreenings.value,
+  documentationWritable.value && canEditScreenings.value,
 )
 
 const canAddLabsHere = computed(() =>
@@ -385,6 +435,10 @@ const canAddLabsHere = computed(() =>
 
 const canEditLabsHere = computed(() =>
   encounterIsOpen.value && canEditLabs.value,
+)
+
+const canEditQualityMeasures = computed(() =>
+  documentationWritable.value && canManageEncounter.value,
 )
 
 const showCompleteButton = computed(() =>
@@ -446,6 +500,7 @@ const canEditNarrative = computed(() => {
   const open = status === encounterStatuses.inProgress
     || status === encounterStatuses.waitingForResults
     || status === encounterStatuses.readyToResume
+    || allowPreSignatureCorrection.value
 
   return open
     && !billingViewOnly.value
@@ -458,6 +513,12 @@ const canEditNarrative = computed(() => {
         clientPermissionNames.manageEncounter,
       ))
 })
+
+const canUseNarrativeAiDraft = computed(() =>
+  canEditNarrative.value
+    && canUseScribe.value
+    && workspace.value?.narrative?.aiFeatureEnabled !== false,
+)
 
 const canSignGeneratedNote = computed(() =>
   !billingViewOnly.value
@@ -555,6 +616,9 @@ const moduleRouteMap = {
     subTab: 'clinical-notes',
   },
   allergies: { tab: addClientTabKeys.allergies },
+  familyMedicalHistory: {
+    tab: addClientTabKeys.familyMedicalHistory,
+  },
   appointments: { tab: addClientTabKeys.appointments },
   'follow-ups': {
     tab: addClientTabKeys.careCoordination,
@@ -705,6 +769,27 @@ function onClinicalDataChanged() {
   }, 600)
 }
 
+async function refreshNarrative() {
+  const id = workspace.value?.encounter?.id
+  if (id == null || !workspace.value) {
+    return
+  }
+  try {
+    const narrative = await fetchEncounterNarrative(id)
+    if (!workspace.value) {
+      return
+    }
+    workspace.value = {
+      ...workspace.value,
+      narrative,
+    }
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      // Keep current narrative if refresh fails.
+    }
+  }
+}
+
 async function refreshCompletion() {
   const id = workspace.value?.encounter?.id
   if (id == null) {
@@ -719,6 +804,7 @@ async function refreshCompletion() {
       ...workspace.value,
       completion,
     }
+    await refreshNarrative()
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       // Keep current snapshot if refresh fails.
@@ -879,6 +965,7 @@ async function onVisitFieldsSaved(updated) {
     }
   }
   await refreshCompletion()
+  void refreshGeneratedNote()
 }
 
 async function onWaitConfirm(payload) {
@@ -988,13 +1075,23 @@ async function onComplete() {
             : workspace.value.completion?.optionalActions,
         },
       }
+      const missingRows = missing.missingRequirements || []
+      const narrativeMessage = formatMissingNarrativeRequirements(
+        t,
+        missingRows,
+      )
+      const onlyNarrativeMissing = missingRows.length > 0
+        && missingRows.every(row =>
+          String(row.type).toUpperCase() === 'NARRATIVE')
       $q.notify({
         type: quasarNotifyTypes.warning,
-        message: t('encounterCompleteRequirementsMissing'),
+        message: onlyNarrativeMissing && narrativeMessage
+          ? narrativeMessage
+          : t('encounterCompleteRequirementsMissing'),
       })
-      const narrativeMissing = (
-        missing.missingRequirements || []
-      ).some(row => String(row.type).toUpperCase() === 'NARRATIVE')
+      const narrativeMissing = missingRows.some(
+        row => String(row.type).toUpperCase() === 'NARRATIVE',
+      )
       if (narrativeMissing) {
         activeTab.value = encounterWorkspaceTabs.narrative
       }
@@ -1086,6 +1183,28 @@ function onNarrativeSaved(saved) {
     narrative: saved,
   }
   void refreshCompletion()
+  void refreshGeneratedNote()
+}
+
+async function refreshGeneratedNote() {
+  const id = workspace.value?.encounter?.id
+  if (id == null || !workspace.value?.generatedClinicalNote?.id) {
+    return
+  }
+  try {
+    const note = await fetchGeneratedClinicalNote(id)
+    if (!workspace.value) {
+      return
+    }
+    workspace.value = {
+      ...workspace.value,
+      generatedClinicalNote: note,
+    }
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      // Keep the current generated note if refresh fails.
+    }
+  }
 }
 
 async function onSignGeneratedNote(signatureData) {
@@ -1186,6 +1305,22 @@ async function onRegenerateGeneratedNote() {
   }
 }
 
+function onEditGeneratedNoteSource(target) {
+  generatedNoteOpen.value = false
+  if (!target) {
+    return
+  }
+  if (target.workspaceTab) {
+    activeTab.value = target.workspaceTab
+  }
+  if (target.clinicalSubTab) {
+    clinicalSubTab.value = target.clinicalSubTab
+  }
+  if (target.moduleKey) {
+    goToModule(target.moduleKey)
+  }
+}
+
 async function onRetryGenerate() {
   await onRetryProcessing('CLINICAL_NOTE_GENERATION')
 }
@@ -1230,6 +1365,14 @@ watch(() => route.query.tab, tab => {
   const allowed = Object.values(encounterWorkspaceTabs)
   if (allowed.includes(value)) {
     activeTab.value = value
+  }
+}, { immediate: true })
+
+watch(() => route.query.clinicalSubTab, subTab => {
+  const value = Array.isArray(subTab) ? subTab[0] : subTab
+  const allowed = Object.values(encounterClinicalSubTabs)
+  if (allowed.includes(value)) {
+    clinicalSubTab.value = value
   }
 }, { immediate: true })
 

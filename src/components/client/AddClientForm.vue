@@ -818,6 +818,16 @@
                 :can-delete="canDeleteLabs"
                 :clinician-options="assignedClinicianOptions"
               />
+              <AddClientDiagnosticStudiesTab
+                v-else-if="
+                  subTab.key === CLINICAL_DIAGNOSTIC_STUDIES_SUB_TAB
+                "
+                :patient-id="props.clientId"
+                :can-view="canViewDiagnosticStudiesTab"
+                :can-add="canAddDiagnosticStudies"
+                :can-edit="canEditDiagnosticStudies"
+                :can-delete="canDeleteDiagnosticStudies"
+              />
               <AddClientMedicationsTab
                 v-else-if="subTab.key === CLINICAL_MEDICATIONS_SUB_TAB"
                 :client-id="props.clientId"
@@ -1091,6 +1101,8 @@ import AddClientFamilyMedicalHistoryTab
 import AddClientVitalsTab from '../AddClientVitalsTab.vue'
 import AddClientScreeningsTab from '../AddClientScreeningsTab.vue'
 import AddClientLabsTab from '../AddClientLabsTab.vue'
+import AddClientDiagnosticStudiesTab from
+  '../AddClientDiagnosticStudiesTab.vue'
 import AddClientMedicationsTab from '../AddClientMedicationsTab.vue'
 import AddClientCarePlansTab from '../AddClientCarePlansTab.vue'
 import AddClientClinicalNotesTab from '../AddClientClinicalNotesTab.vue'
@@ -1163,6 +1175,7 @@ import {
   CLINICAL_VITALS_SUB_TAB,
   CLINICAL_SCREENINGS_SUB_TAB,
   CLINICAL_LABS_SUB_TAB,
+  CLINICAL_DIAGNOSTIC_STUDIES_SUB_TAB,
   CLINICAL_MEDICATIONS_SUB_TAB,
   CLINICAL_CARE_PLANS_SUB_TAB,
   CLINICAL_CLINICAL_NOTES_SUB_TAB,
@@ -1255,6 +1268,9 @@ const {
   canDeleteLabs,
   canAddLabs,
   canEditLabs,
+  canAddDiagnosticStudies,
+  canEditDiagnosticStudies,
+  canDeleteDiagnosticStudies,
 } = useClientPermissions()
 
 const mainTabs = visibleMainTabs
@@ -1270,6 +1286,9 @@ const canViewInsuranceTab = canViewMainTabFor(addClientTabKeys.insurance)
 const canViewVitalsTab = canViewSubTabFor(CLINICAL_VITALS_SUB_TAB)
 const canViewScreeningsTab = canViewSubTabFor(CLINICAL_SCREENINGS_SUB_TAB)
 const canViewLabsTab = canViewSubTabFor(CLINICAL_LABS_SUB_TAB)
+const canViewDiagnosticStudiesTab = canViewSubTabFor(
+  CLINICAL_DIAGNOSTIC_STUDIES_SUB_TAB,
+)
 const canViewFollowUpsTab = canViewSubTabFor(
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
 )

@@ -62,6 +62,16 @@ export function useMainNavPermissions() {
     hasPermission(permissions.value, permissionNames.addClient),
   )
 
+  const showPortalRegistrationsNav = computed(
+    () => showClientList.value || showClientAdd.value,
+  )
+
+  const showPortalMenu = computed(
+    () => showPortalMessages.value
+      || showPortalRegistrationsNav.value
+      || showCalendarMenu.value,
+  )
+
   const showStaffMenu = computed(() =>
     hasAnyPermission(permissions.value, [
       permissionNames.viewStaffMembers,
@@ -173,7 +183,9 @@ export function useMainNavPermissions() {
   return {
     showDashboard,
     showCalendarMenu,
+    showPortalMenu,
     showPortalMessages,
+    showPortalRegistrationsNav,
     showClientMenu,
     showClientList,
     showClientAdd,

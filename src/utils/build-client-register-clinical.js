@@ -7,6 +7,10 @@ import {
 } from 'components/constants.js'
 import { usDateToIso } from 'src/utils/client-form.js'
 import {
+  historyTypeForApi,
+  relationshipForHistoryType,
+} from 'src/utils/client-family-medical-history.js'
+import {
   trimInsuranceField,
   visibleInsuranceProfiles,
 } from 'src/utils/client-insurance.js'
@@ -116,24 +120,61 @@ export function relationshipTokenForApi(value) {
 
 export function buildMedicalHistoryForRegister(form) {
   const section = form?.[clientFormSections.familyMedicalHistory] ?? {}
+  const rows = []
 
-  return (section.entries ?? [])
-    .map(entry => {
-      const row = {
-        relationship: relationshipTokenForApi(entry?.familyRelationship),
-        medical_condition: trim(entry?.medicalConditions),
-      }
-      const apiId = entry?.apiId
-      if (apiId != null && String(apiId).trim()) {
-        const numericId = Number(apiId)
-        row.id = Number.isFinite(numericId) ? numericId : apiId
-      }
-
-      return row
-    })
-    .filter(
-      row => row.relationship && row.medical_condition,
+  for (const entry of section.entries ?? []) {
+    const historyType = historyTypeForApi(
+      entry?.historyType,
+      entry?.familyRelationship,
     )
+    const relationship = relationshipTokenForApi(
+      relationshipForHistoryType(
+        entry?.historyType,
+        entry?.familyRelationship,
+      ),
+    )
+    const medicalCondition = trim(entry?.medicalConditions)
+    if (!medicalCondition) {
+      continue
+    }
+    if (historyType === 'FAMILY' && !relationship) {
+      continue
+    }
+    const row = {
+      history_type: historyType,
+      relationship: relationship || null,
+      medical_condition: medicalCondition,
+      notes: trim(entry?.notes) || null,
+    }
+    const apiId = entry?.apiId
+    if (apiId != null && String(apiId).trim()) {
+      const numericId = Number(apiId)
+      row.id = Number.isFinite(numericId) ? numericId : apiId
+    }
+    rows.push(row)
+  }
+
+  for (const deletion of section.deletionAudit ?? []) {
+    const reason = trim(deletion?.reason)
+    const apiId = deletion?.apiId ?? deletion?.api_id
+    if (!reason || apiId == null || String(apiId).trim() === '') {
+      continue
+    }
+    const numericId = Number(apiId)
+    rows.push({
+      id: Number.isFinite(numericId) ? numericId : apiId,
+      deletion_reason: reason,
+      history_type: historyTypeForApi(
+        deletion?.historyType,
+        deletion?.familyRelationship,
+      ),
+      relationship: relationshipTokenForApi(deletion?.familyRelationship)
+        || null,
+      medical_condition: trim(deletion?.medicalConditions) || null,
+    })
+  }
+
+  return rows
 }
 
 /**

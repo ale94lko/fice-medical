@@ -33,7 +33,7 @@
         </div>
         <EncounterServicesEditor
           :encounter="encounter"
-          :can-edit="canEdit"
+          :can-edit="canEditServices"
           @saved="emit('services-saved', $event)"
         />
       </section>
@@ -72,6 +72,10 @@ const props = defineProps({
     default: null,
   },
   canEdit: {
+    type: Boolean,
+    default: false,
+  },
+  canEditServices: {
     type: Boolean,
     default: false,
   },

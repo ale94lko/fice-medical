@@ -240,6 +240,7 @@
 
   .timezone-mismatch {
     flex-shrink: 0;
+    margin-right: 6px;
   }
 
   .q-btn {
@@ -3139,8 +3140,8 @@ input:-webkit-autofill {
 }
 
 .app-active-encounter-menu {
-  min-width: 280px;
-  max-width: min(340px, calc(100vw - 24px));
+  min-width: 360px;
+  max-width: min(440px, calc(100vw - 24px));
   padding: 0;
   overflow: hidden;
 
@@ -3226,23 +3227,40 @@ input:-webkit-autofill {
     overflow: hidden;
   }
 
-  &__list {
-    padding: 8px 0;
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px 14px;
   }
 
-  &__separator {
-    margin: 4px 0;
-  }
+  &__actions-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    flex-wrap: nowrap;
+    width: 100%;
 
-  &__cancel-item {
-    .q-item__section--avatar {
-      color: $negative;
+    > .q-btn {
+      flex: 1 1 0;
+      min-width: 0;
+      width: 100%;
+      padding-left: 10px !important;
+      padding-right: 10px !important;
     }
   }
 
-  &__cancel-icon,
-  &__cancel-label {
-    color: $negative !important;
+  &__hint {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: $text-muted;
+  }
+
+  .app-btn-primary,
+  .app-btn-outline {
+    min-height: 40px;
+    justify-content: center;
   }
 }
 
@@ -5082,7 +5100,8 @@ body.vp-mobile {
   width: 100%;
 }
 
-.add-client-vitals-tab__bmi-field {
+.add-client-vitals-tab__bmi-field,
+.add-client-vitals-tab__bsa-field {
   :deep(.q-field__control) {
     background: $surface-muted;
   }
@@ -5291,6 +5310,17 @@ body.vp-mobile {
 }
 
 .labs-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $text-strong;
+}
+
+.diagnostic-studies-header {
+  gap: 16px;
+}
+
+.diagnostic-studies-title {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 700;
@@ -5820,6 +5850,28 @@ body.vp-mobile {
 .fmh-add-hint__action {
   color: $primary;
   font-weight: 700;
+}
+
+.fmh-social-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fmh-social-fields__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fmh-social-fields__status {
+  .form-field__label {
+    margin-bottom: 0;
+  }
+}
+
+.fmh-social-fields__notes {
+  width: 100%;
 }
 
 .insurance-card-upload__dropzone {

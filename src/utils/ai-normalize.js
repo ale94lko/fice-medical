@@ -120,6 +120,11 @@ export function normalizeAiConfig(raw = {}) {
       carePlanDraft: Number(
         prompts.care_plan_draft ?? prompts.carePlanDraft ?? 1,
       ) || 1,
+      clinicalNarrativeDrafting: Number(
+        prompts.clinical_narrative_drafting
+          ?? prompts.clinicalNarrativeDrafting
+          ?? 1,
+      ) || 1,
     },
   }
 }
@@ -134,6 +139,9 @@ export function aiConfigPromptsToApi(prompts = {}) {
     clinical_summary: Number(prompts.clinicalSummary) || 1,
     // eslint-disable-next-line camelcase -- API snake_case
     care_plan_draft: Number(prompts.carePlanDraft) || 1,
+    // eslint-disable-next-line camelcase -- API snake_case
+    clinical_narrative_drafting:
+      Number(prompts.clinicalNarrativeDrafting) || 1,
   }
 }
 

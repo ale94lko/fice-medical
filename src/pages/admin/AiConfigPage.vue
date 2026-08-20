@@ -94,6 +94,20 @@
             />
           </FormField>
         </div>
+        <div class="col-12 col-md-6">
+          <FormField :label="t('aiPromptNarrativeDraft')">
+            <TextInput
+              :model-value="promptInput(
+                draft.clinicalNarrativeDrafting,
+              )"
+              type="number"
+              :external-label="true"
+              :test-id="aiTestIds.field('prompt-narrative')"
+              @update:model-value="value =>
+                onPromptInput('clinicalNarrativeDrafting', value)"
+            />
+          </FormField>
+        </div>
       </div>
 
       <div class="row justify-end q-mt-lg">
@@ -143,6 +157,7 @@ const draft = reactive({
   icd10Suggestion: 1,
   clinicalSummary: 1,
   carePlanDraft: 1,
+  clinicalNarrativeDrafting: 1,
 })
 
 const dirty = computed(() => {
@@ -155,6 +170,8 @@ const dirty = computed(() => {
     || draft.icd10Suggestion !== prompts.icd10Suggestion
     || draft.clinicalSummary !== prompts.clinicalSummary
     || draft.carePlanDraft !== prompts.carePlanDraft
+    || draft.clinicalNarrativeDrafting
+      !== prompts.clinicalNarrativeDrafting
 })
 
 function applyDraft(prompts) {
@@ -162,6 +179,8 @@ function applyDraft(prompts) {
   draft.icd10Suggestion = prompts.icd10Suggestion
   draft.clinicalSummary = prompts.clinicalSummary
   draft.carePlanDraft = prompts.carePlanDraft
+  draft.clinicalNarrativeDrafting =
+    prompts.clinicalNarrativeDrafting
 }
 
 function promptInput(value) {

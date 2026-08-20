@@ -575,9 +575,21 @@ function copyClientNumber() {
     .catch(() => {})
 }
 
-const primaryService = computed(() =>
-  props.encounter?.serviceProcedures?.[0] ?? null,
-)
+const primaryService = computed(() => {
+  const lines = Array.isArray(props.encounter?.serviceProcedures)
+    ? props.encounter.serviceProcedures
+    : []
+  const flagged = lines.find(line => line?.isPrimary)
+  if (flagged) {
+    return flagged
+  }
+  if (!lines.length) {
+    return null
+  }
+
+  return [...lines].sort((a, b) =>
+    (a.displayOrder ?? 0) - (b.displayOrder ?? 0))[0]
+})
 
 const serviceLabel = computed(() => {
   const service = primaryService.value

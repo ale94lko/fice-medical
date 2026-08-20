@@ -107,6 +107,26 @@ export function useClientPermissions() {
     permissions,
     clientPermissionNames.deleteLabsClient,
   )
+  const canViewDiagnosticStudies = usePermission(
+    permissions,
+    clientPermissionNames.viewDiagnosticStudiesClient,
+  )
+  const canAddDiagnosticStudies = usePermission(
+    permissions,
+    clientPermissionNames.addDiagnosticStudiesClient,
+  )
+  const canEditDiagnosticStudies = usePermission(
+    permissions,
+    clientPermissionNames.editDiagnosticStudiesClient,
+  )
+  const canReviewDiagnosticStudies = usePermission(
+    permissions,
+    clientPermissionNames.reviewDiagnosticStudiesClient,
+  )
+  const canDeleteDiagnosticStudies = usePermission(
+    permissions,
+    clientPermissionNames.deleteDiagnosticStudiesClient,
+  )
   const canViewScreenings = usePermission(
     permissions,
     clientPermissionNames.viewScreenings,
@@ -263,6 +283,11 @@ export function useClientPermissions() {
     canEditLabs,
     canReviewLabs,
     canDeleteLabs,
+    canViewDiagnosticStudies,
+    canAddDiagnosticStudies,
+    canEditDiagnosticStudies,
+    canReviewDiagnosticStudies,
+    canDeleteDiagnosticStudies,
     canViewScreenings,
     canAddScreenings,
     canEditScreenings,

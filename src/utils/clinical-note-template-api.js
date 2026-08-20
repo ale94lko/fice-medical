@@ -1,5 +1,24 @@
 import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
+import {
+  parseStructuredDefinition,
+  reviewOfSystemsDefinition,
+} from 'src/utils/review-of-systems.js'
+import { physicalExamDefinition } from 'src/utils/physical-exam.js'
+import { mentalStatusExamDefinition } from
+  'src/utils/mental-status-exam.js'
+import { assessmentPlanDefinition } from
+  'src/utils/assessment-plan.js'
+import {
+  parseNarrativeSectionGroup,
+} from 'src/utils/clinical-note-narrative-group.js'
+import {
+  parseNarrativeAiAssistance,
+  parseNarrativeAiContextSources,
+  parseNarrativeAiProviderInput,
+  serializeNarrativeFieldConfig,
+  narrativeAiProviderInputRequired,
+} from 'src/utils/narrative-ai-assistance.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -83,7 +102,33 @@ export function parseStructuredSectionFields(raw) {
     : [{ uid: 'sf-new', key: '', label: '' }]
 }
 
-export function serializeStructuredSectionConfig(fields) {
+export function serializeStructuredSectionConfig(sectionOrFields) {
+  if (sectionOrFields && !Array.isArray(sectionOrFields)) {
+    const definition = sectionOrFields.structuredDefinition
+      || parseStructuredDefinition(sectionOrFields.configurationJson)
+    if (definition === reviewOfSystemsDefinition
+      || definition === physicalExamDefinition
+      || definition === mentalStatusExamDefinition) {
+      return JSON.stringify({
+        definition,
+      })
+    }
+    if (definition === assessmentPlanDefinition) {
+      const obj = { definition }
+      if (sectionOrFields.aiAssistance) {
+        obj['ai_assistance'] = true
+        obj['ai_context_sources'] = parseNarrativeAiContextSources({
+          aiContextSources: sectionOrFields.aiContextSources,
+        })
+        obj['ai_provider_input'] = narrativeAiProviderInputRequired
+      }
+
+      return JSON.stringify(obj)
+    }
+  }
+  const fields = Array.isArray(sectionOrFields)
+    ? sectionOrFields
+    : sectionOrFields?.structuredFields
   const used = new Set()
   const list = (fields || []).map(item => {
     const label = String(item.label || '').trim()
@@ -124,6 +169,13 @@ export function normalizeClinicalNoteTemplateSection(raw = {}) {
     assessmentTemplateId:
       raw.assessment_template_id ?? raw.assessmentTemplateId ?? null,
     configurationJson,
+    sectionGroup: parseNarrativeSectionGroup(configurationJson),
+    aiAssistance: parseNarrativeAiAssistance(configurationJson),
+    aiContextSources: parseNarrativeAiContextSources(configurationJson),
+    aiProviderInputRequired: parseNarrativeAiProviderInput(
+      configurationJson,
+    ) === narrativeAiProviderInputRequired,
+    structuredDefinition: parseStructuredDefinition(configurationJson),
     structuredFields: parseStructuredSectionFields(configurationJson),
     active: raw.active ?? true,
   }
@@ -148,8 +200,13 @@ export function buildClinicalNoteTemplateRequest(form = {}) {
       placeholder: section.placeholder || null,
       assessment_template_id: section.assessmentTemplateId || null,
       configuration_json: section.sectionType === 'STRUCTURED_SECTION'
-        ? serializeStructuredSectionConfig(section.structuredFields)
-        : (section.configurationJson || null),
+        ? serializeStructuredSectionConfig(section)
+        : serializeNarrativeFieldConfig({
+          sectionGroup: section.sectionGroup,
+          aiAssistance: section.aiAssistance,
+          aiContextSources: section.aiContextSources,
+          aiProviderInputRequired: section.aiProviderInputRequired,
+        }),
       active: section.active !== false,
     })),
   }

@@ -17,6 +17,7 @@ import { formatClinicianDisplayLabel } from 'src/utils/clinician-display.js'
 import { normalizeLabDetail } from 'src/utils/lab-normalize.js'
 import { normalizeReferralSummary } from 'src/utils/referral-normalize.js'
 import { sortVitalsEntriesDesc } from 'src/utils/client-vitals.js'
+import { formatBsaDisplay } from 'src/utils/bsa.js'
 import { normalizeVitalRecord } from 'src/utils/vitals-normalize.js'
 
 function trim(value) {
@@ -225,18 +226,24 @@ function buildFamilyHistoryDialogDetail({ form, rawClient }) {
     ).filter(entry => !entry?.deleted)
 
   const rows = source.map(entry => ({
+    historyType: display(
+      entry.history_type ?? entry.historyType,
+    ),
     relationship: display(
       entry.relationship ?? entry.familyRelationship,
     ),
     condition: display(
       entry.medical_condition ?? entry.medicalConditions,
     ),
+    notes: display(entry.notes),
   }))
 
   return buildTableDetail(
     [
+      { key: 'historyType', labelKey: 'fmhHistoryType' },
       { key: 'relationship', labelKey: 'fmhColRelationship' },
-      { key: 'condition', labelKey: 'fmhColConditions' },
+      { key: 'condition', labelKey: 'fmhColConditionEvent' },
+      { key: 'notes', labelKey: 'fmhColNotes' },
     ],
     rows,
   )
@@ -264,6 +271,7 @@ function buildVitalsDialogDetail({ form, rawClient }) {
     weight: display(entry.weight),
     height: display(entry.height),
     bmi: display(entry.bmi),
+    bsa: formatBsaDisplay(entry.bsa, { withUnit: true }),
   }))
 
   return buildTableDetail(
@@ -277,6 +285,7 @@ function buildVitalsDialogDetail({ form, rawClient }) {
       { key: 'weight', labelKey: 'vitalsWeight' },
       { key: 'height', labelKey: 'vitalsHeight' },
       { key: 'bmi', labelKey: 'vitalsBmi' },
+      { key: 'bsa', labelKey: 'vitalsBsa' },
     ],
     rows,
   )

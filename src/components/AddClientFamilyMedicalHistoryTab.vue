@@ -17,80 +17,100 @@
       section-test-id="add-client-accordion-fmh-add"
       :toggle-test-id="tid.accordionToggle('fmh-add')">
       <div class="row q-col-gutter-md items-start">
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('fmhFamilyRelationship')"
-                :test-id="tid.fmhField('relationship')">
-                <FormSelect
-                  v-model="section.draft.familyRelationship"
-                  :test-id="tid.fmhField('relationship')"
-                  outlined
-                  hide-bottom-space
-                  emit-value
-                  map-options
-                  clearable
-                  :options="relationshipOptions"
-                  :error="Boolean(draftRelationshipError)"
-                  :error-message="draftRelationshipError"
-                >
-                  <template #append>
-                    <q-icon name="info_outline" class="cursor-pointer">
-                      <q-tooltip
-                        class="app-info-tooltip"
-                        anchor="top middle"
-                        self="bottom middle"
-                        :offset="[0, 6]">
-                        {{ t('fmhRelationshipTooltip') }}
-                      </q-tooltip>
-                    </q-icon>
-                  </template>
-                </FormSelect>
-              </AddClientLabeledField>
-            </div>
-            <div class="col-12 col-md-6">
-              <AddClientLabeledField
-                :label="t('fmhMedicalConditions')"
-                :test-id="tid.fmhField('conditions')">
-                <q-input
-                  v-model="section.draft.medicalConditions"
-                  outlined
-                  hide-bottom-space
-                  :data-testid="tid.fmhField('conditions')"
-                  :error="Boolean(draftConditionsError)"
-                  :error-message="draftConditionsError"
-                  maxlength="500"
-                />
-              </AddClientLabeledField>
-            </div>
+          <div class="col-12 col-md-6">
+          <AddClientLabeledField
+            :label="t('fmhHistoryType')"
+            required
+            :test-id="tid.fmhField('history-type')">
+            <FormSelect
+              v-model="section.draft.historyType"
+              :test-id="tid.fmhField('history-type')"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              :options="historyTypeSelectOptions"
+              :error="Boolean(draftHistoryTypeError)"
+              :error-message="draftHistoryTypeError"
+              @update:model-value="onHistoryTypeChange"
+            />
+          </AddClientLabeledField>
+        </div>
+        <div
+          v-if="showFamilyRelationship"
+          class="col-12 col-md-6">
+          <AddClientLabeledField
+            :label="t('fmhFamilyRelationship')"
+            required
+            :test-id="tid.fmhField('relationship')">
+            <FormSelect
+              v-model="section.draft.familyRelationship"
+              :test-id="tid.fmhField('relationship')"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              clearable
+              :options="familyRelationshipOptions"
+              :error="Boolean(draftRelationshipError)"
+              :error-message="draftRelationshipError"
+            />
+          </AddClientLabeledField>
+        </div>
+        <div
+          v-if="selectedHistoryType"
+          :class="showFamilyRelationship
+            ? 'col-12'
+            : 'col-12 col-md-6'">
+          <AddClientLabeledField
+            :label="conditionLabel"
+            required
+            :test-id="tid.fmhField('conditions')">
+            <q-input
+              v-model="section.draft.medicalConditions"
+              outlined
+              hide-bottom-space
+              :data-testid="tid.fmhField('conditions')"
+              :placeholder="conditionPlaceholder"
+              :error="Boolean(draftConditionsError)"
+              :error-message="draftConditionsError"
+              maxlength="500"
+            />
+          </AddClientLabeledField>
+        </div>
       </div>
-      <div class="row items-center no-wrap fmh-add-actions">
-              <div class="col">
-                <div class="insurance-info-banner fmh-add-hint">
-                  <q-icon name="info" size="20px" />
-                  <i18n-t
-                    keypath="fmhAddHint"
-                    tag="span"
-                    scope="global">
-                    <template #add>
-                      <strong class="fmh-add-hint__action">
-                        {{ t('fmhAdd') }}
-                      </strong>
-                    </template>
-                  </i18n-t>
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-btn
-                  no-caps
-                  unelevated
-                  color="primary"
-                  class="app-btn-primary"
-                  icon="add"
-                  :data-testid="tid.fmhBtnAdd"
-                  :label="t('fmhAdd')"
-                  @click="onAddEntry"
-                />
-              </div>
+      <div
+        v-if="selectedHistoryType"
+        class="row q-col-gutter-md items-end fmh-add-actions">
+        <div class="col">
+          <AddClientLabeledField
+            :label="t('fmhNote')"
+            :test-id="tid.fmhField('notes')">
+            <q-input
+              v-model="section.draft.notes"
+              outlined
+              hide-bottom-space
+              :data-testid="tid.fmhField('notes')"
+              :placeholder="t('fmhNotePlaceholder')"
+              :error="Boolean(draftNotesError)"
+              :error-message="draftNotesError"
+              maxlength="500"
+            />
+          </AddClientLabeledField>
+        </div>
+        <div class="col-auto">
+          <q-btn
+            no-caps
+            unelevated
+            color="primary"
+            class="app-btn-primary"
+            icon="add"
+            :data-testid="tid.fmhBtnAdd"
+            :label="t('fmhAdd')"
+            @click="onAddEntry"
+          />
+        </div>
       </div>
     </AccordionSection>
 
@@ -98,44 +118,96 @@
       v-if="canAddMedicalHistory"
       class="section-separator" />
 
-    <AccordionSection
+    <MedicalHistoryTypeSection
       icon="person"
       :title="t('fmhPersonalSectionTitle')"
       section-test-id="add-client-accordion-fmh-personal"
-      :toggle-test-id="tid.accordionToggle('fmh-personal')">
-      <AdminTablePanel
-        class="family-medical-history-table-panel admin-table-panel--wide"
-        :show-column-settings="false">
-        <FamilyMedicalHistoryTable
-          :entries="personalEntries"
-          :can-edit="canEditMedicalHistory"
-          :can-delete="canDeleteMedicalHistory"
-          :empty-label="t('fmhPersonalEmpty')"
-          @edit="openEdit"
-          @delete="openDelete"
-        />
-      </AdminTablePanel>
-    </AccordionSection>
+      :toggle-test-id="tid.accordionToggle('fmh-personal')"
+      :flag-label="t('fmhNoSignificantPersonal')"
+      :flag-tooltip="t('fmhNoSignificantPersonalHint')"
+      :flag-test-id="tid.fmhField('no-significant-personal')"
+      :confirmed-title="t('fmhNoSignificantPersonalConfirmed')"
+      :confirmed-subtitle="t('fmhNoSignificantPersonalUncheck')"
+      :empty-label="t('fmhPersonalEmpty')"
+      :entries="personalEntries"
+      :variant="medicalHistoryTypeValues.personal"
+      :negative-checked="section.noSignificantPersonal"
+      :can-edit-negative="canMutateProfile"
+      :can-edit="canEditMedicalHistory"
+      :can-delete="canDeleteMedicalHistory"
+      @update:negative-checked="onNegativeToggle(
+        medicalHistoryTypeValues.personal,
+        $event,
+      )"
+      @edit="openEdit"
+      @delete="openDelete"
+    />
+
+    <q-separator class="section-separator" />
+
+    <MedicalHistoryTypeSection
+      icon="healing"
+      :title="t('fmhSurgicalSectionTitle')"
+      section-test-id="add-client-accordion-fmh-surgical"
+      :toggle-test-id="tid.accordionToggle('fmh-surgical')"
+      :flag-label="t('fmhNoSurgicalHistory')"
+      :flag-tooltip="t('fmhNoSurgicalHistoryHint')"
+      :flag-test-id="tid.fmhField('no-surgical')"
+      :confirmed-title="t('fmhNoSurgicalHistoryConfirmed')"
+      :confirmed-subtitle="t('fmhNoSurgicalHistoryUncheck')"
+      :empty-label="t('fmhSurgicalEmpty')"
+      :entries="surgicalEntries"
+      :variant="medicalHistoryTypeValues.surgical"
+      :negative-checked="section.noSurgicalHistory"
+      :can-edit-negative="canMutateProfile"
+      :can-edit="canEditMedicalHistory"
+      :can-delete="canDeleteMedicalHistory"
+      @update:negative-checked="onNegativeToggle(
+        medicalHistoryTypeValues.surgical,
+        $event,
+      )"
+      @edit="openEdit"
+      @delete="openDelete"
+    />
+
+    <q-separator class="section-separator" />
+
+    <MedicalHistoryTypeSection
+      icon="groups"
+      :title="t('fmhFamilySectionTitle')"
+      section-test-id="add-client-accordion-fmh-family"
+      :toggle-test-id="tid.accordionToggle('fmh-family')"
+      :flag-label="t('fmhNoSignificantFamily')"
+      :flag-tooltip="t('fmhNoSignificantFamilyHint')"
+      :flag-test-id="tid.fmhField('no-significant-family')"
+      :confirmed-title="t('fmhNoSignificantFamilyConfirmed')"
+      :confirmed-subtitle="t('fmhNoSignificantFamilyUncheck')"
+      :empty-label="t('fmhFamilyEmpty')"
+      :entries="familyEntries"
+      :variant="medicalHistoryTypeValues.family"
+      :negative-checked="section.noSignificantFamily"
+      :can-edit-negative="canMutateProfile"
+      :can-edit="canEditMedicalHistory"
+      :can-delete="canDeleteMedicalHistory"
+      @update:negative-checked="onNegativeToggle(
+        medicalHistoryTypeValues.family,
+        $event,
+      )"
+      @edit="openEdit"
+      @delete="openDelete"
+    />
 
     <q-separator class="section-separator" />
 
     <AccordionSection
-      icon="groups"
-      :title="t('fmhFamilySectionTitle')"
-      section-test-id="add-client-accordion-fmh-family"
-      :toggle-test-id="tid.accordionToggle('fmh-family')">
-      <AdminTablePanel
-        class="family-medical-history-table-panel admin-table-panel--wide"
-        :show-column-settings="false">
-        <FamilyMedicalHistoryTable
-          :entries="familyEntries"
-          :can-edit="canEditMedicalHistory"
-          :can-delete="canDeleteMedicalHistory"
-          :empty-label="t('fmhFamilyEmpty')"
-          @edit="openEdit"
-          @delete="openDelete"
-        />
-      </AdminTablePanel>
+      icon="diversity_3"
+      :title="t('fmhSocialSectionTitle')"
+      section-test-id="add-client-accordion-fmh-social"
+      :toggle-test-id="tid.accordionToggle('fmh-social')">
+      <AddClientSocialHistoryFields
+        v-model="section.socialHistory"
+        :can-edit="canMutateProfile"
+      />
     </AccordionSection>
 
     <FamilyMedicalHistoryEditDialog
@@ -143,7 +215,7 @@
       mode="edit"
       :entry="editingEntry"
       :entries="section.entries"
-      :relationship-options="relationshipOptions"
+      :relationship-options="familyRelationshipOptions"
       @save="onEditSave"
     />
 
@@ -151,6 +223,16 @@
       v-model="deleteDialogOpen"
       :require-deletion-reason="deleteDialogRequiresReason"
       @confirm="onDeleteConfirm"
+    />
+
+    <MedicalHistoryNegativeConfirmDialog
+      v-model="negativeConfirmOpen"
+      :title="negativeConfirmTitle"
+      :message="negativeConfirmMessage"
+      :confirm-label="t('fmhNegativeConfirmContinue')"
+      :require-deletion-reason="negativeConfirmRequiresReason"
+      @confirm="onNegativeConfirm"
+      @cancel="onNegativeCancel"
     />
     </template>
   </div>
@@ -161,18 +243,25 @@ import { computed, ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
-import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import FormSelect from 'components/FormSelect.vue'
 import AccordionSection from './AccordionSection.vue'
-import FamilyMedicalHistoryTable from 'components/FamilyMedicalHistoryTable.vue'
+import AddClientSocialHistoryFields from
+  'components/AddClientSocialHistoryFields.vue'
 import FamilyMedicalHistoryEditDialog from
   'components/FamilyMedicalHistoryEditDialog.vue'
 import FamilyMedicalHistoryDeleteDialog from
   'components/FamilyMedicalHistoryDeleteDialog.vue'
+import MedicalHistoryNegativeConfirmDialog from
+  'components/MedicalHistoryNegativeConfirmDialog.vue'
+import MedicalHistoryTypeSection from
+  'components/MedicalHistoryTypeSection.vue'
 import {
-  clientFamilyRelationshipOptions,
+  clientFamilyOnlyRelationshipOptions,
   familyMedicalHistoryMaxConditionsLength,
+  familyMedicalHistoryMaxNotesLength,
   familyMedicalHistoryMaxRelationshipLength,
+  medicalHistoryTypeOptions,
+  medicalHistoryTypeValues,
   quasarNotifyTypes,
 } from 'components/constants.js'
 import {
@@ -180,10 +269,13 @@ import {
   fmhRowHasPersistedApiId,
   getFamilyMedicalHistoryDraftFieldErrorKeys,
   isDuplicateFamilyMedicalHistoryEntry,
+  negativeFlagKeyForType,
   nextFamilyMedicalHistoryId,
+  normalizeMedicalHistoryType,
+  relationshipForHistoryType,
   splitFamilyMedicalHistoryEntries,
   trimFamilyMedicalField,
-  validateFamilyMedicalHistoryForAdd,
+  validateMedicalHistoryDraftForAdd,
 } from 'src/utils/client-family-medical-history.js'
 import { addClientTestIds as tid } from 'src/test-ids/index.js'
 import { useClientMedicalHistoryPermissions } from
@@ -211,27 +303,107 @@ const {
 } = useClientMedicalHistoryPermissions()
 
 const canView = canViewMedicalHistory
+const canMutateProfile = computed(() =>
+  canAddMedicalHistory.value || canEditMedicalHistory.value,
+)
 
+const draftHistoryTypeError = ref('')
 const draftRelationshipError = ref('')
 const draftConditionsError = ref('')
+const draftNotesError = ref('')
 const editDialogOpen = ref(false)
 const deleteDialogOpen = ref(false)
 const editingEntry = ref(null)
 const deletingEntry = ref(null)
+const negativeConfirmOpen = ref(false)
+const pendingNegativeType = ref(null)
 
 const section = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val),
 })
 
-const relationshipOptions = clientFamilyRelationshipOptions
+const familyRelationshipOptions = clientFamilyOnlyRelationshipOptions
 
-const personalEntries = computed(
-  () => splitFamilyMedicalHistoryEntries(section.value.entries).personal,
+const historyTypeSelectOptions = computed(() =>
+  medicalHistoryTypeOptions.map(option => ({
+    label: t(option.labelKey),
+    value: option.value,
+  })),
 )
 
-const familyEntries = computed(
-  () => splitFamilyMedicalHistoryEntries(section.value.entries).family,
+const selectedHistoryType = computed(() =>
+  trimFamilyMedicalField(section.value.draft?.historyType),
+)
+
+const showFamilyRelationship = computed(
+  () => selectedHistoryType.value === medicalHistoryTypeValues.family,
+)
+
+const isSurgicalDraft = computed(
+  () => selectedHistoryType.value === medicalHistoryTypeValues.surgical,
+)
+
+const conditionLabel = computed(() =>
+  isSurgicalDraft.value
+    ? t('fmhProcedureSurgery')
+    : t('fmhMedicalConditionEvent'),
+)
+
+const conditionPlaceholder = computed(() =>
+  isSurgicalDraft.value
+    ? t('fmhProcedurePlaceholder')
+    : t('fmhConditionPlaceholder'),
+)
+
+const splitEntries = computed(
+  () => splitFamilyMedicalHistoryEntries(section.value.entries),
+)
+
+const personalEntries = computed(() => splitEntries.value.personal)
+const familyEntries = computed(() => splitEntries.value.family)
+const surgicalEntries = computed(() => splitEntries.value.surgical)
+
+const negativeConfirmTitle = computed(() => {
+  const type = pendingNegativeType.value
+  if (type === medicalHistoryTypeValues.personal) {
+    return t('fmhNegativePersonalTitle')
+  }
+  if (type === medicalHistoryTypeValues.surgical) {
+    return t('fmhNegativeSurgicalTitle')
+  }
+
+  return t('fmhNegativeFamilyTitle')
+})
+
+const negativeConfirmMessage = computed(() => {
+  const type = pendingNegativeType.value
+  if (type === medicalHistoryTypeValues.personal) {
+    return t('fmhNegativePersonalMessage')
+  }
+  if (type === medicalHistoryTypeValues.surgical) {
+    return t('fmhNegativeSurgicalMessage')
+  }
+
+  return t('fmhNegativeFamilyMessage')
+})
+
+const pendingNegativeEntries = computed(() => {
+  const type = pendingNegativeType.value
+  if (type === medicalHistoryTypeValues.personal) {
+    return personalEntries.value
+  }
+  if (type === medicalHistoryTypeValues.surgical) {
+    return surgicalEntries.value
+  }
+
+  return familyEntries.value
+})
+
+const negativeConfirmRequiresReason = computed(() =>
+  pendingNegativeEntries.value.some(entry =>
+    fmhRowHasPersistedApiId(entry),
+  ),
 )
 
 function notifySuccess(message) {
@@ -242,9 +414,23 @@ function notifySuccess(message) {
   })
 }
 
-function applyFmhDraftFieldErrorKeys(keys) {
+function onHistoryTypeChange() {
+  if (!showFamilyRelationship.value) {
+    section.value.draft.familyRelationship = ''
+  }
+  draftHistoryTypeError.value = ''
   draftRelationshipError.value = ''
   draftConditionsError.value = ''
+  draftNotesError.value = ''
+}
+
+function applyDraftFieldErrorKeys(keys) {
+  draftHistoryTypeError.value = keys.historyType
+    ? t(keys.historyType)
+    : ''
+  draftRelationshipError.value = ''
+  draftConditionsError.value = ''
+  draftNotesError.value = ''
   if (keys.relationship) {
     draftRelationshipError.value = t(
       keys.relationship,
@@ -257,76 +443,65 @@ function applyFmhDraftFieldErrorKeys(keys) {
     draftConditionsError.value = t(
       keys.conditions,
       keys.conditions === 'fmhConditionsInvalid'
+        || keys.conditions === 'fmhProcedureInvalid'
         ? { max: familyMedicalHistoryMaxConditionsLength }
         : {},
+    )
+  }
+  if (keys.notes) {
+    draftNotesError.value = t(
+      keys.notes,
+      { max: familyMedicalHistoryMaxNotesLength },
     )
   }
 }
 
 function applySaveValidation() {
-  applyFmhDraftFieldErrorKeys(
+  applyDraftFieldErrorKeys(
     getFamilyMedicalHistoryDraftFieldErrorKeys(section.value),
   )
 }
 
 function clearSaveValidation() {
-  applyFmhDraftFieldErrorKeys({
+  applyDraftFieldErrorKeys({
+    historyType: null,
     relationship: null,
     conditions: null,
+    notes: null,
   })
-}
-
-function applyDraftValidationErrors(result) {
-  draftRelationshipError.value = ''
-  draftConditionsError.value = ''
-  if (result.ok) {
-    return
-  }
-  if (result.relationship) {
-    draftRelationshipError.value = t(
-      result.relationship,
-      result.relationship === 'fmhRelationshipMax'
-        ? { max: familyMedicalHistoryMaxRelationshipLength }
-        : {},
-    )
-  }
-  if (result.conditions) {
-    draftConditionsError.value = t(
-      result.conditions,
-      result.conditions === 'fmhConditionsInvalid'
-        ? { max: familyMedicalHistoryMaxConditionsLength }
-        : {},
-    )
-  }
 }
 
 async function onAddEntry() {
   if (!canAddMedicalHistory.value) {
     return
   }
-  draftRelationshipError.value = ''
-  draftConditionsError.value = ''
-
   const draft = section.value.draft
-  const result = validateFamilyMedicalHistoryForAdd(
-    draft.familyRelationship,
-    draft.medicalConditions,
-  )
+  const result = validateMedicalHistoryDraftForAdd(draft)
   if (!result.ok) {
-    applyDraftValidationErrors(result)
+    applyDraftFieldErrorKeys(result)
     await notifyAndScrollToValidationErrors(null)
 
     return
   }
 
-  const relationship = trimFamilyMedicalField(draft.familyRelationship)
+  const historyType = normalizeMedicalHistoryType(
+    draft.historyType,
+    draft.familyRelationship,
+  )
+  const relationship = relationshipForHistoryType(
+    historyType,
+    draft.familyRelationship,
+  )
   const conditions = trimFamilyMedicalField(draft.medicalConditions)
+  const notes = trimFamilyMedicalField(draft.notes)
 
   if (
     isDuplicateFamilyMedicalHistoryEntry(
       section.value.entries,
       relationship,
       conditions,
+      null,
+      historyType,
     )
   ) {
     draftConditionsError.value = t('fmhDuplicateEntry')
@@ -337,10 +512,15 @@ async function onAddEntry() {
 
   section.value.entries.push({
     id: nextFamilyMedicalHistoryId(),
+    historyType,
     familyRelationship: relationship,
     medicalConditions: conditions,
+    notes,
   })
+  const flagKey = negativeFlagKeyForType(historyType)
+  section.value[flagKey] = false
   section.value.draft = createEmptyFamilyMedicalHistoryDraft()
+  clearSaveValidation()
   notifySuccess(t('fmhAddedSuccess'))
 }
 
@@ -359,9 +539,18 @@ function onEditSave(payload) {
   if (index < 0) {
     return
   }
+  const historyType = normalizeMedicalHistoryType(
+    payload.historyType ?? editingEntry.value.historyType,
+    payload.familyRelationship,
+  )
   section.value.entries[index] = {
     ...section.value.entries[index],
     ...payload,
+    historyType,
+    familyRelationship: relationshipForHistoryType(
+      historyType,
+      payload.familyRelationship,
+    ),
   }
   notifySuccess(t('fmhUpdatedSuccess'))
 }
@@ -374,10 +563,26 @@ function openDelete(entry) {
   deleteDialogOpen.value = true
 }
 
-/** Audit reason only when deleting an entry already persisted (has apiId). */
 const deleteDialogRequiresReason = computed(() =>
   fmhRowHasPersistedApiId(deletingEntry.value),
 )
+
+function pushDeletionAudit(entry, reason) {
+  if (!fmhRowHasPersistedApiId(entry)) {
+    return
+  }
+  if (!section.value.deletionAudit) {
+    section.value.deletionAudit = []
+  }
+  section.value.deletionAudit.push({
+    apiId: entry.apiId,
+    historyType: entry.historyType,
+    familyRelationship: entry.familyRelationship,
+    medicalConditions: entry.medicalConditions,
+    notes: entry.notes,
+    reason,
+  })
+}
 
 function onDeleteConfirm(reason) {
   const entry = deletingEntry.value
@@ -394,24 +599,64 @@ function onDeleteConfirm(reason) {
   if (fmhRowHasPersistedApiId(entry) && !reasonText) {
     return
   }
-  if (!fmhRowHasPersistedApiId(entry)) {
-    section.value.entries.splice(index, 1)
-    deletingEntry.value = null
-    notifySuccess(t('fmhDeletedSuccess'))
-
-    return
-  }
-  if (!section.value.deletionAudit) {
-    section.value.deletionAudit = []
-  }
-  section.value.deletionAudit.push({
-    familyRelationship: entry.familyRelationship,
-    medicalConditions: entry.medicalConditions,
-    reason: reasonText,
-  })
+  pushDeletionAudit(entry, reasonText)
   section.value.entries.splice(index, 1)
   deletingEntry.value = null
   notifySuccess(t('fmhDeletedSuccess'))
+}
+
+function entriesForType(historyType) {
+  if (historyType === medicalHistoryTypeValues.personal) {
+    return personalEntries.value
+  }
+  if (historyType === medicalHistoryTypeValues.surgical) {
+    return surgicalEntries.value
+  }
+
+  return familyEntries.value
+}
+
+function onNegativeToggle(historyType, checked) {
+  if (!canMutateProfile.value) {
+    return
+  }
+  const flagKey = negativeFlagKeyForType(historyType)
+  if (!checked) {
+    section.value[flagKey] = false
+
+    return
+  }
+  if (!entriesForType(historyType).length) {
+    section.value[flagKey] = true
+
+    return
+  }
+  pendingNegativeType.value = historyType
+  negativeConfirmOpen.value = true
+}
+
+function onNegativeCancel() {
+  pendingNegativeType.value = null
+}
+
+function onNegativeConfirm(reason) {
+  const historyType = pendingNegativeType.value
+  if (!historyType) {
+    return
+  }
+  const reasonText = trimFamilyMedicalField(reason)
+  const ids = new Set(entriesForType(historyType).map(entry => entry.id))
+  for (const entry of [...section.value.entries]) {
+    if (!ids.has(entry.id)) {
+      continue
+    }
+    pushDeletionAudit(entry, reasonText)
+  }
+  section.value.entries = section.value.entries.filter(
+    entry => !ids.has(entry.id),
+  )
+  section.value[negativeFlagKeyForType(historyType)] = true
+  pendingNegativeType.value = null
 }
 
 defineExpose({

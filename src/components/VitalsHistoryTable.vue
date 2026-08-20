@@ -83,6 +83,14 @@
       </q-td>
     </template>
 
+    <template #body-cell-bsa="scope">
+      <q-td
+        :props="scope"
+        class="admin-data-table__secondary-cell">
+        {{ formatBsaDisplay(scope.row.bsa, { withUnit: true }) }}
+      </q-td>
+    </template>
+
     <template #body-cell-recordedBy="scope">
       <q-td
         :props="scope"
@@ -172,6 +180,7 @@ import { resolveBmiClassification } from 'src/utils/bmi-us.js'
 import { clinicianEntriesFromName } from 'src/utils/care-plan-orders.js'
 import {
   formatBmiDisplay,
+  formatBsaDisplay,
   formatRecordedDateTimeDisplay,
   resolveBloodPressureLevel,
   resolveHeartRateLevel,
@@ -237,6 +246,7 @@ const mobileCardLayout = {
     'temperature',
     'oxygenSaturation',
     'bmi',
+    'bsa',
     'recordedBy',
   ],
   hideEmpty: true,
@@ -296,6 +306,15 @@ const columns = computed(() => [
     sortable: false,
     headerStyle: 'min-width: 72px',
     style: 'min-width: 72px',
+  },
+  {
+    name: 'bsa',
+    label: t('vitalsColBsa'),
+    align: 'left',
+    field: row => formatBsaDisplay(row.bsa, { withUnit: true }),
+    sortable: false,
+    headerStyle: 'min-width: 88px',
+    style: 'min-width: 88px',
   },
   {
     name: 'recordedBy',

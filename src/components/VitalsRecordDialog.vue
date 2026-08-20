@@ -321,6 +321,24 @@
                 {{ t('vitalsBmiHint') }}
               </template>
             </AddClientLabeledField>
+            <AddClientLabeledField :label="t('vitalsBsa')" spaced>
+              <q-input
+                :model-value="bsaDisplay"
+                outlined
+                readonly
+                hide-bottom-space
+                :data-testid="tid.vitalsField('bsa')"
+                class="add-client-vitals-tab__bsa-field">
+                <template #append>
+                  <span class="add-client-vitals-tab__unit">
+                    {{ t('vitalsUnitBsa') }}
+                  </span>
+                </template>
+              </q-input>
+              <template #hint>
+                {{ t('vitalsBsaHint') }}
+              </template>
+            </AddClientLabeledField>
           </div>
         </div>
 
@@ -511,6 +529,10 @@ import {
   resolveBmiClassification,
 } from 'src/utils/bmi-us.js'
 import {
+  calculateBsaFromUs,
+  formatBsaDisplay,
+} from 'src/utils/bsa.js'
+import {
   VITALS_LIMITS,
   createEmptyVitalsDraft,
   draftFromVitalsEntry,
@@ -692,6 +714,15 @@ const bmiValue = computed(() =>
 )
 
 const bmiDisplay = computed(() => formatBmiDisplay(bmiValue.value))
+
+const bsaValue = computed(() =>
+  calculateBsaFromUs(
+    localDraft.value.weight,
+    draftHeightToInches(localDraft.value),
+  ),
+)
+
+const bsaDisplay = computed(() => formatBsaDisplay(bsaValue.value))
 
 const patientAgeContext = computed(() =>
   resolvePatientAgeContextForVitals({

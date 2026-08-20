@@ -292,6 +292,9 @@ export default {
   clinicalAuditEntityAppointment: 'Cita',
   clinicalAuditEntityInsurance: 'Seguro',
   clinicalAuditEntityFamilyMedicalHistory: 'Historial médico familiar',
+  clinicalAuditEntityMedicalHistory: 'Historial médico',
+  clinicalAuditEntitySocialHistory: 'Historial social',
+  clinicalAuditEntityEncounterNarrative: 'Narrativa del encounter',
   clinicalAuditEntityStoredFile: 'Archivo almacenado',
   clinicalAuditEntityAuthSession: 'Sesión de acceso',
   clinicalAuditEntityAiSuggestion: 'Sugerencia de IA',
@@ -720,6 +723,7 @@ export default {
   dashboardWidgetPaymentsRecentLabel: 'Pagos recientes',
   dashboardWidgetRevenueTrendLabel: 'Tendencia de ingresos',
   calendar: 'Calendario',
+  navPortal: 'Portal',
   appointmentRequestsNav: 'Solicitudes de cita',
   portalMessagesNav: 'Mensajes',
   portalMessagesTitle: 'Mensajes',
@@ -1107,7 +1111,7 @@ export default {
   moreActions: 'Más acciones',
   clientListError: 'No se pudo cargar el listado de clientes.',
   clientListEmpty: 'No hay clientes registrados.',
-  portalRegistrationsNav: 'Altas del portal',
+  portalRegistrationsNav: 'Registro del portal',
   portalRegistrationsTitle: 'Altas del portal',
   portalRegistrationsSubtitle:
     'Cree fichas de cliente para quienes se registraron '
@@ -1222,7 +1226,9 @@ export default {
   clientOverviewNoAllergies: 'Sin alergias documentadas',
   clientOverviewNoKnownAllergies: 'Sin alergias conocidas confirmadas',
   clientOverviewFamilyHistoryDocumented: '{count} documentado(s)',
-  clientOverviewNoFamilyHistory: 'Sin antecedentes familiares',
+  clientOverviewNoFamilyHistory: 'Sin historial médico documentado',
+  clientOverviewNoSignificantMedicalHistory:
+    'Sin historial médico significativo confirmado',
   clientOverviewVitalsDocumented: '{count} registrado(s)',
   clientOverviewNoVitals: 'Sin signos vitales registrados',
   clientOverviewLabsDocumented: '{count} documentado(s)',
@@ -1342,7 +1348,7 @@ export default {
     '{name} es ahora el punto de contacto preferido.',
   responsibleForPaymentsChanged:
     '{name} es ahora responsable de pagos.',
-  tabFamilyMedicalHistory: 'Historial médico familiar',
+  tabFamilyMedicalHistory: 'Historial médico',
   tabAllergies: 'Alergias',
   tabInsurance: 'Seguro',
   tabClinical: 'Clínico',
@@ -1350,7 +1356,7 @@ export default {
   tabFinancial: 'Finanzas',
   tabFinancials: 'Finanzas',
   tabDocuments: 'Documentos',
-  subTabFamilyHistory: 'Historial familiar',
+  subTabFamilyHistory: 'Historial médico',
   subTabScreenings: 'Tamizajes',
   screeningsTitle: 'Tamizajes',
   screeningsSubtitle:
@@ -1429,18 +1435,51 @@ export default {
     + 'generar la nota clínica desde un encounter.',
   clinicalNoteTemplateSectionsTitle: 'Secciones',
   clinicalNoteTemplateAddSection: 'Añadir sección',
+  clinicalNoteTemplateAddAdditionalNotes: 'Añadir Additional Notes',
   clinicalNoteTemplateSectionLabel: 'Etiqueta',
   clinicalNoteTemplateSectionType: 'Tipo',
   clinicalNoteTemplateDataSource: 'Origen de datos',
   clinicalNoteTemplateShowWhenEmpty: 'Mostrar si está vacío',
   clinicalNoteTemplateInputType: 'Tipo de entrada',
   clinicalNoteTemplatePlaceholder: 'Marcador de posición',
+  clinicalNoteTemplateSectionGroup: 'Grupo',
   clinicalNoteTemplateAssessment: 'Plantilla de evaluación',
   clinicalNoteTemplateRequired: 'Obligatorio',
+  clinicalNoteTemplateAiAssistance: 'Asistencia de IA',
+  clinicalNoteTemplateAiContextSources: 'Fuentes de contexto de IA',
+  clinicalNoteTemplateAiContextHint:
+    'Solo estas fuentes de FiCE se envían al redactar este campo. '
+      + 'Los datos de facturación y seguros nunca se incluyen.',
+  clinicalNoteTemplateAiProviderInputRequired:
+    'Notas del proveedor obligatorias',
+  clinicalNoteAdditionalNotesLabel: 'Additional Notes',
+  clinicalNoteAdditionalNotesPlaceholder:
+    'Ingrese cualquier nota clínica adicional relevante para este '
+    + 'encounter...',
+  clinicalNoteAdditionalNotesHint:
+    'Use este campo para notas complementarias que no correspondan '
+    + 'a Chief Complaint, Diagnoses, Vitals, Medications, Allergies, '
+    + 'Medical History, Assessment & Plan, Diagnostic Studies o '
+    + 'Follow Up.',
   clinicalNoteTemplateHideWhenEmpty: 'Ocultar si está vacío',
   clinicalNoteTemplateStructuredFieldsHint:
     'Defina los campos estructurados que el clínico completa en '
     + 'Narrativa durante el encounter.',
+  clinicalNoteTemplateStructuredDefinition: 'Definición estructurada',
+  clinicalNoteTemplateRosHint:
+    'Review of Systems usa sistemas corporales definidos por FiCE. '
+    + 'Los sistemas y estados no se pueden personalizar.',
+  clinicalNoteTemplatePeHint:
+    'Physical Examination usa áreas de examen definidas por FiCE. '
+    + 'Las áreas y estados no se pueden personalizar.',
+  clinicalNoteTemplateMseHint:
+    'Mental Status Examination usa campos definidos por FiCE. '
+    + 'Los campos y listas de opciones no se pueden personalizar.',
+  clinicalNoteTemplateApHint:
+    'Assessment & Plan reutiliza los diagnósticos del Encounter. '
+    + 'Documente un plan por diagnóstico. Los diagnósticos no se '
+    + 'configuran aquí.',
+  clinicalNoteStructuredCustom: 'Campos personalizados',
   clinicalNoteTemplateStructuredFieldLabel: 'Etiqueta del campo',
   clinicalNoteTemplateAddStructuredField: 'Añadir campo',
   clinicalNoteTemplateMoveUp: 'Subir',
@@ -1471,9 +1510,20 @@ export default {
     'Usa el resultado del tamizaje/evaluación vinculado.',
   clinicalNotePreviewStructured:
     'Campos estructurados completados en el encounter.',
+  clinicalNotePreviewRos:
+    'Review of Systems completado durante el encounter.',
+  clinicalNotePreviewPe:
+    'Physical Examination completado durante el encounter.',
+  clinicalNotePreviewMse:
+    'Mental Status Examination completado durante el encounter.',
+  clinicalNotePreviewAp:
+    'Assessment & Plan completado para los diagnósticos del Encounter.',
   clinicalNotePreviewStructuredFields: 'Campos: {fields}',
   'clinicalNoteDataSource_ENCOUNTER_SUMMARY': 'Resumen del encounter',
+  'clinicalNoteDataSource_ENCOUNTER_INFO':
+    'Información del paciente / visita',
   'clinicalNoteDataSource_REASON_FOR_VISIT': 'Motivo de la visita',
+  'clinicalNoteDataSource_CHIEF_COMPLAINT': 'Motivo de consulta',
   'clinicalNoteDataSource_SERVICES': 'Servicios',
   'clinicalNoteDataSource_DIAGNOSES': 'Diagnósticos',
   'clinicalNoteDataSource_VITALS': 'Signos vitales',
@@ -1483,6 +1533,16 @@ export default {
   'clinicalNoteDataSource_REFERRALS': 'Derivaciones',
   'clinicalNoteDataSource_PROVIDER': 'Información del proveedor',
   'clinicalNoteDataSource_MEDICATION_CHANGES': 'Cambios de medicación',
+  'clinicalNoteDataSource_DIAGNOSTIC_STUDIES':
+    'Estudios diagnósticos',
+  'clinicalNoteDataSource_MEDICAL_HISTORY': 'Antecedentes médicos',
+  'clinicalNoteDataSource_SURGICAL_HISTORY':
+    'Antecedentes quirúrgicos',
+  'clinicalNoteDataSource_FAMILY_HISTORY': 'Antecedentes familiares',
+  'clinicalNoteDataSource_SOCIAL_HISTORY': 'Historia social',
+  'clinicalNoteDataSource_ALLERGIES': 'Alergias',
+  'clinicalNoteDataSource_ENCOUNTER_QUALITY_MEASURES':
+    'Medidas HEDIS abordadas',
   'clinicalNoteInputType_SHORT_TEXT': 'Texto corto',
   'clinicalNoteInputType_LONG_TEXT': 'Texto largo',
   'clinicalNoteInputType_RICH_TEXT': 'Texto enriquecido',
@@ -2148,6 +2208,7 @@ export default {
   no: 'No',
   subTabVitals: 'Signos vitales',
   subTabLabs: 'Laboratorios',
+  subTabDiagnosticStudies: 'Estudios diagnósticos',
   subTabCarePlans: 'Planes de cuidado',
   subTabClinicalNotes: 'Notas clínicas',
   subTabAppointments: 'Citas',
@@ -2307,9 +2368,103 @@ export default {
   insuranceNoPermission:
     'No tiene permiso para ver perfiles de seguro.',
   fmhNoPermission:
-    'No tiene permiso para ver antecedentes médicos familiares.',
+    'No tiene permiso para ver el historial médico.',
   vitalsNoPermission: 'No tiene permiso para ver signos vitales.',
-  labsNoPermission: 'No tiene permiso para ver órdenes de laboratorio.',
+  labsNoPermission:
+    'No tiene permiso para ver órdenes de laboratorio.',
+  dsNoPermission:
+    'No tiene permiso para ver estudios diagnósticos.',
+  dsTitle: 'Diagnostic Studies',
+  dsSubtitle:
+    'Ordene estudios diagnósticos y documente resultados existentes.',
+  dsOrder: 'Order Diagnostic Study',
+  dsExisting: 'Document Existing Result',
+  dsSaveClientFirst:
+    'Guarde el cliente primero para gestionar estudios diagnósticos.',
+  dsListEmpty: 'No diagnostic studies yet.',
+  dsListEmptyHint:
+    'Order a diagnostic study or document an existing result.',
+  dsListError: 'No se pudieron cargar los estudios diagnósticos.',
+  dsSaveError: 'No se pudo guardar el estudio diagnóstico.',
+  dsSaved: 'Estudio diagnóstico guardado correctamente.',
+  dsOrderedSuccess: 'Estudio diagnóstico ordenado correctamente.',
+  dsExistingSuccess: 'Resultado diagnóstico existente documentado.',
+  dsCompletedSuccess: 'Estudio diagnóstico marcado como completado.',
+  dsResultSuccess: 'Resultado del estudio diagnóstico registrado.',
+  dsReviewedSuccess: 'Resultado del estudio diagnóstico revisado.',
+  dsCancelledSuccess: 'Estudio diagnóstico cancelado.',
+  dsDeletedSuccess: 'Estudio diagnóstico eliminado.',
+  dsDownloadError: 'No se pudo descargar el documento fuente.',
+  dsStaleUpdate:
+    'Otro usuario actualizó este estudio. Recargue e inténtelo de nuevo.',
+  dsOrderTitle: 'Order Diagnostic Study',
+  dsOrderSubtitle:
+    'Cree una orden de estudio diagnóstico para este encounter.',
+  dsExistingTitle: 'Document Existing Result',
+  dsExistingSubtitle:
+    'Documente un estudio realizado fuera de FiCE.',
+  dsCompleteTitle: 'Mark Study Completed',
+  dsResultTitle: 'Add Result',
+  dsReviewTitle: 'Review Result',
+  dsViewTitle: 'View Diagnostic Study',
+  dsEditTitle: 'Edit Diagnostic Study',
+  dsCancelTitle: 'Cancel Diagnostic Study',
+  dsCancelMessage:
+    '¿Cancelar este estudio ordenado? '
+    + 'El estado del resultado permanece pendiente.',
+  dsDeleteTitle: 'Delete Diagnostic Study',
+  dsDeleteMessage:
+    '¿Eliminar este estudio? El documento fuente no se elimina.',
+  dsSaveStudy: 'Save Study',
+  dsSaveAndAddAnother: 'Save & Add Another',
+  dsSectionStudy: 'Study Information',
+  dsSectionFindings: 'Findings and Interpretation',
+  dsSectionDocument: 'Source Document (Optional)',
+  dsStudyName: 'Study / Test',
+  dsStudyNamePlaceholder:
+    'e.g., Abdominal Ultrasound, Mammogram, Chest X-Ray',
+  dsStudyNameRequired: 'Study / Test is required.',
+  dsStudyType: 'Study Type',
+  dsStudyTypePlaceholder: 'Select type...',
+  dsReason: 'Reason / Indication',
+  dsReasonPlaceholder: 'Why this study is being ordered...',
+  dsStudyDate: 'Study Date',
+  dsStudyDateRequired: 'Study Date is required.',
+  dsResultDate: 'Result Date',
+  dsFindings: 'Findings / Result',
+  dsFindingsPlaceholder: 'Enter findings or result...',
+  dsFindingsRequired: 'Findings / Result is required.',
+  dsInterpretation: 'Provider Interpretation / Comment',
+  dsInterpretationPlaceholder:
+    'Enter interpretation or comment (optional)...',
+  dsMarkAsReviewed: 'Mark as Reviewed',
+  dsDocumentBrowse: 'Browse',
+  dsNoDocumentSelected: 'No document selected.',
+  dsColStudy: 'Study / Test',
+  dsColType: 'Type',
+  dsColOrderedDate: 'Ordered Date',
+  dsColStudyDate: 'Study Date',
+  dsColStatus: 'Status',
+  dsColResultStatus: 'Result Status',
+  dsStatusOrdered: 'Ordered',
+  dsStatusCompleted: 'Completed',
+  dsStatusCancelled: 'Cancelled',
+  dsResultStatusPending: 'Pending',
+  dsResultStatusAvailable: 'Available',
+  dsResultStatusReviewed: 'Reviewed',
+  dsTypeUltrasound: 'Ultrasound',
+  dsTypeMammography: 'Mammography',
+  dsTypeXRay: 'X-Ray',
+  dsTypeCt: 'CT',
+  dsTypeMri: 'MRI',
+  dsTypeOther: 'Other',
+  dsActionView: 'View',
+  dsActionComplete: 'Mark Completed',
+  dsActionAddResult: 'Add Result',
+  dsActionReview: 'Review Result',
+  dsActionDownload: 'Download',
+  dsActionCancel: 'Cancel',
+  dsActionDelete: 'Delete',
   screeningsNoPermission: 'No tiene permiso para ver tamizajes.',
   referralListEmpty: 'Aún no hay referencias registradas.',
   referralLoadError: 'No se pudieron cargar las referencias.',
@@ -2523,7 +2678,6 @@ export default {
   appointmentDetailAsideChangesTitle: '¿Necesita hacer cambios?',
   appointmentDetailAsideChangesText:
     'Puede reprogramar o cancelar esta cita.',
-  appointmentDetailPrint: 'Imprimir',
   appointmentDetailViewClient: 'Ver cliente',
   appointmentDetailCopiedNumber: 'Número de cita copiado.',
   appointmentDetailCopyError: 'No se pudo copiar el número de cita.',
@@ -3673,33 +3827,104 @@ export default {
   duplicateEmail: 'Esta dirección de correo ya está en la lista.',
   countryMax: 'Máximo {max} caracteres',
   notesMax: 'Máximo {max} caracteres',
-  fmhAddSectionTitle: 'Agregar historial médico familiar',
+  fmhAddSectionTitle: 'Agregar historial médico',
   fmhPersonalSectionTitle: 'Historial médico personal',
+  fmhSurgicalSectionTitle: 'Historial quirúrgico',
   fmhFamilySectionTitle: 'Historial médico familiar',
+  fmhSocialSectionTitle: 'Historial social',
+  fmhHistoryType: 'Tipo de historial',
+  fmhHistoryTypePersonal: 'Personal',
+  fmhHistoryTypeFamily: 'Familiar',
+  fmhHistoryTypeSurgical: 'Quirúrgico',
+  fmhHistoryTypeRequired: 'Seleccione un tipo de historial',
   fmhFamilyRelationship: 'Relación familiar',
-  fmhRelationshipTooltip: 'Seleccione el cliente o un familiar consanguíneo.',
+  fmhRelationshipTooltip:
+    'Seleccione un familiar consanguíneo.',
   fmhMedicalConditions: 'Condición(es) médica(s)',
+  fmhMedicalConditionEvent: 'Condición médica / evento',
+  fmhProcedureSurgery: 'Procedimiento / cirugía',
+  fmhConditionPlaceholder:
+    'Busque o ingrese una condición médica / evento',
+  fmhProcedurePlaceholder:
+    'Busque o ingrese un procedimiento / cirugía',
+  fmhNote: 'Nota',
+  fmhNotePlaceholder: 'Agregar nota (opcional)',
   fmhAdd: 'Agregar',
   fmhAddHint:
-    'Complete ambos campos y haga clic en {add} para guardar la entrada '
-    + 'del historial familiar.',
+    'Complete los campos requeridos y haga clic en {add} para guardar.',
   fmhColRelationship: 'Relación familiar',
   fmhColConditions: 'Condiciones con antecedente familiar',
-  fmhPersonalEmpty: 'Aún no hay entradas de historial médico personal.',
-  fmhFamilyEmpty: 'Aún no hay entradas de historial médico familiar.',
+  fmhColConditionDiagnosis: 'Condición / diagnóstico',
+  fmhColConditionEvent: 'Condición / evento',
+  fmhColProcedure: 'Procedimiento / cirugía',
+  fmhColNotes: 'Notas',
+  fmhPersonalEmpty:
+    'Aún no hay entradas de historial médico personal.',
+  fmhSurgicalEmpty: 'Aún no hay entradas de historial quirúrgico.',
+  fmhFamilyEmpty:
+    'Aún no hay entradas de historial médico familiar.',
+  fmhNoSignificantPersonal:
+    'Sin historial médico personal significativo',
+  fmhNoSignificantPersonalHint:
+    'Confirme que el cliente no tiene un historial médico personal '
+    + 'significativo.',
+  fmhNoSignificantPersonalConfirmed:
+    'Sin historial médico personal significativo confirmado',
+  fmhNoSignificantPersonalUncheck:
+    'Desmarque "Sin historial médico personal significativo" para '
+    + 'agregar información de historial personal.',
+  fmhNoSurgicalHistory: 'Sin historial quirúrgico',
+  fmhNoSurgicalHistoryHint:
+    'Confirme que el cliente no tiene historial quirúrgico.',
+  fmhNoSurgicalHistoryConfirmed: 'Sin historial quirúrgico confirmado',
+  fmhNoSurgicalHistoryUncheck:
+    'Desmarque "Sin historial quirúrgico" para agregar información '
+    + 'quirúrgica.',
+  fmhNoSignificantFamily:
+    'Sin historial médico familiar significativo',
+  fmhNoSignificantFamilyHint:
+    'Confirme que el cliente no tiene un historial médico familiar '
+    + 'significativo.',
+  fmhNoSignificantFamilyConfirmed:
+    'Sin historial médico familiar significativo confirmado',
+  fmhNoSignificantFamilyUncheck:
+    'Desmarque "Sin historial médico familiar significativo" para '
+    + 'agregar información de historial familiar.',
+  fmhNegativePersonalTitle: '¿Eliminar historial médico personal?',
+  fmhNegativePersonalMessage:
+    'Confirmar que no hay historial personal significativo eliminará '
+    + 'las entradas personales existentes.',
+  fmhNegativeSurgicalTitle: '¿Eliminar historial quirúrgico?',
+  fmhNegativeSurgicalMessage:
+    'Confirmar que no hay historial quirúrgico eliminará las entradas '
+    + 'quirúrgicas existentes.',
+  fmhNegativeFamilyTitle: '¿Eliminar historial médico familiar?',
+  fmhNegativeFamilyMessage:
+    'Confirmar que no hay historial familiar significativo eliminará '
+    + 'las entradas familiares existentes.',
+  fmhNegativeConfirmContinue: 'Eliminar entradas y continuar',
   fmhBothRequired:
-    'Seleccione una relación familiar e ingrese al menos una condición médica.',
+    'Seleccione una relación familiar e ingrese al menos una '
+    + 'condición médica.',
   fmhRelationshipRequired: 'Seleccione una relación familiar',
   fmhConditionsRequired: 'Ingrese al menos una condición médica.',
+  fmhProcedureRequired: 'Ingrese un procedimiento o cirugía.',
   fmhRelationshipMax: 'Máximo {max} caracteres',
   fmhConditionsInvalid:
     'Solo letras y números, máximo {max} caracteres',
+  fmhProcedureInvalid:
+    'Solo letras y números, máximo {max} caracteres',
+  fmhNotesInvalid:
+    'Solo letras y números, máximo {max} caracteres',
   fmhDuplicateEntry:
-    'Esta combinación de relación y condición ya existe.',
-  fmhAddedSuccess: 'Entrada de historial médico familiar agregada.',
-  fmhUpdatedSuccess: 'Entrada de historial médico familiar actualizada.',
-  fmhDeletedSuccess: 'Entrada de historial médico familiar eliminada.',
-  fmhEditTitle: 'Editar historial médico familiar',
+    'Esta combinación de tipo, relación y condición ya existe.',
+  fmhAddedSuccess: 'Entrada de historial médico agregada.',
+  fmhUpdatedSuccess: 'Entrada de historial médico actualizada.',
+  fmhDeletedSuccess: 'Entrada de historial médico eliminada.',
+  fmhEditTitle: 'Editar historial médico',
+  fmhEditPersonalTitle: 'Editar historial médico personal',
+  fmhEditFamilyTitle: 'Editar historial médico familiar',
+  fmhEditSurgicalTitle: 'Editar historial quirúrgico',
   fmhDeleteTitle: 'Confirmar eliminación',
   fmhDeleteMessage:
     '¿Seguro que desea eliminar el elemento seleccionado?',
@@ -3709,6 +3934,74 @@ export default {
     'Para fines de auditoría, indique el motivo de la eliminación.',
   fmhDeleteReasonLabel: 'Motivo de eliminación',
   fmhDeleteReasonRequired: 'El motivo de eliminación es obligatorio.',
+  fmhSocialTobacco: 'Tabaco / estado de tabaquismo',
+  fmhSocialAlcohol: 'Consumo de alcohol',
+  fmhSocialSubstance: 'Drogas ilícitas / sustancias',
+  fmhSocialCaffeine: 'Consumo de cafeína',
+  fmhSocialEmployment: 'Situación laboral',
+  fmhSocialDiet: 'Dieta',
+  fmhSocialUnknown: 'Desconocido',
+  fmhSocialTobaccoNever: 'Nunca fumó',
+  fmhSocialTobaccoCurrent: 'Fumador actual',
+  fmhSocialTobaccoFormer: 'Exfumador',
+  fmhSocialTobaccoCurrentSmokeless: 'Usuario actual de tabaco sin humo',
+  fmhSocialTobaccoFormerSmokeless: 'Exusuario de tabaco sin humo',
+  fmhSocialTobaccoOther: 'Otro uso de tabaco',
+  fmhSocialTobaccoNotesCurrent: 'Agregar detalles de tabaquismo',
+  fmhSocialTobaccoNotesFormer: 'Agregar detalles de tabaquismo previo',
+  fmhSocialTobaccoNotesSmokeless: 'Agregar detalles de tabaco sin humo',
+  fmhSocialTobaccoNotesOther: 'Agregar detalles de tabaquismo',
+  fmhSocialTobaccoNotesDefault: 'Agregar detalles de tabaquismo',
+  fmhSocialAlcoholNever: 'Nunca / no consume alcohol',
+  fmhSocialAlcoholCurrent: 'Consumo actual de alcohol',
+  fmhSocialAlcoholSocial: 'Consumo social de alcohol',
+  fmhSocialAlcoholFormer: 'Consumo previo de alcohol',
+  fmhSocialAlcoholOther: 'Otro',
+  fmhSocialAlcoholNotesCurrent: 'Agregar detalles de consumo de alcohol',
+  fmhSocialAlcoholNotesSocial: 'Agregar detalles de consumo de alcohol',
+  fmhSocialAlcoholNotesFormer: 'Agregar detalles de consumo previo',
+  fmhSocialAlcoholNotesOther: 'Agregar detalles de consumo de alcohol',
+  fmhSocialAlcoholNotesDefault: 'Agregar detalles de consumo de alcohol',
+  fmhSocialSubstanceNever: 'Nunca / no usa drogas ilícitas',
+  fmhSocialSubstanceCurrent: 'Uso actual',
+  fmhSocialSubstanceFormer: 'Uso previo',
+  fmhSocialSubstanceOther: 'Otro',
+  fmhSocialSubstanceNotesCurrent: 'Agregar detalles de sustancias',
+  fmhSocialSubstanceNotesFormer: 'Agregar detalles de uso previo',
+  fmhSocialSubstanceNotesOther: 'Agregar detalles de sustancias',
+  fmhSocialSubstanceNotesDefault: 'Agregar detalles de sustancias',
+  fmhSocialCaffeineNone: 'No consume cafeína',
+  fmhSocialCaffeineUses: 'Consume cafeína',
+  fmhSocialCaffeineFormer: 'Consumo previo de cafeína',
+  fmhSocialCaffeineNotesUses: 'Agregar detalles de cafeína',
+  fmhSocialCaffeineNotesFormer: 'Agregar detalles de cafeína previa',
+  fmhSocialCaffeineNotesDefault: 'Agregar detalles de cafeína',
+  fmhSocialEmploymentEmployed: 'Empleado',
+  fmhSocialEmploymentSelf: 'Autónomo',
+  fmhSocialEmploymentUnemployed: 'Desempleado',
+  fmhSocialEmploymentStudent: 'Estudiante',
+  fmhSocialEmploymentRetired: 'Jubilado',
+  fmhSocialEmploymentDisabled: 'Incapacitado / no puede trabajar',
+  fmhSocialEmploymentHomemaker: 'Ama de casa',
+  fmhSocialEmploymentOther: 'Otro',
+  fmhSocialEmploymentNotesEmployed: 'Ocupación / detalles laborales',
+  fmhSocialEmploymentNotesSelf: 'Ocupación / detalles laborales',
+  fmhSocialEmploymentNotesStudent: 'Detalles de estudios o programa',
+  fmhSocialEmploymentNotesDisabled: 'Detalles de limitación laboral',
+  fmhSocialEmploymentNotesOther: 'Detalles laborales',
+  fmhSocialEmploymentNotesDefault: 'Ocupación / detalles laborales',
+  fmhSocialDietRegular: 'Dieta regular / sin restricciones',
+  fmhSocialDietVegetarian: 'Vegetariana',
+  fmhSocialDietVegan: 'Vegana',
+  fmhSocialDietTherapeutic: 'Dieta terapéutica / prescrita',
+  fmhSocialDietRestricted: 'Dieta con restricciones',
+  fmhSocialDietOther: 'Otra',
+  fmhSocialDietNotesVegetarian: 'Especificar detalles de la dieta',
+  fmhSocialDietNotesVegan: 'Especificar detalles de la dieta',
+  fmhSocialDietNotesTherapeutic: 'Especificar restricciones dietéticas',
+  fmhSocialDietNotesRestricted: 'Especificar restricciones dietéticas',
+  fmhSocialDietNotesOther: 'Especificar detalles de la dieta',
+  fmhSocialDietNotesDefault: 'Especificar restricciones dietéticas',
   allergiesAddSectionTitle: 'Alergias',
   allergiesExistingTitle: 'Alergias existentes',
   allergiesExistingEmpty: 'Aún no hay alergias registradas.',
@@ -3830,6 +4123,10 @@ export default {
   vitalsBmiObesity1: 'Obesidad clase 1',
   vitalsBmiObesity2: 'Obesidad clase 2',
   vitalsBmiObesity3: 'Obesidad clase 3',
+  vitalsBsa: 'BSA',
+  vitalsUnitBsa: 'm²',
+  vitalsBsaHint:
+    'Se calcula automáticamente (fórmula de Mosteller)',
   vitalsPainLevel: 'Nivel de dolor',
   vitalsPainMild: '0-2 Leve',
   vitalsPainModerate: '3-6 Moderado',
@@ -3868,6 +4165,7 @@ export default {
   vitalsColTemperature: 'Temperatura',
   vitalsColSpO2: 'SpO₂',
   vitalsColBmi: 'IMC',
+  vitalsColBsa: 'BSA',
   vitalsColRecordedBy: 'Registrado por',
   vitalsFieldRequired: 'Este campo es obligatorio.',
   vitalsFieldInvalid: 'Ingrese un valor válido.',
@@ -4679,6 +4977,7 @@ export default {
   aiPromptIcd10: 'Sugerencia ICD-10',
   aiPromptClinicalSummary: 'Resumen clínico',
   aiPromptCarePlan: 'Borrador de care plan',
+  aiPromptNarrativeDraft: 'Redacción de narrativa clínica',
   aiConfigLoadError: 'No se pudo cargar la configuración de IA.',
   aiConfigSaveError: 'No se pudo guardar la configuración de IA.',
   aiConfigSaved: 'Configuración de IA guardada.',
@@ -5184,6 +5483,34 @@ export default {
     'Solo órdenes de lab registradas en este encounter.',
   encounterClinicalLabsEmpty:
     'Aún no hay labs para este encounter.',
+  encounterClinicalDiagnosticStudies: 'Diagnostic Studies',
+  encounterClinicalDiagnosticStudiesHint:
+    'Estudios diagnósticos ordenados o documentados en este encounter.',
+  encounterClinicalDiagnosticStudiesEmpty:
+    'No diagnostic studies yet.',
+  encounterClinicalQualityMeasures: 'Medidas de calidad',
+  encounterClinicalQualityMeasuresHint:
+    'Medidas HEDIS abordadas durante este encounter.',
+  encounterClinicalQualityMeasuresNote:
+    'Marcar una medida como abordada documenta que se atendió '
+      + 'durante esta visita. No significa que la medida HEDIS '
+      + 'oficial esté cumplida.',
+  encounterClinicalQualityMeasuresEmpty:
+    'No hay medidas HEDIS configuradas para esta clínica.',
+  encounterClinicalQualityMeasuresLoadError:
+    'No se pudieron cargar las medidas de calidad.',
+  encounterClinicalQualityMeasuresSaveError:
+    'No se pudo actualizar la medida abordada.',
+  encounterClinicalQualityMeasuresAddressedBy:
+    'Abordada por: {name}',
+  encounterClinicalQualityMeasuresAddressedAt:
+    'Abordada el: {date}',
+  encounterClinicalQualityMeasuresAddressedByAt:
+    'Abordada por: {name} · Abordada el: {date}',
+  encounterClinicalAllDiagnosticStudies:
+    'All Diagnostic Studies',
+  encounterClinicalAllDiagnosticStudiesTitle:
+    'Todos los estudios diagnósticos del cliente',
   encounterClinicalAllVitals: 'Todos los vitales',
   encounterClinicalAllAssessments: 'Todos los screenings',
   encounterClinicalAllMedications: 'Todos los medicamentos',
@@ -5207,19 +5534,255 @@ export default {
   encounterProgressNote: 'Progress Note',
   encounterNarrativeTitle: 'Narrative',
   encounterNarrativeHint:
-    'Complete la información narrativa de esta visita.',
+    'Complete la narrativa clínica definida por la plantilla de '
+    + 'nota del servicio primario. Los servicios adicionales no '
+    + 'añaden secciones narrativas aparte.',
+  encounterNarrativeHintWithTemplate:
+    '{name}. Complete la narrativa clínica definida por esta '
+    + 'plantilla del servicio primario. Los servicios adicionales '
+    + 'no añaden secciones narrativas aparte.',
   encounterNarrativeEmpty:
     'Esta plantilla no tiene campos narrativos para este encounter.',
   encounterNarrativeNoTemplate:
-    'Este encounter no tiene plantilla de nota clínica configurada.',
+    'Problema de configuración: el servicio primario no tiene '
+    + 'plantilla de nota clínica, así que este encounter no tiene '
+    + 'narrativa clínica.',
+  encounterNarrativeGroupHpi: 'History of Present Illness',
   encounterNarrativeSaved: 'Guardado',
   encounterNarrativeSaveError: 'No se pudo guardar la narrativa.',
   encounterNarrativeConflict:
     'Este campo fue actualizado por otro usuario. '
     + 'Recargue e intente de nuevo.',
+  narrativeAiDraftWithAi: 'Redactar con IA',
+  narrativeAiDialogTitle: 'Borrador narrativo de IA',
+  narrativeAiDialogHint:
+    'Borrador sugerido para {label}. Revíselo antes de que pase '
+      + 'a ser la narrativa guardada.',
+  narrativeAiDialogHintPlan:
+    'Borrador sugerido para {label} — {diagnosis}. La IA reescribe '
+      + 'decisiones que usted ya indicó. No determina el tratamiento.',
+  narrativeAiCurrentNarrative: 'Narrativa actual',
+  narrativeAiProviderInput: 'Notas del proveedor',
+  narrativeAiProviderInputPlaceholder:
+    'Notas opcionales. No se convierten en la narrativa hasta que '
+      + 'use el borrador.',
+  narrativeAiProviderInputHint:
+    'Las notas del proveedor siguen aparte de la narrativa guardada.',
+  narrativeAiProviderInputRequiredPlaceholder:
+    'Indique las decisiones clínicas ya tomadas. La IA no inventará '
+      + 'un Plan.',
+  narrativeAiProviderInputRequiredHint:
+    'Las notas del proveedor son obligatorias para Plan. Siguen '
+      + 'aparte de la narrativa guardada.',
+  narrativeAiProviderInputRequiredError:
+    'Añada las acciones clínicas que ya decidió antes de generar '
+      + 'un borrador del Plan.',
+  narrativeAiSuggestedDraft: 'Borrador sugerido por IA',
+  narrativeAiUseDraft: 'Usar borrador',
+  narrativeAiTryAgain: 'Intentar de nuevo',
+  narrativeAiDiscard: 'Descartar',
+  narrativeAiGenerateError:
+    'No se pudo generar el borrador ahora. Puede intentar de '
+      + 'nuevo o seguir documentando de forma manual.',
+  narrativeAiInsufficientContext:
+    'No hay información suficiente para un borrador fundamentado. '
+      + 'Añada notas del proveedor u otro contexto clínico e '
+      + 'intente de nuevo.',
+  narrativeAiEmptyDraft:
+    'El asistente no devolvió un borrador. Intente de nuevo o '
+      + 'escriba la narrativa manualmente.',
+  narrativeAiReplaceConfirmTitle: '¿Reemplazar la narrativa actual?',
+  narrativeAiReplaceConfirmMessage:
+    'Usar borrador reemplazará el texto del editor. La narrativa '
+      + 'guardada no cambia hasta que la guarde.',
+  'narrativeAiContextSource_CHIEF_COMPLAINT': 'Motivo de consulta',
+  'narrativeAiContextSource_ENCOUNTER_DIAGNOSES':
+    'Diagnósticos del encounter',
+  'narrativeAiContextSource_MEDICAL_HISTORY': 'Antecedentes médicos',
+  'narrativeAiContextSource_SURGICAL_HISTORY':
+    'Antecedentes quirúrgicos',
+  'narrativeAiContextSource_FAMILY_HISTORY':
+    'Antecedentes familiares',
+  'narrativeAiContextSource_SOCIAL_HISTORY': 'Historia social',
+  'narrativeAiContextSource_ACTIVE_MEDICATIONS':
+    'Medicamentos activos',
+  'narrativeAiContextSource_ALLERGIES': 'Alergias',
+  'narrativeAiContextSource_VITALS': 'Signos vitales',
+  'narrativeAiContextSource_SCREENINGS': 'Evaluaciones',
+  'narrativeAiContextSource_DIAGNOSTIC_STUDIES':
+    'Estudios diagnósticos',
+  'narrativeAiContextSource_FOLLOW_UP': 'Seguimiento',
+  'narrativeAiContextSource_PROVIDER_INPUT': 'Notas del proveedor',
   encounterNarrativeIncomplete:
     '{count} campo obligatorio incompleto | '
     + '{count} campos obligatorios incompletos',
+  encounterNarrativeRosIncomplete:
+    'Review of Systems incompleto',
+  encounterNarrativePeIncomplete:
+    'Physical Examination incompleto',
+  encounterNarrativeMseIncomplete:
+    'Mental Status Examination incompleto',
+  encounterNarrativeApIncomplete: 'Assessment & Plan incompleto',
+  encounterNarrativeApIncompleteDetail:
+    'Assessment & Plan incompleto — {count} diagnóstico requiere '
+    + 'un Plan | Assessment & Plan incompleto — {count} '
+    + 'diagnósticos requieren un Plan',
+  rosDefaultLabel: 'Review of Systems',
+  rosSelectStatus: 'Seleccionar estado',
+  rosStatusNegative: 'Negativo',
+  rosStatusPositive: 'Positivo',
+  rosStatusNotReviewed: 'No revisado',
+  rosDetails: 'Detalles',
+  rosDetailsPlaceholder:
+    'Describa los síntomas o hallazgos relevantes',
+  rosProgress: '{completed} de {total} sistemas completados',
+  rosRequiresAttention: 'Requiere atención:',
+  rosStatusRequiredShort: '{system} — Estado obligatorio',
+  rosDetailsRequiredShort: '{system} — Detalles obligatorios',
+  rosDetailsRequired:
+    'Los detalles son obligatorios cuando {system} está marcado '
+    + 'como Positivo.',
+  rosSystemConstitutional: 'Constitucional',
+  rosSystemEyes: 'Ojos',
+  rosSystemEntMouth: 'ENT / Boca',
+  rosSystemCardiovascular: 'Cardiovascular',
+  rosSystemRespiratory: 'Respiratorio',
+  rosSystemGastrointestinal: 'Gastrointestinal',
+  rosSystemGenitourinary: 'Genitourinario',
+  rosSystemMusculoskeletal: 'Musculoesquelético',
+  rosSystemSkin: 'Piel / Tegumentario',
+  rosSystemNeurologic: 'Neurológico',
+  rosSystemPsychiatric: 'Psiquiátrico',
+  rosSystemEndocrine: 'Endocrino',
+  rosSystemHematologic: 'Hematológico / Linfático',
+  rosSystemAllergic: 'Alérgico / Inmunológico',
+  peDefaultLabel: 'Physical Examination',
+  peSelectStatus: 'Seleccionar estado',
+  peStatusNormal: 'Normal',
+  peStatusAbnormal: 'Anormal',
+  peStatusNotExamined: 'No examinado',
+  peStatusDeferred: 'Diferido',
+  peFindings: 'Hallazgos',
+  peFindingsPlaceholder: 'Describa los hallazgos del examen',
+  peReason: 'Motivo',
+  peReasonPlaceholder: 'Motivo para diferir (opcional)',
+  peProgress: '{completed} de {total} áreas completadas',
+  peStatusRequiredShort: '{area} — Estado obligatorio',
+  peFindingsRequiredShort: '{area} — Hallazgos obligatorios',
+  peFindingsRequired:
+    'Los hallazgos son obligatorios cuando {area} está marcado '
+    + 'como Anormal.',
+  peAreaConstitutional: 'Constitucional / general',
+  peAreaEyes: 'Ojos',
+  peAreaEntMouth: 'ENT / Boca',
+  peAreaNeck: 'Cuello',
+  peAreaCardiovascular: 'Cardiovascular',
+  peAreaRespiratory: 'Respiratorio',
+  peAreaGastrointestinal: 'Gastrointestinal / abdomen',
+  peAreaGenitourinary: 'Genitourinario',
+  peAreaMusculoskeletal: 'Musculoesquelético',
+  peAreaSkin: 'Piel',
+  peAreaNeurologic: 'Neurológico',
+  peAreaPsychiatric: 'Psiquiátrico',
+  peAreaLymphatic: 'Linfático',
+  peAreaBreast: 'Mama',
+  mseDefaultLabel: 'Mental Status Examination',
+  mseSelect: 'Seleccionar',
+  mseDetails: 'Detalles',
+  mseDetailsPlaceholder: 'Describa el hallazgo',
+  mseProgress: '{completed} de {total} campos completados',
+  mseValueRequiredShort: '{field} — Valor obligatorio',
+  mseDetailsRequiredShort: '{field} — Detalles obligatorios',
+  mseDetailsRequired:
+    'Los detalles son obligatorios cuando {field} está en Otro.',
+  mseFieldAppearance: 'Apariencia',
+  mseFieldBehavior: 'Conducta',
+  mseFieldSpeech: 'Habla',
+  mseFieldMood: 'Estado de ánimo',
+  mseFieldAffect: 'Afecto',
+  mseFieldThoughtProcess: 'Proceso de pensamiento',
+  mseFieldThoughtContent: 'Contenido del pensamiento',
+  mseFieldPerception: 'Percepción',
+  mseFieldOrientation: 'Orientación',
+  mseFieldAttention: 'Atención / concentración',
+  mseFieldMemory: 'Memoria',
+  mseFieldInsight: 'Insight',
+  mseFieldJudgment: 'Juicio',
+  mseOptOther: 'Otro',
+  mseOptNotAssessed: 'No evaluado',
+  mseOptWellGroomed: 'Bien aseado',
+  mseOptAppropriate: 'Apropiado',
+  mseOptDisheveled: 'Desaliñado',
+  mseOptPoorHygiene: 'Higiene deficiente',
+  mseOptCooperative: 'Cooperador',
+  mseOptCalm: 'Calmado',
+  mseOptGuarded: 'Reservado',
+  mseOptAgitated: 'Agitado',
+  mseOptRestless: 'Inquieto',
+  mseOptWithdrawn: 'Retraído',
+  mseOptHostile: 'Hostil',
+  mseOptNormal: 'Normal',
+  mseOptRapid: 'Rápido',
+  mseOptPressured: 'Presionado',
+  mseOptSlow: 'Lento',
+  mseOptSoft: 'Bajo',
+  mseOptLoud: 'Alto',
+  mseOptMinimal: 'Mínimo',
+  mseOptMute: 'Mudo',
+  mseOptEuthymic: 'Eutímico',
+  mseOptAnxious: 'Ansioso',
+  mseOptDepressed: 'Deprimido',
+  mseOptIrritable: 'Irritable',
+  mseOptElevated: 'Elevado',
+  mseOptAngry: 'Enojado',
+  mseOptSad: 'Triste',
+  mseOptCongruent: 'Congruente',
+  mseOptRestricted: 'Restringido',
+  mseOptFlat: 'Plano',
+  mseOptBlunted: 'Embotado',
+  mseOptLabile: 'Lábil',
+  mseOptLinear: 'Lineal',
+  mseOptLogical: 'Lógico',
+  mseOptGoalDirected: 'Dirigido a un objetivo',
+  mseOptCircumstantial: 'Circunstancial',
+  mseOptTangential: 'Tangencial',
+  mseOptDisorganized: 'Desorganizado',
+  mseOptFlightOfIdeas: 'Fuga de ideas',
+  mseOptSuicidalIdeation: 'Ideación suicida',
+  mseOptHomicidalIdeation: 'Ideación homicida',
+  mseOptDelusional: 'Delirante',
+  mseOptObsessive: 'Obsesivo',
+  mseOptParanoid: 'Paranoide',
+  mseOptNoPerceptualDisturbance: 'Sin alteración perceptiva',
+  mseOptAuditoryHallucinations: 'Alucinaciones auditivas',
+  mseOptVisualHallucinations: 'Alucinaciones visuales',
+  mseOptOtherHallucinations: 'Otras alucinaciones',
+  mseOptOrientedX4: 'Orientado ×4',
+  mseOptOrientedX3: 'Orientado ×3',
+  mseOptPartiallyOriented: 'Parcialmente orientado',
+  mseOptDisoriented: 'Desorientado',
+  mseOptIntact: 'Conservada',
+  mseOptMildlyImpaired: 'Levemente alterada',
+  mseOptImpaired: 'Alterada',
+  mseOptRecentMemoryImpaired: 'Memoria reciente alterada',
+  mseOptRemoteMemoryImpaired: 'Memoria remota alterada',
+  mseOptRecentAndRemoteImpaired:
+    'Memoria reciente y remota alteradas',
+  mseOptGood: 'Bueno',
+  mseOptFair: 'Regular',
+  mseOptPoor: 'Pobre',
+  apDefaultLabel: 'Assessment & Plan',
+  apPlan: 'Plan',
+  apPlanPlaceholder:
+    'Documente el plan clínico para este diagnóstico',
+  apProgress: '{completed} de {total} diagnósticos abordados',
+  apEmptyDiagnoses:
+    'No se han añadido diagnósticos a este Encounter.',
+  apGoToVisit: 'Ir a Visit',
+  apPrimaryDiagnosis: 'Diagnóstico primario',
+  apPlanRequired:
+    'Se requiere un Plan para {description} ({code}).',
+  apPlanRequiredShort: '{code} — {description}',
   encounterProcessingTitle: 'Procesamiento del encounter',
   encounterProcessingSubtitle:
     'Generación de nota clínica y Superbill tras completar.',
@@ -5238,7 +5801,18 @@ export default {
   encounterGeneratedNoteRetry: 'Reintentar generación',
   encounterGeneratedNoteReview: 'Revisar nota clínica',
   encounterGeneratedNoteRegenerate: 'Regenerar nota clínica',
+  encounterGeneratedNoteRegenerateShort: 'Regenerar nota',
   encounterGeneratedNoteSource: 'Origen: {source}',
+  encounterGeneratedNoteEditSource: 'Editar origen',
+  encounterGeneratedNoteBack: 'Volver al Encounter',
+  encounterGeneratedNoteStaleTitle:
+    'La documentación clínica cambió desde que se generó esta nota.',
+  encounterGeneratedNoteStaleBody:
+    'Regenere la nota clínica antes de firmar.',
+  encounterGeneratedNoteDateOfService: 'Fecha de servicio: {date}',
+  encounterGeneratedNoteProvider: 'Proveedor: {name}',
+  encounterGeneratedNoteSignedBy: 'Firmada por: {name}',
+  encounterGeneratedNoteSignedAt: 'Firmada el: {date}',
   encounterGeneratedNoteSignSuccess: 'Nota clínica firmada.',
   encounterGeneratedNoteRegenerateSuccess: 'Nota clínica regenerada.',
   encounterGeneratedNoteGenerateSuccess: 'Nota clínica generada.',
@@ -5263,6 +5837,7 @@ export default {
   encounterCompleteError: 'No se pudo completar el encounter.',
   encounterCompleteRequirementsMissing:
     'Complete los requisitos antes de finalizar este encounter.',
+  encounterNarrativeSectionRequired: '{label} es obligatorio.',
   encounterCancelTitle: 'Cancelar consulta',
   encounterCancelHint:
     'Se cancelará la consulta abierta. Los datos clínicos ya '

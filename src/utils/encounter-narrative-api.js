@@ -2,6 +2,8 @@ import { apiInstance } from 'boot/axios'
 import { apiPaths } from 'components/constants.js'
 import { normalizeClinicalNoteAddenda } from
   'src/utils/clinical-note-normalize.js'
+import { fieldNarrativeSectionGroup } from
+  'src/utils/clinical-note-narrative-group.js'
 
 function unwrapData(body) {
   if (body?.data != null && typeof body.data === 'object') {
@@ -25,6 +27,9 @@ export function normalizeEncounterNarrative(raw = {}) {
     requiredCount: body.required_count ?? body.requiredCount ?? 0,
     completedRequiredCount:
       body.completed_required_count ?? body.completedRequiredCount ?? 0,
+    aiFeatureEnabled: body.ai_feature_enabled
+      ?? body.aiFeatureEnabled
+      ?? true,
     fields: fields.map(field => ({
       templateSectionId:
         field.template_section_id ?? field.templateSectionId ?? null,
@@ -39,6 +44,19 @@ export function normalizeEncounterNarrative(raw = {}) {
       valueJson: field.value_json ?? field.valueJson ?? '',
       configurationJson:
         field.configuration_json ?? field.configurationJson ?? '',
+      sectionGroup: fieldNarrativeSectionGroup(field),
+      aiAssistanceEnabled: Boolean(
+        field.ai_assistance_enabled ?? field.aiAssistanceEnabled,
+      ),
+      aiContextSources: Array.isArray(
+        field.ai_context_sources ?? field.aiContextSources,
+      )
+        ? (field.ai_context_sources ?? field.aiContextSources)
+        : [],
+      aiProviderInputRequired: Boolean(
+        field.ai_provider_input_required
+          ?? field.aiProviderInputRequired,
+      ),
       version: field.version ?? 0,
     })),
   }
@@ -67,6 +85,10 @@ export function normalizeGeneratedClinicalNote(raw) {
     generationFailed: Boolean(
       raw.generation_failed ?? raw.generationFailed,
     ),
+    regenerationRequired: Boolean(
+      raw.regeneration_required ?? raw.regenerationRequired,
+    ),
+    providerName: raw.provider_name ?? raw.providerName ?? '',
     sections: sections.map(section => ({
       id: section.id ?? null,
       sectionKey: section.section_key ?? section.sectionKey ?? '',
@@ -75,6 +97,10 @@ export function normalizeGeneratedClinicalNote(raw) {
       displayOrder: section.display_order ?? section.displayOrder ?? 0,
       contentText: section.content_text ?? section.contentText ?? '',
       contentJson: section.content_json ?? section.contentJson ?? '',
+      sectionGroup: fieldNarrativeSectionGroup({
+        configurationJson:
+          section.content_json ?? section.contentJson ?? '',
+      }),
       sourceType: section.source_type ?? section.sourceType ?? '',
       sourceLabel: section.source_label ?? section.sourceLabel ?? '',
     })),
@@ -101,6 +127,8 @@ export async function saveEncounterNarrative(encounterId, fields) {
         value_text: field.valueText ?? null,
         value_json: field.valueJson || null,
         version: field.version ?? 0,
+        ai_suggestion_id: field.aiSuggestionId || null,
+        ai_modified_after: field.aiModifiedAfter === true,
       })),
     },
   )

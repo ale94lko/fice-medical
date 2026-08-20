@@ -58,6 +58,7 @@ export const layoutTestIds = {
   signOut: 'layout-menu-sign-out',
   navDashboard: 'layout-nav-dashboard',
   navCalendar: 'layout-nav-calendar',
+  navPortalMenu: 'layout-nav-portal-menu',
   navAppointmentRequests: 'layout-nav-appointment-requests',
   navMessages: 'layout-nav-messages',
   navClientMenu: 'layout-nav-client-menu',
@@ -484,6 +485,8 @@ export const clinicalNoteTemplateDialogTestIds = {
   previewDialog: 'clinical-note-template-preview-dialog',
   field: name => toTestId('clinical-note-template-dialog-field', name),
   addSection: 'clinical-note-template-dialog-btn-add-section',
+  addAdditionalNotes:
+    'clinical-note-template-dialog-btn-add-additional-notes',
   moveUp: index => toTestId(
     'clinical-note-template-dialog-section',
     index,
@@ -679,6 +682,8 @@ export const clientOverviewAltTestIds = {
   messages: 'client-overview-alt-btn-messages',
   actionsMenu: 'client-overview-alt-btn-actions-menu',
   actionsMenuPanel: 'client-overview-alt-actions-menu',
+  moreActions: 'client-overview-alt-btn-more-actions',
+  moreActionsPanel: 'client-overview-alt-more-actions',
   copyName: 'client-overview-alt-btn-copy-name',
   copyDob: 'client-overview-alt-btn-copy-dob',
   copyPhone: 'client-overview-alt-btn-copy-phone',
@@ -754,7 +759,10 @@ export const encounterTestIds = {
   toolbarPill: 'active-encounter-toolbar-pill',
   toolbarClientName: 'active-encounter-toolbar-client-name',
   complete: 'active-encounter-btn-complete',
+  completeHint: 'active-encounter-complete-hint',
   cancel: 'active-encounter-btn-cancel',
+  wait: 'active-encounter-btn-wait',
+  resume: 'active-encounter-btn-resume',
   startButton: 'start-encounter-btn',
   openActive: 'open-active-encounter-btn',
   startMenu: 'start-encounter-menu',
@@ -818,6 +826,7 @@ export const addClientTestIds = {
   modalCancelDiscard: 'add-client-modal-btn-discard',
   modalKeepEditing: 'add-client-modal-btn-keep-editing',
   fmhField: name => toTestId('add-client-fmh-field', name),
+  fmhSocialField: name => toTestId('add-client-fmh-social', name),
   fmhBtnAdd: 'add-client-fmh-btn-add',
   fmhRowEdit: id => toTestId('add-client-fmh-row', id, 'btn-edit'),
   fmhRowDelete: id => toTestId('add-client-fmh-row', id, 'btn-delete'),
@@ -938,6 +947,43 @@ export const labTestIds = {
   attachmentOpen: 'lab-attachment-btn-open',
 }
 
+export const diagnosticStudyTestIds = {
+  dialog: mode => toTestId('diagnostic-study-dialog', mode),
+  btn: name => toTestId('diagnostic-study-btn', name),
+  field: name => toTestId('diagnostic-study-field', name),
+  rowView: id => toTestId('diagnostic-study-row', id, 'btn-view'),
+  rowComplete: id => toTestId(
+    'diagnostic-study-row',
+    id,
+    'btn-complete',
+  ),
+  rowResult: id => toTestId(
+    'diagnostic-study-row',
+    id,
+    'btn-result',
+  ),
+  rowReview: id => toTestId(
+    'diagnostic-study-row',
+    id,
+    'btn-review',
+  ),
+  rowDownload: id => toTestId(
+    'diagnostic-study-row',
+    id,
+    'btn-download',
+  ),
+  rowCancel: id => toTestId(
+    'diagnostic-study-row',
+    id,
+    'btn-cancel',
+  ),
+  rowDelete: id => toTestId(
+    'diagnostic-study-row',
+    id,
+    'btn-delete',
+  ),
+}
+
 export const pharmacyTestIds = {
   dialog: mode => toTestId('pharmacy-dialog', mode),
   btn: name => toTestId('pharmacy-dialog-btn', name),
@@ -1014,7 +1060,6 @@ export const appointmentTestIds = {
   field: name => toTestId('appointment-field', name),
   copyNumber: 'appointment-btn-copy-number',
   copyInvite: 'appointment-btn-copy-invite',
-  print: 'appointment-btn-print',
   close: 'appointment-btn-close',
   encounter: 'appointment-btn-encounter',
   joinTelehealth: 'appointment-btn-join-telehealth',

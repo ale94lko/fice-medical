@@ -18,6 +18,8 @@ import {
   normalizeEncounterRequirementsSnapshot,
 } from 'src/utils/encounter-requirements-normalize.js'
 import { mapClientLabsListFromApi } from 'src/utils/lab-normalize.js'
+import { mapDiagnosticStudiesListFromApi } from
+  'src/utils/diagnostic-study-normalize.js'
 import { mapMedicationsListFromApi } from
   'src/utils/medication-normalize.js'
 import { mapReferralsListFromApi } from 'src/utils/referral-normalize.js'
@@ -86,6 +88,8 @@ function normalizeSections(raw = {}) {
     medications: readCount('medications'),
     carePlans: readCount('care_plans') || readCount('carePlans'),
     labs: readCount('labs'),
+    diagnosticStudies: readCount('diagnostic_studies')
+      || readCount('diagnosticStudies'),
     followUps: readCount('follow_ups') || readCount('followUps'),
     referrals: readCount('referrals'),
     documents: readCount('documents') || readCount('files'),
@@ -102,6 +106,9 @@ export function normalizeEncounterWorkspaceClinical(body = {}) {
   return {
     vitals: mapClientVitalsListFromApi(raw.vitals),
     labs: mapClientLabsListFromApi(raw.labs),
+    diagnosticStudies: mapDiagnosticStudiesListFromApi(
+      raw.diagnostic_studies ?? raw.diagnosticStudies,
+    ),
     clinicalNotes: mapClinicalNotesListFromApi(
       raw.clinical_notes ?? raw.clinicalNotes,
     ),

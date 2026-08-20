@@ -116,6 +116,25 @@
       @changed="emit('changed')"
     />
 
+    <EncounterClinicalDiagnosticStudiesPanel
+      v-else-if="isDiagnosticStudiesTab"
+      :client-id="clientId"
+      :encounter-id="encounterId"
+      :diagnostic-studies="diagnosticStudies"
+      :can-add="canAddDiagnosticStudies"
+      :can-edit="canEditDiagnosticStudies"
+      :can-delete="canDeleteDiagnosticStudies"
+      :encounter-open="encounterOpen"
+      @changed="emit('changed')"
+    />
+
+    <EncounterClinicalQualityMeasuresPanel
+      v-else-if="isQualityMeasuresTab"
+      :encounter-id="encounterId"
+      :can-edit="canEditQualityMeasures"
+      @changed="emit('changed')"
+    />
+
     <VitalsRecordDialog
       v-model="recordDialogOpen"
       :entry="editingEntry"
@@ -180,6 +199,10 @@ import EncounterClinicalCarePlansPanel from
   'components/encounter/EncounterClinicalCarePlansPanel.vue'
 import EncounterClinicalLabsPanel from
   'components/encounter/EncounterClinicalLabsPanel.vue'
+import EncounterClinicalDiagnosticStudiesPanel from
+  'components/encounter/EncounterClinicalDiagnosticStudiesPanel.vue'
+import EncounterClinicalQualityMeasuresPanel from
+  'components/encounter/EncounterClinicalQualityMeasuresPanel.vue'
 import EncounterClinicalMedicationsPanel from
   'components/encounter/EncounterClinicalMedicationsPanel.vue'
 import { encounterWorkspaceTestIds as tid } from
@@ -245,6 +268,22 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  canAddDiagnosticStudies: {
+    type: Boolean,
+    default: false,
+  },
+  canEditDiagnosticStudies: {
+    type: Boolean,
+    default: false,
+  },
+  canDeleteDiagnosticStudies: {
+    type: Boolean,
+    default: false,
+  },
+  canEditQualityMeasures: {
+    type: Boolean,
+    default: false,
+  },
   vitals: {
     type: Array,
     default: () => [],
@@ -262,6 +301,10 @@ const props = defineProps({
     default: () => [],
   },
   labs: {
+    type: Array,
+    default: () => [],
+  },
+  diagnosticStudies: {
     type: Array,
     default: () => [],
   },
@@ -318,6 +361,14 @@ const isCarePlansTab = computed(
 const isLabsTab = computed(
   () => props.modelValue === encounterClinicalSubTabs.labs,
 )
+const isDiagnosticStudiesTab = computed(
+  () => props.modelValue
+    === encounterClinicalSubTabs.diagnosticStudies,
+)
+const isQualityMeasuresTab = computed(
+  () => props.modelValue
+    === encounterClinicalSubTabs.qualityMeasures,
+)
 
 const clientKey = computed(() => String(props.clientId ?? '').trim())
 const encounterKey = computed(
@@ -357,6 +408,16 @@ const subTabs = computed(() => [
     key: encounterClinicalSubTabs.labs,
     label: t('encounterClinicalLabs'),
     icon: 'science',
+  },
+  {
+    key: encounterClinicalSubTabs.diagnosticStudies,
+    label: t('encounterClinicalDiagnosticStudies'),
+    icon: 'biotech',
+  },
+  {
+    key: encounterClinicalSubTabs.qualityMeasures,
+    label: t('encounterClinicalQualityMeasures'),
+    icon: 'verified',
   },
 ])
 

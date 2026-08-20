@@ -4,6 +4,7 @@ import {
 } from 'components/constants.js'
 import { visibleInsuranceProfiles } from 'src/utils/client-insurance.js'
 import { formHasAssignedClinicians } from 'src/utils/client-clinicians-form.js'
+import { socialHistoryHasData } from 'src/utils/client-social-history.js'
 
 const ck = clientFieldKeys
 
@@ -121,6 +122,15 @@ export function hasAddClientDataBeyondFirstLastName(form) {
       form[clientFormSections.familyMedicalHistory],
       'entries',
     )
+  ) {
+    return true
+  }
+  const fmh = form[clientFormSections.familyMedicalHistory]
+  if (
+    fmh?.noSignificantPersonal
+    || fmh?.noSurgicalHistory
+    || fmh?.noSignificantFamily
+    || socialHistoryHasData(fmh?.socialHistory)
   ) {
     return true
   }

@@ -143,9 +143,11 @@
       :busy="saving"
       :can-sign="canSignClinicalNotes"
       :can-regenerate="canRegenerateGenerated"
+      :can-correct-sources="canCorrectGeneratedSources"
       @sign="onSignGenerated"
       @regenerate="onRegenerateGenerated"
       @add-addendum="openAddendumFromGenerated"
+      @edit-source="onEditGeneratedSource"
     />
 
     <AiGenerateDialog
@@ -161,6 +163,7 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 import AdminListPageActions from
   'components/admin-table/AdminListPageActions.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -174,6 +177,7 @@ import EncounterGeneratedNoteDialog from
 import ModalComponent from 'components/ModalComponent.vue'
 import {
   aiFeatures,
+  clinicalNoteStatuses,
   permissionNames,
   quasarNotifyTypes,
 } from 'components/constants.js'
@@ -236,6 +240,7 @@ const props = defineProps({
 
 const { t } = useI18n()
 const $q = useQuasar()
+const router = useRouter()
 const { isMobile } = useViewportLayout()
 const siteStore = useSiteStore()
 const authStore = useAuthStore()
@@ -272,6 +277,14 @@ const canRegenerateGenerated = computed(() =>
   )
   && String(generatedNote.value?.status ?? '').toUpperCase() !== 'SIGNED',
 )
+
+const canCorrectGeneratedSources = computed(() => {
+  const status = String(generatedNote.value?.status ?? '').toUpperCase()
+
+  return status === clinicalNoteStatuses.generated
+    && Boolean(generatedNote.value?.encounterId)
+    && (canEditClinicalNotes.value || canSignClinicalNotes.value)
+})
 
 const hasClientId = computed(() =>
   Boolean(String(props.clientId ?? '').trim()),
@@ -481,6 +494,39 @@ async function onRegenerateGenerated() {
     }
   } finally {
     saving.value = false
+  }
+}
+
+function onEditGeneratedSource(target) {
+  generatedOpen.value = false
+  const encounterId = generatedNote.value?.encounterId
+  if (!target || encounterId == null) {
+    return
+  }
+  if (target.workspaceTab) {
+    void router.push({
+      name: 'EncounterWorkspace',
+      params: { id: String(encounterId) },
+      query: {
+        tab: target.workspaceTab,
+        ...(target.clinicalSubTab
+          ? { clinicalSubTab: target.clinicalSubTab }
+          : {}),
+      },
+    })
+
+    return
+  }
+  if (target.tab) {
+    void router.push({
+      name: 'EditClient',
+      params: { id: clientId.value },
+      query: {
+        tab: target.tab,
+        ...(target.subTab ? { subTab: target.subTab } : {}),
+        encounterId: String(encounterId),
+      },
+    })
   }
 }
 

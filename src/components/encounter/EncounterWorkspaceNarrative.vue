@@ -30,31 +30,68 @@
       </div>
 
       <div
-        v-for="field in fields"
-        :key="field.templateSectionId || field.fieldKey"
-        class="q-mb-md">
-        <AddClientLabeledField
-          :label="field.fieldLabel"
-          :required="field.required">
-          <TextInput
-            v-if="field.inputType === 'SHORT_TEXT'"
-            :model-value="field.valueText"
-            :external-label="true"
-            :readonly="!canEdit"
-            :placeholder="field.placeholder"
-            :test-id="tid.narrativeField(field.fieldKey)"
-            @update:model-value="onText(field, $event)"
-            @blur="flushSave"
-          />
-          <q-editor
-            v-else-if="field.inputType === 'RICH_TEXT'"
-            :model-value="field.valueText"
-            min-height="140px"
-            :readonly="!canEdit"
-            :placeholder="field.placeholder"
-            :data-testid="tid.narrativeField(field.fieldKey)"
-            @update:model-value="onText(field, $event)"
-          />
+        v-for="(block, blockIndex) in fieldGroups"
+        :key="block.group || `narrative-block-${blockIndex}`"
+        class="encounter-narrative-group q-mb-md"
+        :data-testid="block.group
+          ? tid.narrativeGroup(block.group)
+          : undefined">
+        <SubsectionHeading
+          v-if="block.headingKey"
+          icon="clinical_notes"
+          :title="t(block.headingKey)"
+        />
+        <div
+          v-for="field in block.fields"
+          :key="field.templateSectionId || field.fieldKey"
+          class="q-mb-md">
+          <AddClientLabeledField
+            :label="field.fieldLabel"
+            :required="field.required">
+          <div
+            v-if="isReviewOfSystemsSection(field)"
+            :data-testid="tid.narrativeField(field.fieldKey)">
+            <EncounterReviewOfSystemsFields
+              :field="field"
+              :can-edit="canEdit"
+              @update="onRosUpdate(field, $event)"
+              @flush="flushSave"
+            />
+          </div>
+          <div
+            v-else-if="isPhysicalExamSection(field)"
+            :data-testid="tid.narrativeField(field.fieldKey)">
+            <EncounterPhysicalExamFields
+              :field="field"
+              :can-edit="canEdit"
+              @update="onPeUpdate(field, $event)"
+              @flush="flushSave"
+            />
+          </div>
+          <div
+            v-else-if="isMentalStatusExamSection(field)"
+            :data-testid="tid.narrativeField(field.fieldKey)">
+            <EncounterMentalStatusExamFields
+              :field="field"
+              :can-edit="canEdit"
+              @update="onMseUpdate(field, $event)"
+              @flush="flushSave"
+            />
+          </div>
+          <div
+            v-else-if="isAssessmentPlanSection(field)"
+            :data-testid="tid.narrativeField(field.fieldKey)">
+            <EncounterAssessmentPlanFields
+              :field="field"
+              :diagnoses="diagnoses"
+              :can-edit="canEdit"
+              :ai-draft-enabled="canDraftWithAi(field)"
+              @update="onApUpdate(field, $event)"
+              @flush="flushSave"
+              @go-to-visit="emit('go-to-visit')"
+              @open-ai-draft="openApAiDraft(field, $event)"
+            />
+          </div>
           <div
             v-else-if="field.sectionType === 'STRUCTURED_SECTION'"
             :data-testid="tid.narrativeField(field.fieldKey)">
@@ -78,20 +115,62 @@
             </div>
           </div>
           <TextInput
+            v-else-if="field.inputType === 'SHORT_TEXT'"
+            :model-value="field.valueText"
+            :external-label="true"
+            :readonly="!canEdit"
+            :placeholder="fieldPlaceholder(field)"
+            :test-id="tid.narrativeField(field.fieldKey)"
+            @update:model-value="onText(field, $event)"
+            @blur="flushSave"
+          />
+          <q-editor
+            v-else-if="field.inputType === 'RICH_TEXT'"
+            :model-value="field.valueText"
+            min-height="140px"
+            :readonly="!canEdit"
+            :placeholder="fieldPlaceholder(field)"
+            :data-testid="tid.narrativeField(field.fieldKey)"
+            @update:model-value="onText(field, $event)"
+          />
+          <TextInput
             v-else
             :model-value="field.valueText"
             type="textarea"
             autogrow
             :external-label="true"
             :readonly="!canEdit"
-            :placeholder="field.placeholder"
+            :placeholder="fieldPlaceholder(field)"
             :test-id="tid.narrativeField(field.fieldKey)"
             @update:model-value="onText(field, $event)"
             @blur="flushSave"
           />
-        </AddClientLabeledField>
+          <q-btn
+            v-if="canDraftWithAi(field)
+              && !isAssessmentPlanSection(field)"
+            no-caps
+            outline
+            color="primary"
+            class="app-btn-outline q-mt-sm"
+            icon="auto_awesome"
+            :label="t('narrativeAiDraftWithAi')"
+            :data-testid="tid.narrativeAiDraft(field.fieldKey)"
+            @click="openAiDraft(field)"
+          />
+          </AddClientLabeledField>
+        </div>
       </div>
     </section>
+    <EncounterNarrativeAiDraftDialog
+      v-model="aiDraftOpen"
+      :encounter-id="encounterId"
+      :field="aiDraftField"
+      :current-text="aiDraftCurrentText"
+      :encounter-diagnosis-id="aiDraftDiagnosisId"
+      :diagnosis-label="aiDraftDiagnosisLabel"
+      :provider-input-required="aiDraftRequiresProviderInput"
+      @use-draft="onUseAiDraft"
+    />
   </div>
 </template>
 
@@ -100,36 +179,169 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
+import SubsectionHeading from 'components/SubsectionHeading.vue'
 import TextInput from 'components/TextInput.vue'
+import EncounterReviewOfSystemsFields from
+  'components/encounter/EncounterReviewOfSystemsFields.vue'
+import EncounterPhysicalExamFields from
+  'components/encounter/EncounterPhysicalExamFields.vue'
+import EncounterMentalStatusExamFields from
+  'components/encounter/EncounterMentalStatusExamFields.vue'
+import EncounterAssessmentPlanFields from
+  'components/encounter/EncounterAssessmentPlanFields.vue'
+import EncounterNarrativeAiDraftDialog from
+  'components/encounter/EncounterNarrativeAiDraftDialog.vue'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
 import {
   saveEncounterNarrative,
 } from 'src/utils/encounter-narrative-api.js'
+import { isReviewOfSystemsSection } from
+  'src/utils/review-of-systems.js'
+import { isPhysicalExamSection } from
+  'src/utils/physical-exam.js'
+import { isMentalStatusExamSection } from
+  'src/utils/mental-status-exam.js'
+import {
+  diagnosisHeading,
+  isAssessmentPlanSection,
+  resolveAssessmentPlanRows,
+  serializeAssessmentPlanValues,
+} from 'src/utils/assessment-plan.js'
+import { groupNarrativeFields } from
+  'src/utils/clinical-note-narrative-group.js'
+import { isAdditionalNotesSection } from
+  'src/utils/additional-notes.js'
+import { fieldAllowsNarrativeAi, fieldRequiresProviderInput } from
+  'src/utils/narrative-ai-assistance.js'
 
 const props = defineProps({
   encounterId: { type: [String, Number], default: null },
   narrative: { type: Object, default: null },
+  diagnoses: { type: Array, default: () => [] },
   canEdit: { type: Boolean, default: false },
+  canUseAiDraft: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['saved'])
+const emit = defineEmits(['saved', 'go-to-visit'])
 const { t } = useI18n()
 const $q = useQuasar()
 const fields = ref([])
 const savedFlash = ref(false)
 const saving = ref(false)
+const aiDraftOpen = ref(false)
+const aiDraftField = ref(null)
+const aiDraftDiagnosisId = ref(null)
+const aiDraftDiagnosisLabel = ref('')
+const aiDraftPlanText = ref('')
 let saveTimer = null
 let flashTimer = null
 
 const headingHint = computed(() => {
   const name = props.narrative?.templateName
   if (name) {
-    return `${name}. ${t('encounterNarrativeHint')}`
+    return t('encounterNarrativeHintWithTemplate', { name })
   }
 
   return t('encounterNarrativeHint')
 })
+
+const fieldGroups = computed(() => groupNarrativeFields(fields.value))
+
+function fieldPlaceholder(field) {
+  const text = String(field?.placeholder || '').trim()
+  if (text) {
+    return text
+  }
+  if (isAdditionalNotesSection(field)) {
+    return t('clinicalNoteAdditionalNotesPlaceholder')
+  }
+
+  return ''
+}
+
+function canDraftWithAi(field) {
+  return props.canEdit
+    && props.canUseAiDraft
+    && fieldAllowsNarrativeAi(field)
+}
+
+const aiDraftCurrentText = computed(() => {
+  if (isAssessmentPlanSection(aiDraftField.value)) {
+    return aiDraftPlanText.value
+  }
+
+  return aiDraftField.value?.valueText || ''
+})
+
+const aiDraftRequiresProviderInput = computed(() =>
+  fieldRequiresProviderInput(aiDraftField.value || {}),
+)
+
+function openAiDraft(field) {
+  aiDraftField.value = field
+  aiDraftDiagnosisId.value = null
+  aiDraftDiagnosisLabel.value = ''
+  aiDraftPlanText.value = ''
+  aiDraftOpen.value = true
+}
+
+function openApAiDraft(field, payload = {}) {
+  aiDraftField.value = field
+  aiDraftDiagnosisId.value = payload.diagnosis?.id ?? null
+  aiDraftDiagnosisLabel.value = diagnosisHeading(payload.diagnosis)
+  aiDraftPlanText.value = String(payload.plan || '')
+  aiDraftOpen.value = true
+}
+
+function mergeSavedNarrativeFields(savedFields, previous) {
+  const priorById = new Map(
+    previous.map(field => [field.templateSectionId, field]),
+  )
+
+  return savedFields.map(field => {
+    const prior = priorById.get(field.templateSectionId)
+
+    return {
+      ...field,
+      aiSuggestionId: prior?.aiSuggestionId || null,
+      aiDraftText: prior?.aiDraftText,
+      aiModifiedAfter: prior?.aiModifiedAfter === true,
+    }
+  })
+}
+
+function onUseAiDraft({ text, suggestionId }) {
+  const field = aiDraftField.value
+  if (!field) {
+    return
+  }
+  if (isAssessmentPlanSection(field) && aiDraftDiagnosisId.value != null) {
+    applyApDraft(field, aiDraftDiagnosisId.value, text)
+  } else {
+    field.valueText = text
+  }
+  field.aiSuggestionId = suggestionId || null
+  field.aiDraftText = text
+  field.aiModifiedAfter = false
+  aiDraftOpen.value = false
+}
+
+function applyApDraft(field, diagnosisId, text) {
+  const rows = resolveAssessmentPlanRows(
+    props.diagnoses,
+    field.valueJson,
+  )
+  const next = rows.map(item => {
+    if (Number(item.diagnosis?.id) !== Number(diagnosisId)) {
+      return item
+    }
+
+    return { ...item, plan: text }
+  })
+  field.valueJson = serializeAssessmentPlanValues(next)
+  aiDraftPlanText.value = text
+}
 
 const emptyMessage = computed(() => {
   if (!props.narrative?.templateId) {
@@ -142,9 +354,10 @@ const emptyMessage = computed(() => {
 watch(
   () => props.narrative,
   value => {
-    fields.value = Array.isArray(value?.fields)
-      ? value.fields.map(field => ({ ...field }))
+    const incoming = Array.isArray(value?.fields)
+      ? value.fields
       : []
+    fields.value = mergeSavedNarrativeFields(incoming, fields.value)
   },
   { immediate: true, deep: true },
 )
@@ -213,6 +426,9 @@ function scheduleSave() {
 
 function onText(field, value) {
   field.valueText = value
+  if (field.aiDraftText != null) {
+    field.aiModifiedAfter = String(value ?? '') !== String(field.aiDraftText)
+  }
   scheduleSave()
 }
 
@@ -220,6 +436,26 @@ function onStructured(field, key, value) {
   const next = structuredMap(field)
   next[key] = value
   field.valueJson = JSON.stringify(next)
+  scheduleSave()
+}
+
+function onRosUpdate(field, valueJson) {
+  field.valueJson = valueJson
+  scheduleSave()
+}
+
+function onPeUpdate(field, valueJson) {
+  field.valueJson = valueJson
+  scheduleSave()
+}
+
+function onMseUpdate(field, valueJson) {
+  field.valueJson = valueJson
+  scheduleSave()
+}
+
+function onApUpdate(field, valueJson) {
+  field.valueJson = valueJson
   scheduleSave()
 }
 
@@ -238,8 +474,9 @@ async function persist() {
   }
   saving.value = true
   try {
-    const saved = await saveEncounterNarrative(id, fields.value)
-    fields.value = saved.fields.map(field => ({ ...field }))
+    const previous = fields.value
+    const saved = await saveEncounterNarrative(id, previous)
+    fields.value = mergeSavedNarrativeFields(saved.fields, previous)
     emit('saved', saved)
     savedFlash.value = true
     if (flashTimer) {

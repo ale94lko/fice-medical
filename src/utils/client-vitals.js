@@ -1,5 +1,6 @@
 import { clientVitalsPainLevelValues } from 'components/constants.js'
 import { calculateBmiFromUs } from 'src/utils/bmi-us.js'
+import { calculateBsaFromUs } from 'src/utils/bsa.js'
 import {
   formatDateUs,
   fullMonthsBetween,
@@ -14,6 +15,10 @@ export {
   calculateBmiFromUs,
   formatBmiDisplay,
 } from 'src/utils/bmi-us.js'
+export {
+  calculateBsaFromUs,
+  formatBsaDisplay,
+} from 'src/utils/bsa.js'
 
 export const VITALS_LIMITS = {
   systolic: { min: 1, max: 300 },
@@ -1097,6 +1102,7 @@ export function normalizeVitalsEntry(draft) {
   const heightInches = draftHeightToInches(draft)
   const height = Number.isFinite(heightInches) ? heightInches : null
   const bmi = calculateBmiFromUs(draft.weight, height)
+  const bsa = calculateBsaFromUs(draft.weight, height)
 
   return {
     systolic: parsePositiveInt(draft.systolic),
@@ -1108,6 +1114,7 @@ export function normalizeVitalsEntry(draft) {
     weight: parseDecimal(draft.weight) ?? null,
     height,
     bmi,
+    bsa,
     painLevel: String(draft.painLevel ?? '').trim() || null,
     notes: String(draft.notes ?? '').trim(),
     recordedDate: String(draft.recordedDate ?? '').trim(),

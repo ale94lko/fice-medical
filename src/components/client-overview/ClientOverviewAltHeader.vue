@@ -129,48 +129,6 @@
                       </q-item-section>
                     </q-item>
 
-                    <q-item
-                      v-if="canInviteToClientPortal"
-                      v-close-popup
-                      clickable
-                      :disable="loading || invitingPortal"
-                      :data-testid="clientOverviewAltTestIds.invitePortal"
-                      @click="inviteToPortal">
-                      <q-item-section avatar>
-                        <q-icon
-                          name="person_add"
-                          size="20px"
-                          color="primary"
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>
-                          {{ t('inviteToClientPortal') }}
-                        </q-item-label>
-                      </q-item-section>
-                    </q-item>
-
-                    <q-item
-                      v-if="canViewPortalMessages"
-                      v-close-popup
-                      clickable
-                      :disable="loading"
-                      :data-testid="clientOverviewAltTestIds.messages"
-                      @click="openMessages">
-                      <q-item-section avatar>
-                        <q-icon
-                          name="chat"
-                          size="20px"
-                          color="primary"
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>
-                          {{ t('clientOverviewMessages') }}
-                        </q-item-label>
-                      </q-item-section>
-                    </q-item>
-
                     <GenerateDocumentAction
                       v-if="clientId"
                       :document-type="documentTypes.clientProfile"
@@ -210,6 +168,48 @@
                       @open-active="emit('open-active-encounter')"
                       @request-dialog="onRequestEncounterDialog"
                     />
+
+                    <q-item
+                      v-if="canViewPortalMessages"
+                      v-close-popup
+                      clickable
+                      :disable="loading"
+                      :data-testid="clientOverviewAltTestIds.messages"
+                      @click="openMessages">
+                      <q-item-section avatar>
+                        <q-icon
+                          name="chat"
+                          size="20px"
+                          color="primary"
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ t('clientOverviewMessages') }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item
+                      v-if="canInviteToClientPortal"
+                      v-close-popup
+                      clickable
+                      :disable="loading || invitingPortal"
+                      :data-testid="clientOverviewAltTestIds.invitePortal"
+                      @click="inviteToPortal">
+                      <q-item-section avatar>
+                        <q-icon
+                          name="person_add"
+                          size="20px"
+                          color="primary"
+                        />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>
+                          {{ t('inviteToClientPortal') }}
+                        </q-item-label>
+                      </q-item-section>
+                    </q-item>
                   </q-list>
                 </q-menu>
               </q-btn>
@@ -470,30 +470,6 @@
             :label="t('editClient')"
             @click="emit('edit')"
           />
-          <q-btn
-            v-if="canInviteToClientPortal"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="person_add"
-            :data-testid="clientOverviewAltTestIds.invitePortal"
-            :disable="loading || invitingPortal"
-            :label="t('inviteToClientPortal')"
-            @click="inviteToPortal"
-          />
-          <q-btn
-            v-if="canViewPortalMessages"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="chat"
-            :data-testid="clientOverviewAltTestIds.messages"
-            :disable="loading"
-            :label="t('clientOverviewMessages')"
-            @click="openMessages"
-          />
           <GenerateDocumentAction
             v-if="clientId"
             :document-type="documentTypes.clientProfile"
@@ -512,6 +488,80 @@
             @select="emit('start-encounter', $event)"
             @open-active="emit('open-active-encounter')"
           />
+          <q-btn
+            v-if="showPortalOverflow"
+            unelevated
+            outline
+            no-caps
+            color="primary"
+            :icon="adminTableActionIcons.more"
+            class="app-btn-outline
+              client-overview-alt-header__more-btn"
+            :disable="loading"
+            :data-testid="clientOverviewAltTestIds.moreActions"
+            :aria-label="t('moreActions')">
+            <q-tooltip
+              class="app-info-tooltip"
+              anchor="top middle"
+              self="bottom middle"
+              :offset="[0, 6]">
+              {{ t('moreActions') }}
+            </q-tooltip>
+            <q-menu
+              anchor="bottom right"
+              self="top right"
+              :offset="[0, 8]"
+              class="app-light-menu
+                client-overview-alt-header__actions-menu"
+              :data-testid="
+                clientOverviewAltTestIds.moreActionsPanel
+              ">
+              <q-list>
+                <q-item
+                  v-if="canViewPortalMessages"
+                  v-close-popup
+                  clickable
+                  :disable="loading"
+                  :data-testid="clientOverviewAltTestIds.messages"
+                  @click="openMessages">
+                  <q-item-section avatar>
+                    <q-icon
+                      name="chat"
+                      size="20px"
+                      color="primary"
+                    />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>
+                      {{ t('clientOverviewMessages') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  v-if="canInviteToClientPortal"
+                  v-close-popup
+                  clickable
+                  :disable="loading || invitingPortal"
+                  :data-testid="
+                    clientOverviewAltTestIds.invitePortal
+                  "
+                  @click="inviteToPortal">
+                  <q-item-section avatar>
+                    <q-icon
+                      name="person_add"
+                      size="20px"
+                      color="primary"
+                    />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>
+                      {{ t('inviteToClientPortal') }}
+                    </q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
         </div>
       </div>
     </div>
@@ -543,6 +593,7 @@ import GenerateDocumentAction from
 import StartEncounterMenuButton from
   'components/StartEncounterMenuButton.vue'
 import { documentTypes } from 'src/utils/document-generation-constants.js'
+import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import {
   clientOverviewAltTestIds,
 } from 'src/test-ids/index.js'
@@ -612,6 +663,10 @@ const { canView: canViewPortalMessages } =
 const invitingPortal = ref(false)
 
 const encounterDialogOpen = ref(false)
+
+const showPortalOverflow = computed(() =>
+  canInviteToClientPortal.value || canViewPortalMessages.value,
+)
 
 const isCompactHeader = computed(() => $q.screen.width < 900)
 

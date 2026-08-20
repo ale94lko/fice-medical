@@ -16,24 +16,92 @@
       </AppDialogHeader>
       <q-card-section
         class="app-dialog-card__body q-px-lg q-pt-md q-pb-md">
-        <div class="row items-center q-gutter-sm q-mb-md">
+        <div class="row items-center q-gutter-sm q-mb-sm">
           <AdminTableStatusCell
             :label="statusLabel"
             :variant="statusVariant"
           />
           <span
-            v-if="unsigned"
+            v-if="unsigned && !stale"
             class="text-body2 text-grey-7">
             {{ t('encounterGeneratedNoteReady') }}
           </span>
         </div>
+        <p
+          v-if="dateOfServiceLabel"
+          class="text-body2 text-grey-7 q-mb-xs">
+          {{ dateOfServiceLabel }}
+        </p>
+        <p
+          v-if="providerLabel"
+          class="text-body2 text-grey-7 q-mb-md">
+          {{ providerLabel }}
+        </p>
+        <p
+          v-if="signedByLabel"
+          class="text-body2 text-grey-7 q-mb-xs">
+          {{ signedByLabel }}
+        </p>
+        <p
+          v-if="signedAtLabel"
+          class="text-body2 text-grey-7 q-mb-md">
+          {{ signedAtLabel }}
+        </p>
         <div
-          v-for="section in sections"
-          :key="section.id || section.sectionKey"
-          class="encounter-generated-note__section q-mb-md">
-          <h3 class="text-subtitle1 q-mt-none q-mb-xs">
-            {{ section.sectionLabel }}
+          v-if="stale"
+          class="encounter-workspace-billing__banner
+            encounter-workspace-billing__banner--alert q-mb-md"
+          :data-testid="tid.generatedNoteStale">
+          <q-icon name="warning" color="warning" size="20px" />
+          <div>
+            <p class="q-mb-xs">
+              {{ t('encounterGeneratedNoteStaleTitle') }}
+            </p>
+            <p class="q-mb-none">
+              {{ t('encounterGeneratedNoteStaleBody') }}
+            </p>
+          </div>
+        </div>
+        <div
+          v-for="(block, blockIndex) in groupedSections"
+          :key="block.group || `note-block-${blockIndex}`"
+          class="encounter-generated-note__group q-mb-md">
+          <h3
+            v-if="block.headingKey"
+            class="text-subtitle1 q-mt-none q-mb-sm">
+            {{ t(block.headingKey) }}
           </h3>
+          <div
+            v-for="section in block.fields"
+            :key="section.id || section.sectionKey"
+            class="encounter-generated-note__section q-mb-md">
+          <div class="row items-start justify-between q-col-gutter-sm">
+            <div class="col">
+              <h3
+                v-if="!block.headingKey"
+                class="text-subtitle1 q-mt-none q-mb-xs">
+                {{ section.sectionLabel }}
+              </h3>
+              <p
+                v-else
+                class="text-subtitle2 q-mt-none q-mb-xs">
+                {{ section.sectionLabel }}
+              </p>
+            </div>
+            <q-btn
+              v-if="showEditSource(section)"
+              no-caps
+              flat
+              dense
+              color="primary"
+              class="col-auto"
+              :label="t('encounterGeneratedNoteEditSource')"
+              :data-testid="tid.generatedNoteEditSource(
+                section.sectionKey,
+              )"
+              @click="onEditSource(section)"
+            />
+          </div>
           <p
             v-if="section.sourceLabel"
             class="text-caption text-grey-7 q-mb-xs">
@@ -44,9 +112,10 @@
           <p class="text-body2 q-mb-none encounter-generated-note__body">
             {{ section.contentText || '—' }}
           </p>
+          </div>
         </div>
         <div
-          v-if="unsigned && canSign"
+          v-if="unsigned && canSign && !stale"
           class="insurance-dialog__card-section q-mt-lg">
           <SubsectionHeading
             icon="draw"
@@ -76,7 +145,7 @@
           outline
           color="primary"
           class="app-btn-outline"
-          :label="t('close')"
+          :label="t('encounterGeneratedNoteBack')"
           :data-testid="tid.generatedNoteClose"
           @click="emit('update:modelValue', false)"
         />
@@ -87,7 +156,9 @@
           color="primary"
           class="app-btn-outline"
           :loading="busy"
-          :label="t('encounterGeneratedNoteRegenerate')"
+          :label="stale
+            ? t('encounterGeneratedNoteRegenerateShort')
+            : t('encounterGeneratedNoteRegenerate')"
           :data-testid="tid.generatedNoteRegenerate"
           @click="emit('regenerate')"
         />
@@ -98,6 +169,7 @@
           color="primary"
           class="app-btn-primary"
           :loading="busy"
+          :disable="stale"
           :label="t('clinicalNoteSign')"
           :data-testid="tid.generatedNoteSign"
           @click="onSign"
@@ -120,6 +192,11 @@ import SubsectionHeading from 'components/SubsectionHeading.vue'
 import { clinicalNoteStatuses } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/index.js'
+import { formatDateTime } from 'src/utils/app-datetime.js'
+import { groupGeneratedNoteSections } from
+  'src/utils/clinical-note-narrative-group.js'
+import { resolveGeneratedNoteEditSource } from
+  'src/utils/generated-note-edit-source.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -127,6 +204,7 @@ const props = defineProps({
   busy: { type: Boolean, default: false },
   canSign: { type: Boolean, default: false },
   canRegenerate: { type: Boolean, default: false },
+  canCorrectSources: { type: Boolean, default: false },
 })
 
 const emit = defineEmits([
@@ -134,12 +212,15 @@ const emit = defineEmits([
   'sign',
   'regenerate',
   'add-addendum',
+  'edit-source',
 ])
 const { t } = useI18n()
 const signatureData = ref('')
 const signatureError = ref('')
 
 const sections = computed(() => props.note?.sections ?? [])
+const groupedSections = computed(() =>
+  groupGeneratedNoteSections(sections.value))
 const unsigned = computed(() => {
   const status = String(props.note?.status ?? '').toUpperCase()
 
@@ -158,6 +239,8 @@ const voided = computed(() => {
 
   return status === clinicalNoteStatuses.voided
 })
+const stale = computed(() =>
+  unsigned.value && Boolean(props.note?.regenerationRequired))
 const statusLabel = computed(() => {
   const status = String(props.note?.status ?? '').toUpperCase()
   if (status === clinicalNoteStatuses.signed) {
@@ -179,11 +262,53 @@ const statusVariant = computed(() => {
   if (voided.value) {
     return 'inactive'
   }
+  if (stale.value) {
+    return 'pending'
+  }
   if (!unsigned.value) {
     return 'active'
   }
 
   return 'pending'
+})
+const dateOfServiceLabel = computed(() => {
+  const raw = props.note?.noteDateTime || props.note?.generatedAt
+  const formatted = formatDateTime(raw)
+  if (!formatted) {
+    return ''
+  }
+
+  return t('encounterGeneratedNoteDateOfService', { date: formatted })
+})
+const providerLabel = computed(() => {
+  const name = String(props.note?.providerName ?? '').trim()
+  if (!name) {
+    return ''
+  }
+
+  return t('encounterGeneratedNoteProvider', { name })
+})
+const signedByLabel = computed(() => {
+  if (!signedOrAmended.value) {
+    return ''
+  }
+  const name = String(props.note?.providerName ?? '').trim()
+  if (!name) {
+    return ''
+  }
+
+  return t('encounterGeneratedNoteSignedBy', { name })
+})
+const signedAtLabel = computed(() => {
+  if (!signedOrAmended.value) {
+    return ''
+  }
+  const formatted = formatDateTime(props.note?.signedAt)
+  if (!formatted) {
+    return ''
+  }
+
+  return t('encounterGeneratedNoteSignedAt', { date: formatted })
 })
 
 watch(
@@ -196,7 +321,24 @@ watch(
   },
 )
 
+function showEditSource(section) {
+  return unsigned.value
+    && props.canCorrectSources
+    && Boolean(resolveGeneratedNoteEditSource(section))
+}
+
+function onEditSource(section) {
+  const target = resolveGeneratedNoteEditSource(section)
+  if (!target) {
+    return
+  }
+  emit('edit-source', target)
+}
+
 function onSign() {
+  if (stale.value) {
+    return
+  }
   if (!signatureData.value) {
     signatureError.value = t('clinicalNoteSignatureRequired')
 

@@ -435,16 +435,6 @@
             :label="t('generateDocumentAction')"
             button-class="app-btn-outline"
           />
-          <q-btn
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline"
-            icon="print"
-            :label="t('appointmentDetailPrint')"
-            :data-testid="tid.print"
-            @click="onPrint"
-          />
         </div>
         <div class="appointment-detail-dialog__actions-right">
           <q-btn
@@ -817,10 +807,6 @@ function copyAppointmentNumber() {
         message: t('appointmentDetailCopyError'),
       })
     })
-}
-
-function onPrint() {
-  window.print()
 }
 
 function onViewClient() {

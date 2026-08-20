@@ -232,6 +232,11 @@ function summariesFromForm(form, t, rawClient = null) {
     'medicalConditions',
     'familyRelationship',
   )
+  const fmhNegative = Boolean(
+    fmh?.noSignificantPersonal
+    || fmh?.noSurgicalHistory
+    || fmh?.noSignificantFamily,
+  )
   const vitals = vitalsToSummaryItems(
     resolveVitalsEntries(form, rawClient),
   )
@@ -305,12 +310,22 @@ function summariesFromForm(form, t, rawClient = null) {
           ),
         },
       ),
-    familyHistory: moduleSummary(
-      fmhItems.length,
-      fmhItems,
-      t('clientOverviewFamilyHistoryDocumented', { count: fmhItems.length }),
-      t('clientOverviewNoFamilyHistory'),
-    ),
+    familyHistory: fmhNegative && !fmhItems.length
+      ? moduleSummary(
+        0,
+        [{
+          label: t('clientOverviewNoSignificantMedicalHistory'),
+          meta: '',
+        }],
+        t('clientOverviewNoSignificantMedicalHistory'),
+        t('clientOverviewNoSignificantMedicalHistory'),
+      )
+      : moduleSummary(
+        fmhItems.length,
+        fmhItems,
+        t('clientOverviewFamilyHistoryDocumented', { count: fmhItems.length }),
+        t('clientOverviewNoFamilyHistory'),
+      ),
     vitals: moduleSummary(
       vitals.length,
       vitals,

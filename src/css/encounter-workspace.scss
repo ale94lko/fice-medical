@@ -699,3 +699,44 @@ body.vp-mobile {
     white-space: normal;
   }
 }
+
+.encounter-ros {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.encounter-ros__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.encounter-ros__status {
+  .form-field__label {
+    margin-bottom: 0;
+  }
+}
+
+.encounter-ros__details {
+  width: 100%;
+}
+
+.encounter-ros__issues {
+  padding: 10px 12px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface;
+}
+
+.encounter-ap__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.encounter-narrative-group {
+  .subsection-heading {
+    margin-bottom: 12px;
+  }
+}

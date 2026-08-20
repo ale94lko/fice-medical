@@ -17,6 +17,9 @@ export const CLINICAL_SCREENINGS_SUB_TAB =
 
 export const CLINICAL_LABS_SUB_TAB = addClientClinicalSubTabKeys.labs
 
+export const CLINICAL_DIAGNOSTIC_STUDIES_SUB_TAB =
+  addClientClinicalSubTabKeys.diagnosticStudies
+
 export const CLINICAL_MEDICATIONS_SUB_TAB =
   addClientClinicalSubTabKeys.medications
 
@@ -107,7 +110,7 @@ export const ADD_CLIENT_SUB_TABS = {
   [addClientTabKeys.clinical]: [
     {
       key: addClientClinicalSubTabKeys.familyHistory,
-      icon: 'groups',
+      icon: 'medical_information',
       labelKey: 'subTabFamilyHistory',
     },
     {
@@ -134,6 +137,11 @@ export const ADD_CLIENT_SUB_TABS = {
       key: addClientClinicalSubTabKeys.labs,
       icon: 'science',
       labelKey: 'subTabLabs',
+    },
+    {
+      key: addClientClinicalSubTabKeys.diagnosticStudies,
+      icon: 'biotech',
+      labelKey: 'subTabDiagnosticStudies',
     },
     {
       key: addClientClinicalSubTabKeys.medications,

@@ -237,6 +237,14 @@
     }
   }
 
+  &__more-btn {
+    flex: 0 0 $app-button-height;
+    width: $app-button-height !important;
+    min-width: $app-button-height !important;
+    max-width: $app-button-height !important;
+    padding: 0 !important;
+  }
+
   &__start-encounter {
     width: auto;
     font-weight: 600;

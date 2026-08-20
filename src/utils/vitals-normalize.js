@@ -1,6 +1,8 @@
 /* eslint-disable camelcase -- API payloads use snake_case */
 import { clientVitalsPainLevelValues } from 'components/constants.js'
 import { calculateBmiFromUs } from 'src/utils/bmi-us.js'
+import { calculateBsaFromMetric, calculateBsaFromUs } from
+  'src/utils/bsa.js'
 import { formatDateUs } from 'src/utils/client-form.js'
 import {
   combineRecordedDateTime,
@@ -194,6 +196,9 @@ export function normalizeVitalRecord(raw) {
     ?? kgToLbs(weightKg)
   const bmi = parseOptionalNumber(raw.bmi)
     ?? calculateBmiFromUs(weight, height)
+  const bsa = parseOptionalNumber(raw.bsa)
+    ?? calculateBsaFromMetric(heightCm, weightKg)
+    ?? calculateBsaFromUs(weight, height)
   const takenAt = trim(
     raw.taken_at_utc
     ?? raw.takenAtUtc
@@ -239,6 +244,7 @@ export function normalizeVitalRecord(raw) {
     heightUnit: trim(raw.height_unit ?? raw.heightUnit) || 'IN',
     weightUnit: trim(raw.weight_unit ?? raw.weightUnit) || 'LB',
     bmi,
+    bsa,
     painLevel: mapPainLevelFromNumber(
       raw.pain_level ?? raw.painLevel,
     ),

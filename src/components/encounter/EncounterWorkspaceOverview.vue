@@ -193,6 +193,21 @@
         class="text-body2 text-negative q-mb-md">
         {{ t('encounterGeneratedNoteFailed') }}
       </p>
+      <div
+        v-else-if="generatedStale"
+        class="encounter-workspace-billing__banner
+          encounter-workspace-billing__banner--alert q-mb-md"
+        :data-testid="tid.generatedNoteStale">
+        <q-icon name="warning" color="warning" size="20px" />
+        <div>
+          <p class="q-mb-xs">
+            {{ t('encounterGeneratedNoteStaleTitle') }}
+          </p>
+          <p class="q-mb-none">
+            {{ t('encounterGeneratedNoteStaleBody') }}
+          </p>
+        </div>
+      </div>
       <p
         v-else-if="generatedUnsigned"
         class="text-body2 text-grey-7 q-mb-md">
@@ -218,6 +233,16 @@
           :label="t('encounterGeneratedNoteReview')"
           :data-testid="tid.generatedNoteReview"
           @click="emit('review-generated-note')"
+        />
+        <q-btn
+          v-if="generatedStale && canRegenerate"
+          no-caps
+          outline
+          color="primary"
+          class="app-btn-outline"
+          :label="t('encounterGeneratedNoteRegenerateShort')"
+          :data-testid="tid.generatedNoteRegenerate"
+          @click="emit('regenerate-generated-note')"
         />
       </div>
     </section>
@@ -370,6 +395,26 @@ import {
 } from 'components/constants.js'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/index.js'
+import {
+  isReviewOfSystemsSection,
+  parseReviewOfSystemsValues,
+  reviewOfSystemsIssues,
+} from 'src/utils/review-of-systems.js'
+import {
+  isPhysicalExamSection,
+  parsePhysicalExamValues,
+  physicalExamIssues,
+} from 'src/utils/physical-exam.js'
+import {
+  isMentalStatusExamSection,
+  mseIssues,
+  parseMentalStatusExamValues,
+} from 'src/utils/mental-status-exam.js'
+import {
+  assessmentPlanIssues,
+  isAssessmentPlanSection,
+  resolveAssessmentPlanRows,
+} from 'src/utils/assessment-plan.js'
 
 const props = defineProps({
   completion: {
@@ -400,6 +445,10 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  diagnoses: {
+    type: Array,
+    default: () => [],
+  },
   generatedNote: {
     type: Object,
     default: null,
@@ -409,6 +458,10 @@ const props = defineProps({
     default: () => [],
   },
   canRetryProcessing: {
+    type: Boolean,
+    default: false,
+  },
+  canRegenerate: {
     type: Boolean,
     default: false,
   },
@@ -423,6 +476,7 @@ const emit = defineEmits([
   'review-generated-note',
   'retry-generate',
   'retry-processing',
+  'regenerate-generated-note',
 ])
 const { t } = useI18n()
 
@@ -455,6 +509,11 @@ const generatedUnsigned = computed(() => {
     && status !== clinicalNoteStatuses.amended
     && status !== clinicalNoteStatuses.voided
 })
+
+const generatedStale = computed(() =>
+  generatedUnsigned.value
+  && Boolean(props.generatedNote?.regenerationRequired),
+)
 
 const generatedStatusLabel = computed(() => {
   const status = String(props.generatedNote?.status ?? '').toUpperCase()
@@ -500,6 +559,68 @@ const requirements = computed(() => {
     const required = props.narrative?.requiredCount ?? 0
     const done = props.narrative?.completedRequiredCount ?? 0
     const missing = Math.max(0, required - done)
+    const rosIncomplete = (props.narrative?.fields || [])
+      .filter(field => isReviewOfSystemsSection(field))
+      .some(field => reviewOfSystemsIssues(
+        parseReviewOfSystemsValues(field.valueJson),
+        Boolean(field.required),
+      ).length > 0)
+    const peIncomplete = (props.narrative?.fields || [])
+      .filter(field => isPhysicalExamSection(field))
+      .some(field => physicalExamIssues(
+        parsePhysicalExamValues(field.valueJson),
+        Boolean(field.required),
+      ).length > 0)
+    const mseIncomplete = (props.narrative?.fields || [])
+      .filter(field => isMentalStatusExamSection(field))
+      .some(field => mseIssues(
+        parseMentalStatusExamValues(field.valueJson),
+        Boolean(field.required),
+      ).length > 0)
+    const apField = (props.narrative?.fields || [])
+      .find(field => isAssessmentPlanSection(field))
+    const apRows = apField
+      ? resolveAssessmentPlanRows(props.diagnoses, apField.valueJson)
+      : []
+    const apIssues = apField
+      ? assessmentPlanIssues(apRows, Boolean(apField.required))
+      : []
+    const apIncomplete = apIssues.length > 0
+    const noDiagnoses = !(props.diagnoses || []).length
+    const diagnosisIncomplete = list.some(req =>
+      req.type === encounterRequirementTypes.diagnosis
+      && !req.completed)
+    if (apIncomplete && noDiagnoses && diagnosisIncomplete) {
+      return item
+    }
+    if (apIncomplete && missing <= 1) {
+      const missingPlans = apIssues.filter(issue => issue.diagnosis).length
+
+      return {
+        ...item,
+        description: missingPlans
+          ? t('encounterNarrativeApIncompleteDetail', missingPlans)
+          : t('encounterNarrativeApIncomplete'),
+      }
+    }
+    if (peIncomplete && missing <= 1) {
+      return {
+        ...item,
+        description: t('encounterNarrativePeIncomplete'),
+      }
+    }
+    if (mseIncomplete && missing <= 1) {
+      return {
+        ...item,
+        description: t('encounterNarrativeMseIncomplete'),
+      }
+    }
+    if (rosIncomplete && missing <= 1) {
+      return {
+        ...item,
+        description: t('encounterNarrativeRosIncomplete'),
+      }
+    }
     if (!missing) {
       return item
     }

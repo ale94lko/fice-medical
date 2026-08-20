@@ -19,6 +19,8 @@ import {
   buildMedicalHistoryForRegister,
   buildVitalsForRegister,
 } from 'src/utils/build-client-register-clinical.js'
+import { buildSocialHistoryPayload } from
+  'src/utils/client-social-history.js'
 import { labToOrderApiPayload } from 'src/utils/lab-normalize.js'
 import { buildFollowUpsForRegister } from 'src/utils/client-follow-ups.js'
 import {
@@ -319,6 +321,10 @@ export function buildClientRegisterBody(form) {
       no_allergies: false,
       insurance: [],
       medical_history: [],
+      no_significant_personal_history: false,
+      no_surgical_history: false,
+      no_significant_family_history: false,
+      social_history: buildSocialHistoryPayload({}),
       vitals: [],
       follow_ups: [],
       labs: [],
@@ -335,6 +341,21 @@ export function buildClientRegisterBody(form) {
     ),
     insurance: buildInsuranceForRegister(form),
     medical_history: buildMedicalHistoryForRegister(form),
+    no_significant_personal_history: Boolean(
+      form?.[clientFormSections.familyMedicalHistory]
+        ?.noSignificantPersonal,
+    ),
+    no_surgical_history: Boolean(
+      form?.[clientFormSections.familyMedicalHistory]
+        ?.noSurgicalHistory,
+    ),
+    no_significant_family_history: Boolean(
+      form?.[clientFormSections.familyMedicalHistory]
+        ?.noSignificantFamily,
+    ),
+    social_history: buildSocialHistoryPayload(
+      form?.[clientFormSections.familyMedicalHistory]?.socialHistory,
+    ),
     vitals: buildVitalsForRegister(form),
     follow_ups: buildFollowUpsForRegister(
       form?.[clientFormSections.followUps],

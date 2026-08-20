@@ -55,7 +55,9 @@ export const clinicalNoteSectionTypes = {
 
 export const clinicalNoteDataSources = [
   'ENCOUNTER_SUMMARY',
+  'ENCOUNTER_INFO',
   'REASON_FOR_VISIT',
+  'CHIEF_COMPLAINT',
   'SERVICES',
   'DIAGNOSES',
   'VITALS',
@@ -65,6 +67,13 @@ export const clinicalNoteDataSources = [
   'REFERRALS',
   'PROVIDER',
   'MEDICATION_CHANGES',
+  'DIAGNOSTIC_STUDIES',
+  'MEDICAL_HISTORY',
+  'SURGICAL_HISTORY',
+  'FAMILY_HISTORY',
+  'SOCIAL_HISTORY',
+  'ALLERGIES',
+  'ENCOUNTER_QUALITY_MEASURES',
 ]
 
 export const clinicalNoteInputTypes = [

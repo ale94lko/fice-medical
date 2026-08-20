@@ -35,8 +35,11 @@ import {
 } from 'src/utils/client-contact-form.js'
 import {
   createEmptyFamilyMedicalHistorySection,
+  historyTypeFromApi,
   nextFamilyMedicalHistoryId,
 } from 'src/utils/client-family-medical-history.js'
+import { mapSocialHistoryFromApi } from
+  'src/utils/client-social-history.js'
 import { nextInsuranceId } from 'src/utils/client-insurance.js'
 import { mapClientVitalsSectionFromApi } from
   'src/utils/vitals-normalize.js'
@@ -756,7 +759,7 @@ function mapInsuranceSectionFromApi(client) {
   }
 }
 
-function mapFamilyMedicalHistoryFromApi(entries) {
+function mapFamilyMedicalHistoryFromApi(entries, client = {}) {
   const section = createEmptyFamilyMedicalHistorySection()
   const list = Array.isArray(entries) ? entries : []
   section.entries = list.map(item => {
@@ -764,15 +767,21 @@ function mapFamilyMedicalHistoryFromApi(entries) {
       ?? item?.relationship
       ?? item?.familyRelationship
       ?? ''
+    const familyRelationship = mapFmhRelationshipFromApi(relRaw)
     const entry = {
       id: nextFamilyMedicalHistoryId(),
-      familyRelationship: mapFmhRelationshipFromApi(relRaw),
+      historyType: historyTypeFromApi(
+        item?.history_type ?? item?.historyType,
+        familyRelationship,
+      ),
+      familyRelationship,
       medicalConditions: String(
         item?.medical_conditions
         ?? item?.medical_condition
         ?? item?.medicalConditions
         ?? '',
       ).trim(),
+      notes: String(item?.notes ?? '').trim(),
     }
     const apiId = item?.id ?? item?.ID
     if (apiId != null && String(apiId).trim() !== '') {
@@ -781,6 +790,20 @@ function mapFamilyMedicalHistoryFromApi(entries) {
 
     return entry
   })
+  section.noSignificantPersonal = Boolean(
+    client?.no_significant_personal_history
+    ?? client?.noSignificantPersonalHistory,
+  )
+  section.noSurgicalHistory = Boolean(
+    client?.no_surgical_history ?? client?.noSurgicalHistory,
+  )
+  section.noSignificantFamily = Boolean(
+    client?.no_significant_family_history
+    ?? client?.noSignificantFamilyHistory,
+  )
+  section.socialHistory = mapSocialHistoryFromApi(
+    client?.social_history ?? client?.socialHistory,
+  )
 
   return section
 }
@@ -968,6 +991,7 @@ export function mapClientApiToForm(client, options = {}) {
       ?? client.family_medical_history
       ?? client.familyMedicalHistory
       ?? client.medicalHistory,
+      client,
     ),
     [clientFormSections.allergies]: mapAllergiesFromApi(client),
     [clientFormSections.insurance]: mapInsuranceSectionFromApi(client),
