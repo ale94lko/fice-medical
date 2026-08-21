@@ -109,23 +109,16 @@
                 :label="t('referralReferringProvider')"
                 required
                 :test-id="tid.field('referring-provider')">
-                <q-select
+                <ReferralProviderSelect
                   :model-value="local.referringProvider"
-                  outlined
-                  hide-bottom-space
-                  use-input
-                  fill-input
-                  hide-selected
-                  input-debounce="0"
                   :readonly="readonly"
-                  :options="filteredProviderOptions"
+                  :options="providerOptions"
                   :placeholder="t('referralReferringProviderPlaceholder')"
                   :error="Boolean(errors.referringProvider)"
                   :error-message="errors.referringProvider"
-                  :data-testid="tid.field('referring-provider')"
-                  @filter="onProviderFilter"
-                  @input-value="onReferringProviderInput"
-                  @update:model-value="onReferringProviderSelect"
+                  :test-id="tid.field('referring-provider')"
+                  :maxlength="referralProviderNameMaxLength"
+                  @update:model-value="onReferringProviderChange"
                 />
               </AddClientLabeledField>
             </div>
@@ -152,7 +145,7 @@
                   v-model="local.specialty"
                   outlined
                   hide-bottom-space
-                  :readonly="readonly"
+                  :readonly="readonly || specialtyLocked"
                   :maxlength="referralSpecialtyMaxLength"
                   :placeholder="t('referralSpecialtyPlaceholder')"
                   :data-testid="tid.field('specialty')"
@@ -209,23 +202,16 @@
               <AddClientLabeledField
                 :label="t('referralReferredToProvider')"
                 :test-id="tid.field('referred-to-provider')">
-                <q-select
+                <ReferralProviderSelect
                   :model-value="local.referredToProvider"
-                  outlined
-                  hide-bottom-space
-                  use-input
-                  fill-input
-                  hide-selected
-                  input-debounce="0"
                   :readonly="readonly"
-                  :options="filteredProviderOptions"
+                  :options="providerOptions"
                   :placeholder="t('referralReferredToProviderPlaceholder')"
                   :error="Boolean(errors.referredToProvider)"
                   :error-message="errors.referredToProvider"
-                  :data-testid="tid.field('referred-to-provider')"
-                  @filter="onProviderFilter"
-                  @input-value="onReferredToProviderInput"
-                  @update:model-value="onReferredToProviderSelect"
+                  :test-id="tid.field('referred-to-provider')"
+                  :maxlength="referralProviderNameMaxLength"
+                  @update:model-value="onReferredToProviderChange"
                 />
               </AddClientLabeledField>
             </div>
@@ -252,7 +238,7 @@
                   v-model="local.specialty"
                   outlined
                   hide-bottom-space
-                  :readonly="readonly"
+                  :readonly="readonly || specialtyLocked"
                   :maxlength="referralSpecialtyMaxLength"
                   :placeholder="t('referralSpecialtyPlaceholder')"
                   :data-testid="tid.field('specialty')"
@@ -288,15 +274,15 @@
                 />
               </AddClientLabeledField>
             </div>
-            <div class="col-12">
-              <AddClientLabeledField
-                :label="t('referralDiagnosisProblem')"
-                :test-id="tid.field('diagnosis')">
-                <ReferralDiagnosesField
-                  v-model="local.diagnoses"
-                  :readonly="readonly"
-                />
-              </AddClientLabeledField>
+            <div
+              class="col-12"
+              :data-testid="tid.field('diagnosis')">
+              <ReferralDiagnosesField
+                v-model="local.diagnoses"
+                :readonly="readonly"
+                :client-id="clientId"
+                :source-text="local.reason"
+              />
             </div>
           </div>
         </div>
@@ -340,9 +326,9 @@
             :title="t('labAttachmentsTitle')"
           />
           <p
-            v-if="!canUploadYet"
+            v-if="!canUploadYet && !readonly"
             class="text-caption text-grey-7 q-mb-none q-mt-sm">
-            {{ t('referralDocumentsAfterSave') }}
+            {{ t('referralDocumentsPendingHint') }}
           </p>
           <LabAttachmentUploadField
             class="q-mt-md"
@@ -350,7 +336,7 @@
             :readonly="attachmentsReadonly"
             :test-id="tid.field('documents')"
             @upload="onUploadDocument"
-            @remove="emit('delete-document', $event)"
+            @remove="onRemoveDocument"
             @preview="onPreviewDocument"
             @download="emit('download-document', $event)"
           />
@@ -421,11 +407,13 @@ import LabAttachmentUploadField from
 import ReferralDiagnosesField from
   'components/ReferralDiagnosesField.vue'
 import ReferralPrioritySelect from 'components/ReferralPrioritySelect.vue'
+import ReferralProviderSelect from 'components/ReferralProviderSelect.vue'
 import CarePlanReasonDialog from 'components/CarePlanReasonDialog.vue'
 import {
   quasarNotifyTypes,
   referralOrganizationMaxLength,
   referralPriorities,
+  referralProviderNameMaxLength,
   referralReasonMaxLength,
   referralSpecialtyMaxLength,
   referralStatuses,
@@ -437,6 +425,11 @@ import {
   createEmptyReferral,
 } from 'src/utils/referral-orders.js'
 import { formatPhoneUs } from 'src/utils/client-contact-form.js'
+import {
+  clinicianSelectLabels,
+  isSystemClinicianName,
+  specialtyAfterProviderChange,
+} from 'src/utils/referral-clinician.js'
 import {
   firstReferralFormErrorKey,
   referralFormHasErrors,
@@ -474,6 +467,18 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  assignedClinicianId: {
+    type: [String, Number],
+    default: null,
+  },
+  clientId: {
+    type: [String, Number],
+    default: null,
+  },
+  initialPendingFiles: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits([
@@ -490,11 +495,12 @@ const $q = useQuasar()
 const local = ref(createEmptyReferral())
 const errors = ref({})
 const dialogBodyRef = ref(null)
-const filteredProviderOptions = ref([])
 const reasonOpen = ref(false)
 const pendingStatus = ref(null)
+const pendingFiles = ref([])
 const previewOpen = ref(false)
 const previewFile = ref(null)
+const previewObjectUrl = ref('')
 
 const open = computed({
   get: () => props.modelValue,
@@ -509,11 +515,24 @@ const statusReadonly = computed(() =>
   local.value.status === referralStatuses.closed
   || local.value.status === referralStatuses.declined,
 )
-const canUploadYet = computed(() => Boolean(local.value.id))
+const canUploadYet = computed(() => {
+  const id = Number(local.value.id)
+
+  return Number.isFinite(id) && id > 0
+})
 const attachmentsReadonly = computed(() =>
-  readonly.value
-  || !props.canUploadDocuments
-  || !canUploadYet.value,
+  readonly.value || !props.canUploadDocuments,
+)
+const specialtyProviderName = computed(() => (
+  isIncoming.value
+    ? local.value.referringProvider
+    : local.value.referredToProvider
+))
+const specialtyLocked = computed(() =>
+  isSystemClinicianName(
+    specialtyProviderName.value,
+    props.clinicianOptions,
+  ),
 )
 
 const dialogTitle = computed(() => {
@@ -556,9 +575,7 @@ const statusOptions = computed(() =>
 )
 
 const providerOptions = computed(() =>
-  (props.clinicianOptions ?? [])
-    .map(option => String(option.label ?? option.name ?? '').trim())
-    .filter(Boolean),
+  clinicianSelectLabels(props.clinicianOptions),
 )
 
 const reasonTitle = computed(() => (
@@ -579,8 +596,8 @@ const reasonLabel = computed(() => (
     : t('referralCloseReasonLabel')
 ))
 
-const documentRows = computed(() =>
-  (local.value.files ?? local.value.documents ?? []).map(doc => ({
+const documentRows = computed(() => [
+  ...(local.value.files ?? local.value.documents ?? []).map(doc => ({
     ...doc,
     id: doc.id,
     name: doc.originalFilename ?? doc.fileName ?? doc.name,
@@ -590,7 +607,14 @@ const documentRows = computed(() =>
       ?? doc.mediaType
       ?? '',
   })),
-)
+  ...pendingFiles.value.map((file, index) => ({
+    id: `pending-${index}`,
+    name: file.name,
+    originalFilename: file.name,
+    contentType: file.type || '',
+    _file: file,
+  })),
+])
 
 watch(
   () => [props.modelValue, props.referral, props.mode],
@@ -598,6 +622,8 @@ watch(
     if (!props.modelValue) {
       previewOpen.value = false
       previewFile.value = null
+      revokePreviewUrl()
+      pendingFiles.value = []
 
       return
     }
@@ -608,10 +634,28 @@ watch(
     if (!local.value.priority) {
       local.value.priority = referralPriorities.routine
     }
-    filteredProviderOptions.value = [...providerOptions.value]
+    if (
+      !readonly.value
+      && !local.value.assignedClinicianId
+      && props.assignedClinicianId
+    ) {
+      local.value.assignedClinicianId = props.assignedClinicianId
+    }
+    applySpecialtyFromProvider()
+    pendingFiles.value = clonePendingFiles(props.initialPendingFiles)
     errors.value = {}
   },
   { immediate: true },
+)
+
+watch(
+  () => props.clinicianOptions,
+  () => {
+    if (!open.value) {
+      return
+    }
+    applySpecialtyFromProvider()
+  },
 )
 
 watch(
@@ -633,30 +677,31 @@ function enumLabel(prefix, token) {
   return token
 }
 
-function onProviderFilter(val, update) {
-  update(() => {
-    const needle = String(val ?? '').trim().toLowerCase()
-    const list = providerOptions.value
-    filteredProviderOptions.value = needle
-      ? list.filter(label => label.toLowerCase().includes(needle))
-      : [...list]
-  })
-}
-
-function onReferringProviderInput(value) {
+function onReferringProviderChange(value) {
+  const previous = local.value.referringProvider
   local.value.referringProvider = String(value ?? '')
+  applySpecialtyFromProvider(previous)
 }
 
-function onReferringProviderSelect(value) {
-  local.value.referringProvider = String(value ?? '')
-}
-
-function onReferredToProviderInput(value) {
+function onReferredToProviderChange(value) {
+  const previous = local.value.referredToProvider
   local.value.referredToProvider = String(value ?? '')
+  applySpecialtyFromProvider(previous)
 }
 
-function onReferredToProviderSelect(value) {
-  local.value.referredToProvider = String(value ?? '')
+function applySpecialtyFromProvider(previousName) {
+  local.value.specialty = specialtyAfterProviderChange(
+    specialtyProviderName.value,
+    previousName,
+    props.clinicianOptions,
+    local.value.specialty,
+  )
+}
+
+function clonePendingFiles(files) {
+  return Array.isArray(files)
+    ? files.filter(file => file instanceof File)
+    : []
 }
 
 function onStatusChange(next) {
@@ -688,13 +733,51 @@ function onStatusReasonConfirm(reason) {
 }
 
 function onUploadDocument(file) {
-  if (!canUploadYet.value || !file) {
+  if (!file) {
     return
   }
-  emit('upload-document', file)
+  if (canUploadYet.value) {
+    emit('upload-document', file)
+
+    return
+  }
+  pendingFiles.value = [...pendingFiles.value, file]
+}
+
+function onRemoveDocument(fileId) {
+  const token = String(fileId ?? '')
+  if (token.startsWith('pending-')) {
+    const index = Number.parseInt(token.replace('pending-', ''), 10)
+    pendingFiles.value = pendingFiles.value.filter(
+      (_, itemIndex) => itemIndex !== index,
+    )
+
+    return
+  }
+  emit('delete-document', fileId)
+}
+
+function revokePreviewUrl() {
+  if (previewObjectUrl.value) {
+    window.URL.revokeObjectURL(previewObjectUrl.value)
+    previewObjectUrl.value = ''
+  }
 }
 
 function onPreviewDocument(file) {
+  revokePreviewUrl()
+  if (file?._file instanceof File) {
+    const url = window.URL.createObjectURL(file._file)
+    previewObjectUrl.value = url
+    previewFile.value = {
+      ...file,
+      url,
+      previewUrl: url,
+    }
+    previewOpen.value = true
+
+    return
+  }
   previewFile.value = file
   previewOpen.value = true
 }
@@ -798,7 +881,10 @@ function onSave() {
 
     return
   }
-  emit('save', cloneReferral(local.value))
+  emit('save', {
+    referral: cloneReferral(local.value),
+    pendingFiles: [...pendingFiles.value],
+  })
 }
 </script>
 

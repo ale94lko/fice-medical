@@ -219,12 +219,7 @@
                     <FormToggle
                       v-model="section.aiProviderInputRequired"
                       :disable="readonly
-                        || isAssessmentPlanSection(section)
-                        || isPlanNarrativeField(section)
-                        || isPreventivePlanField(section)
-                        || isClinicalAssessmentField(section)
-                        || isInterventionsField(section)
-                        || isPatientResponseField(section)"
+                        || locksAiProviderInput(section)"
                       :label="t(
                         'clinicalNoteTemplateAiProviderInputRequired',
                       )"
@@ -486,13 +481,20 @@ import {
   hpiProblemsChronicContextSources,
   isAssessmentSummaryField,
   isClinicalAssessmentField,
+  isClientOwnWordsField,
   isIntervalHpiField,
   isInterventionsField,
   isPatientResponseField,
   isPlanNarrativeField,
   isPreventivePlanField,
+  isProgressTowardsGoalsField,
+  isSessionSummaryField,
+  isTargetedBehaviorsField,
+  isTreatmentModalityField,
   narrativeAiContextSources,
   planNarrativeAiContextSources,
+  progressTowardsGoalsContextSources,
+  targetedBehaviorsContextSources,
 } from 'src/utils/narrative-ai-assistance.js'
 import {
   parseStructuredDefinition,
@@ -668,6 +670,19 @@ function showsNarrativeAiConfig(section) {
     || isAssessmentPlanSection(section)
 }
 
+function locksAiProviderInput(section) {
+  return isAssessmentPlanSection(section)
+    || isPlanNarrativeField(section)
+    || isPreventivePlanField(section)
+    || isClinicalAssessmentField(section)
+    || isInterventionsField(section)
+    || isPatientResponseField(section)
+    || isSessionSummaryField(section)
+    || isProgressTowardsGoalsField(section)
+    || isClientOwnWordsField(section)
+    || isTreatmentModalityField(section)
+}
+
 function onAiAssistance(section) {
   if (!section.aiAssistance) {
     section.aiContextSources = []
@@ -688,11 +703,35 @@ function onAiAssistance(section) {
     return
   }
   if (isInterventionsField(section)
-    || isPatientResponseField(section)) {
+    || isPatientResponseField(section)
+    || isSessionSummaryField(section)
+    || isClientOwnWordsField(section)
+    || isTreatmentModalityField(section)) {
     section.aiProviderInputRequired = true
     if (!Array.isArray(section.aiContextSources)
       || !section.aiContextSources.length) {
       section.aiContextSources = ['PROVIDER_INPUT']
+    }
+
+    return
+  }
+  if (isProgressTowardsGoalsField(section)) {
+    section.aiProviderInputRequired = true
+    if (!Array.isArray(section.aiContextSources)
+      || !section.aiContextSources.length) {
+      section.aiContextSources = [
+        ...progressTowardsGoalsContextSources,
+      ]
+    }
+
+    return
+  }
+  if (isTargetedBehaviorsField(section)) {
+    if (!Array.isArray(section.aiContextSources)
+      || !section.aiContextSources.length) {
+      section.aiContextSources = [
+        ...targetedBehaviorsContextSources,
+      ]
     }
 
     return

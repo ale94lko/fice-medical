@@ -983,7 +983,10 @@ export function mapClientApiToForm(client, options = {}) {
     [ck.clinicians]: resolveCliniciansFormValue(client, personal),
     [ck.status]: String(client.status ?? personal.status ?? 'active').trim(),
     [ck.photoFileId]: parseOptionalNumber(
-      personal.photo_file_id ?? personal.photoFileId,
+      personal.photo_file_id
+        ?? personal.photoFileId
+        ?? client.photo_file_id
+        ?? client.photoFileId,
     ),
     [clientFormSections.contact]: contact,
     [clientFormSections.familyMedicalHistory]: mapFamilyMedicalHistoryFromApi(

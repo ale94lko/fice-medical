@@ -42,6 +42,38 @@ export const interventionsFieldKey = 'INTERVENTIONS'
 
 export const patientResponseFieldKey = 'PATIENT_RESPONSE'
 
+export const sessionSummaryFieldKey = 'SESSION_SUMMARY'
+
+export const targetedBehaviorsFieldKey = 'TARGETED_BEHAVIORS'
+
+export const progressTowardsGoalsFieldKey = 'PROGRESS_TOWARDS_GOALS'
+
+export const clientOwnWordsFieldKey = 'CLIENT_OWN_WORDS'
+
+export const treatmentModalityFieldKey = 'TREATMENT_MODALITY'
+
+export const sessionSummaryContextSources = [
+  'PROVIDER_INPUT',
+]
+
+export const targetedBehaviorsContextSources = [
+  'CARE_PLAN',
+  'PROVIDER_INPUT',
+]
+
+export const progressTowardsGoalsContextSources = [
+  'CARE_PLAN',
+  'PROVIDER_INPUT',
+]
+
+export const clientOwnWordsContextSources = [
+  'PROVIDER_INPUT',
+]
+
+export const treatmentModalityContextSources = [
+  'PROVIDER_INPUT',
+]
+
 export const planNarrativeAiContextSources = [
   'PROVIDER_INPUT',
   'ENCOUNTER_DIAGNOSES',
@@ -69,6 +101,7 @@ export const narrativeAiContextSources = [
   'ASSESSMENT_RESULTS',
   'DIAGNOSTIC_STUDIES',
   'FOLLOW_UP',
+  'CARE_PLAN',
   'PROVIDER_INPUT',
 ]
 
@@ -178,6 +211,56 @@ export function isPatientResponseField(field = {}) {
   return key === 'patient_response'
 }
 
+export function isSessionSummaryField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'session_summary'
+}
+
+export function isTargetedBehaviorsField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'targeted_behaviors'
+}
+
+export function isProgressTowardsGoalsField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'progress_towards_goals'
+}
+
+export function isClientOwnWordsField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'client_own_words'
+}
+
+export function isTreatmentModalityField(field = {}) {
+  const key = String(field.fieldKey || field.sectionKey || '')
+    .trim()
+    .toLowerCase()
+    .replace(/-/g, '_')
+
+  return key === 'treatment_modality'
+}
+
+export function fieldUsesCarePlanAiContext(field = {}) {
+  return isProgressTowardsGoalsField(field)
+    || isTargetedBehaviorsField(field)
+}
+
 export { isAssessmentSummaryField } from
   'src/utils/assessment-summary.js'
 
@@ -203,7 +286,11 @@ export function fieldRequiresProviderInput(field = {}) {
     || isPreventivePlanField(field)
     || isClinicalAssessmentField(field)
     || isInterventionsField(field)
-    || isPatientResponseField(field)) {
+    || isPatientResponseField(field)
+    || isSessionSummaryField(field)
+    || isProgressTowardsGoalsField(field)
+    || isClientOwnWordsField(field)
+    || isTreatmentModalityField(field)) {
     return true
   }
   if (field.aiProviderInputRequired === true) {

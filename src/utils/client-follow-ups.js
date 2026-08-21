@@ -11,6 +11,7 @@ import {
 } from 'src/utils/client-form.js'
 import {
   followUpRelatedToRequiresReference,
+  isLocalFollowUpReference,
   parseFollowUpReference,
 } from 'src/utils/follow-up-reference.js'
 
@@ -101,13 +102,16 @@ export function mapEntryFromDraft(existing, draft) {
     assignedProviderId: draft?.assignedProviderId ?? base.assignedProviderId,
     priority: trim(draft?.priority ?? base.priority).toUpperCase(),
     relatedTo: trim(draft?.relatedTo).toUpperCase() || null,
-    reference: parseFollowUpReference(draft?.reference),
+    reference: isLocalFollowUpReference(draft?.reference)
+      ? String(draft.reference).trim()
+      : parseFollowUpReference(draft?.reference),
     referenceLabel: trim(draft?.referenceLabel) || null,
     notes: trim(draft?.notes),
     reminderEnabled: Boolean(draft?.reminderEnabled),
     reminderValue: parseOptionalNumber(draft?.reminderValue),
     reminderUnit: trim(draft?.reminderUnit ?? base.reminderUnit).toUpperCase()
       || null,
+    fromReferral: Boolean(draft?.fromReferral ?? base.fromReferral),
     isDirty: !base.isPending,
     pendingAction: null,
   }
@@ -155,6 +159,9 @@ export function buildFollowUpsForSave(section) {
   const payloads = []
 
   for (const item of section.pending ?? []) {
+    if (isLocalFollowUpReference(item?.reference)) {
+      continue
+    }
     payloads.push(buildFollowUpCreatePayload(item))
   }
 
@@ -179,9 +186,9 @@ export function mapFollowUpFromApi(raw) {
   const item = raw ?? {}
   const storedStatus = trim(
     item.stored_status ?? item.storedStatus ?? item.status,
-  ).toUpperCase() || followUpStoredStatuses.scheduled
+  ).toUpperCase() || followUpStoredStatuses.pending
   const effectiveStatus = trim(item.status ?? storedStatus).toUpperCase()
-    || followUpStatuses.scheduled
+    || followUpStatuses.pending
 
   return {
     id: item.id != null ? String(item.id) : '',
@@ -310,6 +317,7 @@ export function buildFollowUpCancelPayload(id, notes = '') {
 
 export function buildFollowUpsForRegister(section) {
   return (section?.pending ?? [])
+    .filter(item => !isLocalFollowUpReference(item?.reference))
     .map(item => buildFollowUpCreatePayload(item))
     .filter(row => row.type && row.due_date && row.assigned_provider_id)
 }
@@ -319,23 +327,29 @@ export function mapPendingFollowUpFromDraft(draft) {
     ...mapFollowUpFromApi({
       ...buildFollowUpCreatePayload(draft),
       id: nextFollowUpLocalId(),
-      status: followUpStatuses.scheduled,
-      stored_status: followUpStoredStatuses.scheduled,
+      status: followUpStatuses.pending,
+      stored_status: followUpStoredStatuses.pending,
     }),
     isPending: true,
     isDirty: false,
     pendingAction: null,
+    reference: isLocalFollowUpReference(draft?.reference)
+      ? String(draft.reference).trim()
+      : parseFollowUpReference(draft?.reference),
     referenceLabel: trim(draft?.referenceLabel) || null,
+    fromReferral: Boolean(draft?.fromReferral),
   }
 
   return mapped
 }
 
 export function followUpIsEditable(record) {
-  return String(record?.storedStatus ?? '').toUpperCase()
-    === followUpStoredStatuses.scheduled
+  const status = String(record?.storedStatus ?? '').toUpperCase()
+
+  return status === followUpStoredStatuses.pending
+    || status === followUpStoredStatuses.scheduled
 }
 
 export function followUpEffectiveStatus(record) {
-  return String(record?.status ?? followUpStatuses.scheduled).toUpperCase()
+  return String(record?.status ?? followUpStatuses.pending).toUpperCase()
 }

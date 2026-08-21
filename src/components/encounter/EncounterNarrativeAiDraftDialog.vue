@@ -169,6 +169,11 @@ import { isAuthSessionEndUIError } from
   'src/utils/api-session-error.js'
 import { isAssessmentSummaryField } from
   'src/utils/assessment-summary.js'
+import {
+  isClientOwnWordsField,
+  isProgressTowardsGoalsField,
+  isSessionSummaryField,
+} from 'src/utils/narrative-ai-assistance.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -219,6 +224,21 @@ const generateDisabled = computed(() =>
 const dialogHint = computed(() => {
   if (isAssessmentSummaryField(props.field)) {
     return t('narrativeAiDialogHintAssessmentSummary', {
+      label: props.field?.fieldLabel || '',
+    })
+  }
+  if (isSessionSummaryField(props.field)) {
+    return t('narrativeAiDialogHintSessionSummary', {
+      label: props.field?.fieldLabel || '',
+    })
+  }
+  if (isProgressTowardsGoalsField(props.field)) {
+    return t('narrativeAiDialogHintProgressTowardsGoals', {
+      label: props.field?.fieldLabel || '',
+    })
+  }
+  if (isClientOwnWordsField(props.field)) {
+    return t('narrativeAiDialogHintClientOwnWords', {
       label: props.field?.fieldLabel || '',
     })
   }

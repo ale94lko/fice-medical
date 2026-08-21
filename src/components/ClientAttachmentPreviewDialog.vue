@@ -109,15 +109,22 @@ const isImage = computed(() => contentType.value.startsWith('image/'))
 const isPdf = computed(() => contentType.value === 'application/pdf')
 
 function clearBlob() {
-  if (blobUrl.value) {
+  const externalUrl = props.file?.previewUrl || props.file?.url
+  if (blobUrl.value && blobUrl.value !== externalUrl) {
     revokeStoredFileImageSrc(blobUrl.value)
-    blobUrl.value = ''
   }
+  blobUrl.value = ''
 }
 
 async function loadPreview() {
   clearBlob()
   error.value = ''
+  const externalUrl = props.file?.previewUrl || props.file?.url
+  if (externalUrl) {
+    blobUrl.value = externalUrl
+
+    return
+  }
   if (!props.file?.id) {
     return
   }

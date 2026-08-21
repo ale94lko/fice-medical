@@ -7,6 +7,8 @@ import {
   normalizePhoneDigits,
 } from 'src/utils/client-contact-form.js'
 import { buildFollowUpDraftFromReferral } from 'src/utils/referral-follow-up.js'
+import { normalizeFollowUpReference } from
+  'src/utils/follow-up-reference.js'
 import { validateFollowUpDraft } from 'src/utils/follow-up-utils.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -75,9 +77,10 @@ export function validateReferralForm(referral, t) {
       errors.assignedClinicianId = t('referralFollowUpClinicianRequired')
     } else {
       const draft = buildFollowUpDraftFromReferral(referral)
+      const reference = normalizeFollowUpReference(draft.reference)
       const followUpErrors = validateFollowUpDraft(draft, t, {
-        referenceOptions: referral?.id
-          ? [{ reference: Number(referral.id) }]
+        referenceOptions: reference != null
+          ? [{ reference }]
           : [],
       })
       if (followUpErrors.dueDate) {

@@ -3,6 +3,8 @@ import {
   clientInsurancePriorityValues,
 } from 'components/constants.js'
 import { formatDate, formatTime } from 'src/utils/app-datetime.js'
+import { appointmentCardParts } from
+  'src/utils/clinic-message-display.js'
 import {
   resolveClientListAllergySeverityLabel,
   resolveClientListAllergySeverityModifier,
@@ -57,6 +59,8 @@ function appointmentWhen(row) {
 }
 
 export function mapAppointmentPanelRow(row, t) {
+  const card = appointmentCardParts(row?.startAtUtc)
+
   return {
     id: row?.appointmentId,
     when: appointmentWhen(row),
@@ -65,6 +69,9 @@ export function mapAppointmentPanelRow(row, t) {
     status: appointmentStatusLabel(row?.status, t),
     statusCode: trim(row?.status).toUpperCase(),
     telehealth: Boolean(row?.telemedicine),
+    month: card.month,
+    day: card.day,
+    time: card.time,
   }
 }
 

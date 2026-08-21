@@ -14,6 +14,7 @@ import {
   formatPhoneUs,
   normalizePhoneDigits,
 } from 'src/utils/client-contact-form.js'
+import { isLocalReferralDraft } from 'src/utils/referral-intake.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -286,6 +287,21 @@ export function formatReferralListDate(value) {
 export function isReferralDeletable(row) {
   return String(row?.status ?? '').toUpperCase()
     === referralStatuses.pendingReview
+}
+
+export function isReferralTerminal(row) {
+  const status = String(row?.status ?? '').toUpperCase()
+
+  return status === referralStatuses.closed
+    || status === referralStatuses.declined
+}
+
+export function isReferralDeclinable(row) {
+  return !isReferralTerminal(row) && !isLocalReferralDraft(row)
+}
+
+export function isReferralClosable(row) {
+  return isReferralDeclinable(row)
 }
 
 export function isReferralSchedulable(row) {

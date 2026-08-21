@@ -10,7 +10,11 @@ export function useSecureMessageImagePreviews(
   const pending = new Set()
 
   async function loadPreview(file) {
-    if (!file?.id || pending.has(file.id)) {
+    const fileId = Number(file?.id)
+    if (!Number.isFinite(fileId) || fileId <= 0) {
+      return
+    }
+    if (pending.has(file.id)) {
       return
     }
     if (previewUrls.value[file.id]) {

@@ -11,7 +11,7 @@ import {
 } from 'src/utils/client-follow-ups.js'
 import {
   followUpRelatedToRequiresReference,
-  parseFollowUpReference,
+  normalizeFollowUpReference,
 } from 'src/utils/follow-up-reference.js'
 import {
   isCompleteUsDateString,
@@ -125,13 +125,15 @@ export function validateFollowUpDraft(draft, t, options = {}) {
   }
   const relatedTo = String(draft?.relatedTo ?? '').trim().toUpperCase() || null
   if (relatedTo && followUpRelatedToRequiresReference(relatedTo)) {
-    const refId = parseFollowUpReference(draft?.reference)
+    const refId = normalizeFollowUpReference(draft?.reference)
     const refOptions = options.referenceOptions ?? []
     if (refId == null) {
       errors.reference = t('followUpReferenceRequired')
     } else if (refOptions.length === 0) {
       errors.reference = t('followUpReferenceNoOptions')
-    } else if (!refOptions.some(opt => opt.reference === refId)) {
+    } else if (!refOptions.some(opt =>
+      String(normalizeFollowUpReference(opt.reference))
+        === String(refId))) {
       errors.reference = t('followUpReferenceInvalid')
     }
   }
@@ -161,13 +163,14 @@ export function followUpDraftFromRecord(record) {
     assignedProviderId: record?.assignedProviderId ?? null,
     priority: record?.priority ?? followUpPriorityValues.medium,
     relatedTo: record?.relatedTo ?? null,
-    reference: parseFollowUpReference(record?.reference),
+    reference: normalizeFollowUpReference(record?.reference),
     referenceLabel: record?.referenceLabel ?? '',
     notes: record?.notes ?? '',
     reminderEnabled: Boolean(record?.reminderEnabled),
     reminderValue: record?.reminderValue ?? 3,
     reminderUnit: record?.reminderUnit
       ?? followUpReminderUnitValues.daysBefore,
+    fromReferral: Boolean(record?.fromReferral),
   }
 }
 

@@ -93,21 +93,13 @@
                 :label="t('appointmentPlaceOfService')"
                 required
                 :test-id="tid.field('place-of-service')">
-                <div
-                  v-if="catalogsLoading"
-                  class="form-field-loading-shell"
-                  role="status"
-                  :aria-label="t('appLoading')"
-                  :data-testid="tid.field('place-of-service-loading')">
-                  <q-spinner color="grey-7" size="24px" />
-                </div>
                 <FormSelect
-                  v-else
                   v-model="draft.placeOfServiceId"
                   outlined
                   hide-bottom-space
                   emit-value
                   map-options
+                  :loading="catalogsLoading"
                   :options="placeOptions"
                   :placeholder="t('appointmentPlaceOfServicePlaceholder')"
                   :error="Boolean(errors.placeOfServiceId)"
@@ -147,7 +139,6 @@
                 <ClinicianFormSelect
                   v-model="draft.clinicianId"
                   :options="clinicianOptions"
-                  :disable="mode === 'book' && !serviceLines.length"
                   :placeholder="t('appointmentClinicianPlaceholder')"
                   :error="Boolean(errors.clinicianId)"
                   :error-message="errors.clinicianId"
@@ -353,6 +344,17 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <ModalComponent
+    v-model="reassignConfirmOpen"
+    :title="t('appointmentReassignClinicianTitle')"
+    :message="t('appointmentReassignClinicianMessage')"
+    :confirm-text="t('confirm')"
+    :cancel-text="t('cancel')"
+    test-id="appointment-reassign-clinician"
+    @confirm="onReassignConfirm"
+    @cancel="onReassignCancel"
+  />
 </template>
 
 <script setup>
@@ -373,6 +375,7 @@ import AppointmentServiceLinesField from
 import ClinicianFormSelect from 'components/ClinicianFormSelect.vue'
 import ClinicianSelectAvatar from 'components/ClinicianSelectAvatar.vue'
 import FormSelect from 'components/FormSelect.vue'
+import ModalComponent from 'components/ModalComponent.vue'
 import SubsectionHeading from 'components/SubsectionHeading.vue'
 import {
   appointmentNotesMaxLength,
@@ -439,6 +442,7 @@ const props = defineProps({
   initialClinicianId: { type: [String, Number], default: null },
   initialNotes: { type: String, default: '' },
   referralId: { type: [String, Number], default: null },
+  assignedClinicianId: { type: [String, Number], default: null },
 })
 
 const emit = defineEmits([
@@ -461,6 +465,8 @@ const open = computed({
 
 const draft = ref(createDraft())
 const errors = ref({})
+const reassignConfirmOpen = ref(false)
+const pendingBookPayload = ref(null)
 const serviceCatalog = ref([])
 const catalogsLoading = ref(false)
 const serviceLines = ref([])
@@ -1167,12 +1173,27 @@ function clinicianIdInOptions(options, id) {
   return options.some(option => Number(option.value) === n)
 }
 
+function firstPositiveId(...values) {
+  for (const value of values) {
+    const id = Number(value)
+    if (Number.isFinite(id) && id > 0) {
+      return id
+    }
+  }
+
+  return null
+}
+
 function pickAutoClinicianId(options) {
   if (clinicianIdInOptions(options, draft.value.clinicianId)) {
     return Number(draft.value.clinicianId)
   }
-  if (clinicianIdInOptions(options, props.initialClinicianId)) {
-    return Number(props.initialClinicianId)
+  const preferredId = firstPositiveId(
+    props.initialClinicianId,
+    props.assignedClinicianId,
+  )
+  if (clinicianIdInOptions(options, preferredId)) {
+    return preferredId
   }
   const linkedId = resolveLinkedClinicianId(options)
   if (linkedId != null) {
@@ -1338,9 +1359,13 @@ function applyInitialRequestPrefill() {
       nextIds,
     )
   }
-  const clinicianId = Number(props.initialClinicianId)
-  if (Number.isFinite(clinicianId) && clinicianId > 0) {
+  const clinicianId = firstPositiveId(
+    props.initialClinicianId,
+    props.assignedClinicianId,
+  )
+  if (clinicianId != null) {
     draft.value.clinicianId = clinicianId
+    applySupervisorFromSelectedClinician()
   }
   const notes = String(props.initialNotes ?? '').trim()
   if (notes) {
@@ -1643,6 +1668,49 @@ function canLoadRecurrencePreview() {
   return true
 }
 
+function assignedClinicianChanged(payload) {
+  const assigned = Number(props.assignedClinicianId)
+  const selected = Number(payload?.clinician_id)
+  if (!Number.isFinite(assigned) || assigned <= 0) {
+    return false
+  }
+  if (!Number.isFinite(selected) || selected <= 0) {
+    return false
+  }
+
+  return assigned !== selected
+}
+
+function emitBookedPayload(payload) {
+  emit('booked', payload)
+}
+
+function onReassignConfirm() {
+  const payload = pendingBookPayload.value
+  pendingBookPayload.value = null
+  reassignConfirmOpen.value = false
+  if (!payload) {
+    return
+  }
+  emitBookedPayload(payload)
+}
+
+function onReassignCancel() {
+  pendingBookPayload.value = null
+  reassignConfirmOpen.value = false
+}
+
+function submitBookPayload(includeOccurrences = false) {
+  const payload = buildBookPayload(includeOccurrences)
+  if (assignedClinicianChanged(payload)) {
+    pendingBookPayload.value = payload
+    reassignConfirmOpen.value = true
+
+    return
+  }
+  emitBookedPayload(payload)
+}
+
 async function onSubmit() {
   if (!validateDraft()) {
     return
@@ -1660,11 +1728,11 @@ async function onSubmit() {
   }
   if (draft.value.repeatAppointment) {
     await flushRecurrencePreview()
-    emit('booked', buildBookPayload(true))
+    submitBookPayload(true)
 
     return
   }
-  emit('booked', buildBookPayload())
+  submitBookPayload()
 }
 
 async function reloadAvailability() {
@@ -1699,6 +1767,8 @@ watch(
   async isOpen => {
     if (!isOpen) {
       resetRecurrencePreview()
+      reassignConfirmOpen.value = false
+      pendingBookPayload.value = null
 
       return
     }
@@ -1717,6 +1787,7 @@ watch(
       onSchedulingInputsChanged(),
     ])
   },
+  { immediate: true },
 )
 
 watch(

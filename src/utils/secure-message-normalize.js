@@ -58,6 +58,9 @@ export function normalizeSecureMessage(raw) {
     senderDisplayName: trim(
       raw.sender_display_name ?? raw.senderDisplayName,
     ),
+    senderStaffUserId: parseOptionalNumber(
+      raw.sender_staff_user_id ?? raw.senderStaffUserId,
+    ),
     mine: Boolean(raw.mine),
     messageType: trim(
       raw.message_type ?? raw.messageType,
@@ -74,6 +77,38 @@ export function mapSecureMessages(list) {
   return rows.map(normalizeSecureMessage).filter(Boolean)
 }
 
+export function isPendingSecureMessage(row) {
+  return Boolean(row?.pending)
+    || String(row?.id ?? '').startsWith('pending-')
+}
+
+function messageSortTime(row) {
+  const time = Date.parse(String(row?.createdAt ?? ''))
+
+  return Number.isFinite(time) ? time : 0
+}
+
+function compareSecureMessages(a, b) {
+  const aPending = isPendingSecureMessage(a) ? 1 : 0
+  const bPending = isPendingSecureMessage(b) ? 1 : 0
+  const aId = Number(a?.id)
+  const bId = Number(b?.id)
+  if (!aPending && !bPending
+    && Number.isFinite(aId) && Number.isFinite(bId)) {
+    return aId - bId
+  }
+  const aTime = messageSortTime(a)
+  const bTime = messageSortTime(b)
+  if (aTime !== bTime) {
+    return aTime - bTime
+  }
+  if (aPending !== bPending) {
+    return aPending - bPending
+  }
+
+  return String(a?.id ?? '').localeCompare(String(b?.id ?? ''))
+}
+
 export function mergeSecureMessages(existing, incoming) {
   const byId = new Map()
   ;[...existing, ...incoming].forEach((row) => {
@@ -82,15 +117,92 @@ export function mergeSecureMessages(existing, incoming) {
     }
   })
 
-  return [...byId.values()].sort((a, b) => {
-    const aId = Number(a?.id)
-    const bId = Number(b?.id)
-    if (Number.isFinite(aId) && Number.isFinite(bId)) {
-      return aId - bId
+  return [...byId.values()].sort(compareSecureMessages)
+}
+
+function pendingMatchesSaved(pending, saved) {
+  if (!saved || isPendingSecureMessage(saved) || !saved.mine) {
+    return false
+  }
+  if (pending.body && pending.body === saved.body) {
+    return true
+  }
+  const pendingName = pending.file?.originalFilename
+  const savedName = saved.file?.originalFilename
+
+  return Boolean(pendingName) && pendingName === savedName
+}
+
+export function dropMatchedPendingMessages(list, incoming) {
+  const incomingList = Array.isArray(incoming) ? incoming : []
+  const current = Array.isArray(list) ? list : []
+  if (!incomingList.length) {
+    return current
+  }
+
+  return current.filter((row) => {
+    if (!isPendingSecureMessage(row)) {
+      return true
     }
 
-    return String(a?.id ?? '').localeCompare(String(b?.id ?? ''))
+    return !incomingList.some(saved =>
+      pendingMatchesSaved(row, saved),
+    )
   })
+}
+
+export function replacePendingSecureMessage(
+  list,
+  pendingId,
+  saved,
+) {
+  const without = (Array.isArray(list) ? list : [])
+    .filter(row => row?.id !== pendingId)
+  if (!saved) {
+    return without
+  }
+
+  return mergeSecureMessages(without, [saved])
+}
+
+let pendingSeq = 0
+
+function pendingMessageFile(pendingId, file) {
+  if (!file) {
+    return null
+  }
+
+  return {
+    id: `pending-file-${pendingId}`,
+    originalFilename: trim(file.name),
+    contentType: trim(file.type).toLowerCase(),
+    fileSize: parseOptionalNumber(file.size),
+  }
+}
+
+export function createPendingSecureMessage({
+  conversationId,
+  body,
+  file,
+  senderStaffUserId,
+} = {}) {
+  pendingSeq += 1
+  const id = `pending-${Date.now()}-${pendingSeq}`
+  const hasFile = Boolean(file)
+
+  return {
+    id,
+    conversationId: parseOptionalNumber(conversationId),
+    senderType: 'STAFF',
+    senderDisplayName: '',
+    senderStaffUserId: parseOptionalNumber(senderStaffUserId),
+    mine: true,
+    messageType: hasFile ? 'FILE' : 'TEXT',
+    body: trim(body),
+    file: pendingMessageFile(id, file),
+    createdAt: new Date().toISOString(),
+    pending: true,
+  }
 }
 
 export function lastNumericMessageId(rows) {
@@ -120,6 +232,9 @@ export function normalizeSecureConversation(raw = {}) {
     clientNumber: trim(raw.client_number ?? raw.clientNumber),
     clientDisplayName: trim(
       raw.client_display_name ?? raw.clientDisplayName,
+    ),
+    clientPhotoFileId: parseOptionalNumber(
+      raw.client_photo_file_id ?? raw.clientPhotoFileId,
     ),
     status: trim(raw.status),
     lastMessageAt: raw.last_message_at ?? raw.lastMessageAt ?? null,

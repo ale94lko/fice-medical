@@ -10,6 +10,8 @@ import {
 } from 'src/utils/clinician-display.js'
 import { resolveCatalogOptionLabel } from 'src/utils/catalogs.js'
 import { formatClientDisplayName } from 'src/utils/client-display-name.js'
+import { resolveClientListPhotoFileId } from
+  'src/utils/client-list-normalize.js'
 import {
   formatDate,
   formatDateTime,
@@ -358,7 +360,9 @@ export function buildClientOverviewHeaderData(
     }),
     recordId: numericRecordId(form, rawClient),
     clientNumber: trim(form?.[ck.clientNumber]),
-    photoFileId: form?.[ck.photoFileId] ?? null,
+    photoFileId: form?.[ck.photoFileId]
+      ?? resolveClientListPhotoFileId(rawClient)
+      ?? null,
     clientInitials: clientInitialsFromForm(form),
     status: trim(form?.[ck.status]) || 'active',
     statusLabel: resolveStatusLabel(form?.[ck.status], t),

@@ -119,6 +119,8 @@ import {
   mapPendingFollowUpFromDraft,
 } from 'src/utils/client-follow-ups.js'
 import { followUpTestIds as tid } from 'src/test-ids/index.js'
+import { isReferralLinkedFollowUp } from
+  'src/utils/referral-follow-up.js'
 
 const props = defineProps({
   modelValue: {
@@ -139,7 +141,10 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits([
+  'update:modelValue',
+  'reassign-referral-clinician',
+])
 
 const { t } = useI18n()
 const { isMobile } = useViewportLayout()
@@ -213,6 +218,23 @@ function openView(item) {
   formDialogOpen.value = true
 }
 
+function emitReferralClinicianIfChanged(previous, payload) {
+  const linked = isReferralLinkedFollowUp(payload)
+    || isReferralLinkedFollowUp(previous)
+  if (!linked) {
+    return
+  }
+  const nextId = Number(payload?.assignedProviderId)
+  const prevId = Number(previous?.assignedProviderId)
+  if (!Number.isFinite(nextId) || nextId <= 0 || nextId === prevId) {
+    return
+  }
+  emit('reassign-referral-clinician', {
+    referralId: payload?.reference ?? previous?.reference,
+    clinicianId: nextId,
+  })
+}
+
 function onFormSave(payload) {
   if (dialogMode.value === 'add') {
     onCreateFollowUp(payload)
@@ -238,6 +260,7 @@ function onSaveEdit(payload) {
   if (!activeRecord.value?.id) {
     return
   }
+  emitReferralClinicianIfChanged(activeRecord.value, payload)
   if (activeRecord.value.isPending) {
     const pending = (section.value.pending ?? []).map(item =>
       item.id === activeRecord.value.id
@@ -349,6 +372,11 @@ function onCancelConfirmed() {
   &--scheduled {
     background: #fef9c3;
     color: #a16207;
+  }
+
+  &--pending {
+    background: #e0f2fe;
+    color: #0369a1;
   }
 
   &--completed {

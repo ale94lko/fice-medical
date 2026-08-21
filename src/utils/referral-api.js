@@ -105,9 +105,14 @@ export async function closeClientReferral(clientId, referralId, reason) {
   return normalizeReferralDetail(unwrapData(response.data))
 }
 
-export async function deleteClientReferral(clientId, referralId) {
+export async function deleteClientReferral(
+  clientId,
+  referralId,
+  reason,
+) {
   await apiInstance.delete(
     apiPaths.clientReferralById(clientId, referralId),
+    { data: { reason } },
   )
 }
 

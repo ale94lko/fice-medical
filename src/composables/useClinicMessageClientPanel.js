@@ -1,15 +1,13 @@
-import { computed, ref, unref, watch } from 'vue'
+import { computed, ref, toValue, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useAddClientCatalogs } from
-  'src/composables/useAddClientCatalogs.js'
 import { useActiveEncounter } from
   'src/composables/useActiveEncounter.js'
 import { useClientAppointmentPermissions } from
   'src/composables/useClientAppointmentPermissions.js'
 import { isAuthSessionEndUIError } from
   'src/utils/api-session-error.js'
-import { listClientAppointments } from
-  'src/utils/appointment-api.js'
+import { mapAppointmentsList } from
+  'src/utils/appointment-normalize.js'
 import { buildClientOverviewHeaderData } from
   'src/utils/client-overview-header-data.js'
 import { buildClinicMessageClientSnapshot } from
@@ -17,16 +15,25 @@ import { buildClinicMessageClientSnapshot } from
 import { useSiteStore } from 'src/stores/site-store.js'
 
 function clientKey(value) {
-  return String(unref(value) ?? '').trim()
+  return String(toValue(value) ?? '').trim()
+}
+
+function appointmentsFromClient(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return []
+  }
+
+  return mapAppointmentsList(
+    raw.appointments ?? raw.client_appointments ?? [],
+  )
 }
 
 export function useClinicMessageClientPanel(clientNumberRef) {
   const { t } = useI18n()
   const siteStore = useSiteStore()
-  const catalogs = useAddClientCatalogs(t)
   const { canViewAppointments } = useClientAppointmentPermissions()
-  const loading = ref(false)
   const loadError = ref(false)
+  const loading = ref(false)
   const form = ref(null)
   const rawClient = ref(null)
   const appointments = ref([])
@@ -44,14 +51,6 @@ export function useClinicMessageClientPanel(clientNumberRef) {
 
     return buildClientOverviewHeaderData(form.value, {
       rawClient: rawClient.value,
-      clinicianOptions: catalogs.assignedClinicianSelectOptions.value,
-      raceSelectOptions: catalogs.raceSelectOptions.value,
-      ethnicitySelectOptions: catalogs.ethnicitySelectOptions.value,
-      preferredLanguageSelectOptions:
-        catalogs.preferredLanguageOptions.value,
-      prefixSelectOptions: catalogs.prefixSelectOptions.value,
-      suffixSelectOptions: catalogs.suffixSelectOptions.value,
-      genderSelectOptions: catalogs.genderOptions.value,
       appointments: appointments.value,
       t,
     })
@@ -66,47 +65,6 @@ export function useClinicMessageClientPanel(clientNumberRef) {
     }),
   )
 
-  function mapOptions() {
-    return {
-      resolveCatalogSelectValue: catalogs.resolveCatalogSelectValue,
-      prefixSelectOptions: catalogs.prefixSelectOptions.value,
-      suffixSelectOptions: catalogs.suffixSelectOptions.value,
-      raceSelectOptions: catalogs.raceSelectOptions.value,
-      ethnicitySelectOptions: catalogs.ethnicitySelectOptions.value,
-      genderSelectOptions: catalogs.genderOptions.value,
-      preferredLanguageSelectOptions:
-        catalogs.preferredLanguageOptions.value,
-      contactTypeSelectOptions:
-        catalogs.contactTypeSelectOptions.value,
-      relationshipTypeSelectOptions:
-        catalogs.relationshipTypeSelectOptions.value,
-    }
-  }
-
-  async function ensureCatalogs() {
-    if (!catalogs.loaded.value) {
-      await catalogs.loadBasicInfoCatalogs()
-    }
-    if (!catalogs.cliniciansLoaded.value) {
-      await catalogs.loadCliniciansForAddClient()
-    }
-  }
-
-  async function loadAppointments(id) {
-    if (!canViewAppointments.value) {
-      appointments.value = []
-
-      return
-    }
-    try {
-      appointments.value = await listClientAppointments(id)
-    } catch (error) {
-      if (!isAuthSessionEndUIError(error)) {
-        appointments.value = []
-      }
-    }
-  }
-
   function reset() {
     form.value = null
     rawClient.value = null
@@ -117,26 +75,35 @@ export function useClinicMessageClientPanel(clientNumberRef) {
   async function loadClient(id) {
     if (!id) {
       reset()
+      loading.value = false
 
       return
     }
+    reset()
     loading.value = true
     loadError.value = false
     try {
-      await ensureCatalogs()
-      form.value = await siteStore.buildEditFormForClient(
-        id,
-        mapOptions(),
-      )
+      const mapped = await siteStore.buildEditFormForClient(id)
+      if (clientKey(clientNumberRef) !== id) {
+        return
+      }
+      form.value = mapped
       rawClient.value = siteStore.clientListSourceById[id] ?? null
-      await loadAppointments(id)
+      appointments.value = canViewAppointments.value
+        ? appointmentsFromClient(rawClient.value)
+        : []
     } catch (error) {
+      if (clientKey(clientNumberRef) !== id) {
+        return
+      }
       if (!isAuthSessionEndUIError(error)) {
         reset()
         loadError.value = true
       }
     } finally {
-      loading.value = false
+      if (clientKey(clientNumberRef) === id) {
+        loading.value = false
+      }
     }
   }
 

@@ -729,12 +729,12 @@ export default {
   portalMessagesTitle: 'Mensajes',
   portalMessagesSubtitle:
     'Mensajes seguros con clientes de esta sede.',
-  portalMessagesSearch: 'Buscar clientes',
+  portalMessagesSearch: 'Buscar clientes...',
   portalMessagesEmptyInbox: 'Aún no hay conversaciones.',
   portalMessagesSelectThread:
     'Elige una conversación para leer y responder.',
   portalMessagesEmptyThread: 'Aún no hay mensajes.',
-  portalMessagesPlaceholder: 'Escribe un mensaje',
+  portalMessagesPlaceholder: 'Escribe un mensaje...',
   portalMessagesSend: 'Enviar',
   portalMessagesAttach: 'Adjuntar un archivo',
   portalMessagesAttachment: 'Archivo',
@@ -742,9 +742,11 @@ export default {
   portalMessagesClient: 'Cliente',
   portalMessagesClinic: 'Clínica',
   portalMessagesBack: 'Volver a la bandeja',
-  portalMessagesOpenClient: 'Abrir cliente',
+  portalMessagesOpenClient: 'Overview',
   portalMessagesOpenError:
     'No se pudo abrir esta conversación.',
+  portalMessagesSendError:
+    'No se pudo enviar este mensaje.',
   portalMessagesClientLoadError:
     'No se pudieron cargar los datos del cliente.',
   portalMessagesShowClient: 'Datos del cliente',
@@ -752,6 +754,16 @@ export default {
   portalMessagesUpcomingAppointments: 'Próximas citas',
   portalMessagesNoUpcomingAppointments:
     'No hay citas próximas.',
+  portalMessagesYesterday: 'Ayer',
+  portalMessagesPatientInfo: 'Información del cliente',
+  portalMessagesSending: 'Enviando',
+  portalMessagesPersonalInfo: 'Información personal',
+  portalMessagesMedicalInfo: 'Información médica',
+  portalMessagesForms: 'Formularios',
+  portalMessagesNoDocuments: 'No hay documentos.',
+  portalMessagesNoForms: 'No hay formularios.',
+  portalMessagesOpenInRecord: 'Abrir en ficha del cliente',
+  portalMessagesUnread: 'Mensajes no leídos',
   clientOverviewMessages: 'Mensajes',
   navBilling: 'Facturación',
   navSuperbills: 'Superbills',
@@ -1548,6 +1560,8 @@ export default {
   'clinicalNoteDataSource_ALLERGIES': 'Alergias',
   'clinicalNoteDataSource_ENCOUNTER_QUALITY_MEASURES':
     'Medidas HEDIS abordadas',
+  'clinicalNoteDataSource_ENCOUNTER_PARTICIPANTS':
+    'Participantes de la sesión',
   'clinicalNoteInputType_SHORT_TEXT': 'Texto corto',
   'clinicalNoteInputType_LONG_TEXT': 'Texto largo',
   'clinicalNoteInputType_RICH_TEXT': 'Texto enriquecido',
@@ -2509,6 +2523,8 @@ export default {
   referralSaveError: 'No se pudo guardar la referencia.',
   referralCloseSuccess: 'Referencia cerrada correctamente.',
   referralCloseError: 'No se pudo cerrar la referencia.',
+  referralDeclineSuccess: 'Referencia rechazada correctamente.',
+  referralDeclineError: 'No se pudo rechazar la referencia.',
   referralDeleteSuccess: 'Referencia eliminada correctamente.',
   referralDeleteError: 'No se pudo eliminar la referencia.',
   referralCloseConfirmTitle: '¿Cerrar referencia?',
@@ -2528,6 +2544,9 @@ export default {
   referralDeleteConfirmTitle: '¿Eliminar referencia?',
   referralDeleteConfirmMessage:
     'La referencia se eliminará de la lista activa.',
+  referralDeleteReasonMessage:
+    'Indique el motivo por el que se elimina esta referencia.',
+  referralDeleteReasonLabel: 'Motivo de la eliminación',
   referralSummaryTotal: 'Total de referencias',
   referralSummaryIncoming: 'Referencias entrantes',
   referralSummaryOutgoing: 'Referencias salientes',
@@ -2541,6 +2560,7 @@ export default {
   referralColPriority: 'Prioridad',
   referralActionView: 'Ver referencia',
   referralActionSchedule: 'Programar cita',
+  referralActionDecline: 'Rechazar',
   referralScheduleRedirect:
     'Abra la pestaña Citas para programar esta referencia.',
   referralActionClose: 'Cerrar',
@@ -2619,12 +2639,20 @@ export default {
   referralReason: 'Motivo',
   referralReasonPlaceholder: 'Ingrese motivo clínico de la referencia',
   referralDiagnosisProblem: 'Diagnóstico / problema',
+  referralDiagnosesAiCopyReason: 'Copiar desde el motivo',
   referralDiagnosisPlaceholder: 'Ingrese diagnóstico o problema',
   referralAssignedClinician: 'Clínico asignado',
   referralClinicianPlaceholder: 'Seleccionar clínico',
   referralNotesPlaceholder: 'Notas adicionales',
   referralDocumentsAfterSave:
     'Los documentos se pueden adjuntar después de guardar la referencia.',
+  referralDocumentsPendingHint:
+    'Los archivos añadidos ahora se conservan '
+    + 'hasta guardar la referencia.',
+  referralIntakeDraftUpdated:
+    'Los datos de la referencia se guardarán con el cliente.',
+  referralDraftRemoved:
+    'Esta referencia no se guardará con el cliente.',
   referralDocumentsHint: 'Arrastre o haga clic para subir un documento.',
   referralDocumentsReadonlyHint: 'Documentos adjuntos de la referencia.',
   referralDocumentsFormats: 'PDF, DOC, DOCX, JPG, PNG — máx. 10 MB',
@@ -2968,6 +2996,10 @@ export default {
   appointmentClinicianOptional: 'Clínico',
   appointmentClinicianPlaceholder: 'Seleccionar clínico',
   appointmentClinicianRequired: 'El clínico es obligatorio.',
+  appointmentReassignClinicianTitle: '¿Cambiar el clínico asignado?',
+  appointmentReassignClinicianMessage:
+    'Esto actualizará el clínico asignado en el cliente '
+    + 'y en la referencia.',
   appointmentNoEligibleClinicians:
     'No hay clínicos elegibles para este servicio.',
   appointmentClinicianNotEligible:
@@ -3253,6 +3285,7 @@ export default {
   followUpRelatedToGeneral: 'General',
   followUpReminderUnitDaysBefore: 'días antes',
   followUpReminderUnitWeeksBefore: 'semanas antes',
+  followUpStatusPending: 'Pendiente',
   followUpStatusScheduled: 'Programado',
   followUpStatusCompleted: 'Completado',
   followUpStatusCancelled: 'Cancelado',
@@ -4942,6 +4975,7 @@ export default {
   aiGenerateCarePlan: 'Borrador de care plan con IA',
   aiBtnClinicalSummary: 'FiCE AI Assistant',
   aiAssistantName: 'FiCE AI Assistant',
+  aiBtnFiceAi: 'FiCE AI',
   aiBtnSoapDraft: 'Borrador SOAP con IA',
   aiBtnIcd10: 'Sugerir ICD-10',
   aiBtnCarePlanDraft: 'Borrador de care plan',
@@ -5605,6 +5639,15 @@ export default {
   narrativeAiDialogHintPlan:
     'Borrador sugerido para {label} — {diagnosis}. La IA reescribe '
       + 'decisiones que usted ya indicó. No determina el tratamiento.',
+  narrativeAiDialogHintSessionSummary:
+    'Resumen de sesión para {label}. Reescriba solo los eventos '
+      + 'que indicó. La IA no debe inventar intervenciones.',
+  narrativeAiDialogHintProgressTowardsGoals:
+    'Progreso hacia metas para {label}. Guardar esta narrativa '
+      + 'no cambia el Plan de cuidado.',
+  narrativeAiDialogHintClientOwnWords:
+    'Registre una frase del cliente solo desde las notas del '
+      + 'proveedor. La IA no debe inventar una cita.',
   narrativeAiCurrentNarrative: 'Narrativa actual',
   narrativeAiProviderInput: 'Notas del proveedor',
   narrativeAiProviderInputPlaceholder:
@@ -5661,6 +5704,7 @@ export default {
   'narrativeAiContextSource_DIAGNOSTIC_STUDIES':
     'Estudios diagnósticos',
   'narrativeAiContextSource_FOLLOW_UP': 'Seguimiento',
+  'narrativeAiContextSource_CARE_PLAN': 'Plan de cuidado',
   'narrativeAiContextSource_PROVIDER_INPUT': 'Notas del proveedor',
   encounterNarrativeIncomplete:
     '{count} campo obligatorio incompleto | '

@@ -250,8 +250,11 @@ import { isAdditionalNotesSection } from
   'src/utils/additional-notes.js'
 import { isAssessmentSummaryField } from
   'src/utils/assessment-summary.js'
-import { fieldAllowsNarrativeAi, fieldRequiresProviderInput } from
-  'src/utils/narrative-ai-assistance.js'
+import {
+  fieldAllowsNarrativeAi,
+  fieldRequiresProviderInput,
+  fieldUsesCarePlanAiContext,
+} from 'src/utils/narrative-ai-assistance.js'
 
 const props = defineProps({
   encounterId: { type: [String, Number], default: null },
@@ -262,6 +265,7 @@ const props = defineProps({
   canEdit: { type: Boolean, default: false },
   canUseAiDraft: { type: Boolean, default: false },
   canViewScreenings: { type: Boolean, default: false },
+  canViewCarePlans: { type: Boolean, default: false },
   canAddScreenings: { type: Boolean, default: false },
   canEditScreenings: { type: Boolean, default: false },
 })
@@ -322,6 +326,9 @@ function fieldPlaceholder(field) {
 
 function canDraftWithAi(field) {
   if (isAssessmentSummaryField(field) && !props.canViewScreenings) {
+    return false
+  }
+  if (fieldUsesCarePlanAiContext(field) && !props.canViewCarePlans) {
     return false
   }
 

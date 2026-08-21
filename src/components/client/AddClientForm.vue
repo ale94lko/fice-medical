@@ -578,19 +578,15 @@
                     <AddClientLabeledField
                       :label="t('referralReferringProvider')"
                       :test-id="tid.field(ck.referringProvider)">
-                      <q-input
+                      <ReferralProviderSelect
                         v-model="form[ck.referringProvider]"
-                        outlined
-                        hide-bottom-space
-                        :maxlength="referralProviderNameMaxLength"
+                        :options="referringProviderSelectOptions"
                         :placeholder="
                           t('referralReferringProviderPlaceholder')
                         "
-                        :data-testid="tid.field(ck.referringProvider)">
-                        <template #append>
-                          <q-icon name="search" />
-                        </template>
-                      </q-input>
+                        :test-id="tid.field(ck.referringProvider)"
+                        :maxlength="referralProviderNameMaxLength"
+                      />
                     </AddClientLabeledField>
                   </div>
                   <div class="col-12 col-md-6">
@@ -679,7 +675,7 @@
                     :label="t('clinicians')"
                     :test-id="tid.field(ck.clinicians)">
                     <ClinicianFormSelect
-                      :model-value="form[ck.clinicians]"
+                      :model-value="basicInfoClinicianIds"
                       multiple
                       clearable
                       :show-selected-in-field="false"
@@ -875,9 +871,18 @@
                 :client-id="props.clientId"
                 :referrals="referralsForTab"
                 :clinician-options="assignedClinicianOptions"
+                :assigned-clinician-id="primaryAssignedClinicianId"
+                :intake-pending-files="intakeReferralPendingFiles"
+                :extra-referral-drafts="extraReferralDrafts"
                 @schedule-appointment="onReferralSchedule"
                 @create-follow-up="onReferralCreateFollowUp"
                 @remove-follow-up="onReferralRemoveFollowUp"
+                @update-intake-draft="onIntakeReferralDraftUpdate"
+                @upsert-extra-draft="onUpsertExtraReferralDraft"
+                @remove-extra-draft="onRemoveExtraReferralDraft"
+                @ensure-assigned-clinician="
+                  ensureAssignedClinicianOnClient
+                "
               />
               <AddClientAppointmentsTab
                 v-else-if="
@@ -886,7 +891,9 @@
                 :client-id="props.clientId"
                 :appointments="clientAppointments"
                 :booking-referral="pendingScheduleReferral"
+                :assigned-clinician-id="primaryAssignedClinicianId"
                 @booking-referral-consumed="pendingScheduleReferral = null"
+                @reassign-clinician="onAppointmentReassignClinician"
               />
               <AddClientAuthorizationsTab
                 v-else-if="
@@ -905,6 +912,9 @@
                 :client-id="props.clientId"
                 :reference-context="followUpReferenceContext"
                 :clinician-options="assignedClinicianOptions"
+                @reassign-referral-clinician="
+                  onFollowUpReassignReferralClinician
+                "
               />
               <div
                 v-else
@@ -1109,6 +1119,7 @@ import AddClientClinicalNotesTab from '../AddClientClinicalNotesTab.vue'
 import AddClientFollowUpsTab from '../AddClientFollowUpsTab.vue'
 import AddClientAppointmentsTab from '../AddClientAppointmentsTab.vue'
 import AddClientReferralsTab from '../AddClientReferralsTab.vue'
+import ReferralProviderSelect from '../ReferralProviderSelect.vue'
 import AddClientAuthorizationsTab from
   '../AddClientAuthorizationsTab.vue'
 import AddClientAllergiesTab from '../AddClientAllergiesTab.vue'
@@ -1134,9 +1145,15 @@ import { useContactSubTabs } from 'src/composables/useContactSubTabs.js'
 import { resolveOtherContactTabLabel } from 'src/utils/client-contact-form.js'
 import { formatClientDisplayName } from 'src/utils/client-display-name.js'
 import {
+  appendAssignedClinicianIfMissing,
+  applyReferralClinicianInjection,
   ensureCliniciansSelectionOrder,
+  pruneReferralInjectionsInBasic,
+  rebuildAssignedClinicianIds,
+  removeClinicianFromAssignedSources,
   withPrimaryClinicianFirst,
 } from 'src/utils/client-clinicians-form.js'
+import { replaceClientClinicians } from 'src/utils/client-clinician-api.js'
 import {
   addClientTabKeys,
   clientFormSections,
@@ -1161,10 +1178,18 @@ import {
 } from 'src/utils/client-form.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { clientChartKey } from 'components/helpers.js'
-import { mapPendingFollowUpFromDraft } from 'src/utils/client-follow-ups.js'
 import {
+  buildFollowUpCreatePayload,
+} from 'src/utils/client-follow-ups.js'
+import {
+  bindPendingFollowUpsToReferral,
+  buildFollowUpDraftFromReferral,
   followUpExistsForReferral,
+  snapshotIntakePendingFollowUps,
+  snapshotPendingFollowUpsForReference,
+  upsertFollowUpFromReferralDraft,
   removeFollowUpForReferral,
+  shouldCreateFollowUpFromReferral,
 } from 'src/utils/referral-follow-up.js'
 import {
   highestAllergySeverity,
@@ -1204,14 +1229,29 @@ import { summarizeNewClientDataForAudit }
   from 'src/utils/client-duplicate-audit-summary.js'
 import { hasAddClientDataBeyondFirstLastName }
   from 'src/utils/add-client-beyond-minimal-identity.js'
-import { createClientReferral } from 'src/utils/referral-api.js'
 import {
+  createClientReferral,
+  updateClientReferral,
+  uploadReferralFile,
+} from 'src/utils/referral-api.js'
+import {
+  applyIntakeReferralToBasicInfo,
   buildIntakeReferralFromForm,
   clearNonSelfReferralIntakeFields,
+  INTAKE_REFERRAL_DRAFT_ID,
+  isExtraReferralDraftId,
   isSelfReferredSource,
+  mergeBasicInfoIntoIntakeExtras,
+  mergeExtraReferralDraftsIntoList,
   mergeIntakeReferralIntoList,
   shouldCreateIntakeReferral,
 } from 'src/utils/referral-intake.js'
+import { clinicianSelectLabels } from
+  'src/utils/referral-clinician.js'
+import {
+  isIntakeFollowUpReference,
+  normalizeFollowUpReference,
+} from 'src/utils/follow-up-reference.js'
 import { todayDateUs } from 'src/utils/client-form.js'
 import {
   applyPortalAccountToAddClientForm,
@@ -1491,6 +1531,10 @@ const isIntakeSelfReferred = computed(() =>
   isSelfReferredSource(form.value[ck.referralSource]),
 )
 
+const referringProviderSelectOptions = computed(() =>
+  clinicianSelectLabels(assignedClinicianOptions.value),
+)
+
 watch(
   () => form.value[ck.referralSource],
   source => {
@@ -1554,20 +1598,6 @@ const {
   discardMatch: duplicateDiscardMatch,
   markOpenedMatch: duplicateMarkOpenedMatch,
 } = useClientProgressiveMatch(form, progressiveMatchEnabled)
-
-const followUpReferenceContext = computed(() => {
-  const id = String(props.clientId ?? '').trim()
-  const rawClient = id ? siteStore.clientListSourceById[id] : null
-
-  return {
-    client: rawClient,
-    labs: form.value[clientFormSections.labs] ?? [],
-    insuranceProfiles:
-      form.value[clientFormSections.insurance]?.profiles ?? [],
-    referrals: rawClient?.referrals ?? [],
-    carePlans: rawClient?.care_plans ?? rawClient?.carePlans ?? [],
-  }
-})
 
 const isContactTabActive = computed(
   () => activeTab.value === addClientTabKeys.contact,
@@ -1770,16 +1800,88 @@ const duplicateSaveConfirmOpen = ref(false)
 const duplicateNavigateConfirmOpen = ref(false)
 const pendingSaveDestination = ref(null)
 const pendingScheduleReferral = ref(null)
+const extraReferralDrafts = ref([])
+const basicInfoClinicianIds = ref([])
+const referralInjectedByKey = ref({})
 const intakeReferralCreated = ref(false)
-const referralsForTab = computed(() => mergeIntakeReferralIntoList(
-  clientReferrals.value,
-  form.value,
-  t,
-  {
-    alreadyCreated: intakeReferralCreated.value,
-    skip: isEditMode.value,
-  },
+const intakeReferralExtras = ref({})
+const intakeReferralPendingFiles = ref([])
+const syncingIntakeFromReferral = ref(false)
+const primaryAssignedClinicianId = computed(() => {
+  const ids = Array.isArray(form.value[ck.clinicians])
+    ? form.value[ck.clinicians]
+    : []
+
+  return ids[0] ?? null
+})
+const referralsForTab = computed(() => mergeExtraReferralDraftsIntoList(
+  mergeIntakeReferralIntoList(
+    clientReferrals.value,
+    form.value,
+    t,
+    {
+      alreadyCreated: intakeReferralCreated.value,
+      skip: isEditMode.value,
+      extras: intakeReferralExtras.value,
+    },
+  ),
+  isEditMode.value ? [] : extraReferralDrafts.value,
 ))
+
+const followUpReferenceContext = computed(() => {
+  const id = String(props.clientId ?? '').trim()
+  const rawClient = id ? siteStore.clientListSourceById[id] : null
+
+  return {
+    client: rawClient,
+    labs: form.value[clientFormSections.labs] ?? [],
+    insuranceProfiles:
+      form.value[clientFormSections.insurance]?.profiles ?? [],
+    referrals: referralsForTab.value,
+    carePlans: rawClient?.care_plans ?? rawClient?.carePlans ?? [],
+  }
+})
+
+function syncIntakeExtrasFromBasicInfo() {
+  if (
+    isEditMode.value
+    || syncingIntakeFromReferral.value
+    || !shouldCreateIntakeReferral(form.value)
+  ) {
+    return
+  }
+  intakeReferralExtras.value = mergeBasicInfoIntoIntakeExtras(
+    intakeReferralExtras.value,
+    form.value,
+    assignedClinicianOptions.value,
+  )
+}
+
+watch(assignedClinicianOptions, syncIntakeExtrasFromBasicInfo)
+
+watch(
+  () => form.value[ck.referralSource],
+  source => {
+    if (!isSelfReferredSource(source)) {
+      return
+    }
+    void ensureAssignedClinicianOnClient({
+      referralId: INTAKE_REFERRAL_DRAFT_ID,
+      clinicianId: null,
+    })
+  },
+)
+
+watch(
+  () => [
+    form.value[ck.referringProvider],
+    form.value[ck.referringOrganization],
+    form.value[ck.referralIntakeDate],
+    form.value[ck.referralSourceDetails],
+    form.value[ck.referralSource],
+  ],
+  syncIntakeExtrasFromBasicInfo,
+)
 const duplicatePendingNavigateClientId = ref(null)
 const duplicateReviewOpen = ref(false)
 const duplicateReviewLoading = ref(false)
@@ -1979,14 +2081,33 @@ const selectedAssignedClinicians = computed(() => {
     .filter(Boolean)
 })
 
+function syncClinicianSourcesFromForm() {
+  basicInfoClinicianIds.value = rebuildAssignedClinicianIds(
+    form.value[ck.clinicians],
+    {},
+  )
+  referralInjectedByKey.value = {}
+}
+
+function applyAssignedClinicianSources(basicIds, injectedByKey) {
+  basicInfoClinicianIds.value = basicIds
+  referralInjectedByKey.value = injectedByKey
+  form.value[ck.clinicians] = rebuildAssignedClinicianIds(
+    basicIds,
+    injectedByKey,
+  )
+}
+
 function onAssignedCliniciansUpdate(nextIds) {
-  const previous = Array.isArray(form.value[ck.clinicians])
-    ? form.value[ck.clinicians]
-    : []
-  form.value[ck.clinicians] = ensureCliniciansSelectionOrder(
-    previous,
+  const nextBasic = ensureCliniciansSelectionOrder(
+    basicInfoClinicianIds.value,
     nextIds,
   )
+  const nextInjected = pruneReferralInjectionsInBasic(
+    referralInjectedByKey.value,
+    nextBasic,
+  )
+  applyAssignedClinicianSources(nextBasic, nextInjected)
 }
 
 function setPrimaryAssignedClinician(row) {
@@ -1994,11 +2115,21 @@ function setPrimaryAssignedClinician(row) {
   if (!primaryId) {
     return
   }
-  const current = Array.isArray(form.value[ck.clinicians])
-    ? form.value[ck.clinicians]
-    : []
+  const basic = basicInfoClinicianIds.value
+  const inBasic = basic.some(id => String(id) === primaryId)
+  if (inBasic) {
+    applyAssignedClinicianSources(
+      withPrimaryClinicianFirst(basic, primaryId),
+      referralInjectedByKey.value,
+    )
+
+    return
+  }
+  if (basic.length) {
+    return
+  }
   form.value[ck.clinicians] = withPrimaryClinicianFirst(
-    current,
+    form.value[ck.clinicians],
     primaryId,
   )
 }
@@ -2008,12 +2139,12 @@ function removeAssignedClinician(row) {
   if (!removeId) {
     return
   }
-  const current = Array.isArray(form.value[ck.clinicians])
-    ? form.value[ck.clinicians]
-    : []
-  form.value[ck.clinicians] = current.filter(
-    id => String(id) !== removeId,
+  const next = removeClinicianFromAssignedSources(
+    basicInfoClinicianIds.value,
+    referralInjectedByKey.value,
+    removeId,
   )
+  applyAssignedClinicianSources(next.basicIds, next.injectedByKey)
 }
 
 const cancelModalTitle = computed(() =>
@@ -2089,6 +2220,7 @@ async function loadClientForEdit() {
     getClientMapOptions(),
   )
   applyForm(mapped)
+  syncClinicianSourcesFromForm()
 }
 
 let addClientFormMountAlive = true
@@ -2171,6 +2303,7 @@ async function initializeAddClientForm() {
     return
   }
   resetForm()
+  syncClinicianSourcesFromForm()
   await prefillPortalAccountIfNeeded()
   if (!addClientFormMountAlive) {
     return
@@ -2271,11 +2404,164 @@ async function onNext() {
 function onReferralSchedule(row) {
   pendingScheduleReferral.value = row || null
   activeSubTab.value = CARE_COORDINATION_APPOINTMENTS_SUB_TAB
-  $q.notify({
-    type: quasarNotifyTypes.info,
-    message: t('referralScheduleRedirect'),
-    position: 'top',
+}
+
+function onIntakeReferralDraftUpdate({ referral, pendingFiles } = {}) {
+  syncingIntakeFromReferral.value = true
+  intakeReferralExtras.value = cloneReferralSafe(referral)
+  intakeReferralPendingFiles.value = clonePendingFiles(pendingFiles)
+  applyIntakeReferralToBasicInfo(form.value, referral)
+  nextTick(() => {
+    syncingIntakeFromReferral.value = false
   })
+}
+
+function clonePendingFiles(files) {
+  return Array.isArray(files)
+    ? files.filter(file => file instanceof File)
+    : []
+}
+
+function onUpsertExtraReferralDraft({ referral, pendingFiles } = {}) {
+  const next = {
+    referral: cloneReferralSafe(referral),
+    pendingFiles: clonePendingFiles(pendingFiles),
+  }
+  const id = String(next.referral?.id ?? '')
+  const list = extraReferralDrafts.value
+  const index = list.findIndex(
+    item => String(item?.referral?.id ?? '') === id,
+  )
+  if (index < 0) {
+    extraReferralDrafts.value = [...list, next]
+
+    return
+  }
+  extraReferralDrafts.value = list.map((item, itemIndex) => (
+    itemIndex === index ? next : item
+  ))
+}
+
+function onRemoveExtraReferralDraft(referralId) {
+  const id = String(referralId ?? '')
+  extraReferralDrafts.value = extraReferralDrafts.value.filter(
+    item => String(item?.referral?.id ?? '') !== id,
+  )
+  void ensureAssignedClinicianOnClient({
+    referralId: id,
+    clinicianId: null,
+  })
+}
+
+function cloneReferralSafe(referral) {
+  if (!referral || typeof referral !== 'object') {
+    return {}
+  }
+
+  return {
+    ...referral,
+    diagnoses: Array.isArray(referral.diagnoses)
+      ? referral.diagnoses.map(item => ({ ...item }))
+      : [],
+  }
+}
+
+function idsMatchClinicianList(left, right) {
+  if (left.length !== right.length) {
+    return false
+  }
+
+  return left.every((id, index) => String(id) === String(right[index]))
+}
+
+async function persistAssignedCliniciansIfNeeded() {
+  const clientKey = String(props.clientId ?? '').trim()
+  if (!clientKey) {
+    return
+  }
+  try {
+    await replaceClientClinicians(
+      clientKey,
+      (form.value[ck.clinicians] ?? [])
+        .map(Number)
+        .filter(Number.isFinite),
+    )
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('assignCliniciansSaveError'),
+        position: 'top',
+      })
+    }
+  }
+}
+
+async function ensureAssignedClinicianOnClient(payload = {}) {
+  const referralKey = String(payload?.referralId ?? '').trim()
+  if (!referralKey) {
+    return
+  }
+  const rawId = payload?.clinicianId
+  const parsed = Number(rawId)
+  const clinicianId = Number.isFinite(parsed) && parsed > 0
+    ? String(parsed)
+    : ''
+  const current = Array.isArray(form.value[ck.clinicians])
+    ? form.value[ck.clinicians]
+    : []
+  const result = applyReferralClinicianInjection(
+    referralInjectedByKey.value,
+    referralKey,
+    clinicianId,
+    basicInfoClinicianIds.value,
+  )
+  referralInjectedByKey.value = result.injectedByKey
+  if (idsMatchClinicianList(current, result.assignedIds)) {
+    return
+  }
+  form.value[ck.clinicians] = result.assignedIds
+  await persistAssignedCliniciansIfNeeded()
+}
+
+async function onAppointmentReassignClinician({
+  clinicianId,
+  referralId,
+} = {}) {
+  const nextId = Number(clinicianId)
+  if (!Number.isFinite(nextId) || nextId <= 0) {
+    return
+  }
+  const nextBasic = withPrimaryClinicianFirst(
+    appendAssignedClinicianIfMissing(basicInfoClinicianIds.value, nextId),
+    nextId,
+  )
+  applyAssignedClinicianSources(
+    nextBasic,
+    pruneReferralInjectionsInBasic(
+      referralInjectedByKey.value,
+      nextBasic,
+    ),
+  )
+  await persistAssignedCliniciansIfNeeded()
+  const clientKey = String(props.clientId ?? '').trim()
+  const referralKey = Number(referralId)
+  if (clientKey && Number.isFinite(referralKey) && referralKey > 0) {
+    try {
+      await updateClientReferral(clientKey, {
+        id: referralKey,
+        assignedClinicianId: nextId,
+      })
+    } catch (error) {
+      if (!isAuthSessionEndUIError(error)) {
+        $q.notify({
+          type: quasarNotifyTypes.negative,
+          message: t('referralSaveError'),
+          position: 'top',
+        })
+      }
+    }
+  }
 }
 
 function onAttachmentNavigateSource({ tab, subTab }) {
@@ -2290,16 +2576,13 @@ function onAttachmentNavigateSource({ tab, subTab }) {
 
 function onReferralCreateFollowUp(draft) {
   const section = form.value[clientFormSections.followUps]
-  if (!section?.visible || !draft?.reference) {
+  const result = upsertFollowUpFromReferralDraft(section, draft)
+  if (!result.section) {
     return
   }
-  if (followUpExistsForReferral(section, draft.reference)) {
+  form.value[clientFormSections.followUps] = result.section
+  if (!result.inserted) {
     return
-  }
-  const pendingItem = mapPendingFollowUpFromDraft(draft)
-  form.value[clientFormSections.followUps] = {
-    ...section,
-    pending: [...(section.pending ?? []), pendingItem],
   }
   $q.notify({
     type: quasarNotifyTypes.positive,
@@ -2325,6 +2608,71 @@ function onReferralRemoveFollowUp(referralId) {
     message: t('referralFollowUpRemoved'),
     position: 'top',
   })
+}
+
+async function onFollowUpReassignReferralClinician({
+  referralId,
+  clinicianId,
+} = {}) {
+  const nextId = Number(clinicianId)
+  if (!Number.isFinite(nextId) || nextId <= 0) {
+    return
+  }
+  await ensureAssignedClinicianOnClient({
+    referralId,
+    clinicianId: nextId,
+  })
+  const ref = normalizeFollowUpReference(referralId)
+  if (ref == null) {
+    return
+  }
+  if (isIntakeFollowUpReference(ref)) {
+    intakeReferralExtras.value = {
+      ...intakeReferralExtras.value,
+      assignedClinicianId: nextId,
+    }
+
+    return
+  }
+  if (isExtraReferralDraftId(ref)) {
+    extraReferralDrafts.value = extraReferralDrafts.value.map(item => {
+      if (String(item?.referral?.id ?? '') !== String(ref)) {
+        return item
+      }
+
+      return {
+        ...item,
+        referral: {
+          ...item.referral,
+          assignedClinicianId: nextId,
+        },
+      }
+    })
+
+    return
+  }
+  const existing = (referralsForTab.value ?? []).find(row =>
+    String(normalizeFollowUpReference(row?.id)) === String(ref),
+  )
+  const clientKey = String(props.clientId ?? '').trim()
+  if (!clientKey || !existing) {
+    return
+  }
+  try {
+    await updateClientReferral(clientKey, {
+      ...existing,
+      assignedClinicianId: nextId,
+    })
+    await siteStore.fetchClientById(clientKey)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('referralSaveError'),
+        position: 'top',
+      })
+    }
+  }
 }
 
 function duplicateSaveGateActive() {
@@ -2502,7 +2850,87 @@ function applyMappedClientSections(mapped) {
   }
 }
 
-async function createIntakeReferralAfterClientSave(clientId) {
+async function uploadIntakePendingFiles(clientId, referralId) {
+  const pending = Array.isArray(intakeReferralPendingFiles.value)
+    ? intakeReferralPendingFiles.value.filter(
+      file => file instanceof File,
+    )
+    : []
+  intakeReferralPendingFiles.value = []
+  if (!referralId || !pending.length) {
+    return
+  }
+  for (const file of pending) {
+    await uploadReferralFile(clientId, referralId, file)
+  }
+}
+
+async function persistFollowUpsForSavedReferral(
+  clientId,
+  referral,
+  pendingFromDraft = [],
+  draftReference,
+) {
+  const bound = bindPendingFollowUpsToReferral(
+    pendingFromDraft,
+    draftReference,
+    referral,
+  )
+  const payloads = bound
+    .map(item => buildFollowUpCreatePayload(item))
+    .filter(row => row.type && row.due_date && row.assigned_provider_id)
+  if (!payloads.length && shouldCreateFollowUpFromReferral(referral, {})) {
+    payloads.push(
+      buildFollowUpCreatePayload(buildFollowUpDraftFromReferral(referral)),
+    )
+  }
+  if (!payloads.length) {
+    return
+  }
+  try {
+    const result = await siteStore.patchClientFollowUps(
+      clientId,
+      payloads,
+      t,
+    )
+    const mapped = result?.client && typeof result.client === 'object'
+      ? siteStore.buildEditFormFromClient(
+        result.client,
+        getClientMapOptions(),
+      )
+      : null
+    if (mapped) {
+      applyMappedClientSections(mapped)
+    }
+  } catch (followUpError) {
+    if (isAuthSessionEndUIError(followUpError)) {
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('followUpCreateError'),
+      position: 'top',
+    })
+  }
+}
+
+async function createFollowUpForIntakeReferral(
+  clientId,
+  referral,
+  pendingFromIntake = [],
+) {
+  await persistFollowUpsForSavedReferral(
+    clientId,
+    referral,
+    pendingFromIntake,
+    INTAKE_REFERRAL_DRAFT_ID,
+  )
+}
+
+async function createIntakeReferralAfterClientSave(
+  clientId,
+  pendingFromIntake = [],
+) {
   if (!clientId || !shouldCreateIntakeReferral(form.value)) {
     return
   }
@@ -2511,11 +2939,23 @@ async function createIntakeReferralAfterClientSave(clientId) {
   }
 
   try {
-    await createClientReferral(
+    const extras = {
+      ...intakeReferralExtras.value,
+      assignedClinicianId:
+        intakeReferralExtras.value?.assignedClinicianId
+        ?? primaryAssignedClinicianId.value,
+    }
+    const created = await createClientReferral(
       clientId,
-      buildIntakeReferralFromForm(form.value, t),
+      buildIntakeReferralFromForm(form.value, t, extras),
     )
     intakeReferralCreated.value = true
+    await uploadIntakePendingFiles(clientId, created?.id)
+    await createFollowUpForIntakeReferral(
+      clientId,
+      created,
+      pendingFromIntake,
+    )
   } catch (referralError) {
     if (isAuthSessionEndUIError(referralError)) {
       return
@@ -2528,6 +2968,63 @@ async function createIntakeReferralAfterClientSave(clientId) {
       message: String(referralMsg),
       position: 'top',
     })
+  }
+}
+
+function snapshotExtraReferralDraftsForSave() {
+  const section = form.value[clientFormSections.followUps]
+
+  return extraReferralDrafts.value.map(item => ({
+    draftId: item.referral?.id,
+    pending: snapshotPendingFollowUpsForReference(
+      section,
+      item.referral?.id,
+    ),
+    files: clonePendingFiles(item.pendingFiles),
+    referral: cloneReferralSafe(item.referral),
+  }))
+}
+
+async function uploadExtraPendingFiles(clientId, referralId, files) {
+  const pending = clonePendingFiles(files)
+  if (!referralId || !pending.length) {
+    return
+  }
+  for (const file of pending) {
+    await uploadReferralFile(clientId, referralId, file)
+  }
+}
+
+async function createExtraReferralsAfterClientSave(clientId, extras) {
+  if (!clientId || !extras.length) {
+    return
+  }
+  extraReferralDrafts.value = []
+  for (const item of extras) {
+    try {
+      const created = await createClientReferral(clientId, {
+        ...item.referral,
+        assignedClinicianId:
+          item.referral?.assignedClinicianId
+          ?? primaryAssignedClinicianId.value,
+      })
+      await uploadExtraPendingFiles(clientId, created?.id, item.files)
+      await persistFollowUpsForSavedReferral(
+        clientId,
+        created,
+        item.pending,
+        item.draftId,
+      )
+    } catch (referralError) {
+      if (isAuthSessionEndUIError(referralError)) {
+        return
+      }
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('referralSaveError'),
+        position: 'top',
+      })
+    }
   }
 }
 
@@ -2553,6 +3050,10 @@ async function executeSave(destination = {}) {
 
       applyMappedClientSections(mapped)
     } else {
+      const intakeFollowUps = snapshotIntakePendingFollowUps(
+        form.value[clientFormSections.followUps],
+      )
+      const extraDraftsForSave = snapshotExtraReferralDraftsForSave()
       const created = await siteStore.createClient(form.value, t)
       const createdNumber = clientChartKey(created)
       savedClientId = createdNumber || savedClientId
@@ -2563,7 +3064,14 @@ async function executeSave(destination = {}) {
         )
         applyMappedClientSections(mappedCreate)
       }
-      await createIntakeReferralAfterClientSave(createdNumber)
+      await createIntakeReferralAfterClientSave(
+        createdNumber,
+        intakeFollowUps,
+      )
+      await createExtraReferralsAfterClientSave(
+        createdNumber,
+        extraDraftsForSave,
+      )
     }
     $q.notify({
       type: quasarNotifyTypes.positive,

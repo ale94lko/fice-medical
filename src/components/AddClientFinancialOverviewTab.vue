@@ -6,7 +6,7 @@
       v-if="!hasClientId"
       class="fmh-list-card q-pa-lg text-center">
       <q-icon name="info" size="md" color="grey-7" class="q-mb-sm" />
-      <p class="text-body1 text-grey-8 q-mb-none">
+      <p class="add-client-financial-overview__empty">
         {{ t('appointmentSaveClientFirst') }}
       </p>
     </div>
@@ -15,23 +15,23 @@
       v-else-if="!canViewFinancial"
       class="fmh-list-card q-pa-lg text-center">
       <q-icon name="lock" size="md" color="grey-7" class="q-mb-sm" />
-      <p class="text-body1 text-grey-8 q-mb-none">
+      <p class="add-client-financial-overview__empty">
         {{ t('clientFinancialNoPermission') }}
       </p>
     </div>
 
     <template v-else>
-      <div class="row items-center q-mb-md">
-        <div class="col">
+      <div class="add-client-financial-overview__header">
+        <div class="add-client-financial-overview__heading">
           <SectionHeading
             icon="account_balance_wallet"
             :title="t('clientFinancialOverviewTitle')"
           />
-          <p class="text-body2 text-grey-7 q-mb-none q-mt-xs">
+          <p class="add-client-financial-overview__subtitle">
             {{ t('clientFinancialOverviewSubtitle') }}
           </p>
         </div>
-        <div class="col-auto">
+        <div class="add-client-financial-overview__actions">
           <q-btn
             v-if="canCreatePayment"
             no-caps
@@ -55,14 +55,15 @@
       </div>
 
       <template v-else>
-        <div class="client-list-summary billing-queue-summary
-          row q-col-gutter-md q-mb-lg">
+        <div class="add-client-financial-overview__summary
+          row q-col-gutter-md">
           <div
             v-for="card in cards"
             :key="card.id"
-            class="client-list-summary__col col-12 col-sm-6
-              col-md-4">
-            <article class="client-list-summary__card">
+            class="col-12 col-sm-6 col-md-3">
+            <article
+              class="client-list-summary__card
+                add-client-financial-overview__card">
               <div class="client-list-summary__card-main
                 row items-center no-wrap">
                 <p class="client-list-summary__card-value
@@ -91,60 +92,79 @@
           </div>
         </div>
 
-        <div class="fmh-list-card q-pa-md">
-          <p class="text-subtitle2 text-weight-medium q-mb-sm">
+        <div class="fmh-list-card
+          add-client-financial-overview__panel">
+          <p class="add-client-financial-overview__panel-title">
             {{ t('clientFinancialResponsibilityBreakdown') }}
           </p>
-          <div class="row q-col-gutter-md">
+          <div class="add-client-financial-overview__metrics">
             <div
               v-for="item in breakdownItems"
               :key="item.id"
-              class="col-12 col-sm-6 col-md-3">
-              <p class="text-caption text-grey-7 q-mb-none">
+              class="add-client-financial-overview__metric">
+              <p class="add-client-financial-overview__metric-label
+                q-mb-none">
                 {{ item.label }}
               </p>
-              <p class="text-body1 text-weight-medium q-mb-none">
+              <p class="add-client-financial-overview__metric-value
+                q-mb-none">
                 {{ item.value }}
               </p>
             </div>
           </div>
         </div>
 
-        <div class="q-mt-lg">
-          <p class="text-subtitle2 text-weight-medium q-mb-sm">
+        <div class="add-client-financial-overview__activity">
+          <p class="add-client-financial-overview__panel-title">
             {{ t('clientFinancialRecentActivity') }}
           </p>
           <div
             v-if="!recent.length"
-            class="fmh-list-card q-pa-lg text-center
-              text-grey-7">
-            {{ t('clientLedgerEmpty') }}
+            class="fmh-list-card q-pa-lg text-center">
+            <p class="add-client-financial-overview__empty">
+              {{ t('clientLedgerEmpty') }}
+            </p>
           </div>
           <div
             v-else
             class="fmh-list-card q-pa-none">
-            <div
-              v-for="row in recent"
-              :key="row.id"
-              class="row items-center q-px-md q-py-sm"
-              :data-testid="clientFinancialTestIds.recentRow(
-                row.id,
-              )">
-              <div class="col">
-                <p class="q-mb-none text-weight-medium">
-                  {{ row.description }}
-                </p>
-                <p class="text-caption text-grey-7 q-mb-none">
-                  {{ row.effectiveDateDisplay }}
-                  · {{ typeLabel(row.entryType) }}
-                  · {{ row.referenceNumber || '—' }}
-                </p>
-              </div>
-              <div class="col-auto text-right">
-                <p class="q-mb-none text-weight-medium">
-                  {{ row.amountLabel }}
-                </p>
-              </div>
+            <div class="fmh-table-wrap">
+              <table class="fmh-table">
+                <thead>
+                  <tr>
+                    <th>{{ t('clientLedgerColumnDate') }}</th>
+                    <th>
+                      {{ t('clientLedgerColumnDescription') }}
+                    </th>
+                    <th>{{ t('clientLedgerColumnType') }}</th>
+                    <th>
+                      {{ t('clientLedgerColumnReference') }}
+                    </th>
+                    <th class="text-right">
+                      {{ t('clientLedgerColumnAmount') }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in recent"
+                    :key="row.id"
+                    :data-testid="
+                      clientFinancialTestIds.recentRow(row.id)
+                    ">
+                    <td>{{ row.effectiveDateDisplay }}</td>
+                    <td>{{ row.description }}</td>
+                    <td>{{ typeLabel(row.entryType) }}</td>
+                    <td>{{ row.referenceNumber || '—' }}</td>
+                    <td
+                      class="text-right
+                        add-client-financial-overview__amount"
+                      :class="amountClass(row.amount)">
+                      {{ row.amountLabel }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -207,17 +227,37 @@ const hasClientId = computed(() => {
   return id.length > 0
 })
 
+function lastPaymentCard(data, zero) {
+  const hasPayment = Boolean(
+    data?.lastPaymentNumber
+    || data?.lastPaymentDate
+    || (data?.lastPaymentAmount ?? 0) !== 0,
+  )
+  const details = [
+    data?.lastPaymentNumber,
+    data?.lastPaymentDateDisplay,
+  ].filter(value => value && value !== '—')
+
+  return {
+    id: 'last',
+    label: t('clientFinancialLastPayment'),
+    description: hasPayment && details.length
+      ? details.join(' · ')
+      : t('clientPaymentNoLastPayment'),
+    value: hasPayment
+      ? (data.lastPaymentAmountLabel || zero)
+      : zero,
+    icon: 'paid',
+    tone: 'green',
+  }
+}
+
 const cards = computed(() => {
   const data = summary.value
   const zero = t('clientLedgerZeroBalance')
   const displayBalance = (data?.currentBalance ?? 0) > 0
     ? data.currentBalanceLabel
     : zero
-  const lastPayment = data?.lastPaymentNumber
-    ? `${data.lastPaymentAmountLabel} · ${
-      data.lastPaymentDateDisplay
-    }`
-    : t('clientPaymentNoLastPayment')
 
   return [
     {
@@ -244,14 +284,7 @@ const cards = computed(() => {
       icon: 'savings',
       tone: 'blue',
     },
-    {
-      id: 'last',
-      label: t('clientFinancialLastPayment'),
-      description: data?.lastPaymentNumber || zero,
-      value: lastPayment,
-      icon: 'paid',
-      tone: 'teal',
-    },
+    lastPaymentCard(data, zero),
   ]
 })
 
@@ -290,6 +323,17 @@ function typeLabel(entryType) {
   }
 
   return t(ledgerTypeI18nKey(entryType))
+}
+
+function amountClass(amount) {
+  if (amount < 0) {
+    return 'add-client-financial-overview__amount--credit'
+  }
+  if (amount > 0) {
+    return 'add-client-financial-overview__amount--charge'
+  }
+
+  return ''
 }
 
 async function loadSummary() {

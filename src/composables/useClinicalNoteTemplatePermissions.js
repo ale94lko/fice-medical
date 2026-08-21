@@ -75,6 +75,7 @@ export const clinicalNoteDataSources = [
   'TOBACCO_STATUS',
   'ALLERGIES',
   'ENCOUNTER_QUALITY_MEASURES',
+  'ENCOUNTER_PARTICIPANTS',
 ]
 
 export const clinicalNoteInputTypes = [

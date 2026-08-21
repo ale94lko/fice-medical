@@ -144,6 +144,46 @@ export async function generateIcd10Suggest(encounterId, body = {}) {
   return normalizeAiSuggestion(unwrapData(response.data))
 }
 
+export async function generateIcd10SuggestForClient(clientId, body = {}) {
+  const response = await apiInstance.post(
+    apiPaths.aiSuggestIcd10ForClient(clientId),
+    icd10SuggestPayload(body),
+    generateRequestConfig,
+  )
+
+  return normalizeAiSuggestion(unwrapData(response.data))
+}
+
+export async function generateIcd10SuggestFromText(body = {}) {
+  const response = await apiInstance.post(
+    apiPaths.aiSuggestIcd10FromText,
+    icd10SuggestPayload(body),
+    generateRequestConfig,
+  )
+
+  return normalizeAiSuggestion(unwrapData(response.data))
+}
+
+function icd10SuggestPayload(body = {}) {
+  const payload = {}
+  if (body.clinicalText) {
+    payload.clinical_text = String(body.clinicalText).trim()
+  }
+  if (body.limit != null) {
+    payload.limit = Number(body.limit)
+  }
+  const codes = Array.isArray(body.existingCodes)
+    ? body.existingCodes
+      .map(code => String(code ?? '').trim())
+      .filter(Boolean)
+    : []
+  if (codes.length) {
+    payload.existing_codes = codes
+  }
+
+  return payload
+}
+
 export async function generateNarrativeDraft(encounterId, body = {}) {
   const payload = {}
   if (body.templateSectionId != null) {

@@ -18,6 +18,7 @@
           v-model="localDraft"
           :errors="errors"
           :readonly="readonly"
+          :lock-linked-fields="lockLinkedFields"
           :clinician-options="clinicianOptions"
           :reference-options="referenceOptions"
           :reference-loading="referenceLoading"
@@ -62,6 +63,8 @@ import {
   followUpDraftFromRecord,
   validateFollowUpDraft,
 } from 'src/utils/follow-up-utils.js'
+import { isReferralLinkedFollowUp } from
+  'src/utils/referral-follow-up.js'
 import { followUpTestIds as tid } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -117,6 +120,13 @@ const readonly = computed(() => props.mode === 'view')
 const isAddMode = computed(() => props.mode === 'add')
 const localDraft = ref(createEmptyFollowUpDraft())
 const errors = ref({})
+const lockLinkedFields = computed(() =>
+  !isAddMode.value
+  && (
+    isReferralLinkedFollowUp(localDraft.value)
+    || isReferralLinkedFollowUp(props.record)
+  ),
+)
 
 const dialogTitle = computed(() => {
   if (readonly.value) {

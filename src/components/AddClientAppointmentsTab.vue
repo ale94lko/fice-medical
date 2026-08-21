@@ -205,6 +205,7 @@
       :saving="actionSaving"
       :referral-id="bookingReferralId"
       :initial-clinician-id="bookingClinicianId"
+      :assigned-clinician-id="assignedClinicianId"
       @booked="onBook"
       @cancel="onBookCancel"
     />
@@ -256,7 +257,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -315,9 +316,17 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  assignedClinicianId: {
+    type: [String, Number],
+    default: null,
+  },
 })
 
-const emit = defineEmits(['checked-in', 'booking-referral-consumed'])
+const emit = defineEmits([
+  'checked-in',
+  'booking-referral-consumed',
+  'reassign-clinician',
+])
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -450,8 +459,19 @@ async function refreshClientAppointments() {
 
 function openBookDrawer() {
   bookingReferralId.value = null
-  bookingClinicianId.value = null
+  bookingClinicianId.value = firstPositiveClinicianId(
+    props.assignedClinicianId,
+  )
   bookDrawerOpen.value = true
+}
+
+function firstPositiveClinicianId(value) {
+  const id = Number(value)
+  if (!Number.isFinite(id) || id <= 0) {
+    return null
+  }
+
+  return id
 }
 
 function clearBookingReferral() {
@@ -472,8 +492,12 @@ watch(
       return
     }
     bookingReferralId.value = row.id
-    bookingClinicianId.value = row.assignedClinicianId ?? null
-    bookDrawerOpen.value = true
+    bookingClinicianId.value = firstPositiveClinicianId(
+      row.assignedClinicianId ?? props.assignedClinicianId,
+    )
+    void nextTick(() => {
+      bookDrawerOpen.value = true
+    })
   },
   { immediate: true },
 )
@@ -505,7 +529,22 @@ function confirmDelete(row) {
 
 async function onBook(body) {
   actionSaving.value = true
+  const referralId = bookingReferralId.value
   try {
+    const clinicianId = Number(body?.clinician_id)
+    const assignedId = Number(props.assignedClinicianId)
+    if (
+      Number.isFinite(assignedId)
+      && assignedId > 0
+      && Number.isFinite(clinicianId)
+      && clinicianId > 0
+      && clinicianId !== assignedId
+    ) {
+      emit('reassign-clinician', {
+        clinicianId,
+        referralId,
+      })
+    }
     const result = await bookAppointment(body)
     bookDrawerOpen.value = false
     clearBookingReferral()

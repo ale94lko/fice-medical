@@ -54,8 +54,9 @@
       mode="add"
       :referral="emptyReferral"
       :clinician-options="clinicianOptions"
+      :client-id="clientKey"
       :saving="saving"
-      :can-upload-documents="false"
+      :can-upload-documents="true"
       @save="onReferralSave"
       @cancel="referralOpen = false"
     />
@@ -87,6 +88,7 @@ import { fetchAllCliniciansSelectOptions } from
 import {
   apiErrorMessage as referralApiErrorMessage,
   createClientReferral,
+  uploadReferralFile,
 } from 'src/utils/referral-api.js'
 import { createEmptyReferral } from 'src/utils/referral-orders.js'
 import { useSiteStore } from 'src/stores/site-store.js'
@@ -260,13 +262,20 @@ async function onFollowUpSave(payload) {
   }
 }
 
-async function onReferralSave(referral) {
-  if (!clientKey.value || saving.value) {
+async function onReferralSave(payload) {
+  const referral = payload?.referral ?? payload
+  const pendingFiles = payload?.pendingFiles ?? []
+  if (!clientKey.value || saving.value || !referral) {
     return
   }
   saving.value = true
   try {
-    await createClientReferral(clientKey.value, referral)
+    const saved = await createClientReferral(clientKey.value, referral)
+    for (const file of pendingFiles) {
+      if (file instanceof File) {
+        await uploadReferralFile(clientKey.value, saved.id, file)
+      }
+    }
     referralOpen.value = false
     $q.notify({
       type: quasarNotifyTypes.positive,

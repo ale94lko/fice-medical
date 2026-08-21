@@ -62,7 +62,7 @@
                 class="q-px-sm"
                 icon="content_copy"
                 :disable="!canCopyChiefComplaint"
-                :label="t('encounterDiagnosesAiCopyChiefComplaint')"
+                :label="resolvedCopySourceLabel"
                 :data-testid="tid.diagnosesAiCopyChiefComplaint"
                 @click="copyFromChiefComplaint"
               />
@@ -238,6 +238,8 @@ import { formatRequiredFieldLabel } from 'src/utils/base.js'
 import {
   aiApiErrorMessage,
   generateIcd10Suggest,
+  generateIcd10SuggestForClient,
+  generateIcd10SuggestFromText,
 } from 'src/utils/ai-api.js'
 import { normalizeIcdSuggestions } from 'src/utils/ai-normalize.js'
 import { normalizeIcd10CodeKey } from 'src/utils/icd10-api.js'
@@ -263,6 +265,14 @@ const props = defineProps({
   existingCodes: {
     type: Array,
     default: () => [],
+  },
+  clientId: {
+    type: [Number, String],
+    default: null,
+  },
+  copySourceLabel: {
+    type: String,
+    default: '',
   },
 })
 
@@ -290,6 +300,14 @@ const chiefComplaintText = computed(() =>
 
 const canCopyChiefComplaint = computed(
   () => chiefComplaintText.value.length > 0,
+)
+
+const resolvedCopySourceLabel = computed(() =>
+  props.copySourceLabel || t('encounterDiagnosesAiCopyChiefComplaint'),
+)
+
+const hasClientId = computed(() =>
+  String(props.clientId ?? '').trim().length > 0,
 )
 
 const clinicalTextLabel = computed(() =>
@@ -396,10 +414,26 @@ function toggleSelectAll() {
   )
 }
 
-async function onGenerate() {
-  if (props.encounterId == null) {
-    return
+async function requestIcd10Suggestion(text) {
+  const body = {
+    clinicalText: text,
+    limit: 8,
+    existingCodes: props.existingCodes,
   }
+  if (props.encounterId != null) {
+    return generateIcd10Suggest(props.encounterId, {
+      clinicalText: text,
+      limit: 8,
+    })
+  }
+  if (hasClientId.value) {
+    return generateIcd10SuggestForClient(props.clientId, body)
+  }
+
+  return generateIcd10SuggestFromText(body)
+}
+
+async function onGenerate() {
   const text = String(clinicalText.value ?? '').trim()
   if (!text) {
     clinicalTextError.value = t(
@@ -411,10 +445,7 @@ async function onGenerate() {
   clinicalTextError.value = ''
   generating.value = true
   try {
-    const suggestion = await generateIcd10Suggest(props.encounterId, {
-      clinicalText: text,
-      limit: 8,
-    })
+    const suggestion = await requestIcd10Suggestion(text)
     suggestions.value = normalizeIcdSuggestions(
       suggestion?.result ?? suggestion,
     )

@@ -14,7 +14,7 @@ function unwrapList(data) {
     return data
   }
 
-  return data?.items ?? []
+  return data?.items ?? data?.content ?? []
 }
 
 function trim(value) {
@@ -54,7 +54,9 @@ export function normalizeIcd10Cm(raw) {
     ?? raw.display
     ?? raw.name
     ?? raw.long_description
-    ?? raw.longDescription,
+    ?? raw.longDescription
+    ?? raw.short_description
+    ?? raw.shortDescription,
   )
 
   return {

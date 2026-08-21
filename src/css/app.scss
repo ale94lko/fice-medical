@@ -7,6 +7,7 @@
 @import 'admin-table-standard';
 @import 'client-overview';
 @import 'client-overview-alt';
+@import 'client-financial-overview';
 @import 'encounter-workspace';
 @import 'staff-profile';
 @import 'session-expiry-dialog';
@@ -474,7 +475,8 @@ body.vp-mobile {
   .consent-template-list-page .admin-list-page__subtitle,
   .clinical-audit-list-page .admin-list-page__subtitle,
   .clinical-resource-list-page .admin-list-page__subtitle,
-  .appointment-request-list-page .admin-list-page__subtitle {
+  .appointment-request-list-page .admin-list-page__subtitle,
+  .clinic-messages-page .admin-list-page__subtitle {
     display: none !important;
   }
 }
@@ -2616,6 +2618,32 @@ body.vp-mobile {
   &:hover:not(.disabled) {
     background: color.adjust($ai-accent, $lightness: -6%) !important;
     color: $white !important;
+  }
+}
+
+.app-btn-ai-outline {
+  border-radius: $radius-md;
+  font-weight: 600;
+  font-size: 11px !important;
+  line-height: 1.2;
+  min-height: 22px;
+  padding: 2px 8px !important;
+  color: $ai-accent !important;
+  background: $white !important;
+
+  &:before {
+    border: 1px solid rgba($ai-accent, 0.55) !important;
+    box-shadow: none !important;
+  }
+
+  .q-icon {
+    font-size: 14px !important;
+    color: $ai-accent !important;
+  }
+
+  &:hover:not(.disabled) {
+    background: rgba($ai-accent, 0.08) !important;
+    color: $ai-accent !important;
   }
 }
 
@@ -5587,6 +5615,10 @@ body.vp-mobile {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.referrals-table__reason-cell {
+  max-width: 240px;
 }
 
 .referrals-table__party {

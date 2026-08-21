@@ -12,10 +12,15 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+    padding-bottom: 12px;
   }
 
   .admin-list-page__header {
     margin-bottom: 8px;
+  }
+
+  .admin-list-page__title-row {
+    align-items: flex-end;
   }
 
   .admin-list-page__title {
@@ -32,38 +37,57 @@
 
 .clinic-messages {
   display: flex;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
   overflow: hidden;
   border: 1px solid $border-subtle;
   border-radius: 12px;
   background: $surface;
+  font-family: $typography-font-family;
+  font-size: 14px;
+  line-height: 1.4;
+  color: $text-strong;
 }
 
 .clinic-messages__inbox {
   display: flex;
   flex-direction: column;
-  width: 320px;
-  flex: 0 0 320px;
+  width: 300px;
+  flex: 0 0 300px;
   min-width: 0;
+  min-height: 0;
   border-right: 1px solid $border-subtle;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .clinic-messages__search {
   flex: 0 0 auto;
-  margin: 12px;
+  margin: 12px 12px 8px;
+
+  .q-field__native,
+  .q-field__input {
+    font-size: 14px;
+  }
+}
+
+.clinic-messages__list {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .clinic-messages__empty,
 .clinic-messages__placeholder {
   padding: 16px;
   color: $text-muted;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .clinic-messages__row {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 10px 14px;
   border: 0;
@@ -71,6 +95,7 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
+  position: relative;
 }
 
 .clinic-messages__row:hover {
@@ -78,10 +103,26 @@
 }
 
 .clinic-messages__row--active {
-  background: rgba($primary, 0.12);
+  background: rgba($primary, 0.1);
 }
 
-.clinic-messages__row-head {
+.clinic-messages__row--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: $primary;
+}
+
+.clinic-messages__row-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.clinic-messages__row-head,
+.clinic-messages__row-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -90,15 +131,39 @@
 
 .clinic-messages__row-name {
   color: $text-strong;
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 600;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .clinic-messages__row-preview,
 .clinic-messages__row-time {
   color: $text-muted;
-  font-size: 0.75rem;
+}
+
+.clinic-messages__row-time {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.clinic-messages__row-preview {
   margin-top: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.clinic-messages__unread {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: $primary;
 }
 
 .clinic-messages__thread {
@@ -121,6 +186,9 @@
 .clinic-messages__thread-title {
   flex: 1 1 auto;
   min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: $text-strong;
 }
 
 .clinic-messages__thread-split {
@@ -128,6 +196,53 @@
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+}
+
+.clinic-message-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #d4ede9;
+
+  .stored-file-avatar,
+  .stored-file-avatar__image,
+  .stored-file-avatar__preview-btn,
+  .client-overview-profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+  }
+
+  .stored-file-avatar__image {
+    object-fit: cover;
+  }
+}
+
+.clinic-message-avatar--photo {
+  background: $surface-muted;
+  color: $text-strong;
+}
+
+.clinic-message-avatar--sm {
+  width: 32px;
+  height: 32px;
+  font-size: 0.75rem;
+}
+
+.clinic-message-avatar--md {
+  width: 40px;
+  height: 40px;
+  font-size: 0.875rem;
+}
+
+.clinic-message-avatar--lg {
+  width: 64px;
+  height: 64px;
+  font-size: 1.25rem;
 }
 
 .clinic-messages-thread {
@@ -138,6 +253,15 @@
   min-height: 0;
 }
 
+@media (min-width: 1024px) {
+  .clinic-messages-thread,
+  .clinic-messages-client {
+    flex: 1 1 50%;
+    width: 50%;
+    max-width: 50%;
+  }
+}
+
 .clinic-messages-thread__list {
   flex: 1 1 auto;
   min-height: 0;
@@ -145,52 +269,87 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+}
+
+.clinic-messages-thread__loading,
+.clinic-messages-client__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 80px;
+  padding: 24px;
 }
 
 .clinic-messages-thread__empty {
   color: $text-muted;
-  font-size: 0.875rem;
+  font-size: 14px;
+}
+
+.clinic-messages-thread__date {
+  display: flex;
+  justify-content: center;
+}
+
+.clinic-messages-thread__date span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: $surface-muted;
+  color: $text-muted;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.clinic-messages-thread__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: min(100%, 32rem);
+}
+
+.clinic-messages-thread__row--mine {
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 
 .clinic-messages-thread__item {
-  align-self: flex-start;
-  max-width: min(100%, 28rem);
+  min-width: 0;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: $surface-muted;
-  border: 1px solid $border-subtle;
 }
 
 .clinic-messages-thread__item--mine {
-  align-self: flex-end;
   background: rgba($primary, 0.12);
 }
 
 .clinic-messages-thread__meta {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 4px;
 }
 
 .clinic-messages-thread__author {
   color: $text-strong;
-  font-size: 0.75rem;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .clinic-messages-thread__time {
   color: $text-muted;
-  font-size: 0.75rem;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
   flex: 0 0 auto;
 }
 
 .clinic-messages-thread__body {
   margin: 0;
   color: $text-strong;
-  font-size: 0.875rem;
+  font-size: 14px;
   line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
@@ -236,6 +395,28 @@
   background: $surface;
 }
 
+.clinic-messages-thread__composer-box {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 40px;
+  overflow: hidden;
+  padding: 4px;
+  border: 1px solid $border-subtle;
+  border-radius: 24px;
+  background: $surface;
+}
+
+.clinic-messages-thread__attach.q-btn {
+  flex: 0 0 32px;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+}
+
 .clinic-messages-thread input[type='file'] {
   display: none;
 }
@@ -243,89 +424,175 @@
 .clinic-messages-thread__input {
   flex: 1 1 auto;
   min-width: 0;
+
+  &.q-field:has(textarea) {
+    .q-field__control {
+      min-height: 32px !important;
+      height: auto !important;
+      align-items: center;
+    }
+
+    .q-field__control-container {
+      min-height: 32px;
+      padding-top: 0;
+      padding-bottom: 0;
+      align-items: center;
+    }
+
+    textarea.q-field__native {
+      min-height: 20px;
+      font-size: 14px;
+      line-height: 20px;
+      padding: 6px 8px 6px 4px;
+      resize: none;
+    }
+  }
 }
 
 .clinic-messages-client {
   display: flex;
   flex-direction: column;
-  flex: 0 0 300px;
-  width: 300px;
+  flex: 1 1 auto;
+  width: auto;
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow: hidden;
   border-left: 1px solid $border-subtle;
-  background: $surface-muted;
-  padding: 12px 14px 16px;
+  background: $surface;
+  padding: 16px 16px 0;
 }
 
 .clinic-messages-client__intro {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
   margin-bottom: 12px;
+}
+
+.clinic-messages-client__intro-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .clinic-messages-client__name {
   color: $text-strong;
-  font-size: 0.9375rem;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 1.3;
-  max-width: 100%;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  min-width: 0;
+}
+
+.clinic-messages-client__open {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.clinic-messages-client__chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .clinic-messages-client__meta {
   color: $text-muted;
-  font-size: 0.75rem;
+  font-size: 14px;
   max-width: 100%;
 }
 
 .clinic-messages-client__banner {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+}
+
+.clinic-messages-client__tabs {
+  flex: 0 0 auto;
+  min-height: 40px;
+}
+
+.clinic-messages-client__tabs .q-tab {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.clinic-messages-client__panels {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: transparent;
+}
+
+.clinic-messages-client__panels .q-tab-panel {
+  padding: 12px 0 16px;
+  overflow: auto;
 }
 
 .clinic-messages-client__facts {
-  margin: 0 0 4px;
+  margin: 0;
 }
 
 .clinic-messages-client__fact {
   display: grid;
-  grid-template-columns: 7.5rem 1fr;
+  grid-template-columns: minmax(7.5rem, 40%) 1fr;
   gap: 8px;
-  padding: 5px 0;
+  padding: 8px 0;
   border-bottom: 1px solid $border-subtle;
 }
 
 .clinic-messages-client__fact dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: $text-muted;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .clinic-messages-client__fact dd {
   margin: 0;
   color: $text-strong;
-  font-size: 0.8125rem;
+  font-size: 14px;
   min-width: 0;
 }
 
 .clinic-messages-client__section {
-  margin-top: 14px;
+  margin-top: 4px;
+}
+
+.clinic-messages-client__section + .clinic-messages-client__section {
+  margin-top: 16px;
+}
+
+.clinic-messages-client__section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .clinic-messages-client__heading {
-  margin: 0 0 6px;
+  margin: 0 0 8px;
   color: $text-strong;
-  font-size: 0.75rem;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
+.clinic-messages-client__section-head .clinic-messages-client__heading {
+  margin-bottom: 0;
+}
+
 .clinic-messages-client__line {
   margin: 0 0 4px;
   color: $text-strong;
-  font-size: 0.8125rem;
+  font-size: 14px;
   line-height: 1.35;
 }
 
@@ -336,7 +603,7 @@
 
 .clinic-messages-client__hint {
   color: $text-muted;
-  font-size: 0.75rem;
+  font-size: 14px;
   font-weight: 400;
 }
 
@@ -344,22 +611,58 @@
 .clinic-messages-client__empty-line {
   margin: 0;
   color: $text-muted;
-  font-size: 0.8125rem;
+  font-size: 14px;
 }
 
 .clinic-messages-client__appt {
-  padding: 8px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
   border-bottom: 1px solid $border-subtle;
 }
 
 .clinic-messages-client__appt:last-child {
   border-bottom: 0;
-  padding-bottom: 0;
+}
+
+.clinic-messages-client__appt-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 48px;
+  width: 48px;
+  padding: 6px 4px;
+  border: 1px solid $border-subtle;
+  border-radius: 8px;
+  background: $surface-muted;
+}
+
+.clinic-messages-client__appt-date span {
+  color: $primary;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.clinic-messages-client__appt-date strong {
+  color: $text-strong;
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.clinic-messages-client__appt-body {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .clinic-messages-client__appt-when {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: $text-strong;
-  font-size: 0.8125rem;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -375,11 +678,6 @@
   .clinic-messages__inbox {
     width: 260px;
     flex-basis: 260px;
-  }
-
-  .clinic-messages-client {
-    flex-basis: 260px;
-    width: 260px;
   }
 }
 
@@ -406,6 +704,7 @@
     display: flex;
     flex: 1 1 auto;
     width: 100%;
+    max-width: none;
     border-left: 0;
   }
 }

@@ -60,7 +60,6 @@
         :key="file.id"
         class="lab-attachment-upload__item row items-center no-wrap">
         <button
-          v-if="readonly"
           type="button"
           class="lab-attachment-upload__open col row items-center
             no-wrap"
@@ -82,23 +81,43 @@
             </q-tooltip>
           </span>
         </button>
-        <template v-else>
-          <q-icon
-            name="attach_file"
-            size="18px"
-            class="lab-attachment-upload__file-icon"
-          />
-          <span class="lab-attachment-upload__name col text-body2">
-            {{ file.name }}
-            <q-tooltip
-              class="app-info-tooltip"
-              anchor="top middle"
-              self="bottom middle"
-              :offset="[0, 6]">
-              {{ file.name }}
-            </q-tooltip>
-          </span>
-        </template>
+        <q-btn
+          flat
+          round
+          dense
+          icon="visibility"
+          color="grey-7"
+          :aria-label="t('labActionPreview')"
+          :data-testid="labTid.attachmentPreview"
+          @click.stop="emitPreview(file)"
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionPreview') }}
+          </q-tooltip>
+        </q-btn>
+        <q-btn
+          v-if="canDownload(file)"
+          flat
+          round
+          dense
+          icon="download"
+          color="grey-7"
+          :aria-label="t('labActionDownloadAttachment')"
+          :data-testid="labTid.attachmentDownload"
+          @click.stop="emit('download', file.id)"
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('labActionDownloadAttachment') }}
+          </q-tooltip>
+        </q-btn>
         <q-btn
           v-if="!readonly"
           flat
@@ -110,44 +129,6 @@
           :data-testid="labTid.attachmentRemove"
           @click.stop="emit('remove', file.id)"
         />
-        <template v-else>
-          <q-btn
-            flat
-            round
-            dense
-            icon="visibility"
-            color="grey-7"
-            :aria-label="t('labActionPreview')"
-            :data-testid="labTid.attachmentPreview"
-            @click.stop="emitPreview(file)"
-          >
-            <q-tooltip
-              class="app-info-tooltip"
-              anchor="top middle"
-              self="bottom middle"
-              :offset="[0, 6]">
-              {{ t('labActionPreview') }}
-            </q-tooltip>
-          </q-btn>
-          <q-btn
-            flat
-            round
-            dense
-            icon="download"
-            color="grey-7"
-            :aria-label="t('labActionDownloadAttachment')"
-            :data-testid="labTid.attachmentDownload"
-            @click.stop="emit('download', file.id)"
-          >
-            <q-tooltip
-              class="app-info-tooltip"
-              anchor="top middle"
-              self="bottom middle"
-              :offset="[0, 6]">
-              {{ t('labActionDownloadAttachment') }}
-            </q-tooltip>
-          </q-btn>
-        </template>
       </li>
     </ul>
     <div
@@ -210,6 +191,12 @@ const displayError = computed(() => props.error || localError.value)
 
 function emitPreview(file) {
   emit('preview', file)
+}
+
+function canDownload(file) {
+  const id = String(file?.id ?? '')
+
+  return Boolean(id) && !id.startsWith('pending-')
 }
 
 function fileExtension(fileName) {

@@ -58,6 +58,102 @@ export function ensureCliniciansSelectionOrder(prevIds, nextIds) {
   return next
 }
 
+/**
+ * Adds a clinician to the assigned list if missing.
+ * Empty list: the new clinician becomes primary (first).
+ * Existing list: append only; primary stays first.
+ */
+export function appendAssignedClinicianIfMissing(ids, clinicianId) {
+  const nextId = String(clinicianId ?? '').trim()
+  const list = withPrimaryClinicianFirst(ids, null)
+  if (!nextId || list.includes(nextId)) {
+    return list
+  }
+
+  return [...list, nextId]
+}
+
+export function normalizeClinicianIdList(ids) {
+  return withPrimaryClinicianFirst(ids, null)
+}
+
+export function rebuildAssignedClinicianIds(basicIds, injectedByKey) {
+  const basic = normalizeClinicianIdList(basicIds)
+  const seen = new Set(basic)
+  const injected = []
+  for (const raw of Object.values(injectedByKey ?? {})) {
+    const id = String(raw ?? '').trim()
+    if (!id || seen.has(id)) {
+      continue
+    }
+    seen.add(id)
+    injected.push(id)
+  }
+
+  return [...basic, ...injected]
+}
+
+export function pruneReferralInjectionsInBasic(injectedByKey, basicIds) {
+  const basicSet = new Set(normalizeClinicianIdList(basicIds))
+  const next = {}
+  Object.entries(injectedByKey ?? {}).forEach(([key, raw]) => {
+    const id = String(raw ?? '').trim()
+    if (!id || basicSet.has(id)) {
+      return
+    }
+    next[key] = id
+  })
+
+  return next
+}
+
+export function applyReferralClinicianInjection(
+  injectedByKey,
+  referralKey,
+  clinicianId,
+  basicIds,
+) {
+  const key = String(referralKey ?? '').trim()
+  const nextId = String(clinicianId ?? '').trim()
+  const basicSet = new Set(normalizeClinicianIdList(basicIds))
+  const current = pruneReferralInjectionsInBasic(injectedByKey, basicIds)
+  if (key) {
+    if (!nextId || basicSet.has(nextId)) {
+      delete current[key]
+    } else {
+      current[key] = nextId
+    }
+  }
+
+  return {
+    injectedByKey: current,
+    assignedIds: rebuildAssignedClinicianIds(basicIds, current),
+  }
+}
+
+export function removeClinicianFromAssignedSources(
+  basicIds,
+  injectedByKey,
+  clinicianId,
+) {
+  const removeId = String(clinicianId ?? '').trim()
+  const basic = normalizeClinicianIdList(basicIds)
+    .filter(id => id !== removeId)
+  const injected = {}
+  Object.entries(injectedByKey ?? {}).forEach(([key, raw]) => {
+    const id = String(raw ?? '').trim()
+    if (id && id !== removeId) {
+      injected[key] = id
+    }
+  })
+
+  return {
+    basicIds: basic,
+    injectedByKey: injected,
+    assignedIds: rebuildAssignedClinicianIds(basic, injected),
+  }
+}
+
 export function normalizeClinicianIdsForForm(raw) {
   if (!Array.isArray(raw)) {
     return []

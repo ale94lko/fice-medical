@@ -32,6 +32,18 @@ export function resolveGeneratedNoteEditSource(section = {}) {
   if (key === 'encounter_info') {
     return null
   }
+  if (sourceType === 'CARE_PLAN'
+    || key === 'care_plan_progress'
+    || key.includes('care_plan')) {
+    return {
+      workspaceTab: encounterWorkspaceTabs.clinical,
+      clinicalSubTab: encounterClinicalSubTabs.carePlans,
+    }
+  }
+  if (sourceType === 'ENCOUNTER_PARTICIPANTS'
+    || key === 'participants') {
+    return { workspaceTab: encounterWorkspaceTabs.visit }
+  }
   if (key === 'chief_complaint'
     || key === 'diagnoses'
     || sourceType === 'REASON_FOR_VISIT'

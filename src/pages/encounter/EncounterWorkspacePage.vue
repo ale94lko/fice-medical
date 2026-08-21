@@ -124,6 +124,7 @@
           :can-edit="canEditNarrative"
           :can-use-ai-draft="canUseNarrativeAiDraft"
           :can-view-screenings="canViewScreenings"
+          :can-view-care-plans="canViewCarePlans"
           :can-add-screenings="canAddScreeningsHere"
           :can-edit-screenings="canEditScreeningsHere"
           @saved="onNarrativeSaved"
@@ -356,6 +357,7 @@ const {
   canViewScreenings,
   canAddScreenings,
   canEditScreenings,
+  canViewCarePlans,
   canAddLabs,
   canEditLabs,
   canAddDiagnosticStudies,

@@ -3,16 +3,7 @@
     class="row q-col-gutter-sm items-center
       appointment-service-lines__search-row">
     <div class="col">
-      <div
-        v-if="loading"
-        class="form-field-loading-shell"
-        role="status"
-        :aria-label="t('appLoading')"
-        :data-testid="testIdPrefix + '-search-loading'">
-        <q-spinner color="grey-7" size="24px" />
-      </div>
       <q-select
-        v-else
         :model-value="modelValue"
         outlined
         hide-bottom-space
@@ -25,6 +16,7 @@
         option-label="label"
         :options="options"
         :disable="disable"
+        :loading="loading"
         :placeholder="placeholder"
         :data-testid="testIdPrefix + '-search'"
         @update:model-value="emit('update:modelValue', $event)"

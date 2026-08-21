@@ -26,11 +26,14 @@ import {
 } from 'src/utils/secure-message-api.js'
 import {
   conversationMatchesQuery,
+  createPendingSecureMessage,
+  dropMatchedPendingMessages,
   lastNumericMessageId,
   mergeSecureMessages,
+  replacePendingSecureMessage,
 } from 'src/utils/secure-message-normalize.js'
 
-const POLL_MS = 15000
+const POLL_MS = 5000
 
 function routeClientNumber(route) {
   return String(route.query.clientNumber ?? '').trim()
@@ -49,10 +52,11 @@ export function useClinicMessagesInbox() {
   const inbox = ref([])
   const active = ref(null)
   const messages = ref([])
-  const sending = ref(false)
-  const loading = ref(false)
+  const sendInFlight = ref(0)
+  const threadLoading = ref(false)
   const searchQuery = ref('')
   let pollTimer = null
+  let openSeq = 0
 
   const previewUrls = useSecureMessageImagePreviews(
     messages,
@@ -104,16 +108,43 @@ export function useClinicMessagesInbox() {
     if (!conversationId) {
       return
     }
+    const seq = openSeq + 1
+    openSeq = seq
     const previousId = active.value?.id
-    if (refresh || previousId !== conversationId) {
-      active.value = await getStaffConversation(conversationId)
-      const listed = await listStaffMessages(conversationId)
-      if (listed.length || previousId !== conversationId) {
-        messages.value = listed
-      }
+    const showLoader = refresh && (
+      previousId !== conversationId
+      || !messages.value.length
+    )
+    if (showLoader) {
+      threadLoading.value = true
     }
-    if (messages.value.length) {
-      await markRead(conversationId)
+    try {
+      if (refresh || previousId !== conversationId) {
+        const conversation = await getStaffConversation(
+          conversationId,
+        )
+        if (seq !== openSeq) {
+          return
+        }
+        active.value = conversation
+        const listed = await listStaffMessages(conversationId)
+        if (seq !== openSeq) {
+          return
+        }
+        if (listed.length || previousId !== conversationId) {
+          messages.value = listed
+        }
+      }
+      if (seq !== openSeq) {
+        return
+      }
+      if (messages.value.length) {
+        await markRead(conversationId)
+      }
+    } finally {
+      if (seq === openSeq) {
+        threadLoading.value = false
+      }
     }
   }
 
@@ -138,7 +169,7 @@ export function useClinicMessagesInbox() {
     }
     const conversationId = conversationIdFromRoute(route)
     if (!conversationId) {
-      if (sending.value) {
+      if (sendInFlight.value) {
         return
       }
       active.value = null
@@ -162,9 +193,18 @@ export function useClinicMessagesInbox() {
     if (!row?.id) {
       return
     }
-    await openConversation(row.id)
+    if (active.value?.id !== row.id) {
+      active.value = row
+      messages.value = []
+    }
+    const opening = openConversation(row.id)
     if (conversationIdFromRoute(route) !== row.id) {
       await router.push(clinicMessagesLocation(row.id))
+    }
+    try {
+      await opening
+    } catch (error) {
+      notifyOpenError(error)
     }
   }
 
@@ -175,23 +215,98 @@ export function useClinicMessagesInbox() {
   }
 
   async function poll() {
-    if (document.hidden || sending.value) {
+    if (document.hidden) {
       return
     }
-    await loadInbox()
+    try {
+      await loadInbox()
+      const conversationId = active.value?.id
+      if (!conversationId) {
+        return
+      }
+      const incoming = await listStaffMessages(
+        conversationId,
+        lastMessageId(messages.value),
+      )
+      if (!incoming.length) {
+        return
+      }
+      messages.value = dropMatchedPendingMessages(
+        mergeSecureMessages(messages.value, incoming),
+        incoming,
+      )
+      await markRead(conversationId)
+    } catch {
+      // Keep the last successful snapshot.
+    }
+  }
+
+  function onVisibilityChange() {
+    if (!document.hidden) {
+      void poll()
+    }
+  }
+
+  function notifySendError(error) {
+    if (isAuthSessionEndUIError(error)) {
+      return
+    }
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('portalMessagesSendError'),
+    })
+  }
+
+  function patchInboxPreview(conversationId, pending) {
+    const preview = pending.body
+      || pending.file?.originalFilename
+      || ''
+    inbox.value = inbox.value.map((row) => {
+      if (row.id !== conversationId) {
+        return row
+      }
+
+      return {
+        ...row,
+        lastMessageAt: pending.createdAt,
+        lastMessagePreview: preview,
+      }
+    })
+  }
+
+  async function persistPending(pending, send) {
     const conversationId = active.value?.id
     if (!conversationId) {
       return
     }
-    const incoming = await listStaffMessages(
-      conversationId,
-      lastMessageId(messages.value),
+    messages.value = mergeSecureMessages(
+      messages.value,
+      [pending],
     )
-    if (!incoming.length) {
-      return
+    patchInboxPreview(conversationId, pending)
+    sendInFlight.value += 1
+    try {
+      const saved = await send()
+      if (saved) {
+        messages.value = replacePendingSecureMessage(
+          messages.value,
+          pending.id,
+          saved,
+        )
+      } else {
+        await mergeSent(saved)
+      }
+      await loadInbox()
+    } catch (error) {
+      messages.value = replacePendingSecureMessage(
+        messages.value,
+        pending.id,
+        null,
+      )
+      notifySendError(error)
+    } finally {
+      sendInFlight.value -= 1
     }
-    messages.value = mergeSecureMessages(messages.value, incoming)
-    await markRead(conversationId)
   }
 
   async function mergeSent(saved) {
@@ -210,8 +325,8 @@ export function useClinicMessagesInbox() {
     try {
       const listed = await listStaffMessages(conversationId)
       if (listed.length) {
-        messages.value = mergeSecureMessages(
-          messages.value,
+        messages.value = dropMatchedPendingMessages(
+          mergeSecureMessages(messages.value, listed),
           listed,
         )
       }
@@ -224,40 +339,42 @@ export function useClinicMessagesInbox() {
     if (!active.value?.id || !canSend.value) {
       return
     }
-    sending.value = true
-    try {
-      const saved = await sendStaffMessage(active.value.id, body)
-      await mergeSent(saved)
-      await loadInbox()
-    } finally {
-      sending.value = false
-    }
+    const conversationId = active.value.id
+    const pending = createPendingSecureMessage({
+      conversationId,
+      body,
+    })
+    await persistPending(
+      pending,
+      () => sendStaffMessage(conversationId, body),
+    )
   }
 
   async function onUpload(file) {
     if (!active.value?.id || !canSend.value) {
       return
     }
-    sending.value = true
-    try {
-      const saved = await sendStaffMessageFile(
-        active.value.id,
-        file,
-      )
-      await mergeSent(saved)
-      await loadInbox()
-    } finally {
-      sending.value = false
-    }
+    const conversationId = active.value.id
+    const pending = createPendingSecureMessage({
+      conversationId,
+      file,
+    })
+    await persistPending(
+      pending,
+      () => sendStaffMessageFile(conversationId, file),
+    )
   }
 
   async function onDownload(file) {
-    if (!active.value?.id || !file?.id) {
+    const fileId = Number(file?.id)
+    if (!active.value?.id
+      || !Number.isFinite(fileId)
+      || fileId <= 0) {
       return
     }
     const payload = await downloadStaffMessageFile(
       active.value.id,
-      file.id,
+      fileId,
     )
     triggerBlobDownload(
       payload.blob,
@@ -288,24 +405,29 @@ export function useClinicMessagesInbox() {
   )
 
   onMounted(async() => {
-    loading.value = true
     try {
       await loadInbox()
       await syncFromRoute()
     } catch (error) {
       notifyOpenError(error)
-    } finally {
-      loading.value = false
     }
     pollTimer = window.setInterval(() => {
       void poll()
     }, POLL_MS)
+    document.addEventListener(
+      'visibilitychange',
+      onVisibilityChange,
+    )
   })
 
   onUnmounted(() => {
     if (pollTimer) {
       window.clearInterval(pollTimer)
     }
+    document.removeEventListener(
+      'visibilitychange',
+      onVisibilityChange,
+    )
   })
 
   return {
@@ -314,14 +436,12 @@ export function useClinicMessagesInbox() {
     filteredInbox,
     active,
     messages,
-    sending,
-    loading,
     searchQuery,
     previewUrls,
     isMobile,
     showInboxPanel,
     showThreadPanel,
-    loadInbox,
+    threadLoading,
     selectConversation,
     closeThread,
     onSend,

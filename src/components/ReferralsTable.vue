@@ -74,9 +74,18 @@
     <template #body-cell-reason="scope">
       <q-td
         :props="scope"
-        class="admin-data-table__secondary-cell">
+        class="admin-data-table__secondary-cell
+          referrals-table__reason-cell">
         <span class="referrals-table__ellipsis">
           {{ scope.row.reason || '—' }}
+          <q-tooltip
+            v-if="reasonTooltip(scope.row.reason)"
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ scope.row.reason }}
+          </q-tooltip>
         </span>
       </q-td>
     </template>
@@ -152,6 +161,46 @@
           </q-tooltip>
         </q-btn>
         <q-btn
+          v-if="canDeclineRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="thumb_down"
+          :data-testid="tid.rowDecline(row.id)"
+          :size="siteBreakpoints.SM"
+          :aria-label="t('referralActionDecline')"
+          @click="emit('decline', row)"
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('referralActionDecline') }}
+          </q-tooltip>
+        </q-btn>
+        <q-btn
+          v-if="canCloseRow(row)"
+          flat
+          round
+          dense
+          class="app-btn-icon-action"
+          icon="cancel"
+          :data-testid="tid.rowCancel(row.id)"
+          :size="siteBreakpoints.SM"
+          :aria-label="t('referralActionClose')"
+          @click="emit('close', row)"
+        >
+          <q-tooltip
+            class="app-info-tooltip"
+            anchor="top middle"
+            self="bottom middle"
+            :offset="[0, 6]">
+            {{ t('referralActionClose') }}
+          </q-tooltip>
+        </q-btn>
+        <q-btn
           v-if="canDeleteRow(row)"
           flat
           round
@@ -203,9 +252,15 @@ import { adminTableActionIcons } from 'src/constants/admin-table.js'
 import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { referralI18nKey } from 'src/utils/referral-i18n.js'
-import { isIntakeReferralDraft } from 'src/utils/referral-intake.js'
+import {
+  isExtraReferralDraft,
+  isIntakeReferralDraft,
+  isLocalReferralDraft,
+} from 'src/utils/referral-intake.js'
 import {
   formatReferralListDate,
+  isReferralClosable,
+  isReferralDeclinable,
   isReferralDeletable,
   isReferralSchedulable,
 } from 'src/utils/referral-normalize.js'
@@ -240,9 +295,24 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  canDecline: {
+    type: Boolean,
+    default: true,
+  },
+  canClose: {
+    type: Boolean,
+    default: true,
+  },
 })
 
-const emit = defineEmits(['view', 'edit', 'schedule', 'delete'])
+const emit = defineEmits([
+  'view',
+  'edit',
+  'schedule',
+  'decline',
+  'close',
+  'delete',
+])
 
 const { t } = useI18n()
 const { showGrid } = useAdminTableMobileGrid()
@@ -317,8 +387,8 @@ const columns = computed(() => [
     align: 'left',
     field: row => row.reason,
     sortable: false,
-    headerStyle: 'min-width: 120px',
-    style: 'min-width: 120px',
+    headerStyle: 'min-width: 140px; max-width: 240px',
+    style: 'min-width: 140px; max-width: 240px',
   },
   {
     name: 'status',
@@ -336,8 +406,8 @@ const columns = computed(() => [
     field: row => row.id,
     sortable: false,
     required: true,
-    headerStyle: 'min-width: 140px; width: 140px',
-    style: 'min-width: 140px; width: 140px',
+    headerStyle: 'min-width: 200px; width: 200px',
+    style: 'min-width: 200px; width: 200px',
   },
 ])
 
@@ -448,16 +518,39 @@ function partyClinicianEntries(row) {
 }
 
 function canEditRow(row) {
-  return props.canEdit
-    && isReferralEditable(row)
-    && !isIntakeReferralDraft(row)
+  return props.canEdit && isReferralEditable(row)
 }
 
 function canScheduleRow(row) {
-  return props.canSchedule && isReferralSchedulable(row)
+  return props.canSchedule
+    && isReferralSchedulable(row)
+    && !isLocalReferralDraft(row)
+}
+
+function canDeclineRow(row) {
+  return props.canDecline
+    && isReferralDeclinable(row)
+    && !isLocalReferralDraft(row)
+}
+
+function canCloseRow(row) {
+  return props.canClose
+    && isReferralClosable(row)
+    && !isLocalReferralDraft(row)
 }
 
 function canDeleteRow(row) {
+  if (isIntakeReferralDraft(row)) {
+    return false
+  }
+  if (isExtraReferralDraft(row)) {
+    return props.canEdit || props.canDelete
+  }
+
   return props.canDelete && isReferralDeletable(row)
+}
+
+function reasonTooltip(reason) {
+  return String(reason ?? '').trim().length > 0
 }
 </script>

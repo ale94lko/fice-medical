@@ -903,6 +903,7 @@ export const labMaxResultSummaryLength = 500
 export const labMaxComponentNotesLength = 255
 
 export const followUpStatuses = {
+  pending: 'PENDING',
   scheduled: 'SCHEDULED',
   completed: 'COMPLETED',
   cancelled: 'CANCELLED',
@@ -910,6 +911,7 @@ export const followUpStatuses = {
 }
 
 export const followUpStoredStatuses = {
+  pending: 'PENDING',
   scheduled: 'SCHEDULED',
   completed: 'COMPLETED',
   cancelled: 'CANCELLED',
@@ -2265,6 +2267,10 @@ export const apiPaths = {
   aiSuggestIcd10: encounterId => `/ai/v1/encounters/${encodeURIComponent(
     String(encounterId ?? '').trim(),
   )}/suggest-icd10`,
+  aiSuggestIcd10ForClient: clientId => `/ai/v1/clients/${encodeURIComponent(
+    String(clientId ?? '').trim(),
+  )}/suggest-icd10`,
+  aiSuggestIcd10FromText: '/ai/v1/suggest-icd10',
   aiNarrativeDraft: encounterId => `/ai/v1/encounters/${encodeURIComponent(
     String(encounterId ?? '').trim(),
   )}/narrative-draft`,

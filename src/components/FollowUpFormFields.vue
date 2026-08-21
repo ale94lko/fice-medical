@@ -17,7 +17,8 @@
               hide-bottom-space
               emit-value
               map-options
-              :readonly="props.readonly"
+              :readonly="props.readonly || lockLinkedFields"
+              :clearable="false"
               :options="typeOptions"
               :placeholder="t('followUpTypePlaceholder')"
               :error="Boolean(props.errors.type)"
@@ -102,7 +103,8 @@
               hide-bottom-space
               emit-value
               map-options
-              :readonly="props.readonly"
+              :readonly="props.readonly || lockLinkedFields"
+              :clearable="false"
               :options="relatedToOptions"
               :placeholder="t('followUpRelatedToPlaceholder')"
               :test-id="tid.field('related-to')"
@@ -117,7 +119,10 @@
             :required="referenceRequired && !props.readonly"
             :test-id="tid.field('reference')">
             <q-input
-              v-if="props.readonly && local.referenceLabel"
+              v-if="
+                (props.readonly || lockLinkedFields)
+                && local.referenceLabel
+              "
               :model-value="local.referenceLabel"
               outlined
               hide-bottom-space
@@ -137,7 +142,7 @@
               map-options
               option-value="reference"
               option-label="label"
-              :readonly="props.readonly"
+              :readonly="props.readonly || lockLinkedFields"
               :loading="props.referenceLoading"
               :options="filteredReferenceOptions"
               :placeholder="t('followUpReferencePlaceholder')"
@@ -302,6 +307,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  lockLinkedFields: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['related-to-change'])
@@ -334,6 +343,11 @@ watch(
   () => local.value.relatedTo,
   (next, prev) => {
     if (next === prev) {
+      return
+    }
+    if (props.lockLinkedFields || prev == null || prev === '') {
+      emit('related-to-change', next)
+
       return
     }
     local.value = {

@@ -1,6 +1,11 @@
 
 import { followUpRelatedToValues } from 'components/constants.js'
 import { isoDateToUsDateString } from 'src/utils/client-form.js'
+import {
+  INTAKE_REFERRAL_DRAFT_ID,
+  isExtraReferralDraftId,
+  isLocalReferralDraft,
+} from 'src/utils/referral-intake.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -44,6 +49,26 @@ export function parseFollowUpReference(value) {
   return parseEntityId(value)
 }
 
+export function isIntakeFollowUpReference(value) {
+  return trim(value) === INTAKE_REFERRAL_DRAFT_ID
+}
+
+export function isLocalFollowUpReference(value) {
+  return isIntakeFollowUpReference(value)
+    || isExtraReferralDraftId(value)
+}
+
+export function normalizeFollowUpReference(value) {
+  if (isIntakeFollowUpReference(value)) {
+    return INTAKE_REFERRAL_DRAFT_ID
+  }
+  if (isExtraReferralDraftId(value)) {
+    return trim(value)
+  }
+
+  return parseFollowUpReference(value)
+}
+
 export function followUpRelatedToRequiresReference(relatedTo) {
   const type = trim(relatedTo).toUpperCase()
   if (!type) {
@@ -85,15 +110,22 @@ export function buildLabReferenceOptions(labs = [], t) {
 export function buildReferralReferenceOptions(referrals = []) {
   return (referrals ?? [])
     .map(row => {
-      const reference = parseEntityId(row?.id)
+      const isDraft = isLocalReferralDraft(row)
+      const reference = isDraft
+        ? String(row?.id ?? '').trim()
+        : parseEntityId(row?.id)
       if (reference == null) {
         return null
       }
       const number = trim(row?.referral_number ?? row?.referralNumber)
       const type = trim(row?.type ?? row?.referral_type ?? row?.referralType)
       const status = trim(row?.status)
-      const head = number || `#${reference}`
-      const parts = [head, type, status].filter(Boolean)
+      const head = number
+        || (isDraft ? type : '')
+        || `#${reference}`
+      const parts = isDraft
+        ? [head, status].filter(Boolean)
+        : [head, type, status].filter(Boolean)
 
       return {
         reference,
@@ -258,12 +290,14 @@ export function buildReferenceOptionsForRelatedTo(relatedTo, context = {}, t) {
 }
 
 function findReferenceOption(reference, options = []) {
-  const id = parseEntityId(reference)
+  const id = normalizeFollowUpReference(reference)
   if (id == null) {
     return null
   }
 
-  return (options ?? []).find(opt => opt.reference === id) ?? null
+  return (options ?? []).find(opt =>
+    String(normalizeFollowUpReference(opt.reference)) === String(id),
+  ) ?? null
 }
 
 function resolveFromCollections(relatedTo, reference, context = {}, t) {
@@ -287,7 +321,7 @@ export function resolveReferenceLabel(
   if (!type || !followUpRelatedToRequiresReference(type)) {
     return ''
   }
-  const id = parseEntityId(reference)
+  const id = normalizeFollowUpReference(reference)
   if (id == null) {
     return ''
   }

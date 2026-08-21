@@ -3,29 +3,10 @@
     class="admin-page admin-list-page clinic-messages-page"
     :data-testid="clinicMessagesTestIds.page"
   >
-    <AppLoadingOverlay
-      scope="content"
-      :showing="loading || sending"
-    />
-
     <AdminListPageHeader
       :title="t('portalMessagesTitle')"
       :subtitle="t('portalMessagesSubtitle')"
-    >
-      <template #actions>
-        <q-btn
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          icon="sync"
-          :disable="loading"
-          :data-testid="clinicMessagesTestIds.refresh"
-          :label="t('claimQueueRefresh')"
-          @click="loadInbox"
-        />
-      </template>
-    </AdminListPageHeader>
+    />
 
     <div
       class="clinic-messages"
@@ -41,7 +22,6 @@
         <q-input
           v-model="searchQuery"
           outlined
-          dense
           clearable
           hide-bottom-space
           class="clinic-messages__search"
@@ -54,44 +34,63 @@
           </template>
         </q-input>
         <div
-          v-if="!filteredInbox.length"
-          class="clinic-messages__empty"
+          class="clinic-messages__list"
         >
-          {{ t('portalMessagesEmptyInbox') }}
-        </div>
-        <button
-          v-for="row in filteredInbox"
-          :key="row.id"
-          type="button"
-          class="clinic-messages__row"
-          :class="{
-            'clinic-messages__row--active':
-              row.id === active?.id,
-          }"
-          :data-testid="clinicMessagesTestIds.inboxItem(row.id)"
-          @click="selectConversation(row)"
-        >
-          <div class="clinic-messages__row-head">
-            <span class="clinic-messages__row-name ellipsis">
-              {{ row.clientDisplayName || row.clientNumber }}
-            </span>
-            <q-badge
-              v-if="row.unreadCount"
-              rounded
-              color="primary"
-              :label="row.unreadCount"
-            />
-          </div>
-          <div class="clinic-messages__row-preview ellipsis">
-            {{ row.lastMessagePreview }}
-          </div>
           <div
-            v-if="formatMessageTime(row.lastMessageAt)"
-            class="clinic-messages__row-time"
+            v-if="!filteredInbox.length"
+            class="clinic-messages__empty"
           >
-            {{ formatMessageTime(row.lastMessageAt) }}
+            {{ t('portalMessagesEmptyInbox') }}
           </div>
-        </button>
+          <button
+            v-for="row in filteredInbox"
+            :key="row.id"
+            type="button"
+            class="clinic-messages__row"
+            :class="{
+              'clinic-messages__row--active':
+                row.id === active?.id,
+            }"
+            :data-testid="
+              clinicMessagesTestIds.inboxItem(row.id)
+            "
+            @click="selectConversation(row)"
+          >
+            <ClinicMessageAvatar
+              :name="row.clientDisplayName
+                || row.clientNumber"
+              :file-id="row.clientPhotoFileId"
+            />
+            <div class="clinic-messages__row-body">
+              <div class="clinic-messages__row-head">
+                <span
+                  class="clinic-messages__row-name ellipsis"
+                >
+                  {{ row.clientDisplayName
+                    || row.clientNumber }}
+                </span>
+                <span
+                  v-if="inboxStamp(row)"
+                  class="clinic-messages__row-time"
+                >
+                  {{ inboxStamp(row) }}
+                </span>
+              </div>
+              <div class="clinic-messages__row-foot">
+                <div
+                  class="clinic-messages__row-preview ellipsis"
+                >
+                  {{ row.lastMessagePreview }}
+                </div>
+                <span
+                  v-if="row.unreadCount"
+                  class="clinic-messages__unread"
+                  :aria-label="t('portalMessagesUnread')"
+                />
+              </div>
+            </div>
+          </button>
+        </div>
       </aside>
       <section
         v-show="showThreadPanel"
@@ -99,11 +98,10 @@
         :data-testid="clinicMessagesTestIds.thread"
       >
         <div
-          v-if="active"
+          v-if="active && isMobile"
           class="clinic-messages__thread-head"
         >
           <q-btn
-            v-if="isMobile"
             flat
             dense
             round
@@ -114,17 +112,11 @@
           />
           <div class="clinic-messages__thread-title">
             <div class="ellipsis text-weight-medium">
-              {{ active.clientDisplayName || active.clientNumber }}
-            </div>
-            <div
-              v-if="active.clientNumber"
-              class="text-caption text-grey-7 ellipsis"
-            >
-              {{ active.clientNumber }}
+              {{ active.clientDisplayName
+                || active.clientNumber }}
             </div>
           </div>
           <q-btn
-            v-if="isMobile"
             flat
             dense
             round
@@ -132,21 +124,10 @@
             :aria-label="infoOpen
               ? t('portalMessagesShowChat')
               : t('portalMessagesShowClient')"
-            :data-testid="clinicMessagesTestIds.clientInfoToggle"
+            :data-testid="
+              clinicMessagesTestIds.clientInfoToggle
+            "
             @click="infoOpen = !infoOpen"
-          />
-          <q-btn
-            v-if="active.clientNumber"
-            flat
-            no-caps
-            color="primary"
-            icon="person"
-            :label="isMobile
-              ? undefined
-              : t('portalMessagesOpenClient')"
-            :aria-label="t('portalMessagesOpenClient')"
-            :data-testid="clinicMessagesTestIds.clientLink"
-            @click="openClientChart"
           />
         </div>
         <div
@@ -160,9 +141,10 @@
           <ClinicMessageThread
             :messages="messages"
             :can-send="canSend"
-            :sending="sending"
+            :loading="threadLoading"
             :client-label="active.clientDisplayName
               || active.clientNumber"
+            :client-photo-file-id="active.clientPhotoFileId"
             :preview-urls="previewUrls"
             @send="onSend"
             @upload="onUpload"
@@ -172,6 +154,7 @@
             :client-number="active.clientNumber"
             :fallback-name="active.clientDisplayName
               || active.clientNumber"
+            :photo-file-id="active.clientPhotoFileId"
           />
         </div>
         <div
@@ -186,25 +169,23 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
-import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import ClinicMessageAvatar from
+  'src/components/messages/ClinicMessageAvatar.vue'
 import ClinicMessageClientPanel from
   'src/components/messages/ClinicMessageClientPanel.vue'
 import ClinicMessageThread from
   'src/components/messages/ClinicMessageThread.vue'
 import { useClinicMessagesInbox } from
   'src/composables/useClinicMessagesInbox.js'
-import { useSyncAppPageTitle } from
-  'src/composables/useAppPageTitle.js'
 import { clinicMessagesTestIds } from 'src/test-ids/index.js'
-import { formatMessageTime } from
-  'src/utils/secure-message-normalize.js'
+import { formatInboxStamp } from
+  'src/utils/clinic-message-display.js'
 
 const { t } = useI18n()
-useSyncAppPageTitle(computed(() => t('portalMessagesTitle')))
 const infoOpen = ref(false)
 
 const {
@@ -212,20 +193,17 @@ const {
   filteredInbox,
   active,
   messages,
-  sending,
-  loading,
   searchQuery,
   previewUrls,
   isMobile,
   showInboxPanel,
   showThreadPanel,
-  loadInbox,
+  threadLoading,
   selectConversation,
   closeThread,
   onSend,
   onUpload,
   onDownload,
-  openClientChart,
 } = useClinicMessagesInbox()
 
 watch(
@@ -234,6 +212,10 @@ watch(
     infoOpen.value = false
   },
 )
+
+function inboxStamp(row) {
+  return formatInboxStamp(row?.lastMessageAt, t)
+}
 
 function onMobileBack() {
   if (infoOpen.value) {

@@ -13,7 +13,7 @@ import { resolveClientListAllergyEntries } from
 import { formatPersonDisplayNameFromRecord } from
   'src/utils/person-display-name.js'
 
-function resolveClientListPhotoFileId(item) {
+export function resolveClientListPhotoFileId(item) {
   if (!item || typeof item !== 'object') {
     return null
   }

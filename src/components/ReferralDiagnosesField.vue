@@ -1,5 +1,25 @@
 <template>
   <div class="referral-diagnoses-field appointment-service-lines">
+    <div class="referral-diagnoses-field__head">
+      <FormFieldLabel
+        :label="t('referralDiagnosisProblem')"
+      />
+      <q-btn
+        v-if="showAiButton"
+        no-caps
+        outline
+        dense
+        size="sm"
+        class="app-btn-ai-outline"
+        icon="auto_awesome"
+        :disable="disable"
+        :label="t('aiBtnFiceAi')"
+        :aria-label="t('aiAssistantName')"
+        :data-testid="tid.diagnosesAi"
+        @click="aiDialogOpen = true"
+      />
+    </div>
+
     <AppointmentServiceSearchRow
       v-if="!readonly"
       v-model="pendingIcdId"
@@ -15,21 +35,20 @@
       @add="addFromCatalog"
     />
 
-    <div
-      v-if="!rows.length"
-      class="admin-data-table__empty full-width row flex-center
-        text-grey-7 q-gutter-sm q-pa-md"
-      :class="{ 'q-mt-sm': !readonly }">
-      <q-icon name="inbox" size="md" />
-      <span>{{ t('referralDiagnosesEmpty') }}</span>
-    </div>
-
     <AdminTablePanel
-      v-else
       class="admin-table-panel--wide"
       :class="{ 'q-mt-md': !readonly }"
       :show-column-settings="false">
-      <div class="admin-data-table__scroll">
+      <div
+        v-if="!rows.length"
+        class="admin-data-table__empty full-width row flex-center
+          text-grey-7 q-gutter-sm q-pa-md">
+        <q-icon name="inbox" size="md" />
+        <span>{{ t('referralDiagnosesEmpty') }}</span>
+      </div>
+      <div
+        v-else
+        class="admin-data-table__scroll">
         <AdminQTable
           class="table admin-data-table admin-data-table--embedded
             admin-data-table--inline-column-settings"
@@ -84,6 +103,15 @@
         </AdminQTable>
       </div>
     </AdminTablePanel>
+
+    <EncounterDiagnosesAiSuggestDialog
+      v-model="aiDialogOpen"
+      :client-id="clientId"
+      :chief-complaint="sourceText"
+      :existing-codes="existingCodes"
+      :copy-source-label="t('referralDiagnosesAiCopyReason')"
+      @insert="insertFromAi"
+    />
   </div>
 </template>
 
@@ -95,8 +123,12 @@ import AdminQTable from 'components/AdminQTable.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AppointmentServiceSearchRow from
   'components/appointment/AppointmentServiceSearchRow.vue'
+import EncounterDiagnosesAiSuggestDialog from
+  'components/encounter/EncounterDiagnosesAiSuggestDialog.vue'
+import FormFieldLabel from 'components/FormFieldLabel.vue'
 import { quasarNotifyTypes, siteBreakpoints } from
   'components/constants.js'
+import { useAiPermissions } from 'src/composables/useAiPermissions.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { searchIcd10Cm, normalizeIcd10CodeKey } from
   'src/utils/icd10-api.js'
@@ -115,11 +147,20 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  clientId: {
+    type: [String, Number],
+    default: null,
+  },
+  sourceText: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['update:modelValue'])
 const { t } = useI18n()
 const $q = useQuasar()
+const { canUseCodingAssistant } = useAiPermissions()
 
 const tablePagination = { rowsPerPage: 0 }
 const rows = ref([])
@@ -127,7 +168,18 @@ const pendingIcdId = ref(null)
 const pendingIcdOption = ref(null)
 const icdOptions = ref([])
 const searchLoading = ref(false)
+const aiDialogOpen = ref(false)
 let keySeq = 0
+
+const showAiButton = computed(() =>
+  !props.readonly
+  && !props.disable
+  && canUseCodingAssistant.value,
+)
+
+const existingCodes = computed(() =>
+  rows.value.map(row => row.code).filter(Boolean),
+)
 
 const columns = computed(() => {
   const cols = [
@@ -318,4 +370,65 @@ function removeRow(key) {
   rows.value = rows.value.filter(row => row._key !== key)
   emitRows()
 }
+
+function insertFromAi(items) {
+  const list = Array.isArray(items) ? items : []
+  let added = 0
+  list.forEach(item => {
+    const code = String(
+      item.codeDotted || item.icd10Code || item.code || '',
+    ).trim()
+    if (!code || hasCode(code)) {
+      return
+    }
+    const description = String(item.description ?? '').trim()
+    rows.value = [
+      ...rows.value,
+      {
+        _key: nextKey(),
+        code,
+        description,
+        label: code
+          ? (description ? `${code} — ${description}` : code)
+          : description,
+      },
+    ]
+    added += 1
+  })
+  if (!added) {
+    $q.notify({
+      type: quasarNotifyTypes.warning,
+      message: t('encounterDiagnosesAiAllDuplicates'),
+    })
+
+    return
+  }
+  emitRows()
+}
 </script>
+
+<style lang="scss" scoped>
+.referral-diagnoses-field {
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  &__head :deep(.form-field__label) {
+    margin-bottom: 0;
+  }
+
+  :deep(.admin-table-panel) {
+    flex: none;
+  }
+
+  :deep(.admin-table-panel__table-wrap) {
+    flex: none;
+    min-height: 0;
+  }
+}
+</style>
+
