@@ -210,6 +210,9 @@ export default {
   clinicalAuditListSubtitle:
     'Review clinical data changes across clients and modules.',
   clinicalAuditListEmpty: 'No clinical audit entries found.',
+  clinicalAuditListEmptyTitle: 'No audit entries',
+  clinicalAuditListNoResultsHint:
+    'No audit entries match the selected filters.',
   clinicalAuditListError:
     'Could not load clinical audit entries. Please try again.',
   clinicalAuditDetailTitle: 'Audit entry details',
@@ -252,6 +255,36 @@ export default {
   clinicalAuditColEntityId: 'Entity',
   clinicalAuditColClientId: 'Client',
   clinicalAuditColChangedBy: 'Changed by',
+  clinicalAuditColPerformedBy: 'Performed by',
+  clinicalAuditColTriggeredBy: 'Triggered by',
+  clinicalAuditColSource: 'Source',
+  clinicalAuditPerformedBySystem: 'System',
+  clinicalAuditTriggeredByShort: 'Triggered by {name}',
+  clinicalAuditSourceUser: 'User',
+  clinicalAuditSourceSystem: 'System',
+  clinicalAuditSourceAi: 'AI',
+  clinicalAuditSourceIntegration: 'Integration',
+  clinicalAuditAccessOnlyHint:
+    'This entry records chart access. No clinical data was changed.',
+  clinicalAuditDiffField: 'Field',
+  clinicalAuditDiffKind: 'Change',
+  clinicalAuditDiffAdded: 'Added',
+  clinicalAuditDiffChanged: 'Changed',
+  clinicalAuditDiffRemoved: 'Removed',
+  clinicalAuditDiffUnchanged: 'Unchanged',
+  clinicalAuditDiffFilterAdded: '{count} Added',
+  clinicalAuditDiffFilterChanged: '{count} Changed',
+  clinicalAuditDiffFilterRemoved: '{count} Removed',
+  clinicalAuditDiffFilterEmpty:
+    'No changes match the selected filters.',
+  clinicalAuditViewRawJson: 'View raw JSON (before / after)',
+  clinicalAuditHideRawJson: 'Hide raw JSON',
+  clinicalAuditActionClinicalNoteSigned: 'Clinical note signed',
+  clinicalAuditActionStatusChanged: 'Status changed',
+  clinicalAuditActionStarted: 'Started',
+  clinicalAuditActionCompleted: 'Completed',
+  clinicalAuditActionEncounterCompleted: 'Encounter completed',
+  clinicalAuditEntityEncounter: 'Encounter',
   clinicalAuditColIp: 'IP address',
   clinicalAuditColCorrelationId: 'Correlation ID',
   clinicalAuditColUserAgent: 'User agent',
@@ -776,6 +809,8 @@ export default {
   clientListSubtitle: 'Manage and view all client records.',
   clientListSearchPlaceholder: 'Search clients…',
   clientListSearchEmpty: 'No clients match your search.',
+  clientListFilterEmpty:
+    'No clients match the selected filters.',
   clientListPaginationSummary:
     'Showing {from} to {to} of {total} clients',
   adminTablePaginationSummary:
@@ -785,6 +820,7 @@ export default {
   adminTableCardNoLabel: 'No.',
   adminTablePaginationPrev: 'Previous page',
   adminTablePaginationNext: 'Next page',
+  adminTableNoResultsTitle: 'No results found',
   staffList: 'Staff / Clinicians',
   staffListSubtitle: 'Manage and view all staff members.',
   staffListSearchPlaceholder: 'Search staff-clinicians',
@@ -4155,7 +4191,13 @@ export default {
   insuranceOtherId: 'Other Insurance ID',
   insuranceOtherIdPlaceholder: 'Enter other insurance ID',
   insuranceCardSectionTitle: 'Insurance Card',
-  insuranceCardSectionSubtitle: 'Upload images of the insurance card',
+  insuranceCardSectionSubtitle:
+    'Upload a front and back image for each ID you enter.',
+  insuranceCardTabMember: 'Member ID',
+  insuranceCardTabMedicaid: 'Medicaid ID',
+  insuranceCardTabMedicare: 'Medicare ID',
+  insuranceCardTabGoldenCard: 'Golden Card ID',
+  insuranceCardTabOther: 'Other Insurance ID',
   insuranceCardFront: 'Front of Card',
   insuranceCardBack: 'Back of Card',
   insuranceCardUploadHint: 'Take a photo or upload a file',
@@ -4198,6 +4240,7 @@ export default {
   insuranceReactivateConfirm: 'Reactivate',
   insuranceAddedSuccess: 'Insurance profile added.',
   insuranceUpdatedSuccess: 'Insurance profile updated.',
+  insuranceSaveError: 'Could not save the insurance profile.',
   insuranceDeactivatedSuccess: 'Insurance profile deactivated.',
   insuranceReactivatedSuccess: 'Insurance profile reactivated.',
   insuranceDeactivateError: 'Could not deactivate the insurance profile.',
@@ -4218,7 +4261,7 @@ export default {
     'Primary, Secondary and Tertiary are already active. '
     + 'Deactivate one before adding another profile.',
   insuranceMemberIdInvalid:
-    'Enter 1–20 letters or numbers only (no spaces).',
+    'Enter 1–20 letters, numbers or hyphens (no spaces).',
   insuranceTypeRequired: 'Insurance type is required.',
   insuranceEffectiveDateRequired: 'Policy effective date is required.',
   insuranceExpirationDateInvalid:
@@ -4239,7 +4282,7 @@ export default {
   insuranceGoldenCardRequired: 'Golden Card Member ID is required.',
   insuranceGoldenCardInvalid: 'Golden Card ID must be exactly 8 digits.',
   insuranceIdentifierInvalid:
-    'Use letters and numbers only, 1–20 characters.',
+    'Use letters, numbers or hyphens, 1–20 characters.',
 
   navClinicalResources: 'Resources',
   clinicalResourceListTitle: 'Clinical Resources',

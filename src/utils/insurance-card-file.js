@@ -57,7 +57,7 @@ export async function resolveInsuranceCardAttachment(value, opts = {}) {
   return null
 }
 
-/** File id for create/update insurance profile (`front_card_file_id`). */
+/** File id for insurance identifier card (`front_card_file_id`). */
 export function insuranceCardFileIdForApi(value) {
   if (value == null || value === '') {
     return null

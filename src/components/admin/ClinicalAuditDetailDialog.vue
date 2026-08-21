@@ -110,10 +110,44 @@
               </div>
               <div class="clinical-audit-detail-dialog__cell-body">
                 <p class="clinical-audit-detail-dialog__cell-label">
-                  {{ t('clinicalAuditColChangedBy') }}
+                  {{ t('clinicalAuditColPerformedBy') }}
                 </p>
                 <p class="clinical-audit-detail-dialog__cell-value">
-                  {{ nameOrDash(record.changedByName) }}
+                  {{ performedByLabel }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              v-if="triggeredByLabel"
+              class="clinical-audit-detail-dialog__grid-cell">
+              <div
+                class="clinical-audit-detail-dialog__cell-icon
+                  clinical-audit-detail-dialog__cell-icon--teal">
+                <q-icon name="play_arrow" size="20px" />
+              </div>
+              <div class="clinical-audit-detail-dialog__cell-body">
+                <p class="clinical-audit-detail-dialog__cell-label">
+                  {{ t('clinicalAuditColTriggeredBy') }}
+                </p>
+                <p class="clinical-audit-detail-dialog__cell-value">
+                  {{ triggeredByLabel }}
+                </p>
+              </div>
+            </div>
+
+            <div class="clinical-audit-detail-dialog__grid-cell">
+              <div
+                class="clinical-audit-detail-dialog__cell-icon
+                  clinical-audit-detail-dialog__cell-icon--purple">
+                <q-icon name="hub" size="20px" />
+              </div>
+              <div class="clinical-audit-detail-dialog__cell-body">
+                <p class="clinical-audit-detail-dialog__cell-label">
+                  {{ t('clinicalAuditColSource') }}
+                </p>
+                <p class="clinical-audit-detail-dialog__cell-value">
+                  {{ sourceLabel }}
                 </p>
               </div>
             </div>
@@ -159,7 +193,112 @@
               <span>{{ t('clinicalAuditDetailSectionChanges') }}</span>
             </div>
 
-            <div class="row q-col-gutter-md">
+            <div
+              v-if="isAccessOnly"
+              class="clinical-audit-detail-dialog__access">
+              <q-icon name="visibility" size="20px" />
+              <p class="q-mb-none">
+                {{ t('clinicalAuditAccessOnlyHint') }}
+              </p>
+            </div>
+
+            <template v-else>
+              <div
+                v-if="changeRows.length || hasBeforeJson || hasAfterJson"
+                class="clinical-audit-diff__toolbar">
+                <div class="clinical-audit-diff__filters">
+                  <button
+                    v-for="chip in kindFilterChips"
+                    v-show="changeRows.length"
+                    :key="chip.kind"
+                    type="button"
+                    class="clinical-audit-diff__chip"
+                    :class="[
+                      `clinical-audit-diff__chip--${chip.kind}`,
+                      {
+                        'clinical-audit-diff__chip--active':
+                          isKindFilterActive(chip.kind),
+                      },
+                    ]"
+                    :data-testid="clinicalAuditTestIds.diffFilter(
+                      chip.kind,
+                    )"
+                    @click="toggleKindFilter(chip.kind)">
+                    {{ chip.label }}
+                  </button>
+                </div>
+                <q-btn
+                  v-if="hasBeforeJson || hasAfterJson"
+                  flat
+                  dense
+                  no-caps
+                  color="primary"
+                  icon="code"
+                  class="clinical-audit-diff__raw-btn"
+                  :data-testid="clinicalAuditTestIds.toggleRawJson"
+                  :label="rawJsonToggleLabel"
+                  @click="showRawJson = !showRawJson"
+                />
+              </div>
+
+              <div
+                v-if="visibleChangeRows.length"
+                class="clinical-audit-diff q-mb-md">
+                <div class="clinical-audit-diff__head">
+                  <span>{{ t('clinicalAuditDiffField') }}</span>
+                  <span>{{ t('clinicalAuditDiffKind') }}</span>
+                  <span>{{ t('clinicalAuditBeforeJson') }}</span>
+                  <span>{{ t('clinicalAuditAfterJson') }}</span>
+                </div>
+                <div
+                  v-for="row in visibleChangeRows"
+                  :key="row.path"
+                  class="clinical-audit-diff__row"
+                  :class="clinicalAuditChangeKindClass(row.kind)">
+                  <span class="clinical-audit-diff__path">
+                    {{ row.path }}
+                  </span>
+                  <span
+                    class="clinical-audit-diff__kind"
+                    :class="`clinical-audit-diff__kind--${row.kind}`">
+                    <q-icon
+                      :name="kindIcon(row.kind)"
+                      size="16px"
+                    />
+                    {{ kindLabel(row.kind) }}
+                  </span>
+                  <span
+                    class="clinical-audit-diff__value"
+                    :class="{
+                      'clinical-audit-diff__value--previous':
+                        row.kind === 'changed',
+                      'clinical-audit-diff__value--removed':
+                        row.kind === 'removed',
+                    }">
+                    {{ row.before || '—' }}
+                  </span>
+                  <span
+                    class="clinical-audit-diff__value"
+                    :class="{
+                      'clinical-audit-diff__value--added':
+                        row.kind === 'added',
+                      'clinical-audit-diff__value--changed':
+                        row.kind === 'changed',
+                    }">
+                    {{ row.after || '—' }}
+                  </span>
+                </div>
+              </div>
+              <p
+                v-else-if="changeRows.length"
+                class="text-body2 text-grey-7 q-mb-md">
+                {{ t('clinicalAuditDiffFilterEmpty') }}
+              </p>
+            </template>
+
+            <div
+              v-if="showRawJson && !isAccessOnly"
+              class="row q-col-gutter-md">
               <div class="col-12 col-md-6">
                 <div class="clinical-audit-detail-dialog__panel-head">
                   <div class="clinical-audit-detail-dialog__panel-title">
@@ -308,7 +447,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { copyToClipboard, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
@@ -320,6 +459,11 @@ import {
   formatClinicalAuditJson,
   highlightClinicalAuditJsonLine,
 } from 'src/utils/clinical-audit-normalize.js'
+import {
+  clinicalAuditChangeKindClass,
+  diffClinicalAuditPayloads,
+  isClinicalAuditAccessOnly,
+} from 'src/utils/clinical-audit-diff.js'
 import { clinicalAuditTestIds } from 'src/test-ids/index.js'
 
 const props = defineProps({
@@ -366,6 +510,111 @@ const hasBeforeJson = computed(() => Boolean(beforeJsonText.value))
 
 const hasAfterJson = computed(() => Boolean(afterJsonText.value))
 
+const showRawJson = ref(false)
+const kindFilters = ref(defaultKindFilters())
+
+const isAccessOnly = computed(() =>
+  isClinicalAuditAccessOnly(props.record),
+)
+
+const changeRows = computed(() => {
+  if (isAccessOnly.value) {
+    return []
+  }
+
+  return diffClinicalAuditPayloads(
+    props.record?.beforeJson,
+    props.record?.afterJson,
+  ).filter(row => row.kind !== 'unchanged')
+})
+
+const addedCount = computed(() =>
+  countChangeKind(changeRows.value, 'added'),
+)
+const changedCount = computed(() =>
+  countChangeKind(changeRows.value, 'changed'),
+)
+const removedCount = computed(() =>
+  countChangeKind(changeRows.value, 'removed'),
+)
+
+const kindFilterChips = computed(() => [
+  {
+    kind: 'added',
+    label: t('clinicalAuditDiffFilterAdded', {
+      count: addedCount.value,
+    }),
+  },
+  {
+    kind: 'changed',
+    label: t('clinicalAuditDiffFilterChanged', {
+      count: changedCount.value,
+    }),
+  },
+  {
+    kind: 'removed',
+    label: t('clinicalAuditDiffFilterRemoved', {
+      count: removedCount.value,
+    }),
+  },
+])
+
+const visibleChangeRows = computed(() => {
+  const active = kindFilters.value
+  if (!active.length) {
+    return []
+  }
+
+  return changeRows.value.filter(row => active.includes(row.kind))
+})
+
+const rawJsonToggleLabel = computed(() => (
+  showRawJson.value
+    ? t('clinicalAuditHideRawJson')
+    : t('clinicalAuditViewRawJson')
+))
+
+watch(
+  () => props.modelValue,
+  isOpen => {
+    if (isOpen) {
+      return
+    }
+    showRawJson.value = false
+    kindFilters.value = defaultKindFilters()
+  },
+)
+
+const performedByLabel = computed(() => {
+  const source = String(props.record?.source ?? '').trim().toUpperCase()
+  if (source === 'SYSTEM' && !props.record?.changedByName) {
+    return t('clinicalAuditPerformedBySystem')
+  }
+
+  return nameOrDash(props.record?.changedByName)
+})
+
+const triggeredByLabel = computed(() => {
+  const label = String(props.record?.triggeredByName ?? '').trim()
+
+  return label
+})
+
+const sourceLabel = computed(() => {
+  const token = String(props.record?.source ?? '').trim().toUpperCase()
+  if (token === 'SYSTEM') {
+    return t('clinicalAuditSourceSystem')
+  }
+  if (token === 'AI') {
+    return t('clinicalAuditSourceAi')
+  }
+  if (token === 'INTEGRATION') {
+    return t('clinicalAuditSourceIntegration')
+  }
+
+  return t('clinicalAuditSourceUser')
+})
+
 const beforeJsonRows = computed(() => {
   if (!beforeJsonText.value) {
     return []
@@ -410,6 +659,52 @@ function entityTypeLabel(entityType) {
   const key = clinicalAuditEntityI18nKey(token)
 
   return key && te(key) ? t(key) : token
+}
+
+function kindLabel(kind) {
+  if (kind === 'added') {
+    return t('clinicalAuditDiffAdded')
+  }
+  if (kind === 'changed') {
+    return t('clinicalAuditDiffChanged')
+  }
+  if (kind === 'removed') {
+    return t('clinicalAuditDiffRemoved')
+  }
+
+  return t('clinicalAuditDiffUnchanged')
+}
+
+function kindIcon(kind) {
+  if (kind === 'added') {
+    return 'add'
+  }
+  if (kind === 'removed') {
+    return 'remove'
+  }
+
+  return 'fiber_manual_record'
+}
+
+function defaultKindFilters() {
+  return ['added', 'changed', 'removed']
+}
+
+function countChangeKind(rows, kind) {
+  return rows.filter(row => row.kind === kind).length
+}
+
+function isKindFilterActive(kind) {
+  return kindFilters.value.includes(kind)
+}
+
+function toggleKindFilter(kind) {
+  if (isKindFilterActive(kind)) {
+    kindFilters.value = kindFilters.value.filter(item => item !== kind)
+
+    return
+  }
+  kindFilters.value = [...kindFilters.value, kind]
 }
 
 function copyJson(side) {
@@ -681,4 +976,168 @@ function onClose() {
     grid-template-columns: 1fr;
   }
 }
+
+.clinical-audit-detail-dialog__access {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  background: $surface-muted;
+  color: $text-strong;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.clinical-audit-diff__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.clinical-audit-diff__filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.clinical-audit-diff__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  opacity: 0.45;
+}
+
+.clinical-audit-diff__chip--active {
+  opacity: 1;
+}
+
+.clinical-audit-diff__chip--added {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.clinical-audit-diff__chip--changed {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.clinical-audit-diff__chip--removed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.clinical-audit-diff__raw-btn {
+  font-size: 0.75rem;
+}
+
+.clinical-audit-diff {
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.clinical-audit-diff__head,
+.clinical-audit-diff__row {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.3fr) 110px minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.clinical-audit-diff__head {
+  background: rgba($primary, 0.08);
+  font-weight: 600;
+  color: $text-strong;
+}
+
+.clinical-audit-diff__row {
+  border-top: 1px solid $border-subtle;
+}
+
+.clinical-audit-diff__path {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.clinical-audit-diff__value {
+  word-break: break-word;
+}
+
+.clinical-audit-diff__value--previous {
+  color: #1d4ed8;
+}
+
+.clinical-audit-diff__value--added {
+  color: #166534;
+  font-weight: 600;
+}
+
+.clinical-audit-diff__value--changed {
+  color: #c2410c;
+  font-weight: 600;
+}
+
+.clinical-audit-diff__value--removed {
+  color: #dc2626;
+  text-decoration: line-through;
+}
+
+.clinical-audit-diff__row--added {
+  background: #f0fdf4;
+}
+
+.clinical-audit-diff__row--changed {
+  background: #fff7ed;
+}
+
+.clinical-audit-diff__row--removed {
+  background: #fef2f2;
+}
+
+.clinical-audit-diff__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.clinical-audit-diff__kind--added {
+  color: #166534;
+}
+
+.clinical-audit-diff__kind--changed {
+  color: #c2410c;
+}
+
+.clinical-audit-diff__kind--removed {
+  color: #b91c1c;
+}
+
+@media (max-width: 899px) {
+  .clinical-audit-diff__head,
+  .clinical-audit-diff__row {
+    grid-template-columns: minmax(0, 1fr) 96px;
+  }
+
+  .clinical-audit-diff__head span:nth-child(n+3),
+  .clinical-audit-diff__row span:nth-child(n+3) {
+    grid-column: 1 / -1;
+  }
+}
+
 </style>

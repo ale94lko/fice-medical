@@ -9,6 +9,12 @@
       <slot :name="name" v-bind="scope || {}" />
     </template>
 
+    <template
+      v-if="hasNoDataSlot"
+      #no-data="scope">
+      <slot name="no-data" v-bind="scope || {}" />
+    </template>
+
     <template v-if="hasRowActions" #body-cell-actions="scope">
       <q-td
         :props="scope"
@@ -63,12 +69,18 @@ const props = defineProps({
   },
 })
 
-const RESERVED_SLOTS = ['row-actions', 'body-cell-actions', 'item']
+const RESERVED_SLOTS = [
+  'row-actions',
+  'body-cell-actions',
+  'item',
+  'no-data',
+]
 
 const slots = useSlots()
 const attrs = useAttrs()
 
 const hasRowActions = computed(() => Boolean(slots['row-actions']))
+const hasNoDataSlot = computed(() => Boolean(slots['no-data']))
 
 const bodyCellSlotNames = computed(() =>
   Object.keys(slots).filter(name => name.startsWith('body-cell-')),

@@ -2353,6 +2353,11 @@ export const apiPaths = {
   clientInsuranceProfiles: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/insurance-profiles`,
+  clientInsuranceProfileById: (clientId, profileId) => `/client/v1/${
+    encodeURIComponent(String(clientId ?? '').trim())
+  }/insurance-profiles/${encodeURIComponent(
+    String(profileId ?? '').trim(),
+  )}`,
   clientCarePlans: id => `/client/v1/${encodeURIComponent(
     String(id ?? '').trim(),
   )}/care-plans`,

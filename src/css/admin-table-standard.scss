@@ -280,8 +280,9 @@
     /*
      * Quasar still renders an empty .q-table__middle above
      * .q-table__grid-content; hide it so cards sit flush.
+     * Keep it when the no-data slot is showing.
      */
-    .q-table__middle {
+    &:not(:has(.admin-table-empty-state)) .q-table__middle {
       display: none !important;
     }
 
@@ -299,8 +300,26 @@
     display: none;
   }
 
+  /*
+   * Pagination lives in the app footer, so hide Quasar's bottom bar.
+   * QTable also renders the #no-data slot in this bar — show that case.
+   */
   .q-table__bottom {
     display: none !important;
+  }
+
+  .q-table__bottom.q-table__bottom--nodata {
+    display: flex !important;
+    flex: 1 1 auto;
+    min-height: 220px;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+    border-top: 0;
+  }
+
+  &:has(.q-table__bottom--nodata) .q-table__middle {
+    flex: 0 0 auto;
   }
 
   .q-table {
@@ -347,6 +366,19 @@
       box-sizing: border-box;
       vertical-align: middle;
     }
+
+    tbody tr:has(.admin-table-empty-state) {
+      height: auto !important;
+    }
+
+    tbody tr:has(.admin-table-empty-state) td {
+      height: auto !important;
+      min-height: 220px !important;
+      max-height: none !important;
+      padding: 24px 12px !important;
+      white-space: normal !important;
+      vertical-align: middle;
+    }
   }
 
   &.table .q-table {
@@ -365,8 +397,20 @@
       box-shadow: -4px 0 12px -4px rgba(15, 23, 42, 0.1);
     }
 
+    tbody tr:has(.admin-table-empty-state) td:last-child {
+      position: static !important;
+      right: auto;
+      z-index: auto;
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
     tbody tr:hover td:last-child {
       background: $table-hover-bg !important;
+    }
+
+    tbody tr:has(.admin-table-empty-state):hover td:last-child {
+      background: transparent !important;
     }
 
     tbody tr.q-tr--selected td:last-child {
@@ -376,6 +420,10 @@
 
   .q-table tbody tr:hover td {
     background: $table-hover-bg !important;
+  }
+
+  .q-table tbody tr:has(.admin-table-empty-state):hover td {
+    background: transparent !important;
   }
 
   .q-table tbody tr.q-tr--selected td {

@@ -244,16 +244,14 @@
         </template>
 
         <template #no-data>
-          <div
-            class="admin-data-table__empty full-width column flex-center
-              text-grey-7 q-gutter-sm q-pa-lg">
-            <div class="row items-center q-gutter-sm">
-              <q-icon name="inbox" size="md" />
-              <span>{{ emptyMessage }}</span>
-            </div>
+          <AdminTableEmptyState
+            :icon="emptyIcon"
+            :title="emptyTitle"
+            :hint="emptyHint"
+            :test-id="staffListTestIds.emptyState">
             <div
               v-if="showEmptyActions"
-              class="row q-gutter-sm q-mt-sm">
+              class="row q-gutter-sm">
               <q-btn
                 v-if="canAddClinician"
                 no-caps
@@ -277,7 +275,7 @@
                 @click="goAddStaff"
               />
             </div>
-          </div>
+          </AdminTableEmptyState>
         </template>
       </AdminQTable>
     </AdminTablePanel>
@@ -343,6 +341,8 @@ import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
 import AdminTableColumnSettingsDialog from
   'components/admin-table/AdminTableColumnSettingsDialog.vue'
+import AdminTableEmptyState from
+  'components/admin-table/AdminTableEmptyState.vue'
 import AdminTableColumnSettingsHeader from
   'components/admin-table/AdminTableColumnSettingsHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -512,16 +512,28 @@ const pageActions = computed(() => [
   },
 ])
 
-const emptyMessage = computed(() =>
-  isSearchActive.value || countActiveStaffListFilters(panelFilters.value)
-    ? t('staffListSearchEmpty')
+const isConstrainedEmpty = computed(() =>
+  isSearchActive.value
+    || Boolean(countActiveStaffListFilters(panelFilters.value))
+    || Boolean(activeSummaryFilter.value),
+)
+
+const emptyTitle = computed(() =>
+  isConstrainedEmpty.value
+    ? t('adminTableNoResultsTitle')
     : t('staffListEmpty'),
 )
 
+const emptyHint = computed(() =>
+  isConstrainedEmpty.value ? t('staffListSearchEmpty') : '',
+)
+
+const emptyIcon = computed(() =>
+  isConstrainedEmpty.value ? 'find_in_page' : 'inbox',
+)
+
 const showEmptyActions = computed(() =>
-  !isSearchActive.value
-  && !countActiveStaffListFilters(panelFilters.value)
-  && !activeSummaryFilter.value,
+  !isConstrainedEmpty.value,
 )
 
 const { showGrid } = useAdminTableMobileGrid()

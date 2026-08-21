@@ -217,6 +217,9 @@ export default {
   clinicalAuditListSubtitle:
     'Revise los cambios de datos clínicos en clientes y módulos.',
   clinicalAuditListEmpty: 'No se encontraron entradas de auditoría clínica.',
+  clinicalAuditListEmptyTitle: 'Sin entradas de auditoría',
+  clinicalAuditListNoResultsHint:
+    'Ninguna entrada de auditoría coincide con los filtros seleccionados.',
   clinicalAuditListError:
     'No se pudo cargar la auditoría clínica. Inténtelo de nuevo.',
   clinicalAuditDetailTitle: 'Detalle de auditoría',
@@ -259,6 +262,37 @@ export default {
   clinicalAuditColEntityId: 'Entidad',
   clinicalAuditColClientId: 'Cliente',
   clinicalAuditColChangedBy: 'Modificado por',
+  clinicalAuditColPerformedBy: 'Ejecutado por',
+  clinicalAuditColTriggeredBy: 'Disparado por',
+  clinicalAuditColSource: 'Origen',
+  clinicalAuditPerformedBySystem: 'Sistema',
+  clinicalAuditTriggeredByShort: 'Disparado por {name}',
+  clinicalAuditSourceUser: 'Usuario',
+  clinicalAuditSourceSystem: 'Sistema',
+  clinicalAuditSourceAi: 'IA',
+  clinicalAuditSourceIntegration: 'Integración',
+  clinicalAuditAccessOnlyHint:
+    'Esta entrada registra el acceso al expediente. '
+    + 'No se modificaron datos clínicos.',
+  clinicalAuditDiffField: 'Campo',
+  clinicalAuditDiffKind: 'Cambio',
+  clinicalAuditDiffAdded: 'Añadido',
+  clinicalAuditDiffChanged: 'Modificado',
+  clinicalAuditDiffRemoved: 'Eliminado',
+  clinicalAuditDiffUnchanged: 'Sin cambios',
+  clinicalAuditDiffFilterAdded: '{count} Añadidos',
+  clinicalAuditDiffFilterChanged: '{count} Modificados',
+  clinicalAuditDiffFilterRemoved: '{count} Eliminados',
+  clinicalAuditDiffFilterEmpty:
+    'Ningún cambio coincide con los filtros seleccionados.',
+  clinicalAuditViewRawJson: 'Ver JSON (antes / después)',
+  clinicalAuditHideRawJson: 'Ocultar JSON',
+  clinicalAuditActionClinicalNoteSigned: 'Nota clínica firmada',
+  clinicalAuditActionStatusChanged: 'Estado cambiado',
+  clinicalAuditActionStarted: 'Iniciado',
+  clinicalAuditActionCompleted: 'Completado',
+  clinicalAuditActionEncounterCompleted: 'Encuentro completado',
+  clinicalAuditEntityEncounter: 'Encuentro',
   clinicalAuditColIp: 'Dirección IP',
   clinicalAuditColCorrelationId: 'ID de correlación',
   clinicalAuditColUserAgent: 'User agent',
@@ -808,6 +842,8 @@ export default {
   clientListSubtitle: 'Gestiona y consulta todos los registros de clientes.',
   clientListSearchPlaceholder: 'Buscar clientes…',
   clientListSearchEmpty: 'Ningún cliente coincide con la búsqueda.',
+  clientListFilterEmpty:
+    'Ningún cliente coincide con los filtros seleccionados.',
   clientListPaginationSummary:
     'Mostrando {from} a {to} de {total} clientes',
   adminTablePaginationSummary:
@@ -817,6 +853,7 @@ export default {
   adminTableCardNoLabel: 'No.',
   adminTablePaginationPrev: 'Página anterior',
   adminTablePaginationNext: 'Página siguiente',
+  adminTableNoResultsTitle: 'No se encontraron resultados',
   staffList: 'Personal / Clínicos',
   staffListSubtitle: 'Administre y consulte todo el personal.',
   staffListSearchPlaceholder: 'Buscar personal-clínicos',
@@ -4295,7 +4332,14 @@ export default {
   insuranceOtherId: 'Otro ID de seguro',
   insuranceOtherIdPlaceholder: 'Ingrese otro ID de seguro',
   insuranceCardSectionTitle: 'Tarjeta de seguro',
-  insuranceCardSectionSubtitle: 'Suba imágenes de la tarjeta de seguro',
+  insuranceCardSectionSubtitle:
+    'Suba el frente y el reverso de la tarjeta por cada ID '
+    + 'que introduzca.',
+  insuranceCardTabMember: 'ID de miembro',
+  insuranceCardTabMedicaid: 'ID Medicaid',
+  insuranceCardTabMedicare: 'ID Medicare',
+  insuranceCardTabGoldenCard: 'ID Golden Card',
+  insuranceCardTabOther: 'Otro ID de seguro',
   insuranceCardFront: 'Frente de la tarjeta',
   insuranceCardBack: 'Reverso de la tarjeta',
   insuranceCardUploadHint: 'Tome una foto o suba un archivo',
@@ -4341,6 +4385,7 @@ export default {
   insuranceReactivateConfirm: 'Reactivar',
   insuranceAddedSuccess: 'Perfil de seguro agregado.',
   insuranceUpdatedSuccess: 'Perfil de seguro actualizado.',
+  insuranceSaveError: 'No se pudo guardar el perfil de seguro.',
   insuranceDeactivatedSuccess: 'Perfil de seguro desactivado.',
   insuranceReactivatedSuccess: 'Perfil de seguro reactivado.',
   insuranceDeactivateError: 'No se pudo desactivar el perfil de seguro.',
@@ -4361,7 +4406,7 @@ export default {
     'Primary, Secondary y Tertiary ya están activos. '
     + 'Desactive uno antes de agregar otro perfil.',
   insuranceMemberIdInvalid:
-    'Ingrese 1 a 20 letras o números solamente (sin espacios).',
+    'Ingrese 1 a 20 letras, números o guiones (sin espacios).',
   insuranceTypeRequired: 'El tipo de seguro es obligatorio.',
   insuranceEffectiveDateRequired:
     'La fecha efectiva de la póliza es obligatoria.',
@@ -4385,7 +4430,7 @@ export default {
   insuranceGoldenCardInvalid:
     'El ID Golden Card debe ser exactamente 8 dígitos.',
   insuranceIdentifierInvalid:
-    'Use solo letras y números, de 1 a 20 caracteres.',
+    'Use letras, números o guiones, de 1 a 20 caracteres.',
 
   navClinicalResources: 'Recursos',
   clinicalResourceListTitle: 'Recursos clínicos',

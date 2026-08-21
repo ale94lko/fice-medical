@@ -311,6 +311,7 @@ export const adminTableTestIds = {
     id,
   ),
   contactCopy: value => toTestId('admin-table-contact-copy', value),
+  emptyState: 'admin-table-empty-state',
 }
 
 export const errorNotFoundTestIds = {
@@ -321,6 +322,7 @@ export const errorNotFoundTestIds = {
 export const userListTestIds = {
   page: 'user-list-page',
   search: 'user-list-input-search',
+  emptyState: 'user-list-empty-state',
   addUser: 'user-list-btn-add',
   filters: 'user-list-btn-filters',
   filtersDrawer: 'user-list-filters-drawer',
@@ -518,10 +520,16 @@ export const clinicalNoteTemplateDialogTestIds = {
 }
 
 export const clinicalAuditTestIds = {
+  emptyState: 'clinical-audit-empty-state',
   detailDialog: 'clinical-audit-detail-dialog',
   detailClose: 'clinical-audit-detail-btn-close',
   copyJsonBefore: 'clinical-audit-detail-btn-copy-before',
   copyJsonAfter: 'clinical-audit-detail-btn-copy-after',
+  toggleRawJson: 'clinical-audit-detail-btn-raw-json',
+  diffFilter: kind => toTestId(
+    'clinical-audit-detail-filter',
+    kind,
+  ),
   filtersDrawer: 'clinical-audit-filters-drawer',
   filtersClear: 'clinical-audit-filters-btn-clear',
   filtersApply: 'clinical-audit-filters-btn-apply',
@@ -608,6 +616,7 @@ export const dashboardTestIds = {
 export const clientListTestIds = {
   page: 'client-list-page',
   search: 'client-list-input-search',
+  emptyState: 'client-list-empty-state',
   addClient: 'client-list-btn-add',
   assignClinicians: 'client-list-btn-assign-clinicians',
   changeStatus: 'client-list-btn-change-status',
@@ -639,6 +648,7 @@ export const clientListTestIds = {
 export const staffListTestIds = {
   page: 'staff-list-page',
   search: 'staff-list-input-search',
+  emptyState: 'staff-list-empty-state',
   addStaff: 'staff-list-btn-add-staff',
   addClinician: 'staff-list-btn-add-clinician',
   changeStatus: 'staff-list-btn-change-status',
@@ -869,6 +879,15 @@ export const addClientTestIds = {
   insuranceCardBtn: name => toTestId(
     'add-client-insurance-card-btn',
     name,
+  ),
+  insuranceCardTabs: 'add-client-insurance-card-tabs',
+  insuranceCardTab: kind => toTestId(
+    'add-client-insurance-card-tab',
+    kind,
+  ),
+  insuranceCardPanel: kind => toTestId(
+    'add-client-insurance-card-panel',
+    kind,
   ),
   vitalsField: name => toTestId('add-client-vitals-field', name),
   vitalsPainLevel: token => toTestId('add-client-vitals-pain', token),

@@ -276,23 +276,49 @@
           <p class="text-body2 text-grey-7 q-mb-md">
             {{ t('insuranceCardSectionSubtitle') }}
           </p>
-          <div class="row q-col-gutter-md">
+          <q-tabs
+            v-model="activeCardTab"
+            dense
+            no-caps
+            outside-arrows
+            mobile-arrows
+            align="left"
+            active-color="primary"
+            indicator-color="primary"
+            class="add-client-subtabs insurance-dialog__card-tabs"
+            :data-testid="tid.insuranceCardTabs">
+            <q-tab
+              v-for="tab in cardTabs"
+              :key="tab.kind"
+              :name="tab.kind"
+              :label="tab.label"
+              :data-testid="tid.insuranceCardTab(tab.kind)"
+            />
+          </q-tabs>
+          <div
+            v-if="activeCardTab"
+            class="row q-col-gutter-md q-mt-md"
+            :data-testid="tid.insuranceCardPanel(activeCardTab)">
             <div class="col-12 col-md-6">
               <InsuranceCardUploadField
-                v-model="local.frontCardFile"
+                v-model="activeFrontCardFile"
                 :label="t('insuranceCardFront')"
                 :readonly="readonly"
                 :error="''"
-                :test-id="tid.insuranceField('card-front')"
+                :test-id="tid.insuranceField(
+                  `card-front-${activeCardTab}`,
+                )"
               />
             </div>
             <div class="col-12 col-md-6">
               <InsuranceCardUploadField
-                v-model="local.backCardFile"
+                v-model="activeBackCardFile"
                 :label="t('insuranceCardBack')"
                 :readonly="readonly"
                 :error="''"
-                :test-id="tid.insuranceField('card-back')"
+                :test-id="tid.insuranceField(
+                  `card-back-${activeCardTab}`,
+                )"
               />
             </div>
           </div>
@@ -372,6 +398,7 @@
           class="app-btn-outline"
           :data-testid="cancelTestId"
           :label="readonly ? t('close') : t('cancel')"
+          :disable="saveBusy"
           @click="onCancel"
         />
           <q-btn
@@ -382,8 +409,8 @@
             class="app-btn-primary"
             :data-testid="saveTestId"
             :label="saveLabel"
-            :loading="saving"
-            :disable="saving"
+            :loading="saveBusy"
+            :disable="saveBusy"
             @click="onSave"
           />
       </q-card-actions>
@@ -441,8 +468,14 @@ import {
   filterInsurancePayers,
   formatPayerPlanLabel,
 } from 'src/utils/insurance-payers.js'
-import { resolveInsuranceCardAttachment } from
-  'src/utils/insurance-card-file.js'
+import {
+  cardFileFromProfile,
+  cloneCardFilesByKind,
+  createEmptyCardFilesByKind,
+  insuranceCardTabsFromProfile,
+  resolveAllCardFilesByKind,
+  setCardFileOnProfile,
+} from 'src/utils/insurance-identifier-cards.js'
 import { apiDateTimeToDisplay } from 'src/utils/app-datetime.js'
 import { useValidationSaveFeedback } from
   'src/composables/useValidationSaveFeedback.js'
@@ -480,6 +513,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  persisting: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
@@ -495,6 +532,7 @@ const payerOptions = ref([])
 const payerSelection = ref(null)
 const payerSearch = ref('')
 const saving = ref(false)
+const activeCardTab = ref(null)
 /** Avoid clearing subscriber name while hydrating the dialog profile. */
 const skipSubscriberRelationshipSync = ref(false)
 const subscriberNameInputRef = ref(null)
@@ -519,6 +557,10 @@ const open = computed({
 })
 
 const readonly = computed(() => props.mode === 'view')
+
+const saveBusy = computed(() =>
+  saving.value || props.persisting,
+)
 
 const showStatusBadge = computed(() =>
   Boolean(local.value?.status),
@@ -609,6 +651,67 @@ const goldenCardRequired = computed(() =>
   requiresGoldenCardMemberId(local.value.insuranceType),
 )
 
+const cardTabLabels = computed(() => ({
+  MEMBER: t('insuranceCardTabMember'),
+  MEDICAID: t('insuranceCardTabMedicaid'),
+  MEDICARE: t('insuranceCardTabMedicare'),
+  GOLDEN_CARD: t('insuranceCardTabGoldenCard'),
+  OTHER: t('insuranceCardTabOther'),
+}))
+
+const cardTabs = computed(() =>
+  insuranceCardTabsFromProfile(local.value, cardTabLabels.value),
+)
+
+const activeFrontCardFile = computed({
+  get: () => cardFileFromProfile(
+    local.value,
+    activeCardTab.value,
+    'front',
+  ),
+  set: value => {
+    setCardFileOnProfile(
+      local.value,
+      activeCardTab.value,
+      'front',
+      value,
+    )
+  },
+})
+
+const activeBackCardFile = computed({
+  get: () => cardFileFromProfile(
+    local.value,
+    activeCardTab.value,
+    'back',
+  ),
+  set: value => {
+    setCardFileOnProfile(
+      local.value,
+      activeCardTab.value,
+      'back',
+      value,
+    )
+  },
+})
+
+watch(
+  cardTabs,
+  tabs => {
+    if (!tabs.length) {
+      activeCardTab.value = null
+
+      return
+    }
+    const stillOpen = tabs.some(
+      tab => tab.kind === activeCardTab.value,
+    )
+    if (!stillOpen) {
+      activeCardTab.value = tabs[0].kind
+    }
+  },
+)
+
 watch(
   () => props.modelValue,
   visible => {
@@ -618,14 +721,13 @@ watch(
     skipSubscriberRelationshipSync.value = true
     validationErrors.value = {}
     const raw = props.profile ?? {}
+    const cardFilesByKind = cloneCardFilesByKind(raw)
     local.value = {
       ...JSON.parse(JSON.stringify({
         ...raw,
-        frontCardFile: null,
-        backCardFile: null,
+        cardFilesByKind: createEmptyCardFilesByKind(),
       })),
-      frontCardFile: raw.frontCardFile ?? null,
-      backCardFile: raw.backCardFile ?? null,
+      cardFilesByKind,
     }
     normalizeInsuranceIdentifierFields(local.value)
     if (props.mode === 'add') {
@@ -850,17 +952,15 @@ async function onSave() {
   try {
     const clientId = String(props.clientId ?? '').trim()
     const uploadOpts = clientId ? { clientNumber: clientId } : {}
-    const [frontCardFile, backCardFile] = await Promise.all([
-      resolveInsuranceCardAttachment(local.value.frontCardFile, uploadOpts),
-      resolveInsuranceCardAttachment(local.value.backCardFile, uploadOpts),
-    ])
+    const cardFilesByKind = await resolveAllCardFilesByKind(
+      local.value.cardFilesByKind,
+      uploadOpts,
+    )
     emit('save', {
       ...local.value,
       status: deriveInsuranceStatusFromDates(local.value),
-      frontCardFile,
-      backCardFile,
+      cardFilesByKind,
     })
-    open.value = false
   } catch (error) {
     $q.notify({
       type: quasarNotifyTypes.negative,
@@ -890,5 +990,20 @@ async function onSave() {
   margin: 0;
   font-weight: 600;
   color: $text-strong;
+}
+
+.insurance-dialog__card-tabs {
+  min-height: 40px;
+  border-bottom: 1px solid $border-subtle;
+
+  :deep(.q-tab) {
+    max-width: 180px;
+  }
+
+  :deep(.q-tab__label) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 </style>

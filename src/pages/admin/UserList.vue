@@ -169,18 +169,12 @@
         </template>
 
         <template #no-data>
-          <div
-            class="full-width row flex-center text-grey-7
-              q-gutter-sm q-pa-lg">
-            <q-icon name="inbox" size="md" />
-            <span>
-              {{
-                isSearchActive
-                  ? t('userListSearchEmpty')
-                  : t('userListEmpty')
-              }}
-            </span>
-          </div>
+          <AdminTableEmptyState
+            :icon="emptyIcon"
+            :title="emptyTitle"
+            :hint="emptyHint"
+            :test-id="userListTestIds.emptyState"
+          />
         </template>
       </AdminQTable>
     </AdminTablePanel>
@@ -235,6 +229,8 @@ import AdminListPageActions from
   'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
+import AdminTableEmptyState from
+  'components/admin-table/AdminTableEmptyState.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AdminTableRoleBadgesCell from
   'components/admin-table/AdminTableRoleBadgesCell.vue'
@@ -316,6 +312,24 @@ const rows = computed(() => sourceRows.value)
 
 const activeFilterCount = computed(() =>
   countActiveUserListFilters(appliedFilters.value),
+)
+
+const isConstrainedEmpty = computed(() =>
+  isSearchActive.value || activeFilterCount.value > 0,
+)
+
+const emptyTitle = computed(() =>
+  isConstrainedEmpty.value
+    ? t('adminTableNoResultsTitle')
+    : t('userListEmpty'),
+)
+
+const emptyHint = computed(() =>
+  isConstrainedEmpty.value ? t('userListSearchEmpty') : '',
+)
+
+const emptyIcon = computed(() =>
+  isConstrainedEmpty.value ? 'find_in_page' : 'inbox',
 )
 
 const filtersButtonLabel = computed(() => {

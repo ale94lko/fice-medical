@@ -41,6 +41,28 @@ export async function listClientInsuranceProfiles(
   return unwrapList(response.data)
 }
 
+export async function createInsuranceProfile(clientId, payload) {
+  const response = await apiInstance.post(
+    apiPaths.clientInsuranceProfiles(clientId),
+    payload,
+  )
+
+  return unwrapData(response.data)
+}
+
+export async function updateInsuranceProfile(
+  clientId,
+  profileId,
+  payload,
+) {
+  const response = await apiInstance.patch(
+    apiPaths.clientInsuranceProfileById(clientId, profileId),
+    payload,
+  )
+
+  return unwrapData(response.data)
+}
+
 export function insuranceApiErrorMessage(
   error,
   fallback = 'Request failed',

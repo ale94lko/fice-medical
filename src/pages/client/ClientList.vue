@@ -257,18 +257,12 @@
         </template>
 
         <template #no-data>
-          <div
-            class="full-width row flex-center text-grey-7
-              q-gutter-sm q-pa-lg">
-            <q-icon name="inbox" size="md" />
-            <span>
-              {{
-                isSearchActive
-                  ? t('clientListSearchEmpty')
-                  : t('clientListEmpty')
-              }}
-            </span>
-          </div>
+          <AdminTableEmptyState
+            :icon="emptyIcon"
+            :title="emptyTitle"
+            :hint="emptyHint"
+            :test-id="clientListTestIds.emptyState"
+          />
         </template>
       </AdminQTable>
     </AdminTablePanel>
@@ -326,6 +320,8 @@ import AdminTableContactOverflow from
   'components/admin-table/AdminTableContactOverflow.vue'
 import AdminTableColumnSettingsDialog from
   'components/admin-table/AdminTableColumnSettingsDialog.vue'
+import AdminTableEmptyState from
+  'components/admin-table/AdminTableEmptyState.vue'
 import AdminTableColumnSettingsHeader from
   'components/admin-table/AdminTableColumnSettingsHeader.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
@@ -436,6 +432,31 @@ const {
   tablePagination,
   onQueryChange: () => loadClientsOrSearch(tablePagination.value),
 })
+
+const isConstrainedEmpty = computed(() =>
+  isSearchActive.value || Boolean(activeSummaryFilter.value),
+)
+
+const emptyTitle = computed(() =>
+  isConstrainedEmpty.value
+    ? t('adminTableNoResultsTitle')
+    : t('clientListEmpty'),
+)
+
+const emptyHint = computed(() => {
+  if (isSearchActive.value) {
+    return t('clientListSearchEmpty')
+  }
+  if (activeSummaryFilter.value) {
+    return t('clientListFilterEmpty')
+  }
+
+  return ''
+})
+
+const emptyIcon = computed(() =>
+  isConstrainedEmpty.value ? 'find_in_page' : 'inbox',
+)
 
 async function loadClientsOrSearch(paginationPayload) {
   loading.value = true

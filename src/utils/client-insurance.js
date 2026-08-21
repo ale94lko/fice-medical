@@ -17,6 +17,8 @@ import {
   startOfDay,
 } from 'src/utils/client-form.js'
 import { findPayerById } from 'src/utils/insurance-payers.js'
+import { createEmptyCardFilesByKind } from
+  'src/utils/insurance-identifier-cards.js'
 import {
   NON_PERSON_NAME_CHARS_RE,
   PERSON_NAME_CHAR_RE,
@@ -25,7 +27,7 @@ import {
 
 /** Plan Member ID / Other Insurance ID */
 const PLAN_MEMBER_ID_RE = new RegExp(
-  `^[A-Za-z0-9]{1,${clientInsuranceMaxMemberIdLength}}$`,
+  `^(?=.*[A-Za-z0-9])[A-Za-z0-9-]{1,${clientInsuranceMaxMemberIdLength}}$`,
 )
 
 /** Medicare MBI (11 chars, position-specific alphabet). */
@@ -99,8 +101,7 @@ export function createEmptyInsuranceProfile() {
     goldenCardMemberId: '',
     otherInsuranceId: '',
     status: clientInsuranceStatusValues.ACTIVE,
-    frontCardFile: null,
-    backCardFile: null,
+    cardFilesByKind: createEmptyCardFilesByKind(),
     deleted: false,
     deletedAt: null,
     deactivationReason: '',
@@ -408,16 +409,12 @@ function digitsOnlyInput(value, maxLen) {
   return String(value ?? '').replace(/\D/g, '').slice(0, maxLen)
 }
 
-function alphanumericUpperInput(value, maxLen) {
-  return String(value ?? '')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, maxLen)
-}
-
 /** Plan Member ID / Other Insurance ID while typing. */
 export function sanitizePlanMemberIdInput(value) {
-  return alphanumericUpperInput(value, clientInsuranceMaxMemberIdLength)
+  return String(value ?? '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9-]/g, '')
+    .slice(0, clientInsuranceMaxMemberIdLength)
 }
 
 export function sanitizeMedicaidRecipientIdInput(value) {

@@ -161,6 +161,7 @@
       :client-id="clientId"
       :payer-catalog-items="payerCatalogItems"
       :payer-catalog-loading="payerCatalogLoading"
+      :persisting="persistBusy"
       @save="onDialogSave"
     />
 
@@ -212,10 +213,14 @@ import {
   listInsuranceProfilesForDisplay,
 } from 'src/utils/client-insurance.js'
 import {
+  createInsuranceProfile,
   deactivateInsuranceProfile as deactivateInsuranceProfileApi,
   insuranceApiErrorMessage,
   reactivateInsuranceProfile as reactivateInsuranceProfileApi,
+  updateInsuranceProfile,
 } from 'src/utils/insurance-api.js'
+import { insuranceProfileToApiPayload } from
+  'src/utils/build-client-register-clinical.js'
 import { mapInsuranceProfileFromApi } from
   'src/utils/map-client-api-to-form.js'
 
@@ -263,6 +268,7 @@ const reactivateDialogOpen = ref(false)
 const lifecycleProfile = ref(null)
 const occupyingPriorityProfile = ref(null)
 const lifecycleBusy = ref(false)
+const persistBusy = ref(false)
 const showInactiveInsurance = ref(false)
 
 const displayProfiles = computed(() =>
@@ -329,8 +335,8 @@ function mergeLifecycleFromApi(existing, apiRow) {
     ...mapped,
     id: existing.id,
     payerId: existing.payerId ?? mapped.payerId,
-    frontCardFile: mapped.frontCardFile ?? existing.frontCardFile,
-    backCardFile: mapped.backCardFile ?? existing.backCardFile,
+    cardFilesByKind: mapped.cardFilesByKind
+      ?? existing.cardFilesByKind,
   }
 }
 
@@ -387,12 +393,13 @@ function openReactivate(profile) {
   reactivateDialogOpen.value = true
 }
 
-function onDialogSave(profile) {
+function applyLocalInsuranceSave(profile) {
   const next = {
     ...profile,
     status: deriveInsuranceStatusFromDates(profile),
   }
   replaceProfileInSection(next)
+  dialogOpen.value = false
   $q.notify({
     type: quasarNotifyTypes.positive,
     message: dialogMode.value === 'edit'
@@ -400,6 +407,51 @@ function onDialogSave(profile) {
       : t('insuranceAddedSuccess'),
     position: 'top',
   })
+}
+
+async function persistInsuranceToApi(profile) {
+  const payload = insuranceProfileToApiPayload(profile)
+  const apiRow = insuranceRowHasPersistedApiId(profile)
+    ? await updateInsuranceProfile(
+      props.clientId,
+      profile.apiId,
+      payload,
+    )
+    : await createInsuranceProfile(props.clientId, payload)
+
+  return mergeLifecycleFromApi(profile, apiRow)
+}
+
+async function onDialogSave(profile) {
+  if (!hasPersistedClient()) {
+    applyLocalInsuranceSave(profile)
+
+    return
+  }
+  persistBusy.value = true
+  try {
+    const next = await persistInsuranceToApi(profile)
+    replaceProfileInSection(next)
+    dialogOpen.value = false
+    $q.notify({
+      type: quasarNotifyTypes.positive,
+      message: dialogMode.value === 'edit'
+        ? t('insuranceUpdatedSuccess')
+        : t('insuranceAddedSuccess'),
+      position: 'top',
+    })
+  } catch (error) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: insuranceApiErrorMessage(
+        error,
+        t('insuranceSaveError'),
+      ),
+      position: 'top',
+    })
+  } finally {
+    persistBusy.value = false
+  }
 }
 
 async function onDeactivateConfirm({ reason, notes }) {

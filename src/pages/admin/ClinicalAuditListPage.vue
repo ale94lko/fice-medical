@@ -69,10 +69,16 @@
 
         <template #body-cell-changedBy="scope">
           <q-td :props="scope" class="admin-data-table__secondary-cell">
-            {{ clinicalAuditDisplayLabel(
-              scope.row.changedByName,
-              scope.row.changedBy,
-            ) }}
+            <p class="q-mb-none text-weight-medium">
+              {{ performedByLabel(scope.row) }}
+            </p>
+            <p
+              v-if="scope.row.triggeredByName"
+              class="text-caption text-grey-7 q-mb-none">
+              {{ t('clinicalAuditTriggeredByShort', {
+                name: scope.row.triggeredByName,
+              }) }}
+            </p>
           </q-td>
         </template>
 
@@ -86,12 +92,11 @@
         </template>
 
         <template #no-data>
-          <div
-            class="full-width row flex-center text-grey-7
-              q-gutter-sm q-pa-lg">
-            <q-icon name="inbox" size="md" />
-            <span>{{ t('clinicalAuditListEmpty') }}</span>
-          </div>
+          <AdminTableEmptyState
+            :title="emptyTitle"
+            :hint="emptyHint"
+            :test-id="clinicalAuditTestIds.emptyState"
+          />
         </template>
       </AdminQTable>
     </AdminTablePanel>
@@ -125,6 +130,8 @@ import AdminListPageActions from
   'components/admin-table/AdminListPageActions.vue'
 import AdminListPageHeader from
   'components/admin-table/AdminListPageHeader.vue'
+import AdminTableEmptyState from
+  'components/admin-table/AdminTableEmptyState.vue'
 import AdminTablePanel from 'components/admin-table/AdminTablePanel.vue'
 import AdminTableRowActions from
   'components/admin-table/AdminTableRowActions.vue'
@@ -138,6 +145,7 @@ import { useAdminTableMobileGrid } from
   'src/composables/useAdminTableMobileGrid.js'
 import { useAppFooterPagination } from
   'src/composables/useAppFooterPagination.js'
+import { clinicalAuditTestIds } from 'src/test-ids/index.js'
 import { hasPermission } from 'src/utils/auth-permissions.js'
 import { useAuthStore } from 'stores/auth-store.js'
 import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
@@ -207,6 +215,18 @@ const filtersButtonLabel = computed(() => {
 
   return t('filters')
 })
+
+const emptyTitle = computed(() =>
+  activeFilterCount.value > 0
+    ? t('adminTableNoResultsTitle')
+    : t('clinicalAuditListEmptyTitle'),
+)
+
+const emptyHint = computed(() =>
+  activeFilterCount.value > 0
+    ? t('clinicalAuditListNoResultsHint')
+    : t('clinicalAuditListEmpty'),
+)
 
 const pageActions = computed(() => [
   {
@@ -307,6 +327,16 @@ function entityTypeLabel(entityType) {
   const key = clinicalAuditEntityI18nKey(token)
 
   return key && te(key) ? t(key) : token
+}
+
+function performedByLabel(row) {
+  const source = String(row?.source ?? '').trim().toUpperCase()
+  const name = String(row?.changedByName ?? '').trim()
+  if (source === 'SYSTEM' && !name) {
+    return t('clinicalAuditPerformedBySystem')
+  }
+
+  return clinicalAuditDisplayLabel(row?.changedByName, row?.changedBy)
 }
 
 function tablePaginationFromMeta(paginationPayload, meta) {
@@ -475,3 +505,4 @@ onBeforeUnmount(() => {
   filtersOpen.value = false
 })
 </script>
+

@@ -17,7 +17,8 @@ import {
 import {
   resolvePrimaryClinicianIdForApi,
 } from 'src/utils/client-clinicians-form.js'
-import { insuranceCardFileIdForApi } from 'src/utils/insurance-card-file.js'
+import { identifierCardsForApi } from
+  'src/utils/insurance-identifier-cards.js'
 import { vitalsEntryToApiPayload } from 'src/utils/vitals-normalize.js'
 
 function trim(value) {
@@ -79,8 +80,7 @@ function mapInsuranceProfile(profile) {
     other_insurance_id: trimInsuranceField(profile.otherInsuranceId) || null,
     deactivation_reason: trimInsuranceField(profile.deactivationReason) || null,
     deactivation_notes: trimInsuranceField(profile.deactivationNotes) || null,
-    front_card_file_id: insuranceCardFileIdForApi(profile.frontCardFile),
-    back_card_file_id: insuranceCardFileIdForApi(profile.backCardFile),
+    identifier_cards: identifierCardsForApi(profile),
   }
 
   const apiId = profile?.apiId
@@ -90,6 +90,10 @@ function mapInsuranceProfile(profile) {
   }
 
   return payload
+}
+
+export function insuranceProfileToApiPayload(profile) {
+  return mapInsuranceProfile(profile)
 }
 
 export function buildInsuranceForRegister(form) {

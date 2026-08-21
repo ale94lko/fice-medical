@@ -41,6 +41,8 @@ import {
 import { mapSocialHistoryFromApi } from
   'src/utils/client-social-history.js'
 import { nextInsuranceId } from 'src/utils/client-insurance.js'
+import { mapCardFilesByKindFromApi } from
+  'src/utils/insurance-identifier-cards.js'
 import { mapClientVitalsSectionFromApi } from
   'src/utils/vitals-normalize.js'
 import { mapClientLabsListFromApi } from 'src/utils/lab-normalize.js'
@@ -672,6 +674,10 @@ export function mapInsuranceProfileFromApi(row) {
   const payerPlan = String(
     row?.payer_plan_name ?? row?.payerPlanName ?? '',
   ).trim()
+  const cardFilesByKind = mapCardFilesByKindFromApi(
+    row,
+    mapInsuranceCardAttachmentFromApi,
+  )
 
   return {
     id: nextInsuranceId(),
@@ -719,14 +725,7 @@ export function mapInsuranceProfileFromApi(row) {
         row?.insurance_status ?? row?.insuranceStatus,
       )
       ?? clientInsuranceStatusValues.ACTIVE,
-    frontCardFile: mapInsuranceCardAttachmentFromApi(
-      row?.front_card_file_id ?? row?.frontCardFileId,
-      row?.front_card_file ?? row?.frontCardFile,
-    ),
-    backCardFile: mapInsuranceCardAttachmentFromApi(
-      row?.back_card_file_id ?? row?.backCardFileId,
-      row?.back_card_file ?? row?.backCardFile,
-    ),
+    cardFilesByKind,
     deleted: false,
     deletedAt: null,
     deactivationReason: String(
