@@ -1,0 +1,1 @@
+import{Ht as e,On as t,ft as n,g as r,vn as i}from"./runtime-core.esm-bundler-8hW84IlS.js";var a=i(``),o=0;function s(){return{appPageTitle:r(()=>a.value)}}function c(r){let i=++o;e(()=>t(r),e=>{i===o&&(a.value=String(e??``).trim())},{immediate:!0}),n(()=>{i===o&&(a.value=``)})}export{c as n,s as t};

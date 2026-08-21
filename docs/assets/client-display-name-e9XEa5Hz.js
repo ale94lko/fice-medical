@@ -1,0 +1,1 @@
+import{Tc as e,ko as t}from"./auth-store-OT2RRvpz.js";function n(n,{prefixSelectOptions:r=[],suffixSelectOptions:i=[]}={}){return t({prefix:n?.[e.prefix],firstName:n?.[e.firstName],middleName:n?.[e.middleName],lastName:n?.[e.lastName],suffix:n?.[e.suffix]},{prefixSelectOptions:r,suffixSelectOptions:i})}export{n as t};

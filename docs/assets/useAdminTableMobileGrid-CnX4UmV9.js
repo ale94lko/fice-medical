@@ -1,0 +1,1 @@
+import{t as e}from"./useViewportLayout-DD4keBpq.js";function t(){let{isMobile:t}=e();return{showGrid:t}}export{t};
