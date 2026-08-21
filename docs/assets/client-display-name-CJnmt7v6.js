@@ -1,0 +1,1 @@
+import{Fo as e,jc as t}from"./auth-store-DfikPhas.js";function n(n,{prefixSelectOptions:r=[],suffixSelectOptions:i=[]}={}){return e({prefix:n?.[t.prefix],firstName:n?.[t.firstName],middleName:n?.[t.middleName],lastName:n?.[t.lastName],suffix:n?.[t.suffix]},{prefixSelectOptions:r,suffixSelectOptions:i})}export{n as t};
