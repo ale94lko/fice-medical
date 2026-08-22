@@ -1,1 +1,0 @@
-import{g as e}from"./runtime-core.esm-bundler-8hW84IlS.js";import{D as t,T as n,t as r,tu as i}from"./auth-store-DfikPhas.js";function a(){let a=r(),o=e(()=>a.permissions);return{canView:e(()=>t(o.value,i.viewPortalMessages)),canSend:e(()=>t(o.value,i.sendPortalMessages)),canAccess:e(()=>n(o.value,[i.viewPortalMessages,i.sendPortalMessages]))}}export{a as t};
