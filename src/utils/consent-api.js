@@ -182,6 +182,25 @@ export async function publishConsentVersion(templateId, versionId) {
   return normalizeConsentVersion(unwrapData(response.data))
 }
 
+export async function previewConsentVersionPdf(
+  templateId,
+  versionId,
+  form = {},
+) {
+  const response = await apiInstance.post(
+    apiPaths.consentVersionPreview(templateId, versionId),
+    form.layout
+      ? { layout: buildConsentVersionBody(form).layout }
+      : {},
+    { responseType: 'blob' },
+  )
+
+  return {
+    blob: response.data,
+    fileName: extractFileName(response, 'consent-preview.pdf'),
+  }
+}
+
 export async function listClientConsents(clientId, params = {}) {
   const query = {}
   if (params.status) {
@@ -325,6 +344,10 @@ export async function signConsentPublic(form) {
   if (form.signatureArtifact) {
     // eslint-disable-next-line camelcase -- API body
     body.signature_artifact = form.signatureArtifact
+  }
+  if (Array.isArray(form.fieldValues) && form.fieldValues.length) {
+    // eslint-disable-next-line camelcase -- API body
+    body.field_values = form.fieldValues
   }
   const response = await apiInstance.post(
     apiPaths.consentPublicSign,

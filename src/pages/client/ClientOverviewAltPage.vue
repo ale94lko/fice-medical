@@ -58,6 +58,13 @@
                   v-if="activeTab === addClientTabKeys.basic"
                   :basic-info="basicInfo"
                 />
+                <ClientOverviewAltConsents
+                  v-else-if="activeTab === addClientTabKeys.consents"
+                  :client-id="clientId"
+                  :client-display-name="header.fullName"
+                  :contact-section="form?.[clientFormSections.contact]"
+                  :can-view="canViewConsents"
+                />
                 <ClientOverviewAltContact
                   v-else-if="activeTab === addClientTabKeys.contact"
                   :contact-info="contactInfo"
@@ -146,6 +153,8 @@ import ClientOverviewAltTabs from
   'components/client-overview/ClientOverviewAltTabs.vue'
 import ClientOverviewAltBasicInfo from
   'components/client-overview/ClientOverviewAltBasicInfo.vue'
+import ClientOverviewAltConsents from
+  'components/client-overview/ClientOverviewAltConsents.vue'
 import ClientOverviewAltContact from
   'components/client-overview/ClientOverviewAltContact.vue'
 import ClientOverviewAltAllergies from
@@ -156,6 +165,8 @@ import ClientOverviewAltModulesTab from
   'components/client-overview/ClientOverviewAltModulesTab.vue'
 import { useActiveEncounter } from 'src/composables/useActiveEncounter.js'
 import { useClientOverview } from 'src/composables/useClientOverview.js'
+import { useAddClientTabPermissions } from
+  'src/composables/useAddClientTabPermissions.js'
 import { buildClientOverviewAltBasicInfo } from
   'src/utils/client-overview-alt-basic-info.js'
 import { buildClientOverviewAltContact } from
@@ -179,6 +190,10 @@ const { t } = useI18n()
 const $q = useQuasar()
 const siteStore = useSiteStore()
 const authStore = useAuthStore()
+const { canViewMainTabFor } = useAddClientTabPermissions(
+  computed(() => false),
+)
+const canViewConsents = canViewMainTabFor(addClientTabKeys.consents)
 
 const clientId = computed(() => route.params.id)
 const activeTab = ref(addClientTabKeys.appointments)

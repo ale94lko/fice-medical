@@ -270,6 +270,114 @@
           </div>
 
           <div
+            v-if="local.id"
+            class="subtenant-dialog__full
+              subtenant-dialog__heading-wrap"
+            :data-testid="
+              subtenantDialogTestIds.section('document-branding')
+            ">
+            <SectionHeading
+              icon="palette"
+              :title="t('documentBrandingTitle')"
+            />
+            <p class="text-body2 text-grey-7 q-mb-none">
+              {{ t('documentBrandingHelper') }}
+            </p>
+          </div>
+          <template v-if="local.id">
+            <p class="text-body2 text-grey-7 q-mb-none
+              subtenant-dialog__full">
+              {{ t('documentBrandingLogoNote') }}
+            </p>
+            <p
+              v-if="!branding.entitlementColors"
+              class="text-body2 text-grey-7 q-mb-none
+                subtenant-dialog__full">
+              {{ t('documentBrandingColorsUnavailable') }}
+            </p>
+            <template v-if="branding.entitlementColors">
+              <AddClientLabeledField
+                :label="t('documentBrandingPrimaryColor')">
+                <TextInput
+                  v-model="branding.primaryColor"
+                  :external-label="true"
+                  :readonly="brandingReadonly"
+                  maxlength="7"
+                  :placeholder="'#0f7a74'"
+                  :test-id="
+                    subtenantDialogTestIds.field(
+                      'branding-primary',
+                    )
+                  "
+                />
+              </AddClientLabeledField>
+              <AddClientLabeledField
+                :label="t('documentBrandingSecondaryColor')">
+                <TextInput
+                  v-model="branding.secondaryColor"
+                  :external-label="true"
+                  :readonly="brandingReadonly"
+                  maxlength="7"
+                  :placeholder="'#e2e8f0'"
+                  :test-id="
+                    subtenantDialogTestIds.field(
+                      'branding-secondary',
+                    )
+                  "
+                />
+              </AddClientLabeledField>
+              <AddClientLabeledField
+                :label="t('documentBrandingAccentColor')">
+                <TextInput
+                  v-model="branding.accentColor"
+                  :external-label="true"
+                  :readonly="brandingReadonly"
+                  maxlength="7"
+                  :placeholder="'#14b8a6'"
+                  :test-id="
+                    subtenantDialogTestIds.field(
+                      'branding-accent',
+                    )
+                  "
+                />
+              </AddClientLabeledField>
+            </template>
+            <p
+              v-if="!branding.entitlementCustomTheme"
+              class="text-body2 text-grey-7 q-mb-none
+                subtenant-dialog__full">
+              {{ t('documentBrandingThemeUnavailable') }}
+            </p>
+            <AddClientLabeledField
+              v-if="branding.entitlementCustomTheme"
+              :label="t('documentBrandingThemePreset')">
+              <FormSelect
+                v-model="branding.themePreset"
+                outlined
+                dense
+                emit-value
+                map-options
+                hide-bottom-space
+                :disable="brandingReadonly"
+                :options="themePresetOptions"
+                :test-id="
+                  subtenantDialogTestIds.field(
+                    'branding-theme',
+                  )
+                "
+              />
+            </AddClientLabeledField>
+            <p
+              v-if="branding.effectivePrimaryColor"
+              class="text-body2 text-grey-7 q-mb-none
+                subtenant-dialog__full">
+              {{ t('documentBrandingEffectivePreview') }}
+              :
+              {{ branding.effectivePrimaryColor }}
+            </p>
+          </template>
+
+          <div
             class="subtenant-dialog__full
               subtenant-dialog__heading-wrap"
             :data-testid="
@@ -334,8 +442,12 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { subtenantStatusValues, storedFileCategories } from
-  'components/constants.js'
+import { useQuasar } from 'quasar'
+import {
+  quasarNotifyTypes,
+  storedFileCategories,
+  subtenantStatusValues,
+} from 'components/constants.js'
 import AddClientLabeledField from
   'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
@@ -362,6 +474,12 @@ import {
   TIME_FORMAT_VALUES,
   ianaTimezoneSelectOptions,
 } from 'src/utils/iana-timezones.js'
+import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
+import {
+  fetchDocumentBranding,
+  subtenantApiErrorMessage,
+  updateDocumentBranding,
+} from 'src/utils/subtenant-api.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -376,9 +494,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'save', 'cancel'])
 const { t } = useI18n()
+const $q = useQuasar()
 
 const local = ref(createEmptySubtenantForm())
 const errors = ref({})
+const branding = ref(emptyBranding())
 const companyLogoCategory = storedFileCategories.companyLogo
 const clinicTypeOptions = computed(() => clinicTypeSelectOptions(t))
 const timezoneOptions = computed(() =>
@@ -394,7 +514,6 @@ const firstDayOptions = computed(() => [
   { label: t('firstDayMonday'), value: FIRST_DAY_VALUES.monday },
 ])
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
 const taxIdDisplay = computed(() => formatEinDisplay(local.value.taxId))
 
 function onTaxIdInput(value) {
@@ -407,6 +526,19 @@ const open = computed({
 })
 
 const readonly = computed(() => props.mode === 'view')
+const brandingReadonly = computed(() => (
+  readonly.value || !branding.value.canManage
+))
+const themePresetOptions = computed(() => [
+  {
+    value: 'STANDARD',
+    label: t('documentBrandingThemeStandard'),
+  },
+  {
+    value: 'CLINIC_ACCENT',
+    label: t('documentBrandingThemeAccent'),
+  },
+])
 const isAdd = computed(() => props.mode === 'add')
 
 const showCodeField = computed(() =>
@@ -475,6 +607,22 @@ function validateForm() {
   return Object.keys(errors.value).length === 0
 }
 
+function emptyBranding() {
+  return {
+    canManage: false,
+    entitlementLogo: false,
+    entitlementColors: false,
+    entitlementCustomTheme: false,
+    primaryColor: '',
+    secondaryColor: '',
+    accentColor: '',
+    themePreset: 'STANDARD',
+    effectivePrimaryColor: '',
+    effectiveSecondaryColor: '',
+    effectiveAccentColor: '',
+  }
+}
+
 function syncLocalFromProps() {
   if (props.subtenant) {
     local.value = cloneSubtenantForm(props.subtenant)
@@ -484,11 +632,33 @@ function syncLocalFromProps() {
   resetErrors()
 }
 
+async function loadBranding() {
+  branding.value = emptyBranding()
+  const id = local.value.id
+  if (!id) {
+    return
+  }
+  try {
+    branding.value = await fetchDocumentBranding(id)
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: subtenantApiErrorMessage(
+          error,
+          t('documentBrandingLoadError'),
+        ),
+      })
+    }
+  }
+}
+
 watch(
   () => [props.modelValue, props.subtenant, props.mode],
-  () => {
+  async() => {
     if (props.modelValue) {
       syncLocalFromProps()
+      await loadBranding()
     }
   },
   { immediate: true },
@@ -499,9 +669,36 @@ function onCancel() {
   emit('update:modelValue', false)
 }
 
-function onSave() {
+async function onSave() {
   if (readonly.value || !validateForm()) {
     return
+  }
+  if (local.value.id && branding.value.canManage) {
+    try {
+      const payload = {}
+      if (branding.value.entitlementColors) {
+        payload.primaryColor = branding.value.primaryColor
+        payload.secondaryColor = branding.value.secondaryColor
+        payload.accentColor = branding.value.accentColor
+      }
+      if (branding.value.entitlementCustomTheme) {
+        payload.themePreset = branding.value.themePreset
+      }
+      if (Object.keys(payload).length) {
+        await updateDocumentBranding(local.value.id, payload)
+      }
+    } catch (error) {
+      if (!isAuthSessionEndUIError(error)) {
+        $q.notify({
+          type: quasarNotifyTypes.negative,
+          message: subtenantApiErrorMessage(
+            error,
+            t('documentBrandingSaveError'),
+          ),
+        })
+      }
+      return
+    }
   }
   emit('save', cloneSubtenantForm(local.value))
 }

@@ -226,6 +226,11 @@ export function canViewMainTab(modules, tabKey, isCreate) {
         modules,
         getMainTabViewPermissions(tabKey, isCreate),
       )
+    case addClientTabKeys.consents:
+      return canViewSubTab(
+        modules,
+        addClientDocumentsSubTabKeys.consents,
+      )
     case addClientTabKeys.clinical:
     case addClientTabKeys.careCoordination:
     case addClientTabKeys.documents:

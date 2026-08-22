@@ -2622,6 +2622,8 @@ body.vp-mobile {
 }
 
 .app-btn-ai-outline {
+  position: relative;
+  overflow: hidden;
   border-radius: $radius-md;
   font-weight: 600;
   font-size: 11px !important;
@@ -3687,6 +3689,7 @@ body.vp-mobile {
 .subsection-heading {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 6px;
   margin: 0 0 12px;
   font-size: 0.875rem;
@@ -3694,6 +3697,8 @@ body.vp-mobile {
   color: $primary;
 
   .q-icon {
+    position: static;
+    flex: 0 0 18px;
     color: $primary;
   }
 }

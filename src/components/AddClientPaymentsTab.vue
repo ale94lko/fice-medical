@@ -21,7 +21,7 @@
     </div>
 
     <template v-else>
-      <div class="row items-center q-mb-md">
+      <div class="appointments-header row items-center q-mb-md">
         <div class="col">
           <SectionHeading
             icon="paid"
@@ -31,9 +31,28 @@
             {{ t('clientPaymentHistorySubtitle') }}
           </p>
         </div>
-        <div class="col-auto">
+        <div class="col-grow appointments-header__search">
+          <q-input
+            :model-value="searchQuery"
+            outlined
+            dense
+            clearable
+            hide-bottom-space
+            class="admin-list-page__search-input
+              appointments-header__search-input"
+            :data-testid="clientFinancialTestIds.paymentSearch"
+            :disable="loading"
+            :placeholder="t('clientPaymentSearchPlaceholder')"
+            @update:model-value="onSearchInput">
+            <template #prepend>
+              <q-icon name="search" size="18px" />
+            </template>
+          </q-input>
+        </div>
+        <div
+          v-if="canCreatePayment"
+          class="col-auto appointments-header__actions">
           <q-btn
-            v-if="canCreatePayment"
             no-caps
             unelevated
             color="primary"
@@ -44,23 +63,6 @@
             @click="openRecord"
           />
         </div>
-      </div>
-
-      <div class="billing-queue-filters q-mb-md">
-        <q-input
-          :model-value="searchQuery"
-          outlined
-          clearable
-          hide-bottom-space
-          class="billing-queue-filters__search"
-          :data-testid="clientFinancialTestIds.paymentSearch"
-          :disable="loading"
-          :placeholder="t('clientPaymentSearchPlaceholder')"
-          @update:model-value="onSearchInput">
-          <template #prepend>
-            <q-icon name="search" size="18px" />
-          </template>
-        </q-input>
       </div>
 
       <AdminTablePanel

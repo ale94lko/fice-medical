@@ -119,6 +119,24 @@
             </div>
 
             <div
+              v-if="record.reason"
+              class="clinical-audit-detail-dialog__grid-cell">
+              <div
+                class="clinical-audit-detail-dialog__cell-icon
+                  clinical-audit-detail-dialog__cell-icon--amber">
+                <q-icon name="edit_note" size="20px" />
+              </div>
+              <div class="clinical-audit-detail-dialog__cell-body">
+                <p class="clinical-audit-detail-dialog__cell-label">
+                  {{ t('clinicalAuditColReason') }}
+                </p>
+                <p class="clinical-audit-detail-dialog__cell-value">
+                  {{ record.reason }}
+                </p>
+              </div>
+            </div>
+
+            <div
               v-if="triggeredByLabel"
               class="clinical-audit-detail-dialog__grid-cell">
               <div

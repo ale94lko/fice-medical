@@ -23,6 +23,10 @@ export function useClientPermissions() {
     permissions,
     clientPermissionNames.editBasicInfoClient,
   )
+  const canEditClientIdentity = usePermission(
+    permissions,
+    clientPermissionNames.editClientIdentity,
+  )
   const canChangeStatus = usePermission(
     permissions,
     clientPermissionNames.changeStatusClient,
@@ -262,6 +266,7 @@ export function useClientPermissions() {
     canViewClient,
     canAddClient,
     canEditBasicInfo,
+    canEditClientIdentity,
     canChangeStatus,
     canArchiveClient,
     canInviteToClientPortal,

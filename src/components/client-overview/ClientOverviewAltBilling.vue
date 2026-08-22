@@ -9,7 +9,8 @@
       no-caps
       active-color="primary"
       indicator-color="primary"
-      class="q-mb-md"
+      align="left"
+      class="add-client-subtabs"
       :data-testid="clientFinancialTestIds.overviewTabs">
       <q-tab
         v-for="tab in visibleSubTabs"

@@ -3,6 +3,7 @@ import { addClientTabKeys } from 'components/constants.js'
 
 export const ADD_CLIENT_TAB_ORDER = [
   addClientTabKeys.basic,
+  addClientTabKeys.consents,
   addClientTabKeys.contact,
   addClientTabKeys.allergies,
   addClientTabKeys.insurance,

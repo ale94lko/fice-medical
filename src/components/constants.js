@@ -221,6 +221,7 @@ export const addClientTabKeys = {
   appointments: 'appointments',
   encounters: 'encounters',
   basic: 'basic',
+  consents: 'consents',
   contact: 'contact',
   familyMedicalHistory: 'familyMedicalHistory',
   allergies: 'allergies',
@@ -310,6 +311,8 @@ export const consentSignerTypeValues = {
   client: 'CLIENT',
   guardian: 'GUARDIAN',
   authorizedRepresentative: 'AUTHORIZED_REPRESENTATIVE',
+  witness: 'WITNESS',
+  staff: 'STAFF',
 }
 
 export const consentSignatureMethodValues = {
@@ -1144,6 +1147,7 @@ export const permissionNames = {
   viewClient: 'VIEW_CLIENT',
   addClient: 'ADD_CLIENT',
   editBasicInfoClient: 'EDIT_BASIC_INFO_CLIENT',
+  editClientIdentity: 'EDIT_CLIENT_IDENTITY',
   changeStatusClient: 'CHANGE_STATUS_CLIENT',
   archiveClient: 'ARCHIVE_CLIENT',
   clientPortalInvite: 'CLIENT_PORTAL_INVITE',
@@ -1157,6 +1161,10 @@ export const permissionNames = {
   editCredentials: 'EDIT_CREDENTIALS',
   viewSubtenants: 'VIEW_SUBTENANTS',
   editSubtenants: 'EDIT_SUBTENANTS',
+  documentBrandingManage: 'DOCUMENT_BRANDING_MANAGE',
+  documentBrandingLogo: 'DOCUMENT_BRANDING_LOGO',
+  documentBrandingColors: 'DOCUMENT_BRANDING_COLORS',
+  documentBrandingCustomTheme: 'DOCUMENT_BRANDING_CUSTOM_THEME',
   generateDocuments: 'GENERATE_DOCUMENTS',
   viewFiles: 'VIEW_FILES',
   uploadFiles: 'UPLOAD_FILES',
@@ -1247,6 +1255,7 @@ export const clientPermissionNames = {
   viewClient: permissionNames.viewClient,
   addClient: permissionNames.addClient,
   editBasicInfoClient: 'EDIT_BASIC_INFO_CLIENT',
+  editClientIdentity: permissionNames.editClientIdentity,
   changeStatusClient: 'CHANGE_STATUS_CLIENT',
   archiveClient: 'ARCHIVE_CLIENT',
   clientPortalInvite: permissionNames.clientPortalInvite,
@@ -2665,6 +2674,12 @@ export const apiPaths = {
   consentVersionPublish: (templateId, versionId) => `/consents/v1/templates/${
     encodeURIComponent(String(templateId ?? '').trim())
   }/versions/${encodeURIComponent(String(versionId ?? '').trim())}/publish`,
+  consentVersionPreview: (templateId, versionId) => `/consents/v1/templates/${
+    encodeURIComponent(String(templateId ?? '').trim())
+  }/versions/${encodeURIComponent(String(versionId ?? '').trim())}/preview`,
+  subtenantDocumentBranding: id => `/subtenants/v1/${encodeURIComponent(
+    String(id ?? '').trim(),
+  )}/document-branding`,
   clientConsents: clientId => `/client/v1/${encodeURIComponent(
     String(clientId ?? '').trim(),
   )}/consents`,

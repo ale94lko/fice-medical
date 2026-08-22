@@ -144,6 +144,7 @@
       v-model="versionDialogOpen"
       :mode="versionDialogMode"
       :version="activeVersion"
+      :template-id="activeTemplate?.id"
       :saving="versionSaving"
       @save="onSaveVersion"
     />
@@ -208,12 +209,16 @@ import {
   createConsentVersion,
   deleteConsentTemplate,
   deleteConsentVersion,
+  fetchConsentVersion,
   listConsentTemplates,
   listConsentVersions,
   publishConsentVersion,
   updateConsentTemplate,
   updateConsentVersion,
 } from 'src/utils/consent-api.js'
+import {
+  isConsentVersionEditable,
+} from 'src/utils/consent-normalize.js'
 import { consentTypeI18nKey } from 'src/utils/consent-i18n.js'
 
 const { t, te } = useI18n()
@@ -482,10 +487,23 @@ function openAddVersion() {
   versionDialogOpen.value = true
 }
 
-function openEditVersion(version) {
-  activeVersion.value = version
-  versionDialogMode.value = 'edit'
-  versionDialogOpen.value = true
+async function openEditVersion(version) {
+  if (!activeTemplate.value?.id || !version?.id) {
+    return
+  }
+  try {
+    const detail = await fetchConsentVersion(
+      activeTemplate.value.id,
+      version.id,
+    )
+    activeVersion.value = detail
+    versionDialogMode.value = isConsentVersionEditable(detail)
+      ? 'edit'
+      : 'view'
+    versionDialogOpen.value = true
+  } catch (error) {
+    notifyError(error, 'consentVersionsLoadError')
+  }
 }
 
 function onPreviewVersion(version) {

@@ -116,12 +116,14 @@
         />
         <EncounterWorkspaceNarrative
           v-else-if="activeTab === encounterWorkspaceTabs.narrative"
+          :key="narrativeViewKey"
           :encounter-id="workspace.encounter.id"
           :client-id="chartClientKey"
           :narrative="workspace.narrative"
           :diagnoses="workspace.encounter.diagnoses"
           :screenings="workspace.screenings"
           :can-edit="canEditNarrative"
+          :highlight-missing="highlightNarrativeMissing"
           :can-use-ai-draft="canUseNarrativeAiDraft"
           :can-view-screenings="canViewScreenings"
           :can-view-care-plans="canViewCarePlans"
@@ -332,6 +334,8 @@ const authStore = useAuthStore()
 
 const loading = ref(false)
 const actionBusy = ref(false)
+const narrativeViewKey = ref(0)
+const highlightNarrativeMissing = ref(false)
 const workspace = ref(null)
 const siteStore = useSiteStore()
 const chartClientKey = computed(() =>
@@ -655,6 +659,7 @@ async function loadWorkspace() {
   loadError.value = ''
   try {
     workspace.value = await fetchEncounterWorkspace(id)
+    narrativeViewKey.value += 1
     const encounter = workspace.value?.encounter
     if (encounter) {
       siteStore.putClientDetailInSource({
@@ -807,7 +812,28 @@ async function refreshNarrative() {
   }
 }
 
-async function refreshCompletion() {
+async function refreshBillingReadiness() {
+  const id = workspace.value?.encounter?.id
+  if (id == null) {
+    return
+  }
+  try {
+    const latest = await fetchEncounterWorkspace(id)
+    if (!workspace.value) {
+      return
+    }
+    workspace.value = {
+      ...workspace.value,
+      billingReadiness: latest.billingReadiness,
+    }
+  } catch (error) {
+    if (!isAuthSessionEndUIError(error)) {
+      // Keep current snapshot if refresh fails.
+    }
+  }
+}
+
+async function refreshCompletion(options = {}) {
   const id = workspace.value?.encounter?.id
   if (id == null) {
     return
@@ -821,7 +847,10 @@ async function refreshCompletion() {
       ...workspace.value,
       completion,
     }
-    await refreshNarrative()
+    await refreshBillingReadiness()
+    if (options.reloadNarrative !== false) {
+      await refreshNarrative()
+    }
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       // Keep current snapshot if refresh fails.
@@ -835,6 +864,9 @@ function onRequirementAction(item) {
     generatedNoteOpen.value = true
 
     return
+  }
+  if (target.workspaceTab === encounterWorkspaceTabs.narrative) {
+    highlightNarrativeMissing.value = true
   }
   if (target.workspaceTab) {
     activeTab.value = target.workspaceTab
@@ -1110,6 +1142,7 @@ async function onComplete() {
         row => String(row.type).toUpperCase() === 'NARRATIVE',
       )
       if (narrativeMissing) {
+        highlightNarrativeMissing.value = true
         activeTab.value = encounterWorkspaceTabs.narrative
       }
 
@@ -1199,7 +1232,7 @@ function onNarrativeSaved(saved) {
     ...workspace.value,
     narrative: saved,
   }
-  void refreshCompletion()
+  void refreshCompletion({ reloadNarrative: false })
   void refreshGeneratedNote()
 }
 
@@ -1377,6 +1410,12 @@ async function onRetryProcessing(processType) {
     actionBusy.value = false
   }
 }
+
+watch(activeTab, tab => {
+  if (tab !== encounterWorkspaceTabs.narrative) {
+    highlightNarrativeMissing.value = false
+  }
+})
 
 watch(encounterId, () => {
   void loadWorkspace()

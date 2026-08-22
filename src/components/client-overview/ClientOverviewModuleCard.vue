@@ -121,7 +121,9 @@
         }">
         <template v-if="isAllergyModule">
           <div class="client-overview-module-card__allergy-main col">
-            <span class="client-overview-module-card__item-label">
+            <span
+              class="client-overview-module-card__item-label"
+              :title="item.label">
               {{ item.label }}
             </span>
             <span
@@ -150,12 +152,15 @@
             ]">
             {{ item.severityLabel }}
           </span>
-          <span class="client-overview-module-card__item-label col">
+          <span
+            class="client-overview-module-card__item-label col"
+            :title="item.label">
             {{ item.label }}
           </span>
           <span
             v-if="item.meta && !item.severityModifier"
-            class="client-overview-module-card__item-meta">
+            class="client-overview-module-card__item-meta"
+            :title="item.meta">
             {{ item.meta }}
           </span>
         </template>

@@ -26,6 +26,133 @@ export const consentVersionDialogTestIds = {
   save: 'consent-version-btn-save',
   preview: 'consent-version-btn-preview',
   contentPreviewDialog: 'consent-content-preview',
+  addField: 'consent-version-btn-add-field',
+  fieldEdit: key => toTestId('consent-version-field-row', key, 'edit'),
+  fieldRemove: key => toTestId(
+    'consent-version-field-row',
+    key,
+    'remove',
+  ),
+  fieldMoveUp: key => toTestId('consent-version-field-row', key, 'up'),
+  fieldMoveDown: key => toTestId(
+    'consent-version-field-row',
+    key,
+    'down',
+  ),
+  fieldEditorDialog: 'consent-version-field-editor',
+  addRequirement: 'consent-version-btn-add-requirement',
+  requirementEdit: key => toTestId(
+    'consent-version-requirement-row',
+    key,
+    'edit',
+  ),
+  requirementRemove: key => toTestId(
+    'consent-version-requirement-row',
+    key,
+    'remove',
+  ),
+  requirementMoveUp: key => toTestId(
+    'consent-version-requirement-row',
+    key,
+    'up',
+  ),
+  requirementMoveDown: key => toTestId(
+    'consent-version-requirement-row',
+    key,
+    'down',
+  ),
+  requirementEditorDialog: 'consent-version-requirement-editor',
+  requirementSave: 'consent-version-requirement-btn-save',
+  layoutRoot: 'consent-version-layout',
+  layoutEnable: 'consent-version-layout-btn-enable',
+  layoutAddSection: 'consent-version-layout-btn-add-section',
+  layoutField: name => toTestId('consent-version-layout-field', name),
+  layoutSectionTitle: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'title',
+  ),
+  layoutSectionMoveUp: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'up',
+  ),
+  layoutSectionMoveDown: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'down',
+  ),
+  layoutSectionRemove: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'remove',
+  ),
+  layoutSectionShowTitle: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'show-title',
+  ),
+  layoutSectionBreak: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'break',
+  ),
+  layoutSectionKeep: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'keep',
+  ),
+  layoutSectionAddRow: id => toTestId(
+    'consent-version-layout-section',
+    id,
+    'add-row',
+  ),
+  layoutRowColumns: id => toTestId(
+    'consent-version-layout-row',
+    id,
+    'columns',
+  ),
+  layoutRowRemove: id => toTestId(
+    'consent-version-layout-row',
+    id,
+    'remove',
+  ),
+  layoutColumnAdd: id => toTestId(
+    'consent-version-layout-column',
+    id,
+    'add',
+  ),
+  layoutComponentType: id => toTestId(
+    'consent-version-layout-component',
+    id,
+    'type',
+  ),
+  layoutComponentField: id => toTestId(
+    'consent-version-layout-component',
+    id,
+    'field',
+  ),
+  layoutComponentSignature: id => toTestId(
+    'consent-version-layout-component',
+    id,
+    'signature',
+  ),
+  layoutComponentText: id => toTestId(
+    'consent-version-layout-component',
+    id,
+    'text',
+  ),
+  layoutComponentSource: id => toTestId(
+    'consent-version-layout-component',
+    id,
+    'source',
+  ),
+  layoutComponentRemove: id => toTestId(
+    'consent-version-layout-component',
+    id,
+    'remove',
+  ),
+  pdfPreview: 'consent-version-btn-pdf-preview',
 }
 
 export const clientConsentsTestIds = {
@@ -53,6 +180,7 @@ export const clientConsentsTestIds = {
   signCapture: 'client-consent-sign-btn-capture',
   signComplete: 'client-consent-sign-btn-complete',
   signCopyLink: 'client-consent-sign-btn-copy-link',
+  authField: key => toTestId('client-consent-auth-field', key),
   revokeCancel: 'client-consent-revoke-btn-cancel',
   revokeSubmit: 'client-consent-revoke-btn-submit',
   paperScanRemove: 'client-consent-paper-scan-btn-remove',

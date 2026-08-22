@@ -80,3 +80,80 @@ export async function updateSubtenant(id, form) {
 export async function deleteSubtenant(id) {
   await apiInstance.delete(apiPaths.subtenantById(id))
 }
+
+export function normalizeDocumentBranding(raw = {}) {
+  const row = raw ?? {}
+
+  return {
+    subtenantId: row.subtenant_id ?? row.subtenantId ?? null,
+    canManage: Boolean(row.can_manage ?? row.canManage),
+    entitlementLogo: Boolean(
+      row.entitlement_logo ?? row.entitlementLogo,
+    ),
+    entitlementColors: Boolean(
+      row.entitlement_colors ?? row.entitlementColors,
+    ),
+    entitlementCustomTheme: Boolean(
+      row.entitlement_custom_theme ?? row.entitlementCustomTheme,
+    ),
+    primaryColor: String(
+      row.primary_color ?? row.primaryColor ?? '',
+    ).trim(),
+    secondaryColor: String(
+      row.secondary_color ?? row.secondaryColor ?? '',
+    ).trim(),
+    accentColor: String(
+      row.accent_color ?? row.accentColor ?? '',
+    ).trim(),
+    themePreset: String(
+      row.theme_preset ?? row.themePreset ?? 'STANDARD',
+    ).trim().toUpperCase() || 'STANDARD',
+    effectivePrimaryColor: String(
+      row.effective_primary_color ?? row.effectivePrimaryColor ?? '',
+    ).trim(),
+    effectiveSecondaryColor: String(
+      row.effective_secondary_color
+        ?? row.effectiveSecondaryColor
+        ?? '',
+    ).trim(),
+    effectiveAccentColor: String(
+      row.effective_accent_color ?? row.effectiveAccentColor ?? '',
+    ).trim(),
+    customColorsApplied: Boolean(
+      row.custom_colors_applied ?? row.customColorsApplied,
+    ),
+  }
+}
+
+export async function fetchDocumentBranding(id) {
+  const response = await apiInstance.get(
+    apiPaths.subtenantDocumentBranding(id),
+  )
+
+  return normalizeDocumentBranding(unwrapData(response.data))
+}
+
+export async function updateDocumentBranding(id, form = {}) {
+  const body = {}
+  if (form.primaryColor != null || form.secondaryColor != null
+    || form.accentColor != null) {
+    /* eslint-disable camelcase -- API body */
+    body.primary_color = String(form.primaryColor ?? '').trim()
+      || null
+    body.secondary_color = String(form.secondaryColor ?? '').trim()
+      || null
+    body.accent_color = String(form.accentColor ?? '').trim()
+      || null
+    /* eslint-enable camelcase */
+  }
+  if (form.themePreset) {
+    /* eslint-disable-next-line camelcase -- API body */
+    body.theme_preset = String(form.themePreset).trim()
+  }
+  const response = await apiInstance.put(
+    apiPaths.subtenantDocumentBranding(id),
+    body,
+  )
+
+  return normalizeDocumentBranding(unwrapData(response.data))
+}

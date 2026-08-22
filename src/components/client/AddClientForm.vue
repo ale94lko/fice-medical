@@ -236,6 +236,12 @@
                     :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('firstName'))"
                     :rules="rules.firstName"
+                    :disable="identityLock.firstNameLocked"
+                    :lock-label="adminLockLabel(
+                      identityLock.firstNameBadge,
+                    )"
+                    :lock-hint="identityLockHint"
+                    :lock-test-id="tid.identityLockBadge(ck.firstName)"
                     :test-id="tid.field(ck.firstName)"
                   />
                 </div>
@@ -247,6 +253,12 @@
                     :maxlength="clientNameMaxLength"
                     :label="t('middleName')"
                     :rules="rules.middleName"
+                    :disable="identityLock.middleNameLocked"
+                    :lock-label="adminLockLabel(
+                      identityLock.middleNameBadge,
+                    )"
+                    :lock-hint="identityLockHint"
+                    :lock-test-id="tid.identityLockBadge(ck.middleName)"
                     :test-id="tid.field(ck.middleName)"
                   />
                 </div>
@@ -258,6 +270,12 @@
                     :maxlength="clientNameMaxLength"
                     :label="requiredLabel(t('lastName'))"
                     :rules="rules.lastName"
+                    :disable="identityLock.lastNameLocked"
+                    :lock-label="adminLockLabel(
+                      identityLock.lastNameBadge,
+                    )"
+                    :lock-hint="identityLockHint"
+                    :lock-test-id="tid.identityLockBadge(ck.lastName)"
                     :test-id="tid.field(ck.lastName)"
                   />
                 </div>
@@ -283,7 +301,12 @@
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField
                     :label="t('ssnItin')"
-                    :test-id="tid.field(ck.socialSecurityNumber)">
+                    :test-id="tid.field(ck.socialSecurityNumber)"
+                    :lock-label="adminLockLabel(identityLock.ssnBadge)"
+                    :lock-hint="identityLockHint"
+                    :lock-test-id="tid.identityLockBadge(
+                      ck.socialSecurityNumber,
+                    )">
                     <q-input
                       ref="ssnInputRef"
                       outlined
@@ -292,6 +315,8 @@
                       :data-testid="tid.field(ck.socialSecurityNumber)"
                       :model-value="ssnDisplayValue"
                       :rules="ssnFieldRules"
+                      :disable="identityLock.ssnLocked"
+                      :readonly="identityLock.ssnLocked"
                       maxlength="11"
                       :placeholder="t('taxIdPlaceholder')"
                       inputmode="numeric"
@@ -325,12 +350,16 @@
                 <div class="col-12 col-md-6">
                   <AddClientLabeledField
                     :label="t('dob')"
-                    :test-id="tid.field(ck.dob)">
+                    :test-id="tid.field(ck.dob)"
+                    :lock-label="adminLockLabel(identityLock.dobBadge)"
+                    :lock-hint="identityLockHint"
+                    :lock-test-id="tid.identityLockBadge(ck.dob)">
                     <ClientDateField
                       v-model="form[ck.dob]"
                       max-today
                       :min-year="dobMinYear"
                       :rules="rules.dob"
+                      :readonly="identityLock.dobLocked"
                       :close-label="t('close')"
                       :test-id="tid.field(ck.dob)"
                     />
@@ -454,7 +483,10 @@
                   <AddClientLabeledField
                     :label="t('gender')"
                     required
-                    :test-id="tid.field(ck.gender)">
+                    :test-id="tid.field(ck.gender)"
+                    :lock-label="adminLockLabel(identityLock.sexBadge)"
+                    :lock-hint="identityLockHint"
+                    :lock-test-id="tid.identityLockBadge(ck.gender)">
                     <div
                       class="gender-options"
                       role="radiogroup"
@@ -469,7 +501,8 @@
                           form[ck.gender],
                           opt.value,
                         )"
-                        :disabled="catalogsLoading"
+                        :disabled="catalogsLoading
+                          || identityLock.sexLocked"
                         :data-testid="tid.genderOption(opt.value)"
                         :class="{
                           'gender-option--selected':
@@ -707,6 +740,18 @@
               </div>
           </AddClientAccordionSection>
           </fieldset>
+        </q-tab-panel>
+
+        <q-tab-panel
+          :name="addClientTabKeys.consents"
+          class="q-pa-none"
+          :data-add-client-tab="addClientTabKeys.consents">
+          <AddClientConsentsTab
+            :client-id="props.clientId"
+            :client-display-name="patientFullName"
+            :contact-section="form[contactSectionKey]"
+            :can-view="canViewConsentsTab"
+          />
         </q-tab-panel>
 
         <q-tab-panel
@@ -982,13 +1027,6 @@
                 :can-delete="canDeleteAttachments"
                 @navigate-source="onAttachmentNavigateSource"
               />
-              <AddClientConsentsTab
-                v-else-if="subTab.key === DOCUMENTS_CONSENTS_SUB_TAB"
-                :client-id="props.clientId"
-                :client-display-name="patientFullName"
-                :contact-section="form[contactSectionKey]"
-                :can-view="canViewConsentsTab"
-              />
               <div
                 v-else
                 class="text-body1 text-grey-7 q-py-xl text-center">
@@ -1069,6 +1107,11 @@
       @open-existing="onDuplicateOpenExistingRequest"
       @cancel="onDuplicateReviewCancel"
     />
+    <ClientIdentityChangeReasonDialog
+      v-model="identityReasonOpen"
+      :submitting="saving"
+      @confirm="onIdentityReasonConfirm"
+    />
     <ModalComponent
       v-model="cancelConfirmOpen"
       test-id="cancel-discard"
@@ -1091,6 +1134,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  reactive,
   ref,
   watch,
 } from 'vue'
@@ -1136,8 +1180,12 @@ import AppLoadingOverlay from '../AppLoadingOverlay.vue'
 import BannerComponent from '../BannerComponent.vue'
 import AddClientDuplicateMatchReviewDialog
   from '../AddClientDuplicateMatchReviewDialog.vue'
+import ClientIdentityChangeReasonDialog from
+  './ClientIdentityChangeReasonDialog.vue'
 import { useSiteStore } from '../../stores/site-store.js'
 import { useAddClientForm } from 'src/composables/useAddClientForm.js'
+import { useClientIdentityLock } from
+  'src/composables/useClientIdentityLock.js'
 import { useRegisterUnsavedChanges } from
   'src/composables/useUnsavedChangesRegistry.js'
 import { useAddClientCatalogs } from 'src/composables/useAddClientCatalogs.js'
@@ -1209,7 +1257,6 @@ import {
   CARE_COORDINATION_APPOINTMENTS_SUB_TAB,
   CARE_COORDINATION_AUTHORIZATIONS_SUB_TAB,
   DOCUMENTS_ATTACHMENTS_SUB_TAB,
-  DOCUMENTS_CONSENTS_SUB_TAB,
   FINANCIALS_OVERVIEW_SUB_TAB,
   FINANCIALS_LEDGER_SUB_TAB,
   FINANCIALS_BILLING_SUB_TAB,
@@ -1311,6 +1358,7 @@ const {
   canAddDiagnosticStudies,
   canEditDiagnosticStudies,
   canDeleteDiagnosticStudies,
+  canEditClientIdentity,
 } = useClientPermissions()
 
 const mainTabs = visibleMainTabs
@@ -1333,7 +1381,7 @@ const canViewFollowUpsTab = canViewSubTabFor(
   CARE_COORDINATION_FOLLOW_UPS_SUB_TAB,
 )
 const canViewAttachmentsTab = canViewSubTabFor(DOCUMENTS_ATTACHMENTS_SUB_TAB)
-const canViewConsentsTab = canViewSubTabFor(DOCUMENTS_CONSENTS_SUB_TAB)
+const canViewConsentsTab = canViewMainTabFor(addClientTabKeys.consents)
 
 const authStore = useAuthStore()
 const canUploadAttachments = computed(() =>
@@ -1518,6 +1566,21 @@ const {
 })
 
 useRegisterUnsavedChanges(() => isDirty())
+
+const identityLock = reactive(useClientIdentityLock({
+  form,
+  isEditMode,
+  canOverride: canEditClientIdentity,
+}))
+const identityReasonOpen = ref(false)
+const identityChangeReason = ref('')
+const identityLockHint = computed(
+  () => t('clientIdentityAdminLockHint'),
+)
+
+function adminLockLabel(show) {
+  return show ? t('clientIdentityAdminLock') : ''
+}
 
 const filteredCurrentSubTabs = computed(() => {
   if (!hasSubTabs.value) {
@@ -2221,6 +2284,7 @@ async function loadClientForEdit() {
   )
   applyForm(mapped)
   syncClinicianSourcesFromForm()
+  identityLock.captureBaseline()
 }
 
 let addClientFormMountAlive = true
@@ -2335,6 +2399,9 @@ function requiredLabel(text) {
 }
 
 function onSsnFocus() {
+  if (identityLock.ssnLocked) {
+    return
+  }
   ssnEditing.value = true
   ssnInputRef.value?.resetValidation?.()
 }
@@ -3037,6 +3104,7 @@ async function executeSave(destination = {}) {
         props.clientId,
         form.value,
         t,
+        { identityChangeReason: identityChangeReason.value },
       )
 
       // Remap clinical sections from the API response so local rows get
@@ -3085,6 +3153,8 @@ async function executeSave(destination = {}) {
       activeSubTab: destination.activeSubTab ?? activeSubTab.value,
     })
     markPristine()
+    identityLock.captureBaseline()
+    identityChangeReason.value = ''
   } catch (error) {
     if (!isAuthSessionEndUIError(error)) {
       const msg = error?.response?.data?.message
@@ -3098,6 +3168,7 @@ async function executeSave(destination = {}) {
     }
   } finally {
     saving.value = false
+    identityChangeReason.value = ''
   }
 }
 
@@ -3114,6 +3185,26 @@ async function onSave() {
 
     return
   }
+  if (isEditMode.value && identityLock.hasOverrideChanges()) {
+    if (!canEditClientIdentity.value) {
+      $q.notify({
+        type: quasarNotifyTypes.negative,
+        message: t('clientIdentityLockedError'),
+        position: 'top',
+      })
+
+      return
+    }
+    identityReasonOpen.value = true
+
+    return
+  }
+  await executeSave()
+}
+
+async function onIdentityReasonConfirm(reason) {
+  identityChangeReason.value = reason
+  identityReasonOpen.value = false
   await executeSave()
 }
 

@@ -3,7 +3,26 @@
     class="form-field"
     :class="{ 'q-mt-md': spaced }"
     :data-testid="testId || undefined">
-    <FormFieldLabel v-if="displayLabel" :label="displayLabel" />
+    <div
+      v-if="$slots['label-append'] || lockLabel"
+      class="form-field__head">
+      <FormFieldLabel v-if="displayLabel" :label="displayLabel" />
+      <span
+        v-if="lockLabel"
+        class="form-field__admin-lock"
+        :data-testid="lockTestId || undefined">
+        <q-icon name="lock" size="12px" />
+        {{ lockLabel }}
+        <q-tooltip v-if="lockHint">
+          {{ lockHint }}
+        </q-tooltip>
+      </span>
+      <slot name="label-append" />
+    </div>
+    <FormFieldLabel
+      v-else-if="displayLabel"
+      :label="displayLabel"
+    />
     <div class="form-field__control">
       <slot />
     </div>
@@ -39,6 +58,18 @@ const props = defineProps({
     default: false,
   },
   testId: {
+    type: String,
+    default: '',
+  },
+  lockLabel: {
+    type: String,
+    default: '',
+  },
+  lockHint: {
+    type: String,
+    default: '',
+  },
+  lockTestId: {
     type: String,
     default: '',
   },

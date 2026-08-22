@@ -211,7 +211,7 @@ export function parseMentalStatusExamValues(raw) {
     }
     values[item.key] = {
       value: normalizeValue(row.value, item),
-      details: String(row.details ?? '').trim(),
+      details: String(row.details ?? ''),
     }
   })
 
@@ -223,7 +223,7 @@ export function serializeMentalStatusExamValues(values) {
   mseFields.forEach(item => {
     const row = values?.[item.key] || {}
     const value = normalizeValue(row.value, item)
-    const details = String(row.details || '').trim()
+    const details = String(row.details ?? '')
     if (!value && !details) {
       return
     }

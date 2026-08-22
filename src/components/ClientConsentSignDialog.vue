@@ -19,6 +19,26 @@
         <p class="text-body2 text-grey-7 q-mb-md">
           {{ t('clientConsentSignMethodHint') }}
         </p>
+        <div
+          v-if="signatureRequirements.length"
+          class="q-mb-md">
+          <p class="text-body2 text-weight-medium q-mb-xs">
+            {{ t('consentSignatureProgress') }}
+          </p>
+          <p
+            v-for="requirement in signatureRequirements"
+            :key="requirement.key || requirement.label"
+            class="text-body2 text-grey-7 q-mb-xs">
+            {{ requirement.label }}
+            ·
+            {{ requirement.satisfied
+              ? t('consentSignatureComplete')
+              : t('consentSignaturePending') }}
+            <span v-if="!requirement.required">
+              ({{ t('consentSignatureRequirementOptional') }})
+            </span>
+          </p>
+        </div>
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6">
             <FormField required :label="t('clientConsentSignerType')">
@@ -49,7 +69,9 @@
           <div
             v-if="isSecureLink && !secureLinkBlocked"
             class="col-12">
-            <FormField :label="t('clientConsentSecureLinkEmail')">
+            <FormField
+              required
+              :label="t('clientConsentSecureLinkEmail')">
               <TextInput
                 v-model="secureLinkEmail"
                 outlined
@@ -59,6 +81,9 @@
                 :placeholder="t('emailAddressPlaceholder')"
               />
             </FormField>
+            <p class="text-body2 text-grey-7 q-mt-xs q-mb-none">
+              {{ t('clientConsentSecureLinkEmailHint') }}
+            </p>
           </div>
         </div>
         <p
@@ -100,7 +125,16 @@
           class="client-consent-sign-dialog__content"
           v-html="safeContentHtml"
         />
+        <ConsentAuthorizationFields
+          v-model="fieldValues"
+          class="q-px-lg q-pt-md"
+          :fields="authorizationFields"
+          :show-errors="fieldShowErrors"
+        />
         <div class="client-consent-sign-dialog__form">
+          <p class="text-body2 text-grey-7 q-mb-md">
+            {{ signingAsHint }}
+          </p>
           <div class="row q-col-gutter-md">
             <div
               class="col-12"
@@ -297,6 +331,8 @@ import { computed, ref, watch } from 'vue'
 import { copyToClipboard, useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import ConsentAuthorizationFields from
+  'components/ConsentAuthorizationFields.vue'
 import ConsentPaperScanUploadField from
   'components/ConsentPaperScanUploadField.vue'
 import FormField from 'components/FormField.vue'
@@ -321,6 +357,7 @@ import {
 import {
   buildConsentSignatureMethodOptions,
   buildConsentSignerTypeOptions,
+  consentSignerTypeI18nKey,
   formatConsentDateTime,
 } from 'src/utils/consent-i18n.js'
 import { resolveConsentSecureLinkEmail } from
@@ -331,6 +368,16 @@ import { isAuthSessionEndUIError } from 'src/utils/api-session-error.js'
 import { hasClientChartKey } from 'components/helpers.js'
 import { triggerBlobDownload } from 'src/utils/stored-file-api.js'
 import { sanitizeHtml } from 'src/utils/sanitize-html.js'
+import {
+  isAuthorizationSignerType,
+  remainingSignerTypes,
+  signerNeedsRelationship,
+} from 'src/utils/consent-signature-requirements.js'
+import {
+  buildConsentFieldValueWrites,
+  missingRequiredConsentFields,
+  valuesByKeyFromConsentFields,
+} from 'src/utils/consent-fields.js'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -372,12 +419,28 @@ const secureLinkEmail = ref('')
 const sendingLink = ref(false)
 const secureLinkResult = ref(null)
 const portalRequestResult = ref(null)
+const fieldValues = ref({})
+const fieldShowErrors = ref(false)
+
+const authorizationFields = computed(
+  () => props.consent?.fieldValues || [],
+)
 
 const allowedSignerTypes = computed(() => {
+  const remaining = remainingSignerTypes(props.consent)
+  if (remaining.length) {
+    return remaining
+  }
   const list = props.consent?.allowedSignerTypes
 
   return Array.isArray(list) ? list : []
 })
+
+const signatureRequirements = computed(() => (
+  Array.isArray(props.consent?.signatureRequirements)
+    ? props.consent.signatureRequirements
+    : []
+))
 
 const signerOptions = computed(() => buildConsentSignerTypeOptions(
   t,
@@ -385,14 +448,58 @@ const signerOptions = computed(() => buildConsentSignerTypeOptions(
   allowedSignerTypes.value,
 ))
 
+const clientSignerAllowed = computed(() => {
+  if (!allowedSignerTypes.value.length) {
+    return true
+  }
+
+  return allowedSignerTypes.value.includes(
+    consentSignerTypeValues.client,
+  )
+})
+
+const remoteSignerAllowed = computed(() =>
+  isAuthorizationSignerType(signerType.value),
+)
+
 const methodOptions = computed(() =>
-  buildConsentSignatureMethodOptions(t, te).filter(item =>
-    item.value !== consentSignatureMethodValues.other),
+  buildConsentSignatureMethodOptions(t, te).filter(item => {
+    if (item.value === consentSignatureMethodValues.other) {
+      return false
+    }
+    if (item.value === consentSignatureMethodValues.clientPortal
+      && !clientSignerAllowed.value) {
+      return false
+    }
+    if ((item.value === consentSignatureMethodValues.secureLink
+      || item.value === consentSignatureMethodValues.clientPortal)
+      && !remoteSignerAllowed.value) {
+      return false
+    }
+
+    return true
+  }),
 )
 
 const needsRelationship = computed(
-  () => signerType.value !== consentSignerTypeValues.client,
+  () => signerNeedsRelationship(signerType.value),
 )
+
+const signingAsHint = computed(() => {
+  const key = consentSignerTypeI18nKey(signerType.value)
+  const role = te(key) ? t(key) : signerType.value
+  const name = String(signerName.value ?? '').trim()
+  if (name && relationshipToClient.value && needsRelationship.value) {
+    return `${t('clientConsentSignerName')}: ${name} · ${role} · ${
+      relationshipToClient.value
+    }`
+  }
+  if (name) {
+    return `${t('clientConsentSignerName')}: ${name} · ${role}`
+  }
+
+  return `${t('clientConsentSignerType')}: ${role}`
+})
 
 const isGuardianSigner = computed(
   () => signerType.value === consentSignerTypeValues.guardian,
@@ -592,7 +699,10 @@ function applySignerDefaults() {
 }
 
 function resolveSecureLinkEmailFromContact() {
-  return resolveConsentSecureLinkEmail(props.contactSection)
+  return resolveConsentSecureLinkEmail(props.contactSection, {
+    signerType: signerType.value,
+    allowedSignerTypes: allowedSignerTypes.value,
+  })
 }
 
 function applySecureLinkEmailDefault() {
@@ -611,6 +721,10 @@ function resetForm() {
   sendingLink.value = false
   secureLinkResult.value = null
   portalRequestResult.value = null
+  fieldShowErrors.value = false
+  fieldValues.value = valuesByKeyFromConsentFields(
+    authorizationFields.value,
+  )
   signerName.value = ''
   secureLinkEmail.value = ''
   applySignerDefaults()
@@ -625,6 +739,12 @@ watch(open, value => {
 watch(signerType, () => {
   if (step.value === 'in_person' || step.value === 'method') {
     applySignerDefaults()
+  }
+  if (open.value
+    && step.value === 'method'
+    && signatureMethod.value
+      === consentSignatureMethodValues.secureLink) {
+    applySecureLinkEmailDefault()
   }
 })
 
@@ -694,6 +814,13 @@ function onConfirmInPerson() {
   if (!canSubmitInPerson.value) {
     return
   }
+  fieldShowErrors.value = true
+  if (missingRequiredConsentFields(
+    authorizationFields.value,
+    fieldValues.value,
+  ).length) {
+    return
+  }
   const payload = {
     signerName: String(signerName.value).trim(),
     signerType: signerType.value,
@@ -701,6 +828,10 @@ function onConfirmInPerson() {
       ? String(relationshipToClient.value).trim()
       : null,
     signatureMethod: signatureMethod.value,
+    fieldValues: buildConsentFieldValueWrites(
+      authorizationFields.value,
+      fieldValues.value,
+    ),
   }
   if (isInPersonPaper.value) {
     payload.paperFile = paperFile.value
@@ -752,15 +883,23 @@ async function onSendSecureLink() {
   if (!props.clientId || !props.consent?.id) {
     return
   }
+  const email = String(secureLinkEmail.value ?? '').trim()
+  if (!email) {
+    $q.notify({
+      type: quasarNotifyTypes.negative,
+      message: t('clientConsentSecureLinkEmailRequired'),
+    })
+
+    return
+  }
   sendingLink.value = true
   try {
-    const email = String(secureLinkEmail.value ?? '').trim()
     secureLinkResult.value = await sendClientConsentSecureLink(
       props.clientId,
       props.consent.id,
       {
         email,
-        sendEmail: Boolean(email),
+        sendEmail: true,
       },
     )
     step.value = 'secure_link_result'

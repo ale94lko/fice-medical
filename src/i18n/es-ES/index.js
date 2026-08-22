@@ -1212,6 +1212,7 @@ export default {
   clientOverviewAltLastUpdated: 'Última actualización',
   clientOverviewAltRecordStatus: 'Estado del registro',
   clientOverviewAltUpdatedBy: '{date} por {user}',
+  clientOverviewAltUpdatedByUser: 'por {user}',
   clientOverviewAltViewAllActivity: 'Ver toda la actividad',
   clientOverviewAltTabPlaceholder:
     'Esta sección está disponible por ahora en Editar cliente.',
@@ -1383,6 +1384,7 @@ export default {
   tabBasicInfo: 'Info básica',
   tabAppointments: 'Citas',
   tabEncounters: 'Consultas',
+  tabConsents: 'Consentimientos',
   tabContact: 'Contacto',
   tabContactInformation: 'Información de contacto',
   contactSubTabSelf: 'Contacto propio',
@@ -3385,9 +3387,137 @@ export default {
   consentVersionLabel: 'Versión',
   consentEffectiveDate: 'Fecha de vigencia',
   consentExpirationDate: 'Fecha de expiración',
+  consentValidityYearsAfterSign:
+    'Años de validez después de firmar',
+  consentValidityYearsAfterSignHelp:
+    'Opcional. Si se indica, cada consentimiento firmado caduca ese '
+    + 'número de años después de la firma. Independiente de la fecha de '
+    + 'expiración de la versión, que solo controla nuevas asignaciones.',
+  consentVersionDateRangeInvalid:
+    'La fecha de expiración debe ser igual o posterior a la de vigencia.',
   consentContentHtml: 'Contenido (HTML)',
   consentContentHtmlPlaceholder: 'Ingrese el contenido en HTML…',
+  consentFieldsTitle: 'Campos de autorización',
+  consentFieldsEmpty: 'Esta versión no tiene campos configurables.',
+  consentFieldAdd: 'Agregar campo',
+  consentFieldAddTitle: 'Agregar campo de autorización',
+  consentFieldEditTitle: 'Editar campo de autorización',
+  consentFieldLabel: 'Etiqueta',
+  consentFieldKey: 'Clave del campo',
+  consentFieldKeyPlaceholder:
+    'Se genera a partir de la etiqueta si queda vacía',
+  consentFieldType: 'Tipo de campo',
+  consentFieldTypeText: 'Texto',
+  consentFieldTypeTextarea: 'Área de texto',
+  consentFieldTypeDate: 'Fecha',
+  consentFieldTypeSelect: 'Lista',
+  consentFieldTypeCheckbox: 'Casilla',
+  consentFieldTypeMultiSelect: 'Selección múltiple',
+  consentFieldRequired: 'Obligatorio',
+  consentFieldReadOnly: 'Solo lectura después del precargado',
+  consentFieldIncludeInDocument: 'Incluir en el PDF generado',
+  consentFieldExcludeFromDocument: 'Oculto en el PDF',
+  consentFieldPrefill: 'Origen del precargado',
+  consentFieldPrefillManual: 'Se completa al firmar',
+  consentFieldPrefillClient: 'Información del cliente',
+  consentFieldPrefillStaff: 'Información del personal',
+  consentFieldPrefillKey: 'Dato a precargar',
+  consentFieldPrefillKeyHint:
+    'Ejemplos: client_name, dob, phone, staff_name',
+  consentFieldOptions: 'Opciones',
+  consentFieldOptionsHint:
+    'Una opción por línea. Añada " | DECLINED" para completar esa '
+    + 'opción como un rechazo firmado.',
+  consentFieldPlaceholder: 'Texto de ayuda en el campo',
+  consentFieldHelpText: 'Texto de ayuda',
+  consentFieldConditional:
+    'Obligatorio solo cuando se selecciona otro campo',
+  consentFieldRequiredWhenField: 'Cuando se selecciona este campo',
+  consentFieldRequiredWhenValue: 'Cuando se selecciona este valor',
+  consentFieldRequiredWhenValueHint: 'Ejemplo: true o all_records',
+  consentFieldMoveUp: 'Subir',
+  consentFieldMoveDown: 'Bajar',
+  consentAuthorizationTitle: 'Información de autorización',
+  consentFieldsRequired:
+    'Complete toda la información de consentimiento '
+    + 'requerida antes de firmar.',
+  consentFieldValueRequired: 'Este campo es obligatorio.',
   consentContentPreviewTitle: 'Vista previa',
+  documentLayoutTitle: 'Diseño del documento',
+  documentLayoutHelper:
+    'Define dónde aparecen campos, firmas y saltos de página en el '
+    + 'PDF. El motor de renderizado no inventa la estructura.',
+  documentLayoutEnable: 'Añadir diseño de documento',
+  documentLayoutEmpty:
+    'Todavía no hay secciones. Añada una sección para empezar.',
+  documentLayoutHeaderEnabled: 'Encabezado de la organización',
+  documentLayoutFooterEnabled: 'Pie de la organización',
+  documentLayoutSectionTitle: 'Título de la sección',
+  documentLayoutShowTitle: 'Mostrar título',
+  documentLayoutPageBreakBefore: 'Salto de página antes de la sección',
+  documentLayoutKeepTogether: 'Mantener la sección unida',
+  documentLayoutColumnCount: 'Columnas',
+  documentLayoutColumn: 'Columna {n}',
+  documentLayoutAddSection: 'Añadir sección',
+  documentLayoutAddRow: 'Añadir fila',
+  documentLayoutRemoveRow: 'Quitar fila',
+  documentLayoutAddComponent: 'Añadir componente',
+  documentLayoutRemoveComponent: 'Quitar',
+  documentLayoutComponentType: 'Componente',
+  documentLayoutComponentField: 'Campo',
+  documentLayoutComponentNarrative: 'Narrativa',
+  documentLayoutComponentStaticText: 'Texto estático',
+  documentLayoutComponentSignature: 'Bloque de firma',
+  documentLayoutComponentTable: 'Tabla',
+  documentLayoutComponentPageBreak: 'Salto de página',
+  documentLayoutComponentSpacer: 'Espacio',
+  documentLayoutField: 'Campo',
+  documentLayoutSignature: 'Requisito de firma',
+  documentLayoutTableSource: 'Clave de origen de la tabla',
+  documentLayoutStaticText: 'Texto estático',
+  documentLayoutUseTemplateHtml: 'Insertar el HTML de la plantilla',
+  documentLayoutPdfPreview: 'Vista previa PDF',
+  documentLayoutPreviewSaveFirst:
+    'Guarde la versión antes de previsualizar el PDF.',
+  documentLayoutPreviewMissing:
+    'Añada un diseño de documento antes de previsualizar el PDF.',
+  documentLayoutPreviewError:
+    'No se pudo generar la vista previa del PDF.',
+  documentLayoutPresetHeader: 'Encabezado del documento',
+  documentLayoutPresetSection: 'Encabezado de sección',
+  documentLayoutPresetInfoCard: 'Tarjeta de información',
+  documentLayoutPresetTable: 'Tabla clínica',
+  documentLayoutPresetResult: 'Tarjeta de resultado',
+  documentLayoutPresetNarrative: 'Bloque narrativo',
+  documentLayoutPresetSignature: 'Panel de firmas',
+  documentLayoutPresetLegal: 'Texto legal',
+  documentLayoutPresetFooter: 'Pie del documento',
+  documentBrandingTitle: 'Marca de documentos',
+  documentBrandingHelper:
+    'Identidad de la clínica en los documentos generados. Los '
+    + 'colores personalizados son una prestación del plan y son '
+    + 'independientes del logo.',
+  documentBrandingLogoNote:
+    'El logo de la clínica se usa en documentos cuando la '
+    + 'prestación de logo está activa en este plan.',
+  documentBrandingColorsUnavailable:
+    'Los colores personalizados no están incluidos en este plan. '
+    + 'Los documentos nuevos usan el tema estándar de FiCE. Los '
+    + 'colores guardados se conservan si se restaura la prestación.',
+  documentBrandingPrimaryColor: 'Color primario',
+  documentBrandingSecondaryColor: 'Color secundario',
+  documentBrandingAccentColor: 'Color de acento',
+  documentBrandingThemePreset: 'Tema',
+  documentBrandingThemeStandard: 'Estándar',
+  documentBrandingThemeAccent: 'Acento de la clínica',
+  documentBrandingThemeUnavailable:
+    'Los temas avanzados de documento no están incluidos en este '
+    + 'plan.',
+  documentBrandingEffectivePreview: 'Colores efectivos del documento',
+  documentBrandingSaveError:
+    'No se pudo guardar la marca de documentos.',
+  documentBrandingLoadError:
+    'No se pudo cargar la marca de documentos.',
   consentVersionCreateSuccess: 'Versión de consentimiento creada.',
   consentVersionUpdateSuccess: 'Versión de consentimiento actualizada.',
   consentVersionSaveError:
@@ -3419,6 +3549,27 @@ export default {
   consentSignerTypeGuardian: 'Tutor',
   consentSignerTypeAuthorizedRepresentative:
     'Representante autorizado',
+  consentSignerTypeWitness: 'Testigo',
+  consentSignerTypeStaff: 'Personal / Case manager',
+  consentSignatureRequirementsTitle: 'Requisitos de firma',
+  consentSignatureRequirementsEmpty:
+    'Por defecto: una firma de autorización requerida según los '
+    + 'firmantes permitidos de la plantilla. Añada requisitos para '
+    + 'incluir Testigo, Personal o grupos de firmantes alternativos.',
+  consentSignatureRequirementAdd: 'Añadir requisito',
+  consentSignatureRequirementAddTitle: 'Añadir requisito de firma',
+  consentSignatureRequirementEditTitle: 'Editar requisito de firma',
+  consentSignatureRequirementLabel: 'Etiqueta',
+  consentSignatureRequirementKey: 'Clave del requisito',
+  consentSignatureRequirementRoles: 'Quién puede cumplir esta firma',
+  consentSignatureRequirementRequired: 'Obligatorio',
+  consentSignatureRequirementOptional: 'Opcional',
+  consentSignatureRequirementHint:
+    'Seleccione uno o más roles. Cualquiera de ellos cumple este '
+    + 'requisito. Los requisitos adicionales son independientes.',
+  consentSignatureProgress: 'Progreso de firmas',
+  consentSignaturePending: 'Pendiente',
+  consentSignatureComplete: 'Firmado',
   consentSignatureMethodInPersonDigital: 'En persona (digital)',
   consentSignatureMethodInPersonPaper: 'En persona (papel)',
   consentSignatureMethodClientPortal: 'Portal del cliente',
@@ -3488,6 +3639,12 @@ export default {
     'Envíe un enlace de un solo uso para que el cliente '
     + 'revise y firme este consentimiento.',
   clientConsentSecureLinkEmail: 'Correo electrónico',
+  clientConsentSecureLinkEmailHint:
+    'Use un correo autorizado del cliente o de un contacto. Si hay '
+    + 'varios, elija uno de forma explícita.',
+  clientConsentSecureLinkEmailRequired:
+    'Seleccione un correo autorizado antes de enviar el enlace '
+    + 'seguro.',
   clientConsentSecureLinkSendEmail: 'Enviar correo',
   clientConsentSecureLinkSend: 'Enviar',
   clientConsentSecureLinkSuccess: 'Enlace seguro creado.',
@@ -3524,6 +3681,9 @@ export default {
   consentSignPublicSignedTitle: 'Consentimiento firmado',
   consentSignPublicSignedBody:
     'Gracias. Este enlace era de un solo uso y ya no es válido.',
+  consentSignPublicWaitingOtherSignatures:
+    'Su firma ya está registrada. Las firmas adicionales '
+    + 'requeridas se recogen en persona.',
   consentSignPublicDeclinedTitle: 'Consentimiento rechazado',
   consentSignPublicDeclinedBody:
     'Su respuesta quedó registrada. Este enlace ya no es válido.',
@@ -3562,6 +3722,8 @@ export default {
   clientConsentPrintTooltip: 'Imprimir formulario de firma en blanco',
   clientConsentActionError: 'No se pudo actualizar el consentimiento.',
   clientConsentSignedMeta: 'Firmado {date} por {name}',
+  clientConsentDeclinedMeta: 'Rechazado {date}: {reason}',
+  clientConsentCancelledMeta: 'Cancelado {date}: {reason}',
   clientConsentRevokedMeta: 'Revocado {date}: {reason}',
   clientAttachmentsTitle: 'Adjuntos',
   clientAttachmentsSubtitle:
@@ -3706,6 +3868,22 @@ export default {
   ageDecrement: 'Disminuir edad',
   ssnItin: 'SSN / ITIN',
   socialSecurityNumber: 'SSN / ITIN',
+  clientIdentityAdminLock: 'Admin',
+  clientIdentityAdminLockHint:
+    'Los campos de identidad guardados solo puede cambiarlos un '
+    + 'administrador. El cambio queda registrado en la auditoría clínica.',
+  clientIdentityChangeTitle: 'Confirmar cambio de identidad',
+  clientIdentityChangeMessage:
+    'Está cambiando un campo de identidad bloqueado. Indique un motivo '
+    + 'que se guardará en la auditoría clínica.',
+  clientIdentityChangeReasonLabel: 'Motivo',
+  clientIdentityChangeReasonPlaceholder:
+    'Explique por qué debe cambiar este campo de identidad',
+  clientIdentityChangeReasonRequired:
+    'Indique un motivo de al menos 5 caracteres',
+  clientIdentityChangeConfirm: 'Guardar cambio',
+  clientIdentityLockedError:
+    'Los campos de identidad no se pueden cambiar una vez guardados.',
   taxIdPlaceholder: '###-##-####',
   taxIdTypeSsn: 'SSN',
   taxIdTypeItin: 'ITIN',
@@ -5774,9 +5952,6 @@ export default {
   rosDetailsPlaceholder:
     'Describa los síntomas o hallazgos relevantes',
   rosProgress: '{completed} de {total} sistemas completados',
-  rosRequiresAttention: 'Requiere atención:',
-  rosStatusRequiredShort: '{system} — Estado obligatorio',
-  rosDetailsRequiredShort: '{system} — Detalles obligatorios',
   rosDetailsRequired:
     'Los detalles son obligatorios cuando {system} está marcado '
     + 'como Positivo.',
@@ -5805,8 +5980,6 @@ export default {
   peReason: 'Motivo',
   peReasonPlaceholder: 'Motivo para diferir (opcional)',
   peProgress: '{completed} de {total} áreas completadas',
-  peStatusRequiredShort: '{area} — Estado obligatorio',
-  peFindingsRequiredShort: '{area} — Hallazgos obligatorios',
   peFindingsRequired:
     'Los hallazgos son obligatorios cuando {area} está marcado '
     + 'como Anormal.',
@@ -5829,8 +6002,6 @@ export default {
   mseDetails: 'Detalles',
   mseDetailsPlaceholder: 'Describa el hallazgo',
   mseProgress: '{completed} de {total} campos completados',
-  mseValueRequiredShort: '{field} — Valor obligatorio',
-  mseDetailsRequiredShort: '{field} — Detalles obligatorios',
   mseDetailsRequired:
     'Los detalles son obligatorios cuando {field} está en Otro.',
   mseFieldAppearance: 'Apariencia',
@@ -5920,7 +6091,6 @@ export default {
   apPrimaryDiagnosis: 'Diagnóstico primario',
   apPlanRequired:
     'Se requiere un Plan para {description} ({code}).',
-  apPlanRequiredShort: '{code} — {description}',
   encounterProcessingTitle: 'Procesamiento del encounter',
   encounterProcessingSubtitle:
     'Generación de nota clínica y Superbill tras completar.',
@@ -6519,7 +6689,7 @@ export default {
     'Responsabilidad del cliente',
   'denialResolution.NO_ACTION': 'Sin acción',
   'denialResolution.OTHER': 'Otro',
-  clientFinancialOverviewTitle: 'Libro del cliente',
+  clientFinancialOverviewTitle: 'Resumen financiero',
   clientFinancialOverviewSubtitle:
     'Consulte el saldo de la cuenta y el historial de transacciones.',
   clientFinancialNoPermission:

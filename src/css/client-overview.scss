@@ -692,12 +692,14 @@
 .client-overview-module-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 180px;
   padding: 12px 14px;
   border-radius: $radius-lg;
   border: 1px solid $border-subtle;
   background: $surface;
   box-shadow: $shadow-sm;
+  overflow: hidden;
 
   &--allergy-mild {
     background: #fefce8;
@@ -743,9 +745,13 @@
 
   &__title {
     margin: 0;
+    min-width: 0;
     font-size: 0.9375rem;
     font-weight: 700;
     color: $text-strong;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__count {
@@ -814,12 +820,15 @@
     margin: 0;
     padding: 0;
     flex: 1 1 auto;
+    min-width: 0;
   }
 
   &__list-item {
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+    max-width: 100%;
     padding: 4px 0;
     font-size: 0.8125rem;
 
@@ -853,10 +862,14 @@
   }
 
   &__item-meta {
+    min-width: 0;
+    max-width: 65%;
+    margin-left: auto;
     color: $text-muted;
     font-size: 0.75rem;
-    margin-left: auto;
-    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__severity {
@@ -1067,8 +1080,12 @@
 
   .client-overview-module-card__item-meta {
     margin-left: 0;
+    max-width: 100%;
     font-size: 0.875rem;
     color: $table-text-secondary;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
   }
 
   .client-overview-module-card__empty {

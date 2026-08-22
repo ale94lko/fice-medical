@@ -9,90 +9,75 @@
       }) }}
     </p>
     <div
-      v-if="issues.length"
-      class="encounter-ros__issues q-mb-md">
-      <div class="text-body2 text-grey-8">
-        {{ t('rosRequiresAttention') }}
-      </div>
-      <ul class="q-mb-none q-pl-md">
-        <li
-          v-for="issue in issues"
-          :key="`${issue.key}-${issue.code}`"
-          class="text-body2 text-negative">
-          {{ issueText(issue) }}
-        </li>
-      </ul>
-    </div>
-    <div
       v-for="area in physicalExamAreas"
       :key="area.key"
       class="encounter-ros__item">
-      <div class="row items-center q-col-gutter-md encounter-ros__status">
-        <div class="col-12 col-sm">
-          <FormFieldLabel :label="t(area.labelKey)" />
+      <div class="encounter-ros__row">
+        <div class="encounter-ros__lead">
+          <div class="encounter-ros__name">
+            <FormFieldLabel
+              :label="t(area.labelKey)"
+              :required="Boolean(field?.required)"
+            />
+          </div>
+          <div class="encounter-ros__control">
+            <FormSelect
+              :model-value="statusOf(area) || ''"
+              :test-id="tid.narrativePeStatus(area.key)"
+              outlined
+              hide-bottom-space
+              emit-value
+              map-options
+              class="full-width"
+              :disable="!canEdit"
+              :error="statusError(area)"
+              :options="physicalExamStatusOptions(area, t)"
+              @update:model-value="value => onStatusChange(area, value)"
+            />
+          </div>
         </div>
-        <div class="col-12 col-sm-6">
-          <FormSelect
-            :model-value="statusOf(area) || ''"
-            :test-id="tid.narrativePeStatus(area.key)"
-            outlined
-            hide-bottom-space
-            emit-value
-            map-options
-            class="full-width"
-            :disable="!canEdit"
-            :options="physicalExamStatusOptions(area, t)"
-            @update:model-value="value => onStatusChange(area, value)"
-          />
-        </div>
-      </div>
-      <div
-        v-if="physicalExamNeedsFindings(statusOf(area))"
-        class="encounter-ros__details">
-        <AddClientLabeledField
-          :label="t('peFindings')"
-          required>
+        <div
+          v-if="physicalExamNeedsFindings(statusOf(area))"
+          class="encounter-ros__details">
           <q-input
             :model-value="findingsOf(area)"
             outlined
             :disable="!canEdit"
+            :aria-label="t('peFindings')"
             :data-testid="tid.narrativePeFindings(area.key)"
             :placeholder="t('peFindingsPlaceholder')"
+            :hide-bottom-space="!findingsErrorMessage(area)"
             :error="findingsError(area)"
-            :error-message="t('peFindingsRequired', {
-              area: t(area.labelKey),
-            })"
+            :error-message="findingsErrorMessage(area)"
             maxlength="2000"
             @update:model-value="value => onFindingsChange(area, value)"
-            @blur="emit('flush')"
+            @blur="onFindingsBlur(area)"
           />
-        </AddClientLabeledField>
-      </div>
-      <div
-        v-else-if="physicalExamNeedsReason(statusOf(area), area)"
-        class="encounter-ros__details">
-        <AddClientLabeledField :label="t('peReason')">
+        </div>
+        <div
+          v-else-if="physicalExamNeedsReason(statusOf(area), area)"
+          class="encounter-ros__details">
           <q-input
             :model-value="reasonOf(area)"
             outlined
             hide-bottom-space
             :disable="!canEdit"
+            :aria-label="t('peReason')"
             :data-testid="tid.narrativePeReason(area.key)"
             :placeholder="t('peReasonPlaceholder')"
             maxlength="2000"
             @update:model-value="value => onReasonChange(area, value)"
             @blur="emit('flush')"
           />
-        </AddClientLabeledField>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import FormFieldLabel from 'components/FormFieldLabel.vue'
 import FormSelect from 'components/FormSelect.vue'
 import { encounterWorkspaceTestIds as tid } from
@@ -101,8 +86,6 @@ import {
   parsePhysicalExamValues,
   physicalExamAnsweredCount,
   physicalExamAreas,
-  physicalExamIssueCodes,
-  physicalExamIssues,
   physicalExamNeedsFindings,
   physicalExamNeedsReason,
   physicalExamStatusOptions,
@@ -112,23 +95,24 @@ import {
 const props = defineProps({
   field: { type: Object, required: true },
   canEdit: { type: Boolean, default: false },
+  highlightMissing: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update', 'flush'])
 const { t } = useI18n()
+const touchedFindings = ref({})
+const values = ref(parsePhysicalExamValues(props.field?.valueJson))
 
-const values = computed(() =>
-  parsePhysicalExamValues(props.field?.valueJson),
+watch(
+  () => props.field?.templateSectionId,
+  () => {
+    values.value = parsePhysicalExamValues(props.field?.valueJson)
+  },
 )
 
 const answeredCount = computed(() =>
   physicalExamAnsweredCount(values.value),
 )
-
-const issues = computed(() => physicalExamIssues(
-  values.value,
-  Boolean(props.field?.required),
-))
 
 function statusOf(area) {
   return values.value[area.key]?.status || null
@@ -142,21 +126,49 @@ function reasonOf(area) {
   return values.value[area.key]?.reason || ''
 }
 
+function markFindingsTouched(key) {
+  if (!key || touchedFindings.value[key]) {
+    return
+  }
+  touchedFindings.value = { ...touchedFindings.value, [key]: true }
+}
+
 function findingsError(area) {
+  if (!showMissing(area.key)) {
+    return false
+  }
+
   return physicalExamNeedsFindings(statusOf(area))
     && !String(findingsOf(area)).trim()
 }
 
-function issueText(issue) {
-  const area = t(issue.labelKey)
-  if (issue.code === physicalExamIssueCodes.findings) {
-    return t('peFindingsRequiredShort', { area })
+function findingsErrorMessage(area) {
+  if (props.highlightMissing || !findingsError(area)) {
+    return ''
   }
 
-  return t('peStatusRequiredShort', { area })
+  return t('peFindingsRequired', {
+    area: t(area.labelKey),
+  })
+}
+
+function statusError(area) {
+  return props.highlightMissing
+    && Boolean(props.field?.required)
+    && !statusOf(area)
+}
+
+function showMissing(key) {
+  return props.highlightMissing || Boolean(touchedFindings.value[key])
+}
+
+function onFindingsBlur(area) {
+  markFindingsTouched(area.key)
+  emit('flush')
 }
 
 function commit(next) {
+  values.value = next
   emit('update', serializePhysicalExamValues(next))
 }
 
@@ -169,6 +181,7 @@ function onStatusChange(area, value) {
     },
   }
   commit(next)
+  emit('flush')
 }
 
 function onFindingsChange(area, value) {

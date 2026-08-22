@@ -333,13 +333,13 @@ export const useSiteStore = defineStore('site', {
 
       return created
     },
-    async updateClient(clientId, form, t) {
+    async updateClient(clientId, form, t, options = {}) {
       const id = String(clientId ?? '').trim()
       if (!id) {
         throw new Error('Missing client id')
       }
       const body = attachEncounterIdToClientClinicalBody(
-        buildClientUpdateBody(form),
+        buildClientUpdateBody(form, options),
         id,
       )
       const response = await apiInstance.patch(apiPaths.clientById(id), body)

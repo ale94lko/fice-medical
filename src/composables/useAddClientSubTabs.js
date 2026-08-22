@@ -66,6 +66,11 @@ export const ADD_CLIENT_MAIN_TABS = [
     labelKey: 'tabBasicInfo',
   },
   {
+    key: addClientTabKeys.consents,
+    icon: 'draw',
+    labelKey: 'tabConsents',
+  },
+  {
     key: addClientTabKeys.contact,
     icon: 'contacts',
     labelKey: 'tabContact',
@@ -213,11 +218,6 @@ export const ADD_CLIENT_SUB_TABS = {
       key: addClientDocumentsSubTabKeys.attachments,
       icon: 'attach_file',
       labelKey: 'subTabAttachments',
-    },
-    {
-      key: addClientDocumentsSubTabKeys.consents,
-      icon: 'draw',
-      labelKey: 'subTabConsents',
     },
     {
       key: addClientDocumentsSubTabKeys.signedForms,

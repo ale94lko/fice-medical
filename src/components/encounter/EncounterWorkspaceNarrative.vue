@@ -37,8 +37,7 @@
           ? tid.narrativeGroup(block.group)
           : undefined">
         <SubsectionHeading
-          v-if="block.headingKey"
-          icon="clinical_notes"
+          v-if="showBlockHeading(block)"
           :title="t(block.headingKey)"
         />
         <div
@@ -47,7 +46,26 @@
           class="q-mb-md">
           <AddClientLabeledField
             :label="field.fieldLabel"
-            :required="field.required">
+            :required="outerLabelRequired(field)">
+            <template
+              v-if="canDraftWithAi(field)
+                && !isAssessmentPlanSection(field)"
+              #label-append>
+              <q-btn
+                no-caps
+                outline
+                dense
+                size="sm"
+                class="app-btn-ai-outline"
+                icon="auto_awesome"
+                :label="t('aiBtnFiceAi')"
+                :aria-label="t('aiAssistantName')"
+                :data-testid="tid.narrativeAiDraft(
+                  field.fieldKey,
+                )"
+                @click="openAiDraft(field)"
+              />
+            </template>
           <div
             v-if="isClinicalNoteAssessmentSection(field)"
             :data-testid="tid.narrativeField(field.fieldKey)">
@@ -67,6 +85,7 @@
             <EncounterReviewOfSystemsFields
               :field="field"
               :can-edit="canEdit"
+              :highlight-missing="highlightMissing"
               @update="onRosUpdate(field, $event)"
               @flush="flushSave"
             />
@@ -77,6 +96,7 @@
             <EncounterPhysicalExamFields
               :field="field"
               :can-edit="canEdit"
+              :highlight-missing="highlightMissing"
               @update="onPeUpdate(field, $event)"
               @flush="flushSave"
             />
@@ -87,6 +107,7 @@
             <EncounterMentalStatusExamFields
               :field="field"
               :can-edit="canEdit"
+              :highlight-missing="highlightMissing"
               @update="onMseUpdate(field, $event)"
               @flush="flushSave"
             />
@@ -98,6 +119,7 @@
               :field="field"
               :diagnoses="diagnoses"
               :can-edit="canEdit"
+              :highlight-missing="highlightMissing"
               :ai-draft-enabled="canDraftWithAi(field)"
               @update="onApUpdate(field, $event)"
               @flush="flushSave"
@@ -133,6 +155,7 @@
             :external-label="true"
             :readonly="!canEdit"
             :placeholder="fieldPlaceholder(field)"
+            :error="textFieldIncomplete(field)"
             :test-id="tid.narrativeField(field.fieldKey)"
             @update:model-value="onText(field, $event)"
             @blur="flushSave"
@@ -154,21 +177,10 @@
             :external-label="true"
             :readonly="!canEdit"
             :placeholder="fieldPlaceholder(field)"
+            :error="textFieldIncomplete(field)"
             :test-id="tid.narrativeField(field.fieldKey)"
             @update:model-value="onText(field, $event)"
             @blur="flushSave"
-          />
-          <q-btn
-            v-if="canDraftWithAi(field)
-              && !isAssessmentPlanSection(field)"
-            no-caps
-            outline
-            color="primary"
-            class="app-btn-outline q-mt-sm"
-            icon="auto_awesome"
-            :label="t('narrativeAiDraftWithAi')"
-            :data-testid="tid.narrativeAiDraft(field.fieldKey)"
-            @click="openAiDraft(field)"
           />
           </AddClientLabeledField>
         </div>
@@ -240,8 +252,10 @@ import {
   resolveAssessmentPlanRows,
   serializeAssessmentPlanValues,
 } from 'src/utils/assessment-plan.js'
-import { groupNarrativeFields } from
-  'src/utils/clinical-note-narrative-group.js'
+import {
+  groupNarrativeFields,
+  narrativeSectionGroupHpi,
+} from 'src/utils/clinical-note-narrative-group.js'
 import { isClinicalNoteAssessmentSection } from
   'src/utils/clinical-note-assessment-section.js'
 import { fetchAllCliniciansSelectOptions } from
@@ -268,6 +282,7 @@ const props = defineProps({
   canViewCarePlans: { type: Boolean, default: false },
   canAddScreenings: { type: Boolean, default: false },
   canEditScreenings: { type: Boolean, default: false },
+  highlightMissing: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['saved', 'go-to-visit', 'assessment-changed'])
@@ -290,6 +305,7 @@ const assessmentInitialTemplateId = ref(null)
 const assessmentLockTemplate = ref(false)
 let saveTimer = null
 let flashTimer = null
+let persistQueued = false
 
 const headingHint = computed(() => {
   const name = props.narrative?.templateName
@@ -308,6 +324,52 @@ const hasCompletedAssessments = computed(() =>
       === screeningStatuses.completed,
   ),
 )
+
+function showBlockHeading(block) {
+  if (!block?.headingKey) {
+    return false
+  }
+  const fieldsInBlock = Array.isArray(block.fields)
+    ? block.fields
+    : []
+  if (fieldsInBlock.length !== 1) {
+    return true
+  }
+  const group = String(block.group || '').toUpperCase()
+  if (group === narrativeSectionGroupHpi) {
+    return false
+  }
+  const heading = t(block.headingKey)
+  const label = String(fieldsInBlock[0]?.fieldLabel || '').trim()
+
+  return heading !== label
+}
+
+function outerLabelRequired(field) {
+  if (!field?.required) {
+    return false
+  }
+
+  return !isReviewOfSystemsSection(field)
+    && !isPhysicalExamSection(field)
+    && !isMentalStatusExamSection(field)
+    && !isAssessmentPlanSection(field)
+}
+
+function textFieldIncomplete(field) {
+  if (!props.highlightMissing || !field?.required) {
+    return false
+  }
+  if (isReviewOfSystemsSection(field)
+    || isPhysicalExamSection(field)
+    || isMentalStatusExamSection(field)
+    || isAssessmentPlanSection(field)
+    || isClinicalNoteAssessmentSection(field)) {
+    return false
+  }
+
+  return !String(field.valueText || '').trim()
+}
 
 function fieldPlaceholder(field) {
   const text = String(field?.placeholder || '').trim()
@@ -402,6 +464,33 @@ function openApAiDraft(field, payload = {}) {
   aiDraftOpen.value = true
 }
 
+function narrativeJsonKey(value) {
+  if (value == null || value === '') {
+    return ''
+  }
+  if (typeof value === 'string') {
+    return value
+  }
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return ''
+  }
+}
+
+function applySavedNarrativeMeta(savedFields, current) {
+  const byId = new Map(
+    savedFields.map(field => [field.templateSectionId, field]),
+  )
+  current.forEach(field => {
+    const saved = byId.get(field.templateSectionId)
+    if (!saved || saved.version == null) {
+      return
+    }
+    field.version = saved.version
+  })
+}
+
 function mergeSavedNarrativeFields(savedFields, previous) {
   const priorById = new Map(
     previous.map(field => [field.templateSectionId, field]),
@@ -409,9 +498,17 @@ function mergeSavedNarrativeFields(savedFields, previous) {
 
   return savedFields.map(field => {
     const prior = priorById.get(field.templateSectionId)
+    const keepLocalText = Boolean(prior)
+      && String(prior.valueText ?? '')
+        !== String(field.valueText ?? '')
+    const keepLocalJson = Boolean(prior)
+      && narrativeJsonKey(prior.valueJson)
+        !== narrativeJsonKey(field.valueJson)
 
     return {
       ...field,
+      valueText: keepLocalText ? prior.valueText : field.valueText,
+      valueJson: keepLocalJson ? prior.valueJson : field.valueJson,
       aiSuggestionId: prior?.aiSuggestionId || null,
       aiDraftText: prior?.aiDraftText,
       aiModifiedAfter: prior?.aiModifiedAfter === true,
@@ -465,9 +562,14 @@ watch(
     const incoming = Array.isArray(value?.fields)
       ? value.fields
       : []
-    fields.value = mergeSavedNarrativeFields(incoming, fields.value)
+    if (!fields.value.length) {
+      fields.value = mergeSavedNarrativeFields(incoming, [])
+
+      return
+    }
+    applySavedNarrativeMeta(incoming, fields.value)
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 )
 
 function parseConfig(field) {
@@ -549,22 +651,18 @@ function onStructured(field, key, value) {
 
 function onRosUpdate(field, valueJson) {
   field.valueJson = valueJson
-  scheduleSave()
 }
 
 function onPeUpdate(field, valueJson) {
   field.valueJson = valueJson
-  scheduleSave()
 }
 
 function onMseUpdate(field, valueJson) {
   field.valueJson = valueJson
-  scheduleSave()
 }
 
 function onApUpdate(field, valueJson) {
   field.valueJson = valueJson
-  scheduleSave()
 }
 
 function flushSave() {
@@ -577,14 +675,20 @@ function flushSave() {
 
 async function persist() {
   const id = props.encounterId
-  if (!id || !props.canEdit || saving.value || !fields.value.length) {
+  if (!id || !props.canEdit || !fields.value.length) {
+    return
+  }
+  if (saving.value) {
+    persistQueued = true
+
     return
   }
   saving.value = true
+  persistQueued = false
   try {
     const previous = fields.value
     const saved = await saveEncounterNarrative(id, previous)
-    fields.value = mergeSavedNarrativeFields(saved.fields, previous)
+    applySavedNarrativeMeta(saved.fields, previous)
     emit('saved', saved)
     savedFlash.value = true
     if (flashTimer) {
@@ -604,6 +708,10 @@ async function persist() {
     })
   } finally {
     saving.value = false
+    if (persistQueued) {
+      persistQueued = false
+      void persist()
+    }
   }
 }
 

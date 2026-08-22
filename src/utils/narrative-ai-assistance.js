@@ -157,106 +157,68 @@ export function parseNarrativeAiProviderInput(raw) {
     : narrativeAiProviderInputOptional
 }
 
-export function isPlanNarrativeField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
+function asField(field) {
+  return field && typeof field === 'object' ? field : {}
+}
+
+function narrativeFieldKey(field) {
+  const source = asField(field)
+
+  return String(source.fieldKey || source.sectionKey || '')
     .trim()
     .toLowerCase()
     .replace(/-/g, '_')
+}
+
+export function isPlanNarrativeField(field) {
+  const key = narrativeFieldKey(field)
 
   return key === 'plan' || key === 'plan_documentation'
 }
 
-export function isPreventivePlanField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'preventive_plan'
+export function isPreventivePlanField(field) {
+  return narrativeFieldKey(field) === 'preventive_plan'
 }
 
-export function isIntervalHpiField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
+export function isIntervalHpiField(field) {
+  const key = narrativeFieldKey(field)
 
   return key === 'interval_hpi' || key === 'subjective'
 }
 
-export function isClinicalAssessmentField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'clinical_assessment'
+export function isClinicalAssessmentField(field) {
+  return narrativeFieldKey(field) === 'clinical_assessment'
 }
 
-export function isInterventionsField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'interventions'
+export function isInterventionsField(field) {
+  return narrativeFieldKey(field) === 'interventions'
 }
 
-export function isPatientResponseField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'patient_response'
+export function isPatientResponseField(field) {
+  return narrativeFieldKey(field) === 'patient_response'
 }
 
-export function isSessionSummaryField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'session_summary'
+export function isSessionSummaryField(field) {
+  return narrativeFieldKey(field) === 'session_summary'
 }
 
-export function isTargetedBehaviorsField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'targeted_behaviors'
+export function isTargetedBehaviorsField(field) {
+  return narrativeFieldKey(field) === 'targeted_behaviors'
 }
 
-export function isProgressTowardsGoalsField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'progress_towards_goals'
+export function isProgressTowardsGoalsField(field) {
+  return narrativeFieldKey(field) === 'progress_towards_goals'
 }
 
-export function isClientOwnWordsField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'client_own_words'
+export function isClientOwnWordsField(field) {
+  return narrativeFieldKey(field) === 'client_own_words'
 }
 
-export function isTreatmentModalityField(field = {}) {
-  const key = String(field.fieldKey || field.sectionKey || '')
-    .trim()
-    .toLowerCase()
-    .replace(/-/g, '_')
-
-  return key === 'treatment_modality'
+export function isTreatmentModalityField(field) {
+  return narrativeFieldKey(field) === 'treatment_modality'
 }
 
-export function fieldUsesCarePlanAiContext(field = {}) {
+export function fieldUsesCarePlanAiContext(field) {
   return isProgressTowardsGoalsField(field)
     || isTargetedBehaviorsField(field)
 }
@@ -264,41 +226,43 @@ export function fieldUsesCarePlanAiContext(field = {}) {
 export { isAssessmentSummaryField } from
   'src/utils/assessment-summary.js'
 
-export function fieldAllowsNarrativeAi(field = {}) {
-  const type = String(field.sectionType || '').toUpperCase()
+export function fieldAllowsNarrativeAi(field) {
+  const source = asField(field)
+  const type = String(source.sectionType || '').toUpperCase()
   const allowedType = type === 'NARRATIVE_FIELD'
-    || isAssessmentPlanSection(field)
+    || isAssessmentPlanSection(source)
   if (!allowedType) {
     return false
   }
-  if (field.aiAssistanceEnabled === true) {
+  if (source.aiAssistanceEnabled === true) {
     return true
   }
 
   return parseNarrativeAiAssistance(
-    field.configurationJson ?? field.configuration_json,
+    source.configurationJson ?? source.configuration_json,
   )
 }
 
-export function fieldRequiresProviderInput(field = {}) {
-  if (isAssessmentPlanSection(field)
-    || isPlanNarrativeField(field)
-    || isPreventivePlanField(field)
-    || isClinicalAssessmentField(field)
-    || isInterventionsField(field)
-    || isPatientResponseField(field)
-    || isSessionSummaryField(field)
-    || isProgressTowardsGoalsField(field)
-    || isClientOwnWordsField(field)
-    || isTreatmentModalityField(field)) {
+export function fieldRequiresProviderInput(field) {
+  const source = asField(field)
+  if (isAssessmentPlanSection(source)
+    || isPlanNarrativeField(source)
+    || isPreventivePlanField(source)
+    || isClinicalAssessmentField(source)
+    || isInterventionsField(source)
+    || isPatientResponseField(source)
+    || isSessionSummaryField(source)
+    || isProgressTowardsGoalsField(source)
+    || isClientOwnWordsField(source)
+    || isTreatmentModalityField(source)) {
     return true
   }
-  if (field.aiProviderInputRequired === true) {
+  if (source.aiProviderInputRequired === true) {
     return true
   }
 
   return parseNarrativeAiProviderInput(
-    field.configurationJson ?? field.configuration_json,
+    source.configurationJson ?? source.configuration_json,
   ) === narrativeAiProviderInputRequired
 }
 

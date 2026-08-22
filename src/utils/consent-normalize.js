@@ -5,6 +5,19 @@ import {
   consentTypeValues,
   consentVersionStatusValues,
 } from 'components/constants.js'
+import {
+  buildConsentVersionFieldBody,
+  normalizeConsentFieldDefinition,
+  normalizeConsentFieldValue,
+} from 'src/utils/consent-fields.js'
+import {
+  buildConsentSignatureRequirementBody,
+  normalizeConsentSignatureRequirement,
+} from 'src/utils/consent-signature-requirements.js'
+import {
+  buildDocumentLayoutBody,
+  normalizeDocumentLayout,
+} from 'src/utils/document-layout.js'
 
 function trim(value) {
   return String(value ?? '').trim()
@@ -38,11 +51,15 @@ function parseBoolean(value, fallback = false) {
 }
 
 function normalizeStringList(value) {
-  if (!Array.isArray(value)) {
+  if (Array.isArray(value)) {
+    return value.map(item => trim(item)).filter(Boolean)
+  }
+  const token = trim(value)
+  if (!token) {
     return []
   }
 
-  return value.map(item => trim(item)).filter(Boolean)
+  return token.split(',').map(item => trim(item)).filter(Boolean)
 }
 
 export function normalizeConsentTemplate(raw = {}) {
@@ -61,7 +78,7 @@ export function normalizeConsentTemplate(raw = {}) {
     ),
     allowedSignerTypes: normalizeStringList(
       row.allowed_signer_types ?? row.allowedSignerTypes,
-    ),
+    ).map(item => item.toUpperCase()),
     active: parseBoolean(row.active, true),
     createdAt: trim(row.created_at ?? row.createdAt) || null,
     updatedAt: trim(row.updated_at ?? row.updatedAt) || null,
@@ -89,6 +106,9 @@ export function normalizeConsentVersion(raw = {}) {
       || consentVersionStatusValues.draft,
     effectiveDate: trim(row.effective_date ?? row.effectiveDate) || null,
     expirationDate: trim(row.expiration_date ?? row.expirationDate) || null,
+    validityYearsAfterSign: parseOptionalNumber(
+      row.validity_years_after_sign ?? row.validityYearsAfterSign,
+    ),
     contentHtml: String(row.content_html ?? row.contentHtml ?? ''),
     presentedToClients: parseBoolean(
       row.presented_to_clients ?? row.presentedToClients,
@@ -96,6 +116,21 @@ export function normalizeConsentVersion(raw = {}) {
     publishedAt: trim(row.published_at ?? row.publishedAt) || null,
     createdAt: trim(row.created_at ?? row.createdAt) || null,
     updatedAt: trim(row.updated_at ?? row.updatedAt) || null,
+    fields: Array.isArray(row.fields)
+      ? row.fields.map((item, index) => (
+        normalizeConsentFieldDefinition(item, index)
+      ))
+      : [],
+    signatureRequirements: Array.isArray(row.signature_requirements)
+      ? row.signature_requirements.map((item, index) => (
+        normalizeConsentSignatureRequirement(item, index)
+      ))
+      : Array.isArray(row.signatureRequirements)
+        ? row.signatureRequirements.map((item, index) => (
+          normalizeConsentSignatureRequirement(item, index)
+        ))
+        : [],
+    layout: normalizeDocumentLayout(row.layout),
   }
 }
 
@@ -136,23 +171,66 @@ export function normalizeClientConsent(raw = {}) {
     contentHtml: String(row.content_html ?? row.contentHtml ?? ''),
     signedAt: trim(row.signed_at ?? row.signedAt) || null,
     signedByName: trim(row.signed_by_name ?? row.signedByName) || null,
+    completedAt: trim(row.completed_at ?? row.completedAt) || null,
     signerType: trim(row.signer_type ?? row.signerType) || null,
     relationshipToClient: trim(
       row.relationship_to_client ?? row.relationshipToClient,
     ) || null,
     declinedAt: trim(row.declined_at ?? row.declinedAt) || null,
+    declinedByName: trim(
+      row.declined_by_name ?? row.declinedByName,
+    ) || null,
+    declineReason: trim(row.decline_reason ?? row.declineReason) || null,
+    cancelledAt: trim(row.cancelled_at ?? row.cancelledAt) || null,
+    cancelledBy: parseOptionalNumber(
+      row.cancelled_by ?? row.cancelledBy,
+    ),
+    cancellationReason: trim(
+      row.cancellation_reason ?? row.cancellationReason,
+    ) || null,
     revokedAt: trim(row.revoked_at ?? row.revokedAt) || null,
     revocationReason: trim(
       row.revocation_reason ?? row.revocationReason,
     ) || null,
-    cancelledAt: trim(row.cancelled_at ?? row.cancelledAt) || null,
     expiredAt: trim(row.expired_at ?? row.expiredAt) || null,
     documentFileId: parseOptionalNumber(
-      row.document_file_id ?? row.documentFileId,
+      row.signed_document_file_id
+      ?? row.signedDocumentFileId
+      ?? row.document_file_id
+      ?? row.documentFileId,
     ),
     allowedSignerTypes: normalizeStringList(
       row.allowed_signer_types ?? row.allowedSignerTypes,
     ).map(item => item.toUpperCase()),
+    signatures: (Array.isArray(row.signatures) ? row.signatures : [])
+      .map(item => ({
+        id: parseOptionalNumber(item.id),
+        signerName: trim(item.signer_name ?? item.signerName),
+        signerType: trim(item.signer_type ?? item.signerType)
+          .toUpperCase(),
+        requirementKey: trim(
+          item.requirement_key ?? item.requirementKey,
+        ),
+        relationshipToClient: trim(
+          item.relationship_to_client ?? item.relationshipToClient,
+        ) || null,
+        signatureMethod: trim(
+          item.signature_method ?? item.signatureMethod,
+        ),
+        signedAt: trim(item.signed_at ?? item.signedAt) || null,
+      })),
+    signatureRequirements: (Array.isArray(row.signature_requirements)
+      ? row.signature_requirements
+      : Array.isArray(row.signatureRequirements)
+        ? row.signatureRequirements
+        : [])
+      .map((item, index) => (
+        normalizeConsentSignatureRequirement(item, index)
+      )),
+    fieldValues: (Array.isArray(row.field_values)
+      ? row.field_values
+      : Array.isArray(row.fieldValues) ? row.fieldValues : [])
+      .map((item, index) => normalizeConsentFieldValue(item, index)),
     createdAt: trim(row.created_at ?? row.createdAt) || null,
     updatedAt: trim(row.updated_at ?? row.updatedAt) || null,
   }
@@ -178,7 +256,10 @@ export function buildConsentTemplateBody(form = {}) {
     /* eslint-disable-next-line camelcase -- API body */
     signature_required: Boolean(form.signatureRequired),
     /* eslint-disable-next-line camelcase -- API body */
-    allowed_signer_types: allowed.map(item => trim(item)).filter(Boolean),
+    allowed_signer_types: allowed
+      .map(item => trim(item))
+      .filter(Boolean)
+      .join(','),
     active: form.active !== false,
   }
 }
@@ -191,7 +272,23 @@ export function buildConsentVersionBody(form = {}) {
     /* eslint-disable-next-line camelcase -- API body */
     expiration_date: trim(form.expirationDate) || null,
     /* eslint-disable-next-line camelcase -- API body */
+    validity_years_after_sign: parseOptionalNumber(
+      form.validityYearsAfterSign,
+    ),
+    /* eslint-disable-next-line camelcase -- API body */
     content_html: String(form.contentHtml ?? ''),
+    fields: Array.isArray(form.fields)
+      ? form.fields.map((item, index) => (
+        buildConsentVersionFieldBody(item, index)
+      ))
+      : [],
+    /* eslint-disable-next-line camelcase -- API body */
+    signature_requirements: Array.isArray(form.signatureRequirements)
+      ? form.signatureRequirements.map((item, index) => (
+        buildConsentSignatureRequirementBody(item, index)
+      ))
+      : [],
+    layout: form.layout ? buildDocumentLayoutBody(form.layout) : null,
   }
 }
 
@@ -214,13 +311,22 @@ export function buildConsentSignBody(form = {}) {
       /* eslint-disable-next-line camelcase -- API body */
       body.signature_file_id = fileId
     }
+    attachConsentFieldValues(body, form)
 
     return body
   }
   /* eslint-disable-next-line camelcase -- API body */
   body.signature_artifact = String(form.signatureArtifact ?? '')
+  attachConsentFieldValues(body, form)
 
   return body
+}
+
+function attachConsentFieldValues(body, form) {
+  if (Array.isArray(form.fieldValues) && form.fieldValues.length) {
+    /* eslint-disable-next-line camelcase -- API body */
+    body.field_values = form.fieldValues
+  }
 }
 
 export function resolveConsentSignatureMethod(method) {
@@ -274,5 +380,17 @@ export function normalizeConsentPublicPreview(raw = {}) {
     ).map(item => item.toUpperCase()),
     status: trim(row.status).toUpperCase()
       || consentStatusValues.pendingSignature,
+    fieldValues: (Array.isArray(row.field_values)
+      ? row.field_values
+      : Array.isArray(row.fieldValues) ? row.fieldValues : [])
+      .map((item, index) => normalizeConsentFieldValue(item, index)),
+    signatureRequirements: (Array.isArray(row.signature_requirements)
+      ? row.signature_requirements
+      : Array.isArray(row.signatureRequirements)
+        ? row.signatureRequirements
+        : [])
+      .map((item, index) => (
+        normalizeConsentSignatureRequirement(item, index)
+      )),
   }
 }

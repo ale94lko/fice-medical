@@ -135,8 +135,8 @@ export function parsePhysicalExamValues(raw) {
     }
     values[area.key] = {
       status: normalizeStatus(row.status, area),
-      findings: String(row.findings ?? '').trim(),
-      reason: String(row.reason ?? '').trim(),
+      findings: String(row.findings ?? ''),
+      reason: String(row.reason ?? ''),
     }
   })
 
@@ -148,8 +148,8 @@ export function serializePhysicalExamValues(values) {
   physicalExamAreas.forEach(area => {
     const row = values?.[area.key] || {}
     const status = normalizeStatus(row.status, area)
-    const findings = String(row.findings || '').trim()
-    const reason = String(row.reason || '').trim()
+    const findings = String(row.findings ?? '')
+    const reason = String(row.reason ?? '')
     if (!status && !findings && !reason) {
       return
     }

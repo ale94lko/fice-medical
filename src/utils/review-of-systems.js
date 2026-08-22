@@ -114,7 +114,7 @@ export function parseReviewOfSystemsValues(raw) {
     }
     values[system.key] = {
       status: normalizeStatus(row.status),
-      details: String(row.details ?? '').trim(),
+      details: String(row.details ?? ''),
     }
   })
 
@@ -126,7 +126,7 @@ export function serializeReviewOfSystemsValues(values) {
   reviewOfSystems.forEach(system => {
     const row = values?.[system.key] || {}
     const status = normalizeStatus(row.status)
-    const details = String(row.details || '').trim()
+    const details = String(row.details ?? '')
     if (!status && !details) {
       return
     }

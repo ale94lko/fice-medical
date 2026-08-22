@@ -379,8 +379,15 @@ function canCancelRow(row) {
 }
 
 function canDownloadRow(row) {
-  return props.canDownload
-    && row.status === consentStatusValues.accepted
+  if (!props.canDownload) {
+    return false
+  }
+  if (row.status === consentStatusValues.accepted) {
+    return true
+  }
+
+  return row.status === consentStatusValues.declined
+    && row.documentFileId != null
 }
 
 function canPrintRow(row) {

@@ -374,6 +374,7 @@ async function onSignSubmit(payload) {
         relationshipToClient: payload.relationshipToClient,
         signatureMethod: consentSignatureMethodValues.inPersonPaper,
         signatureFileId: uploaded.id,
+        fieldValues: payload.fieldValues,
       }
     }
     await signClientConsent(

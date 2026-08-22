@@ -135,6 +135,12 @@ function isPublicAuthUrl(url) {
     || u.includes('/consents/v1/public/')
 }
 
+function isLogoutUrl(url) {
+  const u = String(url || '')
+
+  return u === apiPaths.logout || u.endsWith(apiPaths.logout)
+}
+
 function getRefreshInFlight() {
   if (!refreshInFlight) {
     refreshInFlight = performRefresh().finally(() => {
@@ -322,6 +328,7 @@ api.interceptors.response.use(
       || cfg.url?.includes(apiPaths.oauthForgotPassword)
       || cfg.url?.includes(apiPaths.oauthResetPassword)
       || cfg.url?.includes(apiPaths.oauthMfaChallenge)
+      || isLogoutUrl(cfg.url)
     ) {
       return Promise.reject(error)
     }

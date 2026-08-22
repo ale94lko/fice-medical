@@ -60,7 +60,9 @@ function normalizeDiagnosis(row = {}) {
     sequenceNo: parseOptionalNumber(
       row.sequence_no ?? row.sequenceNo,
     ) ?? 0,
-    isPrimary: parseOptionalBool(row.is_primary ?? row.isPrimary),
+    isPrimary: parseOptionalBool(
+      row.is_primary ?? row.isPrimary ?? row.primary,
+    ),
   }
 }
 

@@ -58,6 +58,14 @@ export function buildConsentSignerTypeOptions(t, te, allowed = null) {
   })
 }
 
+export function buildConsentAuthorizationSignerTypeOptions(t, te) {
+  return buildConsentSignerTypeOptions(t, te, [
+    consentSignerTypeValues.client,
+    consentSignerTypeValues.guardian,
+    consentSignerTypeValues.authorizedRepresentative,
+  ])
+}
+
 export function buildConsentSignatureMethodOptions(t, te) {
   return Object.values(consentSignatureMethodValues).map(value => {
     const key = consentSignatureMethodI18nKey(value)

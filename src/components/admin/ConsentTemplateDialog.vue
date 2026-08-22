@@ -242,7 +242,7 @@ import {
   modalTestIds,
 } from 'src/test-ids/index.js'
 import {
-  buildConsentSignerTypeOptions,
+  buildConsentAuthorizationSignerTypeOptions,
   buildConsentTypeOptions,
   consentVersionStatusI18nKey,
   formatConsentDate,
@@ -283,7 +283,9 @@ const readonly = computed(() => props.mode === 'view')
 const templateId = computed(() => props.template?.id ?? null)
 
 const typeOptions = computed(() => buildConsentTypeOptions(t, te))
-const signerOptions = computed(() => buildConsentSignerTypeOptions(t, te))
+const signerOptions = computed(() =>
+  buildConsentAuthorizationSignerTypeOptions(t, te),
+)
 
 const dialogTitle = computed(() => {
   if (props.mode === 'edit') {

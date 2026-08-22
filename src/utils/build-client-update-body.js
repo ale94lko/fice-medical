@@ -8,10 +8,16 @@ import { buildFollowUpsForSave } from 'src/utils/client-follow-ups.js'
  * PATCH /client/v1/{id} — includes follow_ups / labs only when there are
  * changes (empty arrays would wipe existing records on replace).
  */
-export function buildClientUpdateBody(form) {
+export function buildClientUpdateBody(form, options = {}) {
   const body = buildClientRegisterBody(form)
   if (body.basic_info?.id_number == null) {
     delete body.basic_info.id_number
+  }
+  const identityReason = String(
+    options.identityChangeReason ?? '',
+  ).trim()
+  if (identityReason) {
+    body.identity_change_reason = identityReason
   }
   const followUps = buildFollowUpsForSave(form?.[clientFormSections.followUps])
 

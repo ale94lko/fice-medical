@@ -55,29 +55,44 @@
 
     <footer class="client-overview-alt-basic__footer">
       <div class="client-overview-alt-basic__footer-item">
-        <q-icon name="event" size="16px" />
-        <div>
-          <span class="client-overview-alt-basic__footer-label">
-            {{ t('clientOverviewAltCreated') }}
-          </span>
-          <span class="client-overview-alt-basic__footer-value">
-            {{ footer.created }}
-          </span>
-        </div>
+        <span class="client-overview-alt-basic__footer-label">
+          <q-icon name="event" size="16px" />
+          {{ t('clientOverviewAltCreated') }}
+        </span>
+        <span class="client-overview-alt-basic__footer-value">
+          {{ footer.created }}
+        </span>
       </div>
-      <div class="client-overview-alt-basic__footer-item">
-        <q-icon name="schedule" size="16px" />
-        <div>
-          <span class="client-overview-alt-basic__footer-label">
-            {{ t('clientOverviewAltLastUpdated') }}
-          </span>
-          <span class="client-overview-alt-basic__footer-value">
-            {{ footer.lastUpdated }}
-          </span>
-        </div>
-      </div>
+      <div
+        class="client-overview-alt-basic__footer-divider"
+        aria-hidden="true"
+      />
       <div class="client-overview-alt-basic__footer-item">
         <span class="client-overview-alt-basic__footer-label">
+          <q-icon name="schedule" size="16px" />
+          {{ t('clientOverviewAltLastUpdated') }}
+        </span>
+        <span class="client-overview-alt-basic__footer-value">
+          {{ footer.lastUpdated }}
+        </span>
+        <span
+          v-if="footer.updatedBy"
+          class="client-overview-alt-basic__footer-by">
+          {{ t('clientOverviewAltUpdatedByUser', {
+            user: footer.updatedBy,
+          }) }}
+        </span>
+      </div>
+      <div
+        class="client-overview-alt-basic__footer-divider"
+        aria-hidden="true"
+      />
+      <div class="client-overview-alt-basic__footer-item">
+        <span class="client-overview-alt-basic__footer-label">
+          <q-icon
+            :name="statusIcon(footer.recordStatus)"
+            size="16px"
+          />
           {{ t('clientOverviewAltRecordStatus') }}
         </span>
         <span
@@ -117,16 +132,28 @@ const fields = computed(() => [
 const footer = computed(() => props.basicInfo?.footer ?? {
   created: '—',
   lastUpdated: '—',
+  updatedBy: '',
   recordStatusLabel: '—',
   recordStatus: 'active',
 })
 
-function statusClass(status) {
+function isInactiveStatus(status) {
   const key = String(status ?? '').trim().toLowerCase()
-  if (key === 'inactive' || key === 'discharged' || key === 'closed') {
+
+  return key === 'inactive'
+    || key === 'discharged'
+    || key === 'closed'
+}
+
+function statusClass(status) {
+  if (isInactiveStatus(status)) {
     return 'client-overview-alt-basic__status--inactive'
   }
 
   return 'client-overview-alt-basic__status--active'
+}
+
+function statusIcon(status) {
+  return isInactiveStatus(status) ? 'pause_circle' : 'verified'
 }
 </script>

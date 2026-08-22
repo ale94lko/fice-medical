@@ -27,21 +27,6 @@
         }) }}
       </p>
       <div
-        v-if="issues.length"
-        class="encounter-ros__issues q-mb-md">
-        <div class="text-body2 text-grey-8">
-          {{ t('rosRequiresAttention') }}
-        </div>
-        <ul class="q-mb-none q-pl-md">
-          <li
-            v-for="issue in issues"
-            :key="issue.key"
-            class="text-body2 text-negative">
-            {{ issueText(issue) }}
-          </li>
-        </ul>
-      </div>
-      <div
         v-for="row in rows"
         :key="row.diagnosis.id || row.diagnosis.icd10Code"
         class="encounter-ros__item">
@@ -58,6 +43,24 @@
         <AddClientLabeledField
           :label="t('apPlan')"
           :required="Boolean(field?.required)">
+          <template
+            v-if="aiDraftEnabled"
+            #label-append>
+            <q-btn
+              no-caps
+              outline
+              dense
+              size="sm"
+              class="app-btn-ai-outline"
+              icon="auto_awesome"
+              :label="t('aiBtnFiceAi')"
+              :aria-label="t('aiAssistantName')"
+              :data-testid="tid.narrativeApAiDraft(
+                row.diagnosis.id,
+              )"
+              @click="openAiDraft(row)"
+            />
+          </template>
           <q-input
             :model-value="row.plan"
             type="textarea"
@@ -66,38 +69,27 @@
             :disable="!canEdit"
             :data-testid="tid.narrativeApPlan(row.diagnosis.id)"
             :placeholder="t('apPlanPlaceholder')"
+            :hide-bottom-space="!planErrorMessage(row)"
             :error="planError(row)"
             :error-message="planErrorMessage(row)"
             maxlength="4000"
             @update:model-value="value => onPlanChange(row, value)"
-            @blur="emit('flush')"
+            @blur="onPlanBlur(row)"
           />
         </AddClientLabeledField>
-        <q-btn
-          v-if="aiDraftEnabled"
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline q-mt-sm"
-          icon="auto_awesome"
-          :label="t('narrativeAiDraftWithAi')"
-          :data-testid="tid.narrativeApAiDraft(row.diagnosis.id)"
-          @click="openAiDraft(row)"
-        />
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import { encounterWorkspaceTestIds as tid } from
   'src/test-ids/encounter-workspace.js'
 import {
   assessmentPlanAnsweredCount,
-  assessmentPlanIssues,
   diagnosisHeading,
   resolveAssessmentPlanRows,
   serializeAssessmentPlanValues,
@@ -107,6 +99,7 @@ const props = defineProps({
   field: { type: Object, required: true },
   diagnoses: { type: Array, default: () => [] },
   canEdit: { type: Boolean, default: false },
+  highlightMissing: { type: Boolean, default: false },
   aiDraftEnabled: { type: Boolean, default: false },
 })
 
@@ -117,6 +110,7 @@ const emit = defineEmits([
   'open-ai-draft',
 ])
 const { t } = useI18n()
+const touchedPlans = ref({})
 
 const rows = computed(() => resolveAssessmentPlanRows(
   props.diagnoses,
@@ -127,32 +121,43 @@ const answeredCount = computed(() =>
   assessmentPlanAnsweredCount(rows.value),
 )
 
-const issues = computed(() => assessmentPlanIssues(
-  rows.value,
-  Boolean(props.field?.required),
-))
+function planKey(row) {
+  return String(row.diagnosis?.id || row.diagnosis?.icd10Code || '')
+}
+
+function markPlanTouched(row) {
+  const key = planKey(row)
+  if (!key || touchedPlans.value[key]) {
+    return
+  }
+  touchedPlans.value = { ...touchedPlans.value, [key]: true }
+}
 
 function planError(row) {
-  return Boolean(props.field?.required)
-    && !String(row.plan || '').trim()
+  if (!props.field?.required) {
+    return false
+  }
+  if (!props.highlightMissing && !touchedPlans.value[planKey(row)]) {
+    return false
+  }
+
+  return !String(row.plan || '').trim()
 }
 
 function planErrorMessage(row) {
+  if (props.highlightMissing || !planError(row)) {
+    return ''
+  }
+
   return t('apPlanRequired', {
     description: row.diagnosis?.description || '',
     code: row.diagnosis?.icd10Code || '',
   })
 }
 
-function issueText(issue) {
-  if (!issue.diagnosis) {
-    return t('apEmptyDiagnoses')
-  }
-
-  return t('apPlanRequiredShort', {
-    code: issue.diagnosis.icd10Code || '',
-    description: issue.diagnosis.description || '',
-  })
+function onPlanBlur(row) {
+  markPlanTouched(row)
+  emit('flush')
 }
 
 function onPlanChange(row, value) {

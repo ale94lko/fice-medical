@@ -60,7 +60,7 @@ function parseStoredItems(raw) {
           ?? '',
       ).trim(),
       isPrimary: row.isPrimary === true || row.is_primary === true,
-      plan: String(row.plan ?? '').trim(),
+      plan: String(row.plan ?? ''),
     }
   }).filter(Boolean)
 }
@@ -154,7 +154,7 @@ export function resolveAssessmentPlanRows(diagnoses, raw) {
 export function serializeAssessmentPlanValues(rows) {
   const values = (rows || []).map(row => {
     const diagnosis = row.diagnosis || {}
-    const plan = String(row.plan || '').trim()
+    const plan = String(row.plan ?? '')
     const payload = {
       encounterDiagnosisId: diagnosis.id ?? null,
       diagnosisCode: diagnosis.icd10Code || '',

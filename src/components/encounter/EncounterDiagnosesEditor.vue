@@ -1,20 +1,22 @@
 <template>
   <div class="encounter-diagnoses-editor appointment-service-lines">
-    <div class="encounter-workspace-card__head">
+    <div class="encounter-workspace-card__head
+      encounter-diagnoses-editor__head">
       <h2>{{ t('encounterDiagnoses') }}</h2>
       <q-btn
         v-if="canEdit && canUseCodingAssistant"
-        flat
+        no-caps
+        outline
         dense
-        round
-        class="app-btn-ai-icon"
+        size="sm"
+        class="app-btn-ai-outline"
         icon="auto_awesome"
         :disable="saving"
+        :label="t('aiBtnFiceAi')"
         :aria-label="t('aiAssistantName')"
         :data-testid="tid.diagnosesAi"
-        @click="aiDialogOpen = true">
-        <q-tooltip>{{ t('aiAssistantName') }}</q-tooltip>
-      </q-btn>
+        @click="aiDialogOpen = true"
+      />
     </div>
 
     <template v-if="canEdit">
@@ -548,3 +550,10 @@ async function saveRows() {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.encounter-diagnoses-editor__head {
+  justify-content: flex-start;
+  gap: 6px;
+}
+</style>

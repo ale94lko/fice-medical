@@ -77,6 +77,11 @@ const tabs = computed(() => [
     icon: 'person',
   },
   {
+    key: addClientTabKeys.consents,
+    label: t('tabConsents'),
+    icon: 'draw',
+  },
+  {
     key: addClientTabKeys.contact,
     label: t('tabContact'),
     icon: 'contact_mail',

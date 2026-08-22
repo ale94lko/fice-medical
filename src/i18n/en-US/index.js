@@ -1170,6 +1170,7 @@ export default {
   clientOverviewAltLastUpdated: 'Last Updated',
   clientOverviewAltRecordStatus: 'Record Status',
   clientOverviewAltUpdatedBy: '{date} by {user}',
+  clientOverviewAltUpdatedByUser: 'by {user}',
   clientOverviewAltViewAllActivity: 'View All Activity',
   clientOverviewAltTabPlaceholder:
     'This section is available in Edit Client for now.',
@@ -1335,6 +1336,7 @@ export default {
   tabBasicInfo: 'Basic Info',
   tabAppointments: 'Appointments',
   tabEncounters: 'Encounters',
+  tabConsents: 'Consents',
   tabContact: 'Contact',
   tabContactInformation: 'Contact Information',
   contactSubTabSelf: 'Self Contact',
@@ -3281,9 +3283,129 @@ export default {
   consentVersionLabel: 'Version',
   consentEffectiveDate: 'Effective date',
   consentExpirationDate: 'Expiration date',
+  consentValidityYearsAfterSign: 'Years valid after signature',
+  consentValidityYearsAfterSignHelp:
+    'Optional. When set, each signed consent expires this many years '
+    + 'after the signature date. Independent of the version expiration '
+    + 'date, which only controls new assignments.',
+  consentVersionDateRangeInvalid:
+    'Expiration date must be on or after the effective date.',
   consentContentHtml: 'Content (HTML)',
   consentContentHtmlPlaceholder: 'Enter consent content as HTML…',
+  consentFieldsTitle: 'Authorization fields',
+  consentFieldsEmpty: 'No configurable fields on this version.',
+  consentFieldAdd: 'Add field',
+  consentFieldAddTitle: 'Add authorization field',
+  consentFieldEditTitle: 'Edit authorization field',
+  consentFieldLabel: 'Label',
+  consentFieldKey: 'Field key',
+  consentFieldKeyPlaceholder: 'Generated from the label if blank',
+  consentFieldType: 'Field type',
+  consentFieldTypeText: 'Text',
+  consentFieldTypeTextarea: 'Text area',
+  consentFieldTypeDate: 'Date',
+  consentFieldTypeSelect: 'Select',
+  consentFieldTypeCheckbox: 'Checkbox',
+  consentFieldTypeMultiSelect: 'Multi-select',
+  consentFieldRequired: 'Required',
+  consentFieldReadOnly: 'Read only after prefill',
+  consentFieldIncludeInDocument: 'Include in generated PDF',
+  consentFieldExcludeFromDocument: 'Hidden from PDF',
+  consentFieldPrefill: 'Prefill source',
+  consentFieldPrefillManual: 'Entered at signing',
+  consentFieldPrefillClient: 'Client information',
+  consentFieldPrefillStaff: 'Staff information',
+  consentFieldPrefillKey: 'Prefill mapping',
+  consentFieldPrefillKeyHint:
+    'Examples: client_name, dob, phone, staff_name',
+  consentFieldOptions: 'Options',
+  consentFieldOptionsHint:
+    'One option per line. Add " | DECLINED" to complete that choice '
+    + 'as a signed refusal.',
+  consentFieldPlaceholder: 'Placeholder',
+  consentFieldHelpText: 'Help text',
+  consentFieldConditional: 'Required only when another field is selected',
+  consentFieldRequiredWhenField: 'When this field is selected',
+  consentFieldRequiredWhenValue: 'When this value is selected',
+  consentFieldRequiredWhenValueHint: 'Example: true or all_records',
+  consentFieldMoveUp: 'Move up',
+  consentFieldMoveDown: 'Move down',
+  consentAuthorizationTitle: 'Authorization information',
+  consentFieldsRequired:
+    'Please complete all required consent information before signing.',
+  consentFieldValueRequired: 'This field is required.',
   consentContentPreviewTitle: 'Preview',
+  documentLayoutTitle: 'Document layout',
+  documentLayoutHelper:
+    'Defines where fields, signatures and page breaks appear in the '
+    + 'PDF. The renderer does not invent structure.',
+  documentLayoutEnable: 'Add document layout',
+  documentLayoutEmpty: 'No sections yet. Add a section to start.',
+  documentLayoutHeaderEnabled: 'Organization header',
+  documentLayoutFooterEnabled: 'Organization footer',
+  documentLayoutSectionTitle: 'Section title',
+  documentLayoutShowTitle: 'Show title',
+  documentLayoutPageBreakBefore: 'Page break before section',
+  documentLayoutKeepTogether: 'Keep section together',
+  documentLayoutColumnCount: 'Columns',
+  documentLayoutColumn: 'Column {n}',
+  documentLayoutAddSection: 'Add section',
+  documentLayoutAddRow: 'Add row',
+  documentLayoutRemoveRow: 'Remove row',
+  documentLayoutAddComponent: 'Add component',
+  documentLayoutRemoveComponent: 'Remove',
+  documentLayoutComponentType: 'Component',
+  documentLayoutComponentField: 'Field',
+  documentLayoutComponentNarrative: 'Narrative',
+  documentLayoutComponentStaticText: 'Static text',
+  documentLayoutComponentSignature: 'Signature block',
+  documentLayoutComponentTable: 'Table',
+  documentLayoutComponentPageBreak: 'Page break',
+  documentLayoutComponentSpacer: 'Spacer',
+  documentLayoutField: 'Field',
+  documentLayoutSignature: 'Signature requirement',
+  documentLayoutTableSource: 'Table source key',
+  documentLayoutStaticText: 'Static text',
+  documentLayoutUseTemplateHtml: 'Insert template HTML content',
+  documentLayoutPdfPreview: 'Preview PDF',
+  documentLayoutPreviewSaveFirst:
+    'Save the version before previewing the PDF.',
+  documentLayoutPreviewMissing:
+    'Add a document layout before previewing the PDF.',
+  documentLayoutPreviewError: 'Could not generate the PDF preview.',
+  documentLayoutPresetHeader: 'Document header',
+  documentLayoutPresetSection: 'Section header',
+  documentLayoutPresetInfoCard: 'Information card',
+  documentLayoutPresetTable: 'Clinical table',
+  documentLayoutPresetResult: 'Result card',
+  documentLayoutPresetNarrative: 'Narrative block',
+  documentLayoutPresetSignature: 'Signature panel',
+  documentLayoutPresetLegal: 'Legal text',
+  documentLayoutPresetFooter: 'Document footer',
+  documentBrandingTitle: 'Document branding',
+  documentBrandingHelper:
+    'Clinic identity on generated documents. Custom colors are a '
+    + 'plan entitlement and stay independent from the clinic logo.',
+  documentBrandingLogoNote:
+    'The clinic logo above is used on documents when the logo '
+    + 'capability is enabled for this plan.',
+  documentBrandingColorsUnavailable:
+    'Custom document colors are not included in this plan. New '
+    + 'documents use the standard FiCE theme. Stored colors are '
+    + 'kept if the entitlement is restored later.',
+  documentBrandingPrimaryColor: 'Primary color',
+  documentBrandingSecondaryColor: 'Secondary color',
+  documentBrandingAccentColor: 'Accent color',
+  documentBrandingThemePreset: 'Theme',
+  documentBrandingThemeStandard: 'Standard',
+  documentBrandingThemeAccent: 'Clinic accent',
+  documentBrandingThemeUnavailable:
+    'Advanced document themes are not included in this plan.',
+  documentBrandingEffectivePreview: 'Effective document colors',
+  documentBrandingSaveError:
+    'Could not save document branding.',
+  documentBrandingLoadError:
+    'Could not load document branding.',
   consentVersionCreateSuccess: 'Consent version created.',
   consentVersionUpdateSuccess: 'Consent version updated.',
   consentVersionSaveError: 'Could not save consent version.',
@@ -3313,6 +3435,27 @@ export default {
   consentSignerTypeGuardian: 'Guardian',
   consentSignerTypeAuthorizedRepresentative:
     'Authorized representative',
+  consentSignerTypeWitness: 'Witness',
+  consentSignerTypeStaff: 'Staff / Case manager',
+  consentSignatureRequirementsTitle: 'Signature requirements',
+  consentSignatureRequirementsEmpty:
+    'Default: one required authorization signature from the template '
+    + 'allowed signer types. Add requirements to include Witness, '
+    + 'Staff, or alternative signer groups.',
+  consentSignatureRequirementAdd: 'Add requirement',
+  consentSignatureRequirementAddTitle: 'Add signature requirement',
+  consentSignatureRequirementEditTitle: 'Edit signature requirement',
+  consentSignatureRequirementLabel: 'Label',
+  consentSignatureRequirementKey: 'Requirement key',
+  consentSignatureRequirementRoles: 'Who may satisfy this signature',
+  consentSignatureRequirementRequired: 'Required',
+  consentSignatureRequirementOptional: 'Optional',
+  consentSignatureRequirementHint:
+    'Select one or more roles. Any one of them satisfies this '
+    + 'requirement. Additional requirements are independent.',
+  consentSignatureProgress: 'Signature progress',
+  consentSignaturePending: 'Pending',
+  consentSignatureComplete: 'Signed',
   consentSignatureMethodInPersonDigital: 'In person (digital)',
   consentSignatureMethodInPersonPaper: 'In person (paper)',
   consentSignatureMethodClientPortal: 'Client portal',
@@ -3380,6 +3523,12 @@ export default {
   clientConsentSecureLinkHint:
     'Send a one-time link so the client can review and sign this consent.',
   clientConsentSecureLinkEmail: 'Email',
+  clientConsentSecureLinkEmailHint:
+    'Use an authorized client or contact email. If several emails '
+    + 'are on file, choose one explicitly.',
+  clientConsentSecureLinkEmailRequired:
+    'Select an authorized recipient email before sending the '
+    + 'secure link.',
   clientConsentSecureLinkSendEmail: 'Send email',
   clientConsentSecureLinkSend: 'Send',
   clientConsentSecureLinkSuccess: 'Secure link created.',
@@ -3414,6 +3563,9 @@ export default {
   consentSignPublicSignedTitle: 'Consent signed',
   consentSignPublicSignedBody:
     'Thank you. This link was single-use and is no longer valid.',
+  consentSignPublicWaitingOtherSignatures:
+    'Your signature is already on file. Additional required '
+    + 'signatures must be collected in person.',
   consentSignPublicDeclinedTitle: 'Consent declined',
   consentSignPublicDeclinedBody:
     'Your response was recorded. This link is no longer valid.',
@@ -3449,6 +3601,8 @@ export default {
   clientConsentPrintTooltip: 'Print blank signature form',
   clientConsentActionError: 'Could not update consent.',
   clientConsentSignedMeta: 'Signed {date} by {name}',
+  clientConsentDeclinedMeta: 'Declined {date}: {reason}',
+  clientConsentCancelledMeta: 'Cancelled {date}: {reason}',
   clientConsentRevokedMeta: 'Revoked {date}: {reason}',
   clientAttachmentsTitle: 'Attachments',
   clientAttachmentsSubtitle:
@@ -3594,6 +3748,22 @@ export default {
   ageDecrement: 'Decrease age',
   ssnItin: 'SSN / ITIN',
   socialSecurityNumber: 'SSN / ITIN',
+  clientIdentityAdminLock: 'Admin',
+  clientIdentityAdminLockHint:
+    'Saved identity fields can only be changed by an administrator. '
+    + 'The change is recorded in clinical audit.',
+  clientIdentityChangeTitle: 'Confirm identity change',
+  clientIdentityChangeMessage:
+    'You are changing a locked identity field. Enter a reason that will '
+    + 'be stored in the clinical audit log.',
+  clientIdentityChangeReasonLabel: 'Reason',
+  clientIdentityChangeReasonPlaceholder:
+    'Explain why this identity field must change',
+  clientIdentityChangeReasonRequired:
+    'Enter a reason of at least 5 characters',
+  clientIdentityChangeConfirm: 'Save change',
+  clientIdentityLockedError:
+    'Identity fields cannot be changed after they have been saved.',
   taxIdPlaceholder: '###-##-####',
   taxIdTypeSsn: 'SSN',
   taxIdTypeItin: 'ITIN',
@@ -5573,9 +5743,6 @@ export default {
   rosDetails: 'Details',
   rosDetailsPlaceholder: 'Describe relevant symptoms or findings',
   rosProgress: '{completed} of {total} systems completed',
-  rosRequiresAttention: 'Requires attention:',
-  rosStatusRequiredShort: '{system} — Status required',
-  rosDetailsRequiredShort: '{system} — Details required',
   rosDetailsRequired:
     'Details are required when {system} is marked as Positive.',
   rosSystemConstitutional: 'Constitutional',
@@ -5603,8 +5770,6 @@ export default {
   peReason: 'Reason',
   peReasonPlaceholder: 'Reason for deferring (optional)',
   peProgress: '{completed} of {total} areas completed',
-  peStatusRequiredShort: '{area} — Status required',
-  peFindingsRequiredShort: '{area} — Findings required',
   peFindingsRequired:
     'Findings are required when {area} is marked as Abnormal.',
   peAreaConstitutional: 'Constitutional / General',
@@ -5626,8 +5791,6 @@ export default {
   mseDetails: 'Details',
   mseDetailsPlaceholder: 'Describe the finding',
   mseProgress: '{completed} of {total} fields completed',
-  mseValueRequiredShort: '{field} — Value required',
-  mseDetailsRequiredShort: '{field} — Details required',
   mseDetailsRequired:
     'Details are required when {field} is set to Other.',
   mseFieldAppearance: 'Appearance',
@@ -5717,7 +5880,6 @@ export default {
   apPrimaryDiagnosis: 'Primary Diagnosis',
   apPlanRequired:
     'A Plan is required for {description} ({code}).',
-  apPlanRequiredShort: '{code} — {description}',
   encounterProcessingTitle: 'Encounter Processing',
   encounterProcessingSubtitle:
     'Downstream Clinical Note and Superbill generation after completion.',
@@ -6305,7 +6467,7 @@ export default {
     'Client responsibility',
   'denialResolution.NO_ACTION': 'No action',
   'denialResolution.OTHER': 'Other',
-  clientFinancialOverviewTitle: 'Client Ledger',
+  clientFinancialOverviewTitle: 'Financial Overview',
   clientFinancialOverviewSubtitle:
     'View client account balance and transaction history.',
   clientFinancialNoPermission:

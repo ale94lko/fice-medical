@@ -1,8 +1,11 @@
 <template>
-  <FormField
+    <FormField
     v-if="externalLabel"
     :label="props.label"
-    :required="props.required">
+    :required="props.required"
+    :lock-label="props.lockLabel"
+    :lock-hint="props.lockHint"
+    :lock-test-id="props.lockTestId">
     <q-input
       ref="inputRef"
       v-model="model"
@@ -119,6 +122,18 @@ const props = defineProps({
   required: {
     type: Boolean,
     default: false,
+  },
+  lockLabel: {
+    type: String,
+    default: '',
+  },
+  lockHint: {
+    type: String,
+    default: '',
+  },
+  lockTestId: {
+    type: String,
+    default: '',
   },
   placeholder: {
     type: String,

@@ -318,6 +318,13 @@
   margin-bottom: 12px;
 }
 
+.encounter-clinical-care-plans__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
 .encounter-workspace-overview {
   display: grid;
   grid-template-columns:
@@ -709,17 +716,61 @@ body.vp-mobile {
 .encounter-ros__item {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
-.encounter-ros__status {
+.encounter-ros__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.encounter-ros__lead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 calc(50% - 6px);
+  width: calc(50% - 6px);
+  max-width: calc(50% - 6px);
+  min-width: 0;
+}
+
+.encounter-ros__name {
+  flex: 1 1 calc(50% - 6px);
+  width: calc(50% - 6px);
+  max-width: calc(50% - 6px);
+  min-width: 0;
+
   .form-field__label {
     margin-bottom: 0;
+    white-space: normal;
+    overflow-wrap: break-word;
+    line-height: 1.25;
   }
 }
 
+.encounter-ros__control {
+  flex: 1 1 calc(50% - 6px);
+  width: calc(50% - 6px);
+  max-width: calc(50% - 6px);
+  min-width: 0;
+}
+
 .encounter-ros__details {
-  width: 100%;
+  flex: 1 1 calc(50% - 6px);
+  width: calc(50% - 6px);
+  min-width: 0;
+}
+
+@media (max-width: 599px) {
+  .encounter-ros__lead,
+  .encounter-ros__name,
+  .encounter-ros__control,
+  .encounter-ros__details {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .encounter-ros__issues {

@@ -40,14 +40,52 @@
           {{ signedMeta }}
         </p>
         <p
+          v-if="declinedMeta"
+          class="text-body2 text-grey-7 q-mb-md">
+          {{ declinedMeta }}
+        </p>
+        <p
+          v-if="cancelledMeta"
+          class="text-body2 text-grey-7 q-mb-md">
+          {{ cancelledMeta }}
+        </p>
+        <p
           v-if="revokedMeta"
           class="text-body2 text-grey-7 q-mb-md">
           {{ revokedMeta }}
         </p>
 
         <div
+          v-if="signatureRequirements.length"
+          class="q-mb-md">
+          <p class="text-body2 text-weight-medium q-mb-xs">
+            {{ t('consentSignatureProgress') }}
+          </p>
+          <p
+            v-for="requirement in signatureRequirements"
+            :key="requirement.key || requirement.label"
+            class="text-body2 text-grey-7 q-mb-xs">
+            {{ requirement.label }}
+            ·
+            {{ requirement.satisfied
+              ? t('consentSignatureComplete')
+              : t('consentSignaturePending') }}
+            <span v-if="!requirement.required">
+              ({{ t('consentSignatureRequirementOptional') }})
+            </span>
+          </p>
+        </div>
+
+        <div
           class="client-consent-view-dialog__content"
           v-html="safeContentHtml"
+        />
+        <ConsentAuthorizationFields
+          v-if="authorizationFields.length"
+          class="q-mt-lg"
+          :fields="authorizationFields"
+          :model-value="fieldValues"
+          readonly
         />
       </q-card-section>
 
@@ -74,6 +112,8 @@ import { useI18n } from 'vue-i18n'
 import AdminTableStatusCell from
   'components/admin-table/AdminTableStatusCell.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
+import ConsentAuthorizationFields from
+  'components/ConsentAuthorizationFields.vue'
 import { consentStatusValues } from 'components/constants.js'
 import { clientConsentsTestIds as tid, modalTestIds } from
   'src/test-ids/index.js'
@@ -101,6 +141,25 @@ const safeContentHtml = computed(() => sanitizeHtml(
   props.consent?.contentHtml,
 ))
 
+const authorizationFields = computed(
+  () => props.consent?.fieldValues || [],
+)
+
+const signatureRequirements = computed(() => (
+  Array.isArray(props.consent?.signatureRequirements)
+    ? props.consent.signatureRequirements
+    : []
+))
+
+const fieldValues = computed(() => {
+  const map = {}
+  for (const field of authorizationFields.value) {
+    map[field.key] = field.value
+  }
+
+  return map
+})
+
 const statusLabel = computed(() => {
   const key = consentStatusI18nKey(props.consent?.status)
 
@@ -118,6 +177,35 @@ const signedMeta = computed(() => {
   return t('clientConsentSignedMeta', {
     date: formatConsentDateTime(props.consent.signedAt),
     name: props.consent.signedByName || '—',
+  })
+})
+
+const declinedMeta = computed(() => {
+  if (props.consent?.status !== consentStatusValues.declined) {
+    return ''
+  }
+  if (!props.consent?.declinedAt && !props.consent?.declineReason) {
+    return ''
+  }
+
+  return t('clientConsentDeclinedMeta', {
+    date: formatConsentDateTime(props.consent.declinedAt),
+    reason: props.consent.declineReason || '—',
+  })
+})
+
+const cancelledMeta = computed(() => {
+  if (props.consent?.status !== consentStatusValues.cancelled) {
+    return ''
+  }
+  const reason = props.consent.cancellationReason
+    || props.consent.declineReason
+    || '—'
+
+  return t('clientConsentCancelledMeta', {
+    date: formatConsentDateTime(props.consent.cancelledAt
+      || props.consent.completedAt),
+    reason,
   })
 })
 

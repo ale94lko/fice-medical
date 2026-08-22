@@ -37,6 +37,7 @@ const MODULE_TONES = {
 
 const SIDEBAR_TAB_KEYS = new Set([
   addClientTabKeys.basic,
+  addClientTabKeys.consents,
   addClientTabKeys.insurance,
   addClientTabKeys.contact,
 ])
@@ -88,7 +89,7 @@ function isComingSoonSubTab(parentKey, subTabKey) {
       && subTabKey !== addClientFinancialsSubTabKeys.payments
   }
   if (parentKey === addClientTabKeys.documents) {
-    return subTabKey !== 'attachments' && subTabKey !== 'consents'
+    return subTabKey !== 'attachments'
   }
   if (parentKey === addClientTabKeys.careCoordination) {
     return ['careTeam', 'tasks'].includes(subTabKey)

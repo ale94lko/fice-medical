@@ -21,8 +21,9 @@
     </div>
 
     <template v-else>
-      <div class="add-client-financial-overview__header">
-        <div class="add-client-financial-overview__heading">
+      <div class="add-client-financial-overview__header
+        appointments-header row items-center">
+        <div class="add-client-financial-overview__heading col">
           <SectionHeading
             icon="account_balance_wallet"
             :title="t('clientFinancialOverviewTitle')"
@@ -31,9 +32,11 @@
             {{ t('clientFinancialOverviewSubtitle') }}
           </p>
         </div>
-        <div class="add-client-financial-overview__actions">
+        <div
+          v-if="canCreatePayment"
+          class="add-client-financial-overview__actions
+            appointments-header__actions col-auto">
           <q-btn
-            v-if="canCreatePayment"
             no-caps
             unelevated
             color="primary"
@@ -55,48 +58,43 @@
       </div>
 
       <template v-else>
-        <div class="add-client-financial-overview__summary
-          row q-col-gutter-md">
-          <div
+        <div class="add-client-financial-overview__summary">
+          <article
             v-for="card in cards"
             :key="card.id"
-            class="col-12 col-sm-6 col-md-3">
-            <article
-              class="client-list-summary__card
-                add-client-financial-overview__card">
-              <div class="client-list-summary__card-main
-                row items-center no-wrap">
-                <p class="client-list-summary__card-value
-                  q-mb-none">
-                  {{ card.value }}
-                </p>
-                <div class="client-list-summary__card-copy col">
-                  <p class="client-list-summary__card-label
-                    q-mb-none">
-                    {{ card.label }}
-                  </p>
-                  <p class="client-list-summary__card-description
-                    q-mb-none">
-                    {{ card.description }}
-                  </p>
-                </div>
-                <div
-                  class="client-list-summary__card-icon"
-                  :class="`client-list-summary__card-icon--${
-                    card.tone
-                  }`">
-                  <q-icon :name="card.icon" size="18px" />
-                </div>
+            class="add-client-financial-overview__kpi"
+            :class="`add-client-financial-overview__kpi--${
+              card.tone
+            }`">
+            <header class="add-client-financial-overview__kpi-head">
+              <div class="add-client-financial-overview__kpi-icon">
+                <q-icon :name="card.icon" size="18px" />
               </div>
-            </article>
-          </div>
+              <p class="add-client-financial-overview__kpi-label
+                q-mb-none">
+                {{ card.label }}
+              </p>
+            </header>
+            <p
+              class="add-client-financial-overview__kpi-value
+                q-mb-none"
+              :class="card.valueClass">
+              {{ card.value }}
+            </p>
+            <p
+              class="add-client-financial-overview__kpi-hint
+                q-mb-none"
+              :title="card.description">
+              {{ card.description }}
+            </p>
+          </article>
         </div>
 
-        <div class="fmh-list-card
-          add-client-financial-overview__panel">
-          <p class="add-client-financial-overview__panel-title">
-            {{ t('clientFinancialResponsibilityBreakdown') }}
-          </p>
+        <div class="add-client-financial-overview__panel">
+          <SubsectionHeading
+            icon="pie_chart"
+            :title="t('clientFinancialResponsibilityBreakdown')"
+          />
           <div class="add-client-financial-overview__metrics">
             <div
               v-for="item in breakdownItems"
@@ -104,6 +102,7 @@
               class="add-client-financial-overview__metric">
               <p class="add-client-financial-overview__metric-label
                 q-mb-none">
+                <q-icon :name="item.icon" size="16px" />
                 {{ item.label }}
               </p>
               <p class="add-client-financial-overview__metric-value
@@ -115,9 +114,10 @@
         </div>
 
         <div class="add-client-financial-overview__activity">
-          <p class="add-client-financial-overview__panel-title">
-            {{ t('clientFinancialRecentActivity') }}
-          </p>
+          <SubsectionHeading
+            icon="history"
+            :title="t('clientFinancialRecentActivity')"
+          />
           <div
             v-if="!recent.length"
             class="fmh-list-card q-pa-lg text-center">
@@ -153,7 +153,11 @@
                       clientFinancialTestIds.recentRow(row.id)
                     ">
                     <td>{{ row.effectiveDateDisplay }}</td>
-                    <td>{{ row.description }}</td>
+                    <td
+                      class="add-client-financial-overview__desc"
+                      :title="row.description">
+                      {{ row.description }}
+                    </td>
                     <td>{{ typeLabel(row.entryType) }}</td>
                     <td>{{ row.referenceNumber || '—' }}</td>
                     <td
@@ -187,6 +191,7 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { quasarNotifyTypes } from 'components/constants.js'
 import SectionHeading from 'components/SectionHeading.vue'
+import SubsectionHeading from 'components/SubsectionHeading.vue'
 import RecordClientPaymentDialog from
   'components/payments/RecordClientPaymentDialog.vue'
 import { useClientFinancialPermissions } from
@@ -249,6 +254,9 @@ function lastPaymentCard(data, zero) {
       : zero,
     icon: 'paid',
     tone: 'green',
+    valueClass: hasPayment
+      ? 'add-client-financial-overview__kpi-value--credit'
+      : '',
   }
 }
 
@@ -267,6 +275,9 @@ const cards = computed(() => {
       value: displayBalance,
       icon: 'account_balance_wallet',
       tone: 'orange',
+      valueClass: (data?.currentBalance ?? 0) > 0
+        ? 'add-client-financial-overview__kpi-value--due'
+        : '',
     },
     {
       id: 'open',
@@ -275,6 +286,7 @@ const cards = computed(() => {
       value: data?.openObligationsLabel || zero,
       icon: 'receipt_long',
       tone: 'teal',
+      valueClass: '',
     },
     {
       id: 'credit',
@@ -283,6 +295,9 @@ const cards = computed(() => {
       value: data?.availableCreditLabel || zero,
       icon: 'savings',
       tone: 'blue',
+      valueClass: (data?.availableCredit ?? 0) > 0
+        ? 'add-client-financial-overview__kpi-value--credit'
+        : '',
     },
     lastPaymentCard(data, zero),
   ]
@@ -294,21 +309,25 @@ const breakdownItems = computed(() => {
   return [
     {
       id: 'copay',
+      icon: 'payments',
       label: t('ledgerResponsibility.COPAY'),
       value: pr.copayLabel || t('clientLedgerZeroBalance'),
     },
     {
       id: 'deductible',
+      icon: 'percent',
       label: t('ledgerResponsibility.DEDUCTIBLE'),
       value: pr.deductibleLabel || t('clientLedgerZeroBalance'),
     },
     {
       id: 'coinsurance',
+      icon: 'pie_chart',
       label: t('ledgerResponsibility.COINSURANCE'),
       value: pr.coinsuranceLabel || t('clientLedgerZeroBalance'),
     },
     {
       id: 'other',
+      icon: 'more_horiz',
       label: t('ledgerResponsibility.OTHER'),
       value: pr.otherLabel || t('clientLedgerZeroBalance'),
     },

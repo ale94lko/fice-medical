@@ -77,6 +77,10 @@ import AddClientForm from '../../components/client/AddClientForm.vue'
 import AddClientPageHeader from
   '../../components/client/AddClientPageHeader.vue'
 import AppLoadingOverlay from 'components/AppLoadingOverlay.vue'
+import {
+  addClientDocumentsSubTabKeys,
+  addClientTabKeys,
+} from 'components/constants.js'
 import { clientPageTestIds } from 'src/test-ids/index.js'
 import { useActiveEncounter } from 'src/composables/useActiveEncounter.js'
 
@@ -90,12 +94,30 @@ const profilePhotoFileId = ref(null)
 const clientId = computed(() => route.params.id)
 /* Keep active encounter cached so clinical creates send encounter_id. */
 useActiveEncounter(clientId)
-const initialActiveTab = computed(() =>
-  String(route.query.tab ?? '').trim(),
-)
-const initialActiveSubTab = computed(() =>
-  String(route.query.subTab ?? '').trim(),
-)
+const initialActiveTab = computed(() => {
+  const tab = String(route.query.tab ?? '').trim()
+  const subTab = String(route.query.subTab ?? '').trim()
+  if (
+    tab === addClientTabKeys.documents
+    && subTab === addClientDocumentsSubTabKeys.consents
+  ) {
+    return addClientTabKeys.consents
+  }
+
+  return tab
+})
+const initialActiveSubTab = computed(() => {
+  const tab = String(route.query.tab ?? '').trim()
+  const subTab = String(route.query.subTab ?? '').trim()
+  if (
+    tab === addClientTabKeys.documents
+    && subTab === addClientDocumentsSubTabKeys.consents
+  ) {
+    return ''
+  }
+
+  return subTab
+})
 
 const saving = computed(() => clientFormRef.value?.saving ?? false)
 const initialLoading = computed(

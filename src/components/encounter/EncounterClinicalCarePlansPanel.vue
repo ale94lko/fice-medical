@@ -2,24 +2,28 @@
   <section class="encounter-workspace-card">
     <div class="encounter-workspace-card__head">
       <div>
-        <h2>{{ t('encounterClinicalCarePlans') }}</h2>
+        <div class="encounter-clinical-care-plans__title-row">
+          <h2>{{ t('encounterClinicalCarePlans') }}</h2>
+          <q-btn
+            v-if="canDraftHere"
+            no-caps
+            outline
+            dense
+            size="sm"
+            class="app-btn-ai-outline"
+            icon="auto_awesome"
+            :disable="saving"
+            :data-testid="aiTestIds.featureBtn('care-plan')"
+            :label="t('aiBtnFiceAi')"
+            :aria-label="t('aiAssistantName')"
+            @click="aiDialogOpen = true"
+          />
+        </div>
         <p class="text-body2 text-grey-7 q-mb-none">
           {{ t('encounterClinicalCarePlansHint') }}
         </p>
       </div>
       <div class="row q-gutter-sm items-center no-wrap">
-        <q-btn
-          v-if="canDraftHere"
-          no-caps
-          outline
-          color="primary"
-          class="app-btn-outline"
-          icon="auto_awesome"
-          :disable="saving"
-          :data-testid="aiTestIds.featureBtn('care-plan')"
-          :label="t('aiBtnCarePlanDraft')"
-          @click="aiDialogOpen = true"
-        />
         <q-btn
           v-if="canAddHere"
           no-caps

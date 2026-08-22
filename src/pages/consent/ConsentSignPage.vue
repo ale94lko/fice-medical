@@ -47,12 +47,40 @@
           {{ metaLine }}
         </p>
 
-        <div
-          class="consent-sign-card__content"
-          v-html="safeContentHtml"
-        />
+          <div
+            class="consent-sign-card__content"
+            v-html="safeContentHtml"
+          />
 
-        <div class="consent-sign-card__tabs q-mt-lg">
+          <ConsentAuthorizationFields
+            v-model="fieldValues"
+            class="q-mt-lg"
+            :fields="authorizationFields"
+            :show-errors="fieldShowErrors"
+          />
+
+          <div
+            v-if="signatureRequirements.length"
+            class="q-mt-md">
+            <p
+              v-for="requirement in signatureRequirements"
+              :key="requirement.key || requirement.label"
+              class="text-body2 text-grey-7 q-mb-xs">
+              {{ requirement.label }}
+              ·
+              {{ requirement.satisfied
+                ? t('consentSignatureComplete')
+                : t('consentSignaturePending') }}
+            </p>
+          </div>
+
+          <p
+            v-if="!remoteSignerTypes.length"
+            class="text-body2 text-grey-7 q-mt-md">
+            {{ t('consentSignPublicWaitingOtherSignatures') }}
+          </p>
+
+          <div class="consent-sign-card__tabs q-mt-lg">
           <q-btn-toggle
             v-model="mode"
             no-caps
@@ -67,7 +95,7 @@
         </div>
 
         <div
-          v-if="mode === 'sign'"
+          v-if="mode === 'sign' && remoteSignerTypes.length"
           class="consent-sign-card__form q-mt-md">
           <div class="row q-col-gutter-md">
             <div class="col-12">
@@ -190,6 +218,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import AppBrandLoading from 'components/AppBrandLoading.vue'
+import ConsentAuthorizationFields from
+  'components/ConsentAuthorizationFields.vue'
 import FormField from 'components/FormField.vue'
 import FormSelect from 'components/FormSelect.vue'
 import SignatureCanvas from 'components/SignatureCanvas.vue'
@@ -213,7 +243,17 @@ import {
   consentTypeI18nKey,
 } from 'src/utils/consent-i18n.js'
 import { sanitizeHtml } from 'src/utils/sanitize-html.js'
+import {
+  isAuthorizationSignerType,
+  remainingSignerTypes,
+  signerNeedsRelationship,
+} from 'src/utils/consent-signature-requirements.js'
 import { telehealthTestIds } from 'src/test-ids/index.js'
+import {
+  buildConsentFieldValueWrites,
+  missingRequiredConsentFields,
+  valuesByKeyFromConsentFields,
+} from 'src/utils/consent-fields.js'
 
 const { t, te } = useI18n()
 const route = useRoute()
@@ -230,6 +270,8 @@ const relationshipToClient = ref('')
 const signatureArtifact = ref('')
 const declinedByName = ref('')
 const declineReason = ref('')
+const fieldValues = ref({})
+const fieldShowErrors = ref(false)
 
 const tenantKey = computed(() => String(
   route.query.tenant
@@ -245,14 +287,24 @@ const subtenantKey = computed(() => String(
 
 const token = computed(() => String(route.query.token ?? '').trim())
 
+const signatureRequirements = computed(() => (
+  Array.isArray(preview.value?.signatureRequirements)
+    ? preview.value.signatureRequirements
+    : []
+))
+
+const remoteSignerTypes = computed(() => remainingSignerTypes(
+  preview.value,
+).filter(isAuthorizationSignerType))
+
 const signerOptions = computed(() => buildConsentSignerTypeOptions(
   t,
   te,
-  preview.value?.allowedSignerTypes,
+  remoteSignerTypes.value,
 ))
 
 const needsRelationship = computed(
-  () => signerType.value !== consentSignerTypeValues.client,
+  () => signerNeedsRelationship(signerType.value),
 )
 
 const modeOptions = computed(() => [
@@ -284,7 +336,14 @@ const metaLine = computed(() => {
   return parts.join(' · ')
 })
 
+const authorizationFields = computed(
+  () => preview.value?.fieldValues || [],
+)
+
 const canSign = computed(() => {
+  if (!remoteSignerTypes.value.length) {
+    return false
+  }
   if (!String(signerName.value ?? '').trim()) {
     return false
   }
@@ -334,8 +393,10 @@ async function loadPreview() {
       subtenantKey: subtenantKey.value,
       token: token.value,
     })
-    const allowed = preview.value.allowedSignerTypes
-    signerType.value = allowed?.[0] || consentSignerTypeValues.client
+    const remaining = remainingSignerTypes(preview.value)
+      .filter(isAuthorizationSignerType)
+    signerType.value = remaining[0]
+      || consentSignerTypeValues.client
     if (preview.value.status
       && preview.value.status !== consentStatusValues.pendingSignature) {
       errorMessage.value = t('consentSignPublicErrorNotPending')
@@ -343,6 +404,10 @@ async function loadPreview() {
 
       return
     }
+    fieldShowErrors.value = false
+    fieldValues.value = valuesByKeyFromConsentFields(
+      preview.value.fieldValues,
+    )
     phase.value = 'form'
   } catch (error) {
     setError(error)
@@ -351,6 +416,13 @@ async function loadPreview() {
 
 async function onSign() {
   if (!canSign.value) {
+    return
+  }
+  fieldShowErrors.value = true
+  if (missingRequiredConsentFields(
+    authorizationFields.value,
+    fieldValues.value,
+  ).length) {
     return
   }
   submitting.value = true
@@ -367,6 +439,10 @@ async function onSign() {
       signatureArtifact: preview.value?.signatureRequired
         ? signatureArtifact.value
         : undefined,
+      fieldValues: buildConsentFieldValueWrites(
+        authorizationFields.value,
+        fieldValues.value,
+      ),
     })
     phase.value = 'signed'
   } catch (error) {

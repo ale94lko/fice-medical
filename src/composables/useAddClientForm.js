@@ -39,6 +39,7 @@ const TAB_ORDER = ADD_CLIENT_TAB_ORDER
 
 const TAB_LABEL_KEYS = {
   [addClientTabKeys.basic]: 'tabBasicInfo',
+  [addClientTabKeys.consents]: 'tabConsents',
   [addClientTabKeys.contact]: 'tabContact',
   [addClientTabKeys.allergies]: 'tabAllergies',
   [addClientTabKeys.insurance]: 'tabInsurance',

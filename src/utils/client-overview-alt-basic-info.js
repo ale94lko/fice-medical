@@ -39,6 +39,17 @@ function readRawMeta(rawClient, ...keys) {
   return null
 }
 
+function firstRawMeta(sources, keys) {
+  for (const source of sources) {
+    const value = readRawMeta(source, ...keys)
+    if (value != null) {
+      return value
+    }
+  }
+
+  return null
+}
+
 function field(key, label, value) {
   return {
     key,
@@ -56,37 +67,31 @@ export function buildClientOverviewAltBasicInfo(
   rawClient = null,
   t,
 ) {
-  const createdRaw = readRawMeta(
-    rawClient,
+  const metaSources = [rawClient, form, header]
+  const createdRaw = firstRawMeta(metaSources, [
     'created_at',
     'createdAt',
     'created',
-  )
-  const updatedRaw = readRawMeta(
-    rawClient,
+  ])
+  const updatedRaw = firstRawMeta(metaSources, [
     'updated_at',
     'updatedAt',
     'last_updated_at',
     'lastUpdatedAt',
-  )
-  const updatedBy = displayOrDash(readRawMeta(
-    rawClient,
+  ])
+  const updatedByRaw = firstRawMeta(metaSources, [
     'updated_by_name',
     'updatedByName',
     'updated_by',
     'updatedBy',
     'last_updated_by',
-  ))
+  ])
   const createdLabel = formatTimestamp(createdRaw) || '—'
-  const updatedStamp = formatTimestamp(updatedRaw)
-  const lastUpdatedLabel = updatedStamp
-    ? (updatedBy !== '—'
-      ? t('clientOverviewAltUpdatedBy', {
-        date: updatedStamp,
-        user: updatedBy,
-      })
-      : updatedStamp)
-    : '—'
+  const updatedStamp = formatTimestamp(updatedRaw) || (
+    createdLabel !== '—' ? createdLabel : ''
+  )
+  const lastUpdatedLabel = updatedStamp || '—'
+  const updatedBy = trim(updatedByRaw)
 
   const clinicians = Array.isArray(header?.clinicians)
     ? header.clinicians
@@ -137,6 +142,7 @@ export function buildClientOverviewAltBasicInfo(
     footer: {
       created: createdLabel,
       lastUpdated: lastUpdatedLabel,
+      updatedBy,
       recordStatusLabel: displayOrDash(header?.statusLabel),
       recordStatus: trim(form?.[ck.status] || header?.status || 'active'),
     },
