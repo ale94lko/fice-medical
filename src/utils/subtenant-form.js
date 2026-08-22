@@ -38,6 +38,7 @@ export function createEmptySubtenantForm() {
     main: false,
     status: subtenantStatusValues.active,
     clinicType: clinicTypeValues.primaryCare,
+    state: '',
     photoFileId: null,
     timezone: cfg.timezone,
     dateFormat: cfg.date_format,
@@ -69,6 +70,7 @@ export function normalizeSubtenantFromApi(raw = {}) {
     clinicType: String(
       raw.clinic_type ?? raw.clinicType ?? '',
     ).trim() || clinicTypeValues.primaryCare,
+    state: String(raw.state ?? '').trim().toUpperCase(),
     timezone: String(raw.timezone ?? '').trim()
       || getAppDateTimeConfig().timezone,
     dateFormat: String(
@@ -113,6 +115,7 @@ export function buildSubtenantRequest(form = {}) {
   // eslint-disable-next-line camelcase -- API body
   body.clinic_type = String(form.clinicType ?? '').trim()
     || clinicTypeValues.primaryCare
+  body.state = String(form.state ?? '').trim().toUpperCase()
   body.timezone = String(form.timezone ?? '').trim()
   // eslint-disable-next-line camelcase -- API body
   body.date_format = String(form.dateFormat ?? '').trim()

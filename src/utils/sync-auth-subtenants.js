@@ -25,6 +25,7 @@ function patchActiveSubtenantLogo(detail) {
   const photoFileId = detail.photoFileId ?? null
   const name = String(detail.name ?? '').trim()
   const code = String(detail.code ?? '').trim()
+  const state = String(detail.state ?? '').trim().toUpperCase()
   const next = authStore.subtenants.map(item => {
     if (item.id !== activeId) {
       return item
@@ -34,6 +35,7 @@ function patchActiveSubtenantLogo(detail) {
       ...item,
       ...(name ? { name } : {}),
       ...(code ? { code } : {}),
+      ...(state ? { state } : {}),
       photoFileId,
     }
   })

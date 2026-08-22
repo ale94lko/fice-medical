@@ -37,8 +37,14 @@ export function mapLicenseTypesToSelectOptions(items = []) {
     .filter(option => option.label)
 }
 
-export async function fetchLicenseTypes() {
-  const response = await apiInstance.get(apiPaths.licenseTypes)
+export async function fetchLicenseTypes(state) {
+  const issuingState = String(state ?? '').trim().toUpperCase()
+  if (!issuingState) {
+    return []
+  }
+  const response = await apiInstance.get(apiPaths.licenseTypes, {
+    params: { state: issuingState },
+  })
   return mapLicenseTypesToSelectOptions(readItems(readEnvelope(response)))
 }
 

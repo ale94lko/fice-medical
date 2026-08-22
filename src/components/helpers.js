@@ -222,6 +222,7 @@ export function normalizeLoginSubtenants(raw) {
       const billingAddress = String(
         item.billing_address ?? item.billingAddress ?? '',
       ).trim()
+      const state = String(item.state ?? '').trim().toUpperCase()
 
       return {
         id,
@@ -229,6 +230,7 @@ export function normalizeLoginSubtenants(raw) {
         code,
         photoFileId,
         billingAddress,
+        state,
       }
     })
     .filter(Boolean)

@@ -158,8 +158,6 @@
       v-model="licenseDialogOpen"
       :license="activeLicense"
       :readonly="readonly"
-      :license-type-options="licenseTypeOptions"
-      :state-options="stateOptions"
       @save="onLicenseSave"
     />
 
@@ -207,7 +205,6 @@ import {
   createStaffLicense,
   deleteStaffLicense,
   fetchClinicalEligibility,
-  fetchLicenseTypes,
   isDuplicateStaffLicense,
   isPersistedStaffLicenseId,
   staffLicenseApiBody,
@@ -243,10 +240,6 @@ const props = defineProps({
     type: [Number, String],
     default: null,
   },
-  stateOptions: {
-    type: Array,
-    default: () => [],
-  },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -258,7 +251,6 @@ const licenseDialogOpen = ref(false)
 const licenseDeleteOpen = ref(false)
 const activeLicense = ref(null)
 const pendingDeleteLicenseId = ref(null)
-const licenseTypeOptions = ref([])
 const eligibility = ref([])
 
 const clinical = computed({
@@ -299,24 +291,12 @@ const eligibilityRows = computed(() =>
 )
 
 onMounted(() => {
-  loadLicenseTypes()
   loadEligibility()
 })
 
 watch(() => props.staffId, () => {
   loadEligibility()
 })
-
-async function loadLicenseTypes() {
-  try {
-    licenseTypeOptions.value = await fetchLicenseTypes()
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: apiErrorMessage(error, t('failed')),
-    })
-  }
-}
 
 async function loadEligibility() {
   if (!props.staffId) {
@@ -392,10 +372,7 @@ function onTaxonomiesUpdate(taxonomies) {
 }
 
 function openAddLicense() {
-  activeLicense.value = {
-    ...createEmptyStaffLicense(),
-    id: nextStaffLicenseId(),
-  }
+  activeLicense.value = createEmptyStaffLicense()
   licenseDialogOpen.value = true
 }
 
@@ -450,16 +427,17 @@ async function persistLicense(license) {
 
 function applyLicenseToForm(license, previousId) {
   const licenses = [...(clinical.value.licenses ?? [])]
-  const licenseId = String(license.id)
+  const normalized = {
+    ...license,
+    id: license.id ?? nextStaffLicenseId(),
+    isPrimary: Boolean(license.isPrimary),
+  }
+  const licenseId = String(normalized.id)
   const priorId = previousId == null ? '' : String(previousId)
   const index = licenses.findIndex((row) => {
     const rowId = String(row.id)
     return rowId === licenseId || (priorId && rowId === priorId)
   })
-  const normalized = {
-    ...license,
-    isPrimary: Boolean(license.isPrimary),
-  }
   if (normalized.isPrimary) {
     licenses.forEach(row => {
       row.isPrimary = false

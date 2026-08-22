@@ -78,7 +78,6 @@
                 :npi-readonly="Boolean(form.basic?.npiLookupFound)"
                 :credential-options="credentialOptions"
                 :supervisor-options="supervisorOptions"
-                :state-options="stateOptions"
                 :staff-id="props.staffId"
                 :field-errors="fieldErrors"
               />
@@ -170,7 +169,6 @@ import {
 } from 'src/utils/staff-npi-lookup.js'
 import { resolveTaxonomiesAgainstCatalog } from
   'src/utils/provider-taxonomy-api.js'
-import { fetchLicenseTypes } from 'src/utils/staff-license-api.js'
 import { staffFormTestIds } from 'src/test-ids/index.js'
 import {
   emailTypeSelectOptions,
@@ -473,41 +471,47 @@ watch(showSystemAccessTab, visible => {
   }
 })
 
-async function onNpiLookupResult(result) {
-  if (!result?.found) {
-    return
-  }
+async function onNpiLookupResult(result, done) {
+  try {
+    if (!result?.found) {
+      return
+    }
 
-  const rawTaxonomies = extractTaxonomiesFromNpiLookup(result)
-  let catalogTaxonomies = []
-  let missingCodes = []
-  if (rawTaxonomies.length) {
-    const resolved = await resolveTaxonomiesAgainstCatalog(rawTaxonomies)
-    catalogTaxonomies = resolved.taxonomies
-    missingCodes = resolved.missingCodes
-  }
+    const rawTaxonomies = extractTaxonomiesFromNpiLookup(result)
+    let catalogTaxonomies = []
+    let missingCodes = []
+    if (rawTaxonomies.length) {
+      const resolved = await resolveTaxonomiesAgainstCatalog(rawTaxonomies)
+      catalogTaxonomies = resolved.taxonomies
+      missingCodes = resolved.missingCodes
+    }
 
-  form.value = prefillStaffFormFromNpiLookup(form.value, result, {
-    phoneTypeOptions: phoneTypeSelectOptions(),
-    emailTypeOptions: emailTypeSelectOptions(),
-    stateOptions: props.stateOptions,
-    prefixOptions: props.prefixOptions,
-    suffixOptions: props.suffixOptions,
-    genderOptions: props.genderOptions,
-    credentialOptions: props.credentialOptions,
-    specialtyOptions: props.specialtyOptions,
-    licenseTypeOptions: await fetchLicenseTypes(),
-    taxonomiesOverride: catalogTaxonomies,
-  })
-
-  if (missingCodes.length) {
-    $q.notify({
-      type: quasarNotifyTypes.warning,
-      message: t('staffTaxonomyNpiMissingCatalog', {
-        codes: missingCodes.join(', '),
-      }),
-      timeout: 8000,
+    form.value = prefillStaffFormFromNpiLookup(form.value, result, {
+      phoneTypeOptions: phoneTypeSelectOptions(),
+      emailTypeOptions: emailTypeSelectOptions(),
+      stateOptions: props.stateOptions,
+      prefixOptions: props.prefixOptions,
+      suffixOptions: props.suffixOptions,
+      genderOptions: props.genderOptions,
+      credentialOptions: props.credentialOptions,
+      specialtyOptions: props.specialtyOptions,
+      taxonomiesOverride: catalogTaxonomies,
     })
+    await nextTick()
+
+    if (missingCodes.length) {
+      $q.notify({
+        type: quasarNotifyTypes.warning,
+        message: t('staffTaxonomyNpiMissingCatalog', {
+          codes: missingCodes.join(', '),
+        }),
+        timeout: 8000,
+      })
+    }
+  } finally {
+    if (typeof done === 'function') {
+      done()
+    }
   }
 }
 

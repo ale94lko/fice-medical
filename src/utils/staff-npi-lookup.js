@@ -140,12 +140,15 @@ export function extractTaxonomiesFromNpiLookup(lookup) {
 function mapLookupLicenses(
   apiLicenses,
   existingLicenses,
-  licenseTypeOptions = [],
 ) {
   const incoming = (apiLicenses ?? []).filter(row => {
     const source = String(row?.source ?? '').toUpperCase()
     const type = String(row?.type ?? row?.license_type_code ?? '').trim()
     if (type.toLowerCase() === 'npi') {
+      return false
+    }
+    const typeId = row?.license_type_id ?? row?.licenseTypeId
+    if (typeId == null || typeId === '') {
       return false
     }
 
@@ -163,23 +166,23 @@ function mapLookupLicenses(
   }
 
   const mapped = incoming.map(row => {
+    const typeId = row.license_type_id ?? row.licenseTypeId
     const code = String(
       row.license_type_code ?? row.licenseTypeCode ?? row.type ?? '',
     ).trim()
-    const matched = (licenseTypeOptions ?? []).find(option =>
-      String(option?.code ?? '').toLowerCase() === code.toLowerCase()
-      || String(option?.value) === String(row.license_type_id
-        ?? row.licenseTypeId ?? ''))
-    if (!matched) {
-      return null
-    }
+    const name = String(
+      row.license_type_name
+      ?? row.licenseTypeName
+      ?? row.type
+      ?? code,
+    ).trim()
 
     return normalizeStaffLicenseRow({
       id: nextStaffLicenseId(),
-      licenseTypeId: matched.value,
-      licenseTypeCode: matched.code,
-      licenseTypeName: matched.label,
-      type: matched.label,
+      licenseTypeId: typeId,
+      licenseTypeCode: code,
+      licenseTypeName: name,
+      type: name,
       identifier: row.identifier ?? '',
       state: row.state ?? '',
       expiration_date: row.expiration_date ?? '',
@@ -247,7 +250,6 @@ export function prefillStaffFormFromNpiLookup(
     credentialOptions = [],
     specialtyOptions = [],
     genderOptions = [],
-    licenseTypeOptions = [],
     taxonomiesOverride = null,
   } = catalogOptions
 
@@ -342,7 +344,6 @@ export function prefillStaffFormFromNpiLookup(
       licenses: mapLookupLicenses(
         clinician.licenses,
         form.clinical?.licenses,
-        licenseTypeOptions,
       ),
     },
   }

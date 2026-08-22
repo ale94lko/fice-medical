@@ -343,7 +343,9 @@ async function onNpiSearch() {
       return
     }
     npiFoundBanner.value = true
-    emit('npi-result', result)
+    await new Promise(resolve => {
+      emit('npi-result', result, resolve)
+    })
   } catch (error) {
     npiFoundBanner.value = false
     $q.notify({

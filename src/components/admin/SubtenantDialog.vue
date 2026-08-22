@@ -90,6 +90,24 @@
                 />
               </AddClientLabeledField>
               <AddClientLabeledField
+                :label="t('subtenantStateLabel')"
+                required>
+                <FormSelect
+                  v-model="local.state"
+                  outlined
+                  hide-bottom-space
+                  emit-value
+                  map-options
+                  :options="usStates"
+                  :readonly="readonly"
+                  :error="Boolean(errors.state)"
+                  :error-message="errors.state"
+                  :test-id="
+                    subtenantDialogTestIds.field('state')
+                  "
+                />
+              </AddClientLabeledField>
+              <AddClientLabeledField
                 v-if="showCodeField"
                 :label="t('subtenantCodeLabel')">
                 <TextInput
@@ -468,6 +486,8 @@ import {
 } from 'src/utils/ein.js'
 import { subtenantDialogTestIds } from 'src/test-ids/index.js'
 import { clinicTypeSelectOptions } from 'src/utils/clinic-type.js'
+import { usStates } from 'src/data/us-geography.js'
+import { useAuthStore } from 'stores/auth-store.js'
 import {
   DATE_FORMAT_OPTIONS,
   FIRST_DAY_VALUES,
@@ -495,6 +515,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'save', 'cancel'])
 const { t } = useI18n()
 const $q = useQuasar()
+const authStore = useAuthStore()
 
 const local = ref(createEmptySubtenantForm())
 const errors = ref({})
@@ -588,6 +609,9 @@ function validateForm() {
   if (!String(local.value.clinicType ?? '').trim()) {
     errors.value.clinicType = t('clinicTypeRequired')
   }
+  if (!String(local.value.state ?? '').trim()) {
+    errors.value.state = t('subtenantStateRequired')
+  }
   const legalBusinessName = String(
     local.value.legalBusinessName ?? '',
   ).trim()
@@ -628,6 +652,12 @@ function syncLocalFromProps() {
     local.value = cloneSubtenantForm(props.subtenant)
   } else {
     local.value = createEmptySubtenantForm()
+    const currentState = String(
+      authStore.activeSubtenant?.state ?? '',
+    ).trim().toUpperCase()
+    if (currentState) {
+      local.value.state = currentState
+    }
   }
   resetErrors()
 }

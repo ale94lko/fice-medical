@@ -4,7 +4,7 @@
     persistent
     transition-show="scale"
     transition-hide="scale">
-    <q-card class="family-medical-history-dialog app-dialog-card">
+    <q-card class="insurance-dialog app-dialog-card">
       <AppDialogHeader
         :close-label="t('close')"
         :info="t('staffLicenseDialogSubtitle')"
@@ -16,28 +16,6 @@
         <div class="row q-col-gutter-md">
           <div class="col-12 col-md-6">
             <AddClientLabeledField
-              :label="t('staffLicenseTypeLabel')"
-              required>
-              <FormSelect
-                v-model="local.licenseTypeId"
-                outlined
-                hide-bottom-space
-                emit-value
-                map-options
-                use-input
-                input-debounce="0"
-                :readonly="readonly"
-                :options="filteredLicenseTypes"
-                :placeholder="t('staffLicenseTypeSearchPlaceholder')"
-                :error="Boolean(errors.type)"
-                :error-message="errors.type"
-                :test-id="staffLicenseTestIds.typeField"
-                @filter="filterLicenseTypes"
-              />
-            </AddClientLabeledField>
-          </div>
-          <div class="col-12 col-md-6">
-            <AddClientLabeledField
               :label="t('staffLicenseStateLabel')"
               required>
               <FormSelect
@@ -47,6 +25,8 @@
                 emit-value
                 map-options
                 use-input
+                fill-input
+                hide-selected
                 input-debounce="0"
                 :readonly="readonly"
                 :options="filteredStates"
@@ -55,6 +35,32 @@
                 :error-message="errors.state"
                 :test-id="staffLicenseTestIds.stateField"
                 @filter="filterStates"
+                @update:model-value="onIssuingStateChange"
+              />
+            </AddClientLabeledField>
+          </div>
+          <div class="col-12 col-md-6">
+            <AddClientLabeledField
+              :label="t('staffLicenseTypeLabel')"
+              required>
+              <FormSelect
+                v-model="local.licenseTypeId"
+                outlined
+                hide-bottom-space
+                emit-value
+                map-options
+                use-input
+                fill-input
+                hide-selected
+                input-debounce="0"
+                :readonly="readonly"
+                :disable="readonly || !hasIssuingState"
+                :options="filteredLicenseTypes"
+                :placeholder="licenseTypePlaceholder"
+                :error="Boolean(errors.type)"
+                :error-message="errors.type"
+                :test-id="staffLicenseTestIds.typeField"
+                @filter="filterLicenseTypes"
               />
             </AddClientLabeledField>
           </div>
@@ -163,6 +169,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
+import { useAuthStore } from 'stores/auth-store.js'
 import AddClientLabeledField from 'components/AddClientLabeledField.vue'
 import AppDialogHeader from 'components/AppDialogHeader.vue'
 import ClientDateField from 'components/ClientDateField.vue'
@@ -174,6 +182,10 @@ import { storedFileCategories } from 'components/constants.js'
 import { usStates } from 'src/data/us-geography.js'
 import { staffLicenseTestIds } from 'src/test-ids/index.js'
 import { createEmptyStaffLicense } from 'src/utils/staff-form.js'
+import {
+  apiErrorMessage,
+  fetchLicenseTypes,
+} from 'src/utils/staff-license-api.js'
 import { uploadStoredFile } from 'src/utils/stored-file-api.js'
 
 const props = defineProps({
@@ -189,19 +201,13 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  licenseTypeOptions: {
-    type: Array,
-    default: () => [],
-  },
-  stateOptions: {
-    type: Array,
-    default: () => [],
-  },
 })
 
 const emit = defineEmits(['update:modelValue', 'save'])
 
 const { t } = useI18n()
+const $q = useQuasar()
+const authStore = useAuthStore()
 
 const open = computed({
   get: () => props.modelValue,
@@ -214,6 +220,7 @@ const errors = ref({})
 const saving = ref(false)
 const filteredLicenseTypes = ref([])
 const filteredStates = ref([])
+const loadedLicenseTypes = ref([])
 
 const dialogTitle = computed(() =>
   props.license?.id ? t('staffLicenseEditTitle') : t('staffLicenseAddTitle'),
@@ -227,8 +234,18 @@ const statusOptions = computed(() => [
   { label: t('staffLicenseStatusInactive'), value: 'Inactive' },
 ])
 
+const hasIssuingState = computed(() =>
+  Boolean(String(local.value?.state ?? '').trim()),
+)
+
+const licenseTypePlaceholder = computed(() =>
+  hasIssuingState.value
+    ? t('staffLicenseTypeSearchPlaceholder')
+    : t('staffLicenseTypeSelectStateFirst'),
+)
+
 const licenseTypeChoices = computed(() => {
-  const options = [...(props.licenseTypeOptions ?? [])]
+  const options = [...(loadedLicenseTypes.value ?? [])]
   const currentId = local.value?.licenseTypeId
   if (currentId == null || currentId === '') {
     return options
@@ -267,8 +284,9 @@ const stateChoices = computed(() => {
   return [{ label: current, value: current }, ...options]
 })
 
-watch(open, visible => {
+watch(open, async visible => {
   if (!visible) {
+    loadedLicenseTypes.value = []
     return
   }
   local.value = {
@@ -276,19 +294,60 @@ watch(open, visible => {
     ...(props.license ?? {}),
   }
   local.value.state = resolveIssuingStateValue(local.value.state)
+    || defaultIssuingState()
   attachmentFile.value = null
   errors.value = {}
-  filteredLicenseTypes.value = licenseTypeChoices.value
   filteredStates.value = stateChoices.value
-})
-
-watch(licenseTypeChoices, options => {
-  filteredLicenseTypes.value = options
+  await loadTypesForState(local.value.state)
 })
 
 watch(stateChoices, options => {
   filteredStates.value = options
 })
+
+async function onIssuingStateChange() {
+  await loadTypesForState(local.value.state)
+  syncTypeToLoadedState()
+}
+
+function defaultIssuingState() {
+  return resolveIssuingStateValue(authStore.activeSubtenant?.state)
+}
+
+async function loadTypesForState(state) {
+  const issuingState = String(state ?? '').trim().toUpperCase()
+  if (!issuingState) {
+    loadedLicenseTypes.value = []
+    filteredLicenseTypes.value = []
+    return
+  }
+  try {
+    loadedLicenseTypes.value = await fetchLicenseTypes(issuingState)
+  } catch (error) {
+    loadedLicenseTypes.value = []
+    $q.notify({
+      type: 'negative',
+      message: apiErrorMessage(error, t('failed')),
+    })
+  }
+  filteredLicenseTypes.value = licenseTypeChoices.value
+}
+
+function syncTypeToLoadedState() {
+  const currentId = local.value?.licenseTypeId
+  if (currentId == null || currentId === '') {
+    return
+  }
+  const exists = (loadedLicenseTypes.value ?? []).some(option =>
+    String(option?.value) === String(currentId))
+  if (exists) {
+    return
+  }
+  local.value.licenseTypeId = null
+  local.value.licenseTypeCode = ''
+  local.value.licenseTypeName = ''
+  local.value.type = ''
+}
 
 function resolveIssuingStateValue(raw) {
   const current = String(raw ?? '').trim()
@@ -378,7 +437,7 @@ async function onSave() {
       )
       attachmentFileId = uploaded?.id ?? attachmentFileId
     }
-    const selectedType = (props.licenseTypeOptions ?? []).find(option =>
+    const selectedType = (loadedLicenseTypes.value ?? []).find(option =>
       String(option?.value) === String(local.value.licenseTypeId))
     emit('save', {
       ...local.value,

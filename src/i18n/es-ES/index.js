@@ -363,6 +363,8 @@ export default {
   subtenantNameRequired: 'El nombre es obligatorio.',
   clinicType: 'Tipo de clínica',
   clinicTypeRequired: 'El tipo de clínica es obligatorio.',
+  subtenantStateLabel: 'Estado',
+  subtenantStateRequired: 'El estado es obligatorio.',
   clinicTypePrimaryCare: 'Atención primaria',
   clinicTypeSpecialty: 'Especialidad',
   clinicTypeBehavioralHealth: 'Salud mental',
@@ -1082,6 +1084,8 @@ export default {
     'Ingrese los datos de la licencia y adjunte un documento si aplica.',
   staffLicenseTypeLabel: 'Tipo de licencia',
   staffLicenseTypeSearchPlaceholder: 'Buscar tipo de licencia...',
+  staffLicenseTypeSelectStateFirst:
+    'Seleccione primero el estado emisor',
   staffLicenseIdentifierLabel: 'Número de licencia',
   staffLicenseStateLabel: 'Estado emisor',
   staffLicenseStateSearchPlaceholder: 'Buscar estado...',
